@@ -1,0 +1,11 @@
+#ifndef HAD_CONFIG_H
+#define HAD_CONFIG_H
+
+/* END DEFINES */
+#define PACKAGE "@PACKAGE@"
+#define VERSION "@VERSION@"
+#define PACKAGE_BUGREPORT "@PACKAGE_BUGREPORT@"
+
+#cmakedefine HAVE_GETOPT_LONG
+
+#endif /* HAD_CONFIG_H */
