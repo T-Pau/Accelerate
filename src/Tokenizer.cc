@@ -129,7 +129,7 @@ Token Tokenizer::parse_number(unsigned int base, Location location) {
         if (digit < 0 || digit >= base) {
             current_source->unget();
             if (empty) {
-                return {Token::ERROR, location, "empty number"};
+                return {Token::ERROR, location, "empty integer"};
             }
             return {Token::NUMBER, location, integer};
         }

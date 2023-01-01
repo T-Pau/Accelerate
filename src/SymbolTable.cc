@@ -1,5 +1,5 @@
 /*
-Token.h -- Parsing Token
+SymbolTable.cc -- Map Strings to Integers
 
 Copyright (C) Dieter Baron
 
@@ -29,52 +29,34 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef TOKEN_H
-#define TOKEN_H
+#include "SymbolTable.h"
 
+#include "Exception.h"
 
-#include "Location.h"
+symbol_t SymbolTable::add(const std::string &name) {
+    auto it = symbols.find(name);
+    if (it == symbols.end()) {
+        auto symbol = names.size();
+        names.push_back(name);
+        symbols[name] = symbol;
+        return symbol;
+    }
+    else {
+        return it->second;
+    }
+}
 
-class Token {
-public:
-    enum Type {
-        COLON,
-        COMMA,
-        CURLY_PARENTHESIS_CLOSE,
-        CURLY_PARENTHESIS_OPEN,
-        DIRECTIVE,
-        END,
-        EQUAL,
-        ERROR,
-        GREATER,
-        HASH,
-        LESS,
-        MINUS,
-        NAME,
-        NEWLINE,
-        NUMBER,
-        PARENTHESIS_CLOSE,
-        PARENTHESIS_OPEN,
-        PLUS,
-        SQUARE_PARENTHESIS_CLOSE,
-        SQUARE_PARENTHESIS_OPEN,
-        STAR,
-        STRING
-    };
+symbol_t SymbolTable::operator[](const std::string &name) const {
+    auto it = symbols.find(name);
+    if (it == symbols.end()) {
+        throw Exception("unknown symbol '%s'", name.c_str());
+    }
+    return it->second;
+}
 
-    explicit Token(Type type): type(type) {}
-    Token(Type type, Location location): type(type), location(std::move(location)) {}
-    Token(Type type, Location location, std::string name): type(type), location(std::move(location)), name(std::move(name)) {}
-    Token(Type type, Location location, uint64_t integer): Token(type, std::move(location)) { value.integer = integer; }
-    Token(Type type, Location location, double real): Token(type, std::move(location)) { value.real = real; }
-
-    Type type;
-    std::string name;
-    union {
-        uint64_t integer;
-        double real;
-    } value = {0};
-    Location location;
-};
-
-#endif // TOKEN_H
+const std::string &SymbolTable::operator[](symbol_t symbol) const {
+    if (symbol >= names.size()) {
+        throw Exception("unknown symbol %u", symbol);
+    }
+    return names[symbol];
+}

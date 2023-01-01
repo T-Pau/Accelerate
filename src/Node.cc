@@ -1,5 +1,5 @@
 /*
-Token.h -- Parsing Token
+Node.cc -- Abstract Base Class for Nodes
 
 Copyright (C) Dieter Baron
 
@@ -29,52 +29,4 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef TOKEN_H
-#define TOKEN_H
-
-
-#include "Location.h"
-
-class Token {
-public:
-    enum Type {
-        COLON,
-        COMMA,
-        CURLY_PARENTHESIS_CLOSE,
-        CURLY_PARENTHESIS_OPEN,
-        DIRECTIVE,
-        END,
-        EQUAL,
-        ERROR,
-        GREATER,
-        HASH,
-        LESS,
-        MINUS,
-        NAME,
-        NEWLINE,
-        NUMBER,
-        PARENTHESIS_CLOSE,
-        PARENTHESIS_OPEN,
-        PLUS,
-        SQUARE_PARENTHESIS_CLOSE,
-        SQUARE_PARENTHESIS_OPEN,
-        STAR,
-        STRING
-    };
-
-    explicit Token(Type type): type(type) {}
-    Token(Type type, Location location): type(type), location(std::move(location)) {}
-    Token(Type type, Location location, std::string name): type(type), location(std::move(location)), name(std::move(name)) {}
-    Token(Type type, Location location, uint64_t integer): Token(type, std::move(location)) { value.integer = integer; }
-    Token(Type type, Location location, double real): Token(type, std::move(location)) { value.real = real; }
-
-    Type type;
-    std::string name;
-    union {
-        uint64_t integer;
-        double real;
-    } value = {0};
-    Location location;
-};
-
-#endif // TOKEN_H
+#include "Node.h"

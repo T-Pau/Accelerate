@@ -1,5 +1,5 @@
 /*
-  Commandline.h -- parse command line options and arguments
+  Commandline.cc -- parse command line options and arguments
   Copyright (C) 2021 Dieter Baron and Thomas Klausner
 
   This file is part of ckmame, a program to check rom sets for MAME.
@@ -48,7 +48,7 @@ extern int optind;
 
 Commandline::Commandline(std::vector<Option> options_, std::string arguments_, std::string header_, std::string footer_, std::string version_) : options(std::move(options_)), arguments(std::move(arguments_)), header(std::move(header_)), footer(std::move(footer_)), version(std::move(version_)), options_sorted(false) {
     add_option(Option("help", 'h', "display this help message"));
-    add_option(Option("version", 'V', "display version number"));
+    add_option(Option("version", 'V', "display version integer"));
 }
 
 

@@ -1,5 +1,5 @@
 /*
-Token.h -- Parsing Token
+SymbolTable.h -- Map Strings to Integers
 
 Copyright (C) Dieter Baron
 
@@ -29,52 +29,27 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef TOKEN_H
-#define TOKEN_H
+#ifndef SYMBOL_TABLE_H
+#define SYMBOL_TABLE_H
 
+#include <string>
+#include <unordered_map>
+#include <vector>
 
-#include "Location.h"
+typedef uint32_t symbol_t;
 
-class Token {
+class SymbolTable {
 public:
-    enum Type {
-        COLON,
-        COMMA,
-        CURLY_PARENTHESIS_CLOSE,
-        CURLY_PARENTHESIS_OPEN,
-        DIRECTIVE,
-        END,
-        EQUAL,
-        ERROR,
-        GREATER,
-        HASH,
-        LESS,
-        MINUS,
-        NAME,
-        NEWLINE,
-        NUMBER,
-        PARENTHESIS_CLOSE,
-        PARENTHESIS_OPEN,
-        PLUS,
-        SQUARE_PARENTHESIS_CLOSE,
-        SQUARE_PARENTHESIS_OPEN,
-        STAR,
-        STRING
-    };
+    symbol_t add(const std::string& name);
+    symbol_t operator[](const std::string& name) const;
+    const std::string& operator[](symbol_t symbol) const;
 
-    explicit Token(Type type): type(type) {}
-    Token(Type type, Location location): type(type), location(std::move(location)) {}
-    Token(Type type, Location location, std::string name): type(type), location(std::move(location)), name(std::move(name)) {}
-    Token(Type type, Location location, uint64_t integer): Token(type, std::move(location)) { value.integer = integer; }
-    Token(Type type, Location location, double real): Token(type, std::move(location)) { value.real = real; }
+    [[nodiscard]] bool empty() const  {return names.empty();}
+    [[nodiscard]] size_t size() const {return names.size();}
 
-    Type type;
-    std::string name;
-    union {
-        uint64_t integer;
-        double real;
-    } value = {0};
-    Location location;
+private:
+    std::unordered_map<std::string, symbol_t> symbols;
+    std::vector<std::string> names;
 };
 
-#endif // TOKEN_H
+#endif // SYMBOL_TABLE_H

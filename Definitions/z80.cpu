@@ -1,0 +1,515 @@
+.byte_order: 12345678
+
+.registers: a, b, c, d, e, h, l, af, bc, de, hl, ix, iy, sp, pc, i, r
+
+.argument_types:
+bc_or_de: {
+    bc: 0
+    de: 1
+}
+index_register: {
+    ix: 0
+    iy: 1
+}
+interrupt_mode: {
+    0: 0
+    1: 2
+    2: 3
+}
+i_or_r: {
+    i: 0
+    r: 1
+}
+register: {
+    a: 7
+    b: 0
+    c: 1
+    d: 2
+    e: 3
+    h: 4
+    l: 5
+}
+register_pair_af: {
+    bc: 0
+    de: 1
+    hl: 2
+    af: 3
+}
+register_pair_ix: {
+    bc: 0
+    de: 01
+    ix: 10
+    sp: 11
+}
+register_pair_iy: {
+    bc: 0
+    de: 01
+    iy: 10
+    sp: 11
+}
+register_pair_sp: {
+    bc: 0
+    de: 1
+    hl: 2
+    sp: 3
+}
+
+.addressing_modes:
+af_prime_to_af: {
+    notation af,af ; TODO: af,af'
+    encoding: opcode
+}
+a_to_indirect: {
+    notation: (nn),a
+    arguments: {
+        nn: word
+    }
+    encoding: opcode, nn
+}
+a_to_indirect_bc_or_de: {
+    notation: (rr),a
+    arguments: {
+        rr: bc_or_de
+    }
+    encoding: opcode | rr << 4
+}
+a_to_i_or_r: {
+    notation: r,a
+    arguments: {
+        r: i_or_r
+    }
+    encoding: opcode | r << 3
+}
+hl_to_de: {
+    notation: de,hl
+}
+hl_to_indirect: {
+    notation: (nn),hl
+    arguments: {
+        nn: word
+    } 
+    encoding: opcode, nn
+}
+hl_to_indirect_sp: {
+    notation: (sp),hl
+}
+hl_to_sp: {
+    notation: sp,hl
+}
+immediate_to_a: {
+    notation: a,n
+    arguments: {
+        n: byte
+    }
+    encoding: opcode, n
+}
+immediate_to_indexed: {
+    notation: (i+d),n
+    arguments: {
+        i: index_register
+        d: signed_byte
+        n: byte
+    }
+    encoding: opcode | i << 13, d, n
+}
+immediate_to_index_register: {
+    notation: i,nn
+    arguments: {
+        i: index_register
+        nn: word
+    }
+    encoding: opcode | i << 13, word
+}
+immediate_to_indirect_hl: {
+    notation: (hl),n
+    arguments: {
+        n: byte
+    }
+    encoding: opcode, n
+}
+immediate_to_register: {
+    notation: r,n
+    arguments: {
+        r: register
+        n: byte
+    }
+    encoding: opcode | r << 3
+}
+immediate_to_register_pair_sp: {
+    notation: dd, nn
+    arguments: {
+        dd: register_pair_sp
+        nn: word
+    }
+    encoding: opcode | dd << 4, nn
+}
+implied: {
+    notation:
+}
+indexed: {
+    notation: (i+d)
+    arguments: {
+        i: index_register
+        d: signed_byte
+    }
+    encoding: opcode | i << 13, d
+}
+indexed_to_a: {
+    notation: a,(i+d)
+    arguments: {
+        i: index_register
+        d: signed_byte
+    }
+    encoding: opcode | i << 13, d
+}
+indexed_to_register: {
+    notation: r,(i+d)
+    arguments: {
+        r: register
+        i: index_register
+        d: signed_byte
+    }
+    encoding: opcode | i << 13 | r << 3, d
+}
+index_register: {
+    notation: i
+    arguments: {
+        i: index_register
+    }
+    encoding: opcode | i << 13
+}
+index_register_to_indirect: {
+    notation: (nn),i
+    arguments: { 
+        nn: word
+        i: index_register
+    }
+    encoding: opcode | i << 13, nn
+}
+index_register_to_indirect_sp: {
+    notation: (sp),i
+    arguments: {
+        i: index_register
+    }
+    encoding: opcode | i << 13
+}
+index_register_to_sp: {
+    notation: sp,i
+    arguments: { 
+        i: index_register
+    }
+    encoding: opcode | i << 13
+}
+indirect_bc_or_de_to_a: {
+    notation: a,(rr)
+    arguments: {
+        rr: bc_or_de
+    }
+    encoding: opcode | rr << 4
+}
+indirect_de_to_a: {
+    notation: a,(de)
+}
+indirect_hl: {
+    notation: (hl)
+}
+indirect_hl_to_a: {
+    notation: a,(hl)
+}
+indirect_hl_to_register: {
+    notation: r,(hl)
+    arguments: {
+        r: register
+    }
+    encoding: opcode | r << 3
+}
+indirect_to_a: {
+    notation: a,(nn)
+    arguments: {
+        nn: word
+    }
+    encoding: opcode, nn
+}
+indirect_to_hl: {
+    notation: hl,(nn)
+    arguments: {
+        nn: word
+    }
+    encoding: opcode, nn
+}
+indirect_to_index_register: {
+    notation: i,(nn)
+    arguments: {
+        i: index_register
+        nn: word
+    }
+    encoding: opcode | i << 13, word
+}
+indirect_to_register_pair_sp: {
+    notation: dd,(nn)
+    arguments: {
+        dd: register_pari
+        nn: word
+    }
+    encoding: opcode | dd << 4, nn 
+}
+interrupt_mode: {
+    notation: m
+    arguments: {
+        m: interrupt_mode
+    }
+    encoding: opcode | m << 3
+}
+i_or_r_to_a: {
+    notation: a,r
+    arguments: {
+        r: i_or_r
+    }
+    encoding: opcode | r << 3
+}
+register: {
+    notation: r
+    arguments: {
+        r: register
+    }
+    encoding: opcode | r << 3
+}
+register_to_a: {
+    notation: a,r
+    arguments: {
+        r: register
+    }
+    encoding: opcode | r
+}
+register_to_indexed: {
+    notation: (i+d),r
+    arguments: {
+        i: index_register
+        d: signed_byte
+        r: register
+    }
+    encoding: opcode | i << 13 | r << 3, d ; TODO: check if this is correct
+}
+register_to_indirect_hl: {
+    notation: (hl),r
+    arguments: {
+        r: register
+    }
+    encoding: opcode | r
+}
+register_pair_af: {
+    notation: rr
+    arguments: {
+        rr: register_pair_af
+    }
+    encoding: opcode | rr << 4
+}
+register_pair_ix_to_ix: {
+    notation: ix, pp
+    arguments: {
+        pp: register_pair_ix
+    }
+    encoding: opcode | pp < 4
+}
+register_pair_iy_to_iy: {
+    notation: iy, pp
+    arguments: {
+        pp: register_pair_iy
+    }
+    encoding: opcode | pp < 4
+}
+register_pair_sp: {
+    notation: ss
+    arguments: {
+        ss: register_pair_sp
+    }
+    encoding: opcode | ss << 4
+}
+register_pair_sp_to_hl: {
+    notation: (hl),dd
+    arguments: {
+        dd: register_pair_sp
+    }
+    encoding: opcode | dd << 4
+}
+register_pair_sp_to_indirect: {
+    notation: (nn),dd
+    arguments: {
+        dd: register_pair_sp
+        nn: word
+    }
+    encoding: opcode | dd << 4, nn
+}
+register_to_register: {
+    notation: r1,r2
+    arguments: {
+        r1: register
+        r2: register
+    }
+    encoding: opcode | r1 << 3 | r2
+}
+
+.instructions:
+adc: {
+    immediate_to_a: $ce
+    indexed_to_a: $dd8e
+    indirect_hl_to_a: $8e
+    register_to_a: $88
+    register_pair_sp_to_hl: $ed4a
+}
+add: {
+    immediate_to_a: $c6
+    indexed_to_a: $dd86
+    indirect_hl_to_a: $86
+    register_to_a: $80
+    register_pair_ix_to_ix: $dd09
+    register_pair_iy_to_iy: $fd09
+    register_pair_sp_to_hl: $09
+}
+and: {
+    immediate_to_a: $e6
+    indexed_to_a: $dda6
+    indirect_hl_to_a: $a6
+    register_to_a: $a0
+}
+ccf: {
+    implied: $3f
+}
+cp: {
+    immediate_to_a: $fe
+    indexed_to_a: $ddbe
+    indirect_hl_to_a: $be
+    register_to_a: $b8
+}
+cpd: {
+    implied: $eda9
+}
+cpdr: {
+    implied: $edb9
+}
+cpi: {
+    implied: $eda1
+}
+cpir: {
+    implied: $edb1
+}
+cpl: {
+    implied: $2f
+}
+daa: {
+    implied: $27
+}
+dec: {
+    indexed: $dd35
+    index_register: $dd2b
+    indirect_hl: $35
+    register: $05
+    register_pair_sp: $0b
+}
+di: {
+    implied: $f3
+}
+ei: {
+    implied: $fb
+}
+ex: {
+    af_prime_to_af: $08
+    hl_to_de: $eb
+    hl_to_indirect_sp: $e3
+    index_register_to_indirect_sp: $dde3
+}
+exx: {
+    implied: $d9
+}
+halt: {
+    implied: $76
+}
+im: {
+    inerrupt_mode: $ed46
+}
+inc: {
+    indexed: $dd34
+    index_register: $dd23
+    indirect_hl: $34
+    register: $04
+    register_pair_sp: $03
+}
+ld: {
+    a_to_indirect_bc_or_de: $02
+    a_to_i_or_r: $ed47
+    hl_to_indirect: $22
+    hl_to_sp: $f9
+    immediate_to_indexed: $dd36
+    immediate_to_index_register: $dd21
+    immediate_to_indirect_hl: $36
+    immediate_to_register: $06
+    immediate_to_register_pair_sp: $01
+    indexed_to_register: $dd46
+    index_register_to_indirect: $dd22
+    index_register_to_sp: $ddf9
+    indirect_bc_or_de_to_a: $0a
+    indirect_hl_to_register: $46
+    indirect_to_a: $3a
+    indirect_to_hl: $2a
+    indirect_to_index_register: $dd2a
+    indirect_to_register_pair_sp: $ed4b
+    i_or_r_to_a: $ed57
+    register_pair_sp_to_indirect: $ed43
+    register_to_indexed: $dd70
+    register_to_indirect_hl: $70
+    register_to_register: $40
+}
+ldd: {
+    implied: $eda8
+}
+lddr: {
+    implied: $edb8
+}
+ldi: {
+    implied: $eda0
+}
+ldir: {
+    implied: $edb0
+}
+neg: {
+    implied: $ed44
+}
+nop: {
+    implied: $00
+}
+or: {
+    immediate_to_a: $f6
+    indexed_to_a: $ddb6
+    indirect_hl_to_a: $b6
+    register_to_a: $b0
+}
+pop: {
+    index_register: $dde1
+    register_pair_af: $c1
+}
+push: {
+    index_register: $dde5
+    register_pair_af: $c5
+}
+sbc: {
+    immediate_to_a: $de
+    indexed_to_a: $dd9e
+    indirect_hl_to_a: $9e
+    register_to_a: $98
+    register_pair_sp_to_hl: $ed42
+}
+scf: {
+    implied: $37
+}
+sub: {
+    immediate_to_a: $d6
+    indexed_to_a: $dd96
+    indirect_hl_to_a: $96
+    register_to_a: $90
+}
+xor: {
+    immediate_to_a: $ee
+    indexed_to_a: $ddae
+    indirect_hl_to_a: $ae
+    register_to_a: $a8
+}

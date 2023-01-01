@@ -1,0 +1,359 @@
+.byte_order: 12345678
+
+.registers: a, x, y
+
+.addressing_modes
+accumulator: {
+    notation: [
+        a
+
+    ]
+}
+implied: {
+    notation:
+}
+immediate: {
+    notation: #value
+    arguments: {
+        value: byte
+    }
+    encoding: opcode, value
+}
+zero_page: {
+    notation: address
+    arguments: {
+        address: byte
+    }
+    encoding: opcode, address
+}
+relative: {
+    notation: address
+    arguments: {
+        address: word ; TODO: has to be close enough to instruction_address
+    }
+    encoding: opcode, address - instruction_address
+}
+absolute: {
+    notation: address
+    arguments: {
+        address: word
+    }
+    encoding: opcode, address
+}
+indirect: {
+    notation: (address)
+    arguments: {
+        address: word
+    }
+    encoding: opcode, address
+}
+zero_page_x_indexed: {
+    notation: address,x
+    arguemnts: {
+        address: byte
+    }
+    encoding: opcode, address
+}
+zero_page_y_indexed: {
+    notation: address,y
+    arguments: {
+        address: byte
+    }
+    encoding: opcode, address
+}
+absolute_x_indexed: {
+    notation: address,x
+    arguments: {
+        address: word
+    }
+    encoding: opcode, address
+}
+absolute_y_indexed: {
+    notation: address,y
+    arguments: {
+        address: word
+    }
+    encoding: opcode, address
+}
+x_indexed_indirect: {
+    notation: (address,x)
+    arguments: {
+        address: byte
+    }
+    encoding: opcode, address
+}
+indirect_y_indexed: {
+    notation: (address),y
+    arguments: {
+        address: byte
+    }
+    encoding: opcode, address
+}
+
+instructions:
+adc: {
+    absolute: $6d
+    absolute_x_indexed: $7d
+    absolute_y_indexed: $79
+    immediate: $69
+    indirect_y_indexed: $71
+    x_indexed_indirect: $61
+    zero_page: $65
+    zero_page_x_indexed: $75
+}
+and: {
+    absolute: $2d
+    absolute_x_indexed: $3d
+    absolute_y_indexed: $39
+    immediate: $29
+    indirect_y_indexed: $31
+    x_indexed_indirect: $21
+    zero_page: $25
+    zero_page_x_indexed: $35
+}
+asl: {
+    absolute: $0e
+    absolute_x_indexed: $1e
+    accumulator: $0a
+    zero_page: $06
+    zero_page_x_indexed: $16
+}
+bcc: {
+    relative: $90
+}
+bcs: {
+    relative: $b0
+}
+beq: {
+    relative: $f0
+}
+bit: {
+    absolute: $2c
+    zero_page: $24
+}
+bmi: {
+    relative: $30
+}
+bne: {
+    relative: $d0
+}
+bpl: {
+    relative: $10
+}
+brk: {
+    implied: $00
+}
+bvc: {
+    relative: $50
+}
+bvs: {
+    relative: $70
+}
+clc: {
+    implied: $18
+}
+cld: {
+    implied: $d8
+}
+cli: {
+    implied: $58
+}
+clv: {
+    implied: $b8
+}
+cmp: {
+    absolute: $cd
+    absolute_x_indexed: $dd
+    absolute_y_indexed: $d9
+    immediate: $c9
+    indirect_y_indexed: $d1
+    x_indexed_indirect: $c1
+    zero_page: $c5
+    zero_page_x_indexed: $d5
+}
+cpx: {
+    absolute: $ec
+    immediate: $e0
+    zero_page: $e4
+}
+cpy: {
+    absolute: $cc
+    immediate: $c0
+    zero_page: $c4
+}
+dec: {
+    absolute: $ce
+    absolute_x_indexed: $de
+    zero_page: $c6
+    zero_page_x_indexed: $d6
+}
+dex: {
+    implied: $ca
+}
+dey: {
+    implied: $88
+}
+eor: {
+    absolute: $4d
+    absolute_x_indexed: $5d
+    absolute_y_indexed: $59
+    immediate: $49
+    indirect_y_indexed: $51
+    x_indexed_indirect: $41
+    zero_page: $45
+    zero_page_x_indexed: $55
+}
+inc: {
+    absolute: $ee
+    absolute_x_indexed: $fe
+    zero_page: $e6
+    zero_page_x_indexed: $f6
+}
+inx: {
+    implied: $e8
+}
+iny: {
+    implied: $c8
+}
+jmp: {
+    absolute: $4c
+    indirect: $6c
+}
+jsr: {
+    absolute: $20
+}
+lda: {
+    absolute: $ad
+    absolute_x_indexed: $bd
+    absolute_y_indexed: $b9
+    immediate: $a9
+    indirect_y_indexed: $b1
+    x_indexed_indirect: $a1
+    zero_page: $a5
+    zero_page_x_indexed: $b5
+}
+ldx: {
+    absolute: $ae
+    absolute_y_indexed: $be
+    immediate: $a2
+    zero_page: $a6
+    zero_page_y_indexed: $b6
+}
+ldy: {
+    absolute: $ac
+    absolute_y_indexed: $bc
+    immediate: $a0
+    zero_page: $a4
+    zero_page_x_indexed: $b4
+}
+lsr: {
+    absolute: $4e
+    absolute_x_indexed: $5e
+    accumulator: $4a
+    zero_page: $46
+    zero_page_x_indexed: $56
+}
+nop: {
+    implied: $ea
+}
+ora: {
+    absolute: $0d
+    absolute_x_indexed: $1d
+    absolute_y_indexed: $19
+    immediate: $09
+    indirect_y_indexed: $11
+    x_indexed_indirect: $01
+    zero_page: $05
+    zero_page_x_indexed: $15
+}
+pha: {
+    implied: $48
+}
+php: {
+    implied: $08
+}
+pla: {
+    implied: $68
+}
+plp: {
+    implied: $28
+}
+rol: {
+    absolute: $2e
+    absolute_x_indexed: $3e
+    accumulator: $2a
+    zero_page: $26
+    zero_page_x_indexed: $36
+}
+ror: {
+    absolute: $7e
+    absolute_x_indexed: $6e
+    accumulator: $6a
+    zero_page: $66
+    zero_page_x_indexed: $76
+}
+rti: {
+    implied: $40
+}
+rts: {
+    implied: $60
+}
+sed: {
+    implied: $38
+}
+sbc: {
+    absolute: $ed
+    absolute_x_indexed: $fd
+    absolute_y_indexed: $f9
+    immediate: $e9
+    indirect_y_indexed: $f1
+    x_indexed_indirect: $e1
+    zero_page: $e5
+    zero_page_x_indexed: $f5
+}
+sec: {
+    implied: $38
+}
+sed: {
+    implied: $f8
+}
+sei: {
+    implied: $78
+}
+sta: {
+    absolute: $8d
+    absolute_x_indexed: $9d
+    absolute_y_indexed: $99
+    zero_page: $85
+    zero_page_x_indexed: $95
+    x_indexed_indirect: $81
+    indirect_y_indexed: $91
+}
+stx: {
+    absolute: $8e
+    zero_page: $86
+    zero_page_y_indexed: $96
+}
+sty: {
+    absolute: $8c
+    zero_page: $84
+    zero_page_x_indexed: $94
+}
+tax: {
+    implied: $aa
+}
+tay: {
+    implied: $a8
+}
+tsx: {
+    implied: $ba
+}
+txa: {
+    implied: $8a
+}
+txs: {
+     implied: $9a
+}
+tya: {
+    implied: $98
+}

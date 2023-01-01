@@ -21,7 +21,7 @@ std::vector<std::string> type_names = {
         "-",
         "name",
         "newline",
-        "number",
+        "integer",
         "(",
         ")",
         "+",

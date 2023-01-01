@@ -1,5 +1,5 @@
 /*
-Location.cc -- Location within a File
+Location.h -- Location within a File
 
 Copyright (C) Dieter Baron
 

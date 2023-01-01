@@ -1,5 +1,5 @@
 /*
-FileReader.h -- Read File into Array of Lines
+FileReader.cc -- Read File into Array of Lines
 
 Copyright (C) Dieter Baron
 
@@ -60,7 +60,7 @@ const std::string &FileReader::get_line(const std::string &file_name, size_t lin
     }
 
     if (line_number > it->second.size()) {
-        throw Exception("line number %zu out of range in '%s'", line_number, file_name.c_str());
+        throw Exception("line integer %zu out of range in '%s'", line_number, file_name.c_str());
     }
 
     return it->second[line_number];

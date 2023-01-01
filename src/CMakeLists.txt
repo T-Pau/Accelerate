@@ -4,11 +4,18 @@ endif()
 
 
 SET(assembler_SOURCES
+        AddressingMode.cc
         Assembler.cc
         Commandline.cc
+        CPU.cc
         Exception.cc
+        ExpressionListNode.cc
+        ExpressionNode.cc
         FileReader.cc
-        Token.cc
+        Instruction.cc
+        IntegerNode.cc
+        Node.cc
+        SymbolTable.cc
         Tokenizer.cc
         Util.cc
         ${COMPATIBILITY}
