@@ -33,6 +33,12 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "Exception.h"
 
+SymbolTable::SymbolTable(const std::vector<std::string> &initial_symbols) {
+    for (const auto& symbol: initial_symbols) {
+        add(symbol);
+    }
+}
+
 symbol_t SymbolTable::add(const std::string &name) {
     auto it = symbols.find(name);
     if (it == symbols.end()) {

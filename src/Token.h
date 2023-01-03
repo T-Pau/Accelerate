@@ -68,6 +68,11 @@ public:
     Token(Type type, Location location, uint64_t integer): Token(type, std::move(location)) { value.integer = integer; }
     Token(Type type, Location location, double real): Token(type, std::move(location)) { value.real = real; }
 
+    explicit operator bool() const {return type != END;}
+    [[nodiscard]] bool is_directive() const {return type == DIRECTIVE;}
+    [[nodiscard]] bool is_name() const {return type == NAME;}
+    [[nodiscard]] bool is_newline() const {return type == NEWLINE;}
+
     Type type;
     std::string name;
     union {

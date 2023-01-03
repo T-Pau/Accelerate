@@ -1,5 +1,5 @@
 /*
-AddressingMode.h -- 
+CPUParser.h -- Parse CPU Specification
 
 Copyright (C) Dieter Baron
 
@@ -29,30 +29,37 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef ADDRESSING_MODE_H
-#define ADDRESSING_MODE_H
+#ifndef CPU_PARSER_H
+#define CPU_PARSER_H
 
-
+#include "CPU.h"
 #include "SymbolTable.h"
+#include "FileReader.h"
+#include "Tokenizer.h"
 
-class AddressingMode {
-    class Notation {
-        enum Type {
-            ARGUMENT,
-            PUNCTUATION,
-            RESERVED_WORD
-        };
-        class Element {
-            Type type;
-            symbol_t symbol;
-        };
+class CPUParser {
+public:
+    CPUParser();
 
-        std::vector<Element> elements;
-    };
+    CPU parse(const std::string& file_name, FileReader& file_reader);
 
-    std::vector<Notation> notations;
+private:
+    void parse_addressing_mode(const std::string& name);
+    void parse_addressing_modes() {parse_map(&CPUParser::parse_addressing_mode);}
+    void parse_argument_type(const std::string& name);
+    void parse_argument_types() {parse_map(&CPUParser::parse_argument_type);}
+    void parse_byte_order();
+    void parse_include();
+    void parse_instruction(const std::string& name);
+    void parse_instructions() {parse_map(&CPUParser::parse_instruction);}
+    void parse_map(void (CPUParser::*parse_element)(const std::string& name));
 
+    static SymbolTable directives;
+    static std::map<symbol_t, void (CPUParser::*)()> parser_methods;
+
+    Tokenizer tokenizer;
+    CPU cpu;
 };
 
 
-#endif // ADDRESSING_MODE_H
+#endif // CPU_PARSER_H

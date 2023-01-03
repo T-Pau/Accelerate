@@ -8,6 +8,7 @@ SET(assembler_SOURCES
         Assembler.cc
         Commandline.cc
         CPU.cc
+        CPUParser.cc
         Exception.cc
         ExpressionListNode.cc
         ExpressionNode.cc

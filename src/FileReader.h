@@ -33,7 +33,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define FILEREADER_H
 
 #include <string>
-#include <unordered_map>
+#include <map>
 #include <vector>
 
 class FileReader {
@@ -43,7 +43,7 @@ public:
     const std::string& get_line(const std::string& file_name, size_t line_number) const;
 
 private:
-    std::unordered_map<std::string,std::vector<std::string>> files;
+    std::map<std::string,std::vector<std::string>> files;
 };
 
 

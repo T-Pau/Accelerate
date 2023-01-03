@@ -44,6 +44,7 @@ public:
     void push(const std::string& filename, const std::vector<std::string>& lines);
 
     Token next();
+    void unget(Token token);
 
 private:
     class Source {
@@ -74,6 +75,8 @@ private:
 
     std::vector<Source> sources;
     Source* current_source = nullptr;
+
+    std::optional<Token> ungot_token;
 };
 
 #endif // TOKENIZER_H

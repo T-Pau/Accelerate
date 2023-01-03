@@ -40,7 +40,10 @@ typedef uint32_t symbol_t;
 
 class SymbolTable {
 public:
+    SymbolTable() = default;
+    explicit SymbolTable(const std::vector<std::string>& initial_symbols);
     symbol_t add(const std::string& name);
+    bool contains(const std::string& name) {return symbols.find(name) != symbols.end();}
     symbol_t operator[](const std::string& name) const;
     const std::string& operator[](symbol_t symbol) const;
 

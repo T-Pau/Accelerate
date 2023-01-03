@@ -35,13 +35,12 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "SymbolTable.h"
 
 class CPU {
-private:
+public:
     uint64_t byte_order;
 
     SymbolTable addressing_mode_symbols;
-    SymbolTable registers;
-
-
+    SymbolTable argument_type_symbols;
+    SymbolTable reserved_words;
 };
 
 

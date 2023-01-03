@@ -31,9 +31,9 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "Tokenizer.h"
 #include "Util.h"
+#include "Exception.h"
 
 std::unordered_map<char, Token::Type> Tokenizer::single_character_tokens = {
-        {'\n', Token::NEWLINE},
         {'#',  Token::HASH},
         {'(',  Token::PARENTHESIS_OPEN},
         {')',  Token::PARENTHESIS_CLOSE},
@@ -57,6 +57,12 @@ void Tokenizer::push(const std::string& file_name, const std::vector<std::string
 }
 
 Token Tokenizer::next() {
+    if (ungot_token.has_value()) {
+        auto token = std::move(ungot_token.value());
+        ungot_token.reset();
+        return std::move(token);
+    }
+
     if (current_source == nullptr) {
         return Token(Token::END);
     }
@@ -75,10 +81,20 @@ Token Tokenizer::next() {
             continue;
         }
 
+        if (c == '\n') {
+            if (location.end_column == 0) {
+                // ignore empty lines
+                continue;
+            }
+            else {
+                // Not using expand_location() here to correctly handle \n.
+                location.end_column += 1;
+                return {Token::NEWLINE, location};
+            }
+        }
         auto it = single_character_tokens.find(static_cast<char>(c));
         if (it != single_character_tokens.end()) {
-            // Not using expand_location() here to correctly handle \n.
-            location.end_column += 1;
+            current_source->expand_location(location);
             return {it->second, location};
         }
 
@@ -192,12 +208,12 @@ Token Tokenizer::parse_string(Location location) {
 
             case '\\': {
                 current_source->expand_location(location);
-                auto c = current_source->next();
-                switch (c) {
+                auto c2 = current_source->next();
+                switch (c2) {
                     case '\\':
                     case '\"':
                     case '\'':
-                        value += static_cast<char>(c);
+                        value += static_cast<char>(c2);
                         break;
 
                     case 'n':
@@ -220,6 +236,13 @@ Token Tokenizer::parse_string(Location location) {
                 break;
         }
     }
+}
+
+void Tokenizer::unget(Token token) {
+    if (ungot_token.has_value()) {
+        throw Exception("trying to unget two tokens");
+    }
+    ungot_token = std::move(token);
 }
 
 
