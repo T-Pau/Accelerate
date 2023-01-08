@@ -15,8 +15,12 @@ SET(assembler_SOURCES
         FileReader.cc
         Instruction.cc
         IntegerNode.cc
+        Location.cc
         Node.cc
+        Object.cc
+        ParseException.cc
         SymbolTable.cc
+        Token.cc
         Tokenizer.cc
         Util.cc
         ${COMPATIBILITY}

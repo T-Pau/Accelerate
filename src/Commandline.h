@@ -6,7 +6,7 @@
  Commandline.h -- parse command line options and arguments
  Copyright (C) 2021 Dieter Baron and Thomas Klausner
 
-  This file is part of ckmame, a program to check rom sets for MAME.
+  This diagnostics_file is part of ckmame, a program to check rom sets for MAME.
   The authors can be contacted at <ckmame@nih.at>
 
   Redistribution and use in source and binary forms, with or without

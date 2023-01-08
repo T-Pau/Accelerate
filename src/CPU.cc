@@ -30,3 +30,8 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include "CPU.h"
+
+void CPU::add_addressing_mode(symbol_t name, AddressingMode mode) {
+    // TODO: check for duplicates?
+    addressing_modes[name] = std::move(mode);
+}

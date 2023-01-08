@@ -32,18 +32,47 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef FILEREADER_H
 #define FILEREADER_H
 
-#include <string>
+#include <iostream>
 #include <map>
+#include <string>
 #include <vector>
+
+#include "Location.h"
+#include "printf_like.h"
 
 class FileReader {
 public:
-    const std::vector<std::string>& read(const std::string& file_name);
+    enum DiagnosticsSeverity {
+        NOTICE,
+        WARNING,
+        ERROR
+    };
 
-    const std::string& get_line(const std::string& file_name, size_t line_number) const;
+    const std::vector<std::string>& read(const std::string& file_name, bool optional = false);
+
+    [[nodiscard]] const std::string& get_line(const std::string& file_name, size_t line_number) const;
+
+    void notice(const Location& location, const char* format, ...) PRINTF_LIKE(3, 4);
+    void notice(const Location& location, const std::string& message) {output(NOTICE, location, message);}
+    void warning(const Location& location, const char* format, ...) PRINTF_LIKE(3, 4);
+    void warning(const Location& location, const std::string& message) {output(WARNING, location, message);}
+    void error(const Location& location, const char* format, ...) PRINTF_LIKE(3, 4);
+    void error(const Location& location, const std::string& message) {output(ERROR, location, message);}
+
+    void output(DiagnosticsSeverity severity, const Location& location, const char* format, ...) PRINTF_LIKE(4, 5);
+    void output(DiagnosticsSeverity severity, const Location& location, const std::string& message);
+
+    [[nodiscard]] bool had_error() const {return error_flag;}
 
 private:
+    static const char *diagnostics_severity_name(DiagnosticsSeverity severity);
+
+    static std::vector<std::string> empty_file;
+
     std::map<std::string,std::vector<std::string>> files;
+    bool error_flag = false;
+    std::ostream& diagnostics_file = std::cerr;
+
 };
 
 

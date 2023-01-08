@@ -32,6 +32,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef TOKEN_H
 #define TOKEN_H
 
+#include <unordered_set>
 
 #include "Location.h"
 
@@ -62,6 +63,18 @@ public:
         STRING
     };
 
+    class Group {
+    public:
+        explicit Group(Type type): types({type}), name(type_name(type)) {}
+        explicit Group(std::unordered_set<Type> types, std::string name): types(std::move(types)), name(std::move(name)) {}
+
+        [[nodiscard]] bool contains(Type type) const {return types.find(type) != types.end();}
+
+        std::unordered_set<Type> types;
+        std::string name;
+    };
+
+    Token(): type(END) {}
     explicit Token(Type type): type(type) {}
     Token(Type type, Location location): type(type), location(std::move(location)) {}
     Token(Type type, Location location, std::string name): type(type), location(std::move(location)), name(std::move(name)) {}
@@ -69,9 +82,13 @@ public:
     Token(Type type, Location location, double real): Token(type, std::move(location)) { value.real = real; }
 
     explicit operator bool() const {return type != END;}
+    bool operator==(const Token& other) const;
     [[nodiscard]] bool is_directive() const {return type == DIRECTIVE;}
     [[nodiscard]] bool is_name() const {return type == NAME;}
     [[nodiscard]] bool is_newline() const {return type == NEWLINE;}
+    [[nodiscard]] const char* type_name() const {return type_name(type);}
+
+    static const char* type_name(Type type);
 
     Type type;
     std::string name;
@@ -80,6 +97,29 @@ public:
         double real;
     } value = {0};
     Location location;
+};
+
+template<>
+struct std::hash<Token>
+{
+    std::size_t operator()(Token const& token) const noexcept {
+        size_t h1 = std::hash<size_t>{}(static_cast<size_t>(token.type));
+        size_t h2 = 0;
+        switch (token.type) {
+            case Token::NAME:
+            case Token::DIRECTIVE:
+                h2 = std::hash<std::string>{}(token.name);
+                break;
+
+            case Token::NUMBER:
+                h2 = std::hash<::uint64_t>{}(token.value.integer);
+                break;
+
+            default:
+                break;
+        }
+        return h1 ^ (h2 << 1);
+    }
 };
 
 #endif // TOKEN_H

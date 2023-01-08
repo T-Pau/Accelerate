@@ -46,6 +46,17 @@ public:
     Token next();
     void unget(Token token);
 
+    std::vector<Token> collect_until(Token::Type type);
+    std::vector<Token> collect_until(const Token::Group& types);
+    Token expect(Token::Type type, const Token::Group& synchronize);
+    Token expect(const Token::Group& types, const Token::Group& synchronize);
+    void expect_litearls(const std::vector<Token::Type>& types, const Token::Group& synchronize);
+    void skip_until(const Token::Group& types);
+    void skip(const Token::Group& types);
+    void skip(Token::Type type);
+
+    [[nodiscard]] bool ended() {return current_source== nullptr;}
+
 private:
     class Source {
     public:

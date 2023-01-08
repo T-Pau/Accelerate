@@ -34,8 +34,11 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 #include "SymbolTable.h"
+#include "Token.h"
+#include "Object.h"
 
 class AddressingMode {
+public:
     class Notation {
         enum Type {
             ARGUMENT,
@@ -52,6 +55,7 @@ class AddressingMode {
 
     std::vector<Notation> notations;
 
+    void add_notation(const std::vector<Token>& tokens);
 };
 
 

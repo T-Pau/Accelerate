@@ -40,6 +40,8 @@ public:
 
     Location(std::string file, size_t line_number, size_t start_column, size_t end_column) : file(std::move(file)), line_number(line_number), start_column(start_column), end_column(end_column) {}
 
+    [[nodiscard]] std::string to_string() const {return file + ":" + std::to_string(line_number) + "." + std::to_string(start_column);}
+
     std::string file;
     size_t line_number;
     size_t start_column;

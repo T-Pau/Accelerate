@@ -5,7 +5,7 @@
   Exception.h -- exception implementation
   Copyright (C) 1999-2021 Dieter Baron and Thomas Klausner
 
-  This file is part of ckmame, a program to check rom sets for MAME.
+  This diagnostics_file is part of ckmame, a program to check rom sets for MAME.
   The authors can be contacted at <ckmame@nih.at>
 
   Redistribution and use in source and binary forms, with or without
@@ -37,22 +37,23 @@
 #include <exception>
 #include <string>
 #include <system_error>
+#include <utility>
 
 #include "printf_like.h"
 
 class Exception : public std::exception {
 public:
     Exception() = default;
-    explicit Exception(const std::string &message_) : message(message_) { }
-    Exception(const char *format, ...) PRINTF_LIKE(2, 3);
+    explicit Exception(std::string message) : message(std::move(message)) { }
+    explicit Exception(const char *format, ...) PRINTF_LIKE(2, 3);
 
     Exception append_detail(const std::string &str);
     Exception append_system_error(int code = -1); // default: use current errno
     Exception append_filesystem_error(const std::error_code &code);
 
-    const char* what() const noexcept override;
+    [[nodiscard]] const char* what() const noexcept override;
 
-private:
+protected:
     std::string message;
 };
 

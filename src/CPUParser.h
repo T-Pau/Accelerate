@@ -33,8 +33,8 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define CPU_PARSER_H
 
 #include "CPU.h"
-#include "SymbolTable.h"
 #include "FileReader.h"
+#include "SymbolTable.h"
 #include "Tokenizer.h"
 
 class CPUParser {
@@ -44,19 +44,21 @@ public:
     CPU parse(const std::string& file_name, FileReader& file_reader);
 
 private:
-    void parse_addressing_mode(const std::string& name);
-    void parse_addressing_modes() {parse_map(&CPUParser::parse_addressing_mode);}
-    void parse_argument_type(const std::string& name);
-    void parse_argument_types() {parse_map(&CPUParser::parse_argument_type);}
+    void parse_addressing_mode();
+    void parse_argument_type();
     void parse_byte_order();
     void parse_include();
-    void parse_instruction(const std::string& name);
-    void parse_instructions() {parse_map(&CPUParser::parse_instruction);}
-    void parse_map(void (CPUParser::*parse_element)(const std::string& name));
+    void parse_instruction();
+
+    bool parse_addressing_mode_line(AddressingMode& addressing_mode); // returns false for closing }
+
+    static Token::Group group_directive;
+    static Token::Group group_newline;
 
     static SymbolTable directives;
     static std::map<symbol_t, void (CPUParser::*)()> parser_methods;
 
+    FileReader* reader = nullptr;
     Tokenizer tokenizer;
     CPU cpu;
 };

@@ -1,5 +1,5 @@
 /*
-ExpressionNode.h -- Abstract Base Class of Expression Nodes
+ParseException.h --
 
 Copyright (C) Dieter Baron
 
@@ -29,21 +29,26 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef EXPRESSION_NODE_H
-#define EXPRESSION_NODE_H
+#ifndef PARSER_EXCEPTION_H
+#define PARSER_EXCEPTION_H
 
-#include <cstddef>
+#include "Exception.h"
 
-#include "Node.h"
+#include <utility>
 
-class ExpressionNode : public Node {
+#include "Location.h"
+#include "Token.h"
+
+class ParseException: public Exception {
 public:
-    [[nodiscard]] virtual size_t byte_size() const = 0;
-    [[nodiscard]] virtual size_t minimum_size() const = 0;
+    ParseException(Location location, const char *format, ...) PRINTF_LIKE(3, 4);
+    ParseException(const Token& token, const char* format, ...) PRINTF_LIKE(3, 4);
 
-    // serialize to diagnostics_file
-    // serialize as bytes
+    explicit ParseException(Location location, std::string message): Exception(std::move(message)), location(std::move(location)) { }
+    ParseException(const Token& token, std::string message): ParseException(token.location, std::move(message)) {}
+
+    Location location;
 };
 
 
-#endif // EXPRESSION_NODE_H
+#endif // PARSER_EXCEPTION_H

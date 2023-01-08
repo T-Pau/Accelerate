@@ -30,3 +30,8 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include "AddressingMode.h"
+
+void AddressingMode::add_notation(const std::vector<Token>& tokens) {
+
+}
+

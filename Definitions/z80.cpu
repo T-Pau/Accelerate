@@ -1,22 +1,22 @@
 .byte_order: 12345678
 
-.argument_types:
+.keyword "af'"
 
-bc_or_de: {
+.argument_type bc_or_de: enum {
     bc: 0
     de: 1
 }
 
-basic_condition: {
+.argument_type basic_condition: enum {
     nz: 0
     z: 1
     nc: 2
     c: 3
 }
 
-bit_number: ; TODO 0-7
+.argument_type bit_number: range 0, 7
 
-condition: {
+.argument_type condition: enum {
     nz: 0
     z: 1
     nc: 2
@@ -27,23 +27,23 @@ condition: {
     m: 7
 }
 
-index_register: {
+.argument_type index_register: enum {
     ix: 0
     iy: 1
 }
 
-interrupt_mode: {
+.argument_type interrupt_mode: map {
     0: 0
     1: 2
     2: 3
 }
 
-i_or_r: {
+.argument_type i_or_r: enum {
     i: 0
     r: 1
 }
 
-register: {
+.argument_type register: enum {
     a: 7
     b: 0
     c: 1
@@ -53,40 +53,49 @@ register: {
     l: 5
 }
 
-restart_address: ; TODO: $00-$38, divisible by 8
+.argument_type restart_address: map {
+    $00: 0
+    $08: 1
+    $10: 2
+    $18: 3
+    $20: 4
+    $28: 5
+    $30: 6
+    $38: 7
+}
 
-register_pair_af: {
+.argument_type register_pair_af: enum {
     bc: 0
     de: 1
     hl: 2
     af: 3
 }
 
-register_pair_ix: {
+.argument_type register_pair_ix: enum {
     bc: 0
     de: 01
     ix: 10
     sp: 11
 }
 
-register_pair_iy: {
+.argument_type register_pair_iy: enum {
     bc: 0
     de: 01
     iy: 10
     sp: 11
 }
 
-register_pair_sp: {
+.argument_type register_pair_sp: enum {
     bc: 0
     de: 1
     hl: 2
     sp: 3
 }
 
+.argument_type signed_byte: range -128, 127
 
-.addressing_modes:
 
-a__immediate: {
+.addressing_mode a__immediate: {
     notation: a,n
     arguments: {
         n: byte
@@ -94,7 +103,7 @@ a__immediate: {
     encoding: opcode, n
 }
 
-a__indexed: {
+.addressing_mode a__indexed: {
     notation: a,(i+d)
     arguments: {
         i: index_register
@@ -103,7 +112,7 @@ a__indexed: {
     encoding: opcode | i << 13, d
 }
 
-a__indirect: {
+.addressing_mode a__indirect: {
     notation: a,(nn)
     arguments: {
         nn: word
@@ -111,7 +120,7 @@ a__indirect: {
     encoding: opcode, nn
 }
 
-a__indirect_bc_or_de: {
+.addressing_mode a__indirect_bc_or_de: {
     notation: a,(rr)
     arguments: {
         rr: bc_or_de
@@ -119,15 +128,15 @@ a__indirect_bc_or_de: {
     encoding: opcode | rr << 4
 }
 
-a__indirect_de: {
+.addressing_mode a__indirect_de: {
     notation: a,(de)
 }
 
-a__indirect_hl: {
+.addressing_mode a__indirect_hl: {
     notation: a,(hl)
 }
 
-a__i_or_r: {
+.addressing_mode a__i_or_r: {
     notation: a,r
     arguments: {
         r: i_or_r
@@ -135,7 +144,7 @@ a__i_or_r: {
     encoding: opcode | r << 3
 }
 
-a__register: {
+.addressing_mode a__register: {
     notation: a,r
     arguments: {
         r: register
@@ -143,7 +152,7 @@ a__register: {
     encoding: opcode | r
 }
 
-address: {
+.addressing_mode address: {
     notation nn
     arguments: {
        nn: word
@@ -151,12 +160,12 @@ address: {
     encoding: opcode, nn
 }
 
-af__af_prime: {
-    notation af,af ; TODO: af,af'
+.addressing_mode af__af_prime: {
+    notation af,af'
     encoding: opcode
 }
 
-basic_condition__relative: {
+.addressing_mode basic_condition__relative: {
     notation: cc, nn
     arguments: {
         cc: basic_condition
@@ -165,7 +174,7 @@ basic_condition__relative: {
     encoding: opcode | cc << 3, address - instruction_address - 2
 }
 
-bit_number__indexed: {
+.addressing_mode bit_number__indexed: {
     notation: b,(i+d)
     arguments: {
         b: bit_number
@@ -175,7 +184,7 @@ bit_number__indexed: {
     encoding: opcode | i << 29 | d << 8 | b << 3
 }
 
-bit_number__indirect_hl: {
+.addressing_mode bit_number__indirect_hl: {
     notation: b,(hl)
     arguments: {
         b: bit_number
@@ -183,7 +192,7 @@ bit_number__indirect_hl: {
     encoding: opcode | b << 3
 }
 
-bit_number__register: {
+.addressing_mode bit_number__register: {
     notation: b, r
     arguments: {
         b: bit_number
@@ -192,7 +201,7 @@ bit_number__register: {
     encoding: opcode | b << 3 | r
 }
 
-condition__address: {
+.addressing_mode condition__address: {
     notation: cc
     arguments: {
         cc: condition
@@ -200,7 +209,7 @@ condition__address: {
     encoding: opcode | cc << 3
 }
 
-condition__address: {
+.addressing_mode condition__address: {
     notation: cc, nn
     arguments: {
         cc: condition
@@ -209,11 +218,11 @@ condition__address: {
     encoding: opcode | cc << 3, nn
 }
 
-de__hl: {
+.addressing_mode de__hl: {
     notation: de,hl
 }
 
-hl__indirect: {
+.addressing_mode hl__indirect: {
     notation: hl,(nn)
     arguments: {
         nn: word
@@ -221,7 +230,7 @@ hl__indirect: {
     encoding: opcode, nn
 }
 
-hl__register_pair_sp: {
+.addressing_mode hl__register_pair_sp: {
     notation: (hl),dd
     arguments: {
         dd: register_pair_sp
@@ -229,11 +238,11 @@ hl__register_pair_sp: {
     encoding: opcode | dd << 4
 }
 
-implied: {
+.addressing_mode implied: {
     notation:
 }
 
-indexed: {
+.addressing_mode indexed: {
     notation: (i+d)
     arguments: {
         i: index_register
@@ -242,7 +251,7 @@ indexed: {
     encoding: opcode | i << 13, d
 }
 
-indexed_extended: {
+.addressing_mode indexed_extended: {
     notation: (i+d)
     arguments: {
         i: index_register
@@ -251,7 +260,7 @@ indexed_extended: {
     encoding: opcode | i << 29 | d << 8
 }
 
-indexed__immediate: {
+.addressing_mode indexed__immediate: {
     notation: (i+d),n
     arguments: {
         i: index_register
@@ -261,7 +270,7 @@ indexed__immediate: {
     encoding: opcode | i << 13, d, n
 }
 
-indexed__register: {
+.addressing_mode indexed__register: {
     notation: (i+d),r
     arguments: {
         i: index_register
@@ -271,7 +280,7 @@ indexed__register: {
     encoding: opcode | i << 13 | r << 3, d ; TODO: check if this is correct
 }
 
-index_register: {
+.addressing_mode index_register: {
     notation: i
     arguments: {
         i: index_register
@@ -279,7 +288,7 @@ index_register: {
     encoding: opcode | i << 13
 }
 
-index_register__immediate: {
+.addressing_mode index_register__immediate: {
     notation: i,nn
     arguments: {
         i: index_register
@@ -288,7 +297,7 @@ index_register__immediate: {
     encoding: opcode | i << 13, word
 }
 
-index_register__indirect: {
+.addressing_mode index_register__indirect: {
     notation: i,(nn)
     arguments: {
         i: index_register
@@ -297,7 +306,7 @@ index_register__indirect: {
     encoding: opcode | i << 13, word
 }
 
-indirect__a: {
+.addressing_mode indirect__a: {
     notation: (nn),a
     arguments: {
         nn: word
@@ -305,7 +314,7 @@ indirect__a: {
     encoding: opcode, nn
 }
 
-indirect__a_bc_or_de: {
+.addressing_mode indirect__a_bc_or_de: {
     notation: (rr),a
     arguments: {
         rr: bc_or_de
@@ -313,7 +322,7 @@ indirect__a_bc_or_de: {
     encoding: opcode | rr << 4
 }
 
-indirect__hl: {
+.addressing_mode indirect__hl: {
     notation: (nn),hl
     arguments: {
         nn: word
@@ -321,7 +330,7 @@ indirect__hl: {
     encoding: opcode, nn
 }
 
-indirect__index_register: {
+.addressing_mode indirect__index_register: {
     notation: (nn),i
     arguments: {
         nn: word
@@ -330,7 +339,7 @@ indirect__index_register: {
     encoding: opcode | i << 13, nn
 }
 
-indirect__register_pair_sp: {
+.addressing_mode indirect__register_pair_sp: {
     notation: (nn),dd
     arguments: {
         dd: register_pair_sp
@@ -339,11 +348,11 @@ indirect__register_pair_sp: {
     encoding: opcode | dd << 4, nn
 }
 
-indirect_hl: {
+.addressing_mode indirect_hl: {
     notation: (hl)
 }
 
-indirect_hl__immediate: {
+.addressing_mode indirect_hl__immediate: {
     notation: (hl),n
     arguments: {
         n: byte
@@ -351,7 +360,7 @@ indirect_hl__immediate: {
     encoding: opcode, n
 }
 
-indirect_hl__register: {
+.addressing_mode indirect_hl__register: {
     notation: (hl),r
     arguments: {
         r: register
@@ -359,7 +368,7 @@ indirect_hl__register: {
     encoding: opcode | r
 }
 
-indirect_index: {
+.addressing_mode indirect_index: {
     notation: i
     arguments: {
         i: index_register
@@ -367,11 +376,11 @@ indirect_index: {
     encoding: opcode | i << 13
 }
 
-indirect_sp__hl: {
+.addressing_mode indirect_sp__hl: {
     notation: (sp),hl
 }
 
-indirect_sp__index_register: {
+.addressing_mode indirect_sp__index_register: {
     notation: (sp),i
     arguments: {
         i: index_register
@@ -379,7 +388,7 @@ indirect_sp__index_register: {
     encoding: opcode | i << 13
 }
 
-interrupt_mode: {
+.addressing_mode interrupt_mode: {
     notation: m
     arguments: {
         m: interrupt_mode
@@ -387,7 +396,7 @@ interrupt_mode: {
     encoding: opcode | m << 3
 }
 
-i_or_r__a: {
+.addressing_mode i_or_r__a: {
     notation: r,a
     arguments: {
         r: i_or_r
@@ -395,7 +404,7 @@ i_or_r__a: {
     encoding: opcode | r << 3
 }
 
-ix__register_pair_ix: {
+.addressing_mode ix__register_pair_ix: {
     notation: ix, pp
     arguments: {
         pp: register_pair_ix
@@ -403,7 +412,7 @@ ix__register_pair_ix: {
     encoding: opcode | pp < 4
 }
 
-iy__register_pair_iy: {
+.addressing_mode iy__register_pair_iy: {
     notation: iy, pp
     arguments: {
         pp: register_pair_iy
@@ -411,7 +420,7 @@ iy__register_pair_iy: {
     encoding: opcode | pp < 4
 }
 
-register__immediate: {
+.addressing_mode register__immediate: {
     notation: r,n
     arguments: {
         r: register
@@ -420,7 +429,7 @@ register__immediate: {
     encoding: opcode | r << 3
 }
 
-register__indexed: {
+.addressing_mode register__indexed: {
     notation: r,(i+d)
     arguments: {
         r: register
@@ -430,7 +439,7 @@ register__indexed: {
     encoding: opcode | i << 13 | r << 3, d
 }
 
-register__indirect_c: {
+.addressing_mode register__indirect_c: {
     notation: r, (c)
     arguments: {
         r: register
@@ -438,7 +447,7 @@ register__indirect_c: {
     encoding: opcode | r << 3
 }
 
-register__indirect_hl: {
+.addressing_mode register__indirect_hl: {
     notation: r,(hl)
     arguments: {
         r: register
@@ -446,14 +455,14 @@ register__indirect_hl: {
     encoding: opcode | r << 3
 }
 
-register_low: {
+.addressing_mode register_low: {
     notation: r
     arguments: {
         r: register
     }
     encoding: opcode | r
 }
-register_high: {
+.addressing_mode register_high: {
     notation: r
     arguments: {
         r: register
@@ -461,7 +470,7 @@ register_high: {
     encoding: opcode | r << 3
 }
 
-register__register: {
+.addressing_mode register__register: {
     notation: r1,r2
     arguments: {
         r1: register
@@ -470,7 +479,7 @@ register__register: {
     encoding: opcode | r1 << 3 | r2
 }
 
-register_pair_af: {
+.addressing_mode register_pair_af: {
     notation: rr
     arguments: {
         rr: register_pair_af
@@ -478,7 +487,7 @@ register_pair_af: {
     encoding: opcode | rr << 4
 }
 
-register_pair_sp: {
+.addressing_mode register_pair_sp: {
     notation: ss
     arguments: {
         ss: register_pair_sp
@@ -486,7 +495,7 @@ register_pair_sp: {
     encoding: opcode | ss << 4
 }
 
-register_pair_sp__immediate: {
+.addressing_mode register_pair_sp__immediate: {
     notation: dd, nn
     arguments: {
         dd: register_pair_sp
@@ -495,7 +504,7 @@ register_pair_sp__immediate: {
     encoding: opcode | dd << 4, nn
 }
 
-register_pair_sp__indirect: {
+.addressing_mode register_pair_sp__indirect: {
     notation: dd,(nn)
     arguments: {
         dd: register_pari
@@ -504,7 +513,7 @@ register_pair_sp__indirect: {
     encoding: opcode | dd << 4, nn
 }
 
-relative: {
+.addressing_mode relative: {
     notation: address
     arguments: {
         address: word ; TODO: has to be close enough to instruction_address
@@ -512,7 +521,7 @@ relative: {
     encoding: opcode, address - instruction_address - 2
 }
 
-restart_address: {
+.addressing_mode restart_address: {
     notation: p
     arguments: {
         p: restart_address
@@ -520,11 +529,11 @@ restart_address: {
     encoding: opcode | (p / 8) << 3
 }
 
-sp__hl: {
+.addressing_mode sp__hl: {
     notation: sp,hl
 }
 
-sp__index_register: {
+.addressing_mode sp__index_register: {
     notation: sp,i
     arguments: { 
         i: index_register
@@ -533,9 +542,7 @@ sp__index_register: {
 }
 
 
-.instructions:
-
-adc: {
+.instruction adc: {
     a__immediate: $ce
     a__indexed: $dd8e
     a__indirect_hl: $8e
@@ -543,7 +550,7 @@ adc: {
     hl__register_pair_sp: $ed4a
 }
 
-add: {
+.instruction add: {
     a__immediate: $c6
     a__indexed: $dd86
     a__indirect_hl: $86
@@ -553,60 +560,60 @@ add: {
     hl__register_pair_sp: $09
 }
 
-and: {
+.instruction and: {
     a__immediate: $e6
     a__indexed: $dda6
     a__indirect_hl: $a6
     a__register: $a0
 }
 
-bit: {
+.instruction bit: {
     bit_number__indexed: $ddcb0046
     bit_number__indirect: $cb46
     bit_number__register: $cb40
 }
 
-call: {
+.instruction call: {
     address: $cd
     condition__address: $c4
 }
 
-ccf: {
+.instruction ccf: {
     implied: $3f
 }
 
-cp: {
+.instruction cp: {
     a__immediate: $fe
     a__indexed: $ddbe
     a__indirect_hl: $be
     a__register: $b8
 }
 
-cpd: {
+.instruction cpd: {
     implied: $eda9
 }
 
-cpdr: {
+.instruction cpdr: {
     implied: $edb9
 }
 
-cpi: {
+.instruction cpi: {
     implied: $eda1
 }
 
-cpir: {
+.instruction cpir: {
     implied: $edb1
 }
 
-cpl: {
+.instruction cpl: {
     implied: $2f
 }
 
-daa: {
+.instruction daa: {
     implied: $27
 }
 
-dec: {
+.instruction dec: {
     indexed: $dd35
     index_register: $dd2b
     indirect_hl: $35
@@ -614,43 +621,43 @@ dec: {
     register_pair_sp: $0b
 }
 
-di: {
+.instruction di: {
     implied: $f3
 }
 
-djnz: {
+.instruction djnz: {
     relative: $10
 }
 
-ei: {
+.instruction ei: {
     implied: $fb
 }
 
-ex: {
+.instruction ex: {
     af__af_prime: $08
     de__hl: $eb
     indirect_sp__hl: $e3
     indirect_sp__index_register: $dde3
 }
 
-exx: {
+.instruction exx: {
     implied: $d9
 }
 
-halt: {
+.instruction halt: {
     implied: $76
 }
 
-im: {
+.instruction im: {
     inerrupt_mode: $ed46
 }
 
-in: {
+.instruction in: {
     a__indirect: $db
     register__indirect_c: $ed40
 }
 
-inc: {
+.instruction inc: {
     indexed: $dd34
     index_register: $dd23
     indirect_hl: $34
@@ -658,23 +665,23 @@ inc: {
     register_pair_sp: $03
 }
 
-ind: {
+.instruction ind: {
     implied: $edaa
 }
 
-indr: {
+.instruction indr: {
     implied: $edba
 }
 
-ini: {
+.instruction ini: {
     implied: $eda2
 }
 
-inir: {
+.instruction inir: {
     implied: $edb2
 }
 
-jp: {
+.instruction jp: {
     address: $c3
     condition__address: $42
     basic_condition__relative: $20
@@ -682,11 +689,11 @@ jp: {
     indirect_index: $dde9
 }
 
-jr: {
+.instruction jr: {
     relative: $18
 }
 
-ld: {
+.instruction ld: {
     indirect__a_bc_or_de: $02
     i_or_r__a: $ed47
     indirect__hl: $22
@@ -712,140 +719,140 @@ ld: {
     register__register: $40
 }
 
-ldd: {
+.instruction ldd: {
     implied: $eda8
 }
 
-lddr: {
+.instruction lddr: {
     implied: $edb8
 }
 
-ldi: {
+.instruction ldi: {
     implied: $eda0
 }
 
-ldir: {
+.instruction ldir: {
     implied: $edb0
 }
 
-neg: {
+.instruction neg: {
     implied: $ed44
 }
 
-nop: {
+.instruction nop: {
     implied: $00
 }
 
-or: {
+.instruction or: {
     a__immediate: $f6
     a__indexed: $ddb6
     a__indirect_hl: $b6
     a__register: $b0
 }
 
-out: {
+.instruction out: {
     a__indirect: $d3
     register__indirect_c: $ed41
 }
 
-outd: {
+.instruction outd: {
     implied: $edab
 }
 
-outdr: {
+.instruction outdr: {
     implied: $edbb
 }
 
-outi: {
+.instruction outi: {
     implied: $eda3
 }
 
-outir: {
+.instruction outir: {
     implied: $edb3
 }
 
-pop: {
+.instruction pop: {
     index_register: $dde1
     register_pair_af: $c1
 }
 
-push: {
+.instruction push: {
     index_register: $dde5
     register_pair_af: $c5
 }
 
-res: {
+.instruction res: {
     bit_number__indexed: $ddcb0086
     bit_number__indirect: $cb86
     bit_number__register: $cb80
 }
 
-ret: {
+.instruction ret: {
     implied: $c9
     condition: $c0
 }
 
-reti: {
+.instruction reti: {
     implied: $ed4d
 }
 
-retn: {
+.instruction retn: {
     implied: $ed45
 }
 
-rl: {
+.instruction rl: {
     register_low: $cb10
     indexed_extended: $ddcb0016
     indirect_hl: $cb16
 }
 
-rla: {
+.instruction rla: {
     implied: $17
 }
 
-rlc: {
+.instruction rlc: {
     register_low: $cb00
     indexed_extended: $ddcb0016
     indirect_hl: $cb06
 }
 
-rlca: {
+.instruction rlca: {
     implied: $07
 }
 
-rld: {
+.instruction rld: {
     implied: $ed6f
 }
 
-rr: {
+.instruction rr: {
     register_low: $cb18 ; TODO: user manual has it as $cb08, which is rrc
     indexed_extended: $ddcb001e
     indirect_hl: $cb1e
 }
 
-rra: {
+.instruction rra: {
     implied: $1f
 }
 
-rrc: {
+.instruction rrc: {
     register_low: $cb08
     indexed_extended: $ddcb000e
     indirect_hl: $cb0e
 }
 
-rrca: {
+.instruction rrca: {
     implied: $0f
 }
 
-rrd: {
+.instruction rrd: {
     implied: $ed67
 }
 
-rst: {
+.instruction rst: {
     restart_address: $c3
 }
 
-sbc: {
+.instruction sbc: {
     a__immediate: $de
     a__indexed: $dd9e
     a__indirect_hl: $9e
@@ -853,42 +860,42 @@ sbc: {
     hl__register_pair_sp: $ed42
 }
 
-scf: {
+.instruction scf: {
     implied: $37
 }
 
-set: {
+.instruction set: {
     bit_number__indexed: $ddcb00c6
     bit_number__indirect: $cbc6
     bit_number__register: $cbc0
 }
 
-sla: {
+.instruction sla: {
     register_low: $cb20
     indexed_extended: $ddcb0026
     indirect_hl: $cb26
 }
 
-sra: {
+.instruction sra: {
     register_low: $cb28
     indexed_extended: $ddcb002e
     indirect_hl: $cb2e
 }
 
-srl: {
+.instruction srl: {
     register_low: $cb38
     indexed_extended: $ddcb003e
     indirect_hl: $cb3e
 }
 
-sub: {
+.instruction sub: {
     a__immediate: $d6
     a__indexed: $dd96
     a__indirect_hl: $96
     a__register: $90
 }
 
-xor: {
+.instruction xor: {
     a__immediate: $ee
     a__indexed: $ddae
     a__indirect_hl: $ae

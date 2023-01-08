@@ -1,110 +1,106 @@
 .byte_order: 12345678
 
-.addressing_modes
-
-accumulator: {
-    notation: [
-        a
-
+.addressing_mode accumulator {
+    notation [
+        : a
+        :
     ]
 }
 
-implied: {
+.addressing_mode implied {
     notation:
 }
 
-immediate: {
+.addressing_mode immediate {
     notation: #value
-    arguments: {
+    arguments {
         value: byte
     }
     encoding: opcode, value
 }
 
-zero_page: {
+.addressing_mode zero_page {
     notation: address
-    arguments: {
+    arguments {
         address: byte
     }
     encoding: opcode, address
 }
 
-relative: {
+.addressing_mode relative {
     notation: address
-    arguments: {
+    arguments {
         address: word ; TODO: has to be close enough to instruction_address
     }
     encoding: opcode, address - instruction_address
 }
 
-absolute: {
+.addressing_mode absolute {
     notation: address
-    arguments: {
+    arguments {
         address: word
     }
     encoding: opcode, address
 }
 
-indirect: {
+.addressing_mode indirect {
     notation: (address)
-    arguments: {
+    arguments {
         address: word
     }
     encoding: opcode, address
 }
 
-zero_page_x_indexed: {
+.addressing_mode zero_page_x_indexed {
     notation: address,x
-    arguemnts: {
+    arguemnts {
         address: byte
     }
     encoding: opcode, address
 }
 
-zero_page_y_indexed: {
+.addressing_mode zero_page_y_indexed {
     notation: address,y
-    arguments: {
+    arguments {
         address: byte
     }
     encoding: opcode, address
 }
 
-absolute_x_indexed: {
+.addressing_mode absolute_x_indexed {
     notation: address,x
-    arguments: {
+    arguments {
         address: word
     }
     encoding: opcode, address
 }
 
-absolute_y_indexed: {
+.addressing_mode absolute_y_indexed {
     notation: address,y
-    arguments: {
+    arguments {
         address: word
     }
     encoding: opcode, address
 }
 
-x_indexed_indirect: {
+.addressing_mode x_indexed_indirect {
     notation: (address,x)
-    arguments: {
+    arguments {
         address: byte
     }
     encoding: opcode, address
 }
 
-indirect_y_indexed: {
+.addressing_mode indirect_y_indexed {
     notation: (address),y
-    arguments: {
+    arguments {
         address: byte
     }
     encoding: opcode, address
 }
 
 
-instructions:
-
-adc: {
+.instruction adc {
     absolute: $6d
     absolute_x_indexed: $7d
     absolute_y_indexed: $79
@@ -115,7 +111,7 @@ adc: {
     zero_page_x_indexed: $75
 }
 
-and: {
+.instruction and {
     absolute: $2d
     absolute_x_indexed: $3d
     absolute_y_indexed: $39
@@ -126,7 +122,7 @@ and: {
     zero_page_x_indexed: $35
 }
 
-asl: {
+.instruction asl {
     absolute: $0e
     absolute_x_indexed: $1e
     accumulator: $0a
@@ -134,64 +130,64 @@ asl: {
     zero_page_x_indexed: $16
 }
 
-bcc: {
+.instruction bcc {
     relative: $90
 }
 
-bcs: {
+.instruction bcs {
     relative: $b0
 }
 
-beq: {
+.instruction beq {
     relative: $f0
 }
 
-bit: {
+.instruction bit {
     absolute: $2c
     zero_page: $24
 }
 
-bmi: {
+.instruction bmi {
     relative: $30
 }
 
-bne: {
+.instruction bne {
     relative: $d0
 }
 
-bpl: {
+.instruction bpl {
     relative: $10
 }
 
-brk: {
+.instruction brk {
     implied: $00
 }
 
-bvc: {
+.instruction bvc {
     relative: $50
 }
 
-bvs: {
+.instruction bvs {
     relative: $70
 }
 
-clc: {
+.instruction clc {
     implied: $18
 }
 
-cld: {
+.instruction cld {
     implied: $d8
 }
 
-cli: {
+.instruction cli {
     implied: $58
 }
 
-clv: {
+.instruction clv {
     implied: $b8
 }
 
-cmp: {
+.instruction cmp {
     absolute: $cd
     absolute_x_indexed: $dd
     absolute_y_indexed: $d9
@@ -202,34 +198,34 @@ cmp: {
     zero_page_x_indexed: $d5
 }
 
-cpx: {
+.instruction cpx {
     absolute: $ec
     immediate: $e0
     zero_page: $e4
 }
 
-cpy: {
+.instruction cpy {
     absolute: $cc
     immediate: $c0
     zero_page: $c4
 }
 
-dec: {
+.instruction dec {
     absolute: $ce
     absolute_x_indexed: $de
     zero_page: $c6
     zero_page_x_indexed: $d6
 }
 
-dex: {
+.instruction dex {
     implied: $ca
 }
 
-dey: {
+.instruction dey {
     implied: $88
 }
 
-eor: {
+.instruction eor {
     absolute: $4d
     absolute_x_indexed: $5d
     absolute_y_indexed: $59
@@ -240,31 +236,31 @@ eor: {
     zero_page_x_indexed: $55
 }
 
-inc: {
+.instruction inc {
     absolute: $ee
     absolute_x_indexed: $fe
     zero_page: $e6
     zero_page_x_indexed: $f6
 }
 
-inx: {
+.instruction inx {
     implied: $e8
 }
 
-iny: {
+.instruction iny {
     implied: $c8
 }
 
-jmp: {
+.instruction jmp {
     absolute: $4c
     indirect: $6c
 }
 
-jsr: {
+.instruction jsr {
     absolute: $20
 }
 
-lda: {
+.instruction lda {
     absolute: $ad
     absolute_x_indexed: $bd
     absolute_y_indexed: $b9
@@ -275,7 +271,7 @@ lda: {
     zero_page_x_indexed: $b5
 }
 
-ldx: {
+.instruction ldx {
     absolute: $ae
     absolute_y_indexed: $be
     immediate: $a2
@@ -283,7 +279,7 @@ ldx: {
     zero_page_y_indexed: $b6
 }
 
-ldy: {
+.instruction ldy {
     absolute: $ac
     absolute_y_indexed: $bc
     immediate: $a0
@@ -291,7 +287,7 @@ ldy: {
     zero_page_x_indexed: $b4
 }
 
-lsr: {
+.instruction lsr {
     absolute: $4e
     absolute_x_indexed: $5e
     accumulator: $4a
@@ -299,11 +295,11 @@ lsr: {
     zero_page_x_indexed: $56
 }
 
-nop: {
+.instruction nop {
     implied: $ea
 }
 
-ora: {
+.instruction ora {
     absolute: $0d
     absolute_x_indexed: $1d
     absolute_y_indexed: $19
@@ -314,23 +310,23 @@ ora: {
     zero_page_x_indexed: $15
 }
 
-pha: {
+.instruction pha {
     implied: $48
 }
 
-php: {
+.instruction php {
     implied: $08
 }
 
-pla: {
+.instruction pla {
     implied: $68
 }
 
-plp: {
+.instruction plp {
     implied: $28
 }
 
-rol: {
+.instruction rol {
     absolute: $2e
     absolute_x_indexed: $3e
     accumulator: $2a
@@ -338,7 +334,7 @@ rol: {
     zero_page_x_indexed: $36
 }
 
-ror: {
+.instruction ror {
     absolute: $7e
     absolute_x_indexed: $6e
     accumulator: $6a
@@ -346,19 +342,19 @@ ror: {
     zero_page_x_indexed: $76
 }
 
-rti: {
+.instruction rti {
     implied: $40
 }
 
-rts: {
+.instruction rts {
     implied: $60
 }
 
-sed: {
+.instruction sed {
     implied: $38
 }
 
-sbc: {
+.instruction sbc {
     absolute: $ed
     absolute_x_indexed: $fd
     absolute_y_indexed: $f9
@@ -369,19 +365,19 @@ sbc: {
     zero_page_x_indexed: $f5
 }
 
-sec: {
+.instruction sec {
     implied: $38
 }
 
-sed: {
+.instruction sed {
     implied: $f8
 }
 
-sei: {
+.instruction sei {
     implied: $78
 }
 
-sta: {
+.instruction sta {
     absolute: $8d
     absolute_x_indexed: $9d
     absolute_y_indexed: $99
@@ -391,38 +387,38 @@ sta: {
     indirect_y_indexed: $91
 }
 
-stx: {
+.instruction stx {
     absolute: $8e
     zero_page: $86
     zero_page_y_indexed: $96
 }
 
-sty: {
+.instruction sty {
     absolute: $8c
     zero_page: $84
     zero_page_x_indexed: $94
 }
 
-tax: {
+.instruction tax {
     implied: $aa
 }
 
-tay: {
+.instruction tay {
     implied: $a8
 }
 
-tsx: {
+.instruction tsx {
     implied: $ba
 }
 
-txa: {
+.instruction txa {
     implied: $8a
 }
 
-txs: {
+.instruction txs {
      implied: $9a
 }
 
-tya: {
+.instruction tya {
     implied: $98
 }

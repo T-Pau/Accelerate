@@ -29,9 +29,9 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+#include "ParseException.h"
 #include "Tokenizer.h"
 #include "Util.h"
-#include "Exception.h"
 
 std::unordered_map<char, Token::Type> Tokenizer::single_character_tokens = {
         {'#',  Token::HASH},
@@ -99,11 +99,11 @@ Token Tokenizer::next() {
         }
 
         if (isspace(c)) {
-            // skip whitespace
+            // skip_until whitespace
             continue;
         }
         else if (c == ';') {
-            // skip comments
+            // skip_until comments
             while (current_source->next() != '\n') {}
             continue;
         }
@@ -243,6 +243,95 @@ void Tokenizer::unget(Token token) {
         throw Exception("trying to unget two tokens");
     }
     ungot_token = std::move(token);
+}
+
+Token Tokenizer::expect(Token::Type type, const Token::Group& synchronize) {
+    auto token = next();
+    if (token.type == type) {
+        return token;
+    }
+    else {
+        skip_until(synchronize);
+        throw ParseException(token.location, "expected %s, got %s", token.type_name(), Token::type_name(token.type));
+        return Token(Token::Type::ERROR);
+    }
+}
+
+Token Tokenizer::expect(const Token::Group& types, const Token::Group& synchronize) {
+    auto token = next();
+    if (types.contains(token.type)) {
+        return token;
+    }
+    else {
+        skip_until(synchronize);
+        throw ParseException(token.location, "expected %s, got %s", types.name.c_str(), Token::type_name(token.type));
+    }
+}
+
+
+void Tokenizer::skip_until(const Token::Group &types) {
+    Token token;
+    while ((token = next())) {
+        if (types.contains(token.type)) {
+            unget(token);
+            return;
+        }
+    }
+}
+
+void Tokenizer::expect_litearls(const std::vector<Token::Type>& types, const Token::Group &synchronize) {
+    for (auto type : types) {
+        expect(type, synchronize);
+    }
+}
+
+void Tokenizer::skip(const Token::Group &types) {
+    Token token;
+    while ((token = next())) {
+        if (!types.contains(token.type)) {
+            unget(token);
+            return;
+        }
+    }
+}
+
+
+void Tokenizer::skip(Token::Type type) {
+    Token token;
+    while ((token = next())) {
+        if (token.type != type) {
+            unget(token);
+            return;
+        }
+    }
+}
+
+
+std::vector<Token> Tokenizer::collect_until(Token::Type type) {
+    std::vector<Token> tokens;
+
+    Token token;
+    while ((token = next())) {
+        if (token.type != type) {
+            tokens.emplace_back(token);
+        }
+    }
+    unget(token);
+    return tokens;
+}
+
+
+std::vector<Token> Tokenizer::collect_until(const Token::Group& types) {
+    std::vector<Token> tokens;
+
+    Token token;
+    while ((token = next())) {
+        if (!types.contains(token.type)) {
+            tokens.emplace_back(token);
+        }
+    }
+    unget(token);
+    return tokens;
 }
 
 

@@ -33,11 +33,15 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define CPU_H
 
 #include "SymbolTable.h"
+#include "AddressingMode.h"
 
 class CPU {
 public:
     uint64_t byte_order;
 
+    void add_addressing_mode(symbol_t name, AddressingMode mode);
+
+    std::unordered_map<symbol_t, AddressingMode> addressing_modes;
     SymbolTable addressing_mode_symbols;
     SymbolTable argument_type_symbols;
     SymbolTable reserved_words;

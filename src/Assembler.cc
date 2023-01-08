@@ -35,7 +35,7 @@ int main(int argc, char *argv[]) {
     auto reader = FileReader();
 
     if (argc != 2) {
-        std::cerr << "Usage: " << argv[0] << " file\n";
+        std::cerr << "Usage: " << argv[0] << " diagnostics_file\n";
     }
 
     auto lines = reader.read(argv[1]);
