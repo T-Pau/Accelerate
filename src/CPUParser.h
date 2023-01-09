@@ -44,19 +44,16 @@ public:
     CPU parse(const std::string& file_name, FileReader& file_reader);
 
 private:
-    void parse_addressing_mode();
-    void parse_argument_type();
-    void parse_byte_order();
-    void parse_include();
-    void parse_instruction();
-
-    bool parse_addressing_mode_line(AddressingMode& addressing_mode); // returns false for closing }
+    void parse_addressing_mode(const Token& name, const std::shared_ptr<Object>& parameters);
+    void parse_argument_type(const Token& name, const std::shared_ptr<Object>& parameters);
+    void parse_byte_order(const Token& name, const std::shared_ptr<Object>& parameters);
+    void parse_instruction(const Token& name, const std::shared_ptr<Object>& parameters);
 
     static Token::Group group_directive;
     static Token::Group group_newline;
 
-    static SymbolTable directives;
-    static std::map<symbol_t, void (CPUParser::*)()> parser_methods;
+    static std::map<symbol_t, void (CPUParser::*)(const Token& name, const std::shared_ptr<Object>& parameters)> parser_methods;
+    static symbol_t symbol_byte_order;
 
     FileReader* reader = nullptr;
     Tokenizer tokenizer;

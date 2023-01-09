@@ -38,7 +38,8 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 std::vector<std::string> FileReader::empty_file;
 
 const std::vector<std::string>& FileReader::read(const std::string& file_name, bool optional) {
-    auto it = files.find(file_name);
+    auto file = SymbolTable::global.add(file_name);
+    auto it = files.find(file);
     if (it != files.end()) {
         return it->second;
     }
@@ -62,22 +63,22 @@ const std::vector<std::string>& FileReader::read(const std::string& file_name, b
         }
     }
 
-    files[file_name] = std::move(lines);
-    return files[file_name];
+    files[file] = std::move(lines);
+    return files[file];
 }
 
 const std::string &FileReader::get_line(const std::string &file_name, size_t line_number) const {
-    auto it = files.find(file_name);
+    auto it = files.find(SymbolTable::global[file_name]);
 
     if (it == files.end()) {
-        throw Exception("unknown diagnostics_file '%s'", file_name.c_str());
+        throw Exception("unknown file '%s'", file_name.c_str());
     }
 
-    if (line_number > it->second.size()) {
+    if (line_number == 0 || line_number > it->second.size()) {
         throw Exception("line integer %zu out of range in '%s'", line_number, file_name.c_str());
     }
 
-    return it->second[line_number];
+    return it->second[line_number - 1];
 }
 
 

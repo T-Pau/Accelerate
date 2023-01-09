@@ -99,12 +99,13 @@ Token Tokenizer::next() {
         }
 
         if (isspace(c)) {
-            // skip_until whitespace
+            // skip whitespace
             continue;
         }
         else if (c == ';') {
-            // skip_until comments
+            // skip comments
             while (current_source->next() != '\n') {}
+            current_source->unget();
             continue;
         }
         else if (c == '$') {
@@ -247,24 +248,23 @@ void Tokenizer::unget(Token token) {
 
 Token Tokenizer::expect(Token::Type type, const Token::Group& synchronize) {
     auto token = next();
-    if (token.type == type) {
+    if (token.get_type() == type) {
         return token;
     }
     else {
         skip_until(synchronize);
-        throw ParseException(token.location, "expected %s, got %s", token.type_name(), Token::type_name(token.type));
-        return Token(Token::Type::ERROR);
+        throw ParseException(token.location, "expected %s, got %s", Token::type_name(type), token.type_name());
     }
 }
 
 Token Tokenizer::expect(const Token::Group& types, const Token::Group& synchronize) {
     auto token = next();
-    if (types.contains(token.type)) {
+    if (types.contains(token.get_type())) {
         return token;
     }
     else {
         skip_until(synchronize);
-        throw ParseException(token.location, "expected %s, got %s", types.name.c_str(), Token::type_name(token.type));
+        throw ParseException(token.location, "expected %s, got %s", types.name.c_str(), token.type_name());
     }
 }
 
@@ -272,7 +272,7 @@ Token Tokenizer::expect(const Token::Group& types, const Token::Group& synchroni
 void Tokenizer::skip_until(const Token::Group &types) {
     Token token;
     while ((token = next())) {
-        if (types.contains(token.type)) {
+        if (types.contains(token.get_type())) {
             unget(token);
             return;
         }
@@ -288,7 +288,7 @@ void Tokenizer::expect_litearls(const std::vector<Token::Type>& types, const Tok
 void Tokenizer::skip(const Token::Group &types) {
     Token token;
     while ((token = next())) {
-        if (!types.contains(token.type)) {
+        if (!types.contains(token.get_type())) {
             unget(token);
             return;
         }
@@ -299,7 +299,7 @@ void Tokenizer::skip(const Token::Group &types) {
 void Tokenizer::skip(Token::Type type) {
     Token token;
     while ((token = next())) {
-        if (token.type != type) {
+        if (token.get_type() != type) {
             unget(token);
             return;
         }
@@ -312,8 +312,11 @@ std::vector<Token> Tokenizer::collect_until(Token::Type type) {
 
     Token token;
     while ((token = next())) {
-        if (token.type != type) {
+        if (token.get_type() != type) {
             tokens.emplace_back(token);
+        }
+        else {
+            break;
         }
     }
     unget(token);
@@ -326,7 +329,7 @@ std::vector<Token> Tokenizer::collect_until(const Token::Group& types) {
 
     Token token;
     while ((token = next())) {
-        if (!types.contains(token.type)) {
+        if (!types.contains(token.get_type())) {
             tokens.emplace_back(token);
         }
     }
@@ -336,26 +339,26 @@ std::vector<Token> Tokenizer::collect_until(const Token::Group& types) {
 
 
 int Tokenizer::Source::next() {
-    if (line_number >= lines.size()) {
+    if (line >= lines.size()) {
         return EOF;
     }
 
-    if (column >= lines[line_number].size()) {
-        line_number += 1;
+    if (column >= lines[line].size()) {
+        line += 1;
         column = 0;
         return '\n';
     }
 
-    auto c = lines[line_number][column];
+    auto c = lines[line][column];
     column += 1;
     return c;
 }
 
 void Tokenizer::Source::unget() {
     if (column == 0) {
-        if (line_number > 0) {
-            line_number -= 1;
-            column = lines[line_number].size();
+        if (line > 0) {
+            line -= 1;
+            column = lines[line].size();
         }
     }
     else {

@@ -42,9 +42,7 @@ public:
     void add_addressing_mode(symbol_t name, AddressingMode mode);
 
     std::unordered_map<symbol_t, AddressingMode> addressing_modes;
-    SymbolTable addressing_mode_symbols;
-    SymbolTable argument_type_symbols;
-    SymbolTable reserved_words;
+    std::unordered_set<symbol_t> reserved_words;
 };
 
 

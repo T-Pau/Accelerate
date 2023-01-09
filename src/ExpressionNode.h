@@ -41,7 +41,7 @@ public:
     [[nodiscard]] virtual size_t byte_size() const = 0;
     [[nodiscard]] virtual size_t minimum_size() const = 0;
 
-    // serialize to diagnostics_file
+    // serialize to file
     // serialize as bytes
 };
 

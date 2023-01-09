@@ -37,7 +37,7 @@ const Token::Group Object::start_group({Token::COLON, Token::CURLY_PARENTHESIS_O
 std::shared_ptr<Object> Object::parse(Tokenizer &tokenizer) {
     auto token = tokenizer.expect(start_group, Token::Group(Token::NEWLINE));
 
-    switch (token.type) {
+    switch (token.get_type()) {
         case Token::COLON:
             return std::make_shared<ObjectScalar>(tokenizer);
         case Token::CURLY_PARENTHESIS_OPEN:
@@ -52,10 +52,11 @@ std::shared_ptr<Object> Object::parse(Tokenizer &tokenizer) {
 
 
 ObjectArray::ObjectArray(Tokenizer &tokenizer) {
+    tokenizer.skip(Token::NEWLINE);
     auto done = false;
     while (!done) {
         auto token = tokenizer.next();
-        switch (token.type) {
+        switch (token.get_type()) {
             case Token::END:
             case Token::CURLY_PARENTHESIS_CLOSE:
                 throw ParseException(token, "unexpected %s", token.type_name());
@@ -73,10 +74,11 @@ ObjectArray::ObjectArray(Tokenizer &tokenizer) {
 }
 
 ObjectDictionary::ObjectDictionary(Tokenizer &tokenizer) {
+    tokenizer.skip(Token::NEWLINE);
     auto done = false;
     while (!done) {
         auto token = tokenizer.next();
-        switch (token.type) {
+        switch (token.get_type()) {
             case Token::END:
             case Token::SQUARE_PARENTHESIS_CLOSE:
                 throw ParseException(token, "unexpected %s", token.type_name());
@@ -106,4 +108,5 @@ std::shared_ptr<Object> ObjectDictionary::operator[](const Token& token) const {
 
 ObjectScalar::ObjectScalar(Tokenizer &tokenizer) {
     tokens = tokenizer.collect_until(Token::NEWLINE);
+    tokenizer.skip(Token::NEWLINE);
 }

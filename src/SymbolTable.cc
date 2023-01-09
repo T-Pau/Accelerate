@@ -33,6 +33,8 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "Exception.h"
 
+SymbolTable SymbolTable::global;
+
 SymbolTable::SymbolTable(const std::vector<std::string> &initial_symbols) {
     for (const auto& symbol: initial_symbols) {
         add(symbol);

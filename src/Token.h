@@ -35,6 +35,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <unordered_set>
 
 #include "Location.h"
+#include "SymbolTable.h"
 
 class Token {
 public:
@@ -77,43 +78,56 @@ public:
     Token(): type(END) {}
     explicit Token(Type type): type(type) {}
     Token(Type type, Location location): type(type), location(std::move(location)) {}
-    Token(Type type, Location location, std::string name): type(type), location(std::move(location)), name(std::move(name)) {}
+    Token(Type type, Location location, const std::string& name);
     Token(Type type, Location location, uint64_t integer): Token(type, std::move(location)) { value.integer = integer; }
     Token(Type type, Location location, double real): Token(type, std::move(location)) { value.real = real; }
 
     explicit operator bool() const {return type != END;}
     bool operator==(const Token& other) const;
+    [[nodiscard]] Type get_type() const {return type;}
     [[nodiscard]] bool is_directive() const {return type == DIRECTIVE;}
     [[nodiscard]] bool is_name() const {return type == NAME;}
     [[nodiscard]] bool is_newline() const {return type == NEWLINE;}
     [[nodiscard]] const char* type_name() const {return type_name(type);}
 
+    [[nodiscard]] const std::string& as_string() const;
+    [[nodiscard]] symbol_t as_symbol() const {return is_directive() || is_name() ? value.symbol : 0;}
+    [[nodiscard]] uint64_t as_integer() const {return type == NUMBER ? value.integer : 0;}
+
     static const char* type_name(Type type);
 
+    Location location;
+
+private:
     Type type;
-    std::string name;
+    std::string string;
     union {
         uint64_t integer;
         double real;
+        symbol_t symbol;
     } value = {0};
-    Location location;
+
+    static const std::string empty_string;
 };
 
 template<>
 struct std::hash<Token>
 {
     std::size_t operator()(Token const& token) const noexcept {
-        size_t h1 = std::hash<size_t>{}(static_cast<size_t>(token.type));
+        size_t h1 = std::hash<size_t>{}(static_cast<size_t>(token.get_type()));
         size_t h2 = 0;
-        switch (token.type) {
+        switch (token.get_type()) {
             case Token::NAME:
             case Token::DIRECTIVE:
-                h2 = std::hash<std::string>{}(token.name);
+                h2 = std::hash<symbol_t>{}(token.as_symbol());
                 break;
 
             case Token::NUMBER:
-                h2 = std::hash<::uint64_t>{}(token.value.integer);
+                h2 = std::hash<::uint64_t>{}(token.as_integer());
                 break;
+
+            case Token::STRING:
+                h2 = std::hash<std::string>{}(token.as_string());
 
             default:
                 break;

@@ -65,13 +65,13 @@ private:
         int next();
         void unget();
 
-        [[nodiscard]] Location location() const { return {file_name, line_number, column, column}; }
+        [[nodiscard]] Location location() const { return {file_name, line + 1, column, column}; }
         void expand_location(Location& location) const { location.end_column = column; }
 
     private:
         const std::string file_name;
         const std::vector<std::string>& lines;
-        size_t line_number = 0;
+        size_t line = 0;
         size_t column = 0;
     };
 

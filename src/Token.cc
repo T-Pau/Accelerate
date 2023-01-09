@@ -31,6 +31,8 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "Token.h"
 
+const std::string Token::empty_string;
+
 const char* Token::type_name(Type type) {
     switch (type) {
         case COLON:
@@ -49,7 +51,7 @@ const char* Token::type_name(Type type) {
             return "directive";
 
         case END:
-            return "end of diagnostics_file";
+            return "end of file";
 
         case EQUAL:
             return "'='";
@@ -108,20 +110,45 @@ bool Token::operator==(const Token &other) const {
     switch (type) {
         case NAME:
         case DIRECTIVE:
-            if (name != other.name) {
-                return false;
-            }
-            break;
+            return value.symbol == other.value.symbol;
 
         case NUMBER:
-            if (value.integer != other.value.integer) {
-                return false;
-            }
+            return value.integer == other.value.integer;
+
+        case STRING:
+            return string == other.string;
+
+        default:
+            return true;
+    }
+}
+
+const std::string &Token::as_string() const {
+    switch (type) {
+        case NAME:
+        case DIRECTIVE:
+            return SymbolTable::global[value.symbol];
+
+        case STRING:
+            return string;
+
+        default:
+            return empty_string;
+    }
+}
+
+Token::Token(Token::Type type, Location location, const std::string& name): type(type), location(std::move(location)) {
+    switch (type) {
+        case DIRECTIVE:
+        case NAME:
+            value.symbol = SymbolTable::global.add(name);
+            break;
+
+        case STRING:
+            string = name;
             break;
 
         default:
             break;
     }
-
-    return true;
 }

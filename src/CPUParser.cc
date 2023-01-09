@@ -36,20 +36,19 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "AddressingMode.h"
 #include "Object.h"
 
-Token::Group CPUParser::group_directive = Token::Group(Token::DIRECTIVE);
+Token::Group CPUParser::group_directive = Token::Group({Token::DIRECTIVE,Token::END}, "directive");
 Token::Group CPUParser::group_newline = Token::Group(Token::NEWLINE);
 
-SymbolTable CPUParser::directives;
-std::map<symbol_t, void (CPUParser::*)()> CPUParser::parser_methods;
-
+std::map<symbol_t, void (CPUParser::*)(const Token& name, const std::shared_ptr<Object>& parameters)> CPUParser::parser_methods;
+symbol_t CPUParser::symbol_byte_order;
 
 CPUParser::CPUParser() {
-    if (directives.empty()) {
-        parser_methods[directives.add("byte_order")] = &CPUParser::parse_byte_order;
-        parser_methods[directives.add("addressing_mode")] = &CPUParser::parse_addressing_mode;
-        parser_methods[directives.add("argument_type")] = &CPUParser::parse_argument_type;
-        parser_methods[directives.add("include")] = &CPUParser::parse_include;
-        parser_methods[directives.add("instruction")] = &CPUParser::parse_instruction;
+    if (parser_methods.empty()) {
+        symbol_byte_order = SymbolTable::global.add("byte_order");
+        parser_methods[symbol_byte_order] = &CPUParser::parse_byte_order;
+        parser_methods[SymbolTable::global.add("addressing_mode")] = &CPUParser::parse_addressing_mode;
+        parser_methods[SymbolTable::global.add("argument_type")] = &CPUParser::parse_argument_type;
+        parser_methods[SymbolTable::global.add("instruction")] = &CPUParser::parse_instruction;
     }
 }
 
@@ -61,42 +60,50 @@ CPU CPUParser::parse(const std::string &file_name, FileReader& file_reader) {
 
     while (!tokenizer.ended()) {
         try {
-            auto token = tokenizer.expect(Token::DIRECTIVE, group_directive);
-            auto it = parser_methods.find(directives[token.name]);
-            if (it == parser_methods.end()) {
-                throw ParseException(token.location, "unknown directive .%s", token.name.c_str());
+            auto token = tokenizer.expect(group_directive, group_directive);
+            if (!token) {
+                break;
             }
-            (this->*it->second)();
+            auto it = parser_methods.find(token.as_symbol());
+            if (it == parser_methods.end()) {
+                throw ParseException(token.location, "unknown directive .%s", token.as_string().c_str());
+            }
+
+            Token name;
+            if (token.as_symbol() != symbol_byte_order) {
+                name = tokenizer.expect(Token::NAME, group_directive);
+            }
+            auto parameters = Object::parse(tokenizer);
+
+            (this->*it->second)(name, parameters);
         }
         catch (ParseException& ex) {
             reader->error(ex.location, "%s", ex.what());
+            tokenizer.skip_until(group_directive);
         }
     }
 
     return std::move(cpu);
 }
 
-void CPUParser::parse_addressing_mode() {
-    auto name_token = tokenizer.expect(Token::NAME, group_directive);
-    if (cpu.addressing_mode_symbols.contains(name_token.name)) {
+void CPUParser::parse_addressing_mode(const Token& name, const std::shared_ptr<Object>& parameters) {
+    if (cpu.addressing_modes.find(name.as_symbol()) != cpu.addressing_modes.end()) {
         tokenizer.skip_until(group_directive);
-        throw ParseException(name_token.location, "addressing mode %s already defined", name_token.name.c_str());
+        throw ParseException(name.location, "addressing mode %s already defined", name.as_string().c_str());
     }
-    auto name = cpu.addressing_mode_symbols.add(name_token.name);
 
-    auto object = Object::parse(tokenizer);
+    if (!parameters->is_dictionary()) {
+        throw ParseException(name, "addressing mode definition is not a dictionary");
+    }
+
     auto addressing_mode = AddressingMode();
 
-    if (object->is_dictionary()) {
-        throw ParseException(name_token, "addressing mode definition is not a dictionary");
-    }
-
-    auto definition = object->as_dictionary();
+    auto definition = parameters->as_dictionary();
 
     auto arguments = (*definition)["arguments"];
     if (arguments != nullptr) {
         if (!arguments->is_dictionary()) {
-            throw ParseException(name_token, "addressing mode definition is not a dictionary");
+            throw ParseException(name, "addressing mode definition is not a dictionary");
         }
         for (const auto& pair: (*arguments->as_dictionary())) {
             // TODO: parse argument definition
@@ -105,55 +112,18 @@ void CPUParser::parse_addressing_mode() {
 
     // TODO: notations, encoding
 
-    cpu.add_addressing_mode(name, addressing_mode);
+    cpu.add_addressing_mode(name.as_symbol(), addressing_mode);
 }
 
 
-void CPUParser::parse_argument_type() {
+void CPUParser::parse_argument_type(const Token& name, const std::shared_ptr<Object>& parameters) {
 
 }
 
-void CPUParser::parse_byte_order() {
+void CPUParser::parse_byte_order(const Token& name, const std::shared_ptr<Object>& parameters) {
 
 }
 
-void CPUParser::parse_include() {
+void CPUParser::parse_instruction(const Token& name, const std::shared_ptr<Object>& parameters) {
 
 }
-
-void CPUParser::parse_instruction() {
-
-}
-
-bool CPUParser::parse_addressing_mode_line(AddressingMode &addressing_mode) {
-    auto token = tokenizer.next();
-
-    if (token.type == Token::CURLY_PARENTHESIS_CLOSE) {
-        tokenizer.skip(Token::NEWLINE);
-        return false;
-    } else if (token.type != Token::NAME) {
-        throw ParseException(token.location, "expected name, got %s", token.type_name());
-    }
-
-    tokenizer.expect(Token::COLON, group_newline);
-
-    if (token.name == "notation") {
-        auto tokens = tokenizer.collect_until(Token::NEWLINE);
-        if (tokens.size() == 1 && tokens[0].type == Token::SQUARE_PARENTHESIS_OPEN) {
-            // TODO: multiple notations
-        }
-        addressing_mode.add_notation(tokens);
-    }
-    else if (token.name == "arguments") {
-
-    }
-    else if (token.name == "encoding") {
-
-    }
-    else {
-        tokenizer.skip_until(group_newline);
-        throw ParseException(token.location, "unknown addressing mode field %s", token.name.c_str());
-    }
-    return true;
-}
-

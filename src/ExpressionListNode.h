@@ -39,7 +39,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 class ExpressionListNode : public Node {
 public:
     [[nodiscard]] size_t byte_size() const;
-    // serialize to diagnostics_file
+    // serialize to file
     // serialize as bytes
 
     std::vector<ExpressionNode> expressions;

@@ -39,6 +39,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "Location.h"
 #include "printf_like.h"
+#include "SymbolTable.h"
 
 class FileReader {
 public:
@@ -69,7 +70,7 @@ private:
 
     static std::vector<std::string> empty_file;
 
-    std::map<std::string,std::vector<std::string>> files;
+    std::map<symbol_t,std::vector<std::string>> files;
     bool error_flag = false;
     std::ostream& diagnostics_file = std::cerr;
 

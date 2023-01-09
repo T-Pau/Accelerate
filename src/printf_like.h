@@ -5,7 +5,7 @@
   printf_like.c -- macro for telling the compiler a function behaves like printf
   Copyright (C) 1999-2021 Dieter Baron and Thomas Klausner
 
-  This diagnostics_file is part of ckmame, a program to check rom sets for MAME.
+  This file is part of ckmame, a program to check rom sets for MAME.
   The authors can be contacted at <ckmame@nih.at>
 
   Redistribution and use in source and binary forms, with or without

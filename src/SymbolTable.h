@@ -50,6 +50,8 @@ public:
     [[nodiscard]] bool empty() const  {return names.empty();}
     [[nodiscard]] size_t size() const {return names.size();}
 
+    static SymbolTable global;
+
 private:
     std::unordered_map<std::string, symbol_t> symbols;
     std::vector<std::string> names;

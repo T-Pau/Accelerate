@@ -2,3 +2,4 @@
 - allow tokenizing from vector of tokens (encoding) 
 - FileReader, Location: use SymbolTable for file names
 - Location: support multi-line locations
+- parsing objects: end on directive

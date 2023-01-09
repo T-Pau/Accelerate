@@ -35,14 +35,6 @@
     encoding: opcode, address - instruction_address
 }
 
-.addressing_mode absolute {
-    notation: address
-    arguments {
-        address: word
-    }
-    encoding: opcode, address
-}
-
 .addressing_mode indirect {
     notation: (address)
     arguments {
