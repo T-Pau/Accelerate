@@ -54,7 +54,7 @@ public:
         MINUS,
         NAME,
         NEWLINE,
-        NUMBER,
+        INTEGER,
         PARENTHESIS_CLOSE,
         PARENTHESIS_OPEN,
         PLUS,
@@ -86,13 +86,14 @@ public:
     bool operator==(const Token& other) const;
     [[nodiscard]] Type get_type() const {return type;}
     [[nodiscard]] bool is_directive() const {return type == DIRECTIVE;}
+    [[nodiscard]] bool is_integer() const {return type == INTEGER;}
     [[nodiscard]] bool is_name() const {return type == NAME;}
     [[nodiscard]] bool is_newline() const {return type == NEWLINE;}
     [[nodiscard]] const char* type_name() const {return type_name(type);}
 
     [[nodiscard]] const std::string& as_string() const;
     [[nodiscard]] symbol_t as_symbol() const {return is_directive() || is_name() ? value.symbol : 0;}
-    [[nodiscard]] uint64_t as_integer() const {return type == NUMBER ? value.integer : 0;}
+    [[nodiscard]] uint64_t as_integer() const {return type == INTEGER ? value.integer : 0;}
 
     static const char* type_name(Type type);
 
@@ -122,7 +123,7 @@ struct std::hash<Token>
                 h2 = std::hash<symbol_t>{}(token.as_symbol());
                 break;
 
-            case Token::NUMBER:
+            case Token::INTEGER:
                 h2 = std::hash<::uint64_t>{}(token.as_integer());
                 break;
 

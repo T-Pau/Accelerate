@@ -77,7 +77,7 @@ const char* Token::type_name(Type type) {
         case NEWLINE:
             return "newline";
 
-        case NUMBER:
+        case INTEGER:
             return "number";
 
         case PARENTHESIS_CLOSE:
@@ -112,7 +112,7 @@ bool Token::operator==(const Token &other) const {
         case DIRECTIVE:
             return value.symbol == other.value.symbol;
 
-        case NUMBER:
+        case INTEGER:
             return value.integer == other.value.integer;
 
         case STRING:

@@ -1,5 +1,5 @@
 /*
-CPU.h -- Definition of a CPU and Its Instruction Set
+ArgumentType.cc -- 
 
 Copyright (C) Dieter Baron
 
@@ -29,39 +29,4 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef CPU_H
-#define CPU_H
-
-#include <unordered_map>
-
-#include "SymbolTable.h"
-#include "AddressingMode.h"
 #include "ArgumentType.h"
-#include "Instruction.h"
-#include "AddressingModeMatcher.h"
-
-class CPUParser;
-
-class CPU {
-public:
-    uint64_t byte_order;
-
-    [[nodiscard]] const AddressingMode* addressing_mode(symbol_t name) const;
-    [[nodiscard]] const ArgumentType* argument_type(symbol_t name) const;
-
-private:
-    std::unordered_map<symbol_t, AddressingMode> addressing_modes;
-    std::unordered_map<symbol_t, std::unique_ptr<ArgumentType>> argument_types;
-    std::unordered_map<symbol_t, Instruction> instructions;
-    std::unordered_set<symbol_t> reserved_words;
-    AddressingModeMatcher addressing_mode_matcher;
-
-    void add_addressing_mode(symbol_t name, AddressingMode addressing_mode);
-    void add_argument_type(symbol_t name, std::unique_ptr<ArgumentType> argument_type);
-    void add_reserved_word(symbol_t word) {reserved_words.insert(word);}
-
-    friend CPUParser;
-};
-
-
-#endif // CPU_H

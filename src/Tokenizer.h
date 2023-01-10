@@ -41,7 +41,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 class Tokenizer {
 public:
-    void push(const std::string& filename, const std::vector<std::string>& lines);
+    void push(const std::string& filename);
 
     Token next();
     void unget(Token token);
@@ -57,19 +57,21 @@ public:
 
     [[nodiscard]] bool ended() {return current_source== nullptr;}
 
+    Location current_location() const;
+
 private:
     class Source {
     public:
-        Source(std::string file_name, const std::vector<std::string>& lines) : file_name(std::move(file_name)), lines(lines) {}
+        Source(symbol_t file, const std::vector<std::string>& lines) : file(file), lines(lines) {}
 
         int next();
         void unget();
 
-        [[nodiscard]] Location location() const { return {file_name, line + 1, column, column}; }
+        [[nodiscard]] Location location() const { return {file, line + 1, column, column}; }
         void expand_location(Location& location) const { location.end_column = column; }
 
     private:
-        const std::string file_name;
+        symbol_t file;
         const std::vector<std::string>& lines;
         size_t line = 0;
         size_t column = 0;

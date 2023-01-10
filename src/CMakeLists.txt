@@ -5,6 +5,8 @@ endif()
 
 SET(assembler_SOURCES
         AddressingMode.cc
+        AddressingModeMatcher.cc
+        ArgumentType.cc
         Assembler.cc
         Commandline.cc
         CPU.cc

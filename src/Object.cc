@@ -37,17 +37,26 @@ const Token::Group Object::start_group({Token::COLON, Token::CURLY_PARENTHESIS_O
 std::shared_ptr<Object> Object::parse(Tokenizer &tokenizer) {
     auto token = tokenizer.expect(start_group, Token::Group(Token::NEWLINE));
 
+    std::shared_ptr<Object> object;
+
     switch (token.get_type()) {
         case Token::COLON:
-            return std::make_shared<ObjectScalar>(tokenizer);
+            object = std::make_shared<ObjectScalar>(tokenizer);
+            break;
         case Token::CURLY_PARENTHESIS_OPEN:
-            return std::make_shared<ObjectDictionary>(tokenizer);
+            object = std::make_shared<ObjectDictionary>(tokenizer);
+            break;
         case Token::SQUARE_PARENTHESIS_OPEN:
-            return std::make_shared<ObjectArray>(tokenizer);
+            object = std::make_shared<ObjectArray>(tokenizer);
+            break;
 
         default:
             throw ParseException(token, "unexpected %s", token.type_name());
     }
+
+    object->location = token.location;
+    object->location.extend(tokenizer.current_location());
+    return object;
 }
 
 

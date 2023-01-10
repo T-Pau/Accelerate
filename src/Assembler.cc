@@ -10,15 +10,13 @@
 #include "Exception.h"
 
 int main(int argc, char *argv[]) {
-    auto reader = FileReader();
-
     if (argc != 2) {
         std::cerr << "Usage: " << argv[0] << " cpu-definition" << std::endl;
     }
 
     auto parser = CPUParser();
     try {
-        auto cpu = parser.parse(argv[1], reader);
+        auto cpu = parser.parse(argv[1]);
     }
     catch (Exception &ex) {
         std::cerr << "Parser error: " << ex.what() << std::endl;

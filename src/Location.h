@@ -34,18 +34,22 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <string>
 
+#include "SymbolTable.h"
+
 class Location {
 public:
-    Location(): line_number(0), start_column(0), end_column(0) {}
+    Location() = default;
 
-    Location(std::string file, size_t line_number, size_t start_column, size_t end_column) : file(std::move(file)), line_number(line_number), start_column(start_column), end_column(end_column) {}
+    Location(symbol_t file, size_t line_number, size_t start_column, size_t end_column) : file(file), start_line_number(line_number), start_column(start_column), end_column(end_column) {}
 
-    [[nodiscard]] std::string to_string() const {return file + ":" + std::to_string(line_number) + "." + std::to_string(start_column);}
+    void extend(const Location& end);
 
-    std::string file;
-    size_t line_number;
-    size_t start_column;
-    size_t end_column;
+    [[nodiscard]] std::string to_string() const {return SymbolTable::global[file] + ":" + std::to_string(start_line_number) + "." + std::to_string(start_column);}
+
+    symbol_t file = 0;
+    size_t start_line_number = 0;
+    size_t start_column = 0;
+    size_t end_column = 0;
 };
 
 #endif // LOCATION_H

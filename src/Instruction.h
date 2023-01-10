@@ -38,13 +38,8 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "SymbolTable.h"
 
 class Instruction {
-private:
-    class AddressingMode {
-
-    };
-
-    std::string mnemonic;
-    std::unordered_map<symbol_t, AddressingMode> addressing_modes;
+public:
+    std::unordered_map<symbol_t, uint64_t> opcodes; // keys are addressing modes
 };
 
 

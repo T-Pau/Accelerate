@@ -61,6 +61,9 @@ public:
     [[nodiscard]] bool is_array() const {return type() == ARRAY;}
     [[nodiscard]] bool is_dictionary() const {return type() == DICTIONARY;}
     [[nodiscard]] bool is_scalar() const {return type() == SCALAR_SINGULAR || type() == SCALAR_LIST;}
+    [[nodiscard]] bool is_singular_scalar() const {return type() == SCALAR_SINGULAR;}
+
+    Location location;
 
 private:
     static const Token::Group start_group;
@@ -75,6 +78,8 @@ public:
 
     [[nodiscard]] Type type() const override {return ARRAY;}
 
+    [[nodiscard]] bool empty() const {return entries.empty();}
+    [[nodiscard]] size_t size() const {return entries.size();}
     std::shared_ptr<Object> operator[](size_t index) const {return entries[index];}
 
     std::vector<std::shared_ptr<Object>>::iterator begin() {return entries.begin();}
@@ -93,7 +98,7 @@ public:
     [[nodiscard]] Type type() const override {return DICTIONARY;}
 
     std::shared_ptr<Object> operator[](const Token& token) const;
-    std::shared_ptr<Object> operator[](std::string name) const {return (*this)[Token(Token::NAME, {}, std::move(name))];}
+    std::shared_ptr<Object> operator[](const std::string& name) const {return (*this)[Token(Token::NAME, {}, name)];}
 
     std::unordered_map<Token, std::shared_ptr<Object>>::iterator begin() {return entries.begin();}
     std::unordered_map<Token, std::shared_ptr<Object>>::iterator end() {return entries.end();}
@@ -107,6 +112,15 @@ public:
     explicit ObjectScalar(Tokenizer& tokenizer);
 
     std::vector<Token> tokens;
+
+    [[nodiscard]] bool empty() const {return tokens.empty();}
+    [[nodiscard]] size_t size() const {return tokens.size();}
+    const Token& operator[](size_t index) const {return tokens[index];}
+    [[nodiscard]] const Token& token() const {return tokens.front();}
+    [[nodiscard]] std::vector<Token>::iterator begin() {return tokens.begin();}
+    [[nodiscard]] std::vector<Token>::iterator end() {return tokens.end();}
+    [[nodiscard]] std::vector<Token>::const_iterator begin() const {return tokens.begin();}
+    [[nodiscard]] std::vector<Token>::const_iterator end() const {return tokens.end();}
 
     [[nodiscard]] Type type() const override {return tokens.size() == 1 ? SCALAR_SINGULAR : SCALAR_LIST;}
 };

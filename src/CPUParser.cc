@@ -39,24 +39,27 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 Token::Group CPUParser::group_directive = Token::Group({Token::DIRECTIVE,Token::END}, "directive");
 Token::Group CPUParser::group_newline = Token::Group(Token::NEWLINE);
 
-std::map<symbol_t, void (CPUParser::*)(const Token& name, const std::shared_ptr<Object>& parameters)> CPUParser::parser_methods;
-symbol_t CPUParser::symbol_byte_order;
+std::map<symbol_t, std::unique_ptr<ArgumentType> (CPUParser::*)(const Token& name, const Object* parameters)> CPUParser::argument_type_parser_methods;
+std::map<symbol_t, void (CPUParser::*)()> CPUParser::parser_methods;
 
 CPUParser::CPUParser() {
     if (parser_methods.empty()) {
-        symbol_byte_order = SymbolTable::global.add("byte_order");
-        parser_methods[symbol_byte_order] = &CPUParser::parse_byte_order;
+        parser_methods[SymbolTable::global.add("byte_order")] = &CPUParser::parse_byte_order;
         parser_methods[SymbolTable::global.add("addressing_mode")] = &CPUParser::parse_addressing_mode;
         parser_methods[SymbolTable::global.add("argument_type")] = &CPUParser::parse_argument_type;
         parser_methods[SymbolTable::global.add("instruction")] = &CPUParser::parse_instruction;
+        parser_methods[SymbolTable::global.add("keyword")] = &CPUParser::parse_keyword;
+
+        argument_type_parser_methods[SymbolTable::global.add("enum")] = &CPUParser::parse_argument_type_enum;
+        argument_type_parser_methods[SymbolTable::global.add("map")] = &CPUParser::parse_argument_type_map;
+        argument_type_parser_methods[SymbolTable::global.add("range")] = &CPUParser::parse_argument_type_range;
     }
 }
 
 
-CPU CPUParser::parse(const std::string &file_name, FileReader& file_reader) {
+CPU CPUParser::parse(const std::string &file_name) {
     cpu = CPU();
-    reader = &file_reader;
-    tokenizer.push(file_name, file_reader.read(file_name));
+    tokenizer.push(file_name);
 
     while (!tokenizer.ended()) {
         try {
@@ -69,16 +72,10 @@ CPU CPUParser::parse(const std::string &file_name, FileReader& file_reader) {
                 throw ParseException(token.location, "unknown directive .%s", token.as_string().c_str());
             }
 
-            Token name;
-            if (token.as_symbol() != symbol_byte_order) {
-                name = tokenizer.expect(Token::NAME, group_directive);
-            }
-            auto parameters = Object::parse(tokenizer);
-
-            (this->*it->second)(name, parameters);
+            (this->*it->second)();
         }
         catch (ParseException& ex) {
-            reader->error(ex.location, "%s", ex.what());
+            FileReader::global.error(ex.location, "%s", ex.what());
             tokenizer.skip_until(group_directive);
         }
     }
@@ -86,10 +83,22 @@ CPU CPUParser::parse(const std::string &file_name, FileReader& file_reader) {
     return std::move(cpu);
 }
 
-void CPUParser::parse_addressing_mode(const Token& name, const std::shared_ptr<Object>& parameters) {
+void CPUParser::parse_addressing_mode() {
+    Token name = tokenizer.expect(Token::NAME, group_directive);
+    auto parameters = Object::parse(tokenizer);
+
+    {
+        auto it = addressing_mode_names.find(name);
+        if (it != addressing_mode_names.end()) {
+            throw ParseException(name.location, "duplicate definition of addressing mode '%s'", name.as_string().c_str());
+            // TODO: attach note it->second,  previously defined here
+        }
+        addressing_mode_names.insert(name);
+    }
+
+
     if (cpu.addressing_modes.find(name.as_symbol()) != cpu.addressing_modes.end()) {
         tokenizer.skip_until(group_directive);
-        throw ParseException(name.location, "addressing mode %s already defined", name.as_string().c_str());
     }
 
     if (!parameters->is_dictionary()) {
@@ -106,24 +115,214 @@ void CPUParser::parse_addressing_mode(const Token& name, const std::shared_ptr<O
             throw ParseException(name, "addressing mode definition is not a dictionary");
         }
         for (const auto& pair: (*arguments->as_dictionary())) {
-            // TODO: parse argument definition
+            if (!pair.first.is_name()) {
+                throw ParseException(pair.first, "expected %s, got %s", Token::type_name(Token::NAME), pair.first.type_name());
+            }
+            if (!pair.second->is_singular_scalar()) {
+                throw ParseException(pair.second->location, "invalid argument type");
+            }
+            auto argument_type_name = pair.second->as_scalar()->token();
+            if (!argument_type_name.is_name()) {
+                throw ParseException(argument_type_name, "expected %s, got %s", Token::type_name(Token::NAME), argument_type_name.type_name());
+            }
+            auto argument_type = cpu.argument_type(argument_type_name.as_symbol());
+            if (argument_type == nullptr) {
+                throw ParseException(argument_type_name, "unknown argument type '%s'", argument_type_name.as_string().c_str());
+            }
+            addressing_mode.arguments[pair.first.as_symbol()] = argument_type;
         }
     }
 
-    // TODO: notations, encoding
+    auto notation = (*definition)["notation"];
+    if (notation == nullptr) {
+        throw ParseException(name, "notation missing for addressing mode '%s'", name.as_string().c_str());
+    }
+    else if (notation->is_scalar()) {
+        addressing_mode.add_notation(parse_addressing_mode_notation(addressing_mode, notation->as_scalar()));
+    }
+    else if (notation->is_array()) {
+        for (const auto& n: (*notation->as_array())) {
+            if (!n->is_scalar()) {
+                throw ParseException(notation->location, "invalid notation for addressing mode '%s'", name.as_string().c_str());
+            }
+            addressing_mode.add_notation(parse_addressing_mode_notation(addressing_mode, n->as_scalar()));
+        }
+    }
+    else {
+        throw ParseException(notation->location, "invalid notation for addressing mode '%s'", name.as_string().c_str());
+    }
+
+    // TODO: encoding
 
     cpu.add_addressing_mode(name.as_symbol(), addressing_mode);
 }
 
 
-void CPUParser::parse_argument_type(const Token& name, const std::shared_ptr<Object>& parameters) {
+void CPUParser::parse_argument_type() {
+    Token name = tokenizer.expect(Token::NAME, group_directive);
+    Token type = tokenizer.expect(Token::NAME, group_directive);
+    auto parameters = Object::parse(tokenizer);
 
+    {
+        auto it = argument_type_names.find(name);
+        if (it != argument_type_names.end()) {
+            throw ParseException(type, "duplicate definition of argument type '%s'", name.as_string().c_str());
+            // TODO: attach note it->second,  previously defined here
+        }
+        argument_type_names.insert(name);
+    }
+
+    auto it = argument_type_parser_methods.find(type.as_symbol());
+    if (it == argument_type_parser_methods.end()) {
+        throw ParseException(type, "unknown argument type '%s'", type.as_string().c_str());
+    }
+    auto argument_type = (this->*it->second)(name, parameters.get());
+
+    cpu.add_argument_type(name.as_symbol(), std::move(argument_type));
 }
 
-void CPUParser::parse_byte_order(const Token& name, const std::shared_ptr<Object>& parameters) {
+void CPUParser::parse_byte_order() {
+    Token byte_order = tokenizer.expect(Token::INTEGER, group_directive);
+    tokenizer.skip(Token::NEWLINE);
 
+    cpu.byte_order = byte_order.as_integer();
 }
 
-void CPUParser::parse_instruction(const Token& name, const std::shared_ptr<Object>& parameters) {
 
+void CPUParser::parse_instruction() {
+    Token name = tokenizer.expect(Token::NAME, group_directive);
+    auto parameters = Object::parse(tokenizer);
+
+    if (!parameters->is_dictionary()) {
+        throw ParseException(parameters->location, "instruction definition must be dictionary");
+    }
+
+    auto& instruction = cpu.instructions[name.as_symbol()];
+
+    for (const auto& pair: (*parameters->as_dictionary())) {
+        if (!pair.first.is_name()) {
+            throw ParseException(pair.first, "addressing mode must be name");
+        }
+        auto it = instruction.opcodes.find(pair.first.as_symbol());
+        if (it != instruction.opcodes.end()) {
+            throw ParseException(pair.first, "redefinition of addressing mode");
+        }
+        if (!pair.second->is_singular_scalar() || !pair.second->as_scalar()->token().is_integer()) {
+            throw ParseException(pair.second->location, "opcode must be integer");
+        }
+        instruction.opcodes[pair.first.as_symbol()] = pair.second->as_scalar()->token().as_integer();
+    }
+}
+
+
+void CPUParser::parse_keyword() {
+    Token keyword = tokenizer.expect(Token::STRING, group_directive);
+    tokenizer.skip(Token::NEWLINE);
+
+    cpu.add_reserved_word(SymbolTable::global.add(keyword.as_string()));
+    // TODO: add keyword to tokenizer
+}
+
+std::unique_ptr<ArgumentType> CPUParser::parse_argument_type_enum(const Token& name, const Object *parameters) {
+    auto argument_type = std::make_unique<ArgumentTypeEnum>();
+
+    if (!parameters->is_dictionary()) {
+        throw ParseException(parameters->location, "definition of enum argument type '%s' must be dictionary", name.as_string().c_str());
+    }
+
+    for (const auto& pair: (*parameters->as_dictionary())) {
+        if (!pair.first.is_name()) {
+            throw ParseException(pair.first, "key for enum argument type '%s' must be name", name.as_string().c_str());
+        }
+        if (!pair.second->is_singular_scalar()) {
+            throw ParseException(pair.first, "key for enum argument type '%s' must be single scalar", name.as_string().c_str());
+        }
+        const auto& value = pair.second->as_scalar()->token();
+        if (!value.is_integer()) {
+            throw ParseException(pair.first, "key for enum argument type '%s' must be integer", name.as_string().c_str());
+        }
+        argument_type->entries[pair.first.as_symbol()] = value.as_integer();
+    }
+
+    return argument_type;
+}
+
+std::unique_ptr<ArgumentType> CPUParser::parse_argument_type_map(const Token& name, const Object *parameters) {
+    auto argument_type = std::make_unique<ArgumentTypeMap>();
+
+    if (!parameters->is_dictionary()) {
+        throw ParseException(parameters->location, "definition of map argument type '%s' must be dictionary", name.as_string().c_str());
+    }
+
+    for (const auto& pair: (*parameters->as_dictionary())) {
+        if (!pair.first.is_integer()) {
+            throw ParseException(pair.first, "key for map argument type '%s' must be integer", name.as_string().c_str());
+        }
+        if (!pair.second->is_singular_scalar()) {
+            throw ParseException(pair.first, "key for map argument type '%s' must be single scalar", name.as_string().c_str());
+        }
+        const auto& value = pair.second->as_scalar()->token();
+        if (!value.is_integer()) {
+            throw ParseException(pair.first, "key for enum argument type '%s' must be integer", name.as_string().c_str());
+        }
+        argument_type->entries[pair.first.as_integer()] = value.as_integer();
+    }
+
+    return argument_type;
+}
+
+std::unique_ptr<ArgumentType> CPUParser::parse_argument_type_range(const Token& name, const Object *parameters) {
+    auto argument_type = std::make_unique<ArgumentTypeRange>();
+
+    if (!parameters->is_scalar()) {
+        throw ParseException(parameters->location, "definition of range argument type '%s' must be scalar", name.as_string().c_str());
+    }
+    auto limits = parameters->as_scalar();
+    if (limits->size() == 3) {
+        if ((*limits)[0].is_integer() && (*limits)[1].get_type() == Token::COMMA && (*limits)[2].is_integer()) {
+            // TODO: check for overflow
+            argument_type->lower_bound = static_cast<int64_t>((*limits)[0].as_integer());
+            argument_type->upper_bound = (*limits)[2].as_integer();
+        }
+        else {
+            throw ParseException(limits->location, "invalid definition of range argument type '%s'", name.as_string().c_str());
+        }
+    }
+    else if (limits->size() == 4) {
+        if ((*limits)[0].get_type() == Token::MINUS && (*limits)[1].is_integer() && (*limits)[2].get_type() == Token::COMMA && (*limits)[3].is_integer()) {
+            // TODO: check for overflow
+            argument_type->lower_bound = -static_cast<int64_t>((*limits)[1].as_integer());
+            argument_type->upper_bound = (*limits)[3].as_integer();
+        }
+        else {
+            throw ParseException(limits->location, "invalid definition of range argument type '%s'", name.as_string().c_str());
+        }
+    }
+    else {
+        throw ParseException(limits->location, "invalid definition of range argument type '%s'", name.as_string().c_str());
+    }
+
+    return argument_type;
+}
+
+
+AddressingMode::Notation CPUParser::parse_addressing_mode_notation(const AddressingMode& addressing_mode, const ObjectScalar *parameters) {
+    AddressingMode::Notation notation;
+
+    for (const auto& token: (*parameters)) {
+        if (token.is_name()) {
+            if (addressing_mode.arguments.find(token.as_symbol()) != addressing_mode.arguments.end()) {
+                notation.elements.emplace_back(AddressingMode::Notation::ARGUMENT, token.as_symbol());
+            }
+            else {
+                cpu.add_reserved_word(token.as_symbol());
+                notation.elements.emplace_back(AddressingMode::Notation::RESERVED_WORD, token.as_symbol());
+            }
+        }
+        else {
+            notation.elements.emplace_back(token.get_type());
+        }
+    }
+
+    return notation;
 }

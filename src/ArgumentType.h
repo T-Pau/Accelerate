@@ -1,5 +1,5 @@
 /*
-CPU.h -- Definition of a CPU and Its Instruction Set
+ArgumentType.h -- 
 
 Copyright (C) Dieter Baron
 
@@ -29,39 +29,53 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef CPU_H
-#define CPU_H
+#ifndef ARGUMENT_TYPE_H
+#define ARGUMENT_TYPE_H
 
 #include <unordered_map>
 
 #include "SymbolTable.h"
-#include "AddressingMode.h"
-#include "ArgumentType.h"
-#include "Instruction.h"
-#include "AddressingModeMatcher.h"
 
-class CPUParser;
-
-class CPU {
+class ArgumentType {
 public:
-    uint64_t byte_order;
+    enum Type {
+        RANGE,
+        ENUM,
+        MAP
+    };
 
-    [[nodiscard]] const AddressingMode* addressing_mode(symbol_t name) const;
-    [[nodiscard]] const ArgumentType* argument_type(symbol_t name) const;
+    virtual ~ArgumentType() = default;
 
-private:
-    std::unordered_map<symbol_t, AddressingMode> addressing_modes;
-    std::unordered_map<symbol_t, std::unique_ptr<ArgumentType>> argument_types;
-    std::unordered_map<symbol_t, Instruction> instructions;
-    std::unordered_set<symbol_t> reserved_words;
-    AddressingModeMatcher addressing_mode_matcher;
-
-    void add_addressing_mode(symbol_t name, AddressingMode addressing_mode);
-    void add_argument_type(symbol_t name, std::unique_ptr<ArgumentType> argument_type);
-    void add_reserved_word(symbol_t word) {reserved_words.insert(word);}
-
-    friend CPUParser;
+    [[nodiscard]] virtual Type type() const = 0;
 };
 
 
-#endif // CPU_H
+class ArgumentTypeEnum: public ArgumentType {
+public:
+    [[nodiscard]] Type type() const override {return ENUM;}
+
+    std::unordered_map<symbol_t, uint64_t> entries;
+};
+
+
+
+
+class ArgumentTypeMap: public ArgumentType {
+public:
+    [[nodiscard]] Type type() const override {return MAP;}
+
+    std::unordered_map<uint64_t, uint64_t> entries;
+};
+
+
+
+
+class ArgumentTypeRange: public ArgumentType {
+public:
+    [[nodiscard]] Type type() const override {return RANGE;}
+
+    int64_t lower_bound;
+    uint64_t upper_bound;
+};
+
+#endif // ARGUMENT_TYPE_H

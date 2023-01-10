@@ -30,10 +30,13 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include "FileReader.h"
+
 #include "Exception.h"
 #include "Util.h"
 
 #include <fstream>
+
+FileReader FileReader::global;
 
 std::vector<std::string> FileReader::empty_file;
 
@@ -47,9 +50,9 @@ const std::vector<std::string>& FileReader::read(const std::string& file_name, b
     std::vector<std::string> lines;
 
     try {
-        std::ifstream file(file_name);
+        std::ifstream input_file(file_name);
         std::string s;
-        while (getline(file, s)) {
+        while (getline(input_file, s)) {
             lines.push_back(s);
         }
     }
@@ -67,20 +70,19 @@ const std::vector<std::string>& FileReader::read(const std::string& file_name, b
     return files[file];
 }
 
-const std::string &FileReader::get_line(const std::string &file_name, size_t line_number) const {
-    auto it = files.find(SymbolTable::global[file_name]);
+const std::string &FileReader::get_line(symbol_t file, size_t line_number) const {
+    auto it = files.find(file);
 
     if (it == files.end()) {
-        throw Exception("unknown file '%s'", file_name.c_str());
+        throw Exception("unknown file '%s'", SymbolTable::global[file].c_str());
     }
 
     if (line_number == 0 || line_number > it->second.size()) {
-        throw Exception("line integer %zu out of range in '%s'", line_number, file_name.c_str());
+        throw Exception("line integer %zu out of range in '%s'", line_number, SymbolTable::global[file].c_str());
     }
 
     return it->second[line_number - 1];
 }
-
 
 
 const char* FileReader::diagnostics_severity_name(DiagnosticsSeverity severity) {
@@ -94,7 +96,7 @@ const char* FileReader::diagnostics_severity_name(DiagnosticsSeverity severity) 
         case ERROR:
             return "error";
     }
-};
+}
 
 
 void FileReader::notice(const Location &location, const char *format, ...) {
@@ -136,7 +138,7 @@ void FileReader::output(FileReader::DiagnosticsSeverity severity, const Location
     diagnostics_file << location.to_string() << ": " << diagnostics_severity_name(severity) << ": " << message << std::endl;
 
     try {
-        auto line = get_line(location.file, location.line_number);
+        auto line = get_line(location.file, location.start_line_number);
         diagnostics_file << line << std::endl;
         auto width = location.end_column - location.start_column;
         if (width < 1) {

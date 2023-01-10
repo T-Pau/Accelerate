@@ -51,7 +51,7 @@ public:
 
     const std::vector<std::string>& read(const std::string& file_name, bool optional = false);
 
-    [[nodiscard]] const std::string& get_line(const std::string& file_name, size_t line_number) const;
+    [[nodiscard]] const std::string& get_line(symbol_t file, size_t line_number) const;
 
     void notice(const Location& location, const char* format, ...) PRINTF_LIKE(3, 4);
     void notice(const Location& location, const std::string& message) {output(NOTICE, location, message);}
@@ -64,6 +64,8 @@ public:
     void output(DiagnosticsSeverity severity, const Location& location, const std::string& message);
 
     [[nodiscard]] bool had_error() const {return error_flag;}
+
+    static FileReader global;
 
 private:
     static const char *diagnostics_severity_name(DiagnosticsSeverity severity);

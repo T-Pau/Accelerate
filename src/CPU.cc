@@ -32,6 +32,37 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "CPU.h"
 
 void CPU::add_addressing_mode(symbol_t name, AddressingMode mode) {
-    // TODO: check for duplicates?
     addressing_modes[name] = std::move(mode);
+
+    const auto& addressing_mode = addressing_modes[name];
+
+    for (const auto& notation: addressing_mode.notations) {
+        addressing_mode_matcher.add_notation(name, notation);
+    }
+}
+
+
+const AddressingMode *CPU::addressing_mode(symbol_t name) const {
+    auto it = addressing_modes.find(name);
+    if (it == addressing_modes.end()) {
+        return nullptr;
+    }
+    else {
+        return &it->second;
+    }
+}
+
+
+const ArgumentType *CPU::argument_type(symbol_t name) const {
+    auto it = argument_types.find(name);
+    if (it == argument_types.end()) {
+        return nullptr;
+    }
+    else {
+        return it->second.get();
+    }
+}
+
+void CPU::add_argument_type(symbol_t name, std::unique_ptr<ArgumentType> argument_type) {
+    argument_types[name] = std::move(argument_type);
 }

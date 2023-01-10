@@ -29,8 +29,10 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "ParseException.h"
 #include "Tokenizer.h"
+
+#include "FileReader.h"
+#include "ParseException.h"
 #include "Util.h"
 
 std::unordered_map<char, Token::Type> Tokenizer::single_character_tokens = {
@@ -51,8 +53,12 @@ std::unordered_map<char, Token::Type> Tokenizer::single_character_tokens = {
         {'=', Token::EQUAL}
 };
 
-void Tokenizer::push(const std::string& file_name, const std::vector<std::string>& lines) {
-    sources.emplace_back(file_name, lines);
+void Tokenizer::push(const std::string& file_name) {
+    const auto& lines = FileReader::global.read(file_name);
+    if (lines.empty()) {
+        return;
+    }
+    sources.emplace_back(SymbolTable::global[file_name], lines);
     current_source = &sources[sources.size() - 1];
 }
 
@@ -148,7 +154,7 @@ Token Tokenizer::parse_number(unsigned int base, Location location) {
             if (empty) {
                 return {Token::ERROR, location, "empty integer"};
             }
-            return {Token::NUMBER, location, integer};
+            return {Token::INTEGER, location, integer};
         }
 
         empty = false;
@@ -335,6 +341,16 @@ std::vector<Token> Tokenizer::collect_until(const Token::Group& types) {
     }
     unget(token);
     return tokens;
+}
+
+
+Location Tokenizer::current_location() const{
+    if (current_source == nullptr) {
+        return {};
+    }
+    else {
+        return current_source->location();
+    }
 }
 
 

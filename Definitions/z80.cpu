@@ -1,22 +1,26 @@
-.byte_order: 12345678
+.byte_order 12345678
 
-; .keyword "af'"
+.keyword "af'"
 
-.argument_type bc_or_de: enum {
+.argument_type byte range: 0, $ff
+
+.argument_type word range: 0, $ffff
+
+.argument_type bc_or_de enum {
     bc: 0
     de: 1
 }
 
-.argument_type basic_condition: enum {
+.argument_type basic_condition enum {
     nz: 0
     z: 1
     nc: 2
     c: 3
 }
 
-.argument_type bit_number: range 0, 7
+.argument_type bit_number range: 0, 7
 
-.argument_type condition: enum {
+.argument_type condition enum {
     nz: 0
     z: 1
     nc: 2
@@ -27,23 +31,23 @@
     m: 7
 }
 
-.argument_type index_register: enum {
+.argument_type index_register enum {
     ix: 0
     iy: 1
 }
 
-.argument_type interrupt_mode: map {
+.argument_type interrupt_mode map {
     0: 0
     1: 2
     2: 3
 }
 
-.argument_type i_or_r: enum {
+.argument_type i_or_r enum {
     i: 0
     r: 1
 }
 
-.argument_type register: enum {
+.argument_type register enum {
     a: 7
     b: 0
     c: 1
@@ -53,7 +57,7 @@
     l: 5
 }
 
-.argument_type restart_address: map {
+.argument_type restart_address map {
     $00: 0
     $08: 1
     $10: 2
@@ -64,35 +68,35 @@
     $38: 7
 }
 
-.argument_type register_pair_af: enum {
+.argument_type register_pair_af enum {
     bc: 0
     de: 1
     hl: 2
     af: 3
 }
 
-.argument_type register_pair_ix: enum {
+.argument_type register_pair_ix enum {
     bc: 0
     de: 01
     ix: 10
     sp: 11
 }
 
-.argument_type register_pair_iy: enum {
+.argument_type register_pair_iy enum {
     bc: 0
     de: 01
     iy: 10
     sp: 11
 }
 
-.argument_type register_pair_sp: enum {
+.argument_type register_pair_sp enum {
     bc: 0
     de: 1
     hl: 2
     sp: 3
 }
 
-.argument_type signed_byte: range -128, 127
+.argument_type signed_byte range: -128, 127
 
 
 .addressing_mode a__immediate {
@@ -153,7 +157,7 @@
 }
 
 .addressing_mode address {
-    notation nn
+    notation: nn
     arguments {
        nn: word
     }
@@ -161,7 +165,7 @@
 }
 
 .addressing_mode af__af_prime {
-    notation af,af'
+    notation: af,af'
     encoding: opcode
 }
 
@@ -201,7 +205,7 @@
     encoding: opcode | b << 3 | r
 }
 
-.addressing_mode condition__address {
+.addressing_mode condition {
     notation: cc
     arguments {
         cc: condition
@@ -507,7 +511,7 @@
 .addressing_mode register_pair_sp__indirect {
     notation: dd,(nn)
     arguments {
-        dd: register_pari
+        dd: register_pair
         nn: word
     }
     encoding: opcode | dd << 4, nn

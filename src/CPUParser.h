@@ -41,23 +41,32 @@ class CPUParser {
 public:
     CPUParser();
 
-    CPU parse(const std::string& file_name, FileReader& file_reader);
+    CPU parse(const std::string& file_name);
 
 private:
-    void parse_addressing_mode(const Token& name, const std::shared_ptr<Object>& parameters);
-    void parse_argument_type(const Token& name, const std::shared_ptr<Object>& parameters);
-    void parse_byte_order(const Token& name, const std::shared_ptr<Object>& parameters);
-    void parse_instruction(const Token& name, const std::shared_ptr<Object>& parameters);
+    void parse_addressing_mode();
+    void parse_argument_type();
+    void parse_byte_order();
+    void parse_instruction();
+    void parse_keyword();
+
+    AddressingMode::Notation parse_addressing_mode_notation(const AddressingMode& addressing_mode, const ObjectScalar* parameters);
+
+    std::unique_ptr<ArgumentType> parse_argument_type_enum(const Token& name, const Object* parameters);
+    std::unique_ptr<ArgumentType> parse_argument_type_map(const Token& name, const Object* parameters);
+    std::unique_ptr<ArgumentType> parse_argument_type_range(const Token& name, const Object* parameters);
 
     static Token::Group group_directive;
     static Token::Group group_newline;
 
-    static std::map<symbol_t, void (CPUParser::*)(const Token& name, const std::shared_ptr<Object>& parameters)> parser_methods;
-    static symbol_t symbol_byte_order;
+    static std::map<symbol_t, std::unique_ptr<ArgumentType> (CPUParser::*)(const Token& name, const Object* parameters)> argument_type_parser_methods;
+    static std::map<symbol_t, void (CPUParser::*)()> parser_methods;
 
-    FileReader* reader = nullptr;
     Tokenizer tokenizer;
     CPU cpu;
+
+    std::unordered_set<Token> addressing_mode_names;
+    std::unordered_set<Token> argument_type_names;
 };
 
 

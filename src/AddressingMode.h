@@ -32,31 +32,39 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef ADDRESSING_MODE_H
 #define ADDRESSING_MODE_H
 
-
+#include "ArgumentType.h"
+#include "Object.h"
 #include "SymbolTable.h"
 #include "Token.h"
-#include "Object.h"
 
 class AddressingMode {
 public:
     class Notation {
+    public:
         enum Type {
             ARGUMENT,
             PUNCTUATION,
             RESERVED_WORD
         };
         class Element {
+        public:
+            explicit Element(Token::Type token_type) : type(PUNCTUATION), value() {value.token_type = token_type;}
+            Element(Type type, symbol_t symbol): type(type), value() {value.symbol = symbol;}
+
             Type type;
-            symbol_t symbol;
+            union {
+                Token::Type token_type;
+                symbol_t symbol;
+            } value;
         };
 
         std::vector<Element> elements;
     };
 
     std::vector<Notation> notations;
+    std::unordered_map<symbol_t, const ArgumentType*> arguments;
 
-    void add_notation(const std::vector<Token>& tokens);
+    void add_notation(Notation notation) {notations.emplace_back(std::move(notation));}
 };
-
 
 #endif // ADDRESSING_MODE_H

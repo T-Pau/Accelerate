@@ -1,4 +1,8 @@
-.byte_order: 12345678
+.byte_order 12345678
+
+.argument_type byte range: 0, $ff
+
+.argument_type word range: 0, $ffff
 
 .addressing_mode accumulator {
     notation [
@@ -340,10 +344,6 @@
 
 .instruction rts {
     implied: $60
-}
-
-.instruction sed {
-    implied: $38
 }
 
 .instruction sbc {
