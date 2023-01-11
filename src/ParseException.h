@@ -44,7 +44,7 @@ public:
     ParseException(Location location, const char *format, ...) PRINTF_LIKE(3, 4);
     ParseException(const Token& token, const char* format, ...) PRINTF_LIKE(3, 4);
 
-    explicit ParseException(Location location, std::string message): Exception(std::move(message)), location(std::move(location)) { }
+    explicit ParseException(Location location, std::string message): Exception(std::move(message)), location(location) { }
     ParseException(const Token& token, std::string message): ParseException(token.location, std::move(message)) {}
 
     Location location;

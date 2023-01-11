@@ -10,13 +10,15 @@
 #include "Exception.h"
 
 int main(int argc, char *argv[]) {
-    if (argc != 2) {
-        std::cerr << "Usage: " << argv[0] << " cpu-definition" << std::endl;
+    if (argc != 3) {
+        std::cerr << "Usage: " << argv[0] << " cpu-definition source" << std::endl;
     }
 
-    auto parser = CPUParser();
     try {
+        auto parser = CPUParser();
         auto cpu = parser.parse(argv[1]);
+
+        
     }
     catch (Exception &ex) {
         std::cerr << "Parser error: " << ex.what() << std::endl;

@@ -35,15 +35,28 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <cstddef>
 
 #include "Node.h"
+#include "Tokenizer.h"
 
 class ExpressionNode : public Node {
 public:
     [[nodiscard]] virtual size_t byte_size() const = 0;
     [[nodiscard]] virtual size_t minimum_size() const = 0;
 
+    static std::shared_ptr<ExpressionNode> parse(Tokenizer& tokenizer);
+
     // serialize to file
     // serialize as bytes
 };
 
+
+class ExpressionNodeInteger: public ExpressionNode {
+public:
+    explicit ExpressionNodeInteger(int64_t value): value(value) {}
+
+    size_t byte_size() const override;
+    size_t minimum_size() const override;
+    
+    int64_t value;
+};
 
 #endif // EXPRESSION_NODE_H

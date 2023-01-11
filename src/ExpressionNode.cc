@@ -30,3 +30,14 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include "ExpressionNode.h"
+
+std::shared_ptr<ExpressionNode> ExpressionNode::parse(Tokenizer &tokenizer) {
+    auto token = tokenizer.next();
+
+    // TODO: implement
+    
+    switch (token.get_type()) {
+        default:
+            return {};
+    }
+}

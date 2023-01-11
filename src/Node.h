@@ -40,8 +40,9 @@ public:
         EXPRESSION,
         INSTRUCTION,
         INTEGER,
-        LABEL,
-        REGISTER,
+        KEYWORD,
+        VARIABLE,
+        LABEL
     };
 
     [[nodiscard]] virtual Type type() const = 0;
