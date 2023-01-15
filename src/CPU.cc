@@ -89,3 +89,4 @@ void CPU::setup(Tokenizer &tokenizer) const {
         tokenizer.add_literal(Token::INSTRUCTION, SymbolTable::global[pair.first]);
     }
 }
+

@@ -39,6 +39,9 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 class Instruction {
 public:
+    bool has_addressing_mode(symbol_t addressing_mode) const {return opcodes.find(addressing_mode) != opcodes.end();}
+    uint64_t opcode(symbol_t addressing_mode) const;
+
     std::unordered_map<symbol_t, uint64_t> opcodes; // keys are addressing modes
 };
 

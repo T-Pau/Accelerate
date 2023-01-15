@@ -118,11 +118,6 @@ void CPUParser::parse_addressing_mode() {
         addressing_mode_names.insert(name);
     }
 
-
-    if (cpu.addressing_modes.find(name.as_symbol()) != cpu.addressing_modes.end()) {
-        tokenizer.skip_until(group_directive);
-    }
-
     if (!parameters->is_dictionary()) {
         throw ParseException(name, "addressing mode definition is not a dictionary");
     }
@@ -363,7 +358,7 @@ AddressingMode::Notation CPUParser::parse_addressing_mode_notation(const Address
             }
         }
         else {
-            notation.elements.emplace_back(token.get_type());
+            notation.elements.emplace_back(AddressingMode::Notation::PUNCTUATION, token.as_symbol());
         }
     }
 

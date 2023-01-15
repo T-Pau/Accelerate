@@ -48,14 +48,10 @@ public:
         };
         class Element {
         public:
-            explicit Element(Token::Type token_type) : type(PUNCTUATION), value() {value.token_type = token_type;}
-            Element(Type type, symbol_t symbol): type(type), value() {value.symbol = symbol;}
+            Element(Type type, symbol_t symbol): type(type), symbol(symbol) {}
 
             Type type;
-            union {
-                Token::Type token_type;
-                symbol_t symbol;
-            } value;
+            symbol_t symbol;
         };
 
         std::vector<Element> elements;

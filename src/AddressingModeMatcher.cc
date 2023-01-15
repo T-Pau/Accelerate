@@ -30,6 +30,8 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include "AddressingModeMatcher.h"
+#include "ParseException.h"
+#include "TokenNode.h"
 
 void AddressingModeMatcher::add_notation(symbol_t addressing_mode, const AddressingMode::Notation &notation) {
     auto node = &start;
@@ -41,9 +43,19 @@ void AddressingModeMatcher::add_notation(symbol_t addressing_mode, const Address
     node->addressing_modes.insert(addressing_mode);
 }
 
-std::unordered_set<symbol_t> AddressingModeMatcher::match(const std::vector<std::shared_ptr<Node>>& nodes) {
-    // TODO: implement
-    return {};
+std::unordered_set<symbol_t> AddressingModeMatcher::match(const std::vector<std::shared_ptr<Node>>& nodes) const {
+    auto current = nodes.begin();
+
+    const MatcherNode* node = &start;
+    while (current != nodes.end()) {
+        auto it = node->next.find(AddressingModeMatcherElement(current->get()));
+        if (it == node->next.end()) {
+            return {};
+        }
+        node = &it->second;
+    }
+
+    return node->addressing_modes;
 }
 
 
@@ -57,15 +69,13 @@ bool AddressingModeMatcherElement::operator==(const AddressingModeMatcherElement
             return true;
 
         case KEYWORD:
-            return value.symbol == other.value.symbol;
-
         case PUNCTUATION:
-            return value.token_type == other.value.token_type;
+            return symbol == other.symbol;
     }
 }
 
 
-AddressingModeMatcherElement::AddressingModeMatcherElement(AddressingMode::Notation::Element notation_element): value() {
+AddressingModeMatcherElement::AddressingModeMatcherElement(AddressingMode::Notation::Element notation_element) {
     switch (notation_element.type) {
         case AddressingMode::Notation::ARGUMENT:
             type = INTEGER;
@@ -73,16 +83,40 @@ AddressingModeMatcherElement::AddressingModeMatcherElement(AddressingMode::Notat
 
         case AddressingMode::Notation::PUNCTUATION:
             type = PUNCTUATION;
-            value.token_type = notation_element.value.token_type;
+            symbol = notation_element.symbol;
             break;
 
         case AddressingMode::Notation::RESERVED_WORD:
             type = KEYWORD;
-            value.symbol = notation_element.value.symbol;
+            symbol = notation_element.symbol;
             break;
     }
 }
 
-AddressingModeMatcherElement::AddressingModeMatcherElement(Node *node): type(INTEGER), value() {
+AddressingModeMatcherElement::AddressingModeMatcherElement(Node *node) {
+    switch (node->type()) {
+        case Node::INTEGER:
+        case Node::EXPRESSION:
+        case Node::VARIABLE:
+            type = INTEGER;
+            break;
+
+        case Node::PUNCTUATION:
+            type = PUNCTUATION;
+            symbol = dynamic_cast<TokenNode*>(node)->as_symbol();
+            break;
+
+        case Node::INSTRUCTION:
+            throw ParseException(node->location, "instruction not allowed as argument");
+            break;
+        case Node::LABEL:
+            throw ParseException(node->location, "label not allowed as argument");
+            break;
+
+        case Node::KEYWORD:
+            type = KEYWORD;
+            symbol = dynamic_cast<TokenNode*>(node)->as_symbol();
+            break;
+    }
     // TODO: implement
 }

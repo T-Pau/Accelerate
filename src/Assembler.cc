@@ -32,6 +32,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Assembler.h"
 #include "ParseException.h"
 #include "FileReader.h"
+#include "TokenNode.h"
 
 bool Assembler::initialized = false;
 Token Assembler::token_colon;
@@ -111,9 +112,48 @@ void Assembler::parse_instruction(const Token& name) {
         throw ParseException(name, "unknown instruction '%s'", name.as_string().c_str());
     }
 
-    // TODO: implement
-    tokenizer.skip_until(TokenGroup::newline, true);
+    std::vector<std::shared_ptr<Node>> arguments;
+
+    Token token;
+    while ((token = tokenizer.next()) && !token.is_newline()) {
+        switch (token.get_type()) {
+            case Token::PUNCTUATION:
+            case Token::KEYWORD:
+                arguments.emplace_back(std::make_shared<TokenNode>(token));
+                break;
+
+            case Token::DIRECTIVE:
+            case Token::INSTRUCTION:
+                throw ParseException(token, "unexpected %s", token.type_name());
+
+            default:
+                tokenizer.unget(token);
+                arguments.emplace_back(ExpressionNode::parse(tokenizer));
+                break;
+        }
+    }
+
+    auto addressing_modes = cpu.match_addressing_modes(arguments);
+    if (addressing_modes.empty()) {
+        throw ParseException(name, "addressing mode not recognized");
+    }
+
+    // TODO: do in priority order (e. g. zero_page before absolute)
+    bool found = false;
+    for (auto addressing_mode: addressing_modes ) {
+        if (instruction->has_addressing_mode(addressing_mode)) {
+            // TODO: check argument ranges
+            found = true;
+            printf("%s %s -> %llu\n", name.as_string().c_str(), SymbolTable::global[addressing_mode].c_str(), instruction->opcode(addressing_mode));
+            // TODO: emit instruction
+            break;
+        }
+    }
+    if (!found) {
+        throw ParseException(name, "invalid addressing mode");
+    }
 }
+
 
 void Assembler::parse_label(const Token& name) {
     // TODO: implement

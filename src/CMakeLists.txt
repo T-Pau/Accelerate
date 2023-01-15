@@ -19,6 +19,7 @@ SET(assembler_SOURCES
         FileReader.cc
         Instruction.cc
         IntegerNode.cc
+        TokenNode.cc
         Location.cc
         Node.cc
         Object.cc

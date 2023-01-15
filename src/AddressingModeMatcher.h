@@ -53,10 +53,7 @@ public:
     bool operator==(const AddressingModeMatcherElement& other) const;
 
     Type type;
-    union {
-        symbol_t symbol;
-        Token::Type token_type;
-    } value;
+    symbol_t symbol;
 };
 
 template<>
@@ -70,11 +67,8 @@ struct std::hash<AddressingModeMatcherElement>
                 break;
 
             case AddressingModeMatcherElement::KEYWORD:
-                h2 = std::hash<symbol_t>{}(element.value.symbol);
-                break;
-
             case AddressingModeMatcherElement::PUNCTUATION:
-                h2 = std::hash<symbol_t>{}(element.value.token_type);
+                h2 = std::hash<symbol_t>{}(element.symbol);
                 break;
         }
         return h1 ^ (h2 << 1);
@@ -84,7 +78,7 @@ struct std::hash<AddressingModeMatcherElement>
 
 class AddressingModeMatcher {
 public:
-    std::unordered_set<symbol_t> match(const std::vector<std::shared_ptr<Node>>& nodes);
+    [[nodiscard]] std::unordered_set<symbol_t> match(const std::vector<std::shared_ptr<Node>>& nodes) const;
 
     void add_notation(symbol_t addressing_mode, const AddressingMode::Notation& notation);
 

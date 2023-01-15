@@ -30,6 +30,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include "ExpressionNode.h"
+#include "ParseException.h"
 
 std::shared_ptr<ExpressionNode> ExpressionNode::parse(Tokenizer &tokenizer) {
     auto token = tokenizer.next();
@@ -37,7 +38,36 @@ std::shared_ptr<ExpressionNode> ExpressionNode::parse(Tokenizer &tokenizer) {
     // TODO: implement
 
     switch (token.get_type()) {
+        case Token::INTEGER:
+            return std::make_shared<ExpressionNodeInteger>(token);
+
         default:
             return {};
+    }
+}
+
+ExpressionNodeInteger::ExpressionNodeInteger(const Token &token) {
+    if (!token.is_integer()) {
+        throw ParseException(token, "internal error: can't create integer node from %s", token.type_name());
+    }
+    value = static_cast<int64_t>(token.as_integer()); // TODO: handle overflow
+}
+
+size_t ExpressionNodeInteger::byte_size() const {
+    return 0; // TODO
+}
+
+size_t ExpressionNodeInteger::minimum_size() const {
+    if (value > std::numeric_limits<uint32_t>::max()) {
+        return 8;
+    }
+    else if (value > std::numeric_limits<uint16_t>::max()) {
+        return 4;
+    }
+    else if (value > std::numeric_limits<uint8_t>::max()) {
+        return 2;
+    }
+    else {
+        return 1;
     }
 }

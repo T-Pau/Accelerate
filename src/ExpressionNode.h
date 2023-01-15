@@ -51,9 +51,11 @@ public:
 
 class ExpressionNodeInteger: public ExpressionNode {
 public:
+    explicit ExpressionNodeInteger(const Token& token);
     explicit ExpressionNodeInteger(int64_t value): value(value) {}
 
-    size_t byte_size() const override;
+    Type type() const override {return INTEGER;}
+    [[nodiscard]] size_t byte_size() const override;
     size_t minimum_size() const override;
     
     int64_t value;

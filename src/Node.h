@@ -41,6 +41,7 @@ public:
         INSTRUCTION,
         INTEGER,
         KEYWORD,
+        PUNCTUATION,
         VARIABLE,
         LABEL
     };
