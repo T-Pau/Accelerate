@@ -1,0 +1,35 @@
+file:
+    END
+    lines END
+
+lines:
+    line
+    lines line
+
+line:
+    assignment
+    directive
+    instruction
+    label line
+    label
+
+label:
+    NAME :
+
+assignment:
+    NAME = expression NEWLINE
+
+instruction:
+    NAME instruction_arguments NEWLINE
+    NAME NEWLINE
+
+instruction_arguments:
+    instruction_argument
+    instruction_arguments instruction_argument
+
+instruction_argument:
+    PUNCTUATION
+    KEYWORD
+    expression
+
+

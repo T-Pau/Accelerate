@@ -48,17 +48,22 @@ public:
 
     [[nodiscard]] const AddressingMode* addressing_mode(symbol_t name) const;
     [[nodiscard]] const ArgumentType* argument_type(symbol_t name) const;
+    [[nodiscard]] const Instruction* instruction(symbol_t name) const;
+
+    void setup(Tokenizer& tokenizer) const;
 
 private:
     std::unordered_map<symbol_t, AddressingMode> addressing_modes;
     std::unordered_map<symbol_t, std::unique_ptr<ArgumentType>> argument_types;
     std::unordered_map<symbol_t, Instruction> instructions;
     std::unordered_set<symbol_t> reserved_words;
+    std::unordered_set<symbol_t> punctuation;
     AddressingModeMatcher addressing_mode_matcher;
 
     void add_addressing_mode(symbol_t name, AddressingMode addressing_mode);
     void add_argument_type(symbol_t name, std::unique_ptr<ArgumentType> argument_type);
     void add_reserved_word(symbol_t word) {reserved_words.insert(word);}
+    void add_punctuation(symbol_t name) {punctuation.insert(name);}
 
     friend CPUParser;
 };

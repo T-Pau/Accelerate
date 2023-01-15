@@ -1,5 +1,5 @@
 /*
-ExpressionNode.cc -- Abstract Base Class of Expression Nodes
+Assembler.h --
 
 Copyright (C) Dieter Baron
 
@@ -29,15 +29,35 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "ExpressionNode.h"
+#ifndef ASSEMBLER_H
+#define ASSEMBLER_H
 
-std::shared_ptr<ExpressionNode> ExpressionNode::parse(Tokenizer &tokenizer) {
-    auto token = tokenizer.next();
+#include "AssemblerObject.h"
+#include "CPU.h"
+#include "Tokenizer.h"
 
-    // TODO: implement
+class Assembler {
+public:
+    explicit Assembler(const CPU& cpu): cpu(cpu) {}
 
-    switch (token.get_type()) {
-        default:
-            return {};
-    }
-}
+    AssemblerObject parse(const std::string& file_name);
+
+private:
+    void parse_assignment(const Token& name);
+    void parse_directive(const Token& directive);
+    void parse_instruction(const Token& name);
+    void parse_label(const Token& name);
+
+    const CPU& cpu;
+
+    Tokenizer tokenizer;
+    AssemblerObject object;
+
+    static void initialize();
+    static bool initialized;
+    static Token token_colon;
+    static Token token_equals;
+};
+
+
+#endif // ASSEMBLER_H

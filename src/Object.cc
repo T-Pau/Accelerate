@@ -32,26 +32,47 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Object.h"
 #include "ParseException.h"
 
-const Token::Group Object::start_group({Token::COLON, Token::CURLY_PARENTHESIS_OPEN, Token::SQUARE_PARENTHESIS_OPEN}, "object start");
+bool Object::initialized = false;
+TokenGroup Object::start_group;
+Token Object::token_colon;
+Token Object::token_curly_close;
+Token Object::token_curly_open;
+Token Object::token_square_close;
+Token Object::token_square_open;
+
+void Object::initialize() {
+    if (!initialized) {
+        token_colon = Token(Token::PUNCTUATION, {}, ":");
+        token_curly_close = Token(Token::PUNCTUATION, {}, "}");
+        token_curly_open = Token(Token::PUNCTUATION, {}, "{");
+        token_square_close = Token(Token::PUNCTUATION, {}, "]");
+        token_square_open = Token(Token::PUNCTUATION, {}, "[");
+
+        start_group = TokenGroup({}, {token_colon, token_curly_open, token_square_open}, "object start");
+
+        initialized = true;
+    }
+}
+
 
 std::shared_ptr<Object> Object::parse(Tokenizer &tokenizer) {
-    auto token = tokenizer.expect(start_group, Token::Group(Token::NEWLINE));
+    initialize();
+
+    auto token = tokenizer.expect(start_group, TokenGroup(Token::NEWLINE));
 
     std::shared_ptr<Object> object;
 
-    switch (token.get_type()) {
-        case Token::COLON:
-            object = std::make_shared<ObjectScalar>(tokenizer);
-            break;
-        case Token::CURLY_PARENTHESIS_OPEN:
-            object = std::make_shared<ObjectDictionary>(tokenizer);
-            break;
-        case Token::SQUARE_PARENTHESIS_OPEN:
-            object = std::make_shared<ObjectArray>(tokenizer);
-            break;
-
-        default:
-            throw ParseException(token, "unexpected %s", token.type_name());
+    if (token == token_colon) {
+        object = std::make_shared<ObjectScalar>(tokenizer);
+    }
+    else if (token == token_curly_open) {
+        object = std::make_shared<ObjectDictionary>(tokenizer);
+    }
+    else if (token == token_square_open) {
+        object = std::make_shared<ObjectArray>(tokenizer);
+    }
+    else {
+        throw ParseException(token, "unexpected %s", token.type_name());
     }
 
     object->location = token.location;
@@ -59,48 +80,38 @@ std::shared_ptr<Object> Object::parse(Tokenizer &tokenizer) {
     return object;
 }
 
+void Object::setup(Tokenizer &tokenizer) {
+    tokenizer.add_punctuations({"{", "}", "[", "]", ":"});
+}
+
 
 ObjectArray::ObjectArray(Tokenizer &tokenizer) {
     tokenizer.skip(Token::NEWLINE);
-    auto done = false;
-    while (!done) {
+    while (true) {
         auto token = tokenizer.next();
-        switch (token.get_type()) {
-            case Token::END:
-            case Token::CURLY_PARENTHESIS_CLOSE:
-                throw ParseException(token, "unexpected %s", token.type_name());
 
-            case Token::SQUARE_PARENTHESIS_CLOSE:
-                done = true;
-                break;
-
-            default:
-                tokenizer.unget(token);
-                entries.emplace_back(Object::parse(tokenizer));
+        if (token == token_square_close) {
+            break;
         }
+
+        tokenizer.unget(token);
+        entries.emplace_back(Object::parse(tokenizer));
     }
-    tokenizer.expect(Token::NEWLINE, Token::Group(Token::NEWLINE));
+    tokenizer.expect(Token::NEWLINE, TokenGroup::newline);
 }
+
 
 ObjectDictionary::ObjectDictionary(Tokenizer &tokenizer) {
     tokenizer.skip(Token::NEWLINE);
-    auto done = false;
-    while (!done) {
+    while (true) {
         auto token = tokenizer.next();
-        switch (token.get_type()) {
-            case Token::END:
-            case Token::SQUARE_PARENTHESIS_CLOSE:
-                throw ParseException(token, "unexpected %s", token.type_name());
-
-            case Token::CURLY_PARENTHESIS_CLOSE:
-                done = true;
-                break;
-
-            default:
-                entries[token] = Object::parse(tokenizer);
+        if (token == token_curly_close) {
+            break;
         }
+
+        entries[token] = Object::parse(tokenizer);
     }
-    tokenizer.expect(Token::NEWLINE, Token::Group(Token::NEWLINE));
+    tokenizer.expect(Token::NEWLINE, TokenGroup::newline);
 }
 
 

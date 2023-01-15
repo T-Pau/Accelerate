@@ -36,33 +36,55 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "AddressingMode.h"
 #include "Object.h"
 
-Token::Group CPUParser::group_directive = Token::Group({Token::DIRECTIVE,Token::END}, "directive");
-Token::Group CPUParser::group_newline = Token::Group(Token::NEWLINE);
+
+
+TokenGroup CPUParser::group_directive = TokenGroup({Token::DIRECTIVE,Token::END}, {}, "directive");
 
 std::map<symbol_t, std::unique_ptr<ArgumentType> (CPUParser::*)(const Token& name, const Object* parameters)> CPUParser::argument_type_parser_methods;
 std::map<symbol_t, void (CPUParser::*)()> CPUParser::parser_methods;
 
-CPUParser::CPUParser() {
-    if (parser_methods.empty()) {
+bool CPUParser::initialized = false;
+Token CPUParser::token_comma;
+Token CPUParser::token_minus;
+Token CPUParser::token_keywords;
+Token CPUParser::token_punctuation;
+
+void CPUParser::initialize() {
+    if (!initialized) {
+        token_comma = Token(Token::PUNCTUATION, {}, ",");
+        token_minus = Token(Token::PUNCTUATION, {}, "-");
+        token_keywords = Token(Token::NAME, {}, "keywords");
+        token_punctuation = Token(Token::NAME, {}, "punctuation");
+
         parser_methods[SymbolTable::global.add("byte_order")] = &CPUParser::parse_byte_order;
         parser_methods[SymbolTable::global.add("addressing_mode")] = &CPUParser::parse_addressing_mode;
         parser_methods[SymbolTable::global.add("argument_type")] = &CPUParser::parse_argument_type;
         parser_methods[SymbolTable::global.add("instruction")] = &CPUParser::parse_instruction;
-        parser_methods[SymbolTable::global.add("keyword")] = &CPUParser::parse_keyword;
+        parser_methods[SymbolTable::global.add("syntax")] = &CPUParser::parse_syntax;
 
         argument_type_parser_methods[SymbolTable::global.add("enum")] = &CPUParser::parse_argument_type_enum;
         argument_type_parser_methods[SymbolTable::global.add("map")] = &CPUParser::parse_argument_type_map;
         argument_type_parser_methods[SymbolTable::global.add("range")] = &CPUParser::parse_argument_type_range;
+
+        initialized = true;
     }
+}
+
+CPUParser::CPUParser() {
+    initialize();
 }
 
 
 CPU CPUParser::parse(const std::string &file_name) {
+    Object::setup(tokenizer);
+    add_literals(tokenizer);
+
     cpu = CPU();
     tokenizer.push(file_name);
 
     while (!tokenizer.ended()) {
         try {
+            tokenizer.skip(Token::NEWLINE);
             auto token = tokenizer.expect(group_directive, group_directive);
             if (!token) {
                 break;
@@ -215,13 +237,34 @@ void CPUParser::parse_instruction() {
 }
 
 
-void CPUParser::parse_keyword() {
-    Token keyword = tokenizer.expect(Token::STRING, group_directive);
-    tokenizer.skip(Token::NEWLINE);
+void CPUParser::parse_syntax() {
+    auto type = tokenizer.expect(Token::NAME, group_directive);
+    auto values = Object::parse(tokenizer);
 
-    cpu.add_reserved_word(SymbolTable::global.add(keyword.as_string()));
-    // TODO: add keyword to tokenizer
+    if (!values->is_scalar()) {
+        throw ParseException(values->location, "expected strings");
+    }
+
+    if (type == token_keywords) {
+        for (const auto& value : (*values->as_scalar())) {
+            if (!value.is_string()) {
+                throw ParseException(value, "expected string");
+            }
+            cpu.add_reserved_word(SymbolTable::global.add(value.as_string()));
+            tokenizer.add_literal(Token::NAME, value.as_string());
+        }
+    }
+    else if (type == token_punctuation) {
+        for (const auto& value : (*values->as_scalar())) {
+            if (!value.is_string()) {
+                throw ParseException(value, "expected string");
+            }
+            cpu.add_punctuation(SymbolTable::global.add(value.as_string()));
+            tokenizer.add_literal(Token::PUNCTUATION, value.as_string());
+        }
+    }
 }
+
 
 std::unique_ptr<ArgumentType> CPUParser::parse_argument_type_enum(const Token& name, const Object *parameters) {
     auto argument_type = std::make_unique<ArgumentTypeEnum>();
@@ -279,7 +322,7 @@ std::unique_ptr<ArgumentType> CPUParser::parse_argument_type_range(const Token& 
     }
     auto limits = parameters->as_scalar();
     if (limits->size() == 3) {
-        if ((*limits)[0].is_integer() && (*limits)[1].get_type() == Token::COMMA && (*limits)[2].is_integer()) {
+        if ((*limits)[0].is_integer() && (*limits)[1] == token_comma && (*limits)[2].is_integer()) {
             // TODO: check for overflow
             argument_type->lower_bound = static_cast<int64_t>((*limits)[0].as_integer());
             argument_type->upper_bound = (*limits)[2].as_integer();
@@ -289,7 +332,7 @@ std::unique_ptr<ArgumentType> CPUParser::parse_argument_type_range(const Token& 
         }
     }
     else if (limits->size() == 4) {
-        if ((*limits)[0].get_type() == Token::MINUS && (*limits)[1].is_integer() && (*limits)[2].get_type() == Token::COMMA && (*limits)[3].is_integer()) {
+        if ((*limits)[0] == token_minus && (*limits)[1].is_integer() && (*limits)[2] == token_comma && (*limits)[3].is_integer()) {
             // TODO: check for overflow
             argument_type->lower_bound = -static_cast<int64_t>((*limits)[1].as_integer());
             argument_type->upper_bound = (*limits)[3].as_integer();
@@ -325,4 +368,8 @@ AddressingMode::Notation CPUParser::parse_addressing_mode_notation(const Address
     }
 
     return notation;
+}
+
+void CPUParser::add_literals(Tokenizer &tokenizer) {
+    tokenizer.add_punctuations({"-", ","});
 }

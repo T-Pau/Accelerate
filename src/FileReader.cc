@@ -49,21 +49,16 @@ const std::vector<std::string>& FileReader::read(const std::string& file_name, b
 
     std::vector<std::string> lines;
 
-    try {
-        std::ifstream input_file(file_name);
+    std::ifstream input_file(file_name);
+    if (input_file) {
         std::string s;
         while (getline(input_file, s)) {
             lines.push_back(s);
         }
     }
-    catch (...) {
-        if (optional) {
-            return empty_file;
-        }
-        else {
-            error_flag = true;
-            throw Exception(); // TODO: error details
-        }
+    else if (errno != EEXIST || !optional) {
+        error_flag = true;
+        throw Exception("can't open '%s': %s", file_name.c_str(), strerror(errno));
     }
 
     files[file] = std::move(lines);

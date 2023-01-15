@@ -29,14 +29,15 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef ASSEMBLER_OBJECT_H
-#define ASSEMBLER_OBJECT_H
+#ifndef OBJECT_H
+#define OBJECT_H
 
 #include <unordered_map>
 #include <vector>
 
 #include "Token.h"
 #include "Tokenizer.h"
+#include "TokenGroup.h"
 
 class ObjectArray;
 class ObjectDictionary;
@@ -53,6 +54,7 @@ public:
 
     [[nodiscard]] virtual Type type() const = 0;
 
+    static void setup(Tokenizer& tokenizer);
     static std::shared_ptr<Object> parse(Tokenizer& tokenizer);
 
     [[nodiscard]] const ObjectArray* as_array() const {return is_array() ? reinterpret_cast<const ObjectArray*>(this) : nullptr;}
@@ -65,8 +67,15 @@ public:
 
     Location location;
 
-private:
-    static const Token::Group start_group;
+protected:
+    static void initialize();
+    static bool initialized;
+    static TokenGroup start_group;
+    static Token token_colon;
+    static Token token_curly_close;
+    static Token token_curly_open;
+    static Token token_square_close;
+    static Token token_square_open;
 };
 
 
@@ -98,7 +107,7 @@ public:
     [[nodiscard]] Type type() const override {return DICTIONARY;}
 
     std::shared_ptr<Object> operator[](const Token& token) const;
-    std::shared_ptr<Object> operator[](const std::string& name) const {return (*this)[Token(Token::NAME, {}, name)];}
+    std::shared_ptr<Object> operator[](const std::string& name) const {return (*this)[Token(Token::NAME, {}, SymbolTable::global.add(name))];}
 
     std::unordered_map<Token, std::shared_ptr<Object>>::iterator begin() {return entries.begin();}
     std::unordered_map<Token, std::shared_ptr<Object>>::iterator end() {return entries.end();}
@@ -126,4 +135,4 @@ public:
 };
 
 
-#endif //ASSEMBLER_OBJECT_H
+#endif // OBJECT_H

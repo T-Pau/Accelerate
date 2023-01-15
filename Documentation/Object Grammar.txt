@@ -1,0 +1,31 @@
+object:
+    scalar
+    array
+    dictionary
+
+scalar:
+    : elements NEWLINE
+
+elements:
+    ; empty
+    non-newline
+    elements non-newline
+
+array:
+    [ NEWLINE items ] NEWLINE
+
+items:
+    ; empty
+    object
+    items object
+
+dictionary:
+    { NEWLINE dictionary-entries } NEWLINE
+
+dictionary-entries:
+    ; empty
+    dictionary-entry
+    dicrionary-entries dictionary-entry
+
+dictionary-entry:
+    non-newline object

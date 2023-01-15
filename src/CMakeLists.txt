@@ -8,6 +8,8 @@ SET(assembler_SOURCES
         AddressingModeMatcher.cc
         ArgumentType.cc
         Assembler.cc
+        AssemblerMain.cc
+        AssemblerObject.cc
         Commandline.cc
         CPU.cc
         CPUParser.cc
@@ -23,6 +25,7 @@ SET(assembler_SOURCES
         ParseException.cc
         SymbolTable.cc
         Token.cc
+        TokenGroup.cc
         Tokenizer.cc
         Util.cc
         ${COMPATIBILITY}

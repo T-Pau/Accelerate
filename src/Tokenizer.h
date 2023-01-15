@@ -37,6 +37,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <vector>
 
 #include "Token.h"
+#include "TokenGroup.h"
 #include "Location.h"
 
 class Tokenizer {
@@ -47,17 +48,20 @@ public:
     void unget(Token token);
 
     std::vector<Token> collect_until(Token::Type type);
-    std::vector<Token> collect_until(const Token::Group& types);
-    Token expect(Token::Type type, const Token::Group& synchronize);
-    Token expect(const Token::Group& types, const Token::Group& synchronize);
-    void expect_litearls(const std::vector<Token::Type>& types, const Token::Group& synchronize);
-    void skip_until(const Token::Group& types);
-    void skip(const Token::Group& types);
+    std::vector<Token> collect_until(const TokenGroup& types);
+    Token expect(Token::Type type, const TokenGroup& synchronize);
+    Token expect(const TokenGroup& types, const TokenGroup& synchronize);
+    void expect_litearls(const std::vector<Token::Type>& types, const TokenGroup& synchronize);
+    void skip_until(const TokenGroup& types, bool including_terminator = false);
+    void skip(const TokenGroup& types);
     void skip(Token::Type type);
 
-    [[nodiscard]] bool ended() {return current_source== nullptr;}
+    [[nodiscard]] bool ended() {return !ungot_token.has_value() && current_source == nullptr;}
 
-    Location current_location() const;
+    [[nodiscard]] Location current_location() const;
+
+    void add_punctuations(const std::unordered_set<std::string>& names);
+    void add_literal(Token::Type match, const std::string& name) {matcher.add(name.c_str(), match);}
 
 private:
     class Source {
@@ -70,12 +74,25 @@ private:
         [[nodiscard]] Location location() const { return {file, line + 1, column, column}; }
         void expand_location(Location& location) const { location.end_column = column; }
 
+        void reset_to(const Location& new_location);
+
     private:
         symbol_t file;
         const std::vector<std::string>& lines;
         size_t line = 0;
         size_t column = 0;
     };
+
+    class MatcherNode {
+    public:
+        std::optional<Token::Type> match_type;
+        std::unordered_map<char,MatcherNode> next;
+
+        void add(const char* string, Token::Type type);
+        std::optional<Token::Type> match(Source& source, std::string& name);
+    };
+
+
 
     Token parse_number(unsigned int base, Location location);
     Token parse_name(Token::Type type, Location location);
@@ -84,11 +101,12 @@ private:
     static int convert_digit(int c);
     static bool isword(int c) { return islower(c) || isupper(c) || c == '_'; }
 
-    static std::unordered_map<char, Token::Type> single_character_tokens;
+    MatcherNode matcher;
 
     std::vector<Source> sources;
     Source* current_source = nullptr;
 
+    bool last_was_newline = false;
     std::optional<Token> ungot_token;
 };
 

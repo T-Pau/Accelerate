@@ -35,41 +35,14 @@ const std::string Token::empty_string;
 
 const char* Token::type_name(Type type) {
     switch (type) {
-        case COLON:
-            return "':'";
-
-        case COMMA:
-            return "','";
-
-        case CURLY_PARENTHESIS_CLOSE:
-            return "'}'";
-
-        case CURLY_PARENTHESIS_OPEN:
-            return "'{'";
+        case PUNCTUATION:
+            return "punctuation";
 
         case DIRECTIVE:
             return "directive";
 
         case END:
             return "end of file";
-
-        case EQUAL:
-            return "'='";
-
-        case ERROR:
-            return "error";
-
-        case GREATER:
-            return "'>'";
-
-        case HASH:
-            return "'#'";
-
-        case LESS:
-            return "'<'";
-
-        case MINUS:
-            return "'-'";
 
         case NAME:
             return "name";
@@ -80,26 +53,17 @@ const char* Token::type_name(Type type) {
         case INTEGER:
             return "number";
 
-        case PARENTHESIS_CLOSE:
-            return "')'";
-
-        case PARENTHESIS_OPEN:
-            return "'('";
-
-        case PLUS:
-            return "'+'";
-
-        case SQUARE_PARENTHESIS_CLOSE:
-            return "']'";
-
-        case SQUARE_PARENTHESIS_OPEN:
-            return "'['";
-
-        case STAR:
-            return "'*'";
-
         case STRING:
             return "string";
+
+        case REAL:
+            return "real";
+
+        case KEYWORD:
+            return "keyword";
+
+        case INSTRUCTION:
+            return "instruction";
     }
 }
 
@@ -110,15 +74,20 @@ bool Token::operator==(const Token &other) const {
     switch (type) {
         case NAME:
         case DIRECTIVE:
+        case KEYWORD:
+        case PUNCTUATION:
+        case INSTRUCTION:
+        case STRING:
             return value.symbol == other.value.symbol;
 
         case INTEGER:
             return value.integer == other.value.integer;
 
-        case STRING:
-            return string == other.string;
+        case REAL:
+            return value.real == other.value.real;
 
-        default:
+        case END:
+        case NEWLINE:
             return true;
     }
 }
@@ -127,28 +96,34 @@ const std::string &Token::as_string() const {
     switch (type) {
         case NAME:
         case DIRECTIVE:
+        case PUNCTUATION:
+        case STRING:
+        case KEYWORD:
+        case INSTRUCTION:
             return SymbolTable::global[value.symbol];
 
-        case STRING:
-            return string;
-
-        default:
+        case INTEGER:
+        case REAL:
+        case END:
+        case NEWLINE:
             return empty_string;
     }
 }
 
-Token::Token(Token::Type type, Location location, const std::string& name): type(type), location(std::move(location)) {
+symbol_t Token::as_symbol() const {
     switch (type) {
-        case DIRECTIVE:
         case NAME:
-            value.symbol = SymbolTable::global.add(name);
-            break;
-
+        case DIRECTIVE:
+        case PUNCTUATION:
         case STRING:
-            string = name;
-            break;
+        case KEYWORD:
+        case INSTRUCTION:
+            return value.symbol;
 
-        default:
-            break;
+        case INTEGER:
+        case REAL:
+        case END:
+        case NEWLINE:
+            return 0;
     }
 }

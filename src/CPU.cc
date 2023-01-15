@@ -66,3 +66,26 @@ const ArgumentType *CPU::argument_type(symbol_t name) const {
 void CPU::add_argument_type(symbol_t name, std::unique_ptr<ArgumentType> argument_type) {
     argument_types[name] = std::move(argument_type);
 }
+
+const Instruction *CPU::instruction(symbol_t name) const {
+    auto it = instructions.find(name);
+
+    if (it == instructions.end()) {
+        return nullptr;
+    }
+    else {
+        return &it->second;
+    }
+}
+
+void CPU::setup(Tokenizer &tokenizer) const {
+    for (const auto& item: reserved_words) {
+        tokenizer.add_literal(Token::KEYWORD, SymbolTable::global[item]);
+    }
+    for (const auto& item: punctuation) {
+        tokenizer.add_literal(Token::PUNCTUATION, SymbolTable::global[item]);
+    }
+    for (const auto& pair: instructions) {
+        tokenizer.add_literal(Token::INSTRUCTION, SymbolTable::global[pair.first]);
+    }
+}

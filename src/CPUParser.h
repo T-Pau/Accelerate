@@ -48,7 +48,7 @@ private:
     void parse_argument_type();
     void parse_byte_order();
     void parse_instruction();
-    void parse_keyword();
+    void parse_syntax();
 
     AddressingMode::Notation parse_addressing_mode_notation(const AddressingMode& addressing_mode, const ObjectScalar* parameters);
 
@@ -56,8 +56,7 @@ private:
     std::unique_ptr<ArgumentType> parse_argument_type_map(const Token& name, const Object* parameters);
     std::unique_ptr<ArgumentType> parse_argument_type_range(const Token& name, const Object* parameters);
 
-    static Token::Group group_directive;
-    static Token::Group group_newline;
+    static TokenGroup group_directive;
 
     static std::map<symbol_t, std::unique_ptr<ArgumentType> (CPUParser::*)(const Token& name, const Object* parameters)> argument_type_parser_methods;
     static std::map<symbol_t, void (CPUParser::*)()> parser_methods;
@@ -67,6 +66,15 @@ private:
 
     std::unordered_set<Token> addressing_mode_names;
     std::unordered_set<Token> argument_type_names;
+
+    static void initialize();
+    static bool initialized;
+    static Token token_minus;
+    static Token token_comma;
+    static Token token_keywords;
+    static Token token_punctuation;
+
+    static void add_literals(Tokenizer &tokenizer);
 };
 
 

@@ -1,5 +1,5 @@
 /*
-ExpressionNode.cc -- Abstract Base Class of Expression Nodes
+TokenGroup.h -- 
 
 Copyright (C) Dieter Baron
 
@@ -29,15 +29,25 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "ExpressionNode.h"
+#ifndef TOKEN_GROUP_H
+#define TOKEN_GROUP_H
 
-std::shared_ptr<ExpressionNode> ExpressionNode::parse(Tokenizer &tokenizer) {
-    auto token = tokenizer.next();
+#include "Token.h"
 
-    // TODO: implement
+class TokenGroup {
+public:
+    TokenGroup() = default;
+    explicit TokenGroup(Token::Type type): types({ type }), name (Token::type_name(type)) {}
+    explicit TokenGroup(std::unordered_set<Token::Type> types, std::unordered_set<Token> tokens, std::string name): types (std::move(types)), tokens(std::move(tokens)), name(std::move(name)) {}
 
-    switch (token.get_type()) {
-        default:
-            return {};
-    }
-}
+    [[nodiscard]] bool contains(const Token& token) const {return  (types.find(token.get_type()) != types.end() || tokens.find(token) != tokens.end());}
+
+    static const TokenGroup newline;
+
+    std::unordered_set<Token::Type> types;
+    std::unordered_set<Token> tokens;
+    std::string name;
+};
+
+
+#endif // TOKEN_GROUP_H

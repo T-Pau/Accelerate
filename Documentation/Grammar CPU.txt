@@ -1,0 +1,30 @@
+file:
+    END
+    lines END
+
+lines:
+    line
+    lines line
+
+line:
+    byte_order
+    argument_type
+    addressing_mode
+    instruction
+
+byte_order:
+    <.byte_order> number NEWLINE
+
+argument_type:
+    <.argument_type> NAME argument_type_definition
+
+argument_type_definition:
+    <range> scalar
+    <enum> dictionary
+    <map> dictionary
+
+addressing_mode:
+    <.addressing_mode> name dictionary
+
+.instruction:
+    <.instruction> name dictionary

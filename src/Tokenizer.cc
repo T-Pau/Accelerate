@@ -35,6 +35,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ParseException.h"
 #include "Util.h"
 
+/*
 std::unordered_map<char, Token::Type> Tokenizer::single_character_tokens = {
         {'#',  Token::HASH},
         {'(',  Token::PARENTHESIS_OPEN},
@@ -52,6 +53,7 @@ std::unordered_map<char, Token::Type> Tokenizer::single_character_tokens = {
         {'>', Token::GREATER},
         {'=', Token::EQUAL}
 };
+ */
 
 void Tokenizer::push(const std::string& file_name) {
     const auto& lines = FileReader::global.read(file_name);
@@ -64,47 +66,53 @@ void Tokenizer::push(const std::string& file_name) {
 
 Token Tokenizer::next() {
     if (ungot_token.has_value()) {
-        auto token = std::move(ungot_token.value());
+        auto token = ungot_token.value();
         ungot_token.reset();
-        return std::move(token);
+        return token;
     }
 
     if (current_source == nullptr) {
-        return Token(Token::END);
+        return {};
     }
 
     while (true) {
         auto location = current_source->location();
+
+        std::string name;
+        auto type = matcher.match(*current_source, name);
+        if (type.has_value()) {
+            current_source->expand_location(location);
+            last_was_newline = false;
+            return {type.value(), location, SymbolTable::global.add(name)};
+        }
+
+        current_source->reset_to(location);
+
         auto c = current_source->next();
 
         if (c == EOF) {
             current_source = nullptr;
             sources.pop_back();
             if (sources.empty()) {
-                return Token(Token::END);
+                return {};
             }
             current_source = &sources[sources.size() - 1];
             continue;
         }
 
         if (c == '\n') {
-            if (location.end_column == 0) {
+            if (last_was_newline) {
                 // ignore empty lines
                 continue;
             }
             else {
                 // Not using expand_location() here to correctly handle \n.
                 location.end_column += 1;
+                last_was_newline = true;
                 return {Token::NEWLINE, location};
             }
         }
-        auto it = single_character_tokens.find(static_cast<char>(c));
-        if (it != single_character_tokens.end()) {
-            current_source->expand_location(location);
-            return {it->second, location};
-        }
-
-        if (isspace(c)) {
+        else if (isspace(c)) {
             // skip whitespace
             continue;
         }
@@ -114,7 +122,10 @@ Token Tokenizer::next() {
             current_source->unget();
             continue;
         }
-        else if (c == '$') {
+
+        last_was_newline = false;
+
+        if (c == '$') {
             return parse_number(16, location);
         }
         else if (c == '%') {
@@ -135,7 +146,7 @@ Token Tokenizer::next() {
             return parse_string(location);
         }
         else {
-            return {Token::ERROR, location, string_format("illegal character '%c'", c)};
+            throw ParseException(location, "illegal character '%c'", c);
         }
     }
 }
@@ -152,7 +163,7 @@ Token Tokenizer::parse_number(unsigned int base, Location location) {
         if (digit < 0 || digit >= base) {
             current_source->unget();
             if (empty) {
-                return {Token::ERROR, location, "empty integer"};
+                throw ParseException(location, "empty integer");
             }
             return {Token::INTEGER, location, integer};
         }
@@ -190,9 +201,9 @@ Token Tokenizer::parse_name(Token::Type type, Location location) {
         else {
             current_source->unget();
             if (name.empty()) {
-                return {Token::ERROR, location, "empty directive"};
+                throw ParseException(location, "empty directive");
             }
-            return {type, location, name};
+            return {type, location, SymbolTable::global.add(name)};
         }
     }
 
@@ -207,11 +218,11 @@ Token Tokenizer::parse_string(Location location) {
 
         switch (c) {
             case '\n':
-                return {Token::ERROR, location, "unterminated string"};
+                throw ParseException(location, "unterminated string");
 
             case '"':
                 current_source->expand_location(location);
-                return {Token::STRING, location, value};
+                return {Token::STRING, location, SymbolTable::global.add(value)};
 
             case '\\': {
                 current_source->expand_location(location);
@@ -228,7 +239,7 @@ Token Tokenizer::parse_string(Location location) {
                         break;
 
                     case '\n':
-                        return {Token::ERROR, location, "unterminated string"};
+                        throw ParseException(location, "unterminated string");
 
                     default:
                         current_source->expand_location(location);
@@ -249,10 +260,10 @@ void Tokenizer::unget(Token token) {
     if (ungot_token.has_value()) {
         throw Exception("trying to unget two tokens");
     }
-    ungot_token = std::move(token);
+    ungot_token = token;
 }
 
-Token Tokenizer::expect(Token::Type type, const Token::Group& synchronize) {
+Token Tokenizer::expect(Token::Type type, const TokenGroup& synchronize) {
     auto token = next();
     if (token.get_type() == type) {
         return token;
@@ -263,9 +274,9 @@ Token Tokenizer::expect(Token::Type type, const Token::Group& synchronize) {
     }
 }
 
-Token Tokenizer::expect(const Token::Group& types, const Token::Group& synchronize) {
+Token Tokenizer::expect(const TokenGroup& types, const TokenGroup& synchronize) {
     auto token = next();
-    if (types.contains(token.get_type())) {
+    if (types.contains(token)) {
         return token;
     }
     else {
@@ -275,26 +286,28 @@ Token Tokenizer::expect(const Token::Group& types, const Token::Group& synchroni
 }
 
 
-void Tokenizer::skip_until(const Token::Group &types) {
+void Tokenizer::skip_until(const TokenGroup &types, bool including_terminator) {
     Token token;
     while ((token = next())) {
-        if (types.contains(token.get_type())) {
-            unget(token);
+        if (types.contains(token)) {
+            if (!including_terminator) {
+                unget(token);
+            }
             return;
         }
     }
 }
 
-void Tokenizer::expect_litearls(const std::vector<Token::Type>& types, const Token::Group &synchronize) {
+void Tokenizer::expect_litearls(const std::vector<Token::Type>& types, const TokenGroup &synchronize) {
     for (auto type : types) {
         expect(type, synchronize);
     }
 }
 
-void Tokenizer::skip(const Token::Group &types) {
+void Tokenizer::skip(const TokenGroup &types) {
     Token token;
     while ((token = next())) {
-        if (!types.contains(token.get_type())) {
+        if (!types.contains(token)) {
             unget(token);
             return;
         }
@@ -330,12 +343,12 @@ std::vector<Token> Tokenizer::collect_until(Token::Type type) {
 }
 
 
-std::vector<Token> Tokenizer::collect_until(const Token::Group& types) {
+std::vector<Token> Tokenizer::collect_until(const TokenGroup& types) {
     std::vector<Token> tokens;
 
     Token token;
     while ((token = next())) {
-        if (!types.contains(token.get_type())) {
+        if (!types.contains(token)) {
             tokens.emplace_back(token);
         }
     }
@@ -350,6 +363,12 @@ Location Tokenizer::current_location() const{
     }
     else {
         return current_source->location();
+    }
+}
+
+void Tokenizer::add_punctuations(const std::unordered_set<std::string> &names) {
+    for (const auto& name: names) {
+        add_literal(Token::PUNCTUATION, name);
     }
 }
 
@@ -379,5 +398,46 @@ void Tokenizer::Source::unget() {
     }
     else {
         column -= 1;
+    }
+}
+
+void Tokenizer::Source::reset_to(const Location &new_location) {
+    if (new_location.file != file) {
+        throw ParseException(location(), "can't reset to new_location in different file");
+    }
+    line = new_location.start_line_number - 1;
+    column = new_location.start_column;
+}
+
+
+std::optional<Token::Type> Tokenizer::MatcherNode::match(Tokenizer::Source &source, std::string& name) {
+    auto c = source.next();
+    if (c == EOF) {
+        return match_type;
+    }
+
+    auto it = next.find(static_cast<char>(c));
+
+    if (it == next.end()) {
+        source.unget();
+        return match_type;
+    }
+
+    name += static_cast<char>(c);
+    return it->second.match(source,name);
+}
+
+
+void Tokenizer::MatcherNode::add(const char *string, Token::Type type) {
+    if (string[0] == '\0') {
+        if (match_type.has_value() && match_type.value() != type) {
+            throw Exception("literal already defined with different type"); // TODO: include more detail
+        }
+        else {
+            match_type = type;
+        }
+    }
+    else {
+        next[string[0]].add(string + 1, type);
     }
 }

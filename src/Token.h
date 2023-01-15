@@ -40,47 +40,24 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 class Token {
 public:
     enum Type {
-        COLON,
-        COMMA,
-        CURLY_PARENTHESIS_CLOSE,
-        CURLY_PARENTHESIS_OPEN,
         DIRECTIVE,
-        END,
-        EQUAL,
-        ERROR,
-        GREATER,
-        HASH,
-        LESS,
-        MINUS,
+        PUNCTUATION,
         NAME,
+        END,
         NEWLINE,
         INTEGER,
-        PARENTHESIS_CLOSE,
-        PARENTHESIS_OPEN,
-        PLUS,
-        SQUARE_PARENTHESIS_CLOSE,
-        SQUARE_PARENTHESIS_OPEN,
-        STAR,
-        STRING
-    };
-
-    class Group {
-    public:
-        explicit Group(Type type): types({type}), name(type_name(type)) {}
-        explicit Group(std::unordered_set<Type> types, std::string name): types(std::move(types)), name(std::move(name)) {}
-
-        [[nodiscard]] bool contains(Type type) const {return types.find(type) != types.end();}
-
-        std::unordered_set<Type> types;
-        std::string name;
+        REAL,
+        STRING,
+        KEYWORD,
+        INSTRUCTION
     };
 
     Token(): type(END) {}
-    explicit Token(Type type): type(type) {}
-    Token(Type type, Location location): type(type), location(std::move(location)) {}
-    Token(Type type, Location location, const std::string& name);
-    Token(Type type, Location location, uint64_t integer): Token(type, std::move(location)) { value.integer = integer; }
-    Token(Type type, Location location, double real): Token(type, std::move(location)) { value.real = real; }
+    Token(Type type, Location location): type(type), location(location) {}
+    Token(Type type, Location location, const std::string& name): Token(type, location) {value.symbol = SymbolTable::global.add(name);}
+    Token(Type type, Location location, symbol_t symbol): Token(type, location) {value.symbol = symbol;}
+    Token(Type type, Location location, uint64_t integer): Token(type, location) {value.integer = integer;}
+    Token(Type type, Location location, double real): Token(type, location) {value.real = real;}
 
     explicit operator bool() const {return type != END;}
     bool operator==(const Token& other) const;
@@ -89,11 +66,13 @@ public:
     [[nodiscard]] bool is_integer() const {return type == INTEGER;}
     [[nodiscard]] bool is_name() const {return type == NAME;}
     [[nodiscard]] bool is_newline() const {return type == NEWLINE;}
+    [[nodiscard]] bool is_string() const {return type == STRING;}
     [[nodiscard]] const char* type_name() const {return type_name(type);}
 
     [[nodiscard]] const std::string& as_string() const;
-    [[nodiscard]] symbol_t as_symbol() const {return is_directive() || is_name() ? value.symbol : 0;}
+    [[nodiscard]] symbol_t as_symbol() const;
     [[nodiscard]] uint64_t as_integer() const {return type == INTEGER ? value.integer : 0;}
+    [[nodiscard]] double as_real() const {return type == REAL ? value.real : 0.0;}
 
     static const char* type_name(Type type);
 
@@ -101,7 +80,6 @@ public:
 
 private:
     Type type;
-    std::string string;
     union {
         uint64_t integer;
         double real;
@@ -118,19 +96,25 @@ struct std::hash<Token>
         size_t h1 = std::hash<size_t>{}(static_cast<size_t>(token.get_type()));
         size_t h2 = 0;
         switch (token.get_type()) {
-            case Token::NAME:
             case Token::DIRECTIVE:
+            case Token::INSTRUCTION:
+            case Token::KEYWORD:
+            case Token::NAME:
+            case Token::PUNCTUATION:
+            case Token::STRING:
                 h2 = std::hash<symbol_t>{}(token.as_symbol());
                 break;
 
             case Token::INTEGER:
-                h2 = std::hash<::uint64_t>{}(token.as_integer());
+                h2 = std::hash<uint64_t>{}(token.as_integer());
                 break;
 
-            case Token::STRING:
-                h2 = std::hash<std::string>{}(token.as_string());
+            case Token::REAL:
+                h2 = std::hash<double>{}(token.as_real());
+                break;
 
-            default:
+            case Token::END:
+            case Token::NEWLINE:
                 break;
         }
         return h1 ^ (h2 << 1);
