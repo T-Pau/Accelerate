@@ -37,7 +37,7 @@ void CPU::add_addressing_mode(symbol_t name, AddressingMode mode) {
     const auto& addressing_mode = addressing_modes[name];
 
     for (const auto& notation: addressing_mode.notations) {
-        addressing_mode_matcher.add_notation(name, notation);
+        addressing_mode_matcher.add_notation(name, notation, addressing_mode.arguments);
     }
 }
 

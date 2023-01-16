@@ -33,14 +33,18 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ParseException.h"
 #include "TokenNode.h"
 
-void AddressingModeMatcher::add_notation(symbol_t addressing_mode, const AddressingMode::Notation &notation) {
-    auto node = &start;
+void AddressingModeMatcher::add_notation(symbol_t addressing_mode, const AddressingMode::Notation &notation, const std::unordered_map<symbol_t, const ArgumentType*>& arguments) {
+    start.add_notation(addressing_mode, notation.elements.begin(), notation.elements.end(), arguments);
+}
 
-    for (const auto& notation_element: notation.elements) {
-        node = &node->next[AddressingModeMatcherElement(notation_element)];
+void AddressingModeMatcher::MatcherNode::add_notation(symbol_t addressing_mode, std::vector<AddressingMode::Notation::Element>::const_iterator current, std::vector<AddressingMode::Notation::Element>::const_iterator end, const std::unordered_map<symbol_t, const ArgumentType*>& arguments) {
+    if (current == end) {
+        addressing_modes.insert(addressing_mode);
+        return;
     }
-
-    node->addressing_modes.insert(addressing_mode);
+    for (const auto& element: AddressingModeMatcherElement::elements_for(*current, arguments)) {
+        next[element].add_notation(addressing_mode, current + 1, end, arguments);
+    }
 }
 
 std::unordered_set<symbol_t> AddressingModeMatcher::match(const std::vector<std::shared_ptr<Node>>& nodes) const {
@@ -76,23 +80,41 @@ bool AddressingModeMatcherElement::operator==(const AddressingModeMatcherElement
 }
 
 
-AddressingModeMatcherElement::AddressingModeMatcherElement(AddressingMode::Notation::Element notation_element) {
-    switch (notation_element.type) {
-        case AddressingMode::Notation::ARGUMENT:
-            // TODO: handle enum
-            type = INTEGER;
-            break;
+std::vector<AddressingModeMatcherElement>
+AddressingModeMatcherElement::elements_for(const AddressingMode::Notation::Element &element, const std::unordered_map<symbol_t, const ArgumentType*>& arguments) {
+    std::vector<AddressingModeMatcherElement> elements;
+
+    switch (element.type) {
+        case AddressingMode::Notation::ARGUMENT: {
+            auto it = arguments.find(element.symbol);
+            if (it == arguments.end()) {
+                throw Exception("unknown argument '%s'", SymbolTable::global[element.symbol].c_str());
+            }
+
+            auto argument_type = it->second;
+            switch (argument_type->type()) {
+                case ArgumentType::RANGE:
+                case ArgumentType::MAP:
+                    elements.emplace_back(INTEGER, 0);
+                    break;
+
+                case ArgumentType::ENUM:
+                    for (const auto &pair: dynamic_cast<const ArgumentTypeEnum *>(argument_type)->entries) {
+                        elements.emplace_back(KEYWORD, pair.first);
+                    }
+                    break;
+            }
+        }
 
         case AddressingMode::Notation::PUNCTUATION:
-            type = PUNCTUATION;
-            symbol = notation_element.symbol;
+            elements.emplace_back(PUNCTUATION, element.symbol);
             break;
 
         case AddressingMode::Notation::RESERVED_WORD:
-            type = KEYWORD;
-            symbol = notation_element.symbol;
+            elements.emplace_back(KEYWORD, element.symbol);
             break;
     }
+    return elements;
 }
 
 AddressingModeMatcherElement::AddressingModeMatcherElement(Node *node) {
@@ -110,10 +132,9 @@ AddressingModeMatcherElement::AddressingModeMatcherElement(Node *node) {
 
         case Node::INSTRUCTION:
             throw ParseException(node->location, "instruction not allowed as argument");
-            break;
+
         case Node::LABEL:
             throw ParseException(node->location, "label not allowed as argument");
-            break;
 
         case Node::KEYWORD:
             type = KEYWORD;

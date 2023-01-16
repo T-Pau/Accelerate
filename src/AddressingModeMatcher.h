@@ -47,13 +47,15 @@ public:
         INTEGER
     };
 
-    explicit AddressingModeMatcherElement(AddressingMode::Notation::Element notation_element);
+    AddressingModeMatcherElement(Type type, symbol_t symbol): type(type), symbol(symbol) {}
     explicit AddressingModeMatcherElement(Node* node);
 
     bool operator==(const AddressingModeMatcherElement& other) const;
 
-    Type type;
-    symbol_t symbol;
+    Type type = INTEGER;
+    symbol_t symbol = 0;
+
+    static std::vector<AddressingModeMatcherElement> elements_for(const AddressingMode::Notation::Element& element, const std::unordered_map<symbol_t, const ArgumentType*>& arguments);
 };
 
 template<>
@@ -80,12 +82,13 @@ class AddressingModeMatcher {
 public:
     [[nodiscard]] std::unordered_set<symbol_t> match(const std::vector<std::shared_ptr<Node>>& nodes) const;
 
-    void add_notation(symbol_t addressing_mode, const AddressingMode::Notation& notation);
+    void add_notation(symbol_t addressing_mode, const AddressingMode::Notation& notation, const std::unordered_map<symbol_t, const ArgumentType*>& arguments);
 
 private:
-
     class MatcherNode {
     public:
+        void add_notation(symbol_t addressing_mode, std::vector<AddressingMode::Notation::Element>::const_iterator current, std::vector<AddressingMode::Notation::Element>::const_iterator end, const std::unordered_map<symbol_t, const ArgumentType*>& arguments);
+
         std::unordered_set<symbol_t> addressing_modes;
         std::unordered_map<AddressingModeMatcherElement, MatcherNode> next;
     };
