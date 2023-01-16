@@ -76,11 +76,11 @@ std::shared_ptr<Object> Object::parse(Tokenizer &tokenizer) {
     }
 
     object->location = token.location;
-    object->location.extend(tokenizer.current_location());
+    //object->location.extend(tokenizer.current_location());
     return object;
 }
 
-void Object::setup(Tokenizer &tokenizer) {
+void Object::setup(TokenizerFile &tokenizer) {
     tokenizer.add_punctuations({"{", "}", "[", "]", ":"});
 }
 

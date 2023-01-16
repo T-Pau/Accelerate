@@ -71,3 +71,11 @@ size_t ExpressionNodeInteger::minimum_size() const {
         return 1;
     }
 }
+
+ExpressionNodeVariable::ExpressionNodeVariable(const Token &token) {
+    if (!token.is_name()) {
+        throw Exception("internal error: creating ExpressionNodeVariable from non-name token");
+    }
+    location = token.location;
+    symbol = token.as_symbol();
+}

@@ -30,12 +30,12 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include "CPUParser.h"
-#include "Tokenizer.h"
+#include "TokenizerFile.h"
 #include "Exception.h"
 #include "ParseException.h"
 #include "AddressingMode.h"
 #include "Object.h"
-
+#include "TokenizerSequence.h"
 
 
 TokenGroup CPUParser::group_directive = TokenGroup({Token::DIRECTIVE,Token::END}, {}, "directive");
@@ -47,6 +47,7 @@ bool CPUParser::initialized = false;
 Token CPUParser::token_comma;
 Token CPUParser::token_minus;
 Token CPUParser::token_keywords;
+Token CPUParser::token_opcode;
 Token CPUParser::token_punctuation;
 
 void CPUParser::initialize() {
@@ -54,6 +55,7 @@ void CPUParser::initialize() {
         token_comma = Token(Token::PUNCTUATION, {}, ",");
         token_minus = Token(Token::PUNCTUATION, {}, "-");
         token_keywords = Token(Token::NAME, {}, "keywords");
+        token_opcode = Token(Token::NAME, {}, "opcode");
         token_punctuation = Token(Token::NAME, {}, "punctuation");
 
         parser_methods[SymbolTable::global.add("byte_order")] = &CPUParser::parse_byte_order;
@@ -169,7 +171,17 @@ void CPUParser::parse_addressing_mode() {
         throw ParseException(notation->location, "invalid notation for addressing mode '%s'", name.as_string().c_str());
     }
 
-    // TODO: encoding
+    auto encoding_definition = (*definition)["encoding"];
+    if (encoding_definition == nullptr) {
+        addressing_mode.encoding = {std::make_shared<ExpressionNodeVariable>(token_opcode)};
+    }
+    else if (encoding_definition->is_scalar()) {
+        auto encoding_tokenizer = TokenizerSequence(encoding_definition->as_scalar()->tokens);
+        // TODO: addressing_mode.encoding = parse_xpression_list(encoding_tokenizer);
+    }
+    else {
+        throw ParseException(name, "encoding missing for addressing mode '%s'", name.as_string().c_str());
+    }
 
     cpu.add_addressing_mode(name.as_symbol(), addressing_mode);
 }
@@ -365,6 +377,6 @@ AddressingMode::Notation CPUParser::parse_addressing_mode_notation(const Address
     return notation;
 }
 
-void CPUParser::add_literals(Tokenizer &tokenizer) {
+void CPUParser::add_literals(TokenizerFile &tokenizer) {
     tokenizer.add_punctuations({"-", ","});
 }

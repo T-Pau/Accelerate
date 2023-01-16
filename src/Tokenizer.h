@@ -1,5 +1,5 @@
 /*
-Tokenizer.h -- Convert File into Stream of Tokens
+Tokenizer.h -- 
 
 Copyright (C) Dieter Baron
 
@@ -32,18 +32,13 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef TOKENIZER_H
 #define TOKENIZER_H
 
-#include <string>
-#include <unordered_map>
-#include <vector>
+#include <optional>
 
 #include "Token.h"
 #include "TokenGroup.h"
-#include "Location.h"
 
 class Tokenizer {
 public:
-    void push(const std::string& filename);
-
     Token next();
     void unget(Token token);
 
@@ -56,58 +51,15 @@ public:
     void skip(const TokenGroup& types);
     void skip(Token::Type type);
 
-    [[nodiscard]] bool ended() {return !ungot_token.has_value() && current_source == nullptr;}
+    [[nodiscard]] bool ended() const {return !ungot_token.has_value() && sub_ended();}
 
-    [[nodiscard]] Location current_location() const;
-
-    void add_punctuations(const std::unordered_set<std::string>& names);
-    void add_literal(Token::Type match, const std::string& name) {matcher.add(name.c_str(), match);}
+protected:
+    virtual Token sub_next() = 0;
+    [[nodiscard]] virtual bool sub_ended() const = 0;
 
 private:
-    class Source {
-    public:
-        Source(symbol_t file, const std::vector<std::string>& lines) : file(file), lines(lines) {}
-
-        int next();
-        void unget();
-
-        [[nodiscard]] Location location() const { return {file, line + 1, column, column}; }
-        void expand_location(Location& location) const { location.end_column = column; }
-
-        void reset_to(const Location& new_location);
-
-    private:
-        symbol_t file;
-        const std::vector<std::string>& lines;
-        size_t line = 0;
-        size_t column = 0;
-    };
-
-    class MatcherNode {
-    public:
-        std::optional<Token::Type> match_type;
-        std::unordered_map<char,MatcherNode> next;
-
-        void add(const char* string, Token::Type type);
-        std::optional<Token::Type> match(Source& source, std::string& name);
-    };
-
-
-
-    Token parse_number(unsigned int base, Location location);
-    Token parse_name(Token::Type type, Location location);
-    Token parse_string(Location location);
-
-    static int convert_digit(int c);
-    static bool isword(int c) { return islower(c) || isupper(c) || c == '_'; }
-
-    MatcherNode matcher;
-
-    std::vector<Source> sources;
-    Source* current_source = nullptr;
-
-    bool last_was_newline = false;
     std::optional<Token> ungot_token;
+
 };
 
 #endif // TOKENIZER_H

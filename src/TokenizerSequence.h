@@ -1,5 +1,5 @@
 /*
-Assembler.h --
+TokenizerSequence.h -- 
 
 Copyright (C) Dieter Baron
 
@@ -29,35 +29,26 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef ASSEMBLER_H
-#define ASSEMBLER_H
+#ifndef TOKENIZER_SEQUENCE_H
+#define TOKENIZER_SEQUENCE_H
 
-#include "AssemblerObject.h"
-#include "CPU.h"
-#include "TokenizerFile.h"
+#include <vector>
 
-class Assembler {
+#include "Tokenizer.h"
+
+class TokenizerSequence: public Tokenizer {
 public:
-    explicit Assembler(const CPU& cpu): cpu(cpu) {}
+    TokenizerSequence(std::vector<Token> tokens): tokens(std::move(tokens)) {current_position = tokens.begin();}
 
-    AssemblerObject parse(const std::string& file_name);
+protected:
+    bool sub_ended() const override {return current_position == tokens.end();}
+    Token sub_next() override;
 
 private:
-    void parse_assignment(const Token& name);
-    void parse_directive(const Token& directive);
-    void parse_instruction(const Token& name);
-    void parse_label(const Token& name);
+    std::vector<Token> tokens;
+    std::vector<Token>::iterator current_position;
 
-    const CPU& cpu;
-
-    TokenizerFile tokenizer;
-    AssemblerObject object;
-
-    static void initialize();
-    static bool initialized;
-    static Token token_colon;
-    static Token token_equals;
 };
 
 
-#endif // ASSEMBLER_H
+#endif // TOKENIZER_SEQUENCE_H

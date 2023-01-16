@@ -36,7 +36,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <vector>
 
 #include "Token.h"
-#include "Tokenizer.h"
+#include "TokenizerFile.h"
 #include "TokenGroup.h"
 
 class ObjectArray;
@@ -54,7 +54,7 @@ public:
 
     [[nodiscard]] virtual Type type() const = 0;
 
-    static void setup(Tokenizer& tokenizer);
+    static void setup(TokenizerFile& tokenizer);
     static std::shared_ptr<Object> parse(Tokenizer& tokenizer);
 
     [[nodiscard]] const ObjectArray* as_array() const {return is_array() ? reinterpret_cast<const ObjectArray*>(this) : nullptr;}

@@ -52,7 +52,7 @@ public:
 
     [[nodiscard]] std::unordered_set<symbol_t> match_addressing_modes(const std::vector<std::shared_ptr<Node>>& arguments) const {return addressing_mode_matcher.match(arguments);}
 
-    void setup(Tokenizer& tokenizer) const;
+    void setup(TokenizerFile& tokenizer) const;
 
 private:
     std::unordered_map<symbol_t, AddressingMode> addressing_modes;

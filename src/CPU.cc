@@ -78,7 +78,7 @@ const Instruction *CPU::instruction(symbol_t name) const {
     }
 }
 
-void CPU::setup(Tokenizer &tokenizer) const {
+void CPU::setup(TokenizerFile& tokenizer) const {
     for (const auto& item: reserved_words) {
         tokenizer.add_literal(Token::KEYWORD, SymbolTable::global[item]);
     }

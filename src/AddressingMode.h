@@ -33,6 +33,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define ADDRESSING_MODE_H
 
 #include "ArgumentType.h"
+#include "ExpressionNode.h"
 #include "Object.h"
 #include "SymbolTable.h"
 #include "Token.h"
@@ -59,6 +60,7 @@ public:
 
     std::vector<Notation> notations;
     std::unordered_map<symbol_t, const ArgumentType*> arguments;
+    std::vector<std::shared_ptr<ExpressionNode>> encoding;
 
     void add_notation(Notation notation) {notations.emplace_back(std::move(notation));}
 };

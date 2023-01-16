@@ -35,7 +35,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "CPU.h"
 #include "FileReader.h"
 #include "SymbolTable.h"
-#include "Tokenizer.h"
+#include "TokenizerFile.h"
 
 class CPUParser {
 public:
@@ -61,7 +61,7 @@ private:
     static std::map<symbol_t, std::unique_ptr<ArgumentType> (CPUParser::*)(const Token& name, const Object* parameters)> argument_type_parser_methods;
     static std::map<symbol_t, void (CPUParser::*)()> parser_methods;
 
-    Tokenizer tokenizer;
+    TokenizerFile tokenizer;
     CPU cpu;
 
     std::unordered_set<Token> addressing_mode_names;
@@ -72,9 +72,10 @@ private:
     static Token token_minus;
     static Token token_comma;
     static Token token_keywords;
+    static Token token_opcode;
     static Token token_punctuation;
 
-    static void add_literals(Tokenizer &tokenizer);
+    static void add_literals(TokenizerFile& tokenizer);
 };
 
 

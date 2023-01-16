@@ -35,7 +35,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <cstddef>
 
 #include "Node.h"
-#include "Tokenizer.h"
+#include "TokenizerFile.h"
 
 class ExpressionNode : public Node {
 public:
@@ -54,11 +54,25 @@ public:
     explicit ExpressionNodeInteger(const Token& token);
     explicit ExpressionNodeInteger(int64_t value): value(value) {}
 
-    Type type() const override {return INTEGER;}
+    [[nodiscard]] Type type() const override {return INTEGER;}
     [[nodiscard]] size_t byte_size() const override;
-    size_t minimum_size() const override;
+    [[nodiscard]] size_t minimum_size() const override;
     
     int64_t value;
 };
 
+class ExpressionNodeVariable: public ExpressionNode {
+public:
+    explicit ExpressionNodeVariable(const Token& token);
+    explicit ExpressionNodeVariable(symbol_t symbol): symbol(symbol) {}
+
+    [[nodiscard]] Type type() const override {return VARIABLE;}
+
+    [[nodiscard]] size_t byte_size() const override {return 0;} // TODO
+    [[nodiscard]] size_t minimum_size() const override {return 0;} // TODO
+
+private:
+    symbol_t symbol;
+    int64_t value = 0;
+};
 #endif // EXPRESSION_NODE_H

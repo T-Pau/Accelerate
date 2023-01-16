@@ -3,7 +3,7 @@ if(NOT HAVE_GETOPT_LONG)
 endif()
 
 
-SET(assembler_SOURCES
+SET(xlr8-as_SOURCES
         AddressingMode.cc
         AddressingModeMatcher.cc
         ArgumentType.cc
@@ -28,11 +28,13 @@ SET(assembler_SOURCES
         Token.cc
         TokenGroup.cc
         Tokenizer.cc
+        TokenizerFile.cc
+        TokenizerSequence.cc
         Util.cc
         ${COMPATIBILITY}
 )
 
-foreach(PROGRAM assembler)
+foreach(PROGRAM xlr8-as)
     ADD_EXECUTABLE(${PROGRAM} ${${PROGRAM}_SOURCES})
     target_include_directories(${PROGRAM} PRIVATE ${PROJECT_BINARY_DIR})
     INSTALL(TARGETS ${PROGRAM} RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
