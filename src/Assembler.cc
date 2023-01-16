@@ -144,7 +144,7 @@ void Assembler::parse_instruction(const Token& name) {
         if (instruction->has_addressing_mode(addressing_mode)) {
             // TODO: check argument ranges
             found = true;
-            printf("%s %s -> %llu\n", name.as_string().c_str(), SymbolTable::global[addressing_mode].c_str(), instruction->opcode(addressing_mode));
+            printf("%s %s -> $%llx\n", name.as_string().c_str(), SymbolTable::global[addressing_mode].c_str(), instruction->opcode(addressing_mode));
             // TODO: emit instruction
             break;
         }

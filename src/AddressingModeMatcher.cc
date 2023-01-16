@@ -52,6 +52,7 @@ std::unordered_set<symbol_t> AddressingModeMatcher::match(const std::vector<std:
         if (it == node->next.end()) {
             return {};
         }
+        current++;
         node = &it->second;
     }
 
@@ -78,6 +79,7 @@ bool AddressingModeMatcherElement::operator==(const AddressingModeMatcherElement
 AddressingModeMatcherElement::AddressingModeMatcherElement(AddressingMode::Notation::Element notation_element) {
     switch (notation_element.type) {
         case AddressingMode::Notation::ARGUMENT:
+            // TODO: handle enum
             type = INTEGER;
             break;
 
