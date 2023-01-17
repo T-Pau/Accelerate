@@ -77,9 +77,10 @@ private:
     class MatcherNode {
     public:
         std::optional<Token::Type> match_type;
+        bool match_in_word = false;
         std::unordered_map<char,MatcherNode> next;
 
-        void add(const char* string, Token::Type type);
+        void add(const char* string, Token::Type type, bool match_in_word = false);
         std::optional<Token::Type> match(Source& source, std::string& name);
     };
 
@@ -88,7 +89,8 @@ private:
     Token parse_string(Location location);
 
     static int convert_digit(int c);
-    static bool isword(int c) { return islower(c) || isupper(c) || c == '_'; }
+    static bool is_identifier_continuation(int c) {return is_identifier_start(c) || isdigit(c);}
+    static bool is_identifier_start(int c) { return islower(c) || isupper(c) || c == '_'; }
 
     MatcherNode matcher;
 

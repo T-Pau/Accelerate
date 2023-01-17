@@ -72,6 +72,20 @@ std::shared_ptr<ExpressionNode> ExpressionNode::parse(Tokenizer &tokenizer) {
 }
 
 
+std::shared_ptr<ExpressionNode> ExpressionNode::parse(Tokenizer& tokenizer, std::shared_ptr<ExpressionNode> left) {
+    auto token = tokenizer.next();
+
+    auto it = multiplicative_operators.find(token);
+    if (it == multiplicative_operators.end()) {
+        tokenizer.unget(token);
+        return left;
+    }
+
+    auto right = parse_unary_term(tokenizer);
+
+    return std::make_shared<ExpressionNodeBinary>(left, it->second, right);
+}
+
 
 std::shared_ptr<ExpressionNode> ExpressionNode::parse_multiplicative_term(Tokenizer &tokenizer) {
     auto left = parse_unary_term(tokenizer);

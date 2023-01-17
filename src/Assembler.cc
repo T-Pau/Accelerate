@@ -30,17 +30,24 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include "Assembler.h"
+
+#include <memory>
+
 #include "ParseException.h"
 #include "FileReader.h"
 #include "TokenNode.h"
 
 bool Assembler::initialized = false;
+Token Assembler::token_brace_close;
+Token Assembler::token_brace_open;
 Token Assembler::token_colon;
 Token Assembler::token_equals;
 
 
 void Assembler::initialize() {
     if (!initialized) {
+        token_brace_close = Token(Token::PUNCTUATION, {}, SymbolTable::global.add(")"));
+        token_brace_open = Token(Token::PUNCTUATION, {}, SymbolTable::global.add("("));
         token_colon = Token(Token::PUNCTUATION, {}, SymbolTable::global.add(":"));
         token_equals = Token(Token::PUNCTUATION, {}, SymbolTable::global.add("="));
 
@@ -51,6 +58,7 @@ void Assembler::initialize() {
 AssemblerObject Assembler::parse(const std::string &file_name) {
     initialize();
     cpu.setup(tokenizer);
+    ExpressionNode::add_literals(tokenizer);
     tokenizer.push(file_name);
 
     while (!tokenizer.ended()) {
@@ -116,20 +124,57 @@ void Assembler::parse_instruction(const Token& name) {
 
     Token token;
     while ((token = tokenizer.next()) && !token.is_newline()) {
-        switch (token.get_type()) {
-            case Token::PUNCTUATION:
-            case Token::KEYWORD:
-                arguments.emplace_back(std::make_shared<TokenNode>(token));
-                break;
+        if (cpu.uses_braces() && token == token_brace_open) {
+            auto node = parse_instruction_argument(tokenizer.next());
+            if (node->type() != Node::EXPRESSION) {
+                // place '(' non-expression
+                arguments.emplace_back(parse_instruction_argument(token));
+                arguments.emplace_back(node);
+            }
+            else {
+                auto token2 = tokenizer.next();
+                if (token2.is_newline()) {
+                    arguments.emplace_back(node);
+                    // place trailing '(' expression
+                    arguments.emplace_back(parse_instruction_argument(token));
+                    arguments.emplace_back(node);
+                    break;
+                }
+                else if (token2 == token_brace_close) {
+                    auto token3 = tokenizer.next();
 
-            case Token::DIRECTIVE:
-            case Token::INSTRUCTION:
-                throw ParseException(token, "unexpected %s", token.type_name());
+                    if (token3.is_newline()) {
+                        // place trailing '(' expression ')'
+                        arguments.emplace_back(parse_instruction_argument(token));
+                        arguments.emplace_back(node);
+                        arguments.emplace_back(parse_instruction_argument(token2));
+                        break;
+                    }
 
-            default:
-                tokenizer.unget(token);
-                arguments.emplace_back(ExpressionNode::parse(tokenizer));
-                break;
+                    tokenizer.unget(token3);
+
+                    if (!token3.is_punctuation() || cpu.uses_punctuation(token3.as_symbol())) {
+                        // place '(' expression ')' that is not part of larger expression
+                        arguments.emplace_back(parse_instruction_argument(token));
+                        arguments.emplace_back(node);
+                        arguments.emplace_back(parse_instruction_argument(token2));
+
+                    }
+                    else {
+                        // '(' expression ')' is part of larger expression
+                        arguments.emplace_back(ExpressionNode::parse(tokenizer, std::dynamic_pointer_cast<ExpressionNode>(node)));
+                    }
+                }
+                else {
+                    tokenizer.unget(token2);
+                    // place '(' expression that is not followed by ')'
+                    arguments.emplace_back(parse_instruction_argument(token_brace_open));
+                    arguments.emplace_back(node);
+                }
+            }
+        }
+        else {
+            arguments.emplace_back(parse_instruction_argument(token));
         }
     }
 
@@ -150,7 +195,24 @@ void Assembler::parse_instruction(const Token& name) {
         }
     }
     if (!found) {
-        throw ParseException(name, "invalid addressing mode");
+        throw ParseException(name, "invalid addressing mode for instruction");
+    }
+}
+
+std::shared_ptr<Node> Assembler::parse_instruction_argument(const Token& token) {
+    switch (token.get_type()) {
+        case Token::PUNCTUATION:
+        case Token::KEYWORD:
+            // TODO: check it's used by CPU, throw otherwise
+            return std::make_shared<TokenNode>(token);
+
+        case Token::DIRECTIVE:
+        case Token::INSTRUCTION:
+            throw ParseException(token, "unexpected %s", token.type_name());
+
+        default:
+            tokenizer.unget(token);
+            return ExpressionNode::parse(tokenizer);
     }
 }
 

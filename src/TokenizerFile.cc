@@ -112,7 +112,7 @@ Token TokenizerFile::sub_next() {
         else if (c == '.') {
             return parse_name(Token::DIRECTIVE, location);
         }
-        else if (isword(c)) {
+        else if (is_identifier_start(c)) {
             current_source->unget();
             return parse_name(Token::NAME, location);
         }
@@ -169,7 +169,7 @@ Token TokenizerFile::parse_name(Token::Type type, Location location) {
         current_source->expand_location(location);
         auto c = current_source->next();
 
-        if (isword(c) || (!name.empty()) && isdigit(c)) {
+        if (is_identifier_start(c) || (!name.empty()) && isdigit(c)) {
             name += static_cast<char>(c);
         }
         else {
@@ -292,8 +292,33 @@ std::optional<Token::Type> TokenizerFile::MatcherNode::match(TokenizerFile::Sour
     auto it = next.find(static_cast<char>(c));
 
     if (it == next.end()) {
-        source.unget();
-        return match_type;
+        bool matched;
+
+        if (name.empty()) {
+            // don't match empty string
+            matched = false;
+        }
+        else if (match_in_word) {
+            // match if it should match prefix of longer identifier
+            matched = true;
+        }
+        else if (is_identifier_continuation(c)) {
+            // don't match prefix of longer identifier (if matched stirng is valid identifier)
+            matched = !(is_identifier_start((name[0]) && std::all_of(name.begin() + 1, name.end(),
+                                                                   is_identifier_continuation)));
+        }
+        else {
+            // match if next character can't be part of identifier
+            matched = true;
+        }
+
+        if (matched) {
+            source.unget();
+            return match_type;
+        }
+        else {
+            return {};
+        }
     }
 
     name += static_cast<char>(c);
@@ -301,12 +326,13 @@ std::optional<Token::Type> TokenizerFile::MatcherNode::match(TokenizerFile::Sour
 }
 
 
-void TokenizerFile::MatcherNode::add(const char *string, Token::Type type) {
+void TokenizerFile::MatcherNode::add(const char *string, Token::Type type, bool match_in_word_) {
     if (string[0] == '\0') {
-        if (match_type.has_value() && match_type.value() != type) {
+        if (match_type.has_value() && (match_type.value() != type || match_in_word != match_in_word_)) {
             throw Exception("literal already defined with different type"); // TODO: include more detail
         }
         else {
+            match_in_word = match_in_word_;
             match_type = type;
         }
     }

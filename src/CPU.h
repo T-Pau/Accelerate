@@ -54,6 +54,9 @@ public:
 
     void setup(TokenizerFile& tokenizer) const;
 
+    [[nodiscard]] bool uses_braces() const {return uses_punctuation(SymbolTable::global["("]);}
+    [[nodiscard]] bool uses_punctuation(symbol_t symbol) const {return punctuation.find(symbol) != punctuation.end();}
+
 private:
     std::unordered_map<symbol_t, AddressingMode> addressing_modes;
     std::unordered_map<symbol_t, std::unique_ptr<ArgumentType>> argument_types;

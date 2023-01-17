@@ -64,9 +64,11 @@ public:
     [[nodiscard]] virtual size_t byte_size() const = 0;
     [[nodiscard]] virtual size_t minimum_size() const = 0;
 
-    Type type() const override {return EXPRESSION;}
+    [[nodiscard]] Type type() const override {return EXPRESSION;}
 
     static std::shared_ptr<ExpressionNode> parse(Tokenizer& tokenizer);
+    static std::shared_ptr<ExpressionNode> parse(Tokenizer& tokenizer, std::shared_ptr<ExpressionNode> left);
+
     static void add_literals(TokenizerFile& tokenizer);
 
     // serialize to file

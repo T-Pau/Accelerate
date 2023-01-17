@@ -48,6 +48,8 @@ private:
     void parse_instruction(const Token& name);
     void parse_label(const Token& name);
 
+    std::shared_ptr<Node> parse_instruction_argument(const Token& token);
+
     const CPU& cpu;
 
     TokenizerFile tokenizer;
@@ -57,6 +59,8 @@ private:
     static bool initialized;
     static Token token_colon;
     static Token token_equals;
+    static Token token_brace_close;
+    static Token token_brace_open;
 };
 
 
