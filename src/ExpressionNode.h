@@ -39,13 +39,65 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 class ExpressionNode : public Node {
 public:
+    enum SubType {
+        ADD,
+        BANK_BYTE,
+        BITWISE_AND,
+        BITWISE_NOT,
+        BITWISE_OR,
+        BITWISE_XOR,
+        DIVIDE,
+        HIGH_BYTE,
+        INTEGER,
+        LOW_BYTE,
+        MINUS,
+        MODULO,
+        MULTIPLY,
+        PLUS,
+        SHIFT_LEFT,
+        SHIFT_RIGHT,
+        SUBTRACT,
+        VARIABLE
+    };
+
+    [[nodiscard]] virtual SubType subtype() const = 0;
     [[nodiscard]] virtual size_t byte_size() const = 0;
     [[nodiscard]] virtual size_t minimum_size() const = 0;
 
+    Type type() const override {return EXPRESSION;}
+
     static std::shared_ptr<ExpressionNode> parse(Tokenizer& tokenizer);
+    static void add_literals(TokenizerFile& tokenizer);
 
     // serialize to file
     // serialize as bytes
+
+protected:
+
+private:
+    static bool initialized;
+    static Token token_ampersand;
+    static Token token_caret;
+    static Token token_double_greater;
+    static Token token_double_less;
+    static Token token_greater;
+    static Token token_less;
+    static Token token_minus;
+    static Token token_paren_close;
+    static Token token_paren_open;
+    static Token token_pipe;
+    static Token token_plus;
+    static Token token_slash;
+    static Token token_star;
+    static Token token_tilde;
+
+    static std::unordered_map<Token, SubType> unary_operators;
+    static std::unordered_map<Token, SubType> additive_operators;
+    static std::unordered_map<Token, SubType> multiplicative_operators;
+
+    static std::shared_ptr<ExpressionNode> parse_multiplicative_term(Tokenizer& tokenizer);
+    static std::shared_ptr<ExpressionNode> parse_unary_term(Tokenizer& tokenizer);
+    static std::shared_ptr<ExpressionNode> parse_operand(Tokenizer& tokenizer);
 };
 
 
@@ -54,10 +106,11 @@ public:
     explicit ExpressionNodeInteger(const Token& token);
     explicit ExpressionNodeInteger(int64_t value): value(value) {}
 
-    [[nodiscard]] Type type() const override {return INTEGER;}
+    [[nodiscard]] SubType subtype() const override {return INTEGER;}
+
     [[nodiscard]] size_t byte_size() const override;
     [[nodiscard]] size_t minimum_size() const override;
-    
+
     int64_t value;
 };
 
@@ -66,7 +119,7 @@ public:
     explicit ExpressionNodeVariable(const Token& token);
     explicit ExpressionNodeVariable(symbol_t symbol): symbol(symbol) {}
 
-    [[nodiscard]] Type type() const override {return VARIABLE;}
+    [[nodiscard]] SubType subtype() const override {return VARIABLE;}
 
     [[nodiscard]] size_t byte_size() const override {return 0;} // TODO
     [[nodiscard]] size_t minimum_size() const override {return 0;} // TODO
@@ -75,4 +128,36 @@ private:
     symbol_t symbol;
     int64_t value = 0;
 };
+
+class ExpressionNodeUnary: public ExpressionNode {
+public:
+    ExpressionNodeUnary(SubType operation, std::shared_ptr<ExpressionNode>operand);
+
+    [[nodiscard]] SubType subtype() const override {return operation;}
+
+    [[nodiscard]] size_t byte_size() const override {return 0;} // TODO
+    [[nodiscard]] size_t minimum_size() const override {return 0;} // TODO
+
+private:
+    SubType operation;
+    std::shared_ptr<ExpressionNode> operand;
+};
+
+
+
+class ExpressionNodeBinary: public ExpressionNode {
+public:
+    ExpressionNodeBinary(std::shared_ptr<ExpressionNode>  left, SubType operation, std::shared_ptr<ExpressionNode> right);
+
+    [[nodiscard]] SubType subtype() const override {return operation;}
+
+    [[nodiscard]] size_t byte_size() const override {return 0;} // TODO
+    [[nodiscard]] size_t minimum_size() const override {return 0;} // TODO
+
+private:
+    SubType operation;
+    std::shared_ptr<ExpressionNode> left;
+    std::shared_ptr<ExpressionNode> right;
+};
+
 #endif // EXPRESSION_NODE_H

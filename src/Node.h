@@ -39,10 +39,10 @@ public:
     enum Type {
         EXPRESSION,
         INSTRUCTION,
-        INTEGER,
+//        INTEGER,
         KEYWORD,
         PUNCTUATION,
-        VARIABLE,
+//        VARIABLE,
         LABEL
     };
 

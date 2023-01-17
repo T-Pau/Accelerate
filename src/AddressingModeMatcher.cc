@@ -119,9 +119,7 @@ AddressingModeMatcherElement::elements_for(const AddressingMode::Notation::Eleme
 
 AddressingModeMatcherElement::AddressingModeMatcherElement(Node *node) {
     switch (node->type()) {
-        case Node::INTEGER:
         case Node::EXPRESSION:
-        case Node::VARIABLE:
             type = INTEGER;
             break;
 

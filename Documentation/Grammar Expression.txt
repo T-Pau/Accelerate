@@ -1,0 +1,29 @@
+expression:
+    multiplicative_term
+    multiplicative_term + multiplicative_term
+    multiplicative_term - multiplicative_term
+    multiplicative_term | multiplicative_term
+
+multiplicative_term:
+    unary_term
+    unary_term * unary_term
+    unary_term / unary_term
+    ; unary_term mod unary_term
+    unary_term & unary_term
+    unary_term ^ unary_term
+    unary_term << unary_term
+    unary_term >> unary_term
+
+unary_term:
+    operand
+    - operand
+    + operand
+    ^ operand
+    < operand
+    > operand
+
+operand:
+    INTEGER
+    NAME
+    ( expression )
+

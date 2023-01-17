@@ -61,11 +61,13 @@ public:
 
     explicit operator bool() const {return type != END;}
     bool operator==(const Token& other) const;
+    bool operator!=(const Token& other) const {return !((*this)==other);}
     [[nodiscard]] Type get_type() const {return type;}
     [[nodiscard]] bool is_directive() const {return type == DIRECTIVE;}
     [[nodiscard]] bool is_integer() const {return type == INTEGER;}
     [[nodiscard]] bool is_name() const {return type == NAME;}
     [[nodiscard]] bool is_newline() const {return type == NEWLINE;}
+    [[nodiscard]] bool is_punctuation() const {return type == PUNCTUATION;}
     [[nodiscard]] bool is_string() const {return type == STRING;}
     [[nodiscard]] const char* type_name() const {return type_name(type);}
 

@@ -18,7 +18,6 @@ SET(xlr8-as_SOURCES
         ExpressionNode.cc
         FileReader.cc
         Instruction.cc
-        IntegerNode.cc
         TokenNode.cc
         Location.cc
         Node.cc
