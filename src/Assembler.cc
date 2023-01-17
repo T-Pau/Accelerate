@@ -38,6 +38,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "TokenNode.h"
 
 bool Assembler::initialized = false;
+symbol_t Assembler::symbol_opcode;
 Token Assembler::token_brace_close;
 Token Assembler::token_brace_open;
 Token Assembler::token_colon;
@@ -46,6 +47,7 @@ Token Assembler::token_equals;
 
 void Assembler::initialize() {
     if (!initialized) {
+        symbol_opcode = SymbolTable::global.add("opcode");
         token_brace_close = Token(Token::PUNCTUATION, {}, SymbolTable::global.add(")"));
         token_brace_open = Token(Token::PUNCTUATION, {}, SymbolTable::global.add("("));
         token_colon = Token(Token::PUNCTUATION, {}, SymbolTable::global.add(":"));
@@ -178,18 +180,51 @@ void Assembler::parse_instruction(const Token& name) {
         }
     }
 
-    auto addressing_modes = cpu.match_addressing_modes(arguments);
-    if (addressing_modes.empty()) {
+    auto matches = cpu.match_addressing_modes(arguments);
+    if (matches.empty()) {
         throw ParseException(name, "addressing mode not recognized");
     }
 
     // TODO: do in priority order (e. g. zero_page before absolute)
     bool found = false;
-    for (auto addressing_mode: addressing_modes ) {
-        if (instruction->has_addressing_mode(addressing_mode)) {
+    for (const auto& match: matches ) {
+        if (instruction->has_addressing_mode(match.addressing_mode)) {
             // TODO: check argument ranges
             found = true;
-            printf("%s %s -> $%llx\n", name.as_string().c_str(), SymbolTable::global[addressing_mode].c_str(), instruction->opcode(addressing_mode));
+            std::cout << name.as_string() << " " << SymbolTable::global[match.addressing_mode];
+
+            auto environment = Environment(); // TODO: include outer environment
+
+            const auto addressing_mode = cpu.addressing_mode(match.addressing_mode);
+            const auto& notation = addressing_mode->notations[match.notation_index];
+            auto it_notation = notation.elements.begin();
+            auto it_arguments = arguments.begin();
+            while (it_notation != notation.elements.end()) {
+                if (it_notation->is_argument()) {
+                    if ((*it_arguments)->type() != Node::EXPRESSION) {
+                        throw ParseException((*it_arguments)->location, "argument is not an expression");
+                    }
+                    environment.add(it_notation->symbol, std::dynamic_pointer_cast<ExpressionNode>(*it_arguments));
+                }
+                environment.add(symbol_opcode, std::make_shared<ExpressionNodeInteger>(instruction->opcode(match.addressing_mode)));
+
+                it_notation++;
+                it_arguments++;
+            }
+
+            std::vector<std::string> bytes;
+            for (const auto& expression: addressing_mode->encoding) {
+                auto value = ExpressionNode::evaluate(expression, environment);
+                std::cout << " ";
+                if (value->subtype() == ExpressionNode::INTEGER) {
+                    std::cout << "$" << std::hex << std::dynamic_pointer_cast<ExpressionNodeInteger>(value)->as_int();
+                }
+                else {
+                    std::cout << "...";
+                }
+            }
+            std::cout << std::endl;
+
             // TODO: emit instruction
             break;
         }

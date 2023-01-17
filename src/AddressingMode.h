@@ -51,6 +51,8 @@ public:
         public:
             Element(Type type, symbol_t symbol): type(type), symbol(symbol) {}
 
+            [[nodiscard]] bool is_argument() const {return type == ARGUMENT;}
+
             Type type;
             symbol_t symbol;
         };

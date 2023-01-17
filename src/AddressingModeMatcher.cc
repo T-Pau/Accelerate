@@ -33,21 +33,21 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ParseException.h"
 #include "TokenNode.h"
 
-void AddressingModeMatcher::add_notation(symbol_t addressing_mode, const AddressingMode::Notation &notation, const std::unordered_map<symbol_t, const ArgumentType*>& arguments) {
-    start.add_notation(addressing_mode, notation.elements.begin(), notation.elements.end(), arguments);
+void AddressingModeMatcher::add_notation(symbol_t addressing_mode, size_t notation_index, const AddressingMode::Notation &notation, const std::unordered_map<symbol_t, const ArgumentType*>& arguments) {
+    start.add_notation(AddressingModeMatcherResult(addressing_mode, notation_index), notation.elements.begin(), notation.elements.end(), arguments);
 }
 
-void AddressingModeMatcher::MatcherNode::add_notation(symbol_t addressing_mode, std::vector<AddressingMode::Notation::Element>::const_iterator current, std::vector<AddressingMode::Notation::Element>::const_iterator end, const std::unordered_map<symbol_t, const ArgumentType*>& arguments) {
+void AddressingModeMatcher::MatcherNode::add_notation(const AddressingModeMatcherResult& result, std::vector<AddressingMode::Notation::Element>::const_iterator current, std::vector<AddressingMode::Notation::Element>::const_iterator end, const std::unordered_map<symbol_t, const ArgumentType*>& arguments) {
     if (current == end) {
-        addressing_modes.insert(addressing_mode);
+        results.insert(result);
         return;
     }
     for (const auto& element: AddressingModeMatcherElement::elements_for(*current, arguments)) {
-        next[element].add_notation(addressing_mode, current + 1, end, arguments);
+        next[element].add_notation(result, current + 1, end, arguments);
     }
 }
 
-std::unordered_set<symbol_t> AddressingModeMatcher::match(const std::vector<std::shared_ptr<Node>>& nodes) const {
+std::unordered_set<AddressingModeMatcherResult> AddressingModeMatcher::match(const std::vector<std::shared_ptr<Node>>& nodes) const {
     auto current = nodes.begin();
 
     const MatcherNode* node = &start;
@@ -60,7 +60,7 @@ std::unordered_set<symbol_t> AddressingModeMatcher::match(const std::vector<std:
         node = &it->second;
     }
 
-    return node->addressing_modes;
+    return node->results;
 }
 
 

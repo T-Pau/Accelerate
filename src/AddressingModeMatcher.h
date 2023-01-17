@@ -58,6 +58,7 @@ public:
     static std::vector<AddressingModeMatcherElement> elements_for(const AddressingMode::Notation::Element& element, const std::unordered_map<symbol_t, const ArgumentType*>& arguments);
 };
 
+
 template<>
 struct std::hash<AddressingModeMatcherElement>
 {
@@ -78,18 +79,37 @@ struct std::hash<AddressingModeMatcherElement>
 };
 
 
+class AddressingModeMatcherResult {
+public:
+    AddressingModeMatcherResult(symbol_t addressing_mode, size_t notation_index): addressing_mode(addressing_mode), notation_index(notation_index) {}
+    bool operator==(const AddressingModeMatcherResult& other) const {return addressing_mode == other.addressing_mode && notation_index == other.notation_index;}
+
+    symbol_t addressing_mode;
+    size_t notation_index;
+};
+
+
+template<>
+struct std::hash<AddressingModeMatcherResult>
+{
+    std::size_t operator()(AddressingModeMatcherResult const& result) const noexcept {
+        return std::hash<symbol_t>{}(result.addressing_mode) ^ (std::hash<size_t>{}(result.notation_index) << 1);
+    }
+};
+
+
 class AddressingModeMatcher {
 public:
-    [[nodiscard]] std::unordered_set<symbol_t> match(const std::vector<std::shared_ptr<Node>>& nodes) const;
+    [[nodiscard]] std::unordered_set<AddressingModeMatcherResult> match(const std::vector<std::shared_ptr<Node>>& nodes) const;
 
-    void add_notation(symbol_t addressing_mode, const AddressingMode::Notation& notation, const std::unordered_map<symbol_t, const ArgumentType*>& arguments);
+    void add_notation(symbol_t addressing_mode, size_t notation_index, const AddressingMode::Notation& notation, const std::unordered_map<symbol_t, const ArgumentType*>& arguments);
 
 private:
     class MatcherNode {
     public:
-        void add_notation(symbol_t addressing_mode, std::vector<AddressingMode::Notation::Element>::const_iterator current, std::vector<AddressingMode::Notation::Element>::const_iterator end, const std::unordered_map<symbol_t, const ArgumentType*>& arguments);
+        void add_notation(const AddressingModeMatcherResult& result, std::vector<AddressingMode::Notation::Element>::const_iterator current, std::vector<AddressingMode::Notation::Element>::const_iterator end, const std::unordered_map<symbol_t, const ArgumentType*>& arguments);
 
-        std::unordered_set<symbol_t> addressing_modes;
+        std::unordered_set<AddressingModeMatcherResult> results;
         std::unordered_map<AddressingModeMatcherElement, MatcherNode> next;
     };
 
