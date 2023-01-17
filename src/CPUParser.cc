@@ -79,6 +79,7 @@ CPUParser::CPUParser() {
 
 CPU CPUParser::parse(const std::string &file_name) {
     Object::setup(tokenizer);
+    ExpressionNode::add_literals(tokenizer);
     add_literals(tokenizer);
 
     cpu = CPU();
@@ -177,7 +178,8 @@ void CPUParser::parse_addressing_mode() {
     }
     else if (encoding_definition->is_scalar()) {
         auto encoding_tokenizer = TokenizerSequence(encoding_definition->as_scalar()->tokens);
-        // TODO: addressing_mode.encoding = parse_xpression_list(encoding_tokenizer);
+        addressing_mode.encoding = ExpressionNode::parse_list(encoding_tokenizer);
+        // TODO: addressing_mode.encoding = parse_expression_list(encoding_tokenizer);
     }
     else {
         throw ParseException(name, "encoding missing for addressing mode '%s'", name.as_string().c_str());

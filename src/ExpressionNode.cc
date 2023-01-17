@@ -37,6 +37,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 bool ExpressionNode::initialized;
 Token ExpressionNode::token_ampersand;
 Token ExpressionNode::token_caret;
+Token ExpressionNode::token_comma;
 Token ExpressionNode::token_double_greater;
 Token ExpressionNode::token_double_less;
 Token ExpressionNode::token_greater;
@@ -156,11 +157,12 @@ std::shared_ptr<ExpressionNode> ExpressionNode::parse_operand(Tokenizer &tokeniz
 
 
 void ExpressionNode::add_literals(TokenizerFile &tokenizer) {
-    tokenizer.add_punctuations({"+", "-", "~", "<", ">", "*", "/", /* mod */ "&", "^", "<<", ">>", "|", "(", ")"});
+    tokenizer.add_punctuations({"+", "-", "~", "<", ">", "*", "/", /* mod */ "&", "^", "<<", ">>", "|", "(", ")", ","});
 
     if (!initialized) {
         token_ampersand = Token(Token::PUNCTUATION, {}, SymbolTable::global.add("&"));
         token_caret = Token(Token::PUNCTUATION, {}, SymbolTable::global.add("^"));
+        token_comma = Token(Token::PUNCTUATION, {}, SymbolTable::global.add(","));
         token_double_greater = Token(Token::PUNCTUATION, {}, SymbolTable::global.add(">>"));
         token_double_less = Token(Token::PUNCTUATION, {}, SymbolTable::global.add("<<"));
         token_greater = Token(Token::PUNCTUATION, {}, SymbolTable::global.add(">"));
@@ -179,7 +181,8 @@ void ExpressionNode::add_literals(TokenizerFile &tokenizer) {
                 {token_minus, MINUS},
                 {token_caret, BANK_BYTE},
                 {token_less, LOW_BYTE},
-                {token_greater, HIGH_BYTE}
+                {token_greater, HIGH_BYTE},
+                {token_tilde, BITWISE_NOT}
         };
 
         additive_operators = {
@@ -197,6 +200,23 @@ void ExpressionNode::add_literals(TokenizerFile &tokenizer) {
                 {token_double_greater, SHIFT_RIGHT}
         };
     }
+}
+
+std::vector<std::shared_ptr<ExpressionNode>> ExpressionNode::parse_list(Tokenizer &tokenizer) {
+    std::vector<std::shared_ptr<ExpressionNode>> list;
+
+    while (true) {
+        list.emplace_back(parse(tokenizer));
+        auto token = tokenizer.next();
+        if (!token || token.is_newline()) {
+            break;
+        }
+        else if (token != token_comma) {
+            throw ParseException(token, "expected ',' or newline");
+        }
+    }
+
+    return list;
 }
 
 

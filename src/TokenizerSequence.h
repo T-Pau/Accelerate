@@ -38,7 +38,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 class TokenizerSequence: public Tokenizer {
 public:
-    TokenizerSequence(std::vector<Token> tokens): tokens(std::move(tokens)) {current_position = tokens.begin();}
+    TokenizerSequence(std::vector<Token> tokens): tokens(std::move(tokens)) {current_position = this->tokens.begin();}
 
 protected:
     bool sub_ended() const override {return current_position == tokens.end();}

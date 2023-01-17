@@ -68,6 +68,7 @@ public:
 
     static std::shared_ptr<ExpressionNode> parse(Tokenizer& tokenizer);
     static std::shared_ptr<ExpressionNode> parse(Tokenizer& tokenizer, std::shared_ptr<ExpressionNode> left);
+    static std::vector<std::shared_ptr<ExpressionNode>> parse_list(Tokenizer& tokenizer);
 
     static void add_literals(TokenizerFile& tokenizer);
 
@@ -80,6 +81,7 @@ private:
     static bool initialized;
     static Token token_ampersand;
     static Token token_caret;
+    static Token token_comma;
     static Token token_double_greater;
     static Token token_double_less;
     static Token token_greater;
