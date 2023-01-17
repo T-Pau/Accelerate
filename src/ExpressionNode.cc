@@ -69,22 +69,26 @@ std::shared_ptr<ExpressionNode> ExpressionNode::parse(Tokenizer &tokenizer) {
 
     auto right = parse_multiplicative_term(tokenizer);
 
-    return std::make_shared<ExpressionNodeBinary>(left, it->second, right);
+    return evaluate(std::make_shared<ExpressionNodeBinary>(left, it->second, right), {});
 }
 
 
 std::shared_ptr<ExpressionNode> ExpressionNode::parse(Tokenizer& tokenizer, std::shared_ptr<ExpressionNode> left) {
-    auto token = tokenizer.next();
+    // TODO: check that it works for all binary operands
+    
+    while (true) {
+        auto token = tokenizer.next();
 
-    auto it = multiplicative_operators.find(token);
-    if (it == multiplicative_operators.end()) {
-        tokenizer.unget(token);
-        return left;
+        auto it = multiplicative_operators.find(token);
+        if (it == multiplicative_operators.end()) {
+            tokenizer.unget(token);
+            return evaluate(left, {});
+        }
+
+        auto right = parse_unary_term(tokenizer);
+
+        left = std::make_shared<ExpressionNodeBinary>(left, it->second, right);
     }
-
-    auto right = parse_unary_term(tokenizer);
-
-    return std::make_shared<ExpressionNodeBinary>(left, it->second, right);
 }
 
 
@@ -219,6 +223,17 @@ std::vector<std::shared_ptr<ExpressionNode>> ExpressionNode::parse_list(Tokenize
     return list;
 }
 
+std::shared_ptr<ExpressionNode> ExpressionNode::evaluate(std::shared_ptr<ExpressionNode> node, const Environment &environment) {
+    auto new_node = node->evaluate(environment);
+
+    if (!new_node) {
+        return node;
+    }
+    else {
+        return new_node;
+    }
+}
+
 
 ExpressionNodeInteger::ExpressionNodeInteger(const Token &token) {
     if (!token.is_integer()) {
@@ -269,6 +284,47 @@ ExpressionNodeUnary::ExpressionNodeUnary(SubType operation, std::shared_ptr<Expr
     }
 }
 
+std::shared_ptr<ExpressionNode> ExpressionNodeUnary::evaluate(const Environment &environment) const {
+    auto new_operand = operand->evaluate(environment);
+
+    if (!new_operand) {
+        return {};
+    }
+
+    if (new_operand->subtype() == INTEGER) {
+        auto value = std::dynamic_pointer_cast<ExpressionNodeInteger>(new_operand)->as_int();
+        switch (operation) {
+            case MINUS:
+                value = -value;
+                break;
+
+            case BITWISE_NOT:
+                value = ~value; // TODO: mask to size
+                break;
+
+            case LOW_BYTE:
+                value =value & 0xff;
+                break;
+
+            case HIGH_BYTE:
+                value = (value >> 8) & 0xff;
+                break;
+
+            case BANK_BYTE:
+                value = (value >> 16) & 0xff;
+                break;
+
+            default:
+                throw Exception("invalid operand for unary expression");
+        }
+
+        return std::make_shared<ExpressionNodeInteger>(value);
+    }
+    else {
+        return std::make_shared<ExpressionNodeUnary>(operation, new_operand);
+    }
+}
+
 
 ExpressionNodeBinary::ExpressionNodeBinary(std::shared_ptr<ExpressionNode> left, ExpressionNode::SubType operation,
                                            std::shared_ptr<ExpressionNode> right): left(std::move(left)), operation(operation), right(std::move(right)) {
@@ -287,5 +343,71 @@ ExpressionNodeBinary::ExpressionNodeBinary(std::shared_ptr<ExpressionNode> left,
 
         default:
             throw Exception("invalid operand for binary expression");
+    }
+}
+
+
+std::shared_ptr<ExpressionNode> ExpressionNodeBinary::evaluate(const Environment &environment) const {
+    auto new_left = left->evaluate(environment);
+    auto new_right= right->evaluate(environment);
+
+    if (!new_left && !new_right) {
+        return {};
+    }
+
+    if (new_left && new_left->subtype() == INTEGER && new_right && new_right->subtype() == INTEGER) {
+        auto left_value = std::dynamic_pointer_cast<ExpressionNodeInteger>(new_left)->as_int();
+        auto right_value = std::dynamic_pointer_cast<ExpressionNodeInteger>(new_right)->as_int();
+        int64_t value;
+
+        switch (operation) {
+            case ADD:
+                value = left_value + right_value;
+                break;
+
+            case SUBTRACT:
+                value = left_value - right_value;
+                break;
+
+            case SHIFT_RIGHT:
+                value = left_value >> right_value;
+                break;
+
+            case SHIFT_LEFT:
+                value = left_value << right_value;
+                break;
+
+            case BITWISE_XOR:
+                value = left_value ^ right_value; // TODO: mask with size
+                break;
+
+            case BITWISE_AND:
+                value = left_value & right_value;
+                break;
+
+            case BITWISE_OR:
+                value = left_value | right_value;
+                break;
+
+            case MULTIPLY:
+                value = left_value * right_value;
+                break;
+
+            case DIVIDE:
+                value = left_value / right_value;
+                break;
+
+            case MODULO:
+                value = left_value % right_value;
+                break;
+
+            default:
+                throw Exception("invalid operand for binary expression");
+        }
+
+        return std::make_shared<ExpressionNodeInteger>(value);
+    }
+    else {
+        return std::make_shared<ExpressionNodeBinary>(new_left ? new_left : left, operation, new_right ? new_right : right);
     }
 }

@@ -34,6 +34,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <cstddef>
 
+#include "Environment.h"
 #include "Node.h"
 #include "TokenizerFile.h"
 
@@ -70,12 +71,15 @@ public:
     static std::shared_ptr<ExpressionNode> parse(Tokenizer& tokenizer, std::shared_ptr<ExpressionNode> left);
     static std::vector<std::shared_ptr<ExpressionNode>> parse_list(Tokenizer& tokenizer);
 
+    static std::shared_ptr<ExpressionNode> evaluate(std::shared_ptr<ExpressionNode> node, const Environment& environment);
+
     static void add_literals(TokenizerFile& tokenizer);
 
     // serialize to file
     // serialize as bytes
 
-protected:
+    // should be protected
+    [[nodiscard]] virtual std::shared_ptr<ExpressionNode> evaluate(const Environment& environment) const = 0;
 
 private:
     static bool initialized;
@@ -115,6 +119,11 @@ public:
     [[nodiscard]] size_t byte_size() const override;
     [[nodiscard]] size_t minimum_size() const override;
 
+    [[nodiscard]] int64_t as_int() const {return value;}
+
+protected:
+    [[nodiscard]] std::shared_ptr<ExpressionNode> evaluate(const Environment &environment) const override {return {};}
+
     int64_t value;
 };
 
@@ -128,9 +137,11 @@ public:
     [[nodiscard]] size_t byte_size() const override {return 0;} // TODO
     [[nodiscard]] size_t minimum_size() const override {return 0;} // TODO
 
+protected:
+    [[nodiscard]] std::shared_ptr<ExpressionNode> evaluate(const Environment &environment) const override {return environment[symbol];}
+
 private:
     symbol_t symbol;
-    int64_t value = 0;
 };
 
 class ExpressionNodeUnary: public ExpressionNode {
@@ -138,9 +149,11 @@ public:
     ExpressionNodeUnary(SubType operation, std::shared_ptr<ExpressionNode>operand);
 
     [[nodiscard]] SubType subtype() const override {return operation;}
-
     [[nodiscard]] size_t byte_size() const override {return 0;} // TODO
     [[nodiscard]] size_t minimum_size() const override {return 0;} // TODO
+
+protected:
+    [[nodiscard]] std::shared_ptr<ExpressionNode> evaluate(const Environment &environment) const override;
 
 private:
     SubType operation;
@@ -152,11 +165,13 @@ private:
 class ExpressionNodeBinary: public ExpressionNode {
 public:
     ExpressionNodeBinary(std::shared_ptr<ExpressionNode>  left, SubType operation, std::shared_ptr<ExpressionNode> right);
-
     [[nodiscard]] SubType subtype() const override {return operation;}
 
     [[nodiscard]] size_t byte_size() const override {return 0;} // TODO
     [[nodiscard]] size_t minimum_size() const override {return 0;} // TODO
+
+protected:
+    [[nodiscard]] std::shared_ptr<ExpressionNode> evaluate(const Environment &environment) const override;
 
 private:
     SubType operation;

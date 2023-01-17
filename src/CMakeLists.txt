@@ -13,6 +13,7 @@ SET(xlr8-as_SOURCES
         Commandline.cc
         CPU.cc
         CPUParser.cc
+        Environment.cc
         Exception.cc
         ExpressionListNode.cc
         ExpressionNode.cc
