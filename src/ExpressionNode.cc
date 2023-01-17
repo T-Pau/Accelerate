@@ -75,7 +75,7 @@ std::shared_ptr<ExpressionNode> ExpressionNode::parse(Tokenizer &tokenizer) {
 
 std::shared_ptr<ExpressionNode> ExpressionNode::parse(Tokenizer& tokenizer, std::shared_ptr<ExpressionNode> left) {
     // TODO: check that it works for all binary operands
-    
+
     while (true) {
         auto token = tokenizer.next();
 
@@ -267,6 +267,17 @@ ExpressionNodeVariable::ExpressionNodeVariable(const Token &token) {
     }
     location = token.location;
     symbol = token.as_symbol();
+}
+
+std::shared_ptr<ExpressionNode> ExpressionNodeVariable::evaluate(const Environment &environment) const {
+    auto value = environment[symbol];
+
+    if (value) {
+        return ExpressionNode::evaluate(value, environment);
+    }
+    else {
+        return {};
+    }
 }
 
 

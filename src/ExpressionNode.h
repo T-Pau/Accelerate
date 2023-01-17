@@ -138,7 +138,7 @@ public:
     [[nodiscard]] size_t minimum_size() const override {return 0;} // TODO
 
 protected:
-    [[nodiscard]] std::shared_ptr<ExpressionNode> evaluate(const Environment &environment) const override {return environment[symbol];}
+    [[nodiscard]] std::shared_ptr<ExpressionNode> evaluate(const Environment &environment) const override;
 
 private:
     symbol_t symbol;
