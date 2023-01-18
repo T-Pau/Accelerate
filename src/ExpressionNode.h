@@ -80,6 +80,9 @@ public:
 
     // should be protected
     [[nodiscard]] virtual std::shared_ptr<ExpressionNode> evaluate(const Environment& environment) const = 0;
+    [[nodiscard]] std::shared_ptr<ExpressionNode> static create_binary(const std::shared_ptr<ExpressionNode>& left, SubType operation, const std::shared_ptr<ExpressionNode>& right);
+    [[nodiscard]] std::shared_ptr<ExpressionNode> static create_unary(SubType operation, std::shared_ptr<ExpressionNode> operand);
+
 
 private:
     static bool initialized;

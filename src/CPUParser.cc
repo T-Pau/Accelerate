@@ -85,6 +85,8 @@ CPU CPUParser::parse(const std::string &file_name) {
     cpu = CPU();
     tokenizer.push(file_name);
 
+    auto ok = true;
+
     while (!tokenizer.ended()) {
         try {
             tokenizer.skip(Token::NEWLINE);
@@ -100,9 +102,14 @@ CPU CPUParser::parse(const std::string &file_name) {
             (this->*it->second)();
         }
         catch (ParseException& ex) {
+            ok = false;
             FileReader::global.error(ex.location, "%s", ex.what());
             tokenizer.skip_until(group_directive);
         }
+    }
+
+    if (!ok) {
+        throw Exception("can't parse CPU definition");
     }
 
     return std::move(cpu);

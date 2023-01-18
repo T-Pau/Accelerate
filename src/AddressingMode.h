@@ -60,6 +60,8 @@ public:
         std::vector<Element> elements;
     };
 
+    [[nodiscard]] const ArgumentType* argument(symbol_t name) const;
+
     std::vector<Notation> notations;
     std::unordered_map<symbol_t, const ArgumentType*> arguments;
     std::vector<std::shared_ptr<ExpressionNode>> encoding;

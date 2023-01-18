@@ -58,18 +58,20 @@ std::unordered_map<Token, ExpressionNode::SubType> ExpressionNode::multiplicativ
 
 std::shared_ptr<ExpressionNode> ExpressionNode::parse(Tokenizer &tokenizer) {
     auto left = parse_multiplicative_term(tokenizer);
+    while (true) {
 
-    auto token = tokenizer.next();
+        auto token = tokenizer.next();
 
-    auto it = additive_operators.find(token);
-    if (it == additive_operators.end()) {
-        tokenizer.unget(token);
-        return left;
+        auto it = additive_operators.find(token);
+        if (it == additive_operators.end()) {
+            tokenizer.unget(token);
+            return left;
+        }
+
+        auto right = parse_multiplicative_term(tokenizer);
+
+        left = create_binary(left, it->second, right);
     }
-
-    auto right = parse_multiplicative_term(tokenizer);
-
-    return evaluate(std::make_shared<ExpressionNodeBinary>(left, it->second, right), {});
 }
 
 
@@ -82,12 +84,12 @@ std::shared_ptr<ExpressionNode> ExpressionNode::parse(Tokenizer& tokenizer, std:
         auto it = multiplicative_operators.find(token);
         if (it == multiplicative_operators.end()) {
             tokenizer.unget(token);
-            return evaluate(left, {});
+            return left;
         }
 
         auto right = parse_unary_term(tokenizer);
 
-        left = std::make_shared<ExpressionNodeBinary>(left, it->second, right);
+        left = create_binary(left, it->second, right);
     }
 }
 
@@ -95,17 +97,19 @@ std::shared_ptr<ExpressionNode> ExpressionNode::parse(Tokenizer& tokenizer, std:
 std::shared_ptr<ExpressionNode> ExpressionNode::parse_multiplicative_term(Tokenizer &tokenizer) {
     auto left = parse_unary_term(tokenizer);
 
-    auto token = tokenizer.next();
+    while (true) {
+        auto token = tokenizer.next();
 
-    auto it = multiplicative_operators.find(token);
-    if (it == multiplicative_operators.end()) {
-        tokenizer.unget(token);
-        return left;
+        auto it = multiplicative_operators.find(token);
+        if (it == multiplicative_operators.end()) {
+            tokenizer.unget(token);
+            return left;
+        }
+
+        auto right = parse_unary_term(tokenizer);
+
+        left = create_binary(left, it->second, right);
     }
-
-    auto right = parse_unary_term(tokenizer);
-
-    return std::make_shared<ExpressionNodeBinary>(left, it->second, right);
 }
 
 
@@ -125,12 +129,7 @@ std::shared_ptr<ExpressionNode> ExpressionNode::parse_unary_term(Tokenizer &toke
 
     auto operand = parse_operand(tokenizer);
 
-    if (operation == PLUS) {
-        return operand;
-    }
-    else {
-        return std::make_shared<ExpressionNodeUnary>(operation, operand);
-    }
+    return create_unary(operation, operand);
 }
 
 
@@ -234,141 +233,10 @@ std::shared_ptr<ExpressionNode> ExpressionNode::evaluate(std::shared_ptr<Express
     }
 }
 
-
-ExpressionNodeInteger::ExpressionNodeInteger(const Token &token) {
-    if (!token.is_integer()) {
-        throw ParseException(token, "internal error: can't create integer node from %s", token.type_name());
-    }
-    value = static_cast<int64_t>(token.as_integer()); // TODO: handle overflow
-}
-
-size_t ExpressionNodeInteger::byte_size() const {
-    return 0; // TODO
-}
-
-size_t ExpressionNodeInteger::minimum_size() const {
-    if (value > std::numeric_limits<uint32_t>::max()) {
-        return 8;
-    }
-    else if (value > std::numeric_limits<uint16_t>::max()) {
-        return 4;
-    }
-    else if (value > std::numeric_limits<uint8_t>::max()) {
-        return 2;
-    }
-    else {
-        return 1;
-    }
-}
-
-ExpressionNodeVariable::ExpressionNodeVariable(const Token &token) {
-    if (!token.is_name()) {
-        throw Exception("internal error: creating ExpressionNodeVariable from non-name token");
-    }
-    location = token.location;
-    symbol = token.as_symbol();
-}
-
-std::shared_ptr<ExpressionNode> ExpressionNodeVariable::evaluate(const Environment &environment) const {
-    auto value = environment[symbol];
-
-    if (value) {
-        return ExpressionNode::evaluate(value, environment);
-    }
-    else {
-        return {};
-    }
-}
-
-
-ExpressionNodeUnary::ExpressionNodeUnary(SubType operation, std::shared_ptr<ExpressionNode>operand) : operation(operation), operand(std::move(operand)) {
-    switch (operation) {
-        case MINUS:
-        case BITWISE_NOT:
-        case LOW_BYTE:
-        case HIGH_BYTE:
-        case BANK_BYTE:
-            return;
-
-        default:
-            throw Exception("invalid operand for unary expression");
-    }
-}
-
-std::shared_ptr<ExpressionNode> ExpressionNodeUnary::evaluate(const Environment &environment) const {
-    auto new_operand = operand->evaluate(environment);
-
-    if (!new_operand) {
-        return {};
-    }
-
-    if (new_operand->subtype() == INTEGER) {
-        auto value = std::dynamic_pointer_cast<ExpressionNodeInteger>(new_operand)->as_int();
-        switch (operation) {
-            case MINUS:
-                value = -value;
-                break;
-
-            case BITWISE_NOT:
-                value = ~value; // TODO: mask to size
-                break;
-
-            case LOW_BYTE:
-                value =value & 0xff;
-                break;
-
-            case HIGH_BYTE:
-                value = (value >> 8) & 0xff;
-                break;
-
-            case BANK_BYTE:
-                value = (value >> 16) & 0xff;
-                break;
-
-            default:
-                throw Exception("invalid operand for unary expression");
-        }
-
-        return std::make_shared<ExpressionNodeInteger>(value);
-    }
-    else {
-        return std::make_shared<ExpressionNodeUnary>(operation, new_operand);
-    }
-}
-
-
-ExpressionNodeBinary::ExpressionNodeBinary(std::shared_ptr<ExpressionNode> left, ExpressionNode::SubType operation,
-                                           std::shared_ptr<ExpressionNode> right): left(std::move(left)), operation(operation), right(std::move(right)) {
-    switch (operation) {
-        case ADD:
-        case SUBTRACT:
-        case SHIFT_RIGHT:
-        case SHIFT_LEFT:
-        case BITWISE_XOR:
-        case BITWISE_AND:
-        case BITWISE_OR:
-        case MULTIPLY:
-        case DIVIDE:
-        case MODULO:
-            return;
-
-        default:
-            throw Exception("invalid operand for binary expression");
-    }
-}
-
-
-std::shared_ptr<ExpressionNode> ExpressionNodeBinary::evaluate(const Environment &environment) const {
-    auto new_left = left->evaluate(environment);
-    auto new_right= right->evaluate(environment);
-
-    if (!new_left && !new_right) {
-        return {};
-    }
-
-    if (new_left && new_left->subtype() == INTEGER && new_right && new_right->subtype() == INTEGER) {
-        auto left_value = std::dynamic_pointer_cast<ExpressionNodeInteger>(new_left)->as_int();
-        auto right_value = std::dynamic_pointer_cast<ExpressionNodeInteger>(new_right)->as_int();
+std::shared_ptr<ExpressionNode> ExpressionNode::create_binary(const std::shared_ptr<ExpressionNode>& left, ExpressionNode::SubType operation, const std::shared_ptr<ExpressionNode>& right) {
+    if (left->subtype() == INTEGER && right->subtype() == INTEGER) {
+        auto left_value = std::dynamic_pointer_cast<ExpressionNodeInteger>(left)->as_int();
+        auto right_value = std::dynamic_pointer_cast<ExpressionNodeInteger>(right)->as_int();
         int64_t value;
 
         switch (operation) {
@@ -419,6 +287,150 @@ std::shared_ptr<ExpressionNode> ExpressionNodeBinary::evaluate(const Environment
         return std::make_shared<ExpressionNodeInteger>(value);
     }
     else {
-        return std::make_shared<ExpressionNodeBinary>(new_left ? new_left : left, operation, new_right ? new_right : right);
+        return std::make_shared<ExpressionNodeBinary>(left, operation, right);
     }
+}
+
+std::shared_ptr<ExpressionNode> ExpressionNode::create_unary(ExpressionNode::SubType operation, std::shared_ptr<ExpressionNode> operand) {
+    if (operation == PLUS) {
+        return operand;
+    }
+    else if (operand->subtype() == INTEGER) {
+        auto value = std::dynamic_pointer_cast<ExpressionNodeInteger>(operand)->as_int();
+        switch (operation) {
+            case MINUS:
+                value = -value;
+                break;
+
+            case BITWISE_NOT:
+                value = ~value; // TODO: mask to size
+                break;
+
+            case LOW_BYTE:
+                value =value & 0xff;
+                break;
+
+            case HIGH_BYTE:
+                value = (value >> 8) & 0xff;
+                break;
+
+            case BANK_BYTE:
+                value = (value >> 16) & 0xff;
+                break;
+
+            default:
+                throw Exception("invalid operand for unary expression");
+        }
+
+        return std::make_shared<ExpressionNodeInteger>(value);
+    }
+    else {
+        return std::make_shared<ExpressionNodeUnary>(operation, operand);
+    }
+}
+
+
+ExpressionNodeInteger::ExpressionNodeInteger(const Token &token) {
+    if (!token.is_integer()) {
+        throw ParseException(token, "internal error: can't create integer node from %s", token.type_name());
+    }
+    value = static_cast<int64_t>(token.as_integer()); // TODO: handle overflow
+}
+
+size_t ExpressionNodeInteger::byte_size() const {
+    return 0; // TODO
+}
+
+size_t ExpressionNodeInteger::minimum_size() const {
+    if (value > std::numeric_limits<uint32_t>::max()) {
+        return 8;
+    }
+    else if (value > std::numeric_limits<uint16_t>::max()) {
+        return 4;
+    }
+    else if (value > std::numeric_limits<uint8_t>::max()) {
+        return 2;
+    }
+    else {
+        return 1;
+    }
+}
+
+ExpressionNodeVariable::ExpressionNodeVariable(const Token &token) {
+    if (!token.is_name()) {
+        throw Exception("internal error: creating ExpressionNodeVariable from non-name token");
+    }
+    location = token.location;
+    symbol = token.as_symbol();
+}
+
+std::shared_ptr<ExpressionNode> ExpressionNodeVariable::evaluate(const Environment &environment) const {
+    auto value = environment[symbol];
+
+    if (value) {
+        // TODO: Don't evaluate further if evaluating encoding.
+        // TODO: Detect loops
+        return ExpressionNode::evaluate(value, environment);
+    }
+    else {
+        return {};
+    }
+}
+
+
+ExpressionNodeUnary::ExpressionNodeUnary(SubType operation, std::shared_ptr<ExpressionNode>operand) : operation(operation), operand(std::move(operand)) {
+    switch (operation) {
+        case MINUS:
+        case BITWISE_NOT:
+        case LOW_BYTE:
+        case HIGH_BYTE:
+        case BANK_BYTE:
+            return;
+
+        default:
+            throw Exception("invalid operand for unary expression");
+    }
+}
+
+std::shared_ptr<ExpressionNode> ExpressionNodeUnary::evaluate(const Environment &environment) const {
+    auto new_operand = operand->evaluate(environment);
+
+    if (!new_operand) {
+        return {};
+    }
+
+    return create_unary(operation, new_operand ? new_operand : operand);
+}
+
+
+ExpressionNodeBinary::ExpressionNodeBinary(std::shared_ptr<ExpressionNode> left, ExpressionNode::SubType operation,
+                                           std::shared_ptr<ExpressionNode> right): left(std::move(left)), operation(operation), right(std::move(right)) {
+    switch (operation) {
+        case ADD:
+        case SUBTRACT:
+        case SHIFT_RIGHT:
+        case SHIFT_LEFT:
+        case BITWISE_XOR:
+        case BITWISE_AND:
+        case BITWISE_OR:
+        case MULTIPLY:
+        case DIVIDE:
+        case MODULO:
+            return;
+
+        default:
+            throw Exception("invalid operand for binary expression");
+    }
+}
+
+
+std::shared_ptr<ExpressionNode> ExpressionNodeBinary::evaluate(const Environment &environment) const {
+    auto new_left = left->evaluate(environment);
+    auto new_right= right->evaluate(environment);
+
+    if (!new_left && !new_right) {
+        return {};
+    }
+
+    return create_binary(new_left ? new_left : left, operation, new_right ? new_right : right);
 }

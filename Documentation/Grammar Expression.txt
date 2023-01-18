@@ -1,18 +1,18 @@
 expression:
     multiplicative_term
-    multiplicative_term + multiplicative_term
-    multiplicative_term - multiplicative_term
-    multiplicative_term | multiplicative_term
+    expression + multiplicative_term
+    expression - multiplicative_term
+    expression | multiplicative_term
 
 multiplicative_term:
     unary_term
-    unary_term * unary_term
-    unary_term / unary_term
-    ; unary_term mod unary_term
-    unary_term & unary_term
-    unary_term ^ unary_term
-    unary_term << unary_term
-    unary_term >> unary_term
+    multiplicative_term * unary_term
+    multiplicative_term / unary_term
+    ; multiplicative_term mod unary_term
+    multiplicative_term & unary_term
+    multiplicative_term ^ unary_term
+    multiplicative_term << unary_term
+    multiplicative_term >> unary_term
 
 unary_term:
     operand

@@ -54,6 +54,9 @@ class ArgumentTypeEnum: public ArgumentType {
 public:
     [[nodiscard]] Type type() const override {return ENUM;}
 
+    [[nodiscard]] bool has_entry(symbol_t name) const {return entries.find(name) != entries.end();}
+    [[nodiscard]] uint64_t entry(symbol_t name) const;
+
     std::unordered_map<symbol_t, uint64_t> entries;
 };
 

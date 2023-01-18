@@ -49,6 +49,9 @@ void Tokenizer::unget(Token token) {
     if (ungot_token.has_value()) {
         throw Exception("trying to unget two tokens");
     }
+    if (!token) {
+        return;
+    }
     ungot_token = token;
 }
 

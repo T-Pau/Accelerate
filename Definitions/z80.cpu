@@ -442,7 +442,7 @@
     arguments {
         pp: register_pair_ix
     }
-    encoding: opcode | pp < 4
+    encoding: opcode | pp << 4
 }
 
 .addressing_mode iy__register_pair_iy {
@@ -450,7 +450,7 @@
     arguments {
         pp: register_pair_iy
     }
-    encoding: opcode | pp < 4
+    encoding: opcode | pp << 4
 }
 
 .addressing_mode register__immediate {
@@ -540,7 +540,7 @@
 .addressing_mode register_pair_sp__indirect {
     notation: dd,(nn)
     arguments {
-        dd: register_pair
+        dd: register_pair_sp
         nn: word
     }
     encoding: opcode | dd << 4, nn

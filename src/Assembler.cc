@@ -201,10 +201,36 @@ void Assembler::parse_instruction(const Token& name) {
             auto it_arguments = arguments.begin();
             while (it_notation != notation.elements.end()) {
                 if (it_notation->is_argument()) {
-                    if ((*it_arguments)->type() != Node::EXPRESSION) {
-                        throw ParseException((*it_arguments)->location, "argument is not an expression");
+                    auto argument_type = addressing_mode->argument(it_notation->symbol);
+                    switch (argument_type->type()) {
+                        case ArgumentType::ENUM: {
+                            if ((*it_arguments)->type() != Node::KEYWORD) {
+                                throw ParseException((*it_arguments)->location, "enum argument is not an expression");
+                            }
+                            auto enum_type = dynamic_cast<const ArgumentTypeEnum *>(argument_type);
+                            auto name = std::dynamic_pointer_cast<TokenNode>(*it_arguments)->as_symbol();
+                            if (!enum_type->has_entry(name)) {
+                                throw ParseException((*it_arguments)->location, "invalid enum argument");
+                            }
+                            environment.add(name, std::make_shared<ExpressionNodeInteger>(enum_type->entry(name)));
+                            break;
+                        }
+
+                        case ArgumentType::MAP:
+                            if ((*it_arguments)->type() != Node::EXPRESSION) {
+                                throw ParseException((*it_arguments)->location, "map argument is not an expression");
+                            }
+                            // TODO
+                            break;
+
+                        case ArgumentType::RANGE:
+                            // TODO: check range, set size
+                            if ((*it_arguments)->type() != Node::EXPRESSION) {
+                                throw ParseException((*it_arguments)->location, "range argument is not an expression");
+                            }
+                            environment.add(it_notation->symbol, std::dynamic_pointer_cast<ExpressionNode>(*it_arguments));
+                            break;
                     }
-                    environment.add(it_notation->symbol, std::dynamic_pointer_cast<ExpressionNode>(*it_arguments));
                 }
                 environment.add(symbol_opcode, std::make_shared<ExpressionNodeInteger>(instruction->opcode(match.addressing_mode)));
 
