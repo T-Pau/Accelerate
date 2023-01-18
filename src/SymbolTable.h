@@ -54,7 +54,7 @@ public:
 
 private:
     std::unordered_map<std::string, symbol_t> symbols;
-    std::vector<std::string> names;
+    std::vector<std::string> names = {""};
 };
 
 #endif // SYMBOL_TABLE_H

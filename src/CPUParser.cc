@@ -300,7 +300,9 @@ std::unique_ptr<ArgumentType> CPUParser::parse_argument_type_enum(const Token& n
         if (!value.is_integer()) {
             throw ParseException(pair.first, "key for enum argument type '%s' must be integer", name.as_string().c_str());
         }
-        argument_type->entries[pair.first.as_symbol()] = value.as_integer();
+        auto symbol = pair.first.as_symbol();
+        cpu.add_reserved_word(symbol);
+        argument_type->entries[symbol] = value.as_integer();
     }
 
     return argument_type;

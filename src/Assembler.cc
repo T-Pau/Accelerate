@@ -191,7 +191,6 @@ void Assembler::parse_instruction(const Token& name) {
         if (instruction->has_addressing_mode(match.addressing_mode)) {
             // TODO: check argument ranges
             found = true;
-            std::cout << name.as_string() << " " << SymbolTable::global[match.addressing_mode];
 
             auto environment = Environment(); // TODO: include outer environment
 
@@ -212,7 +211,7 @@ void Assembler::parse_instruction(const Token& name) {
                             if (!enum_type->has_entry(name)) {
                                 throw ParseException((*it_arguments)->location, "invalid enum argument");
                             }
-                            environment.add(name, std::make_shared<ExpressionNodeInteger>(enum_type->entry(name)));
+                            environment.add(it_notation->symbol, std::make_shared<ExpressionNodeInteger>(enum_type->entry(name)));
                             break;
                         }
 
@@ -238,10 +237,17 @@ void Assembler::parse_instruction(const Token& name) {
                 it_arguments++;
             }
 
+            auto first = true;
             std::vector<std::string> bytes;
             for (const auto& expression: addressing_mode->encoding) {
                 auto value = ExpressionNode::evaluate(expression, environment);
-                std::cout << " ";
+                if (first) {
+                    first = false;
+                    std::cout << ".bytes ";
+                }
+                else {
+                    std::cout << ", ";
+                }
                 if (value->subtype() == ExpressionNode::INTEGER) {
                     std::cout << "$" << std::hex << std::dynamic_pointer_cast<ExpressionNodeInteger>(value)->as_int();
                 }
@@ -249,7 +255,7 @@ void Assembler::parse_instruction(const Token& name) {
                     std::cout << "...";
                 }
             }
-            std::cout << std::endl;
+            std::cout << " ; " << name.as_string() << " " << SymbolTable::global[match.addressing_mode] << std::endl;
 
             // TODO: emit instruction
             break;
