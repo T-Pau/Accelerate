@@ -139,5 +139,4 @@ AddressingModeMatcherElement::AddressingModeMatcherElement(Node *node) {
             symbol = dynamic_cast<TokenNode*>(node)->as_symbol();
             break;
     }
-    // TODO: implement
 }
