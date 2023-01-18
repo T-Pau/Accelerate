@@ -31,6 +31,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "Assembler.h"
 
+#include <iomanip>
 #include <memory>
 
 #include "ParseException.h"
@@ -215,12 +216,22 @@ void Assembler::parse_instruction(const Token& name) {
                             break;
                         }
 
-                        case ArgumentType::MAP:
+                        case ArgumentType::MAP: {
                             if ((*it_arguments)->type() != Node::EXPRESSION) {
                                 throw ParseException((*it_arguments)->location, "map argument is not an expression");
                             }
-                            // TODO
+                            if (std::dynamic_pointer_cast<ExpressionNode>(*it_arguments)->subtype() !=
+                                ExpressionNode::INTEGER) {
+                                throw ParseException((*it_arguments)->location, "map argument is not an integer");
+                            }
+                            auto map_type = dynamic_cast<const ArgumentTypeMap *>(argument_type);
+                            auto value = std::dynamic_pointer_cast<ExpressionNodeInteger>(*it_arguments)->as_int();
+                            if (!map_type->has_entry(value)) {
+                                throw ParseException((*it_arguments)->location, "invalid map argument");
+                            }
+                            environment.add(it_notation->symbol, std::make_shared<ExpressionNodeInteger>(map_type->entry(value)));
                             break;
+                        }
 
                         case ArgumentType::RANGE:
                             // TODO: check range, set size
@@ -249,7 +260,7 @@ void Assembler::parse_instruction(const Token& name) {
                     std::cout << ", ";
                 }
                 if (value->subtype() == ExpressionNode::INTEGER) {
-                    std::cout << "$" << std::hex << std::dynamic_pointer_cast<ExpressionNodeInteger>(value)->as_int();
+                    std::cout << "$" << std::setfill('0') << std::setw(2) << std::hex << std::dynamic_pointer_cast<ExpressionNodeInteger>(value)->as_int();
                 }
                 else {
                     std::cout << "...";

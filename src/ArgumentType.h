@@ -67,6 +67,9 @@ class ArgumentTypeMap: public ArgumentType {
 public:
     [[nodiscard]] Type type() const override {return MAP;}
 
+    [[nodiscard]] bool has_entry(symbol_t name) const {return entries.find(name) != entries.end();}
+    [[nodiscard]] uint64_t entry(symbol_t name) const;
+
     std::unordered_map<uint64_t, uint64_t> entries;
 };
 

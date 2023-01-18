@@ -43,3 +43,15 @@ uint64_t ArgumentTypeEnum::entry(symbol_t name) const {
         return it->second;
     }
 }
+
+
+uint64_t ArgumentTypeMap::entry(symbol_t name) const {
+    auto it = entries.find(name);
+
+    if (it == entries.end()) {
+        throw Exception("invalid value for argument");
+    }
+    else {
+        return it->second;
+    }
+}
