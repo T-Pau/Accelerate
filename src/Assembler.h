@@ -58,6 +58,7 @@ private:
     static void initialize();
     static bool initialized;
     static symbol_t symbol_opcode;
+    static symbol_t symbol_pc;
     static Token token_colon;
     static Token token_equals;
     static Token token_brace_close;

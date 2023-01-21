@@ -73,6 +73,7 @@ private:
     static Token token_comma;
     static Token token_keywords;
     static Token token_opcode;
+    static Token token_pc;
     static Token token_punctuation;
 
     static void add_literals(TokenizerFile& tokenizer);

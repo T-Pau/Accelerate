@@ -133,7 +133,7 @@
     arguments {
         n: byte
     }
-    encoding: opcode, n
+    encoding: .opcode, n
 }
 
 .addressing_mode a__indexed {
@@ -142,7 +142,7 @@
         i: index_register
         d: signed_byte
     }
-    encoding: opcode | i << 13, d
+    encoding: .opcode | i << 13, d
 }
 
 .addressing_mode a__indirect {
@@ -150,7 +150,7 @@
     arguments {
         nn: word
     }
-    encoding: opcode, nn
+    encoding: .opcode, nn
 }
 
 .addressing_mode a__indirect_bc_or_de {
@@ -158,7 +158,7 @@
     arguments {
         rr: bc_or_de
     }
-    encoding: opcode | rr << 4
+    encoding: .opcode | rr << 4
 }
 
 .addressing_mode a__indirect_de {
@@ -174,7 +174,7 @@
     arguments {
         r: i_or_r
     }
-    encoding: opcode | r << 3
+    encoding: .opcode | r << 3
 }
 
 .addressing_mode a__register {
@@ -182,7 +182,7 @@
     arguments {
         r: register
     }
-    encoding: opcode | r
+    encoding: .opcode | r
 }
 
 .addressing_mode address {
@@ -190,21 +190,21 @@
     arguments {
        nn: word
     }
-    encoding: opcode, nn
+    encoding: .opcode, nn
 }
 
 .addressing_mode af__af_prime {
     notation: af,af'
-    encoding: opcode
+    encoding: .opcode
 }
 
 .addressing_mode basic_condition__relative {
     notation: cc, nn
     arguments {
         cc: basic_condition
-        nn: word ; TODO: has to be close enough to instruction_address
+        nn: word
     }
-    encoding: opcode | cc << 3, address - instruction_address - 2
+    encoding: .opcode | cc << 3, address - .pc - 2 ; : 1
 }
 
 .addressing_mode bit_number__indexed {
@@ -214,7 +214,7 @@
         i: index_register
         d: signed_byte
     }
-    encoding: opcode | i << 29 | d << 8 | b << 3
+    encoding: .opcode | i << 29 | d << 8 | b << 3
 }
 
 .addressing_mode bit_number__indirect_hl {
@@ -222,7 +222,7 @@
     arguments {
         b: bit_number
     }
-    encoding: opcode | b << 3
+    encoding: .opcode | b << 3
 }
 
 .addressing_mode bit_number__register {
@@ -231,7 +231,7 @@
         b: bit_number
         r: register
     }
-    encoding: opcode | b << 3 | r
+    encoding: .opcode | b << 3 | r
 }
 
 .addressing_mode condition {
@@ -239,7 +239,7 @@
     arguments {
         cc: condition
     }
-    encoding: opcode | cc << 3
+    encoding: .opcode | cc << 3
 }
 
 .addressing_mode condition__address {
@@ -248,7 +248,7 @@
         cc: condition
         nn: word
     }
-    encoding: opcode | cc << 3, nn
+    encoding: .opcode | cc << 3, nn
 }
 
 .addressing_mode de__hl {
@@ -260,7 +260,7 @@
     arguments {
         nn: word
     }
-    encoding: opcode, nn
+    encoding: .opcode, nn
 }
 
 .addressing_mode hl__register_pair_sp {
@@ -268,7 +268,7 @@
     arguments {
         dd: register_pair_sp
     }
-    encoding: opcode | dd << 4
+    encoding: .opcode | dd << 4
 }
 
 .addressing_mode implied {
@@ -281,7 +281,7 @@
         i: index_register
         d: signed_byte
     }
-    encoding: opcode | i << 13, d
+    encoding: .opcode | i << 13, d
 }
 
 .addressing_mode indexed_extended {
@@ -290,7 +290,7 @@
         i: index_register
         d: signed_byte
     }
-    encoding: opcode | i << 29 | d << 8
+    encoding: .opcode | i << 29 | d << 8
 }
 
 .addressing_mode indexed__immediate {
@@ -300,7 +300,7 @@
         d: signed_byte
         n: byte
     }
-    encoding: opcode | i << 13, d, n
+    encoding: .opcode | i << 13, d, n
 }
 
 .addressing_mode indexed__register {
@@ -310,7 +310,7 @@
         d: signed_byte
         r: register
     }
-    encoding: opcode | i << 13 | r << 3, d ; TODO: check if this is correct
+    encoding: .opcode | i << 13 | r << 3, d ; TODO: check if this is correct
 }
 
 .addressing_mode index_register {
@@ -318,7 +318,7 @@
     arguments {
         i: index_register
     }
-    encoding: opcode | i << 13
+    encoding: .opcode | i << 13
 }
 
 .addressing_mode index_register__immediate {
@@ -327,7 +327,7 @@
         i: index_register
         nn: word
     }
-    encoding: opcode | i << 13, word
+    encoding: .opcode | i << 13, word
 }
 
 .addressing_mode index_register__indirect {
@@ -336,7 +336,7 @@
         i: index_register
         nn: word
     }
-    encoding: opcode | i << 13, word
+    encoding: .opcode | i << 13, word
 }
 
 .addressing_mode indirect__a {
@@ -344,7 +344,7 @@
     arguments {
         nn: word
     }
-    encoding: opcode, nn
+    encoding: .opcode, nn
 }
 
 .addressing_mode indirect__a_bc_or_de {
@@ -352,7 +352,7 @@
     arguments {
         rr: bc_or_de
     }
-    encoding: opcode | rr << 4
+    encoding: .opcode | rr << 4
 }
 
 .addressing_mode indirect__hl {
@@ -360,7 +360,7 @@
     arguments {
         nn: word
     }
-    encoding: opcode, nn
+    encoding: .opcode, nn
 }
 
 .addressing_mode indirect__index_register {
@@ -369,7 +369,7 @@
         nn: word
         i: index_register
     }
-    encoding: opcode | i << 13, nn
+    encoding: .opcode | i << 13, nn
 }
 
 .addressing_mode indirect__register_pair_sp {
@@ -378,7 +378,7 @@
         dd: register_pair_sp
         nn: word
     }
-    encoding: opcode | dd << 4, nn
+    encoding: .opcode | dd << 4, nn
 }
 
 .addressing_mode indirect_hl {
@@ -390,7 +390,7 @@
     arguments {
         n: byte
     }
-    encoding: opcode, n
+    encoding: .opcode, n
 }
 
 .addressing_mode indirect_hl__register {
@@ -398,7 +398,7 @@
     arguments {
         r: register
     }
-    encoding: opcode | r
+    encoding: .opcode | r
 }
 
 .addressing_mode indirect_index {
@@ -406,7 +406,7 @@
     arguments {
         i: index_register
     }
-    encoding: opcode | i << 13
+    encoding: .opcode | i << 13
 }
 
 .addressing_mode indirect_sp__hl {
@@ -418,7 +418,7 @@
     arguments {
         i: index_register
     }
-    encoding: opcode | i << 13
+    encoding: .opcode | i << 13
 }
 
 .addressing_mode interrupt_mode {
@@ -426,7 +426,7 @@
     arguments {
         m: interrupt_mode
     }
-    encoding: opcode | m << 3
+    encoding: .opcode | m << 3
 }
 
 .addressing_mode i_or_r__a {
@@ -434,7 +434,7 @@
     arguments {
         r: i_or_r
     }
-    encoding: opcode | r << 3
+    encoding: .opcode | r << 3
 }
 
 .addressing_mode ix__register_pair_ix {
@@ -442,7 +442,7 @@
     arguments {
         pp: register_pair_ix
     }
-    encoding: opcode | pp << 4
+    encoding: .opcode | pp << 4
 }
 
 .addressing_mode iy__register_pair_iy {
@@ -450,7 +450,7 @@
     arguments {
         pp: register_pair_iy
     }
-    encoding: opcode | pp << 4
+    encoding: .opcode | pp << 4
 }
 
 .addressing_mode register__immediate {
@@ -459,7 +459,7 @@
         r: register
         n: byte
     }
-    encoding: opcode | r << 3
+    encoding: .opcode | r << 3
 }
 
 .addressing_mode register__indexed {
@@ -469,7 +469,7 @@
         i: index_register
         d: signed_byte
     }
-    encoding: opcode | i << 13 | r << 3, d
+    encoding: .opcode | i << 13 | r << 3, d
 }
 
 .addressing_mode register__indirect_c {
@@ -477,7 +477,7 @@
     arguments {
         r: register
     }
-    encoding: opcode | r << 3
+    encoding: .opcode | r << 3
 }
 
 .addressing_mode register__indirect_hl {
@@ -485,7 +485,7 @@
     arguments {
         r: register
     }
-    encoding: opcode | r << 3
+    encoding: .opcode | r << 3
 }
 
 .addressing_mode register_low {
@@ -493,14 +493,14 @@
     arguments {
         r: register
     }
-    encoding: opcode | r
+    encoding: .opcode | r
 }
 .addressing_mode register_high {
     notation: r
     arguments {
         r: register
     }
-    encoding: opcode | r << 3
+    encoding: .opcode | r << 3
 }
 
 .addressing_mode register__register {
@@ -509,7 +509,7 @@
         r1: register
         r2: register
     }
-    encoding: opcode | r1 << 3 | r2
+    encoding: .opcode | r1 << 3 | r2
 }
 
 .addressing_mode register_pair_af {
@@ -517,7 +517,7 @@
     arguments {
         rr: register_pair_af
     }
-    encoding: opcode | rr << 4
+    encoding: .opcode | rr << 4
 }
 
 .addressing_mode register_pair_sp {
@@ -525,7 +525,7 @@
     arguments {
         ss: register_pair_sp
     }
-    encoding: opcode | ss << 4
+    encoding: .opcode | ss << 4
 }
 
 .addressing_mode register_pair_sp__immediate {
@@ -534,7 +534,7 @@
         dd: register_pair_sp
         nn: word
     }
-    encoding: opcode | dd << 4, nn
+    encoding: .opcode | dd << 4, nn
 }
 
 .addressing_mode register_pair_sp__indirect {
@@ -543,15 +543,15 @@
         dd: register_pair_sp
         nn: word
     }
-    encoding: opcode | dd << 4, nn
+    encoding: .opcode | dd << 4, nn
 }
 
 .addressing_mode relative {
     notation: address
     arguments {
-        address: word ; TODO: has to be close enough to instruction_address
+        address: word ; TODO: has to be close enough to .pc
     }
-    encoding: opcode, address - instruction_address - 2
+    encoding: .opcode, address - .pc - 2
 }
 
 .addressing_mode restart_address {
@@ -559,7 +559,7 @@
     arguments {
         p: restart_address
     }
-    encoding: opcode | (p / 8) << 3
+    encoding: .opcode | (p / 8) << 3
 }
 
 .addressing_mode sp__hl {
@@ -571,7 +571,7 @@
     arguments { 
         i: index_register
     }
-    encoding: opcode | i << 13
+    encoding: .opcode | i << 13
 }
 
 

@@ -41,6 +41,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 bool Assembler::initialized = false;
 symbol_t Assembler::symbol_opcode;
+symbol_t Assembler::symbol_pc;
 Token Assembler::token_brace_close;
 Token Assembler::token_brace_open;
 Token Assembler::token_colon;
@@ -49,7 +50,8 @@ Token Assembler::token_equals;
 
 void Assembler::initialize() {
     if (!initialized) {
-        symbol_opcode = SymbolTable::global.add("opcode");
+        symbol_opcode = SymbolTable::global.add(".opcode");
+        symbol_pc = SymbolTable::global.add(".pc");
         token_brace_close = Token(Token::PUNCTUATION, {}, SymbolTable::global.add(")"));
         token_brace_open = Token(Token::PUNCTUATION, {}, SymbolTable::global.add("("));
         token_colon = Token(Token::PUNCTUATION, {}, SymbolTable::global.add(":"));

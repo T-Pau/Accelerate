@@ -49,6 +49,7 @@ Token CPUParser::token_comma;
 Token CPUParser::token_minus;
 Token CPUParser::token_keywords;
 Token CPUParser::token_opcode;
+Token CPUParser::token_pc;
 Token CPUParser::token_punctuation;
 
 void CPUParser::initialize() {
@@ -56,7 +57,8 @@ void CPUParser::initialize() {
         token_comma = Token(Token::PUNCTUATION, {}, ",");
         token_minus = Token(Token::PUNCTUATION, {}, "-");
         token_keywords = Token(Token::NAME, {}, "keywords");
-        token_opcode = Token(Token::NAME, {}, "opcode");
+        token_opcode = Token(Token::NAME, {}, ".opcode");
+        token_pc = Token(Token::NAME, {}, ".pc");
         token_punctuation = Token(Token::NAME, {}, "punctuation");
 
         parser_methods[SymbolTable::global.add("byte_order")] = &CPUParser::parse_byte_order;
@@ -390,4 +392,6 @@ AddressingMode::Notation CPUParser::parse_addressing_mode_notation(const Address
 
 void CPUParser::add_literals(TokenizerFile &tokenizer) {
     tokenizer.add_punctuations({"-", ","});
+    tokenizer.add_literal(token_opcode);
+    tokenizer.add_literal(token_pc);
 }

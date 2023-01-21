@@ -51,7 +51,7 @@
     arguments {
         value: byte
     }
-    encoding: opcode, value
+    encoding: .opcode, value
 }
 
 .addressing_mode zero_page {
@@ -59,15 +59,15 @@
     arguments {
         address: byte
     }
-    encoding: opcode, address
+    encoding: .opcode, address
 }
 
 .addressing_mode relative {
     notation: address
     arguments {
-        address: word ; TODO: has to be close enough to instruction_address
+        address: word
     }
-    encoding: opcode, address - instruction_address
+    encoding: .opcode, address - .pc ; : 1
 }
 
 .addressing_mode indirect {
@@ -75,7 +75,7 @@
     arguments {
         address: word
     }
-    encoding: opcode, address
+    encoding: .opcode, address
 }
 
 .addressing_mode zero_page_x_indexed {
@@ -83,7 +83,7 @@
     arguemnts {
         address: byte
     }
-    encoding: opcode, address
+    encoding: .opcode, address
 }
 
 .addressing_mode zero_page_y_indexed {
@@ -91,7 +91,7 @@
     arguments {
         address: byte
     }
-    encoding: opcode, address
+    encoding: .opcode, address
 }
 
 .addressing_mode absolute_x_indexed {
@@ -99,7 +99,7 @@
     arguments {
         address: word
     }
-    encoding: opcode, address
+    encoding: .opcode, address
 }
 
 .addressing_mode absolute_y_indexed {
@@ -107,7 +107,7 @@
     arguments {
         address: word
     }
-    encoding: opcode, address
+    encoding: .opcode, address
 }
 
 .addressing_mode x_indexed_indirect {
@@ -115,7 +115,7 @@
     arguments {
         address: byte
     }
-    encoding: opcode, address
+    encoding: .opcode, address
 }
 
 .addressing_mode indirect_y_indexed {
@@ -123,7 +123,7 @@
     arguments {
         address: byte
     }
-    encoding: opcode, address
+    encoding: .opcode, address
 }
 
 

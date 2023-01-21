@@ -48,6 +48,7 @@ public:
     [[nodiscard]] Location current_location() const;
 
     void add_punctuations(const std::unordered_set<std::string>& names);
+    void add_literal(const Token& token) { add_literal(token.get_type(), token.as_string());}
     void add_literal(Token::Type match, const std::string& name) {matcher.add(name.c_str(), match);}
 
 protected:
