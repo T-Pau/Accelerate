@@ -17,6 +17,7 @@ SET(xlr8-as_SOURCES
         Exception.cc
         ExpressionListNode.cc
         ExpressionNode.cc
+        ExpressionParser.cc
         FileReader.cc
         Instruction.cc
         TokenNode.cc

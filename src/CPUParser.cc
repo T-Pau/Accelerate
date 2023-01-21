@@ -36,6 +36,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "AddressingMode.h"
 #include "Object.h"
 #include "TokenizerSequence.h"
+#include "ExpressionParser.h"
 
 
 TokenGroup CPUParser::group_directive = TokenGroup({Token::DIRECTIVE,Token::END}, {}, "directive");
@@ -79,7 +80,7 @@ CPUParser::CPUParser() {
 
 CPU CPUParser::parse(const std::string &file_name) {
     Object::setup(tokenizer);
-    ExpressionNode::add_literals(tokenizer);
+    ExpressionParser::setup(tokenizer);
     add_literals(tokenizer);
 
     cpu = CPU();
@@ -185,7 +186,7 @@ void CPUParser::parse_addressing_mode() {
     }
     else if (encoding_definition->is_scalar()) {
         auto encoding_tokenizer = TokenizerSequence(encoding_definition->as_scalar()->tokens);
-        addressing_mode.encoding = ExpressionNode::parse_list(encoding_tokenizer);
+        addressing_mode.encoding = ExpressionParser(encoding_tokenizer).parse_list();
     }
     else {
         throw ParseException(name, "encoding missing for addressing mode '%s'", name.as_string().c_str());

@@ -55,6 +55,7 @@ public:
         MODULO,
         MULTIPLY,
         PLUS,
+        SIZE,
         SHIFT_LEFT,
         SHIFT_RIGHT,
         SUBTRACT,
@@ -67,48 +68,14 @@ public:
 
     [[nodiscard]] Type type() const override {return EXPRESSION;}
 
-    static std::shared_ptr<ExpressionNode> parse(Tokenizer& tokenizer);
-    static std::shared_ptr<ExpressionNode> parse(Tokenizer& tokenizer, std::shared_ptr<ExpressionNode> left);
-    static std::vector<std::shared_ptr<ExpressionNode>> parse_list(Tokenizer& tokenizer);
-
     static std::shared_ptr<ExpressionNode> evaluate(std::shared_ptr<ExpressionNode> node, const Environment& environment);
-
-    static void add_literals(TokenizerFile& tokenizer);
 
     // serialize to file
     // serialize as bytes
 
-    // should be protected
     [[nodiscard]] virtual std::shared_ptr<ExpressionNode> evaluate(const Environment& environment) const = 0;
     [[nodiscard]] std::shared_ptr<ExpressionNode> static create_binary(const std::shared_ptr<ExpressionNode>& left, SubType operation, const std::shared_ptr<ExpressionNode>& right);
     [[nodiscard]] std::shared_ptr<ExpressionNode> static create_unary(SubType operation, std::shared_ptr<ExpressionNode> operand);
-
-
-private:
-    static bool initialized;
-    static Token token_ampersand;
-    static Token token_caret;
-    static Token token_comma;
-    static Token token_double_greater;
-    static Token token_double_less;
-    static Token token_greater;
-    static Token token_less;
-    static Token token_minus;
-    static Token token_paren_close;
-    static Token token_paren_open;
-    static Token token_pipe;
-    static Token token_plus;
-    static Token token_slash;
-    static Token token_star;
-    static Token token_tilde;
-
-    static std::unordered_map<Token, SubType> unary_operators;
-    static std::unordered_map<Token, SubType> additive_operators;
-    static std::unordered_map<Token, SubType> multiplicative_operators;
-
-    static std::shared_ptr<ExpressionNode> parse_multiplicative_term(Tokenizer& tokenizer);
-    static std::shared_ptr<ExpressionNode> parse_unary_term(Tokenizer& tokenizer);
-    static std::shared_ptr<ExpressionNode> parse_operand(Tokenizer& tokenizer);
 };
 
 

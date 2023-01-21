@@ -37,6 +37,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ParseException.h"
 #include "FileReader.h"
 #include "TokenNode.h"
+#include "ExpressionParser.h"
 
 bool Assembler::initialized = false;
 symbol_t Assembler::symbol_opcode;
@@ -61,7 +62,7 @@ void Assembler::initialize() {
 AssemblerObject Assembler::parse(const std::string &file_name) {
     initialize();
     cpu.setup(tokenizer);
-    ExpressionNode::add_literals(tokenizer);
+    ExpressionParser::setup(tokenizer);
     tokenizer.push(file_name);
 
     while (!tokenizer.ended()) {
@@ -165,7 +166,7 @@ void Assembler::parse_instruction(const Token& name) {
                     }
                     else {
                         // '(' expression ')' is part of larger expression
-                        arguments.emplace_back(ExpressionNode::parse(tokenizer, std::dynamic_pointer_cast<ExpressionNode>(node)));
+                        arguments.emplace_back(ExpressionParser(tokenizer).parse(std::dynamic_pointer_cast<ExpressionNode>(node)));
                     }
                 }
                 else {
@@ -290,7 +291,7 @@ std::shared_ptr<Node> Assembler::parse_instruction_argument(const Token& token) 
 
         default:
             tokenizer.unget(token);
-            return ExpressionNode::parse(tokenizer);
+            return ExpressionParser(tokenizer).parse();
     }
 }
 
