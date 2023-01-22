@@ -43,6 +43,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 class TokenizerFile: public Tokenizer {
 public:
+    explicit TokenizerFile(bool use_preprocessor = true);
     void push(const std::string& filename);
 
     [[nodiscard]] Location current_location() const;
@@ -85,13 +86,22 @@ private:
         std::optional<Token::Type> match(Source& source, std::string& name);
     };
 
+    Token next_raw();
+
     Token parse_number(unsigned int base, Location location);
     Token parse_name(Token::Type type, Location location);
     Token parse_string(Location location);
 
+    void preprocess(const std::vector<Token>& tokens);
+
     static int convert_digit(int c);
     static bool is_identifier_continuation(int c) {return is_identifier_start(c) || isdigit(c);}
     static bool is_identifier_start(int c) { return islower(c) || isupper(c) || c == '_'; }
+
+    bool use_preprocessor;
+
+    static bool initialized;
+    static Token token_include;
 
     MatcherNode matcher;
 

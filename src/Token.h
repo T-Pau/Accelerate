@@ -46,6 +46,7 @@ public:
         END,
         NEWLINE,
         INTEGER,
+        PREPROCESSOR,
         REAL,
         STRING,
         KEYWORD,
@@ -67,6 +68,7 @@ public:
     [[nodiscard]] bool is_integer() const {return type == INTEGER;}
     [[nodiscard]] bool is_name() const {return type == NAME;}
     [[nodiscard]] bool is_newline() const {return type == NEWLINE;}
+    [[nodiscard]] bool is_preprocessor() const {return type == PREPROCESSOR;}
     [[nodiscard]] bool is_punctuation() const {return type == PUNCTUATION;}
     [[nodiscard]] bool is_string() const {return type == STRING;}
     [[nodiscard]] const char* type_name() const {return type_name(type);}
@@ -102,6 +104,7 @@ struct std::hash<Token>
             case Token::INSTRUCTION:
             case Token::KEYWORD:
             case Token::NAME:
+            case Token::PREPROCESSOR:
             case Token::PUNCTUATION:
             case Token::STRING:
                 h2 = std::hash<symbol_t>{}(token.as_symbol());

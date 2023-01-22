@@ -35,6 +35,9 @@ const std::string Token::empty_string;
 
 const char* Token::type_name(Type type) {
     switch (type) {
+        case PREPROCESSOR:
+            return "preprocessor directive";
+
         case PUNCTUATION:
             return "punctuation";
 
@@ -75,6 +78,7 @@ bool Token::operator==(const Token &other) const {
         case NAME:
         case DIRECTIVE:
         case KEYWORD:
+        case PREPROCESSOR:
         case PUNCTUATION:
         case INSTRUCTION:
         case STRING:
@@ -96,6 +100,7 @@ const std::string &Token::as_string() const {
     switch (type) {
         case NAME:
         case DIRECTIVE:
+        case PREPROCESSOR:
         case PUNCTUATION:
         case STRING:
         case KEYWORD:
@@ -114,6 +119,7 @@ symbol_t Token::as_symbol() const {
     switch (type) {
         case NAME:
         case DIRECTIVE:
+        case PREPROCESSOR:
         case PUNCTUATION:
         case STRING:
         case KEYWORD:

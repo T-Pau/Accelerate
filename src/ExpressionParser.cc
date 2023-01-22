@@ -254,7 +254,7 @@ std::shared_ptr<ExpressionNode> ExpressionParser::do_parse() {
                     case END:
                     case PARENTHESIS_CLOSED:
                         if (top.type == START && next.type == END) {
-                            throw ParseException(next.location, "expected expression", next.description());
+                            throw ParseException(next.location, "expected expression");
                         }
                         throw ParseException(next.location, "unexpected %s", next.description());
 

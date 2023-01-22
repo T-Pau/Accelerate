@@ -35,6 +35,9 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ParseException.h"
 #include "Util.h"
 
+bool TokenizerFile::initialized = false;
+Token TokenizerFile::token_include;
+
 void TokenizerFile::push(const std::string& file_name) {
     const auto& lines = FileReader::global.read(file_name);
     if (lines.empty()) {
@@ -45,6 +48,32 @@ void TokenizerFile::push(const std::string& file_name) {
 }
 
 Token TokenizerFile::sub_next() {
+    while (true) {
+        bool beginning_of_line = last_was_newline;
+
+        auto token = next_raw();
+
+        if (!use_preprocessor || !token.is_preprocessor()) {
+            return token;
+        }
+
+        if (!beginning_of_line) {
+            throw ParseException(token, "preprocessor directive in middle of line");
+        }
+
+        try {
+            std::vector<Token> tokens = {token};
+            while ((token = next_raw()) && !token.is_newline()) {
+                tokens.emplace_back(token);
+            }
+            preprocess(tokens);
+        }
+        catch (ParseException& ex) {
+        }
+    }
+}
+
+Token TokenizerFile::next_raw() {
     if (current_source == nullptr) {
         return {};
     }
@@ -242,6 +271,39 @@ Location TokenizerFile::current_location() const{
 void TokenizerFile::add_punctuations(const std::unordered_set<std::string> &names) {
     for (const auto& name: names) {
         add_literal(Token::PUNCTUATION, name);
+    }
+}
+
+TokenizerFile::TokenizerFile(bool use_preprocessor): use_preprocessor(use_preprocessor) {
+    if (use_preprocessor) {
+        if (!initialized) {
+            token_include = Token(Token::PREPROCESSOR, {}, SymbolTable::global.add(".include"));
+        }
+        matcher.add(".include", Token::PREPROCESSOR);
+    }
+}
+
+void TokenizerFile::preprocess(const std::vector<Token>& tokens) {
+    const auto& directive = tokens.front();
+
+    if (directive == token_include) {
+        if (tokens.size() < 2) {
+            throw ParseException(directive, "missing argument for %s", directive.as_string().c_str());
+        }
+        if (tokens.size() > 2) {
+            throw ParseException(directive, "too many arguments for %s", directive.as_string().c_str());
+        }
+        const auto& filename = tokens[1];
+
+        if (!filename.is_string()) {
+            throw ParseException(filename, "expected string");
+        }
+
+        // TODO: resolve relative paths relative to current file name, search in include path
+        push(filename.as_string());
+    }
+    else {
+        throw ParseException(directive, "unknown preprocessor directive");
     }
 }
 
