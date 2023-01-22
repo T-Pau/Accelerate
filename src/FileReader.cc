@@ -47,22 +47,25 @@ const std::vector<std::string>& FileReader::read(const std::string& file_name, b
         return it->second;
     }
 
-    std::vector<std::string> lines;
-
     std::ifstream input_file(file_name);
     if (input_file) {
+        std::vector<std::string> lines;
         std::string s;
         while (getline(input_file, s)) {
             lines.push_back(s);
         }
+
+        files[file] = std::move(lines);
+        return files[file];
     }
-    else if (errno != EEXIST || !optional) {
+    else if (errno == EEXIST && optional) {
+        return empty_file;
+    }
+    else {
         error_flag = true;
         throw Exception("can't open '%s': %s", file_name.c_str(), strerror(errno));
     }
 
-    files[file] = std::move(lines);
-    return files[file];
 }
 
 const std::string &FileReader::get_line(symbol_t file, size_t line_number) const {
