@@ -3,7 +3,7 @@ Tokenizer.cc -- Convert File into Stream of Tokens
 
 Copyright (C) Dieter Baron
 
-The authors can be contacted at <assembler@tpau.group>
+The authors can be contacted at <accelerate@tpau.group>
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions
@@ -69,6 +69,7 @@ Token TokenizerFile::sub_next() {
             preprocess(tokens);
         }
         catch (ParseException& ex) {
+            FileReader::global.error(ex.location, "%s", ex.what());
         }
     }
 }
@@ -274,10 +275,11 @@ void TokenizerFile::add_punctuations(const std::unordered_set<std::string> &name
     }
 }
 
-TokenizerFile::TokenizerFile(bool use_preprocessor): use_preprocessor(use_preprocessor) {
+TokenizerFile::TokenizerFile(std::shared_ptr<const Path> path, bool use_preprocessor): path(path), use_preprocessor(use_preprocessor) {
     if (use_preprocessor) {
         if (!initialized) {
             token_include = Token(Token::PREPROCESSOR, {}, SymbolTable::global.add(".include"));
+            initialized = true;
         }
         matcher.add(".include", Token::PREPROCESSOR);
     }
@@ -293,14 +295,23 @@ void TokenizerFile::preprocess(const std::vector<Token>& tokens) {
         if (tokens.size() > 2) {
             throw ParseException(directive, "too many arguments for %s", directive.as_string().c_str());
         }
-        const auto& filename = tokens[1];
+        const auto& filename_token = tokens[1];
 
-        if (!filename.is_string()) {
-            throw ParseException(filename, "expected string");
+        if (!filename_token.is_string()) {
+            throw ParseException(filename_token, "expected string");
         }
 
-        // TODO: resolve relative paths relative to current file name, search in include path
-        push(filename.as_string());
+        try {
+            auto filename = filename_token.as_string();
+            auto file = path->find(filename, SymbolTable::global[current_source->location().file]);
+            if (!file.has_value()) {
+                throw ParseException(filename_token, "file not found");
+            }
+            push(file.value());
+        }
+        catch (Exception& ex) {
+            throw ParseException(filename_token, "%s", ex.what());
+        }
     }
     else {
         throw ParseException(directive, "unknown preprocessor directive");
@@ -360,17 +371,13 @@ std::optional<Token::Type> TokenizerFile::MatcherNode::match(TokenizerFile::Sour
             // don't match empty string
             matched = false;
         }
-        else if (match_in_word) {
-            // match if it should match prefix of longer identifier
-            matched = true;
-        }
-        else if (is_identifier_continuation(c)) {
-            // don't match prefix of longer identifier (if matched stirng is valid identifier)
+        else if (!match_in_word && is_identifier_continuation(c)) {
+            // don't match prefix of longer identifier (if matched string is valid identifier)
             matched = !(is_identifier_start((name[0]) && std::all_of(name.begin() + 1, name.end(),
                                                                    is_identifier_continuation)));
         }
         else {
-            // match if next character can't be part of identifier
+            // match if next character can't be part of identifier, or we're matching inside longer identifiers.
             matched = true;
         }
 

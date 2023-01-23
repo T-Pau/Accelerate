@@ -3,7 +3,7 @@ Tokenizer.h -- Convert File into Stream of Tokens
 
 Copyright (C) Dieter Baron
 
-The authors can be contacted at <assembler@tpau.group>
+The authors can be contacted at <accelerate@tpau.group>
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions
@@ -40,10 +40,11 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Token.h"
 #include "TokenGroup.h"
 #include "Location.h"
+#include "Path.h"
 
 class TokenizerFile: public Tokenizer {
 public:
-    explicit TokenizerFile(bool use_preprocessor = true);
+    explicit TokenizerFile(std::shared_ptr<const Path> path = std::make_shared<const Path>(), bool use_preprocessor = true);
     void push(const std::string& filename);
 
     [[nodiscard]] Location current_location() const;
@@ -99,6 +100,7 @@ private:
     static bool is_identifier_start(int c) { return islower(c) || isupper(c) || c == '_'; }
 
     bool use_preprocessor;
+    std::shared_ptr<const Path> path;
 
     static bool initialized;
     static Token token_include;
