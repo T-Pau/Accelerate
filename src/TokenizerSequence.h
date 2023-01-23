@@ -3,7 +3,7 @@ TokenizerSequence.h --
 
 Copyright (C) Dieter Baron
 
-The authors can be contacted at <assembler@tpau.group>
+The authors can be contacted at <accelerate@tpau.group>
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions
