@@ -1,0 +1,255 @@
+; 65c02.cpu -- CPU definition for 65c02
+;
+; Copyright (C) Dieter Baron
+;
+; The authors can be contacted at <accelerate@tpau.group>
+;
+; Redistribution and use in source and binary forms, with or without
+; modification, are permitted provided that the following conditions
+; are met:
+;
+; 1. Redistributions of source code must retain the above copyright
+;    notice, this list of conditions and the following disclaimer.
+;
+; 2. The names of the authors may not be used to endorse or promote
+;   products derived from this software without specific prior
+;   written permission.
+;
+; THIS SOFTWARE IS PROVIDED BY THE AUTHORS "AS IS" AND ANY EXPRESS
+; OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+; WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+; ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHORS BE LIABLE FOR ANY
+; DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+; DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE
+; GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+; INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER
+; IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+; OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
+; IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+.include "6502.cpu"
+
+.instruction adc {
+    indirect: $72
+}
+
+.instruction and {
+    indirect: $32
+}
+
+.instruction bbr0 {
+    zeropage: $0f
+}
+
+.instruction bbr1 {
+    zeropage: $1f
+}
+
+.instruction bbr2 {
+    zeropage: $2f
+}
+
+.instruction bbr3 {
+    zeropage: $3f
+}
+
+.instruction bbr4 {
+    zeropage: $4f
+}
+
+.instruction bbr5 {
+    zeropage: $5f
+}
+
+.instruction bbr6 {
+    zeropage: $6f
+}
+
+.instruction bbr7 {
+    zeropage: $7f
+}
+
+.instruction bbs0 {
+    zeropage: $8f
+}
+
+.instruction bbs1 {
+    zeropage: $9f
+}
+
+.instruction bbs2 {
+    zeropage: $af
+}
+
+.instruction bbs3 {
+    zeropage: $bf
+}
+
+.instruction bbs4 {
+    zeropage: $cf
+}
+
+.instruction bbs5 {
+    zeropage: $df
+}
+
+.instruction bbs6 {
+    zeropage: $ef
+}
+
+.instruction bbs7 {
+    zeropage: $ff
+}
+
+.instruction bra {
+    relative: $80
+}
+
+.instruction cmp {
+    indirect: $d2
+}
+
+.instruction dea {
+    implied: $3a
+}
+
+.instruction dec {
+    accumulator: $3a
+}
+
+.instruction eor {
+    indirect: $52
+}
+
+.instruction ina {
+    implied: $1a
+}
+
+.instruction inc {
+    accumulator: $1a
+}
+
+.instruction jmp {
+    x_indexed_indirect: $7c
+}
+
+.instruction lda {
+    indirect: $b2
+}
+
+.instruction ora {
+    indirect: $12
+}
+
+.instruction phx {
+    implied: $da
+}
+
+.instruction phy {
+    implied: $5a
+}
+
+.instruction plx {
+    implied: $fa
+}
+
+.instruction ply {
+    implied: $7a
+}
+
+.instruction rmb0 {
+    zeropage: $07
+}
+
+.instruction rmb1 {
+    zeropage: $17
+}
+
+.instruction rmb2 {
+    zeropage: $27
+}
+
+.instruction rmb3 {
+    zeropage: $37
+}
+
+.instruction rmb4 {
+    zeropage: $47
+}
+
+.instruction rmb5 {
+    zeropage: $57
+}
+
+.instruction rmb6 {
+    zeropage: $67
+}
+
+.instruction rmb7 {
+    zeropage: $77
+}
+
+.instruction sbc {
+    indirect: $f2
+}
+
+.instruction smb0 {
+    zeropage: $87
+}
+
+.instruction smb1 {
+    zeropage: $97
+}
+
+.instruction smb2 {
+    zeropage: $a7
+}
+
+.instruction smb3 {
+    zeropage: $b7
+}
+
+.instruction smb4 {
+    zeropage: $c7
+}
+
+.instruction smb5 {
+    zeropage: $d7
+}
+
+.instruction smb6 {
+    zeropage: $e7
+}
+
+.instruction smb7 {
+    zeropage: $f7
+}
+
+.instruction sta {
+    indirect: $92
+}
+
+.instruction stp {
+    implied: $db
+}
+
+.instruction stz {
+    absolute: $9c
+    absolute_x_indexed: $9e
+    zeropage: $64
+    zeropage_x_indexed: $74
+}
+
+.instruction trb {
+    absolute: $1c
+    zeropage: $14
+}
+
+.instruction tsb {
+    absolute: $0c
+    zeropage: $04
+}
+
+.instruction wai {
+    implied: $cb
+}
