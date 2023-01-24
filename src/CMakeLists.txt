@@ -26,7 +26,9 @@ SET(xlr8-as_SOURCES
         Object.cc
         ParseException.cc
         Path.cc
+        MemoryMap.cc
         Section.cc
+        Symbol.cc
         SymbolTable.cc
         Token.cc
         TokenGroup.cc
