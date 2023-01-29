@@ -80,6 +80,8 @@ class ArgumentTypeRange: public ArgumentType {
 public:
     [[nodiscard]] Type type() const override {return RANGE;}
 
+    [[nodiscard]] size_t byte_size() const;
+
     int64_t lower_bound;
     uint64_t upper_bound;
 };

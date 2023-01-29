@@ -34,6 +34,19 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <utility>
 #include "ParseException.h"
 
+
+std::ostream& operator<<(std::ostream& stream, const std::shared_ptr<ExpressionNode>& node) {
+    node->serialize(stream);
+    return stream;
+}
+
+
+std::ostream& operator<< (std::ostream& stream, const ExpressionNode& node) {
+    node.serialize(stream);
+    return stream;
+}
+
+
 std::shared_ptr<ExpressionNode> ExpressionNode::evaluate(std::shared_ptr<ExpressionNode> node, const Environment &environment) {
     auto new_node = node->evaluate(environment);
 
@@ -45,10 +58,12 @@ std::shared_ptr<ExpressionNode> ExpressionNode::evaluate(std::shared_ptr<Express
     }
 }
 
-std::shared_ptr<ExpressionNode> ExpressionNode::create_binary(const std::shared_ptr<ExpressionNode>& left, ExpressionNode::SubType operation, const std::shared_ptr<ExpressionNode>& right) {
-    if (left->subtype() == INTEGER && right->subtype() == INTEGER) {
-        auto left_value = std::dynamic_pointer_cast<ExpressionNodeInteger>(left)->as_int();
-        auto right_value = std::dynamic_pointer_cast<ExpressionNodeInteger>(right)->as_int();
+std::shared_ptr<ExpressionNode> ExpressionNode::create_binary(const std::shared_ptr<ExpressionNode>& left, ExpressionNode::SubType operation, const std::shared_ptr<ExpressionNode>& right, size_t byte_size) {
+    std::shared_ptr<ExpressionNode> node;
+
+    if (left->has_value() && right->has_value()) {
+        auto left_value = std::dynamic_pointer_cast<ExpressionNodeInteger>(left)->value();
+        auto right_value = std::dynamic_pointer_cast<ExpressionNodeInteger>(right)->value();
         int64_t value;
 
         switch (operation) {
@@ -96,19 +111,26 @@ std::shared_ptr<ExpressionNode> ExpressionNode::create_binary(const std::shared_
                 throw Exception("invalid operand for binary expression");
         }
 
-        return std::make_shared<ExpressionNodeInteger>(value);
+        // TODO: check byte_size
+
+        node = std::make_shared<ExpressionNodeInteger>(value);
     }
     else {
-        return std::make_shared<ExpressionNodeBinary>(left, operation, right);
+        node = std::make_shared<ExpressionNodeBinary>(left, operation, right);
     }
+
+    node->set_byte_size(byte_size);
+    return node;
 }
 
-std::shared_ptr<ExpressionNode> ExpressionNode::create_unary(ExpressionNode::SubType operation, std::shared_ptr<ExpressionNode> operand) {
+std::shared_ptr<ExpressionNode> ExpressionNode::create_unary(ExpressionNode::SubType operation, std::shared_ptr<ExpressionNode> operand, size_t byte_size) {
+    std::shared_ptr<ExpressionNode> node;
+
     if (operation == PLUS) {
         return operand;
     }
-    else if (operand->subtype() == INTEGER) {
-        auto value = std::dynamic_pointer_cast<ExpressionNodeInteger>(operand)->as_int();
+    else if (operand->has_value()) {
+        auto value = std::dynamic_pointer_cast<ExpressionNodeInteger>(operand)->value();
         switch (operation) {
             case MINUS:
                 value = -value;
@@ -134,10 +156,84 @@ std::shared_ptr<ExpressionNode> ExpressionNode::create_unary(ExpressionNode::Sub
                 throw Exception("invalid operand for unary expression");
         }
 
-        return std::make_shared<ExpressionNodeInteger>(value);
+        node = std::make_shared<ExpressionNodeInteger>(value);
     }
     else {
-        return std::make_shared<ExpressionNodeUnary>(operation, operand);
+        node = std::make_shared<ExpressionNodeUnary>(operation, operand);
+    }
+
+    node->set_byte_size(byte_size);
+    return node;
+}
+
+
+void ExpressionNode::set_byte_size(size_t size) {
+    if (size != 0 && minimum_byte_size() != 0 && size < minimum_byte_size()) {
+        throw ParseException(location, "value overflow");
+    }
+    byte_size_ = size;
+}
+
+void ExpressionNode::serialize(std::ostream &stream) const {
+    serialize_sub(stream);
+    if (byte_size() != 0 && (minimum_byte_size() == 0 || minimum_byte_size() != byte_size())) {
+        stream << ":" << byte_size();
+    }
+}
+
+std::shared_ptr<ExpressionNode> ExpressionNodeUnary::clone() const {
+    switch (subtype()) {
+        case BANK_BYTE:
+        case BITWISE_NOT:
+        case HIGH_BYTE:
+        case LOW_BYTE:
+        case MINUS:
+            return create_unary(operation, operand, byte_size());
+            break;
+
+        case ADD:
+        case BITWISE_AND:
+        case BITWISE_OR:
+        case BITWISE_XOR:
+        case DIVIDE:
+        case MODULO:
+        case MULTIPLY:
+        case PLUS:
+        case SHIFT_LEFT:
+        case SHIFT_RIGHT:
+        case SUBTRACT:
+        case INTEGER:
+        case SIZE:
+        case VARIABLE:
+            throw ParseException(location, "internal error: invalid binary operation");
+    }
+}
+
+std::shared_ptr<ExpressionNode> ExpressionNodeBinary::clone() const {
+    switch (subtype()) {
+        case ADD:
+        case BITWISE_AND:
+        case BITWISE_OR:
+        case BITWISE_XOR:
+        case DIVIDE:
+        case MODULO:
+        case MULTIPLY:
+        case PLUS:
+        case SHIFT_LEFT:
+        case SHIFT_RIGHT:
+        case SUBTRACT:
+            return create_binary(left, operation, right, byte_size());
+
+
+        case BANK_BYTE:
+        case BITWISE_NOT:
+        case HIGH_BYTE:
+        case LOW_BYTE:
+        case MINUS:
+        case INTEGER:
+        case SIZE:
+        case VARIABLE:
+            throw ParseException(location, "internal error: invalid binary operation");
     }
 }
 
@@ -146,26 +242,41 @@ ExpressionNodeInteger::ExpressionNodeInteger(const Token &token) {
     if (!token.is_integer()) {
         throw ParseException(token, "internal error: can't create integer node from %s", token.type_name());
     }
-    value = static_cast<int64_t>(token.as_integer()); // TODO: handle overflow
+    value_ = static_cast<int64_t>(token.as_integer()); // TODO: handle overflow
 }
 
-size_t ExpressionNodeInteger::byte_size() const {
-    return 0; // TODO
+std::shared_ptr<ExpressionNode> ExpressionNodeInteger::clone() const {
+    auto node = std::make_shared<ExpressionNodeInteger>(value());
+    node->set_byte_size(byte_size());
+    return node;
 }
 
-size_t ExpressionNodeInteger::minimum_size() const {
-    if (value > std::numeric_limits<uint32_t>::max()) {
+
+std::shared_ptr<ExpressionNode> ExpressionNodeVariable::clone() const {
+    auto node = std::make_shared<ExpressionNodeInteger>(symbol);
+    node->set_byte_size(byte_size());
+    return node;
+}
+
+
+size_t ExpressionNodeInteger::minimum_byte_size() const {
+    if (value() > std::numeric_limits<uint32_t>::max()) {
         return 8;
     }
-    else if (value > std::numeric_limits<uint16_t>::max()) {
+    else if (value() > std::numeric_limits<uint16_t>::max()) {
         return 4;
     }
-    else if (value > std::numeric_limits<uint8_t>::max()) {
+    else if (value() > std::numeric_limits<uint8_t>::max()) {
         return 2;
     }
     else {
         return 1;
     }
+}
+
+void ExpressionNodeInteger::serialize_sub(std::ostream &stream) const {
+    auto width = static_cast<int>(byte_size() > 0 ? byte_size() : minimum_byte_size()) * 2;
+    stream << "$" << std::setfill('0') << std::setw(width) << std::hex << value();
 }
 
 ExpressionNodeVariable::ExpressionNodeVariable(const Token &token) {
@@ -182,7 +293,13 @@ std::shared_ptr<ExpressionNode> ExpressionNodeVariable::evaluate(const Environme
     if (value) {
         // TODO: Don't evaluate further if evaluating encoding.
         // TODO: Detect loops
-        return ExpressionNode::evaluate(value, environment);
+        auto node = ExpressionNode::evaluate(value, environment);
+
+        if (byte_size() != 0 && node->byte_size() != byte_size()) {
+            node = node->clone();
+            node->set_byte_size(byte_size());
+        }
+        return node;
     }
     else {
         return {};
@@ -211,7 +328,7 @@ std::shared_ptr<ExpressionNode> ExpressionNodeUnary::evaluate(const Environment 
         return {};
     }
 
-    return create_unary(operation, new_operand ? new_operand : operand);
+    return create_unary(operation, new_operand ? new_operand : operand, byte_size());
 }
 
 
@@ -244,5 +361,110 @@ std::shared_ptr<ExpressionNode> ExpressionNodeBinary::evaluate(const Environment
         return {};
     }
 
-    return create_binary(new_left ? new_left : left, operation, new_right ? new_right : right);
+    return create_binary(new_left ? new_left : left, operation, new_right ? new_right : right, byte_size());
+}
+
+void ExpressionNodeBinary::serialize_sub(std::ostream &stream) const {
+    stream << '(' << left;
+
+    switch (operation) {
+        case ADD:
+            stream << '+';
+            break;
+
+        case BITWISE_AND:
+            stream << '&';
+            break;
+
+        case BITWISE_OR:
+            stream << '|';
+            break;
+
+        case BITWISE_XOR:
+            stream << '^';
+            break;
+
+        case DIVIDE:
+            stream << '/';
+            break;
+
+        case MODULO:
+            stream << '%';
+            break;
+
+        case MULTIPLY:
+            stream << '*';
+            break;
+
+        case PLUS:
+            stream << '+';
+            break;
+
+        case SHIFT_LEFT:
+            stream << "<<";
+            break;
+
+        case SHIFT_RIGHT:
+            stream << ">>";
+            break;
+
+        case SUBTRACT:
+            stream << '-';
+            break;
+
+        case BANK_BYTE:
+        case BITWISE_NOT:
+        case HIGH_BYTE:
+        case INTEGER:
+        case LOW_BYTE:
+        case MINUS:
+        case SIZE:
+        case VARIABLE:
+            throw Exception("internal error: invalid binary operator");
+    }
+
+    stream << right << ')';
+}
+
+
+void ExpressionNodeUnary::serialize_sub(std::ostream &stream) const {
+    switch (operation) {
+        case BANK_BYTE:
+            stream << '^';
+            break;
+
+        case BITWISE_NOT:
+            stream << '~';
+            break;
+
+        case HIGH_BYTE:
+            stream << '>';
+            break;
+
+        case LOW_BYTE:
+            stream << '<';
+            break;
+
+        case MINUS:
+            stream << '-';
+            break;
+
+        case ADD:
+        case BITWISE_AND:
+        case BITWISE_OR:
+        case BITWISE_XOR:
+        case DIVIDE:
+        case INTEGER:
+        case MODULO:
+        case MULTIPLY:
+        case PLUS:
+        case SIZE:
+        case SHIFT_LEFT:
+        case SHIFT_RIGHT:
+        case SUBTRACT:
+        case VARIABLE:
+            throw Exception("internal error: invalid unary operator");
+    }
+
+    stream << operand;
 }

@@ -243,6 +243,9 @@ void CPUParser::parse_instruction() {
         if (!pair.first.is_name()) {
             throw ParseException(pair.first, "addressing mode must be name");
         }
+        if (addressing_mode_names.find(pair.first) == addressing_mode_names.end()) {
+            throw ParseException(pair.first, "unknown addressing mode");
+        }
         auto it = instruction.opcodes.find(pair.first.as_symbol());
         if (it != instruction.opcodes.end()) {
             throw ParseException(pair.first, "redefinition of addressing mode");

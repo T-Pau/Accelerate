@@ -62,12 +62,20 @@
     encoding: .opcode, address
 }
 
+.addressing_mode absolute {
+    notation: address
+    arguments {
+        address: word
+    }
+    encoding: .opcode, address
+}
+
 .addressing_mode relative {
     notation: address
     arguments {
         address: word
     }
-    encoding: .opcode, address - .pc ; : 1
+    encoding: .opcode, address - .pc : 1
 }
 
 .addressing_mode indirect {

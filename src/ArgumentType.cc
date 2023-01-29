@@ -55,3 +55,22 @@ uint64_t ArgumentTypeMap::entry(symbol_t name) const {
         return it->second;
     }
 }
+
+
+size_t ArgumentTypeRange::byte_size() const {
+    // TODO: Take lower_bound into account.
+    // TODO: Avoid duplicating code with ExpressionNodeInteger::minimum_byte_size().
+
+    if (upper_bound > std::numeric_limits<uint32_t>::max()) {
+        return 8;
+    }
+    else if (upper_bound > std::numeric_limits<uint16_t>::max()) {
+        return 4;
+    }
+    else if (upper_bound > std::numeric_limits<uint8_t>::max()) {
+        return 2;
+    }
+    else {
+        return 1;
+    }
+}

@@ -278,7 +278,7 @@ void ExpressionParser::reduce_unary(const ExpressionParser::Element& next) {
     if (top.type != UNARY_OPERATOR || next.type != OPERAND) {
         throw Exception("internal error: invalid element types in reduce_unary");
     }
-    top = Element(ExpressionNode::create_unary(top.operation, next.node), 0);
+    top = Element(ExpressionNode::create_unary(top.operation, next.node, 0), 0);
 }
 
 void ExpressionParser::reduce_binary(int up_to_level) {
@@ -291,7 +291,16 @@ void ExpressionParser::reduce_binary(int up_to_level) {
             break;
         }
 
-        top = Element(ExpressionNode::create_binary(left.node, operation.operation, top.node), operation.level);
+        if (operation.operation == ExpressionNode::SIZE) {
+            if (!top.node->has_value()) {
+                throw ParseException(top.node->location, "size not a constant expression");
+            }
+            left.node->set_byte_size(top.node->value());
+            top = left;
+        }
+        else {
+            top = Element(ExpressionNode::create_binary(left.node, operation.operation, top.node, 0), operation.level);
+        }
 
         stack.pop_back();
         stack.pop_back();

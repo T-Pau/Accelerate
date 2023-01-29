@@ -223,12 +223,12 @@ void Assembler::parse_instruction(const Token& name) {
                             if ((*it_arguments)->type() != Node::EXPRESSION) {
                                 throw ParseException((*it_arguments)->location, "map argument is not an expression");
                             }
-                            if (std::dynamic_pointer_cast<ExpressionNode>(*it_arguments)->subtype() !=
-                                ExpressionNode::INTEGER) {
+                            auto expression = std::dynamic_pointer_cast<ExpressionNode>(*it_arguments);
+                            if (!expression->has_value()) {
                                 throw ParseException((*it_arguments)->location, "map argument is not an integer");
                             }
                             auto map_type = dynamic_cast<const ArgumentTypeMap *>(argument_type);
-                            auto value = std::dynamic_pointer_cast<ExpressionNodeInteger>(*it_arguments)->as_int();
+                            auto value = expression->value();
                             if (!map_type->has_entry(value)) {
                                 throw ParseException((*it_arguments)->location, "invalid map argument");
                             }
@@ -237,11 +237,14 @@ void Assembler::parse_instruction(const Token& name) {
                         }
 
                         case ArgumentType::RANGE:
-                            // TODO: check range, set size
+                            auto range_type = dynamic_cast<const ArgumentTypeRange *>(argument_type);
+
                             if ((*it_arguments)->type() != Node::EXPRESSION) {
                                 throw ParseException((*it_arguments)->location, "range argument is not an expression");
                             }
-                            environment.add(it_notation->symbol, std::dynamic_pointer_cast<ExpressionNode>(*it_arguments));
+                            auto expression = std::dynamic_pointer_cast<ExpressionNode>(*it_arguments);
+                            expression->set_byte_size(range_type->byte_size());
+                            environment.add(it_notation->symbol, expression);
                             break;
                     }
                 }
@@ -257,17 +260,12 @@ void Assembler::parse_instruction(const Token& name) {
                 auto value = ExpressionNode::evaluate(expression, environment);
                 if (first) {
                     first = false;
-                    std::cout << ".bytes ";
+                    std::cout << ".data ";
                 }
                 else {
                     std::cout << ", ";
                 }
-                if (value->subtype() == ExpressionNode::INTEGER) {
-                    std::cout << "$" << std::setfill('0') << std::setw(2) << std::hex << std::dynamic_pointer_cast<ExpressionNodeInteger>(value)->as_int();
-                }
-                else {
-                    std::cout << "...";
-                }
+                std::cout << value;
             }
             std::cout << " ; " << name.as_string() << " " << SymbolTable::global[match.addressing_mode] << std::endl;
 
