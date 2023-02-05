@@ -1,5 +1,5 @@
 /*
-ExpressionListNode.cc -- List of Epressions
+ExpressionList.cc -- List of Epressions
 
 Copyright (C) Dieter Baron
 
@@ -29,14 +29,51 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "ExpressionListNode.h"
+#include "ExpressionList.h"
+#include "ParseException.h"
 
-size_t ExpressionListNode::byte_size() const {
+size_t ExpressionList::byte_size() const {
     size_t size = 0;
 
     for (const auto& expression : expressions) {
+        if (expression.byte_size() == 0) {
+            return 0;
+        }
         size += expression.byte_size();
     }
 
     return size;
 }
+
+void ExpressionList::serialize(std::ostream &stream) const {
+    auto first = true;
+
+    for (const auto& expression: expressions) {
+        stream << expression;
+        if (first) {
+            first = false;
+        }
+        else {
+            stream << ", ";
+        }
+    }
+}
+
+std::vector<uint8_t> ExpressionList::bytes(uint64_t byte_order) const {
+    std::vector<uint8_t> data;
+
+    for (const auto& expression: expressions) {
+        if (!expression.has_value()) {
+            throw ParseException(expression.location, "value not known");
+        }
+        size_t size = expression.byte_size();
+        if (size == 0) {
+            size = expression.minimum_byte_size();
+        }
+
+        Int::encode(data, expression.value(), byte_order);
+    }
+
+    return data;
+}
+

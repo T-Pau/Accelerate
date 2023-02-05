@@ -38,67 +38,67 @@
 }
 
 .instruction bbr0 {
-    zeropage: $0f
+    zero_page: $0f
 }
 
 .instruction bbr1 {
-    zeropage: $1f
+    zero_page: $1f
 }
 
 .instruction bbr2 {
-    zeropage: $2f
+    zero_page: $2f
 }
 
 .instruction bbr3 {
-    zeropage: $3f
+    zero_page: $3f
 }
 
 .instruction bbr4 {
-    zeropage: $4f
+    zero_page: $4f
 }
 
 .instruction bbr5 {
-    zeropage: $5f
+    zero_page: $5f
 }
 
 .instruction bbr6 {
-    zeropage: $6f
+    zero_page: $6f
 }
 
 .instruction bbr7 {
-    zeropage: $7f
+    zero_page: $7f
 }
 
 .instruction bbs0 {
-    zeropage: $8f
+    zero_page: $8f
 }
 
 .instruction bbs1 {
-    zeropage: $9f
+    zero_page: $9f
 }
 
 .instruction bbs2 {
-    zeropage: $af
+    zero_page: $af
 }
 
 .instruction bbs3 {
-    zeropage: $bf
+    zero_page: $bf
 }
 
 .instruction bbs4 {
-    zeropage: $cf
+    zero_page: $cf
 }
 
 .instruction bbs5 {
-    zeropage: $df
+    zero_page: $df
 }
 
 .instruction bbs6 {
-    zeropage: $ef
+    zero_page: $ef
 }
 
 .instruction bbs7 {
-    zeropage: $ff
+    zero_page: $ff
 }
 
 .instruction bra {
@@ -158,35 +158,35 @@
 }
 
 .instruction rmb0 {
-    zeropage: $07
+    zero_page: $07
 }
 
 .instruction rmb1 {
-    zeropage: $17
+    zero_page: $17
 }
 
 .instruction rmb2 {
-    zeropage: $27
+    zero_page: $27
 }
 
 .instruction rmb3 {
-    zeropage: $37
+    zero_page: $37
 }
 
 .instruction rmb4 {
-    zeropage: $47
+    zero_page: $47
 }
 
 .instruction rmb5 {
-    zeropage: $57
+    zero_page: $57
 }
 
 .instruction rmb6 {
-    zeropage: $67
+    zero_page: $67
 }
 
 .instruction rmb7 {
-    zeropage: $77
+    zero_page: $77
 }
 
 .instruction sbc {
@@ -194,35 +194,35 @@
 }
 
 .instruction smb0 {
-    zeropage: $87
+    zero_page: $87
 }
 
 .instruction smb1 {
-    zeropage: $97
+    zero_page: $97
 }
 
 .instruction smb2 {
-    zeropage: $a7
+    zero_page: $a7
 }
 
 .instruction smb3 {
-    zeropage: $b7
+    zero_page: $b7
 }
 
 .instruction smb4 {
-    zeropage: $c7
+    zero_page: $c7
 }
 
 .instruction smb5 {
-    zeropage: $d7
+    zero_page: $d7
 }
 
 .instruction smb6 {
-    zeropage: $e7
+    zero_page: $e7
 }
 
 .instruction smb7 {
-    zeropage: $f7
+    zero_page: $f7
 }
 
 .instruction sta {
@@ -236,18 +236,18 @@
 .instruction stz {
     absolute: $9c
     absolute_x_indexed: $9e
-    zeropage: $64
-    zeropage_x_indexed: $74
+    zero_page: $64
+    zero_page_x_indexed: $74
 }
 
 .instruction trb {
     absolute: $1c
-    zeropage: $14
+    zero_page: $14
 }
 
 .instruction tsb {
     absolute: $0c
-    zeropage: $04
+    zero_page: $04
 }
 
 .instruction wai {

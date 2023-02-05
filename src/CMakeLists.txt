@@ -15,11 +15,12 @@ SET(xlr8-as_SOURCES
         CPUParser.cc
         Environment.cc
         Exception.cc
-        ExpressionListNode.cc
+        ExpressionList.cc
         ExpressionNode.cc
         ExpressionParser.cc
         FileReader.cc
         Instruction.cc
+        Int.cc
         TokenNode.cc
         Location.cc
         Node.cc

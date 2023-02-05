@@ -259,21 +259,6 @@ std::shared_ptr<ExpressionNode> ExpressionNodeVariable::clone() const {
 }
 
 
-size_t ExpressionNodeInteger::minimum_byte_size() const {
-    if (value() > std::numeric_limits<uint32_t>::max()) {
-        return 8;
-    }
-    else if (value() > std::numeric_limits<uint16_t>::max()) {
-        return 4;
-    }
-    else if (value() > std::numeric_limits<uint8_t>::max()) {
-        return 2;
-    }
-    else {
-        return 1;
-    }
-}
-
 void ExpressionNodeInteger::serialize_sub(std::ostream &stream) const {
     auto width = static_cast<int>(byte_size() > 0 ? byte_size() : minimum_byte_size()) * 2;
     stream << "$" << std::setfill('0') << std::setw(width) << std::hex << value();

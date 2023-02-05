@@ -1,5 +1,5 @@
 /*
-ExpressionListNode.h -- List of Expressionse
+ExpressionList.h -- List of Expressionse
 
 Copyright (C) Dieter Baron
 
@@ -36,16 +36,18 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "ExpressionNode.h"
 
-class ExpressionListNode : public Node {
+class ExpressionList {
 public:
+    [[nodiscard]] bool empty() const {return expressions.empty();}
     [[nodiscard]] size_t byte_size() const;
-    // serialize to file
-    // serialize as bytes
+
+    void serialize(std::ostream& stream) const;
+    [[nodiscard]] std::vector<uint8_t> bytes(uint64_t byte_order) const;
+
 
     std::vector<ExpressionNode> expressions;
-
-
 };
 
+std::ostream operator<<(std::ostream& stream, const ExpressionList& list);
 
 #endif // EXPRESSION_LIST_NODE_H

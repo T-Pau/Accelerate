@@ -7,8 +7,8 @@
 
 #include <vector>
 
-#include "ExpressionNode.h"
 #include "MemoryMap.h"
+#include "ExpressionList.h"
 
 class Symbol {
 public:
@@ -17,7 +17,7 @@ public:
     Token name;
     uint64_t size;
 
-    std::vector<ExpressionNode> data;
+    ExpressionList data;
 };
 
 #endif // SYMBOL_H

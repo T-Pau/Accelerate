@@ -37,6 +37,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Environment.h"
 #include "Node.h"
 #include "TokenizerFile.h"
+#include "Int.h"
 
 class ExpressionNode : public Node {
 public:
@@ -101,7 +102,7 @@ public:
 
     [[nodiscard]] bool has_value() const override {return true;}
     [[nodiscard]] int64_t value() const override {return value_;}
-    [[nodiscard]] size_t minimum_byte_size() const override;
+    [[nodiscard]] size_t minimum_byte_size() const override {return Int::minimum_byte_size(value());}
 
 protected:
     [[nodiscard]] std::shared_ptr<ExpressionNode> evaluate(const Environment &environment) const override {return {};}

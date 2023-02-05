@@ -34,6 +34,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <unordered_map>
 
+#include "Int.h"
 #include "SymbolTable.h"
 
 class ArgumentType {
@@ -80,10 +81,10 @@ class ArgumentTypeRange: public ArgumentType {
 public:
     [[nodiscard]] Type type() const override {return RANGE;}
 
-    [[nodiscard]] size_t byte_size() const;
+    [[nodiscard]] size_t byte_size() const {return Int::minimum_byte_size(upper_bound);} // TODO: Take lower_bound into account.
 
     int64_t lower_bound;
-    uint64_t upper_bound;
+    int64_t upper_bound;
 };
 
 #endif // ARGUMENT_TYPE_H
