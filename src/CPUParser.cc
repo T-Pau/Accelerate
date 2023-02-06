@@ -196,7 +196,7 @@ void CPUParser::parse_addressing_mode() {
         addressing_mode.encoding = encoding;
     }
     else {
-        throw ParseException(name, "encoding missing for addressing mode '%s'", name.as_string().c_str());
+        throw ParseException(name, "invalid encoding for addressing mode '%s'", name.as_string().c_str());
     }
 
     cpu.add_addressing_mode(name.as_symbol(), addressing_mode);

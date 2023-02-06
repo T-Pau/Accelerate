@@ -248,11 +248,11 @@ void Assembler::parse_instruction(const Token& name) {
                             break;
                     }
                 }
-                environment.add(symbol_opcode, std::make_shared<ExpressionNodeInteger>(instruction->opcode(match.addressing_mode)));
 
                 it_notation++;
                 it_arguments++;
             }
+            environment.add(symbol_opcode, std::make_shared<ExpressionNodeInteger>(instruction->opcode(match.addressing_mode)));
 
             auto first = true;
             std::vector<std::string> bytes;
