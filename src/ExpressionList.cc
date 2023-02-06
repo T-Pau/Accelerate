@@ -49,13 +49,13 @@ void ExpressionList::serialize(std::ostream &stream) const {
     auto first = true;
 
     for (const auto& expression: expressions) {
-        stream << expression;
         if (first) {
             first = false;
         }
         else {
             stream << ", ";
         }
+        stream << expression;
     }
 }
 
@@ -77,3 +77,7 @@ std::vector<uint8_t> ExpressionList::bytes(uint64_t byte_order) const {
     return data;
 }
 
+std::ostream& operator<<(std::ostream& stream, const ExpressionList& list) {
+    list.serialize(stream);
+    return stream;
+}

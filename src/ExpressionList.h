@@ -54,6 +54,6 @@ public:
     [[nodiscard]] std::vector<std::shared_ptr<ExpressionNode>>::const_iterator end() const {return expressions.end();}
 };
 
-std::ostream operator<<(std::ostream& stream, const ExpressionList& list);
+std::ostream& operator<<(std::ostream& stream, const ExpressionList& list);
 
 #endif // EXPRESSION_LIST_NODE_H

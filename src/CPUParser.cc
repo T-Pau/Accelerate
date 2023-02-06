@@ -382,11 +382,8 @@ AddressingMode::Notation CPUParser::parse_addressing_mode_notation(const Address
 
     for (const auto& token: (*parameters)) {
         if (token.is_name()) {
-            if (addressing_mode.arguments.find(token.as_symbol()) != addressing_mode.arguments.end()) {
-                auto symbol = argument_symbol(token.as_symbol());
-                if (!addressing_mode.has_argument(symbol)) {
-                    throw ParseException(token, "unknown argument");
-                }
+            auto symbol = argument_symbol(token.as_symbol());
+            if (addressing_mode.has_argument(symbol)) {
                 notation.elements.emplace_back(AddressingMode::Notation::ARGUMENT, symbol);
             }
             else {
@@ -408,7 +405,10 @@ void CPUParser::add_literals(TokenizerFile &tokenizer) {
     tokenizer.add_literal(token_pc);
 }
 
-symbol_t CPUParser::argument_symbol(symbol_t name) {
-    return name;
-    //return SymbolTable::global.add("#" + SymbolTable::global[name]);
+symbol_t CPUParser::argument_symbol(symbol_t symbol) {
+    auto name = SymbolTable::global[symbol];
+    if (name.front() == '.') {
+        return symbol;
+    }
+    return SymbolTable::global.add("$" + name);
 }

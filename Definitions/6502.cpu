@@ -88,7 +88,7 @@
 
 .addressing_mode zero_page_x_indexed {
     notation: address,x
-    arguemnts {
+    arguments {
         address: byte
     }
     encoding: .opcode, address

@@ -1,4 +1,4 @@
-    adc offset + 2
+    adc address + 2
 
     lda #$00
 

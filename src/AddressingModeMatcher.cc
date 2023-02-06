@@ -104,6 +104,7 @@ AddressingModeMatcherElement::elements_for(const AddressingMode::Notation::Eleme
                     }
                     break;
             }
+            break;
         }
 
         case AddressingMode::Notation::PUNCTUATION:
