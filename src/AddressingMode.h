@@ -62,7 +62,7 @@ public:
     };
 
     [[nodiscard]] const ArgumentType* argument(symbol_t name) const;
-    [[nodiscard]] const bool has_argument(symbol_t name) const {return argument(name) != nullptr;}
+    [[nodiscard]] bool has_argument(symbol_t name) const {return argument(name) != nullptr;}
 
     std::vector<Notation> notations;
     std::unordered_map<symbol_t, const ArgumentType*> arguments;
