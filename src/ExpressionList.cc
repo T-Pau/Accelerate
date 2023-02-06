@@ -36,10 +36,10 @@ size_t ExpressionList::byte_size() const {
     size_t size = 0;
 
     for (const auto& expression : expressions) {
-        if (expression.byte_size() == 0) {
+        if (expression->byte_size() == 0) {
             return 0;
         }
-        size += expression.byte_size();
+        size += expression->byte_size();
     }
 
     return size;
@@ -63,15 +63,15 @@ std::vector<uint8_t> ExpressionList::bytes(uint64_t byte_order) const {
     std::vector<uint8_t> data;
 
     for (const auto& expression: expressions) {
-        if (!expression.has_value()) {
-            throw ParseException(expression.location, "value not known");
+        if (!expression->has_value()) {
+            throw ParseException(expression->location, "value not known");
         }
-        size_t size = expression.byte_size();
+        size_t size = expression->byte_size();
         if (size == 0) {
-            size = expression.minimum_byte_size();
+            size = expression->minimum_byte_size();
         }
 
-        Int::encode(data, expression.value(), byte_order);
+        Int::encode(data, expression->value(), byte_order);
     }
 
     return data;

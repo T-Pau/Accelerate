@@ -37,6 +37,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "Tokenizer.h"
 #include "ExpressionNode.h"
+#include "ExpressionList.h"
 
 class ExpressionParser {
 public:
@@ -46,7 +47,7 @@ public:
 
     std::shared_ptr<ExpressionNode> parse() {top = Element({}, START); return do_parse();}
     std::shared_ptr<ExpressionNode> parse(const std::shared_ptr<ExpressionNode>& left) {top = Element(left, 0); return do_parse();}
-    std::vector<std::shared_ptr<ExpressionNode>> parse_list();
+    ExpressionList parse_list();
 
 private:
     class BinaryOperator {

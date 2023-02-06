@@ -37,6 +37,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Object.h"
 #include "SymbolTable.h"
 #include "Token.h"
+#include "ExpressionList.h"
 
 class AddressingMode {
 public:
@@ -61,10 +62,11 @@ public:
     };
 
     [[nodiscard]] const ArgumentType* argument(symbol_t name) const;
+    [[nodiscard]] const bool has_argument(symbol_t name) const {return argument(name) != nullptr;}
 
     std::vector<Notation> notations;
     std::unordered_map<symbol_t, const ArgumentType*> arguments;
-    std::vector<std::shared_ptr<ExpressionNode>> encoding;
+    ExpressionList encoding;
 
     void add_notation(Notation notation) {notations.emplace_back(std::move(notation));}
 };

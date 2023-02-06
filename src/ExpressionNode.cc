@@ -291,6 +291,10 @@ std::shared_ptr<ExpressionNode> ExpressionNodeVariable::evaluate(const Environme
     }
 }
 
+void ExpressionNodeVariable::replace_variables(symbol_t (*transform)(symbol_t)) {
+    symbol = transform(symbol);
+}
+
 
 ExpressionNodeUnary::ExpressionNodeUnary(SubType operation, std::shared_ptr<ExpressionNode>operand) : operation(operation), operand(std::move(operand)) {
     switch (operation) {

@@ -1,5 +1,5 @@
 /*
-ExpressionList.h -- List of Expressionse
+ExpressionList.h -- List of Expressions
 
 Copyright (C) Dieter Baron
 
@@ -38,6 +38,9 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 class ExpressionList {
 public:
+    ExpressionList() = default;
+    ExpressionList(std::initializer_list<std::shared_ptr<ExpressionNode>> list): expressions(list) {}
+
     [[nodiscard]] bool empty() const {return expressions.empty();}
     [[nodiscard]] size_t byte_size() const;
 
@@ -45,7 +48,10 @@ public:
     [[nodiscard]] std::vector<uint8_t> bytes(uint64_t byte_order) const;
 
 
-    std::vector<ExpressionNode> expressions;
+    std::vector<std::shared_ptr<ExpressionNode>> expressions;
+
+    [[nodiscard]] std::vector<std::shared_ptr<ExpressionNode>>::const_iterator begin() const {return expressions.begin();}
+    [[nodiscard]] std::vector<std::shared_ptr<ExpressionNode>>::const_iterator end() const {return expressions.end();}
 };
 
 std::ostream operator<<(std::ostream& stream, const ExpressionList& list);

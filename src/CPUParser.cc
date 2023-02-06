@@ -159,7 +159,7 @@ void CPUParser::parse_addressing_mode() {
             if (argument_type == nullptr) {
                 throw ParseException(argument_type_name, "unknown argument type '%s'", argument_type_name.as_string().c_str());
             }
-            addressing_mode.arguments[pair.first.as_symbol()] = argument_type;
+            addressing_mode.arguments[argument_symbol(pair.first.as_symbol())] = argument_type;
         }
     }
 
@@ -188,7 +188,12 @@ void CPUParser::parse_addressing_mode() {
     }
     else if (encoding_definition->is_scalar()) {
         auto encoding_tokenizer = TokenizerSequence(encoding_definition->as_scalar()->tokens);
-        addressing_mode.encoding = ExpressionParser(encoding_tokenizer).parse_list();
+        auto encoding = ExpressionParser(encoding_tokenizer).parse_list();
+
+        for (auto& expression: encoding) {
+            expression->replace_variables(argument_symbol);
+        }
+        addressing_mode.encoding = encoding;
     }
     else {
         throw ParseException(name, "encoding missing for addressing mode '%s'", name.as_string().c_str());
@@ -378,7 +383,11 @@ AddressingMode::Notation CPUParser::parse_addressing_mode_notation(const Address
     for (const auto& token: (*parameters)) {
         if (token.is_name()) {
             if (addressing_mode.arguments.find(token.as_symbol()) != addressing_mode.arguments.end()) {
-                notation.elements.emplace_back(AddressingMode::Notation::ARGUMENT, token.as_symbol());
+                auto symbol = argument_symbol(token.as_symbol());
+                if (!addressing_mode.has_argument(symbol)) {
+                    throw ParseException(token, "unknown argument");
+                }
+                notation.elements.emplace_back(AddressingMode::Notation::ARGUMENT, symbol);
             }
             else {
                 cpu.add_reserved_word(token.as_symbol());
@@ -397,4 +406,9 @@ void CPUParser::add_literals(TokenizerFile &tokenizer) {
     tokenizer.add_punctuations({"-", ","});
     tokenizer.add_literal(token_opcode);
     tokenizer.add_literal(token_pc);
+}
+
+symbol_t CPUParser::argument_symbol(symbol_t name) {
+    return name;
+    //return SymbolTable::global.add("#" + SymbolTable::global[name]);
 }

@@ -67,6 +67,7 @@ public:
     [[nodiscard]] virtual int64_t value() const {return 0;}
     [[nodiscard]] virtual SubType subtype() const = 0;
     [[nodiscard]] virtual size_t minimum_byte_size() const = 0;
+    virtual void replace_variables(symbol_t (*transform)(symbol_t)) = 0;
 
     [[nodiscard]] size_t byte_size() const {return byte_size_;}
     void set_byte_size(size_t size);
@@ -103,6 +104,7 @@ public:
     [[nodiscard]] bool has_value() const override {return true;}
     [[nodiscard]] int64_t value() const override {return value_;}
     [[nodiscard]] size_t minimum_byte_size() const override {return Int::minimum_byte_size(value());}
+    void replace_variables(symbol_t (*transform)(symbol_t)) override {}
 
 protected:
     [[nodiscard]] std::shared_ptr<ExpressionNode> evaluate(const Environment &environment) const override {return {};}
@@ -122,6 +124,7 @@ public:
     [[nodiscard]] SubType subtype() const override {return VARIABLE;}
 
     [[nodiscard]] size_t minimum_byte_size() const override {return 0;} // TODO
+    void replace_variables(symbol_t (*transform)(symbol_t)) override;
 
 protected:
     [[nodiscard]] std::shared_ptr<ExpressionNode> evaluate(const Environment &environment) const override;
@@ -139,6 +142,7 @@ public:
 
     [[nodiscard]] SubType subtype() const override {return operation;}
     [[nodiscard]] size_t minimum_byte_size() const override {return 0;} // TODO
+    void replace_variables(symbol_t (*transform)(symbol_t)) override {operand->replace_variables(transform);}
 
 protected:
     [[nodiscard]] std::shared_ptr<ExpressionNode> evaluate(const Environment &environment) const override;
@@ -159,6 +163,7 @@ public:
     [[nodiscard]] SubType subtype() const override {return operation;}
 
     [[nodiscard]] size_t minimum_byte_size() const override {return 0;} // TODO
+    void replace_variables(symbol_t (*transform)(symbol_t)) override {left->replace_variables(transform); right->replace_variables(transform);}
 
 protected:
     [[nodiscard]] std::shared_ptr<ExpressionNode> evaluate(const Environment &environment) const override;

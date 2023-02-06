@@ -315,11 +315,11 @@ void ExpressionParser::shift(ExpressionParser::Element next) {
 }
 
 
-std::vector<std::shared_ptr<ExpressionNode>> ExpressionParser::parse_list() {
-    std::vector<std::shared_ptr<ExpressionNode>> list;
+ExpressionList ExpressionParser::parse_list() {
+    ExpressionList list;
 
     while (true) {
-        list.emplace_back(parse());
+        list.expressions.emplace_back(parse());
         auto token = tokenizer.next();
         if (!token || token.is_newline()) {
             break;

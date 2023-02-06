@@ -50,6 +50,8 @@ private:
     void parse_instruction();
     void parse_syntax();
 
+    static symbol_t argument_symbol(symbol_t name);
+
     AddressingMode::Notation parse_addressing_mode_notation(const AddressingMode& addressing_mode, const ObjectScalar* parameters);
 
     std::unique_ptr<ArgumentType> parse_argument_type_enum(const Token& name, const Object* parameters);
