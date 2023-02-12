@@ -42,9 +42,12 @@ class ObjectFile {
 public:
     void add_object(symbol_t name, std::shared_ptr<Symbol> object) {objects[name] = std::move(object);}
 
+    void serialize(std::ostream& stream) const;
+
 private:
     std::map<symbol_t, std::shared_ptr<Symbol>> objects;
 };
 
+std::ostream& operator<<(std::ostream& stream, const ObjectFile& list);
 
 #endif // OBJECT_FILE_H

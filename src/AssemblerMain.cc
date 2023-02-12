@@ -20,6 +20,8 @@ int main(int argc, char *argv[]) {
 
         auto assembler = Assembler(cpu);
         auto source = assembler.parse(argv[2]);
+
+        std::cout << source;
     }
     catch (std::exception &ex) {
         std::cerr << "Parser error: " << ex.what() << std::endl;

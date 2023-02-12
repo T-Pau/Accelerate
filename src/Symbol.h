@@ -23,6 +23,8 @@ public:
     [[nodiscard]] bool is_reservation() const {return data.empty();}
     [[nodiscard]] bool empty() const {return is_reservation() && size == 0;}
 
+    void serialize(std::ostream& stream) const;
+
     void append(const ExpressionList& list) {data.append(list);}
     void append(const std::shared_ptr<ExpressionNode>& expression) {data.append(expression);}
 
@@ -34,5 +36,9 @@ public:
 
     ExpressionList data;
 };
+
+std::ostream& operator<<(std::ostream& stream, const std::shared_ptr<Symbol>& node);
+std::ostream& operator<<(std::ostream& stream, const Symbol& node);
+
 
 #endif // SYMBOL_H

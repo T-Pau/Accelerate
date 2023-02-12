@@ -30,3 +30,14 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include "ObjectFile.h"
+
+std::ostream& operator<<(std::ostream& stream, const ObjectFile& file) {
+    file.serialize(stream);
+    return stream;
+}
+
+void ObjectFile::serialize(std::ostream &stream) const {
+    for (const auto& pair: objects) {
+        stream << pair.second;
+    }
+}
