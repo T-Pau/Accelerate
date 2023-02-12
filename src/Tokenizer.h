@@ -41,6 +41,7 @@ class Tokenizer {
 public:
     Token next();
     void unget(Token token);
+    Token peek();
 
     std::vector<Token> collect_until(Token::Type type);
     std::vector<Token> collect_until(const TokenGroup& types);

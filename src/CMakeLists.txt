@@ -9,7 +9,7 @@ SET(xlr8-as_SOURCES
         ArgumentType.cc
         Assembler.cc
         AssemblerMain.cc
-        AssemblerObject.cc
+        ObjectFile.cc
         Commandline.cc
         CPU.cc
         CPUParser.cc

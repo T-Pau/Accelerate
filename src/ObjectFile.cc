@@ -1,5 +1,5 @@
 /*
-AssemblerObject.cc -- 
+ObjectFile.cc --
 
 Copyright (C) Dieter Baron
 
@@ -29,4 +29,4 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "AssemblerObject.h"
+#include "ObjectFile.h"

@@ -43,6 +43,8 @@ public:
 
     [[nodiscard]] bool empty() const {return expressions.empty();}
     [[nodiscard]] size_t byte_size() const;
+    void append(const ExpressionList& list) {expressions.insert(expressions.end(), list.expressions.begin(), list.expressions.end());}
+    void append(const std::shared_ptr<ExpressionNode>& expression) {expressions.emplace_back(expression);}
 
     void serialize(std::ostream& stream) const;
     [[nodiscard]] std::vector<uint8_t> bytes(uint64_t byte_order) const;

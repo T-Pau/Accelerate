@@ -148,3 +148,8 @@ std::vector<Token> Tokenizer::collect_until(const TokenGroup& types) {
     return tokens;
 }
 
+Token Tokenizer::peek() {
+    auto token = next();
+    unget(token);
+    return token;
+}

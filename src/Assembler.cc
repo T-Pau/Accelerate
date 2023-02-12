@@ -42,30 +42,52 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 bool Assembler::initialized = false;
 symbol_t Assembler::symbol_opcode;
 symbol_t Assembler::symbol_pc;
+Token Assembler::token_align;
 Token Assembler::token_brace_close;
 Token Assembler::token_brace_open;
 Token Assembler::token_colon;
+Token Assembler::token_curly_brace_close;
+Token Assembler::token_curly_brace_open;
 Token Assembler::token_equals;
+Token Assembler::token_global;
+Token Assembler::token_local;
+Token Assembler::token_reserve;
+Token Assembler::token_section;
 
 
 void Assembler::initialize() {
     if (!initialized) {
         symbol_opcode = SymbolTable::global.add(".opcode");
         symbol_pc = SymbolTable::global.add(".pc");
+        token_align = Token(Token::DIRECTIVE, {}, SymbolTable::global.add(".align"));
         token_brace_close = Token(Token::PUNCTUATION, {}, SymbolTable::global.add(")"));
         token_brace_open = Token(Token::PUNCTUATION, {}, SymbolTable::global.add("("));
         token_colon = Token(Token::PUNCTUATION, {}, SymbolTable::global.add(":"));
+        token_curly_brace_close = Token(Token::PUNCTUATION, {}, SymbolTable::global.add("}"));
+        token_curly_brace_open = Token(Token::PUNCTUATION, {}, SymbolTable::global.add("{"));
         token_equals = Token(Token::PUNCTUATION, {}, SymbolTable::global.add("="));
+        token_global = Token(Token::DIRECTIVE, {}, SymbolTable::global.add(".global"));
+        token_local = Token(Token::DIRECTIVE, {}, SymbolTable::global.add(".local"));
+        token_reserve = Token(Token::DIRECTIVE, {}, SymbolTable::global.add(".reserve"));
+        token_section = Token(Token::DIRECTIVE, {}, SymbolTable::global.add(".section"));
 
         initialized = true;
     }
 }
 
-AssemblerObject Assembler::parse(const std::string &file_name) {
+ObjectFile Assembler::parse(const std::string &file_name) {
     initialize();
     cpu.setup(tokenizer);
     ExpressionParser::setup(tokenizer);
+    tokenizer.add_punctuations({"{", "}", "=", ":"});
+    tokenizer.add_literal(token_align);
+    tokenizer.add_literal(token_global);
+    tokenizer.add_literal(token_local);
+    tokenizer.add_literal(token_reserve);
+    tokenizer.add_literal(token_section);
     tokenizer.push(file_name);
+
+    file_environment = std::make_shared<Environment>();
 
     while (!tokenizer.ended()) {
         try {
@@ -74,6 +96,79 @@ AssemblerObject Assembler::parse(const std::string &file_name) {
             switch (token.get_type()) {
                 case Token::END:
                     break;
+
+                case Token::DIRECTIVE: {
+                    auto visibility = visibility_value(token);
+                    if (visibility != Symbol::NONE) {
+                        auto name = tokenizer.next();
+                        if (name.get_type() != Token::NAME) {
+                            throw ParseException(name, "name expected");
+                        }
+                        auto token2 = tokenizer.next();
+                        if (token2 == token_equals) {
+                            parse_assignment(visibility, name);
+                        }
+                        else {
+                            tokenizer.unget(token2);
+                            parse_symbol(visibility, name);
+                        }
+                    }
+                    else if (token == token_section) {
+                        parse_section();
+                    }
+                    else {
+                        throw ParseException(token, "unknown directive");
+                    }
+                    tokenizer.expect(Token::NEWLINE, TokenGroup::newline);
+                    break;
+                }
+
+                case Token::NAME: {
+                    auto token2 = tokenizer.next();
+                    if (token2 == token_equals) {
+                        parse_assignment(Symbol::NONE, token);
+                        break;
+                    }
+                    else {
+                        throw ParseException(token2, "unexpected");
+                    }
+                }
+
+                case Token::NEWLINE:
+                    // ignore
+                    break;
+
+                case Token::INSTRUCTION:
+                    throw ParseException(token, "instruction not allowed outside symbol");
+                    break;
+
+                case Token::PUNCTUATION:
+                case Token::INTEGER:
+                case Token::PREPROCESSOR:
+                case Token::REAL:
+                case Token::STRING:
+                case Token::KEYWORD:
+                    throw ParseException(token, "unexpected %s", token.type_name());
+                    break;
+            }
+        }
+        catch (ParseException &ex) {
+            FileReader::global.error(ex.location, "%s", ex.what());
+            tokenizer.skip_until(TokenGroup::newline, true);
+        }
+    }
+
+    return object_file;
+}
+
+void Assembler::parse_symbol_body() {
+    while (!tokenizer.ended()) {
+        try {
+            auto token = tokenizer.next();
+
+            switch (token.get_type()) {
+                case Token::END:
+                    throw ParseException(token, "unclosed symbol body");
 
                 case Token::DIRECTIVE:
                     parse_directive(token);
@@ -85,7 +180,7 @@ AssemblerObject Assembler::parse(const std::string &file_name) {
                         parse_label(token);
                     }
                     else if (token2 == token_equals) {
-                        parse_assignment(token);
+                        parse_assignment(Symbol::NONE, token);
                     }
                     else {
                         tokenizer.unget(token2);
@@ -102,6 +197,15 @@ AssemblerObject Assembler::parse(const std::string &file_name) {
                     // ignore
                     break;
 
+                case Token::PUNCTUATION:
+                    if (token == token_curly_brace_close) {
+                        return;
+                    }
+                    else {
+                        throw ParseException(token, "unexpected %s", token.type_name());
+                    }
+                    break;
+
                 default:
                     throw ParseException(token, "unexpected %s", token.type_name());
             }
@@ -110,8 +214,6 @@ AssemblerObject Assembler::parse(const std::string &file_name) {
             FileReader::global.error(ex.location, "%s", ex.what());
         }
     }
-
-    return object;
 }
 
 void Assembler::parse_directive(const Token& directive) {
@@ -258,18 +360,8 @@ void Assembler::parse_instruction(const Token& name) {
             std::vector<std::string> bytes;
             for (const auto& expression: addressing_mode->encoding) {
                 auto value = ExpressionNode::evaluate(expression, environment);
-                if (first) {
-                    first = false;
-                    std::cout << ".data ";
-                }
-                else {
-                    std::cout << ", ";
-                }
-                std::cout << value;
+                current_object->append(value);
             }
-            std::cout << " ; " << name.as_string() << " " << SymbolTable::global[match.addressing_mode] << std::endl;
-
-            // TODO: emit instruction
             break;
         }
     }
@@ -301,7 +393,78 @@ void Assembler::parse_label(const Token& name) {
 
 }
 
-void Assembler::parse_assignment(const Token &name) {
-    // TODO: implement
-    tokenizer.skip_until(TokenGroup::newline, true);
+void Assembler::parse_assignment(Symbol::Visibility visibility, const Token &name) {
+    auto parser = ExpressionParser(tokenizer);
+    auto value = parser.parse();
+    // TODO: store in environment
+}
+
+void Assembler::parse_section() {
+    auto token = tokenizer.expect(Token::NAME, TokenGroup::newline);
+    current_section = token.as_symbol();
+}
+
+Symbol::Visibility Assembler::visibility_value(const Token& token) {
+    if (token == token_local) {
+        return Symbol::LOCAL;
+    }
+    else if (token == token_global) {
+        return Symbol::GLOBAL;
+    }
+    else {
+        return Symbol::NONE;
+    }
+}
+
+void Assembler::parse_symbol(Symbol::Visibility visibility, const Token &name) {
+    current_object = std::make_shared<Symbol>(current_section, visibility, name);
+
+    while (true) {
+        auto token = tokenizer.next();
+        if (token.is_newline()) {
+            tokenizer.unget(token);
+            break;
+        }
+        else if (token == token_curly_brace_open) {
+            // TODO: error if .reserved
+            current_environment = std::make_shared<Environment>(file_environment);
+            parse_symbol_body();
+            current_environment = file_environment;
+            break;
+        }
+        // TODO: parameters
+        else if (token == token_align || token == token_reserve) {
+            auto value = ExpressionParser(tokenizer).parse();
+
+            value = ExpressionNode::evaluate(value, *file_environment);
+
+            if (token == token_align) {
+                if (!value->has_value()) {
+                    throw ParseException(value->location, "alignment must be constant value");
+                }
+                current_object->alignment = value->value();
+            }
+            else {
+                if (!value->has_value()) {
+                    throw ParseException(value->location, "reservation must be constant value");
+                }
+                current_object->size = value->value();
+            }
+        }
+        else {
+            throw ParseException(token, "unexpected");
+        }
+    }
+
+    if (current_section == 0) {
+        throw ParseException(name, "symbol outside section");
+    }
+    if (current_object->empty()) {
+        throw ParseException(name, "empty symbol");
+    }
+
+    // TODO: warn if reserved in saved section
+    // TODO: error if data in unsaved section
+
+    object_file.add_object(name.as_symbol(), current_object);
 }

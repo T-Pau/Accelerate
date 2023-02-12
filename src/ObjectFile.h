@@ -1,5 +1,5 @@
 /*
-AssemblerObject.h -- 
+ObjectFile.h --
 
 Copyright (C) Dieter Baron
 
@@ -29,13 +29,22 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef ASSEMBLER_OBJECT_H
-#define ASSEMBLER_OBJECT_H
+#ifndef OBJECT_FILE_H
+#define OBJECT_FILE_H
 
+#include <map>
+#include <utility>
 
-class AssemblerObject {
+#include "SymbolTable.h"
+#include "Symbol.h"
 
+class ObjectFile {
+public:
+    void add_object(symbol_t name, std::shared_ptr<Symbol> object) {objects[name] = std::move(object);}
+
+private:
+    std::map<symbol_t, std::shared_ptr<Symbol>> objects;
 };
 
 
-#endif // ASSEMBLER_OBJECT_H
+#endif // OBJECT_FILE_H

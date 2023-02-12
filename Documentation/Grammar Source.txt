@@ -1,27 +1,43 @@
 file:
-    END
-    lines END
+    statements? END
 
-lines:
-    line
-    lines line
+statements:
+    <empty>
+    statements statement NEWLINE
 
-line:
+statement:
     assignment
-    directive
-    instruction
-    label line
+    symbol
+    section
+
+assignment:
+    visibility? NAME = expression NEWLINE
+
+symbol:
+    visibility NAME symbol-parameter*
+    visibility NAME symbol-parameter* { NEWLINE symbol-body }
+
+section:
+    .SECTION NAME
+
+symbol-body:
+    <empty>
+    symbol-body symbol-body-line NEWLINE
+
+visibility:
+    .GLOBAL
+    .LOCAL
+
+symbol-body-line:
+    assignment
+    label? instruction
     label
 
 label:
-    NAME :
-
-assignment:
-    NAME = expression NEWLINE
+    visibility? NAME :
 
 instruction:
-    NAME instruction_arguments NEWLINE
-    NAME NEWLINE
+    NAME instruction_arguments? NEWLINE
 
 instruction_arguments:
     instruction_argument

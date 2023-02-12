@@ -32,38 +32,57 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef ASSEMBLER_H
 #define ASSEMBLER_H
 
-#include "AssemblerObject.h"
+#include "ObjectFile.h"
 #include "CPU.h"
 #include "TokenizerFile.h"
+#include "Symbol.h"
 
 class Assembler {
 public:
     explicit Assembler(const CPU& cpu): cpu(cpu) {}
 
-    AssemblerObject parse(const std::string& file_name);
+    ObjectFile parse(const std::string& file_name);
 
 private:
-    void parse_assignment(const Token& name);
+    void parse_assignment(Symbol::Visibility visibility, const Token& name);
     void parse_directive(const Token& directive);
     void parse_instruction(const Token& name);
     void parse_label(const Token& name);
+    void parse_section();
+    void parse_symbol(Symbol::Visibility visibility, const Token& name);
+    void parse_symbol_body();
 
     std::shared_ptr<Node> parse_instruction_argument(const Token& token);
 
+    static Symbol::Visibility visibility_value(const Token& token);
+
     const CPU& cpu;
 
+    symbol_t current_section = 0;
+    std::shared_ptr<Symbol> current_object;
+    std::shared_ptr<Environment> file_environment;
+    std::shared_ptr<Environment> current_environment;
+
     TokenizerFile tokenizer;
-    AssemblerObject object;
+    ObjectFile object_file;
 
     static void initialize();
     static bool initialized;
+
     static symbol_t symbol_opcode;
     static symbol_t symbol_pc;
-    static Token token_colon;
-    static Token token_equals;
+
+    static Token token_align;
     static Token token_brace_close;
     static Token token_brace_open;
+    static Token token_colon;
+    static Token token_curly_brace_close;
+    static Token token_curly_brace_open;
+    static Token token_equals;
+    static Token token_global;
+    static Token token_local;
+    static Token token_reserve;
+    static Token token_section;
 };
-
 
 #endif // ASSEMBLER_H
