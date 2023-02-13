@@ -9,30 +9,32 @@ SET(xlr8-as_SOURCES
         ArgumentType.cc
         Assembler.cc
         AssemblerMain.cc
-        ObjectFile.cc
-        Commandline.cc
         CPU.cc
         CPUParser.cc
+        Commandline.cc
         Environment.cc
         Exception.cc
         ExpressionList.cc
         ExpressionNode.cc
         ExpressionParser.cc
+        FileParser.cc
         FileReader.cc
         Instruction.cc
         Int.cc
-        TokenNode.cc
         Location.cc
-        Node.cc
-        ParsedValue.cc
-        ParseException.cc
-        Path.cc
         MemoryMap.cc
-        Section.cc
+        Node.cc
         Object.cc
+        ObjectFile.cc
+        ObjectFileParser.cc
+        ParseException.cc
+        ParsedValue.cc
+        Path.cc
+        Section.cc
         SymbolTable.cc
         Token.cc
         TokenGroup.cc
+        TokenNode.cc
         Tokenizer.cc
         TokenizerFile.cc
         TokenizerSequence.cc
