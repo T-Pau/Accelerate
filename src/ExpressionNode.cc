@@ -119,7 +119,9 @@ std::shared_ptr<ExpressionNode> ExpressionNode::create_binary(const std::shared_
         node = std::make_shared<ExpressionNodeBinary>(left, operation, right);
     }
 
-    node->set_byte_size(byte_size);
+    if (byte_size) {
+        node->set_byte_size(byte_size);
+    }
     return node;
 }
 
@@ -243,6 +245,7 @@ ExpressionNodeInteger::ExpressionNodeInteger(const Token &token) {
         throw ParseException(token, "internal error: can't create integer node from %s", token.type_name());
     }
     value_ = static_cast<int64_t>(token.as_integer()); // TODO: handle overflow
+    set_byte_size(minimum_byte_size());
 }
 
 std::shared_ptr<ExpressionNode> ExpressionNodeInteger::clone() const {
@@ -261,7 +264,7 @@ std::shared_ptr<ExpressionNode> ExpressionNodeVariable::clone() const {
 
 void ExpressionNodeInteger::serialize_sub(std::ostream &stream) const {
     auto width = static_cast<int>(byte_size() > 0 ? byte_size() : minimum_byte_size()) * 2;
-    stream << "$" << std::setfill('0') << std::setw(width) << std::hex << value();
+    stream << "$" << std::setfill('0') << std::setw(width) << std::hex << value() << std::dec;
 }
 
 ExpressionNodeVariable::ExpressionNodeVariable(const Token &token) {
@@ -276,7 +279,6 @@ std::shared_ptr<ExpressionNode> ExpressionNodeVariable::evaluate(const Environme
     auto value = environment[symbol];
 
     if (value) {
-        // TODO: Don't evaluate further if evaluating encoding.
         // TODO: Detect loops
         auto node = ExpressionNode::evaluate(value, environment);
 

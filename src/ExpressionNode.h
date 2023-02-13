@@ -81,7 +81,7 @@ public:
 
     [[nodiscard]] virtual std::shared_ptr<ExpressionNode> evaluate(const Environment& environment) const = 0;
     [[nodiscard]] virtual std::shared_ptr<ExpressionNode> clone() const = 0;
-    [[nodiscard]] std::shared_ptr<ExpressionNode> static create_binary(const std::shared_ptr<ExpressionNode>& left, SubType operation, const std::shared_ptr<ExpressionNode>& right, size_t byte_size);
+    [[nodiscard]] std::shared_ptr<ExpressionNode> static create_binary(const std::shared_ptr<ExpressionNode>& left, SubType operation, const std::shared_ptr<ExpressionNode>& right, size_t byte_size = 0);
     [[nodiscard]] std::shared_ptr<ExpressionNode> static create_unary(SubType operation, std::shared_ptr<ExpressionNode> operand, size_t byte_size);
 
 protected:
@@ -97,7 +97,7 @@ std::ostream& operator<<(std::ostream& stream, const ExpressionNode& node);
 class ExpressionNodeInteger: public ExpressionNode {
 public:
     explicit ExpressionNodeInteger(const Token& token);
-    explicit ExpressionNodeInteger(int64_t value): value_(value) {}
+    explicit ExpressionNodeInteger(int64_t value): value_(value) {set_byte_size(minimum_byte_size());}
 
     [[nodiscard]] SubType subtype() const override {return INTEGER;}
 
