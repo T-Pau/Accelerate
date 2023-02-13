@@ -34,7 +34,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "ArgumentType.h"
 #include "ExpressionNode.h"
-#include "Object.h"
+#include "ParsedValue.h"
 #include "SymbolTable.h"
 #include "Token.h"
 #include "ExpressionList.h"

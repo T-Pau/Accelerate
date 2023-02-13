@@ -99,7 +99,7 @@ ObjectFile Assembler::parse(const std::string &file_name) {
 
                 case Token::DIRECTIVE: {
                     auto visibility = visibility_value(token);
-                    if (visibility != Symbol::NONE) {
+                    if (visibility != Object::NONE) {
                         auto name = tokenizer.next();
                         if (name.get_type() != Token::NAME) {
                             throw ParseException(name, "name expected");
@@ -126,7 +126,7 @@ ObjectFile Assembler::parse(const std::string &file_name) {
                 case Token::NAME: {
                     auto token2 = tokenizer.next();
                     if (token2 == token_equals) {
-                        parse_assignment(Symbol::NONE, token);
+                        parse_assignment(Object::NONE, token);
                         break;
                     }
                     else {
@@ -175,10 +175,10 @@ void Assembler::parse_symbol_body() {
                 case Token::NAME: {
                     auto token2 = tokenizer.next();
                     if (token2 == token_colon) {
-                        parse_label(Symbol::NONE, token);
+                        parse_label(Object::NONE, token);
                     }
                     else if (token2 == token_equals) {
-                        parse_assignment(Symbol::NONE, token);
+                        parse_assignment(Object::NONE, token);
                     }
                     else {
                         tokenizer.unget(token2);
@@ -413,23 +413,23 @@ std::shared_ptr<Node> Assembler::parse_instruction_argument(const Token& token) 
 }
 
 
-void Assembler::parse_label(Symbol::Visibility visibility, const Token& name) {
+void Assembler::parse_label(Object::Visibility visibility, const Token& name) {
     add_constant(visibility, name, get_pc());
 }
 
-void Assembler::add_constant(Symbol::Visibility visibility, const Token& name, const std::shared_ptr<ExpressionNode>& value) {
+void Assembler::add_constant(Object::Visibility visibility, const Token& name, const std::shared_ptr<ExpressionNode>& value) {
     switch (visibility) {
-        case Symbol::NONE:
+        case Object::NONE:
             break;
-        case Symbol::LOCAL:
-        case Symbol::GLOBAL:
+        case Object::LOCAL:
+        case Object::GLOBAL:
             object_file.add_constant(name.as_symbol(), visibility, value);
             break;
     }
     current_environment->add(name.as_symbol(), value);
 }
 
-void Assembler::parse_assignment(Symbol::Visibility visibility, const Token &name) {
+void Assembler::parse_assignment(Object::Visibility visibility, const Token &name) {
     add_constant(visibility, name, ExpressionParser(tokenizer).parse());
 }
 
@@ -438,20 +438,20 @@ void Assembler::parse_section() {
     current_section = token.as_symbol();
 }
 
-Symbol::Visibility Assembler::visibility_value(const Token& token) {
+Object::Visibility Assembler::visibility_value(const Token& token) {
     if (token == token_local) {
-        return Symbol::LOCAL;
+        return Object::LOCAL;
     }
     else if (token == token_global) {
-        return Symbol::GLOBAL;
+        return Object::GLOBAL;
     }
     else {
-        return Symbol::NONE;
+        return Object::NONE;
     }
 }
 
-void Assembler::parse_symbol(Symbol::Visibility visibility, const Token &name) {
-    current_object = std::make_shared<Symbol>(current_section, visibility, name);
+void Assembler::parse_symbol(Object::Visibility visibility, const Token &name) {
+    current_object = std::make_shared<Object>(current_section, visibility, name);
 
     while (true) {
         auto token = tokenizer.next();

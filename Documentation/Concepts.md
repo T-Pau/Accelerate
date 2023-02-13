@@ -6,7 +6,7 @@
 
 ## Source
 
-## Object
+## ParsedValue
 
 ## Module
 
@@ -40,7 +40,7 @@ A constant set in the assembler source:
 base_address = $1000
 ```
 
-## Symbol
+## Object
 
 A constant or unit
 

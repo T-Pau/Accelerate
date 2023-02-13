@@ -53,7 +53,7 @@ void ObjectFile::serialize(std::ostream &stream) const {
     }
 }
 
-void ObjectFile::add_constant(symbol_t name, Symbol::Visibility visibility, std::shared_ptr<ExpressionNode> value) {
+void ObjectFile::add_constant(symbol_t name, Object::Visibility visibility, std::shared_ptr<ExpressionNode> value) {
     // TODO: check for duplicates;
     constants[name] = Constant(name, visibility, std::move(value));
 }

@@ -24,12 +24,12 @@ SET(xlr8-as_SOURCES
         TokenNode.cc
         Location.cc
         Node.cc
-        Object.cc
+        ParsedValue.cc
         ParseException.cc
         Path.cc
         MemoryMap.cc
         Section.cc
-        Symbol.cc
+        Object.cc
         SymbolTable.cc
         Token.cc
         TokenGroup.cc

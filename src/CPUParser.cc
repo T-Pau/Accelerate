@@ -34,14 +34,14 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Exception.h"
 #include "ParseException.h"
 #include "AddressingMode.h"
-#include "Object.h"
+#include "ParsedValue.h"
 #include "TokenizerSequence.h"
 #include "ExpressionParser.h"
 
 
 TokenGroup CPUParser::group_directive = TokenGroup({Token::DIRECTIVE,Token::END}, {}, "directive");
 
-std::map<symbol_t, std::unique_ptr<ArgumentType> (CPUParser::*)(const Token& name, const Object* parameters)> CPUParser::argument_type_parser_methods;
+std::map<symbol_t, std::unique_ptr<ArgumentType> (CPUParser::*)(const Token& name, const ParsedValue* parameters)> CPUParser::argument_type_parser_methods;
 std::map<symbol_t, void (CPUParser::*)()> CPUParser::parser_methods;
 
 bool CPUParser::initialized = false;
@@ -81,7 +81,7 @@ CPUParser::CPUParser() {
 
 
 CPU CPUParser::parse(const std::string &file_name) {
-    Object::setup(tokenizer);
+    ParsedValue::setup(tokenizer);
     ExpressionParser::setup(tokenizer);
     add_literals(tokenizer);
 
@@ -120,7 +120,7 @@ CPU CPUParser::parse(const std::string &file_name) {
 
 void CPUParser::parse_addressing_mode() {
     Token name = tokenizer.expect(Token::NAME, group_directive);
-    auto parameters = Object::parse(tokenizer);
+    auto parameters = ParsedValue::parse(tokenizer);
 
     {
         auto it = addressing_mode_names.find(name);
@@ -206,7 +206,7 @@ void CPUParser::parse_addressing_mode() {
 void CPUParser::parse_argument_type() {
     Token name = tokenizer.expect(Token::NAME, group_directive);
     Token type = tokenizer.expect(Token::NAME, group_directive);
-    auto parameters = Object::parse(tokenizer);
+    auto parameters = ParsedValue::parse(tokenizer);
 
     {
         auto it = argument_type_names.find(name);
@@ -236,7 +236,7 @@ void CPUParser::parse_byte_order() {
 
 void CPUParser::parse_instruction() {
     Token name = tokenizer.expect(Token::NAME, group_directive);
-    auto parameters = Object::parse(tokenizer);
+    auto parameters = ParsedValue::parse(tokenizer);
 
     if (!parameters->is_dictionary()) {
         throw ParseException(parameters->location, "instruction definition must be dictionary");
@@ -265,7 +265,7 @@ void CPUParser::parse_instruction() {
 
 void CPUParser::parse_syntax() {
     auto type = tokenizer.expect(Token::NAME, group_directive);
-    auto values = Object::parse(tokenizer);
+    auto values = ParsedValue::parse(tokenizer);
 
     if (!values->is_scalar()) {
         throw ParseException(values->location, "expected strings");
@@ -292,7 +292,7 @@ void CPUParser::parse_syntax() {
 }
 
 
-std::unique_ptr<ArgumentType> CPUParser::parse_argument_type_enum(const Token& name, const Object *parameters) {
+std::unique_ptr<ArgumentType> CPUParser::parse_argument_type_enum(const Token& name, const ParsedValue *parameters) {
     auto argument_type = std::make_unique<ArgumentTypeEnum>();
 
     if (!parameters->is_dictionary()) {
@@ -318,7 +318,7 @@ std::unique_ptr<ArgumentType> CPUParser::parse_argument_type_enum(const Token& n
     return argument_type;
 }
 
-std::unique_ptr<ArgumentType> CPUParser::parse_argument_type_map(const Token& name, const Object *parameters) {
+std::unique_ptr<ArgumentType> CPUParser::parse_argument_type_map(const Token& name, const ParsedValue *parameters) {
     auto argument_type = std::make_unique<ArgumentTypeMap>();
 
     if (!parameters->is_dictionary()) {
@@ -342,7 +342,7 @@ std::unique_ptr<ArgumentType> CPUParser::parse_argument_type_map(const Token& na
     return argument_type;
 }
 
-std::unique_ptr<ArgumentType> CPUParser::parse_argument_type_range(const Token& name, const Object *parameters) {
+std::unique_ptr<ArgumentType> CPUParser::parse_argument_type_range(const Token& name, const ParsedValue *parameters) {
     auto argument_type = std::make_unique<ArgumentTypeRange>();
 
     if (!parameters->is_scalar()) {
@@ -377,7 +377,7 @@ std::unique_ptr<ArgumentType> CPUParser::parse_argument_type_range(const Token& 
 }
 
 
-AddressingMode::Notation CPUParser::parse_addressing_mode_notation(const AddressingMode& addressing_mode, const ObjectScalar *parameters) {
+AddressingMode::Notation CPUParser::parse_addressing_mode_notation(const AddressingMode& addressing_mode, const ParsedScalar *parameters) {
     AddressingMode::Notation notation;
 
     for (const auto& token: (*parameters)) {

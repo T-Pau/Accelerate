@@ -35,7 +35,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ObjectFile.h"
 #include "CPU.h"
 #include "TokenizerFile.h"
-#include "Symbol.h"
+#include "Object.h"
 
 class Assembler {
 public:
@@ -44,25 +44,25 @@ public:
     ObjectFile parse(const std::string& file_name);
 
 private:
-    void parse_assignment(Symbol::Visibility visibility, const Token& name);
+    void parse_assignment(Object::Visibility visibility, const Token& name);
     void parse_directive(const Token& directive);
     void parse_instruction(const Token& name);
-    void parse_label(Symbol::Visibility visibility, const Token& name);
+    void parse_label(Object::Visibility visibility, const Token& name);
     void parse_section();
-    void parse_symbol(Symbol::Visibility visibility, const Token& name);
+    void parse_symbol(Object::Visibility visibility, const Token& name);
     void parse_symbol_body();
 
     std::shared_ptr<Node> parse_instruction_argument(const Token& token);
 
-    void add_constant(Symbol::Visibility visibility, const Token& name, const std::shared_ptr<ExpressionNode>& value);
+    void add_constant(Object::Visibility visibility, const Token& name, const std::shared_ptr<ExpressionNode>& value);
     [[nodiscard]] std::shared_ptr<ExpressionNode> get_pc() const;
 
-    static Symbol::Visibility visibility_value(const Token& token);
+    static Object::Visibility visibility_value(const Token& token);
 
     const CPU& cpu;
 
     symbol_t current_section = 0;
-    std::shared_ptr<Symbol> current_object;
+    std::shared_ptr<Object> current_object;
     std::shared_ptr<Environment> file_environment;
     std::shared_ptr<Environment> current_environment;
 

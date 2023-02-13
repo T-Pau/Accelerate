@@ -52,15 +52,15 @@ private:
 
     static symbol_t argument_symbol(symbol_t name);
 
-    AddressingMode::Notation parse_addressing_mode_notation(const AddressingMode& addressing_mode, const ObjectScalar* parameters);
+    AddressingMode::Notation parse_addressing_mode_notation(const AddressingMode& addressing_mode, const ParsedScalar* parameters);
 
-    std::unique_ptr<ArgumentType> parse_argument_type_enum(const Token& name, const Object* parameters);
-    std::unique_ptr<ArgumentType> parse_argument_type_map(const Token& name, const Object* parameters);
-    std::unique_ptr<ArgumentType> parse_argument_type_range(const Token& name, const Object* parameters);
+    std::unique_ptr<ArgumentType> parse_argument_type_enum(const Token& name, const ParsedValue* parameters);
+    std::unique_ptr<ArgumentType> parse_argument_type_map(const Token& name, const ParsedValue* parameters);
+    std::unique_ptr<ArgumentType> parse_argument_type_range(const Token& name, const ParsedValue* parameters);
 
     static TokenGroup group_directive;
 
-    static std::map<symbol_t, std::unique_ptr<ArgumentType> (CPUParser::*)(const Token& name, const Object* parameters)> argument_type_parser_methods;
+    static std::map<symbol_t, std::unique_ptr<ArgumentType> (CPUParser::*)(const Token& name, const ParsedValue* parameters)> argument_type_parser_methods;
     static std::map<symbol_t, void (CPUParser::*)()> parser_methods;
 
     TokenizerFile tokenizer;
