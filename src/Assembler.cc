@@ -31,7 +31,6 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "Assembler.h"
 
-#include <iomanip>
 #include <memory>
 
 #include "ParseException.h"
@@ -88,6 +87,7 @@ ObjectFile Assembler::parse(const std::string &file_name) {
     tokenizer.push(file_name);
 
     file_environment = std::make_shared<Environment>();
+    current_environment = file_environment;
 
     while (!tokenizer.ended()) {
         try {
@@ -140,7 +140,6 @@ ObjectFile Assembler::parse(const std::string &file_name) {
 
                 case Token::INSTRUCTION:
                     throw ParseException(token, "instruction not allowed outside symbol");
-                    break;
 
                 case Token::PUNCTUATION:
                 case Token::INTEGER:
@@ -149,7 +148,6 @@ ObjectFile Assembler::parse(const std::string &file_name) {
                 case Token::STRING:
                 case Token::KEYWORD:
                     throw ParseException(token, "unexpected %s", token.type_name());
-                    break;
             }
         }
         catch (ParseException &ex) {
@@ -177,7 +175,7 @@ void Assembler::parse_symbol_body() {
                 case Token::NAME: {
                     auto token2 = tokenizer.next();
                     if (token2 == token_colon) {
-                        parse_label(token);
+                        parse_label(Symbol::NONE, token);
                     }
                     else if (token2 == token_equals) {
                         parse_assignment(Symbol::NONE, token);
@@ -204,7 +202,6 @@ void Assembler::parse_symbol_body() {
                     else {
                         throw ParseException(token, "unexpected %s", token.type_name());
                     }
-                    break;
 
                 default:
                     throw ParseException(token, "unexpected %s", token.type_name());
@@ -292,25 +289,27 @@ void Assembler::parse_instruction(const Token& name) {
     }
 
     // TODO: do in priority order (e. g. zero_page before absolute)
-    bool found = false;
+    auto found = false;
+    auto matched = false;
     for (const auto& match: matches ) {
         if (instruction->has_addressing_mode(match.addressing_mode)) {
             // TODO: check argument ranges
             found = true;
+            auto fits = true;
 
-            auto environment = Environment(); // TODO: include outer environment
+            auto environment = Environment(current_environment); // TODO: include outer environment
 
             const auto addressing_mode = cpu.addressing_mode(match.addressing_mode);
             const auto& notation = addressing_mode->notations[match.notation_index];
             auto it_notation = notation.elements.begin();
             auto it_arguments = arguments.begin();
-            while (it_notation != notation.elements.end()) {
+            while (fits && it_notation != notation.elements.end()) {
                 if (it_notation->is_argument()) {
                     auto argument_type = addressing_mode->argument(it_notation->symbol);
                     switch (argument_type->type()) {
                         case ArgumentType::ENUM: {
                             if ((*it_arguments)->type() != Node::KEYWORD) {
-                                throw ParseException((*it_arguments)->location, "enum argument is not an expression");
+                                throw ParseException((*it_arguments)->location, "enum argument is not a keyword");
                             }
                             auto enum_type = dynamic_cast<const ArgumentTypeEnum *>(argument_type);
                             auto name = std::dynamic_pointer_cast<TokenNode>(*it_arguments)->as_symbol();
@@ -345,6 +344,10 @@ void Assembler::parse_instruction(const Token& name) {
                                 throw ParseException((*it_arguments)->location, "range argument is not an expression");
                             }
                             auto expression = std::dynamic_pointer_cast<ExpressionNode>(*it_arguments);
+                            if (expression->minimum_byte_size() > range_type->byte_size()) {
+                                fits = false;
+                                break;
+                            }
                             expression->set_byte_size(range_type->byte_size());
                             environment.add(it_notation->symbol, expression);
                             break;
@@ -354,19 +357,41 @@ void Assembler::parse_instruction(const Token& name) {
                 it_notation++;
                 it_arguments++;
             }
-            environment.add(symbol_opcode, std::make_shared<ExpressionNodeInteger>(instruction->opcode(match.addressing_mode)));
 
-            auto first = true;
-            std::vector<std::string> bytes;
-            for (const auto& expression: addressing_mode->encoding) {
-                auto value = ExpressionNode::evaluate(expression, environment);
-                current_object->append(value);
+            if (!fits) {
+                // TODO: store details
+                continue;
             }
+
+            environment.add(symbol_opcode, std::make_shared<ExpressionNodeInteger>(instruction->opcode(match.addressing_mode)));
+            environment.add(symbol_pc, get_pc());
+
+            auto list = ExpressionList();
+
+            for (const auto& expression: addressing_mode->encoding) {
+                try {
+                    auto value = ExpressionNode::evaluate(expression, environment);
+                    list.append(value);
+                }
+                catch (ParseException &ex) {
+                    fits = false;
+                    // TODO: store detail
+                }
+            }
+            if (!fits) {
+                continue;
+            }
+            current_object->append(list);
+            // std::cout << " ; " << name.as_string() << " " << SymbolTable::global[match.addressing_mode] << std::endl;
+            matched = true;
             break;
         }
     }
     if (!found) {
         throw ParseException(name, "invalid addressing mode for instruction");
+    }
+    if (!matched) {
+        throw ParseException(name, "arguments out of range"); // TODO: more details
     }
 }
 
@@ -388,15 +413,24 @@ std::shared_ptr<Node> Assembler::parse_instruction_argument(const Token& token) 
 }
 
 
-void Assembler::parse_label(const Token& name) {
-    // TODO: implement
+void Assembler::parse_label(Symbol::Visibility visibility, const Token& name) {
+    add_constant(visibility, name, get_pc());
+}
 
+void Assembler::add_constant(Symbol::Visibility visibility, const Token& name, const std::shared_ptr<ExpressionNode>& value) {
+    switch (visibility) {
+        case Symbol::NONE:
+            break;
+        case Symbol::LOCAL:
+        case Symbol::GLOBAL:
+            object_file.add_constant(name.as_symbol(), visibility, value);
+            break;
+    }
+    current_environment->add(name.as_symbol(), value);
 }
 
 void Assembler::parse_assignment(Symbol::Visibility visibility, const Token &name) {
-    auto parser = ExpressionParser(tokenizer);
-    auto value = parser.parse();
-    // TODO: store in environment
+    add_constant(visibility, name, ExpressionParser(tokenizer).parse());
 }
 
 void Assembler::parse_section() {
@@ -467,4 +501,8 @@ void Assembler::parse_symbol(Symbol::Visibility visibility, const Token &name) {
     // TODO: error if data in unsaved section
 
     object_file.add_object(name.as_symbol(), current_object);
+}
+
+std::shared_ptr<ExpressionNode> Assembler::get_pc() const {
+    return ExpressionNode::create_binary(std::make_shared<ExpressionNodeVariable>(current_object->name), ExpressionNode::ADD, std::make_shared<ExpressionNodeInteger>(current_object->size));
 }

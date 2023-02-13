@@ -126,6 +126,8 @@ public:
     [[nodiscard]] size_t minimum_byte_size() const override {return 0;} // TODO
     void replace_variables(symbol_t (*transform)(symbol_t)) override;
 
+    symbol_t variable() const {return symbol;}
+
 protected:
     [[nodiscard]] std::shared_ptr<ExpressionNode> evaluate(const Environment &environment) const override;
     [[nodiscard]] std::shared_ptr<ExpressionNode> clone() const override;
@@ -141,7 +143,7 @@ public:
     ExpressionNodeUnary(SubType operation, std::shared_ptr<ExpressionNode>operand);
 
     [[nodiscard]] SubType subtype() const override {return operation;}
-    [[nodiscard]] size_t minimum_byte_size() const override {return 0;} // TODO
+    [[nodiscard]] size_t minimum_byte_size() const override;
     void replace_variables(symbol_t (*transform)(symbol_t)) override {operand->replace_variables(transform);}
 
 protected:
@@ -162,7 +164,7 @@ public:
     ExpressionNodeBinary(std::shared_ptr<ExpressionNode>  left, SubType operation, std::shared_ptr<ExpressionNode> right);
     [[nodiscard]] SubType subtype() const override {return operation;}
 
-    [[nodiscard]] size_t minimum_byte_size() const override {return 0;} // TODO
+    [[nodiscard]] size_t minimum_byte_size() const override;
     void replace_variables(symbol_t (*transform)(symbol_t)) override {left->replace_variables(transform); right->replace_variables(transform);}
 
 protected:
@@ -171,7 +173,7 @@ protected:
 
     void serialize_sub(std::ostream& stream) const override;
 
-private:
+public: // TODO: these should not be public, make create_binary part of ExpressionNodeBinary
     SubType operation;
     std::shared_ptr<ExpressionNode> left;
     std::shared_ptr<ExpressionNode> right;

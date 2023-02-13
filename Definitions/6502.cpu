@@ -75,7 +75,7 @@
     arguments {
         address: word
     }
-    encoding: .opcode, address - .pc : 1
+    encoding: .opcode, address - .pc - 2 : 1
 }
 
 .addressing_mode indirect {

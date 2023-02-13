@@ -110,7 +110,7 @@ private:
     std::vector<Source> sources;
     Source* current_source = nullptr;
 
-    bool last_was_newline = false;
+    bool last_was_newline = true;
 };
 
 #endif // TOKENIZER_FILE_H

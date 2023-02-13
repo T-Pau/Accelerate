@@ -115,7 +115,21 @@ std::shared_ptr<ExpressionNode> ExpressionNode::create_binary(const std::shared_
 
         node = std::make_shared<ExpressionNodeInteger>(value);
     }
-    else {
+    else if (operation == SUBTRACT && left->subtype() == ADD && right->subtype() == ADD) {
+        // This special case is for resolving relative addressing within an object: (object_name + N) - (object_name + M)
+        auto left_binary = std::dynamic_pointer_cast<ExpressionNodeBinary>(left);
+        auto right_binary = std::dynamic_pointer_cast<ExpressionNodeBinary>(right);
+
+        if (left_binary->left->subtype() == VARIABLE && right_binary->left->subtype() == VARIABLE) {
+            auto left_left = std::dynamic_pointer_cast<ExpressionNodeVariable>(left_binary->left);
+            auto right_left = std::dynamic_pointer_cast<ExpressionNodeVariable>(right_binary->left);
+            if (left_left->variable() == right_left->variable()) {
+                node = create_binary(left_binary->right, operation, right_binary->right, byte_size);
+            }
+        }
+    }
+
+    if (!node) {
         node = std::make_shared<ExpressionNodeBinary>(left, operation, right);
     }
 
@@ -264,7 +278,10 @@ std::shared_ptr<ExpressionNode> ExpressionNodeVariable::clone() const {
 
 void ExpressionNodeInteger::serialize_sub(std::ostream &stream) const {
     auto width = static_cast<int>(byte_size() > 0 ? byte_size() : minimum_byte_size()) * 2;
-    stream << "$" << std::setfill('0') << std::setw(width) << std::hex << value() << std::dec;
+    if (value() < 0) {
+        stream << "-";
+    }
+    stream << "$" << std::setfill('0') << std::setw(width) << std::hex << std::abs(value()) << std::dec;
 }
 
 ExpressionNodeVariable::ExpressionNodeVariable(const Token &token) {
@@ -417,6 +434,18 @@ void ExpressionNodeBinary::serialize_sub(std::ostream &stream) const {
     stream << right << ')';
 }
 
+size_t ExpressionNodeBinary::minimum_byte_size() const {
+    auto left_size = left->minimum_byte_size();
+    auto right_size = right->minimum_byte_size();
+
+    // TODO: be more accurate
+
+    if (left_size == 0 || right_size == 0) {
+        return 0;
+    }
+    return std::max(left_size, right_size);
+}
+
 
 void ExpressionNodeUnary::serialize_sub(std::ostream &stream) const {
     switch (operation) {
@@ -459,3 +488,34 @@ void ExpressionNodeUnary::serialize_sub(std::ostream &stream) const {
 
     stream << operand;
 }
+
+
+size_t ExpressionNodeUnary::minimum_byte_size() const {
+    switch (operation) {
+        case BANK_BYTE:
+        case HIGH_BYTE:
+        case LOW_BYTE:
+            return 1;
+
+        case BITWISE_NOT:
+        case MINUS:
+            return operand->minimum_byte_size();
+
+        case ADD:
+        case BITWISE_AND:
+        case BITWISE_OR:
+        case BITWISE_XOR:
+        case DIVIDE:
+        case INTEGER:
+        case MODULO:
+        case MULTIPLY:
+        case PLUS:
+        case SIZE:
+        case SHIFT_LEFT:
+        case SHIFT_RIGHT:
+        case SUBTRACT:
+        case VARIABLE:
+            throw Exception("internal error: invalid unary operator");
+    }
+}
+

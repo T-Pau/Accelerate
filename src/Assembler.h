@@ -47,12 +47,15 @@ private:
     void parse_assignment(Symbol::Visibility visibility, const Token& name);
     void parse_directive(const Token& directive);
     void parse_instruction(const Token& name);
-    void parse_label(const Token& name);
+    void parse_label(Symbol::Visibility visibility, const Token& name);
     void parse_section();
     void parse_symbol(Symbol::Visibility visibility, const Token& name);
     void parse_symbol_body();
 
     std::shared_ptr<Node> parse_instruction_argument(const Token& token);
+
+    void add_constant(Symbol::Visibility visibility, const Token& name, const std::shared_ptr<ExpressionNode>& value);
+    [[nodiscard]] std::shared_ptr<ExpressionNode> get_pc() const;
 
     static Symbol::Visibility visibility_value(const Token& token);
 

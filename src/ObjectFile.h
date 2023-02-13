@@ -40,12 +40,26 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 class ObjectFile {
 public:
-    void add_object(symbol_t name, std::shared_ptr<Symbol> object) {objects[name] = std::move(object);}
+    class Constant {
+    public:
+        Constant() = default;
+        Constant(symbol_t name, Symbol::Visibility visibility, std::shared_ptr<ExpressionNode> value): name(name), visibility(visibility), value(std::move(value)) {}
+
+        void serialize(std::ostream& stream) const;
+
+        symbol_t name = 0;
+        Symbol::Visibility visibility = Symbol::NONE;
+        std::shared_ptr<ExpressionNode> value;
+    };
+
+    void add_constant(symbol_t name, Symbol::Visibility visibility, std::shared_ptr<ExpressionNode> value);
+    void add_object(symbol_t name, std::shared_ptr<Symbol> object) {objects[name] = std::move(object);} // TODO: check for duplicates
 
     void serialize(std::ostream& stream) const;
 
 private:
     std::map<symbol_t, std::shared_ptr<Symbol>> objects;
+    std::map<symbol_t, Constant> constants;
 };
 
 std::ostream& operator<<(std::ostream& stream, const ObjectFile& list);

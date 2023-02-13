@@ -31,13 +31,36 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "ObjectFile.h"
 
+#include <utility>
+
 std::ostream& operator<<(std::ostream& stream, const ObjectFile& file) {
     file.serialize(stream);
     return stream;
 }
 
+std::ostream& operator<<(std::ostream& stream, const ObjectFile::Constant& file) {
+    file.serialize(stream);
+    return stream;
+}
+
 void ObjectFile::serialize(std::ostream &stream) const {
+    for (const auto& pair : constants) {
+        stream << pair.second;
+    }
+
     for (const auto& pair: objects) {
         stream << pair.second;
     }
+}
+
+void ObjectFile::add_constant(symbol_t name, Symbol::Visibility visibility, std::shared_ptr<ExpressionNode> value) {
+    // TODO: check for duplicates;
+    constants[name] = Constant(name, visibility, std::move(value));
+}
+
+void ObjectFile::Constant::serialize(std::ostream &stream) const {
+    stream << ".constant " << SymbolTable::global[name] << " {" << std::endl;
+    // TODO: visibility
+    stream << "    value: " << value << std::endl;
+    stream << "}" << std::endl;
 }
