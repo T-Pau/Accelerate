@@ -38,10 +38,10 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 class TokenizerSequence: public Tokenizer {
 public:
-    TokenizerSequence(std::vector<Token> tokens): tokens(std::move(tokens)) {current_position = this->tokens.begin();}
+    explicit TokenizerSequence(std::vector<Token> tokens): tokens(std::move(tokens)) {current_position = this->tokens.begin();}
 
 protected:
-    bool sub_ended() const override {return current_position == tokens.end();}
+    [[nodiscard]] bool sub_ended() const override {return current_position == tokens.end();}
     Token sub_next() override;
 
 private:

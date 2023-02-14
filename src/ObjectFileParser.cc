@@ -30,3 +30,85 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include "ObjectFileParser.h"
+#include "Exception.h"
+#include "ParsedValue.h"
+#include "ParseException.h"
+#include "ExpressionParser.h"
+#include "TokenizerSequence.h"
+
+bool ObjectFileParser::initialized = false;
+std::map<symbol_t, void (ObjectFileParser::*)()> ObjectFileParser::parser_methods;
+Token ObjectFileParser::token_alignment;
+Token ObjectFileParser::token_constant;
+Token ObjectFileParser::token_data;
+Token ObjectFileParser::token_object;
+Token ObjectFileParser::token_section;
+Token ObjectFileParser::token_size;
+Token ObjectFileParser::token_value;
+
+void ObjectFileParser::initialize() {
+    if (!initialized) {
+        token_alignment = Token(Token::NAME, {}, SymbolTable::global.add("alignment"));
+        token_constant = Token(Token::DIRECTIVE, {}, SymbolTable::global.add(".constant"));
+        token_data = Token(Token::NAME, {}, SymbolTable::global.add("data"));
+        token_object = Token(Token::DIRECTIVE, {}, SymbolTable::global.add(".object"));
+        token_section = Token(Token::NAME, {}, SymbolTable::global.add("section"));
+        token_size = Token(Token::NAME, {}, SymbolTable::global.add("size"));
+        token_value = Token(Token::NAME, {}, SymbolTable::global.add("value"));
+
+        parser_methods[token_constant.as_symbol()] = &ObjectFileParser::parse_constant;
+        parser_methods[token_object.as_symbol()] = &ObjectFileParser::parse_object;
+
+        initialized = true;
+    }
+}
+
+ObjectFileParser::ObjectFileParser() {
+    initialize();
+}
+
+ObjectFile ObjectFileParser::parse(const std::string &filename) {
+    if (!parse_file(filename)) {
+        throw Exception("can't parse object file '%s'", filename.c_str());
+    }
+    return file;
+}
+
+void ObjectFileParser::parse_directive(const Token &directive) {
+
+}
+
+void ObjectFileParser::parse_constant() {
+    auto name = tokenizer.expect(Token::NAME, TokenGroup::newline);
+    auto parsed_value = ParsedValue::parse(tokenizer);
+
+    if (!parsed_value->is_dictionary()) {
+        throw ParseException(parsed_value->location, "constant is not a dictionary");
+    }
+    auto parameters = parsed_value->as_dictionary();
+
+    auto value = (*parameters)[token_value];
+    if (!value) {
+        throw ParseException(parsed_value->location, "constant has no value");
+    }
+    if (!value->is_scalar()) {
+        throw ParseException(parsed_value->location, "constant value is not a scalar");
+    }
+    // TODO: visibility
+    auto value_tokenizer = TokenizerSequence(value->as_scalar()->tokens);
+    file.add_constant(name.as_symbol(), Object::NONE, ExpressionParser(value_tokenizer).parse());
+}
+
+
+void ObjectFileParser::parse_object() {
+    auto name = tokenizer.expect(Token::NAME, TokenGroup::newline);
+    auto parsed_value = ParsedValue::parse(tokenizer);
+
+    if (!parsed_value->is_dictionary()) {
+        throw ParseException(parsed_value->location, "object is not a dictionary");
+    }
+    auto parameters = std::dynamic_pointer_cast<ParsedDictionary>(parsed_value);
+
+}
+
+

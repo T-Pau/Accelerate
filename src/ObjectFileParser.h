@@ -48,8 +48,22 @@ protected:
     void parse_directive(const Token& directive) override;
 
 private:
-    TokenizerFile tokenizer;
     ObjectFile file;
+
+    void parse_constant();
+    void parse_object();
+
+    static void initialize();
+
+    static bool initialized;
+    static std::map<symbol_t, void (ObjectFileParser::*)()> parser_methods;
+    static Token token_alignment;
+    static Token token_constant;
+    static Token token_data;
+    static Token token_object;
+    static Token token_section;
+    static Token token_size;
+    static Token token_value;
 };
 
 
