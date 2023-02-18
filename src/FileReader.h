@@ -33,8 +33,8 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define FILEREADER_H
 
 #include <iostream>
-#include <map>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 #include "Location.h"
@@ -63,6 +63,8 @@ public:
     void output(DiagnosticsSeverity severity, const Location& location, const char* format, ...) PRINTF_LIKE(4, 5);
     void output(DiagnosticsSeverity severity, const Location& location, const std::string& message);
 
+    [[nodiscard]] std::vector<std::string> file_names() const;
+
     [[nodiscard]] bool had_error() const {return error_flag;}
 
     static FileReader global;
@@ -72,7 +74,7 @@ private:
 
     static std::vector<std::string> empty_file;
 
-    std::map<symbol_t,std::vector<std::string>> files;
+    std::unordered_map<symbol_t,std::vector<std::string>> files;
     bool error_flag = false;
     std::ostream& diagnostics_file = std::cerr;
 

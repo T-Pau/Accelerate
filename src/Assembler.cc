@@ -32,6 +32,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Assembler.h"
 
 #include <memory>
+#include <utility>
 
 #include "ParseException.h"
 #include "FileReader.h"
@@ -417,16 +418,17 @@ void Assembler::parse_label(Object::Visibility visibility, const Token& name) {
     add_constant(visibility, name, get_pc());
 }
 
-void Assembler::add_constant(Object::Visibility visibility, const Token& name, const std::shared_ptr<ExpressionNode>& value) {
+void Assembler::add_constant(Object::Visibility visibility, const Token& name, std::shared_ptr<ExpressionNode> value) {
+    auto evaluated_value = ExpressionNode::evaluate(std::move(value), *current_environment);
     switch (visibility) {
         case Object::NONE:
             break;
         case Object::LOCAL:
         case Object::GLOBAL:
-            object_file.add_constant(name.as_symbol(), visibility, value);
+            object_file.add_constant(name.as_symbol(), visibility, evaluated_value);
             break;
     }
-    current_environment->add(name.as_symbol(), value);
+    current_environment->add(name.as_symbol(), evaluated_value);
 }
 
 void Assembler::parse_assignment(Object::Visibility visibility, const Token &name) {

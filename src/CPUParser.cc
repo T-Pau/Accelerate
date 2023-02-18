@@ -41,22 +41,28 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 TokenGroup CPUParser::group_directive = TokenGroup({Token::DIRECTIVE,Token::END}, {}, "directive");
 
-std::map<symbol_t, std::unique_ptr<ArgumentType> (CPUParser::*)(const Token& name, const ParsedValue* parameters)> CPUParser::argument_type_parser_methods;
-std::map<symbol_t, void (CPUParser::*)()> CPUParser::parser_methods;
+std::unordered_map<symbol_t, std::unique_ptr<ArgumentType> (CPUParser::*)(const Token& name, const ParsedValue* parameters)> CPUParser::argument_type_parser_methods;
+std::unordered_map<symbol_t, void (CPUParser::*)()> CPUParser::parser_methods;
 
 bool CPUParser::initialized = false;
+Token CPUParser::token_arguments;
 Token CPUParser::token_comma;
-Token CPUParser::token_minus;
+Token CPUParser::token_encoding;
 Token CPUParser::token_keywords;
+Token CPUParser::token_minus;
+Token CPUParser::token_notation;
 Token CPUParser::token_opcode;
 Token CPUParser::token_pc;
 Token CPUParser::token_punctuation;
 
 void CPUParser::initialize() {
     if (!initialized) {
+        token_arguments = Token(Token::NAME, {}, "arguments");
         token_comma = Token(Token::PUNCTUATION, {}, ",");
-        token_minus = Token(Token::PUNCTUATION, {}, "-");
+        token_encoding = Token(Token::NAME, {}, "encoding");
         token_keywords = Token(Token::NAME, {}, "keywords");
+        token_minus = Token(Token::PUNCTUATION, {}, "-");
+        token_notation = Token(Token::NAME, {}, "notation");
         token_opcode = Token(Token::NAME, {}, ".opcode");
         token_pc = Token(Token::NAME, {}, ".pc");
         token_punctuation = Token(Token::NAME, {}, "punctuation");
@@ -139,7 +145,7 @@ void CPUParser::parse_addressing_mode() {
 
     auto definition = parameters->as_dictionary();
 
-    auto arguments = (*definition)["arguments"];
+    auto arguments = definition->get_optional(token_arguments);
     if (arguments != nullptr) {
         if (!arguments->is_dictionary()) {
             throw ParseException(name, "addressing mode definition is not a dictionary");
@@ -163,7 +169,7 @@ void CPUParser::parse_addressing_mode() {
         }
     }
 
-    auto notation = (*definition)["notation"];
+    auto notation = (*definition)[token_notation];
     if (notation == nullptr) {
         throw ParseException(name, "notation missing for addressing mode '%s'", name.as_string().c_str());
     }
@@ -182,7 +188,7 @@ void CPUParser::parse_addressing_mode() {
         throw ParseException(notation->location, "invalid notation for addressing mode '%s'", name.as_string().c_str());
     }
 
-    auto encoding_definition = (*definition)["encoding"];
+    auto encoding_definition = definition->get_optional(token_encoding);
     if (encoding_definition == nullptr) {
         addressing_mode.encoding = {std::make_shared<ExpressionNodeVariable>(token_opcode)};
     }

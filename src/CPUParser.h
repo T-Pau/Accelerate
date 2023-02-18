@@ -60,8 +60,8 @@ private:
 
     static TokenGroup group_directive;
 
-    static std::map<symbol_t, std::unique_ptr<ArgumentType> (CPUParser::*)(const Token& name, const ParsedValue* parameters)> argument_type_parser_methods;
-    static std::map<symbol_t, void (CPUParser::*)()> parser_methods;
+    static std::unordered_map<symbol_t, std::unique_ptr<ArgumentType> (CPUParser::*)(const Token& name, const ParsedValue* parameters)> argument_type_parser_methods;
+    static std::unordered_map<symbol_t, void (CPUParser::*)()> parser_methods;
 
     TokenizerFile tokenizer;
     CPU cpu;
@@ -71,9 +71,12 @@ private:
 
     static void initialize();
     static bool initialized;
-    static Token token_minus;
+    static Token token_arguments;
     static Token token_comma;
+    static Token token_encoding;
     static Token token_keywords;
+    static Token token_minus;
+    static Token token_notation;
     static Token token_opcode;
     static Token token_pc;
     static Token token_punctuation;

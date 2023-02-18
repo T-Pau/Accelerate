@@ -85,6 +85,42 @@ void ParsedValue::setup(TokenizerFile &tokenizer) {
 }
 
 
+const ParsedArray *ParsedValue::as_array() const {
+    if (!is_array()) {
+        throw ParseException(location, "array expected");
+    }
+
+    return reinterpret_cast<const ParsedArray*>(this);
+}
+
+
+const ParsedDictionary *ParsedValue::as_dictionary() const {
+    if (!is_dictionary()) {
+        throw ParseException(location, "dictionary expected");
+    }
+
+    return reinterpret_cast<const ParsedDictionary*>(this);
+}
+
+
+const ParsedScalar *ParsedValue::as_scalar() const {
+    if (!is_scalar()) {
+        throw ParseException(location, "scalar expected");
+    }
+
+    return reinterpret_cast<const ParsedScalar*>(this);
+}
+
+
+const ParsedScalar *ParsedValue::as_singular_scalar() const {
+    if (!is_singular_scalar()) {
+        throw ParseException(location, "singular scalar expected");
+    }
+
+    return reinterpret_cast<const ParsedScalar*>(this);
+}
+
+
 ParsedArray::ParsedArray(Tokenizer &tokenizer) {
     tokenizer.skip(Token::NEWLINE);
     while (true) {
@@ -114,15 +150,24 @@ ParsedDictionary::ParsedDictionary(Tokenizer &tokenizer) {
     tokenizer.expect(Token::NEWLINE, TokenGroup::newline);
 }
 
-
-std::shared_ptr<ParsedValue> ParsedDictionary::operator[](const Token& token) const {
+std::shared_ptr<ParsedValue> ParsedDictionary::get_optional(const Token &token) const {
     auto it = entries.find(token);
-    if (it != entries.end()) {
-        return it->second;
-    }
-    else {
+    if (it == entries.end()) {
         return {};
     }
+
+    return it->second;
+}
+
+
+
+std::shared_ptr<ParsedValue> ParsedDictionary::operator[](const Token& token) const {
+    auto value = get_optional(token);
+    if (value == nullptr) {
+            throw ParseException(location, "missing key '%s'", token.as_string().c_str());
+    }
+
+    return value;
 }
 
 

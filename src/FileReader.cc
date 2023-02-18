@@ -152,3 +152,15 @@ void FileReader::output(FileReader::DiagnosticsSeverity severity, const Location
     }
     catch (...) {}
 }
+
+std::vector<std::string> FileReader::file_names() const {
+    auto file_names = std::vector<std::string>();
+
+    for (const auto& pair: files) {
+        file_names.emplace_back(SymbolTable::global[pair.first]);
+    }
+
+    std::sort(file_names.begin(), file_names.end());
+
+    return file_names;
+}

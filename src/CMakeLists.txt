@@ -2,13 +2,11 @@ if(NOT HAVE_GETOPT_LONG)
     list(APPEND COMPATIBILITY getopt_long.cc)
 endif()
 
-
-SET(xlr8-as_SOURCES
+add_library(xlr8 STATIC
         AddressingMode.cc
         AddressingModeMatcher.cc
         ArgumentType.cc
         Assembler.cc
-        AssemblerMain.cc
         CPU.cc
         CPUParser.cc
         Commandline.cc
@@ -42,8 +40,11 @@ SET(xlr8-as_SOURCES
         ${COMPATIBILITY}
 )
 
-foreach(PROGRAM xlr8-as)
-    ADD_EXECUTABLE(${PROGRAM} ${${PROGRAM}_SOURCES})
+target_include_directories(xlr8 PRIVATE ${PROJECT_BINARY_DIR})
+
+foreach(PROGRAM xlr8-as xlr8-ld)
+    ADD_EXECUTABLE(${PROGRAM} ${PROGRAM}.cc)
     target_include_directories(${PROGRAM} PRIVATE ${PROJECT_BINARY_DIR})
+    target_link_libraries(${PROGRAM} xlr8)
     INSTALL(TARGETS ${PROGRAM} RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 endforeach()

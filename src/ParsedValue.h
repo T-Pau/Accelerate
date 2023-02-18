@@ -57,9 +57,10 @@ public:
     static void setup(TokenizerFile& tokenizer);
     static std::shared_ptr<ParsedValue> parse(Tokenizer& tokenizer);
 
-    [[nodiscard]] const ParsedArray* as_array() const {return is_array() ? reinterpret_cast<const ParsedArray*>(this) : nullptr;}
-    [[nodiscard]] const ParsedDictionary* as_dictionary() const {return is_dictionary() ? reinterpret_cast<const ParsedDictionary*>(this) : nullptr;}
-    [[nodiscard]] const ParsedScalar* as_scalar() const {return is_scalar() ? reinterpret_cast<const ParsedScalar*>(this) : nullptr;}
+    [[nodiscard]] const ParsedArray* as_array() const;
+    [[nodiscard]] const ParsedDictionary* as_dictionary() const;
+    [[nodiscard]] const ParsedScalar* as_scalar() const;
+    [[nodiscard]] const ParsedScalar* as_singular_scalar() const;
     [[nodiscard]] bool is_array() const {return type() == ARRAY;}
     [[nodiscard]] bool is_dictionary() const {return type() == DICTIONARY;}
     [[nodiscard]] bool is_scalar() const {return type() == SCALAR_SINGULAR || type() == SCALAR_LIST;}
@@ -108,6 +109,7 @@ public:
 
     std::shared_ptr<ParsedValue> operator[](const Token& token) const;
     std::shared_ptr<ParsedValue> operator[](const std::string& name) const {return (*this)[Token(Token::NAME, {}, SymbolTable::global.add(name))];}
+    std::shared_ptr<ParsedValue> get_optional(const Token& token) const;
 
     std::unordered_map<Token, std::shared_ptr<ParsedValue>>::iterator begin() {return entries.begin();}
     std::unordered_map<Token, std::shared_ptr<ParsedValue>>::iterator end() {return entries.end();}

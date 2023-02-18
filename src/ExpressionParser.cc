@@ -235,7 +235,10 @@ std::shared_ptr<ExpressionNode> ExpressionParser::do_parse() {
                             tokenizer.unget(token);
                             return top.node;
                         }
-                        else if (stack.back().type != PARENTHESIS_OPEN) {
+                        else if (stack.back().type == PARENTHESIS_OPEN) {
+                            stack.pop_back();
+                        }
+                        else {
                             throw ParseException(next.location, "unmatched ')'");
                         }
                         break;

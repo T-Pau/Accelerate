@@ -49,9 +49,9 @@ Token ObjectFileParser::token_value;
 void ObjectFileParser::initialize() {
     if (!initialized) {
         token_alignment = Token(Token::NAME, {}, SymbolTable::global.add("alignment"));
-        token_constant = Token(Token::DIRECTIVE, {}, SymbolTable::global.add(".constant"));
+        token_constant = Token(Token::DIRECTIVE, {}, SymbolTable::global.add("constant"));
         token_data = Token(Token::NAME, {}, SymbolTable::global.add("data"));
-        token_object = Token(Token::DIRECTIVE, {}, SymbolTable::global.add(".object"));
+        token_object = Token(Token::DIRECTIVE, {}, SymbolTable::global.add("object"));
         token_section = Token(Token::NAME, {}, SymbolTable::global.add("section"));
         token_size = Token(Token::NAME, {}, SymbolTable::global.add("size"));
         token_value = Token(Token::NAME, {}, SymbolTable::global.add("value"));
@@ -75,40 +75,58 @@ ObjectFile ObjectFileParser::parse(const std::string &filename) {
 }
 
 void ObjectFileParser::parse_directive(const Token &directive) {
-
+    auto it = parser_methods.find(directive.as_symbol());
+    if (it == parser_methods.end()) {
+        throw ParseException(directive, "unknown directive");
+    }
+    (this->*it->second)();
 }
 
 void ObjectFileParser::parse_constant() {
     auto name = tokenizer.expect(Token::NAME, TokenGroup::newline);
-    auto parsed_value = ParsedValue::parse(tokenizer);
+    auto parse_value = ParsedValue::parse(tokenizer);
+    auto parameters = parse_value->as_dictionary();
 
-    if (!parsed_value->is_dictionary()) {
-        throw ParseException(parsed_value->location, "constant is not a dictionary");
-    }
-    auto parameters = parsed_value->as_dictionary();
-
-    auto value = (*parameters)[token_value];
-    if (!value) {
-        throw ParseException(parsed_value->location, "constant has no value");
-    }
-    if (!value->is_scalar()) {
-        throw ParseException(parsed_value->location, "constant value is not a scalar");
-    }
+    auto value = (*parameters)[token_value]->as_scalar();
     // TODO: visibility
-    auto value_tokenizer = TokenizerSequence(value->as_scalar()->tokens);
+    auto value_tokenizer = TokenizerSequence(value->tokens);
     file.add_constant(name.as_symbol(), Object::NONE, ExpressionParser(value_tokenizer).parse());
 }
 
 
 void ObjectFileParser::parse_object() {
     auto name = tokenizer.expect(Token::NAME, TokenGroup::newline);
-    auto parsed_value = ParsedValue::parse(tokenizer);
+    auto parse_value = ParsedValue::parse(tokenizer);
+    auto parameters = parse_value->as_dictionary();
 
-    if (!parsed_value->is_dictionary()) {
-        throw ParseException(parsed_value->location, "object is not a dictionary");
+    auto section = (*parameters)[token_section]->as_singular_scalar()->token();
+    if (!section.is_name()) {
+        throw ParseException(section, "name expected");
     }
-    auto parameters = std::dynamic_pointer_cast<ParsedDictionary>(parsed_value);
+    // TODO: visibility
 
+    auto object = Object(section.as_symbol(), Object::NONE, name);
+
+    auto alignment_value = parameters->get_optional(token_alignment);
+    if (alignment_value != nullptr) {
+        auto alignment = alignment_value->as_singular_scalar()->token();
+        if (!alignment.is_integer()) {
+            throw ParseException(alignment, "integer expected");
+        }
+        object.alignment = alignment.as_integer();
+    }
+
+    auto size = (*parameters)[token_size]->as_singular_scalar()->token();
+    if (!size.is_integer()) {
+        throw ParseException(size, "integer expected");
+    }
+    object.size = size.as_integer();
+
+    auto data_value = parameters->get_optional(token_data);
+    if (data_value != nullptr) {
+        auto tokenizer = TokenizerSequence(data_value->as_scalar()->tokens);
+        object.append(ExpressionParser(tokenizer).parse());
+    }
 }
 
 
