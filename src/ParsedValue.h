@@ -109,6 +109,7 @@ public:
 
     std::shared_ptr<ParsedValue> operator[](const Token& token) const;
     [[nodiscard]] std::shared_ptr<ParsedValue> get_optional(const Token& token) const;
+    [[nodiscard]] bool has_key(const Token& token) const {return entries.find(token) != entries.end();}
 
     std::unordered_map<Token, std::shared_ptr<ParsedValue>>::iterator begin() {return entries.begin();}
     std::unordered_map<Token, std::shared_ptr<ParsedValue>>::iterator end() {return entries.end();}

@@ -1,5 +1,5 @@
 /*
-ObjectFileParser.h -- 
+MemoryMapParser.h -- 
 
 Copyright (C) Dieter Baron
 
@@ -29,47 +29,49 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef OBJECT_FILE_PARSER_H
-#define OBJECT_FILE_PARSER_H
+#ifndef MEMORY_MAP_PARSER_H
+#define MEMORY_MAP_PARSER_H
 
-#include <string>
 
 #include "FileParser.h"
-#include "ObjectFile.h"
+#include "MemoryMap.h"
+#include "ParsedValue.h"
 
-
-class ObjectFileParser: public FileParser {
+class MemoryMapParser: public FileParser {
 public:
-    ObjectFileParser();
+    MemoryMapParser();
 
-    ObjectFile parse(const std::string& filename);
+    MemoryMap parse(const std::string& file_name);
 
 protected:
     void parse_directive(const Token& directive) override;
 
 private:
-    ObjectFile file;
+    void parse_section();
+    void parse_segment();
 
-    void parse_constant();
-    void parse_object();
+    static std::vector<MemoryMap::Block> parse_address(const ParsedValue* address);
+    static MemoryMap::Block parse_single_address(const ParsedScalar* address);
+    static MemoryMap::AccessType parse_type(Token type);
 
-    static Object::Visibility visibility_from_name(Token name);
+    MemoryMap map;
+    std::unordered_set<Token> section_names;
+    std::unordered_set<Token> segment_names;
 
     static void initialize();
-
     static bool initialized;
-    static std::unordered_map<symbol_t, void (ObjectFileParser::*)()> parser_methods;
-    static Token token_alignment;
-    static Token token_constant;
-    static Token token_data;
-    static Token token_global;
-    static Token token_local;
-    static Token token_object;
+    static std::unordered_map<symbol_t, void (MemoryMapParser::*)()> parser_methods;
+    static Token token_address;
+    static Token token_colon;
+    static Token token_minus;
+    static Token token_read_only;
+    static Token token_read_write;
+    static Token token_reserve_only;
     static Token token_section;
-    static Token token_size;
-    static Token token_value;
-    static Token token_visibility;
+    static Token token_segment;
+    static Token token_segment_name;
+    static Token token_type;
 };
 
 
-#endif // OBJECT_FILE_PARSER_H
+#endif // MEMORY_MAP_PARSER_H

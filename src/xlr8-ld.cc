@@ -36,16 +36,27 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Command.h"
 #include "CPUParser.h"
 #include "ObjectFileParser.h"
+#include "Exception.h"
+#include "MemoryMapParser.h"
 
 class xlr8_ld: public Command {
 public:
-    xlr8_ld(): Command({}, "file ...", "xlr8-ld") {}
+    xlr8_ld(): Command(options, "file ...", "xlr8-ld") {}
 
 protected:
     void process() override;
     void create_output() override;
     size_t minimum_arguments() override {return 1;}
+
+private:
+    static std::vector<Commandline::Option> options;
 };
+
+std::vector<Commandline::Option> xlr8_ld::options = {
+        Commandline::Option("cpu", "file", "read CPU definition from FILE"),
+        Commandline::Option("map", "file", "read memory map from FILE")
+};
+
 
 int main(int argc, char *argv[]) {
     auto command = xlr8_ld();
@@ -56,6 +67,13 @@ int main(int argc, char *argv[]) {
 
 void xlr8_ld::process() {
     auto parser = ObjectFileParser();
+
+    auto map_file = arguments.find_first("map");
+    if (!map_file.has_value()) {
+        throw Exception("missing option --map");
+    }
+
+    auto map = MemoryMapParser().parse(map_file.value());
 
     // TODO: implement
 

@@ -22,6 +22,7 @@ add_library(xlr8 STATIC
         Int.cc
         Location.cc
         MemoryMap.cc
+        MemoryMapParser.cc
         Node.cc
         Object.cc
         ObjectFile.cc
@@ -29,7 +30,6 @@ add_library(xlr8 STATIC
         ParseException.cc
         ParsedValue.cc
         Path.cc
-        Section.cc
         SymbolTable.cc
         Token.cc
         TokenGroup.cc

@@ -1,0 +1,24 @@
+.section zero_page {
+    type: reserve_only
+    address [
+        : $02
+        : $fb - $fe
+    ]
+}
+
+.segment program {
+    address: $0801 - $7fff
+}
+
+.section code {
+    segment: program
+}
+
+.section data {
+    segment: program
+}
+
+.section bss {
+    type: reserve_only
+    segment: program
+}

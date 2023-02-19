@@ -5,11 +5,27 @@
 #include "MemoryMap.h"
 #include "Exception.h"
 
-void MemoryMap::Range::reduce(uint64_t amount) {
-    if (amount > size) {
-        throw Exception("not enough space");
-    }
+const std::vector<MemoryMap::Block> *MemoryMap::segment(symbol_t name) const {
+    auto it = segments.find(name);
 
-    size -= amount;
-    offset -= amount;
+    if (it == segments.end()) {
+        return nullptr;
+    }
+    else {
+        return &it->second;
+    }
 }
+
+const MemoryMap::Section *MemoryMap::section(symbol_t name) const {
+    auto it = sections.find(name);
+
+    if (it == sections.end()) {
+        return nullptr;
+    }
+    else {
+        return &it->second;
+    }
+}
+
+
+

@@ -37,7 +37,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "TokenizerSequence.h"
 
 bool ObjectFileParser::initialized = false;
-std::map<symbol_t, void (ObjectFileParser::*)()> ObjectFileParser::parser_methods;
+std::unordered_map<symbol_t, void (ObjectFileParser::*)()> ObjectFileParser::parser_methods;
 Token ObjectFileParser::token_alignment;
 Token ObjectFileParser::token_constant;
 Token ObjectFileParser::token_data;
