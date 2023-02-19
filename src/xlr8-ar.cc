@@ -29,42 +29,49 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include <iostream>
 #include <fstream>
 #include <vector>
 
 #include "Command.h"
-#include "CPUParser.h"
 #include "ObjectFileParser.h"
+#include "Exception.h"
 
-class xlr8_ld: public Command {
+class xlr8_ar: public Command {
 public:
-    xlr8_ld(): Command({}, "file ...", "xlr8-ld") {}
+    xlr8_ar(): Command({}, "object-file ...", "xlr8-ar") {}
 
 protected:
     void process() override;
     void create_output() override;
     size_t minimum_arguments() override {return 1;}
+
+private:
+    ObjectFile library;
 };
 
+
 int main(int argc, char *argv[]) {
-    auto command = xlr8_ld();
+    auto command = xlr8_ar();
 
     return command.run(argc, argv);
 }
 
 
-void xlr8_ld::process() {
+void xlr8_ar::process() {
     auto parser = ObjectFileParser();
+    auto environment = Environment();
 
-    // TODO: implement
-
-    for (const auto &file: arguments.arguments) {
-        (void)parser.parse(file);
+    for (const auto &file_name: arguments.arguments) {
+        auto file = parser.parse(file_name);
+        file.export_constants(environment, false);
+        library.add_object_file(file);
     }
+
+    library.evaluate(environment);
 }
 
 
-void xlr8_ld::create_output() {
-    // TODO: implement
+void xlr8_ar::create_output() {
+    auto stream = std::ofstream(output_file);
+    stream << library;
 }

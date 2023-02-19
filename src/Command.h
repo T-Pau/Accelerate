@@ -1,5 +1,5 @@
 /*
-xlr8-ld.cc -- 
+Command.h -- 
 
 Copyright (C) Dieter Baron
 
@@ -29,42 +29,37 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include <iostream>
-#include <fstream>
-#include <vector>
+#ifndef ACCELERATE_COMMAND_H
+#define ACCELERATE_COMMAND_H
 
-#include "Command.h"
-#include "CPUParser.h"
-#include "ObjectFileParser.h"
+#include <string>
 
-class xlr8_ld: public Command {
+#include "Commandline.h"
+
+class Command {
 public:
-    xlr8_ld(): Command({}, "file ...", "xlr8-ld") {}
+    Command(const std::vector<Commandline::Option>& options, std::string arguments, const std::string& name);
+    int run(int argc, char * const argv[]);
+
+    std::string program_name;
 
 protected:
-    void process() override;
-    void create_output() override;
-    size_t minimum_arguments() override {return 1;}
+    virtual void process() = 0;
+    virtual void create_output() = 0;
+    virtual std::string default_output_file() {return "";}
+    virtual size_t minimum_arguments() {return 0;}
+    virtual size_t maximum_arguments() {return std::numeric_limits<size_t>::max();}
+
+    Commandline commandline;
+    ParsedCommandline arguments;
+    std::string output_file;
+
+private:
+    static std::vector<Commandline::Option> standard_options;
+    static std::string header;
+    static std::string footer;
+    static std::string version;
 };
 
-int main(int argc, char *argv[]) {
-    auto command = xlr8_ld();
 
-    return command.run(argc, argv);
-}
-
-
-void xlr8_ld::process() {
-    auto parser = ObjectFileParser();
-
-    // TODO: implement
-
-    for (const auto &file: arguments.arguments) {
-        (void)parser.parse(file);
-    }
-}
-
-
-void xlr8_ld::create_output() {
-    // TODO: implement
-}
+#endif //ACCELERATE_COMMAND_H

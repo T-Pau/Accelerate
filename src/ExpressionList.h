@@ -46,6 +46,8 @@ public:
     void append(const ExpressionList& list) {expressions.insert(expressions.end(), list.expressions.begin(), list.expressions.end());}
     void append(const std::shared_ptr<ExpressionNode>& expression) {expressions.emplace_back(expression);}
 
+    void evaluate(const Environment& environment);
+
     void serialize(std::ostream& stream) const;
     [[nodiscard]] std::vector<uint8_t> bytes(uint64_t byte_order) const;
 

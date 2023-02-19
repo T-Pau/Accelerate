@@ -53,6 +53,8 @@ private:
     void parse_constant();
     void parse_object();
 
+    static Object::Visibility visibility_from_name(Token name);
+
     static void initialize();
 
     static bool initialized;
@@ -60,10 +62,13 @@ private:
     static Token token_alignment;
     static Token token_constant;
     static Token token_data;
+    static Token token_global;
+    static Token token_local;
     static Token token_object;
     static Token token_section;
     static Token token_size;
     static Token token_value;
+    static Token token_visibility;
 };
 
 

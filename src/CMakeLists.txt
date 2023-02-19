@@ -9,6 +9,7 @@ add_library(xlr8 STATIC
         Assembler.cc
         CPU.cc
         CPUParser.cc
+        Command.cc
         Commandline.cc
         Environment.cc
         Exception.cc
@@ -42,7 +43,7 @@ add_library(xlr8 STATIC
 
 target_include_directories(xlr8 PRIVATE ${PROJECT_BINARY_DIR})
 
-foreach(PROGRAM xlr8-as xlr8-ld)
+foreach(PROGRAM xlr8-ar xlr8-as xlr8-ld)
     ADD_EXECUTABLE(${PROGRAM} ${PROGRAM}.cc)
     target_include_directories(${PROGRAM} PRIVATE ${PROJECT_BINARY_DIR})
     target_link_libraries(${PROGRAM} xlr8)

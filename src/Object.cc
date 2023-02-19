@@ -15,6 +15,21 @@ std::ostream& operator<< (std::ostream& stream, const Object& object) {
     return stream;
 }
 
+std::ostream& operator<< (std::ostream& stream, Object::Visibility visibility) {
+    switch  (visibility) {
+        case Object::NONE:
+            stream << "none";
+            break;
+        case Object::LOCAL:
+            stream << "local";
+            break;
+        case Object::GLOBAL:
+            stream << "global";
+            break;
+    }
+    return stream;
+}
+
 void Object::serialize(std::ostream &stream) const {
     stream << ".object " << name.as_string() << " {" << std::endl;
     if (alignment > 0) {
@@ -22,7 +37,7 @@ void Object::serialize(std::ostream &stream) const {
     }
     stream << "    section: " << SymbolTable::global[section] << std::endl;
     stream << "    size: " << size << std::endl;
-    // TODO: visibility
+    stream << "    visibility: " << visibility << std::endl;
     if (!data.empty()) {
         stream << "    data: " << data << std::endl;
     }

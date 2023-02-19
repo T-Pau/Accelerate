@@ -36,13 +36,12 @@
 #include <algorithm>
 #include <cctype>
 #include <sstream>
+#include <iostream>
 #include <strings.h>
 #include <unordered_map>
 #include <utility>
 
 #include "compat.h"
-
-#include "Exception.h"
 
 extern int optind;
 
@@ -57,8 +56,8 @@ ParsedCommandline Commandline::parse(int argc, char *const *argv) {
     std::vector<struct option> long_options;
     std::unordered_map<int, size_t> option_indices;
     int next_index = 256;
-    
-    for (const auto &option : options) {
+
+    for (const auto &option: options) {
 //#define DEBUG_OPTIONS
 #ifdef DEBUG_OPTIONS
         printf("option '%s'", option.name.c_str());
@@ -77,61 +76,60 @@ ParsedCommandline Commandline::parse(int argc, char *const *argv) {
             if (option.has_argument()) {
                 short_options += ":";
             }
-        }
-        else {
+        } else {
             index = next_index++;
         }
-        
+
         option_indices[index] = long_options.size();
         struct option long_option = {
-            option.name.c_str(), option.has_argument() ? 1 : 0, nullptr, index
+                option.name.c_str(), option.has_argument() ? 1 : 0, nullptr, index
         };
         long_options.push_back(long_option);
     }
-    
+
 #ifdef DEBUG_OPTIONS
     printf("short options: '%s'\n", short_options.c_str());
 #endif
-    struct option terminator = { nullptr, 0, nullptr, 0 };
+    struct option terminator = {nullptr, 0, nullptr, 0};
     long_options.push_back(terminator);
-        
+
     auto parsed_commandline = ParsedCommandline();
     opterr = 0;
     int c;
     while ((c = getopt_long(argc, argv, short_options.c_str(), long_options.data(), nullptr)) != EOF) {
         if (c == '?') {
-	    usage(false, stderr);
-	    fprintf(stderr, "unknown option\n"); // TODO: include unknown option, how to get that information?
-	    exit(1);
+            usage(false, stderr);
+            fprintf(stderr, "unknown option\n"); // TODO: include unknown option, how to get that information?
+            exit(1);
         }
         if (c == ':') {
-	    usage(false, stderr);
-	    fprintf(stderr, "option missing argument\n"); // TODO: include unknown option, how to get that information?
-	    exit(1);
+            usage(false, stderr);
+            fprintf(stderr, "option missing argument\n"); // TODO: include unknown option, how to get that information?
+            exit(1);
         }
-        
+
         auto it = option_indices.find(c);
         if (it == option_indices.end()) {
-	    usage(false, stderr);
-	    fprintf(stderr, "unknown option '%c'\n", c);
-	    exit(1);
+            usage(false, stderr);
+            fprintf(stderr, "unknown option '%c'\n", c);
+            exit(1);
         }
         const auto &option = long_options[it->second];
-        
+
         parsed_commandline.options.emplace_back(option.name, option.has_arg ? optarg : "");
     }
-    
+
     for (auto i = optind; i < argc; i++) {
         parsed_commandline.arguments.emplace_back(argv[i]);
     }
 
     if (parsed_commandline.find_first("help").has_value()) {
-	usage(true);
-	exit(0);
+        usage(true);
+        exit(0);
     }
     if (parsed_commandline.find_first("version").has_value()) {
-	fputs(version.c_str(), stdout);
-	exit(0);
+        std::cout << version << std::endl;
+        exit(0);
     }
 
     return parsed_commandline;

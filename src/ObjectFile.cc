@@ -58,9 +58,35 @@ void ObjectFile::add_constant(symbol_t name, Object::Visibility visibility, std:
     constants[name] = Constant(name, visibility, std::move(value));
 }
 
+void ObjectFile::add_object_file(const ObjectFile &file) {
+    for (const auto& pair: file.constants) {
+        add_constant(pair.second.name, pair.second.visibility, pair.second.value);
+    }
+    for (const auto& pair: file.objects) {
+        add_object(pair.first, pair.second);
+    }
+}
+
+void ObjectFile::evaluate(const Environment &environment) {
+    for (auto& pair: constants) {
+        pair.second.value = ExpressionNode::evaluate(pair.second.value, environment);
+    }
+    for (auto& pair: objects) {
+        pair.second->data.evaluate(environment);
+    }
+}
+
+void ObjectFile::export_constants(Environment &environment, bool global_only) {
+    for (auto& pair: constants) {
+        if (pair.second.visibility == Object::GLOBAL || !global_only) {
+            environment.add(pair.second.name, pair.second.value);
+        }
+    }
+}
+
 void ObjectFile::Constant::serialize(std::ostream &stream) const {
     stream << ".constant " << SymbolTable::global[name] << " {" << std::endl;
-    // TODO: visibility
+    stream << "    visibility: " << visibility << std::endl;
     stream << "    value: " << value << std::endl;
     stream << "}" << std::endl;
 }

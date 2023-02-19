@@ -108,8 +108,7 @@ public:
     [[nodiscard]] Type type() const override {return DICTIONARY;}
 
     std::shared_ptr<ParsedValue> operator[](const Token& token) const;
-    std::shared_ptr<ParsedValue> operator[](const std::string& name) const {return (*this)[Token(Token::NAME, {}, SymbolTable::global.add(name))];}
-    std::shared_ptr<ParsedValue> get_optional(const Token& token) const;
+    [[nodiscard]] std::shared_ptr<ParsedValue> get_optional(const Token& token) const;
 
     std::unordered_map<Token, std::shared_ptr<ParsedValue>>::iterator begin() {return entries.begin();}
     std::unordered_map<Token, std::shared_ptr<ParsedValue>>::iterator end() {return entries.end();}

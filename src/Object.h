@@ -39,6 +39,7 @@ public:
 
 std::ostream& operator<<(std::ostream& stream, const std::shared_ptr<Object>& node);
 std::ostream& operator<<(std::ostream& stream, const Object& node);
+std::ostream& operator<<(std::ostream& stream, Object::Visibility visibility);
 
 
 #endif // OBJECT_H

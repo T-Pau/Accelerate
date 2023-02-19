@@ -41,20 +41,26 @@ std::map<symbol_t, void (ObjectFileParser::*)()> ObjectFileParser::parser_method
 Token ObjectFileParser::token_alignment;
 Token ObjectFileParser::token_constant;
 Token ObjectFileParser::token_data;
+Token ObjectFileParser::token_global;
+Token ObjectFileParser::token_local;
 Token ObjectFileParser::token_object;
 Token ObjectFileParser::token_section;
 Token ObjectFileParser::token_size;
 Token ObjectFileParser::token_value;
+Token ObjectFileParser::token_visibility;
 
 void ObjectFileParser::initialize() {
     if (!initialized) {
         token_alignment = Token(Token::NAME, {}, SymbolTable::global.add("alignment"));
         token_constant = Token(Token::DIRECTIVE, {}, SymbolTable::global.add("constant"));
         token_data = Token(Token::NAME, {}, SymbolTable::global.add("data"));
+        token_global = Token(Token::NAME, {}, SymbolTable::global.add("global"));
+        token_local = Token(Token::NAME, {}, SymbolTable::global.add("local"));
         token_object = Token(Token::DIRECTIVE, {}, SymbolTable::global.add("object"));
         token_section = Token(Token::NAME, {}, SymbolTable::global.add("section"));
         token_size = Token(Token::NAME, {}, SymbolTable::global.add("size"));
         token_value = Token(Token::NAME, {}, SymbolTable::global.add("value"));
+        token_visibility = Token(Token::NAME, {}, SymbolTable::global.add("visibility"));
 
         parser_methods[token_constant.as_symbol()] = &ObjectFileParser::parse_constant;
         parser_methods[token_object.as_symbol()] = &ObjectFileParser::parse_object;
@@ -88,9 +94,9 @@ void ObjectFileParser::parse_constant() {
     auto parameters = parse_value->as_dictionary();
 
     auto value = (*parameters)[token_value]->as_scalar();
-    // TODO: visibility
+    auto visibility = visibility_from_name((*parameters)[token_visibility]->as_singular_scalar()->token());
     auto value_tokenizer = TokenizerSequence(value->tokens);
-    file.add_constant(name.as_symbol(), Object::NONE, ExpressionParser(value_tokenizer).parse());
+    file.add_constant(name.as_symbol(), visibility, ExpressionParser(value_tokenizer).parse());
 }
 
 
@@ -103,9 +109,9 @@ void ObjectFileParser::parse_object() {
     if (!section.is_name()) {
         throw ParseException(section, "name expected");
     }
-    // TODO: visibility
+    auto visibility = visibility_from_name((*parameters)[token_visibility]->as_singular_scalar()->token());
 
-    auto object = Object(section.as_symbol(), Object::NONE, name);
+    auto object = std::make_shared<Object>(section.as_symbol(), visibility, name);
 
     auto alignment_value = parameters->get_optional(token_alignment);
     if (alignment_value != nullptr) {
@@ -113,19 +119,33 @@ void ObjectFileParser::parse_object() {
         if (!alignment.is_integer()) {
             throw ParseException(alignment, "integer expected");
         }
-        object.alignment = alignment.as_integer();
+        object->alignment = alignment.as_integer();
     }
 
     auto size = (*parameters)[token_size]->as_singular_scalar()->token();
     if (!size.is_integer()) {
         throw ParseException(size, "integer expected");
     }
-    object.size = size.as_integer();
+    object->size = size.as_integer();
 
     auto data_value = parameters->get_optional(token_data);
     if (data_value != nullptr) {
         auto tokenizer = TokenizerSequence(data_value->as_scalar()->tokens);
-        object.append(ExpressionParser(tokenizer).parse());
+        object->append(ExpressionParser(tokenizer).parse_list());
+    }
+
+    file.add_object(name.as_symbol(), object);
+}
+
+Object::Visibility ObjectFileParser::visibility_from_name(Token name) {
+    if (name == token_global) {
+        return Object::GLOBAL;
+    }
+    else if (name == token_local) {
+        return Object::LOCAL;
+    }
+    else {
+        throw ParseException(name, "illegal visibility");
     }
 }
 

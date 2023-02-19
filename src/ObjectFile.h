@@ -54,6 +54,10 @@ public:
 
     void add_constant(symbol_t name, Object::Visibility visibility, std::shared_ptr<ExpressionNode> value);
     void add_object(symbol_t name, std::shared_ptr<Object> object) { objects[name] = std::move(object);} // TODO: check for duplicates
+    void add_object_file(const ObjectFile& file);
+
+    void evaluate(const Environment& environment);
+    void export_constants(Environment& environment, bool global_only);
 
     void serialize(std::ostream& stream) const;
 

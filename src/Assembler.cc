@@ -157,6 +157,8 @@ ObjectFile Assembler::parse(const std::string &file_name) {
         }
     }
 
+    object_file.evaluate(*file_environment);
+
     return object_file;
 }
 
