@@ -29,8 +29,7 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include <iostream>
-#include <fstream>
+//#include <filesystem>
 #include <vector>
 
 #include "Command.h"
@@ -38,6 +37,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ObjectFileParser.h"
 #include "Exception.h"
 #include "MemoryMapParser.h"
+#include "Linker.h"
 
 class xlr8_ld: public Command {
 public:
@@ -49,6 +49,8 @@ protected:
     size_t minimum_arguments() override {return 1;}
 
 private:
+    Linker linker;
+
     static std::vector<Commandline::Option> options;
 };
 
@@ -66,23 +68,41 @@ int main(int argc, char *argv[]) {
 
 
 void xlr8_ld::process() {
-    auto parser = ObjectFileParser();
+    auto cpu_file = arguments.find_first("cpu");
+    if (!cpu_file.has_value()) {
+        throw Exception("missing option --cpu");
+    }
+    auto cpu = CPUParser().parse(cpu_file.value());
 
     auto map_file = arguments.find_first("map");
     if (!map_file.has_value()) {
         throw Exception("missing option --map");
     }
-
     auto map = MemoryMapParser().parse(map_file.value());
 
-    // TODO: implement
+    linker = Linker(std::move(map), std::move(cpu));
 
-    for (const auto &file: arguments.arguments) {
-        (void)parser.parse(file);
+    auto parser = ObjectFileParser();
+
+    for (const auto &file_name: arguments.arguments) {
+        auto file = parser.parse(file_name);
+
+        auto extension = std::filesystem::path(file_name).extension();
+        if (extension == "o") {
+            linker.add_file(file);
+        }
+        else if (extension == "lib") {
+            linker.add_library(file);
+        }
+        else {
+            throw Exception("unrecognized file type '.%s'", extension.c_str());
+        }
     }
+
+    linker.link();
 }
 
 
 void xlr8_ld::create_output() {
-    // TODO: implement
+    linker.output(output_file);
 }

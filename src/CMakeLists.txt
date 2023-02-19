@@ -20,6 +20,7 @@ add_library(xlr8 STATIC
         FileReader.cc
         Instruction.cc
         Int.cc
+        Linker.cc
         Location.cc
         MemoryMap.cc
         MemoryMapParser.cc

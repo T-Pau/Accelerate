@@ -56,6 +56,8 @@ public:
     void add_object(symbol_t name, std::shared_ptr<Object> object) { objects[name] = std::move(object);} // TODO: check for duplicates
     void add_object_file(const ObjectFile& file);
 
+    [[nodiscard]] std::shared_ptr<Object> object(symbol_t name) const;
+
     void evaluate(const Environment& environment);
     void export_constants(Environment& environment) const;
     void remove_local_constants();

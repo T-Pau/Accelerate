@@ -102,6 +102,19 @@ void ObjectFile::remove_local_constants() {
     });
 }
 
+
+std::shared_ptr<Object> ObjectFile::object(symbol_t name) const {
+    auto it = objects.find(name);
+
+    if (it != objects.end()) {
+        return it-> second;
+    }
+    else {
+        return {};
+    }
+}
+
+
 void ObjectFile::Constant::serialize(std::ostream &stream) const {
     stream << ".constant " << SymbolTable::global[name] << " {" << std::endl;
     stream << "    visibility: " << visibility << std::endl;
