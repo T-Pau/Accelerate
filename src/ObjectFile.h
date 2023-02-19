@@ -57,7 +57,8 @@ public:
     void add_object_file(const ObjectFile& file);
 
     void evaluate(const Environment& environment);
-    void export_constants(Environment& environment, bool global_only);
+    void export_constants(Environment& environment) const;
+    void remove_local_constants();
 
     void serialize(std::ostream& stream) const;
 

@@ -2,7 +2,7 @@
 
 .section code
 
-VIC = $d000
+.local TEST = $8000
 
 .global test {
     lda #$00

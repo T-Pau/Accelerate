@@ -68,3 +68,7 @@ const std::string &SymbolTable::operator[](symbol_t symbol) const {
     }
     return names[symbol];
 }
+
+bool SymbolTable::global_less(symbol_t a, symbol_t b) {
+    return SymbolTable::global[a] < SymbolTable::global[b];
+}

@@ -44,12 +44,24 @@ std::ostream& operator<<(std::ostream& stream, const ObjectFile::Constant& file)
 }
 
 void ObjectFile::serialize(std::ostream &stream) const {
-    for (const auto& pair : constants) {
-        stream << pair.second;
+    auto names = std::vector<symbol_t>();
+    for (const auto& pair: constants) {
+        names.emplace_back(pair.first);
+    }
+    std::sort(names.begin(), names.end(), SymbolTable::global_less);
+
+    for (auto name: names) {
+        stream << constants.find(name)->second;
     }
 
+    names.clear();
     for (const auto& pair: objects) {
-        stream << pair.second;
+        names.emplace_back(pair.first);
+    }
+    std::sort(names.begin(), names.end(), SymbolTable::global_less);
+
+    for (auto name: names) {
+        stream << objects.find(name)->second;
     }
 }
 
@@ -76,12 +88,18 @@ void ObjectFile::evaluate(const Environment &environment) {
     }
 }
 
-void ObjectFile::export_constants(Environment &environment, bool global_only) {
+
+void ObjectFile::export_constants(Environment &environment) const {
     for (auto& pair: constants) {
-        if (pair.second.visibility == Object::GLOBAL || !global_only) {
-            environment.add(pair.second.name, pair.second.value);
-        }
+        environment.add(pair.second.name, pair.second.value);
     }
+}
+
+
+void ObjectFile::remove_local_constants() {
+    std::erase_if(constants, [](const auto& item) {
+       return item.second.visibility == Object::LOCAL;
+    });
 }
 
 void ObjectFile::Constant::serialize(std::ostream &stream) const {

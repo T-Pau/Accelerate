@@ -52,6 +52,8 @@ public:
 
     static SymbolTable global;
 
+    static bool global_less(symbol_t a, symbol_t b);
+
 private:
     std::unordered_map<std::string, symbol_t> symbols;
     std::vector<std::string> names = {""};

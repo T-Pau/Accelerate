@@ -63,11 +63,12 @@ void xlr8_ar::process() {
 
     for (const auto &file_name: arguments.arguments) {
         auto file = parser.parse(file_name);
-        file.export_constants(environment, false);
+        file.export_constants(environment);
         library.add_object_file(file);
     }
 
     library.evaluate(environment);
+    library.remove_local_constants();
 }
 
 
