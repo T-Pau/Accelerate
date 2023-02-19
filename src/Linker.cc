@@ -32,7 +32,25 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Linker.h"
 
 void Linker::link() {
-    // TODO: implement
+    // TODO: resolve constants
+
+    for (const auto& file: files) {
+        size_t index = 0;
+        for (const auto& pair: file.objects) {
+            objects.emplace_back(false, index, pair.second);
+            index += 1;
+        }
+    }
+
+    for (size_t index = 0; index < objects.size(); index += 1) {
+        auto& object = objects[index];
+
+        // TODO: resolve object
+    }
+
+    // TODO: place objects
+
+    // TODO: resolve object addresses
 }
 
 void Linker::output(const std::string &file_name) const {

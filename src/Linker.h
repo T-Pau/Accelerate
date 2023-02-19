@@ -66,7 +66,9 @@ private:
     std::vector<ObjectFile> files;
     std::vector<ObjectFile> libraries;
 
-    std::unordered_map<symbol_t, LinkerObject> objects_by_section;
+    std::vector<LinkerObject> objects;
+
+    std::unordered_map<symbol_t, LinkerObject*> objects_by_section;
 };
 
 

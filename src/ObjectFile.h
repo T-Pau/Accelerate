@@ -64,7 +64,6 @@ public:
 
     void serialize(std::ostream& stream) const;
 
-private:
     std::map<symbol_t, std::shared_ptr<Object>> objects;
     std::map<symbol_t, Constant> constants;
 };
