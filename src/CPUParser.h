@@ -36,12 +36,16 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "FileReader.h"
 #include "SymbolTable.h"
 #include "TokenizerFile.h"
+#include "FileParser.h"
 
-class CPUParser {
+class CPUParser: public FileParser {
 public:
     CPUParser();
 
     CPU parse(const std::string& file_name);
+
+protected:
+    void parse_directive(const Token& directive) override;
 
 private:
     void parse_addressing_mode();
@@ -58,12 +62,9 @@ private:
     std::unique_ptr<ArgumentType> parse_argument_type_map(const Token& name, const ParsedValue* parameters);
     std::unique_ptr<ArgumentType> parse_argument_type_range(const Token& name, const ParsedValue* parameters);
 
-    static TokenGroup group_directive;
-
     static std::unordered_map<symbol_t, std::unique_ptr<ArgumentType> (CPUParser::*)(const Token& name, const ParsedValue* parameters)> argument_type_parser_methods;
     static std::unordered_map<symbol_t, void (CPUParser::*)()> parser_methods;
 
-    TokenizerFile tokenizer;
     CPU cpu;
 
     std::unordered_set<Token> addressing_mode_names;
@@ -80,8 +81,6 @@ private:
     static Token token_opcode;
     static Token token_pc;
     static Token token_punctuation;
-
-    static void add_literals(TokenizerFile& tokenizer);
 };
 
 

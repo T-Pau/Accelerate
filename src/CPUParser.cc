@@ -39,8 +39,6 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ExpressionParser.h"
 
 
-TokenGroup CPUParser::group_directive = TokenGroup({Token::DIRECTIVE,Token::END}, {}, "directive");
-
 std::unordered_map<symbol_t, std::unique_ptr<ArgumentType> (CPUParser::*)(const Token& name, const ParsedValue* parameters)> CPUParser::argument_type_parser_methods;
 std::unordered_map<symbol_t, void (CPUParser::*)()> CPUParser::parser_methods;
 
@@ -83,45 +81,28 @@ void CPUParser::initialize() {
 
 CPUParser::CPUParser() {
     initialize();
+
+    tokenizer.add_punctuations({"-", ","});
+    tokenizer.add_literal(token_opcode);
+    tokenizer.add_literal(token_pc);
 }
 
 
 CPU CPUParser::parse(const std::string &file_name) {
-    ParsedValue::setup(tokenizer);
-    ExpressionParser::setup(tokenizer);
-    add_literals(tokenizer);
-
     cpu = CPU();
-    tokenizer.push(file_name);
 
-    auto ok = true;
-
-    while (!tokenizer.ended()) {
-        try {
-            tokenizer.skip(Token::NEWLINE);
-            auto token = tokenizer.expect(group_directive, group_directive);
-            if (!token) {
-                break;
-            }
-            auto it = parser_methods.find(token.as_symbol());
-            if (it == parser_methods.end()) {
-                throw ParseException(token.location, "unknown directive .%s", token.as_string().c_str());
-            }
-
-            (this->*it->second)();
-        }
-        catch (ParseException& ex) {
-            ok = false;
-            FileReader::global.error(ex.location, "%s", ex.what());
-            tokenizer.skip_until(group_directive);
-        }
+    if (!parse_file(file_name)) {
+        throw Exception("can't parse object file '%s'", file_name.c_str());
     }
-
-    if (!ok) {
-        throw Exception("can't parse CPU definition");
-    }
-
     return std::move(cpu);
+}
+
+void CPUParser::parse_directive(const Token &directive) {
+    auto it = parser_methods.find(directive.as_symbol());
+    if (it == parser_methods.end()) {
+        throw ParseException(directive, "unknown directive");
+    }
+    (this->*it->second)();
 }
 
 void CPUParser::parse_addressing_mode() {
@@ -405,11 +386,6 @@ AddressingMode::Notation CPUParser::parse_addressing_mode_notation(const Address
     return notation;
 }
 
-void CPUParser::add_literals(TokenizerFile &tokenizer) {
-    tokenizer.add_punctuations({"-", ","});
-    tokenizer.add_literal(token_opcode);
-    tokenizer.add_literal(token_pc);
-}
 
 symbol_t CPUParser::argument_symbol(symbol_t symbol) {
     auto name = SymbolTable::global[symbol];

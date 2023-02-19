@@ -38,12 +38,8 @@ class Node {
 public:
     enum Type {
         EXPRESSION,
-        INSTRUCTION,
-//        INTEGER,
         KEYWORD,
-        PUNCTUATION,
-//        VARIABLE,
-        LABEL
+        PUNCTUATION
     };
 
     [[nodiscard]] virtual Type type() const = 0;

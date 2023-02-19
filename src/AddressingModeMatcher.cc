@@ -129,12 +129,6 @@ AddressingModeMatcherElement::AddressingModeMatcherElement(Node *node) {
             symbol = dynamic_cast<TokenNode*>(node)->as_symbol();
             break;
 
-        case Node::INSTRUCTION:
-            throw ParseException(node->location, "instruction not allowed as argument");
-
-        case Node::LABEL:
-            throw ParseException(node->location, "label not allowed as argument");
-
         case Node::KEYWORD:
             type = KEYWORD;
             symbol = dynamic_cast<TokenNode*>(node)->as_symbol();
