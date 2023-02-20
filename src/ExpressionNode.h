@@ -76,13 +76,15 @@ public:
 
     static std::shared_ptr<ExpressionNode> evaluate(std::shared_ptr<ExpressionNode> node, const Environment& environment);
 
-
     void serialize(std::ostream& stream) const;
+    [[nodiscard]] std::vector<symbol_t> get_variables() const;
 
     [[nodiscard]] virtual std::shared_ptr<ExpressionNode> evaluate(const Environment& environment) const = 0;
     [[nodiscard]] virtual std::shared_ptr<ExpressionNode> clone() const = 0;
     [[nodiscard]] std::shared_ptr<ExpressionNode> static create_binary(const std::shared_ptr<ExpressionNode>& left, SubType operation, const std::shared_ptr<ExpressionNode>& right, size_t byte_size = 0);
     [[nodiscard]] std::shared_ptr<ExpressionNode> static create_unary(SubType operation, std::shared_ptr<ExpressionNode> operand, size_t byte_size);
+
+    virtual void collect_variables(std::vector<symbol_t>& variables) const = 0;
 
 protected:
     virtual void serialize_sub(std::ostream& stream) const = 0;
@@ -97,7 +99,7 @@ std::ostream& operator<<(std::ostream& stream, const ExpressionNode& node);
 class ExpressionNodeInteger: public ExpressionNode {
 public:
     explicit ExpressionNodeInteger(const Token& token);
-    explicit ExpressionNodeInteger(int64_t value): value_(value) {set_byte_size(minimum_byte_size());}
+    explicit ExpressionNodeInteger(int64_t value): value_(value) {set_byte_size(Int::minimum_byte_size(value));}
 
     [[nodiscard]] SubType subtype() const override {return INTEGER;}
 
@@ -105,6 +107,8 @@ public:
     [[nodiscard]] int64_t value() const override {return value_;}
     [[nodiscard]] size_t minimum_byte_size() const override {return Int::minimum_byte_size(value());}
     void replace_variables(symbol_t (*transform)(symbol_t)) override {}
+
+    void collect_variables(std::vector<symbol_t>& variables) const override {}
 
 protected:
     [[nodiscard]] std::shared_ptr<ExpressionNode> evaluate(const Environment &environment) const override {return {};}
@@ -126,7 +130,9 @@ public:
     [[nodiscard]] size_t minimum_byte_size() const override {return 0;} // TODO
     void replace_variables(symbol_t (*transform)(symbol_t)) override;
 
-    symbol_t variable() const {return symbol;}
+    [[nodiscard]] symbol_t variable() const {return symbol;}
+
+    void collect_variables(std::vector<symbol_t>& variables) const override {variables.emplace_back(symbol);}
 
 protected:
     [[nodiscard]] std::shared_ptr<ExpressionNode> evaluate(const Environment &environment) const override;
@@ -145,6 +151,8 @@ public:
     [[nodiscard]] SubType subtype() const override {return operation;}
     [[nodiscard]] size_t minimum_byte_size() const override;
     void replace_variables(symbol_t (*transform)(symbol_t)) override {operand->replace_variables(transform);}
+
+    void collect_variables(std::vector<symbol_t>& variables) const override { operand->collect_variables(variables);}
 
 protected:
     [[nodiscard]] std::shared_ptr<ExpressionNode> evaluate(const Environment &environment) const override;
@@ -166,6 +174,8 @@ public:
 
     [[nodiscard]] size_t minimum_byte_size() const override;
     void replace_variables(symbol_t (*transform)(symbol_t)) override {left->replace_variables(transform); right->replace_variables(transform);}
+
+    void collect_variables(std::vector<symbol_t>& variables) const override {left->collect_variables(variables); right->collect_variables(variables);}
 
 protected:
     [[nodiscard]] std::shared_ptr<ExpressionNode> evaluate(const Environment &environment) const override;

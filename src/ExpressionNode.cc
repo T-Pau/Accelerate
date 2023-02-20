@@ -197,6 +197,14 @@ void ExpressionNode::serialize(std::ostream &stream) const {
     }
 }
 
+std::vector<symbol_t> ExpressionNode::get_variables() const {
+    auto variables = std::vector<symbol_t>();
+
+    collect_variables(variables);
+
+    return variables;
+}
+
 std::shared_ptr<ExpressionNode> ExpressionNodeUnary::clone() const {
     switch (subtype()) {
         case BANK_BYTE:
@@ -205,7 +213,6 @@ std::shared_ptr<ExpressionNode> ExpressionNodeUnary::clone() const {
         case LOW_BYTE:
         case MINUS:
             return create_unary(operation, operand, byte_size());
-            break;
 
         case ADD:
         case BITWISE_AND:
@@ -259,7 +266,7 @@ ExpressionNodeInteger::ExpressionNodeInteger(const Token &token) {
         throw ParseException(token, "internal error: can't create integer node from %s", token.type_name());
     }
     value_ = static_cast<int64_t>(token.as_integer()); // TODO: handle overflow
-    set_byte_size(minimum_byte_size());
+    set_byte_size(Int::minimum_byte_size(value_));
 }
 
 std::shared_ptr<ExpressionNode> ExpressionNodeInteger::clone() const {
