@@ -39,6 +39,8 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "TokenNode.h"
 #include "ExpressionParser.h"
 #include "ExpressionNode.h"
+#include "IntegerExpression.h"
+#include "VariableExpression.h"
 
 bool Assembler::initialized = false;
 symbol_t Assembler::symbol_opcode;

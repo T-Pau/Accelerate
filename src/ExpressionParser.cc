@@ -30,7 +30,10 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include "ExpressionParser.h"
+
+#include "IntegerExpression.h"
 #include "ParseException.h"
+#include "VariableExpression.h"
 
 
 bool ExpressionParser::initialized;
@@ -304,7 +307,7 @@ void ExpressionParser::reduce_binary(int up_to_level) {
                 break;
 
             case BinaryOperator::OPERATION:
-                top = Element(BinaryExpression::create(left.node, operation.operation.binary.opeartion, top.node, 0), operation.level);
+                top = Element(BinaryExpression::create(left.node, operation.operation.binary.operation, top.node, 0), operation.level);
                 break;
         }
 

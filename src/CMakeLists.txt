@@ -7,6 +7,7 @@ add_library(xlr8 STATIC
         AddressingModeMatcher.cc
         ArgumentType.cc
         Assembler.cc
+        BinaryExpression.cc
         CPU.cc
         CPUParser.cc
         Command.cc
@@ -21,6 +22,7 @@ add_library(xlr8 STATIC
         FileReader.cc
         Instruction.cc
         Int.cc
+        IntegerExpression.cc
         Linker.cc
         Location.cc
         MemoryMap.cc
@@ -39,6 +41,8 @@ add_library(xlr8 STATIC
         Tokenizer.cc
         TokenizerFile.cc
         TokenizerSequence.cc
+        UnaryExpression.cc
+        VariableExpression.cc
         Util.cc
         ${COMPATIBILITY}
 )

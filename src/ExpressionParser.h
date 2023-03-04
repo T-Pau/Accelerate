@@ -35,9 +35,10 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <utility>
 
-#include "Tokenizer.h"
-#include "Expression.h"
+#include "BinaryExpression.h"
 #include "ExpressionList.h"
+#include "Tokenizer.h"
+#include "UnaryExpression.h"
 
 class ExpressionParser {
 public:
@@ -56,10 +57,10 @@ private:
             SIZE,
             OPERATION
         };
-        BinaryOperator(Type type, BinaryExpression::Operation opearation, int level): type(type), opeartion(opearation), level(level) {}
+        BinaryOperator(Type type, BinaryExpression::Operation operation, int level): type(type), operation(operation), level(level) {}
 
         Type type;
-        BinaryExpression::Operation opeartion;
+        BinaryExpression::Operation operation;
         int level;
     };
 

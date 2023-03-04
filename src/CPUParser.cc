@@ -37,6 +37,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ParsedValue.h"
 #include "TokenizerSequence.h"
 #include "ExpressionParser.h"
+#include "VariableExpression.h"
 
 
 std::unordered_map<symbol_t, std::unique_ptr<ArgumentType> (CPUParser::*)(const Token& name, const ParsedValue* parameters)> CPUParser::argument_type_parser_methods;
