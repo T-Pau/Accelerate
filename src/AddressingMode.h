@@ -33,7 +33,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define ADDRESSING_MODE_H
 
 #include "ArgumentType.h"
-#include "ExpressionNode.h"
+#include "Expression.h"
 #include "ParsedValue.h"
 #include "SymbolTable.h"
 #include "Token.h"

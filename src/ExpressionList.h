@@ -34,17 +34,17 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <vector>
 
-#include "ExpressionNode.h"
+#include "Expression.h"
 
 class ExpressionList {
 public:
     ExpressionList() = default;
-    ExpressionList(std::initializer_list<std::shared_ptr<ExpressionNode>> list): expressions(list) {}
+    ExpressionList(std::initializer_list<std::shared_ptr<Expression>> list): expressions(list) {}
 
     [[nodiscard]] bool empty() const {return expressions.empty();}
     [[nodiscard]] size_t byte_size() const;
     void append(const ExpressionList& list) {expressions.insert(expressions.end(), list.expressions.begin(), list.expressions.end());}
-    void append(const std::shared_ptr<ExpressionNode>& expression) {expressions.emplace_back(expression);}
+    void append(const std::shared_ptr<Expression>& expression) {expressions.emplace_back(expression);}
 
     void evaluate(const Environment& environment);
 
@@ -52,10 +52,10 @@ public:
     [[nodiscard]] std::vector<uint8_t> bytes(uint64_t byte_order) const;
 
 
-    std::vector<std::shared_ptr<ExpressionNode>> expressions;
+    std::vector<std::shared_ptr<Expression>> expressions;
 
-    [[nodiscard]] std::vector<std::shared_ptr<ExpressionNode>>::const_iterator begin() const {return expressions.begin();}
-    [[nodiscard]] std::vector<std::shared_ptr<ExpressionNode>>::const_iterator end() const {return expressions.end();}
+    [[nodiscard]] std::vector<std::shared_ptr<Expression>>::const_iterator begin() const {return expressions.begin();}
+    [[nodiscard]] std::vector<std::shared_ptr<Expression>>::const_iterator end() const {return expressions.end();}
 };
 
 std::ostream& operator<<(std::ostream& stream, const ExpressionList& list);

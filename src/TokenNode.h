@@ -13,11 +13,13 @@ public:
     explicit TokenNode(const Token& token);
 
     [[nodiscard]] Type type() const override {return node_type;}
-    [[nodiscard]] symbol_t as_symbol() const {return symbol;}
+    [[nodiscard]] const Location& get_location() const override {return token.location;}
+
+    [[nodiscard]] symbol_t as_symbol() const {return token.as_symbol();}
 
 private:
     Type node_type;
-    symbol_t symbol;
+    Token token;
 };
 
 

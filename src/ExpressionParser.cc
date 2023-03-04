@@ -52,7 +52,7 @@ Token ExpressionParser::token_star;
 Token ExpressionParser::token_tilde;
 
 std::unordered_map<Token, ExpressionParser::BinaryOperator> ExpressionParser::binary_operators;
-std::unordered_map<Token, ExpressionNode::SubType> ExpressionParser::unary_operators;
+std::unordered_map<Token, Expression::SubType> ExpressionParser::unary_operators;
 
 void ExpressionParser::initialize() {
     if (initialized) {
@@ -77,27 +77,27 @@ void ExpressionParser::initialize() {
     token_tilde = Token(Token::PUNCTUATION, {}, SymbolTable::global.add("~"));
 
     unary_operators = {
-            {token_plus, ExpressionNode::PLUS},
-            {token_minus, ExpressionNode::MINUS},
-            {token_caret, ExpressionNode::BANK_BYTE},
-            {token_less, ExpressionNode::LOW_BYTE},
-            {token_greater, ExpressionNode::HIGH_BYTE},
-            {token_tilde, ExpressionNode::BITWISE_NOT}
+            {token_plus,    Expression::PLUS},
+            {token_minus,   Expression::MINUS},
+            {token_caret,   Expression::BANK_BYTE},
+            {token_less,    Expression::LOW_BYTE},
+            {token_greater, Expression::HIGH_BYTE},
+            {token_tilde,   Expression::BITWISE_NOT}
     };
 
     binary_operators = {
-            {token_colon, BinaryOperator(ExpressionNode::SIZE, 0)},
+            {token_colon, BinaryOperator(Expression::SIZE, 0)},
 
-            {token_plus, BinaryOperator(ExpressionNode::ADD, 1)},
-            {token_minus, BinaryOperator(ExpressionNode::SUBTRACT, 1)},
-            {token_pipe, BinaryOperator(ExpressionNode::BITWISE_OR, 1)},
+            {token_plus, BinaryOperator(Expression::ADD, 1)},
+            {token_minus, BinaryOperator(Expression::SUBTRACT, 1)},
+            {token_pipe, BinaryOperator(Expression::BITWISE_OR, 1)},
 
-            {token_star, BinaryOperator(ExpressionNode::MULTIPLY, 2)},
-            {token_slash, BinaryOperator(ExpressionNode::DIVIDE, 2)},
-            {token_ampersand, BinaryOperator(ExpressionNode::BITWISE_AND, 2)},
-            {token_caret, BinaryOperator(ExpressionNode::BITWISE_XOR, 2)},
-            {token_double_less, BinaryOperator(ExpressionNode::SHIFT_LEFT, 2)},
-            {token_double_greater, BinaryOperator(ExpressionNode::SHIFT_RIGHT, 2)}
+            {token_star, BinaryOperator(Expression::MULTIPLY, 2)},
+            {token_slash, BinaryOperator(Expression::DIVIDE, 2)},
+            {token_ampersand, BinaryOperator(Expression::BITWISE_AND, 2)},
+            {token_caret, BinaryOperator(Expression::BITWISE_XOR, 2)},
+            {token_double_less, BinaryOperator(Expression::SHIFT_LEFT, 2)},
+            {token_double_greater, BinaryOperator(Expression::SHIFT_RIGHT, 2)}
     };
 }
 
@@ -105,10 +105,10 @@ ExpressionParser::Element ExpressionParser::next_element() {
     auto token = tokenizer.next();
 
     if (token.is_integer()) {
-        return {std::make_shared<ExpressionNodeInteger>(token), 0};
+        return {std::make_shared<IntegerExpression>(token), 0};
     }
     else if (token.is_name()) {
-        return {std::make_shared<ExpressionNodeVariable>(token), 0};
+        return {std::make_shared<VariableExpression>(token), 0};
     }
     else if (token == token_paren_close) {
         return Element(token.location, PARENTHESIS_CLOSED);
@@ -153,7 +153,7 @@ void ExpressionParser::setup(TokenizerFile &tokenizer) {
     initialize();
 }
 
-std::shared_ptr<ExpressionNode> ExpressionParser::do_parse() {
+std::shared_ptr<Expression> ExpressionParser::do_parse() {
     stack.clear();
 
     while (true) {
@@ -281,7 +281,7 @@ void ExpressionParser::reduce_unary(const ExpressionParser::Element& next) {
     if (top.type != UNARY_OPERATOR || next.type != OPERAND) {
         throw Exception("internal error: invalid element types in reduce_unary");
     }
-    top = Element(ExpressionNode::create_unary(top.operation, next.node, 0), 0);
+    top = Element(Expression::create_unary(top.operation, next.node, 0), 0);
 }
 
 void ExpressionParser::reduce_binary(int up_to_level) {
@@ -294,7 +294,7 @@ void ExpressionParser::reduce_binary(int up_to_level) {
             break;
         }
 
-        if (operation.operation == ExpressionNode::SIZE) {
+        if (operation.operation == Expression::SIZE) {
             if (!top.node->has_value()) {
                 throw ParseException(top.node->location, "size not a constant expression");
             }
@@ -302,7 +302,7 @@ void ExpressionParser::reduce_binary(int up_to_level) {
             top = left;
         }
         else {
-            top = Element(ExpressionNode::create_binary(left.node, operation.operation, top.node, 0), operation.level);
+            top = Element(Expression::create_binary(left.node, operation.operation, top.node, 0), operation.level);
         }
 
         stack.pop_back();

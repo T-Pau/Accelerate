@@ -43,16 +43,16 @@ public:
     class Constant {
     public:
         Constant() = default;
-        Constant(symbol_t name, Object::Visibility visibility, std::shared_ptr<ExpressionNode> value): name(name), visibility(visibility), value(std::move(value)) {}
+        Constant(symbol_t name, Object::Visibility visibility, std::shared_ptr<Expression> value): name(name), visibility(visibility), value(std::move(value)) {}
 
         void serialize(std::ostream& stream) const;
 
         symbol_t name = 0;
         Object::Visibility visibility = Object::NONE;
-        std::shared_ptr<ExpressionNode> value;
+        std::shared_ptr<Expression> value;
     };
 
-    void add_constant(symbol_t name, Object::Visibility visibility, std::shared_ptr<ExpressionNode> value);
+    void add_constant(symbol_t name, Object::Visibility visibility, std::shared_ptr<Expression> value);
     void add_object(symbol_t name, std::shared_ptr<Object> object) { objects[name] = std::move(object);} // TODO: check for duplicates
     void add_object_file(const ObjectFile& file);
 

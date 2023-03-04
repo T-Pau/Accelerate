@@ -31,7 +31,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "Environment.h"
 
-std::shared_ptr<ExpressionNode> Environment::operator[](symbol_t name) const {
+std::shared_ptr<Expression> Environment::operator[](symbol_t name) const {
     auto it = variables.find(name);
     if (it != variables.end()) {
         return it->second;
@@ -44,13 +44,13 @@ std::shared_ptr<ExpressionNode> Environment::operator[](symbol_t name) const {
     }
 }
 
-void Environment::set(symbol_t name, const std::shared_ptr<ExpressionNode>& value) {
+void Environment::set(symbol_t name, const std::shared_ptr<Expression>& value) {
     if (!update(name, value)) {
         add(name, value);
     }
 }
 
-bool Environment::update(symbol_t name, const std::shared_ptr<ExpressionNode>& value) {
+bool Environment::update(symbol_t name, const std::shared_ptr<Expression>& value) {
     auto it = variables.find(name);
     if (it != variables.end()) {
         it->second = value;

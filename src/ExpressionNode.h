@@ -1,9 +1,9 @@
 /*
-ExpressionNode.h -- Abstract Base Class of Expression Nodes
+ExpressionNode.h -- 
 
 Copyright (C) Dieter Baron
 
-The authors can be contacted at <accelerate@tpau.group>
+The authors can be contacted at <assembler@tpau.group>
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions
@@ -32,161 +32,18 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef EXPRESSION_NODE_H
 #define EXPRESSION_NODE_H
 
-#include <cstddef>
-
-#include "Environment.h"
+#include "Expression.h"
 #include "Node.h"
-#include "TokenizerFile.h"
-#include "Int.h"
 
-class ExpressionNode : public Node {
+class ExpressionNode: public Node {
 public:
-    enum SubType {
-        ADD,
-        BANK_BYTE,
-        BITWISE_AND,
-        BITWISE_NOT,
-        BITWISE_OR,
-        BITWISE_XOR,
-        DIVIDE,
-        HIGH_BYTE,
-        INTEGER,
-        LOW_BYTE,
-        MINUS,
-        MODULO,
-        MULTIPLY,
-        PLUS,
-        SIZE,
-        SHIFT_LEFT,
-        SHIFT_RIGHT,
-        SUBTRACT,
-        VARIABLE
-    };
-
-    [[nodiscard]] virtual bool has_value() const {return false;}
-    [[nodiscard]] virtual int64_t value() const {return 0;}
-    [[nodiscard]] virtual SubType subtype() const = 0;
-    [[nodiscard]] virtual size_t minimum_byte_size() const = 0;
-    virtual void replace_variables(symbol_t (*transform)(symbol_t)) = 0;
-
-    [[nodiscard]] size_t byte_size() const {return byte_size_;}
-    void set_byte_size(size_t size);
+    ExpressionNode(std::shared_ptr<Expression> expression): expression(std::move(expression)) {}
 
     [[nodiscard]] Type type() const override {return EXPRESSION;}
+    [[nodiscard]] const Location& get_location() const override {return expression->location;}
 
-    static std::shared_ptr<ExpressionNode> evaluate(std::shared_ptr<ExpressionNode> node, const Environment& environment);
-
-    void serialize(std::ostream& stream) const;
-    [[nodiscard]] std::vector<symbol_t> get_variables() const;
-
-    [[nodiscard]] virtual std::shared_ptr<ExpressionNode> evaluate(const Environment& environment) const = 0;
-    [[nodiscard]] virtual std::shared_ptr<ExpressionNode> clone() const = 0;
-    [[nodiscard]] std::shared_ptr<ExpressionNode> static create_binary(const std::shared_ptr<ExpressionNode>& left, SubType operation, const std::shared_ptr<ExpressionNode>& right, size_t byte_size = 0);
-    [[nodiscard]] std::shared_ptr<ExpressionNode> static create_unary(SubType operation, std::shared_ptr<ExpressionNode> operand, size_t byte_size);
-
-    virtual void collect_variables(std::vector<symbol_t>& variables) const = 0;
-
-protected:
-    virtual void serialize_sub(std::ostream& stream) const = 0;
-
-private:
-    size_t byte_size_ = 0;
-};
-
-std::ostream& operator<<(std::ostream& stream, const std::shared_ptr<ExpressionNode>& node);
-std::ostream& operator<<(std::ostream& stream, const ExpressionNode& node);
-
-class ExpressionNodeInteger: public ExpressionNode {
-public:
-    explicit ExpressionNodeInteger(const Token& token);
-    explicit ExpressionNodeInteger(int64_t value): value_(value) {set_byte_size(Int::minimum_byte_size(value));}
-
-    [[nodiscard]] SubType subtype() const override {return INTEGER;}
-
-    [[nodiscard]] bool has_value() const override {return true;}
-    [[nodiscard]] int64_t value() const override {return value_;}
-    [[nodiscard]] size_t minimum_byte_size() const override {return Int::minimum_byte_size(value());}
-    void replace_variables(symbol_t (*transform)(symbol_t)) override {}
-
-    void collect_variables(std::vector<symbol_t>& variables) const override {}
-
-protected:
-    [[nodiscard]] std::shared_ptr<ExpressionNode> evaluate(const Environment &environment) const override {return {};}
-    [[nodiscard]] std::shared_ptr<ExpressionNode> clone() const override;
-
-    void serialize_sub(std::ostream& stream) const override;
-
-private:
-    int64_t value_;
-};
-
-class ExpressionNodeVariable: public ExpressionNode {
-public:
-    explicit ExpressionNodeVariable(const Token& token);
-    explicit ExpressionNodeVariable(symbol_t symbol): symbol(symbol) {}
-
-    [[nodiscard]] SubType subtype() const override {return VARIABLE;}
-
-    [[nodiscard]] size_t minimum_byte_size() const override {return 0;} // TODO
-    void replace_variables(symbol_t (*transform)(symbol_t)) override;
-
-    [[nodiscard]] symbol_t variable() const {return symbol;}
-
-    void collect_variables(std::vector<symbol_t>& variables) const override {variables.emplace_back(symbol);}
-
-protected:
-    [[nodiscard]] std::shared_ptr<ExpressionNode> evaluate(const Environment &environment) const override;
-    [[nodiscard]] std::shared_ptr<ExpressionNode> clone() const override;
-
-    void serialize_sub(std::ostream& stream) const override {stream << SymbolTable::global[symbol];}
-
-private:
-    symbol_t symbol;
-};
-
-class ExpressionNodeUnary: public ExpressionNode {
-public:
-    ExpressionNodeUnary(SubType operation, std::shared_ptr<ExpressionNode>operand);
-
-    [[nodiscard]] SubType subtype() const override {return operation;}
-    [[nodiscard]] size_t minimum_byte_size() const override;
-    void replace_variables(symbol_t (*transform)(symbol_t)) override {operand->replace_variables(transform);}
-
-    void collect_variables(std::vector<symbol_t>& variables) const override { operand->collect_variables(variables);}
-
-protected:
-    [[nodiscard]] std::shared_ptr<ExpressionNode> evaluate(const Environment &environment) const override;
-    [[nodiscard]] std::shared_ptr<ExpressionNode> clone() const override;
-
-    void serialize_sub(std::ostream& stream) const override;
-
-private:
-    SubType operation;
-    std::shared_ptr<ExpressionNode> operand;
+    std::shared_ptr<Expression> expression;
 };
 
 
-
-class ExpressionNodeBinary: public ExpressionNode {
-public:
-    ExpressionNodeBinary(std::shared_ptr<ExpressionNode>  left, SubType operation, std::shared_ptr<ExpressionNode> right);
-    [[nodiscard]] SubType subtype() const override {return operation;}
-
-    [[nodiscard]] size_t minimum_byte_size() const override;
-    void replace_variables(symbol_t (*transform)(symbol_t)) override {left->replace_variables(transform); right->replace_variables(transform);}
-
-    void collect_variables(std::vector<symbol_t>& variables) const override {left->collect_variables(variables); right->collect_variables(variables);}
-
-protected:
-    [[nodiscard]] std::shared_ptr<ExpressionNode> evaluate(const Environment &environment) const override;
-    [[nodiscard]] std::shared_ptr<ExpressionNode> clone() const override;
-
-    void serialize_sub(std::ostream& stream) const override;
-
-public: // TODO: these should not be public, make create_binary part of ExpressionNodeBinary
-    SubType operation;
-    std::shared_ptr<ExpressionNode> left;
-    std::shared_ptr<ExpressionNode> right;
-};
-
-#endif // EXPRESSION_NODE_H
+#endif //EXPRESSION_NODE_H

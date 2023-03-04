@@ -34,7 +34,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <string>
 
-#include "ExpressionNode.h"
+#include "Expression.h"
 #include "SymbolTable.h"
 
 class Instruction {

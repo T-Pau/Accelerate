@@ -26,7 +26,7 @@ public:
     void serialize(std::ostream& stream) const;
 
     void append(const ExpressionList& list);
-    void append(const std::shared_ptr<ExpressionNode>& expression);
+    void append(const std::shared_ptr<Expression>& expression);
 
     symbol_t section;
     Visibility visibility;

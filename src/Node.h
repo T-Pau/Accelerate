@@ -43,8 +43,7 @@ public:
     };
 
     [[nodiscard]] virtual Type type() const = 0;
-
-    Location location;
+    [[nodiscard]] virtual const Location& get_location() const = 0;
 };
 
 #endif // NODE_H

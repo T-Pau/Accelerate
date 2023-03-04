@@ -54,8 +54,8 @@ private:
 
     std::shared_ptr<Node> parse_instruction_argument(const Token& token);
 
-    void add_constant(Object::Visibility visibility, const Token& name, std::shared_ptr<ExpressionNode> value);
-    [[nodiscard]] std::shared_ptr<ExpressionNode> get_pc() const;
+    void add_constant(Object::Visibility visibility, const Token& name, std::shared_ptr<Expression> value);
+    [[nodiscard]] std::shared_ptr<Expression> get_pc() const;
 
     static Object::Visibility visibility_value(const Token& token);
 

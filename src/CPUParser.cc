@@ -171,7 +171,7 @@ void CPUParser::parse_addressing_mode() {
 
     auto encoding_definition = definition->get_optional(token_encoding);
     if (encoding_definition == nullptr) {
-        addressing_mode.encoding = {std::make_shared<ExpressionNodeVariable>(token_opcode)};
+        addressing_mode.encoding = {std::make_shared<VariableExpression>(token_opcode)};
     }
     else if (encoding_definition->is_scalar()) {
         auto encoding_tokenizer = TokenizerSequence(encoding_definition->as_scalar()->tokens);

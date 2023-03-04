@@ -38,6 +38,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "FileReader.h"
 #include "TokenNode.h"
 #include "ExpressionParser.h"
+#include "ExpressionNode.h"
 
 bool Assembler::initialized = false;
 symbol_t Assembler::symbol_opcode;
@@ -270,7 +271,7 @@ void Assembler::parse_instruction(const Token& name) {
                     }
                     else {
                         // '(' expression ')' is part of larger expression
-                        arguments.emplace_back(ExpressionParser(tokenizer).parse(std::dynamic_pointer_cast<ExpressionNode>(node)));
+                        arguments.emplace_back(std::make_shared<ExpressionNode>(ExpressionParser(tokenizer).parse(std::dynamic_pointer_cast<Expression>(node))));
                     }
                 }
                 else {
@@ -312,31 +313,31 @@ void Assembler::parse_instruction(const Token& name) {
                     switch (argument_type->type()) {
                         case ArgumentType::ENUM: {
                             if ((*it_arguments)->type() != Node::KEYWORD) {
-                                throw ParseException((*it_arguments)->location, "enum argument is not a keyword");
+                                throw ParseException((*it_arguments)->get_location(), "enum argument is not a keyword");
                             }
                             auto enum_type = dynamic_cast<const ArgumentTypeEnum *>(argument_type);
                             auto name = std::dynamic_pointer_cast<TokenNode>(*it_arguments)->as_symbol();
                             if (!enum_type->has_entry(name)) {
-                                throw ParseException((*it_arguments)->location, "invalid enum argument");
+                                throw ParseException((*it_arguments)->get_location(), "invalid enum argument");
                             }
-                            environment.add(it_notation->symbol, std::make_shared<ExpressionNodeInteger>(enum_type->entry(name)));
+                            environment.add(it_notation->symbol, std::make_shared<IntegerExpression>(enum_type->entry(name)));
                             break;
                         }
 
                         case ArgumentType::MAP: {
                             if ((*it_arguments)->type() != Node::EXPRESSION) {
-                                throw ParseException((*it_arguments)->location, "map argument is not an expression");
+                                throw ParseException((*it_arguments)->get_location(), "map argument is not an expression");
                             }
-                            auto expression = std::dynamic_pointer_cast<ExpressionNode>(*it_arguments);
+                            auto expression = std::dynamic_pointer_cast<ExpressionNode>(*it_arguments)->expression;
                             if (!expression->has_value()) {
-                                throw ParseException((*it_arguments)->location, "map argument is not an integer");
+                                throw ParseException((*it_arguments)->get_location(), "map argument is not an integer");
                             }
                             auto map_type = dynamic_cast<const ArgumentTypeMap *>(argument_type);
                             auto value = expression->value();
                             if (!map_type->has_entry(value)) {
-                                throw ParseException((*it_arguments)->location, "invalid map argument");
+                                throw ParseException((*it_arguments)->get_location(), "invalid map argument");
                             }
-                            environment.add(it_notation->symbol, std::make_shared<ExpressionNodeInteger>(map_type->entry(value)));
+                            environment.add(it_notation->symbol, std::make_shared<IntegerExpression>(map_type->entry(value)));
                             break;
                         }
 
@@ -344,9 +345,9 @@ void Assembler::parse_instruction(const Token& name) {
                             auto range_type = dynamic_cast<const ArgumentTypeRange *>(argument_type);
 
                             if ((*it_arguments)->type() != Node::EXPRESSION) {
-                                throw ParseException((*it_arguments)->location, "range argument is not an expression");
+                                throw ParseException((*it_arguments)->get_location(), "range argument is not an expression");
                             }
-                            auto expression = std::dynamic_pointer_cast<ExpressionNode>(*it_arguments);
+                            auto expression = std::dynamic_pointer_cast<ExpressionNode>(*it_arguments)->expression;
                             if (expression->minimum_byte_size() > range_type->byte_size()) {
                                 fits = false;
                                 break;
@@ -366,14 +367,14 @@ void Assembler::parse_instruction(const Token& name) {
                 continue;
             }
 
-            environment.add(symbol_opcode, std::make_shared<ExpressionNodeInteger>(instruction->opcode(match.addressing_mode)));
+            environment.add(symbol_opcode, std::make_shared<IntegerExpression>(instruction->opcode(match.addressing_mode)));
             environment.add(symbol_pc, get_pc());
 
             auto list = ExpressionList();
 
             for (const auto& expression: addressing_mode->encoding) {
                 try {
-                    auto value = ExpressionNode::evaluate(expression, environment);
+                    auto value = Expression::evaluate(expression, environment);
                     list.append(value);
                 }
                 catch (ParseException &ex) {
@@ -411,7 +412,7 @@ std::shared_ptr<Node> Assembler::parse_instruction_argument(const Token& token) 
 
         default:
             tokenizer.unget(token);
-            return ExpressionParser(tokenizer).parse();
+            return std::make_shared<ExpressionNode>(ExpressionParser(tokenizer).parse());
     }
 }
 
@@ -420,8 +421,8 @@ void Assembler::parse_label(Object::Visibility visibility, const Token& name) {
     add_constant(visibility, name, get_pc());
 }
 
-void Assembler::add_constant(Object::Visibility visibility, const Token& name, std::shared_ptr<ExpressionNode> value) {
-    auto evaluated_value = ExpressionNode::evaluate(std::move(value), *current_environment);
+void Assembler::add_constant(Object::Visibility visibility, const Token& name, std::shared_ptr<Expression> value) {
+    auto evaluated_value = Expression::evaluate(std::move(value), *current_environment);
     switch (visibility) {
         case Object::NONE:
             break;
@@ -474,7 +475,7 @@ void Assembler::parse_symbol(Object::Visibility visibility, const Token &name) {
         else if (token == token_align || token == token_reserve) {
             auto value = ExpressionParser(tokenizer).parse();
 
-            value = ExpressionNode::evaluate(value, *file_environment);
+            value = Expression::evaluate(value, *file_environment);
 
             if (token == token_align) {
                 if (!value->has_value()) {
@@ -507,6 +508,6 @@ void Assembler::parse_symbol(Object::Visibility visibility, const Token &name) {
     object_file.add_object(name.as_symbol(), current_object);
 }
 
-std::shared_ptr<ExpressionNode> Assembler::get_pc() const {
-    return ExpressionNode::create_binary(std::make_shared<ExpressionNodeVariable>(current_object->name), ExpressionNode::ADD, std::make_shared<ExpressionNodeInteger>(current_object->size));
+std::shared_ptr<Expression> Assembler::get_pc() const {
+    return Expression::create_binary(std::make_shared<VariableExpression>(current_object->name), Expression::ADD, std::make_shared<IntegerExpression>(current_object->size));
 }

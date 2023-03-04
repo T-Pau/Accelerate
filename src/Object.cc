@@ -50,7 +50,7 @@ void Object::append(const ExpressionList &list) {
     size = data.byte_size();
 }
 
-void Object::append(const std::shared_ptr<ExpressionNode> &expression) {
+void Object::append(const std::shared_ptr<Expression> &expression) {
     data.append(expression);
     size = data.byte_size();
 }

@@ -65,7 +65,7 @@ void ObjectFile::serialize(std::ostream &stream) const {
     }
 }
 
-void ObjectFile::add_constant(symbol_t name, Object::Visibility visibility, std::shared_ptr<ExpressionNode> value) {
+void ObjectFile::add_constant(symbol_t name, Object::Visibility visibility, std::shared_ptr<Expression> value) {
     // TODO: check for duplicates;
     constants[name] = Constant(name, visibility, std::move(value));
 }
@@ -81,7 +81,7 @@ void ObjectFile::add_object_file(const ObjectFile &file) {
 
 void ObjectFile::evaluate(const Environment &environment) {
     for (auto& pair: constants) {
-        pair.second.value = ExpressionNode::evaluate(pair.second.value, environment);
+        pair.second.value = Expression::evaluate(pair.second.value, environment);
     }
     for (auto& pair: objects) {
         pair.second->data.evaluate(environment);

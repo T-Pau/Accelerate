@@ -14,6 +14,7 @@ add_library(xlr8 STATIC
         Environment.cc
         Exception.cc
         ExpressionList.cc
+        Expression.cc
         ExpressionNode.cc
         ExpressionParser.cc
         FileParser.cc

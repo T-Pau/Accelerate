@@ -79,7 +79,7 @@ std::vector<uint8_t> ExpressionList::bytes(uint64_t byte_order) const {
 
 void ExpressionList::evaluate(const Environment &environment) {
     for (auto expression: expressions) {
-        expression = ExpressionNode::evaluate(expression, environment);
+        expression = Expression::evaluate(expression, environment);
     }
 }
 

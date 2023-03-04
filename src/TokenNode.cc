@@ -5,7 +5,7 @@
 #include "ParseException.h"
 #include "TokenNode.h"
 
-TokenNode::TokenNode(const Token &token) {
+TokenNode::TokenNode(const Token &token): token(token) {
     switch (token.get_type()) {
         case Token::PUNCTUATION:
             node_type = PUNCTUATION;
@@ -18,7 +18,4 @@ TokenNode::TokenNode(const Token &token) {
         default:
             throw ParseException(token, "internal error: can't create TokenNode from %s", token.type_name());
     }
-
-    location = token.location;
-    symbol = token.as_symbol();
 }
