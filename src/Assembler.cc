@@ -509,5 +509,5 @@ void Assembler::parse_symbol(Object::Visibility visibility, const Token &name) {
 }
 
 std::shared_ptr<Expression> Assembler::get_pc() const {
-    return Expression::create_binary(std::make_shared<VariableExpression>(current_object->name), Expression::ADD, std::make_shared<IntegerExpression>(current_object->size));
+    return BinaryExpression::create(std::make_shared<VariableExpression>(current_object->name), BinaryExpression::ADD, std::make_shared<IntegerExpression>(current_object->size));
 }

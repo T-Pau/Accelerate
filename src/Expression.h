@@ -41,28 +41,14 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 class Expression {
 public:
-    enum SubType {
-        ADD,
-        BANK_BYTE,
-        BITWISE_AND,
-        BITWISE_NOT,
-        BITWISE_OR,
-        BITWISE_XOR,
-        DIVIDE,
-        HIGH_BYTE,
+    enum Type {
+        BINARY,
         INTEGER,
-        LOW_BYTE,
-        MINUS,
-        MODULO,
-        MULTIPLY,
-        PLUS,
-        SIZE,
-        SHIFT_LEFT,
-        SHIFT_RIGHT,
-        SUBTRACT,
+        UNARY,
         VARIABLE
     };
 
+    [[nodiscard]] virtual Type type() const = 0;
     [[nodiscard]] virtual bool has_value() const {return false;}
     [[nodiscard]] virtual int64_t value() const {return 0;}
     [[nodiscard]] virtual size_t minimum_byte_size() const = 0;
@@ -78,8 +64,6 @@ public:
 
     [[nodiscard]] virtual std::shared_ptr<Expression> evaluate(const Environment& environment) const = 0;
     [[nodiscard]] virtual std::shared_ptr<Expression> clone() const = 0;
-    [[nodiscard]] std::shared_ptr<Expression> static create_binary(const std::shared_ptr<Expression>& left, SubType operation, const std::shared_ptr<Expression>& right, size_t byte_size = 0);
-    [[nodiscard]] std::shared_ptr<Expression> static create_unary(SubType operation, std::shared_ptr<Expression> operand, size_t byte_size);
 
     virtual void collect_variables(std::vector<symbol_t>& variables) const = 0;
 
@@ -87,7 +71,6 @@ public:
 
 protected:
     virtual void serialize_sub(std::ostream& stream) const = 0;
-    [[nodiscard]] virtual SubType subtype() const = 0;
 
 private:
     size_t byte_size_ = 0;
@@ -101,7 +84,7 @@ public:
     explicit IntegerExpression(const Token& token);
     explicit IntegerExpression(int64_t value): value_(value) {set_byte_size(Int::minimum_byte_size(value));}
 
-    [[nodiscard]] SubType subtype() const override {return INTEGER;}
+    [[nodiscard]] Type type() const override {return INTEGER;}
 
     [[nodiscard]] bool has_value() const override {return true;}
     [[nodiscard]] int64_t value() const override {return value_;}
@@ -125,7 +108,7 @@ public:
     explicit VariableExpression(const Token& token);
     explicit VariableExpression(symbol_t symbol): symbol(symbol) {}
 
-    [[nodiscard]] SubType subtype() const override {return VARIABLE;}
+    [[nodiscard]] Type type() const override {return VARIABLE;}
 
     [[nodiscard]] size_t minimum_byte_size() const override {return 0;} // TODO
     void replace_variables(symbol_t (*transform)(symbol_t)) override;
@@ -146,9 +129,19 @@ private:
 
 class UnaryExpression: public Expression {
 public:
-    UnaryExpression(SubType operation, std::shared_ptr<Expression>operand);
+    enum Operation {
+        BANK_BYTE,
+        BITWISE_NOT,
+        HIGH_BYTE,
+        LOW_BYTE,
+        MINUS,
+        PLUS
+    };
 
-    [[nodiscard]] SubType subtype() const override {return operation;}
+    UnaryExpression(Operation operation, std::shared_ptr<Expression>operand);
+    [[nodiscard]] std::shared_ptr<Expression> static create(Operation operation, std::shared_ptr<Expression> operand, size_t byte_size);
+
+    [[nodiscard]] Type type() const override {return UNARY;}
     [[nodiscard]] size_t minimum_byte_size() const override;
     void replace_variables(symbol_t (*transform)(symbol_t)) override {operand->replace_variables(transform);}
 
@@ -161,7 +154,7 @@ protected:
     void serialize_sub(std::ostream& stream) const override;
 
 private:
-    SubType operation;
+    Operation operation;
     std::shared_ptr<Expression> operand;
 };
 
@@ -169,8 +162,23 @@ private:
 
 class BinaryExpression: public Expression {
 public:
-    BinaryExpression(std::shared_ptr<Expression>  left, SubType operation, std::shared_ptr<Expression> right);
-    [[nodiscard]] SubType subtype() const override {return operation;}
+    enum Operation {
+        ADD,
+        BITWISE_AND,
+        BITWISE_OR,
+        BITWISE_XOR,
+        DIVIDE,
+        MODULO,
+        MULTIPLY,
+        SHIFT_LEFT,
+        SHIFT_RIGHT,
+        SUBTRACT
+    };
+
+    BinaryExpression(std::shared_ptr<Expression>  left, Operation operation, std::shared_ptr<Expression> right);
+    [[nodiscard]] std::shared_ptr<Expression> static create(const std::shared_ptr<Expression>& left, Operation operation, const std::shared_ptr<Expression>& right, size_t byte_size = 0);
+
+    [[nodiscard]] Type type() const override {return BINARY;}
 
     [[nodiscard]] size_t minimum_byte_size() const override;
     void replace_variables(symbol_t (*transform)(symbol_t)) override {left->replace_variables(transform); right->replace_variables(transform);}
@@ -183,8 +191,8 @@ protected:
 
     void serialize_sub(std::ostream& stream) const override;
 
-public: // TODO: these should not be public, make create_binary part of BinaryExpression
-    SubType operation;
+private:
+    Operation operation;
     std::shared_ptr<Expression> left;
     std::shared_ptr<Expression> right;
 };

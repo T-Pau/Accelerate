@@ -52,9 +52,14 @@ public:
 private:
     class BinaryOperator {
     public:
-        BinaryOperator(Expression::SubType opearation, int level): opeartion(opearation), level(level) {}
+        enum Type {
+            SIZE,
+            OPERATION
+        };
+        BinaryOperator(Type type, BinaryExpression::Operation opearation, int level): type(type), opeartion(opearation), level(level) {}
 
-        Expression::SubType opeartion;
+        Type type;
+        BinaryExpression::Operation opeartion;
         int level;
     };
 
@@ -71,7 +76,8 @@ private:
     class Element {
     public:
         Element(const std::shared_ptr<Expression>& node, int level): type(OPERAND), node(node), level(level), location(node->location) {}
-        Element(Location location, ElementType type, Expression::SubType operation, int level): type(type), operation(operation), level(level), location(location) {}
+        Element(Location location, BinaryOperator binary);
+        Element(Location location, UnaryExpression::Operation unary);
         explicit Element(Location location, ElementType type): type(type), location(location) {}
 
         [[nodiscard]] const char* description() const;
@@ -80,7 +86,11 @@ private:
         int level = 0;
 
         std::shared_ptr<Expression> node;
-        Expression::SubType operation = Expression::INTEGER; // TODO: better value for not used
+        union {
+            int none;
+            BinaryOperator binary;
+            UnaryExpression::Operation unary;
+        } operation = {0};
 
         Location location;
     };
@@ -117,7 +127,7 @@ private:
     static Token token_tilde;
 
     static std::unordered_map<Token, BinaryOperator> binary_operators;
-    static std::unordered_map<Token, Expression::SubType> unary_operators;
+    static std::unordered_map<Token, UnaryExpression::Operation> unary_operators;
 };
 
 

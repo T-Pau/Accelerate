@@ -58,7 +58,7 @@ std::shared_ptr<Expression> Expression::evaluate(std::shared_ptr<Expression> nod
     }
 }
 
-std::shared_ptr<Expression> Expression::create_binary(const std::shared_ptr<Expression>& left, Expression::SubType operation, const std::shared_ptr<Expression>& right, size_t byte_size) {
+std::shared_ptr<Expression> BinaryExpression::create(const std::shared_ptr<Expression>& left, Operation operation, const std::shared_ptr<Expression>& right, size_t byte_size) {
     std::shared_ptr<Expression> node;
 
     if (left->has_value() && right->has_value()) {
@@ -106,25 +106,22 @@ std::shared_ptr<Expression> Expression::create_binary(const std::shared_ptr<Expr
             case MODULO:
                 value = left_value % right_value;
                 break;
-
-            default:
-                throw Exception("invalid operand for binary expression");
         }
 
         // TODO: check byte_size
 
         node = std::make_shared<IntegerExpression>(value);
     }
-    else if (operation == SUBTRACT && left->subtype() == ADD && right->subtype() == ADD) {
+    else if (operation == SUBTRACT && left->type() == BINARY && right->type() == BINARY) {
         // This special case is for resolving relative addressing within an object: (object_name + N) - (object_name + M)
         auto left_binary = std::dynamic_pointer_cast<BinaryExpression>(left);
         auto right_binary = std::dynamic_pointer_cast<BinaryExpression>(right);
 
-        if (left_binary->left->subtype() == VARIABLE && right_binary->left->subtype() == VARIABLE) {
+        if (left_binary->operation == ADD && right_binary->operation == ADD && left_binary->left->type() == VARIABLE && right_binary->left->type() == VARIABLE) {
             auto left_left = std::dynamic_pointer_cast<VariableExpression>(left_binary->left);
             auto right_left = std::dynamic_pointer_cast<VariableExpression>(right_binary->left);
             if (left_left->variable() == right_left->variable()) {
-                node = create_binary(left_binary->right, operation, right_binary->right, byte_size);
+                node = create(left_binary->right, operation, right_binary->right, byte_size);
             }
         }
     }
@@ -139,7 +136,7 @@ std::shared_ptr<Expression> Expression::create_binary(const std::shared_ptr<Expr
     return node;
 }
 
-std::shared_ptr<Expression> Expression::create_unary(Expression::SubType operation, std::shared_ptr<Expression> operand, size_t byte_size) {
+std::shared_ptr<Expression> UnaryExpression::create(Operation operation, std::shared_ptr<Expression> operand, size_t byte_size) {
     std::shared_ptr<Expression> node;
 
     if (operation == PLUS) {
@@ -148,6 +145,9 @@ std::shared_ptr<Expression> Expression::create_unary(Expression::SubType operati
     else if (operand->has_value()) {
         auto value = std::dynamic_pointer_cast<IntegerExpression>(operand)->value();
         switch (operation) {
+            case PLUS:
+                break;
+
             case MINUS:
                 value = -value;
                 break;
@@ -167,9 +167,6 @@ std::shared_ptr<Expression> Expression::create_unary(Expression::SubType operati
             case BANK_BYTE:
                 value = (value >> 16) & 0xff;
                 break;
-
-            default:
-                throw Exception("invalid operand for unary expression");
         }
 
         node = std::make_shared<IntegerExpression>(value);
@@ -206,58 +203,11 @@ std::vector<symbol_t> Expression::get_variables() const {
 }
 
 std::shared_ptr<Expression> UnaryExpression::clone() const {
-    switch (subtype()) {
-        case BANK_BYTE:
-        case BITWISE_NOT:
-        case HIGH_BYTE:
-        case LOW_BYTE:
-        case MINUS:
-            return create_unary(operation, operand, byte_size());
-
-        case ADD:
-        case BITWISE_AND:
-        case BITWISE_OR:
-        case BITWISE_XOR:
-        case DIVIDE:
-        case MODULO:
-        case MULTIPLY:
-        case PLUS:
-        case SHIFT_LEFT:
-        case SHIFT_RIGHT:
-        case SUBTRACT:
-        case INTEGER:
-        case SIZE:
-        case VARIABLE:
-            throw ParseException(location, "internal error: invalid binary operation");
-    }
+    return create(operation, operand, byte_size());
 }
 
 std::shared_ptr<Expression> BinaryExpression::clone() const {
-    switch (subtype()) {
-        case ADD:
-        case BITWISE_AND:
-        case BITWISE_OR:
-        case BITWISE_XOR:
-        case DIVIDE:
-        case MODULO:
-        case MULTIPLY:
-        case PLUS:
-        case SHIFT_LEFT:
-        case SHIFT_RIGHT:
-        case SUBTRACT:
-            return create_binary(left, operation, right, byte_size());
-
-
-        case BANK_BYTE:
-        case BITWISE_NOT:
-        case HIGH_BYTE:
-        case LOW_BYTE:
-        case MINUS:
-        case INTEGER:
-        case SIZE:
-        case VARIABLE:
-            throw ParseException(location, "internal error: invalid binary operation");
-    }
+    return create(left, operation, right, byte_size());
 }
 
 
@@ -322,19 +272,7 @@ void VariableExpression::replace_variables(symbol_t (*transform)(symbol_t)) {
 }
 
 
-UnaryExpression::UnaryExpression(SubType operation, std::shared_ptr<Expression>operand) : operation(operation), operand(std::move(operand)) {
-    switch (operation) {
-        case MINUS:
-        case BITWISE_NOT:
-        case LOW_BYTE:
-        case HIGH_BYTE:
-        case BANK_BYTE:
-            return;
-
-        default:
-            throw Exception("invalid operand for unary expression");
-    }
-}
+UnaryExpression::UnaryExpression(Operation operation, std::shared_ptr<Expression>operand) : operation(operation), operand(std::move(operand)) {}
 
 std::shared_ptr<Expression> UnaryExpression::evaluate(const Environment &environment) const {
     auto new_operand = operand->evaluate(environment);
@@ -343,29 +281,12 @@ std::shared_ptr<Expression> UnaryExpression::evaluate(const Environment &environ
         return {};
     }
 
-    return create_unary(operation, new_operand ? new_operand : operand, byte_size());
+    return create(operation, new_operand ? new_operand : operand, byte_size());
 }
 
 
-BinaryExpression::BinaryExpression(std::shared_ptr<Expression> left, Expression::SubType operation,
-                                   std::shared_ptr<Expression> right): left(std::move(left)), operation(operation), right(std::move(right)) {
-    switch (operation) {
-        case ADD:
-        case SUBTRACT:
-        case SHIFT_RIGHT:
-        case SHIFT_LEFT:
-        case BITWISE_XOR:
-        case BITWISE_AND:
-        case BITWISE_OR:
-        case MULTIPLY:
-        case DIVIDE:
-        case MODULO:
-            return;
-
-        default:
-            throw Exception("invalid operand for binary expression");
-    }
-}
+BinaryExpression::BinaryExpression(std::shared_ptr<Expression> left, Operation operation,
+                                   std::shared_ptr<Expression> right): left(std::move(left)), operation(operation), right(std::move(right)) {}
 
 
 std::shared_ptr<Expression> BinaryExpression::evaluate(const Environment &environment) const {
@@ -376,7 +297,7 @@ std::shared_ptr<Expression> BinaryExpression::evaluate(const Environment &enviro
         return {};
     }
 
-    return create_binary(new_left ? new_left : left, operation, new_right ? new_right : right, byte_size());
+    return create(new_left ? new_left : left, operation, new_right ? new_right : right, byte_size());
 }
 
 void BinaryExpression::serialize_sub(std::ostream &stream) const {
@@ -411,10 +332,6 @@ void BinaryExpression::serialize_sub(std::ostream &stream) const {
             stream << '*';
             break;
 
-        case PLUS:
-            stream << '+';
-            break;
-
         case SHIFT_LEFT:
             stream << "<<";
             break;
@@ -426,16 +343,6 @@ void BinaryExpression::serialize_sub(std::ostream &stream) const {
         case SUBTRACT:
             stream << '-';
             break;
-
-        case BANK_BYTE:
-        case BITWISE_NOT:
-        case HIGH_BYTE:
-        case INTEGER:
-        case LOW_BYTE:
-        case MINUS:
-        case SIZE:
-        case VARIABLE:
-            throw Exception("internal error: invalid binary operator");
     }
 
     stream << right << ')';
@@ -476,22 +383,9 @@ void UnaryExpression::serialize_sub(std::ostream &stream) const {
             stream << '-';
             break;
 
-        case ADD:
-        case BITWISE_AND:
-        case BITWISE_OR:
-        case BITWISE_XOR:
-        case DIVIDE:
-        case INTEGER:
-        case MODULO:
-        case MULTIPLY:
         case PLUS:
-        case SIZE:
-        case SHIFT_LEFT:
-        case SHIFT_RIGHT:
-        case SUBTRACT:
-        case VARIABLE:
-            throw Exception("internal error: invalid unary operator");
-    }
+            break;
+   }
 
     stream << operand;
 }
@@ -506,23 +400,8 @@ size_t UnaryExpression::minimum_byte_size() const {
 
         case BITWISE_NOT:
         case MINUS:
-            return operand->minimum_byte_size();
-
-        case ADD:
-        case BITWISE_AND:
-        case BITWISE_OR:
-        case BITWISE_XOR:
-        case DIVIDE:
-        case INTEGER:
-        case MODULO:
-        case MULTIPLY:
         case PLUS:
-        case SIZE:
-        case SHIFT_LEFT:
-        case SHIFT_RIGHT:
-        case SUBTRACT:
-        case VARIABLE:
-            throw Exception("internal error: invalid unary operator");
+            return operand->minimum_byte_size();
     }
 }
 
