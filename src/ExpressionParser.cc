@@ -224,14 +224,14 @@ std::shared_ptr<Expression> ExpressionParser::do_parse() {
                         break;
 
                     case END:
-                        reduce_binary(std::numeric_limits<int>::max());
+                        reduce_binary(0);
                         if (!stack.empty()) {
                             throw ParseException(stack.back().location, "unmatched '('");
                         }
                         return top.node;
 
                     case PARENTHESIS_CLOSED:
-                        reduce_binary(std::numeric_limits<int>::max());
+                        reduce_binary(0);
                         if (stack.empty()) {
                             auto token = token_paren_close;
                             token.location = next.location;
@@ -292,7 +292,7 @@ void ExpressionParser::reduce_binary(int up_to_level) {
         const auto& operation = stack[stack.size() - 1];
         const auto& left = stack[stack.size() - 2];
 
-        if (operation.type != BINARY_OPERATOR || operation.level > up_to_level || left.type != OPERAND) {
+        if (operation.type != BINARY_OPERATOR || operation.level < up_to_level || left.type != OPERAND) {
             // TODO: error?
             break;
         }
