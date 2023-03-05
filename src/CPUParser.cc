@@ -223,7 +223,15 @@ void CPUParser::parse_byte_order() {
 
 
 void CPUParser::parse_instruction() {
-    Token name = tokenizer.expect(Token::NAME, group_directive);
+    Token name = tokenizer.next();
+
+    if (name == ParsedValue::token_curly_open) {
+        tokenizer.unget(name);
+        name = Token(Token::NAME, name.location, static_cast<symbol_t>(0));
+    }
+    else if (name.get_type() != Token::NAME) {
+        throw ParseException(name, "expected name or '{'");
+    }
     auto parameters = ParsedValue::parse(tokenizer);
 
     if (!parameters->is_dictionary()) {

@@ -1,0 +1,182 @@
+.syntax punctuation: "," "(" ")" "=" "+" "-" "++"
+
+.argument_type byte range: 0, $ff
+
+.argument_type destination_register enum {
+    ah: 0
+    al: 1
+    bh: 2
+    bl: 3
+    jah: 4
+    jal: 5
+}
+
+.argument_type source_register enum {
+    ah: 0
+    al: 1
+    bh: 2
+    bl: 3
+    rh: 4
+    rl: 5
+}
+
+.argument_type address_register enum {
+    ar1: 0
+    ar2: 1
+}
+
+
+.addressing_mode implied {
+    notation:
+}
+
+.addressing_mode register_immediate {
+    notation: register = value
+    arguments {
+        register: destination_register
+        value: byte
+    }
+    encoding: .opcode + register, value
+}
+
+.addressing_mode increment {
+    notation: address_register++
+    arguments {
+        address_register: address_register
+    }
+    encoding: .opcode + address_register
+}
+
+.addressing_mode indirect_register {
+    notation: (address_register) = register
+    arguments {
+        address_register: address_register
+        register: source_register
+    }
+    encoding: .opcode + register + address_register + 6
+}
+
+.addressing_mode indirect_ar1_register__increment_ar2 {
+    notation: (ar1) = register, ar2++
+    arguments {
+        register: source_register
+    }
+    encoding: .opcode + register
+}
+
+.addressing_mode indirect_ar2_register__increment_ar1 {
+    notation: (ar2) = register, ar1++
+    arguments {
+        register: source_register
+    }
+    encoding: .opcode + register
+}
+
+.addressing_mode register_indirect {
+    notation: register = (address_register)
+    arguments {
+        register: destination_register
+        address_register: address_register
+    }
+    encoding: .opcode + register + address_register * 6
+}
+
+.addressing_mode register_indirect_ar1__increment_ar2 {
+    notation: register = (ar1), ar2++
+    argument {
+        register: destination_register
+    }
+    encoding: .opcode + register
+}
+
+.addressing_mode register_indirect_ar2__increment_ar1 {
+    notation: register = (ar2), ar1++
+    argument {
+        register: destination_register
+    }
+    encoding: .opcode + register
+}
+
+
+.instruction nop {
+    implied: 0
+}
+
+.instruction {
+    register_immediate: 1
+    increment: 7
+    indirect_register: 33
+    indirect_ar1_register__increment_ar2: 45
+    indirect_ar2_register__increment_ar1: 51
+    register_indirect: 9
+    register_indirect_ar1__increment_ar2: 21
+    register_indirect_ar2__increment_ar1: 27
+}
+
+.instruction cimf {
+    implied: 239
+}
+
+.instruction somf {
+    implied: 240
+}
+
+.instruction jp {
+    implied: 241
+}
+
+.instruction jzh {
+    implied: 241
+}
+
+.instruction jzl {
+    implied: 243
+}
+
+.instruction jsh {
+    implied: 244
+}
+
+.instruction jsl {
+    implied: 245
+}
+
+.instruction jch {
+    implied: 246
+}
+
+.instruction jcl {
+    implied: 247
+}
+
+.instruction jnzh {
+    implied: 248
+}
+
+.instruction jnzl {
+    implied: 249
+}
+
+.instruction jnsh {
+    implied: 250
+}
+
+.instruction jnsl {
+    implied: 251
+}
+
+.instruction jnch {
+    implied: 252
+}
+
+.instruction jncl {
+    implied: 253
+}
+
+.instruction jim {
+    implied: 254
+}
+
+.instruction jom {
+    implied: 255
+}

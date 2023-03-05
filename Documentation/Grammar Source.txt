@@ -38,6 +38,7 @@ label:
 
 instruction:
     NAME instruction_arguments? NEWLINE
+    instruction_arguments NEWLINE
 
 instruction_arguments:
     instruction_argument

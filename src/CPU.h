@@ -54,6 +54,7 @@ public:
 
     void setup(TokenizerFile& tokenizer) const;
 
+    [[nodiscard]] bool uses_empty_mnemonic() const {return instructions.find(0) != instructions.end();}
     [[nodiscard]] bool uses_braces() const {return uses_punctuation(SymbolTable::global["("]);}
     [[nodiscard]] bool uses_punctuation(symbol_t symbol) const {return punctuation.find(symbol) != punctuation.end();}
 

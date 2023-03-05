@@ -88,7 +88,9 @@ void CPU::setup(TokenizerFile& tokenizer) const {
         tokenizer.add_literal(Token::PUNCTUATION, SymbolTable::global[item]);
     }
     for (const auto& pair: instructions) {
-        tokenizer.add_literal(Token::INSTRUCTION, SymbolTable::global[pair.first]);
+        if (pair.first != 0) {
+            tokenizer.add_literal(Token::INSTRUCTION, SymbolTable::global[pair.first]);
+        }
     }
 }
 

@@ -206,11 +206,23 @@ void Assembler::parse_symbol_body() {
                         return;
                     }
                     else {
-                        throw ParseException(token, "unexpected %s", token.type_name());
+                        if (cpu.uses_empty_mnemonic()) {
+                            tokenizer.unget(token);
+                            parse_instruction(Token(Token::NAME, token.location, static_cast<symbol_t >(0)));
+                        }
+                        else {
+                            throw ParseException(token, "unexpected %s", token.type_name());
+                        }
                     }
 
                 default:
-                    throw ParseException(token, "unexpected %s", token.type_name());
+                    if (cpu.uses_empty_mnemonic()) {
+                        tokenizer.unget(token);
+                        parse_instruction(Token(Token::NAME, token.location, static_cast<symbol_t >(0)));
+                    }
+                    else {
+                        throw ParseException(token, "unexpected %s", token.type_name());
+                    }
             }
         }
         catch (ParseException& ex) {
