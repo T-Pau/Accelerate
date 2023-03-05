@@ -214,6 +214,7 @@ void Assembler::parse_symbol_body() {
                             throw ParseException(token, "unexpected %s", token.type_name());
                         }
                     }
+                    break;
 
                 default:
                     if (cpu.uses_empty_mnemonic()) {
@@ -223,6 +224,7 @@ void Assembler::parse_symbol_body() {
                     else {
                         throw ParseException(token, "unexpected %s", token.type_name());
                     }
+                    break;
             }
         }
         catch (ParseException& ex) {
