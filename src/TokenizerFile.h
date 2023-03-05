@@ -98,6 +98,7 @@ private:
     static int convert_digit(int c);
     static bool is_identifier_continuation(int c) {return is_identifier_start(c) || isdigit(c);}
     static bool is_identifier_start(int c) { return islower(c) || isupper(c) || c == '_'; }
+    static bool is_identifier(const std::string& s);
 
     bool use_preprocessor;
     std::shared_ptr<const Path> path;

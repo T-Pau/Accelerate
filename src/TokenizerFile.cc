@@ -318,6 +318,19 @@ void TokenizerFile::preprocess(const std::vector<Token>& tokens) {
     }
 }
 
+bool TokenizerFile::is_identifier(const std::string &s) {
+    if (s.empty()) {
+        return false;
+    }
+    if (!std::all_of(s.begin(), s.end(), is_identifier_continuation)) {
+        return false;
+    }
+    if (!is_identifier_start(s.front())) {
+        return false;
+    }
+    return true;
+}
+
 
 int TokenizerFile::Source::next() {
     if (line >= lines.size()) {
@@ -359,6 +372,10 @@ void TokenizerFile::Source::reset_to(const Location &new_location) {
 std::optional<Token::Type> TokenizerFile::MatcherNode::match(TokenizerFile::Source &source, std::string& name) {
     auto c = source.next();
     if (c == EOF) {
+        if (name.empty()) {
+            // don't match empty string
+            return {};
+        }
         return match_type;
     }
 
@@ -367,14 +384,13 @@ std::optional<Token::Type> TokenizerFile::MatcherNode::match(TokenizerFile::Sour
     if (it == next.end()) {
         bool matched;
 
-        if (name.empty()) {
+        if (name.empty() || !match_type.has_value()) {
             // don't match empty string
             matched = false;
         }
         else if (!match_in_word && is_identifier_continuation(c)) {
             // don't match prefix of longer identifier (if matched string is valid identifier)
-            matched = !(is_identifier_start((name[0]) && std::all_of(name.begin() + 1, name.end(),
-                                                                   is_identifier_continuation)));
+            matched = !is_identifier(name);
         }
         else {
             // match if next character can't be part of identifier, or we're matching inside longer identifiers.
@@ -406,6 +422,6 @@ void TokenizerFile::MatcherNode::add(const char *string, Token::Type type, bool 
         }
     }
     else {
-        next[string[0]].add(string + 1, type);
+        next[string[0]].add(string + 1, type, match_in_word_);
     }
 }
