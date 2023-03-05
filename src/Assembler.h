@@ -62,7 +62,7 @@ private:
     const CPU& cpu;
 
     symbol_t current_section = 0;
-    std::shared_ptr<Object> current_object;
+    Object* current_object;
     std::shared_ptr<Environment> file_environment;
     std::shared_ptr<Environment> current_environment;
 

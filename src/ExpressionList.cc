@@ -78,10 +78,29 @@ std::vector<uint8_t> ExpressionList::bytes(uint64_t byte_order) const {
 }
 
 void ExpressionList::evaluate(const Environment &environment) {
-    for (auto expression: expressions) {
+    for (auto& expression: expressions) {
         expression = Expression::evaluate(expression, environment);
     }
 }
+
+
+ExpressionList& ExpressionList::operator=(const ExpressionList &other) {
+    if (this != &other) {
+        expressions.clear();
+        for (const auto& expression: other.expressions) {
+            append(expression->clone());
+        }
+    }
+    return *this;
+}
+
+ExpressionList& ExpressionList::operator=(ExpressionList &&other) {
+    if (this != &other) {
+        expressions = std::move(other.expressions);
+    }
+    return *this;
+}
+
 
 std::ostream& operator<<(std::ostream& stream, const ExpressionList& list) {
     list.serialize(stream);

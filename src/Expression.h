@@ -44,6 +44,7 @@ public:
     enum Type {
         BINARY,
         INTEGER,
+        OBJECT,
         UNARY,
         VARIABLE
     };

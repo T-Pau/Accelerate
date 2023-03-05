@@ -1,5 +1,5 @@
 /*
-Linker.h -- 
+ObjectExpression.h --
 
 Copyright (C) Dieter Baron
 
@@ -29,39 +29,32 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef LINKER_H
-#define LINKER_H
+#ifndef LINKER_OBJECT_EXPRESSION_H
+#define LINKER_OBJECT_EXPRESSION_H
 
-#include <unordered_map>
-#include <vector>
+#include "Expression.h"
+#include "Object.h"
 
-#include "CPU.h"
-#include "MemoryMap.h"
-#include "ObjectFile.h"
-
-class Linker {
+class ObjectExpression: public Expression {
 public:
-    Linker() = default;
-    Linker(MemoryMap map, CPU cpu): map(std::move(map)), cpu(std::move(cpu)) {}
+    explicit ObjectExpression(const Object* object): object(object) {}
 
-    void add_file(ObjectFile file) {files.emplace_back(std::move(file));}
-    void add_library(ObjectFile library) {libraries.emplace_back(std::move(library));}
+    [[nodiscard]] Type type() const override {return OBJECT;}
 
-    void link();
-    void output(const std::string& file_name) const;
+    [[nodiscard]] bool has_value() const override {return object->has_address();}
+    [[nodiscard]] int64_t value() const override {return has_value() ? static_cast<int64_t>(object->address.value()) : 0;}
+    [[nodiscard]] size_t minimum_byte_size() const override;
+    void replace_variables(symbol_t (*transform)(symbol_t)) override {}
+    void collect_variables(std::vector<symbol_t>& variables) const override {}
+
+protected:
+    [[nodiscard]] std::shared_ptr<Expression> evaluate(const Environment &environment) const override {return {};}
+    [[nodiscard]] std::shared_ptr<Expression> clone() const override;
+
+    void serialize_sub(std::ostream& stream) const override {stream << object->name.as_symbol();}
 
 private:
-
-    MemoryMap map;
-    CPU cpu;
-
-    std::vector<ObjectFile> files;
-    std::vector<ObjectFile> libraries;
-
-    std::vector<Object*> objects;
-
-    std::unordered_map<symbol_t, Object*> objects_by_section;
+    const Object* object;
 };
 
-
-#endif // LINKER_H
+#endif // LINKER_OBJECT_EXPRESSION_H

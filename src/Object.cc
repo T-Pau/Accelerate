@@ -54,3 +54,4 @@ void Object::append(const std::shared_ptr<Expression> &expression) {
     data.append(expression);
     size = data.byte_size();
 }
+

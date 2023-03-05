@@ -40,6 +40,10 @@ class ExpressionList {
 public:
     ExpressionList() = default;
     ExpressionList(std::initializer_list<std::shared_ptr<Expression>> list): expressions(list) {}
+    ExpressionList(const ExpressionList& other) {*this = other;}
+    ExpressionList(ExpressionList&& other) noexcept {*this = std::move(other);}
+    ExpressionList& operator=(const ExpressionList& other);
+    ExpressionList& operator=(ExpressionList&& other);
 
     [[nodiscard]] bool empty() const {return expressions.empty();}
     [[nodiscard]] size_t byte_size() const;

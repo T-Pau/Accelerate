@@ -24,6 +24,7 @@ add_library(xlr8 STATIC
         Int.cc
         IntegerExpression.cc
         Linker.cc
+        ObjectExpression.cc
         Location.cc
         MemoryMap.cc
         MemoryMapParser.cc

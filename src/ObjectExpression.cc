@@ -1,5 +1,5 @@
 /*
-Linker.h -- 
+ObjectExpression.cc --
 
 Copyright (C) Dieter Baron
 
@@ -29,39 +29,19 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef LINKER_H
-#define LINKER_H
+#include "ObjectExpression.h"
 
-#include <unordered_map>
-#include <vector>
+std::shared_ptr<Expression> ObjectExpression::clone() const {
+    auto node = std::make_shared<ObjectExpression>(object);
+    node->set_byte_size(byte_size());
+    return node;
+}
 
-#include "CPU.h"
-#include "MemoryMap.h"
-#include "ObjectFile.h"
-
-class Linker {
-public:
-    Linker() = default;
-    Linker(MemoryMap map, CPU cpu): map(std::move(map)), cpu(std::move(cpu)) {}
-
-    void add_file(ObjectFile file) {files.emplace_back(std::move(file));}
-    void add_library(ObjectFile library) {libraries.emplace_back(std::move(library));}
-
-    void link();
-    void output(const std::string& file_name) const;
-
-private:
-
-    MemoryMap map;
-    CPU cpu;
-
-    std::vector<ObjectFile> files;
-    std::vector<ObjectFile> libraries;
-
-    std::vector<Object*> objects;
-
-    std::unordered_map<symbol_t, Object*> objects_by_section;
-};
-
-
-#endif // LINKER_H
+size_t ObjectExpression::minimum_byte_size() const {
+    if (has_value()) {
+        return Int::minimum_byte_size(value());
+    }
+    else {
+        return 0;
+    }
+}

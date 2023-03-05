@@ -111,7 +111,7 @@ void ObjectFileParser::parse_object() {
     }
     auto visibility = visibility_from_name((*parameters)[token_visibility]->as_singular_scalar()->token());
 
-    auto object = std::make_shared<Object>(section.as_symbol(), visibility, name);
+    auto object = file.create_object(section.as_symbol(), visibility, name);
 
     auto alignment_value = parameters->get_optional(token_alignment);
     if (alignment_value != nullptr) {
@@ -133,8 +133,6 @@ void ObjectFileParser::parse_object() {
         auto tokenizer = TokenizerSequence(data_value->as_scalar()->tokens);
         object->append(ExpressionParser(tokenizer).parse_list());
     }
-
-    file.add_object(name.as_symbol(), object);
 }
 
 Object::Visibility ObjectFileParser::visibility_from_name(Token name) {

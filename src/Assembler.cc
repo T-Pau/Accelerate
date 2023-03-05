@@ -458,7 +458,7 @@ Object::Visibility Assembler::visibility_value(const Token& token) {
 }
 
 void Assembler::parse_symbol(Object::Visibility visibility, const Token &name) {
-    current_object = std::make_shared<Object>(current_section, visibility, name);
+    current_object = object_file.create_object(current_section, visibility, name);
 
     while (true) {
         auto token = tokenizer.next();
@@ -506,8 +506,6 @@ void Assembler::parse_symbol(Object::Visibility visibility, const Token &name) {
 
     // TODO: warn if reserved in saved section
     // TODO: error if data in unsaved section
-
-    object_file.add_object(name.as_symbol(), current_object);
 }
 
 std::shared_ptr<Expression> Assembler::get_pc() const {

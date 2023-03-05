@@ -30,6 +30,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include "ObjectFile.h"
+#include "ParseException.h"
 
 #include <utility>
 
@@ -75,7 +76,7 @@ void ObjectFile::add_object_file(const ObjectFile &file) {
         add_constant(pair.second.name, pair.second.visibility, pair.second.value);
     }
     for (const auto& pair: file.objects) {
-        add_object(pair.first, pair.second);
+        objects.insert(pair);
     }
 }
 
@@ -84,7 +85,7 @@ void ObjectFile::evaluate(const Environment &environment) {
         pair.second.value = Expression::evaluate(pair.second.value, environment);
     }
     for (auto& pair: objects) {
-        pair.second->data.evaluate(environment);
+        pair.second.data.evaluate(environment);
     }
 }
 
@@ -103,15 +104,24 @@ void ObjectFile::remove_local_constants() {
 }
 
 
-std::shared_ptr<Object> ObjectFile::object(symbol_t name) const {
+const Object* ObjectFile::object(symbol_t name) const {
     auto it = objects.find(name);
 
     if (it != objects.end()) {
-        return it-> second;
+        return &it-> second;
     }
     else {
-        return {};
+        return nullptr;
     }
+}
+
+
+Object *ObjectFile::create_object(symbol_t section, Object::Visibility visibility, Token name) {
+    auto pair = objects.insert({name.as_symbol(), {this, section, visibility, name}});
+    if (!pair.second) {
+        throw ParseException(name, "redefinition of object");
+    }
+    return &pair.first->second;
 }
 
 
