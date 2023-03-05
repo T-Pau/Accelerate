@@ -1,4 +1,5 @@
 .syntax punctuation: "," "(" ")" "=" "+" "-" "++"
+.syntax keywords: "a" "ah" "al" "b" "bh" "bl" "r" "rh" "rl" "ja" "jah" "jal" "ar1" "ar2"
 
 .argument_type byte range: 0, $ff
 
@@ -53,7 +54,7 @@
         address_register: address_register
         register: source_register
     }
-    encoding: .opcode + register + address_register + 6
+    encoding: .opcode + register + address_register * 6
 }
 
 .addressing_mode indirect_ar1_register__increment_ar2 {
@@ -83,7 +84,7 @@
 
 .addressing_mode register_indirect_ar1__increment_ar2 {
     notation: register = (ar1), ar2++
-    argument {
+    arguments {
         register: destination_register
     }
     encoding: .opcode + register
@@ -91,7 +92,7 @@
 
 .addressing_mode register_indirect_ar2__increment_ar1 {
     notation: register = (ar2), ar1++
-    argument {
+    arguments {
         register: destination_register
     }
     encoding: .opcode + register
