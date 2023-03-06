@@ -12,6 +12,65 @@
     jal: 5
 }
 
+.argument_type destination_register_from_a enum {
+    b: 2
+    ar1: 4
+    ar2: 7
+    ja: 10
+}
+
+.argument_type destination_register_from_al enum {
+    bl: 2
+    jal: 4
+}
+
+.argument_type destination_register_from_ah enum {
+    bh: 2
+    jah: 4
+}
+
+.argument_type destination_register_from_b enum {
+    a: 0
+    ar1: 5
+    ar2: 8
+    ja: 11
+}
+
+.argument_type destination_register_from_bl enum {
+    al: 0
+    jal: 5
+}
+
+.argument_type destination_register_from_bh enum {
+    ah: 0
+    jah: 5
+}
+
+.argument_type destination_register_from_r enum {
+    a: 1
+    b: 3
+    ar1: 6
+    ar2: 9
+    ja: 12
+}
+
+.argument_type destination_register_from_rl enum {
+    al: 1
+    bl: 3
+    jal: 6
+}
+
+.argument_type destination_register_from_rh enum {
+    ah: 1
+    bh: 3
+    jah: 6
+}
+
+.argument_type destination_register_increment_ar1 enum {
+    ar2: 0
+    ja: 1
+}
+
 .argument_type source_register enum {
     ah: 0
     al: 1
@@ -19,6 +78,24 @@
     bl: 3
     rh: 4
     rl: 5
+}
+
+.argument_type source_register_increment enum {
+    a: 0
+    b: 1
+    r: 2
+}
+
+.argument_type source_register_low_increment enum {
+    al: 0
+    bl: 1
+    rl: 2
+}
+
+.argument_type source_register_high_increment enum {
+    ah: 0
+    bh: 1
+    rh: 2
 }
 
 .argument_type address_register enum {
@@ -29,6 +106,15 @@
 
 .addressing_mode implied {
     notation:
+}
+
+.addressing_mode nop {
+    notation [
+        :
+        : rh = ah + bh, rl = al + bl
+        : rh = ah + bh
+        : rl = al + bl
+    ]
 }
 
 .addressing_mode register_immediate {
@@ -73,6 +159,132 @@
     encoding: .opcode + register
 }
 
+.addressing_mode register_a {
+    notation: register = a
+    arguments {
+        register: destination_register_from_a
+    }
+    encoding: .opcode + register
+}
+
+.addressing_mode register_al {
+    notation: register = al
+    arguments {
+        register: destination_register_from_al
+    }
+    encoding: .opcode + register
+}
+
+.addressing_mode register_ah {
+    notation: register = ah
+    arguments {
+        register: destination_register_from_ah
+    }
+    encoding: .opcode + register
+}
+
+.addressing_mode register_al__increment {
+    notation: register = al, address_register++
+    arguments {
+        register: destination_register_from_al
+        address_register: address_register
+    }
+    encoding: .opcode + register + address_register * 17
+}
+
+.addressing_mode register_ah__increment {
+    notation: register = ah, address_register++
+    arguments {
+        register: destination_register_from_ah
+        address_register: address_register
+    }
+    encoding: .opcode + register + address_register * 17
+}
+
+.addressing_mode register_b {
+    notation: register = b
+    arguments {
+        register: destination_register_from_b
+    }
+    encoding: .opcode + register
+}
+
+.addressing_mode register_bl {
+    notation: register = bl
+    arguments {
+        register: destination_register_from_bl
+    }
+    encoding: .opcode + register
+}
+
+.addressing_mode register_bl__increment {
+    notation: register = bl, address_register++
+    arguments {
+        register: destination_register_from_bl
+        address_register: address_register
+    }
+    encoding: .opcode + register + address_register * 17
+}
+
+.addressing_mode register_bh__increment {
+    notation: register = bh, address_register++
+    arguments {
+        register: destination_register_from_bh
+        address_register: address_register
+    }
+    encoding: .opcode + register + address_register * 17
+}
+
+.addressing_mode register_bh {
+    notation: register = bh
+    arguments {
+        register: destination_register_from_bh
+    }
+    encoding: .opcode + register
+}
+
+.addressing_mode register_r {
+    notation: register = r
+    arguments {
+        register: destination_register_from_r
+    }
+    encoding: .opcode + register
+}
+
+.addressing_mode register_rl {
+    notation: register = rl
+    arguments {
+        register: destination_register_from_rl
+    }
+    encoding: .opcode + register
+}
+
+.addressing_mode register_rh {
+    notation: register = rh
+    arguments {
+        register: destination_register_from_rh
+    }
+    encoding: .opcode + register
+}
+
+.addressing_mode register_rl__increment {
+    notation: register = rl, address_register++
+    arguments {
+        register: destination_register_from_rl
+        address_register: address_register
+    }
+    encoding: .opcode + register + address_register * 17
+}
+
+.addressing_mode register_rh__increment {
+    notation: register = rh, address_register++
+    arguments {
+        register: destination_register_from_rh
+        address_register: address_register
+    }
+    encoding: .opcode + register + address_register * 17
+}
+
 .addressing_mode register_indirect {
     notation: register = (address_register)
     arguments {
@@ -98,20 +310,64 @@
     encoding: .opcode + register
 }
 
+.addressing_mode ar1_register__increment {
+    notation: ar1 = register, ar2++
+    arguments {
+        register: source_register_increment
+    }
+    encoding: .opcode + register
+}
+
+.addressing_mode register_register__increment_ar1 {
+    notation: destination = source, ar1++
+    arguments {
+        destination: destination_register_increment_ar1
+        source: source_register_increment
+    }
+    encoding: .opcode + destination * 3 + source
+}
+
+.addressing_mode ja_register__increment_ar2 {
+    notation: ja = source, ar2++
+    arguments {
+        source: source_register_increment
+    }
+    encoding: .opcode + source
+}
+
 
 .instruction nop {
     implied: 0
 }
 
 .instruction {
+    nop: 0
     register_immediate: 1
     increment: 7
-    indirect_register: 33
-    indirect_ar1_register__increment_ar2: 45
-    indirect_ar2_register__increment_ar1: 51
     register_indirect: 9
     register_indirect_ar1__increment_ar2: 21
     register_indirect_ar2__increment_ar1: 27
+    indirect_register: 33
+    indirect_ar1_register__increment_ar2: 45
+    indirect_ar2_register__increment_ar1: 51
+    register_a: 57
+    register_b: 57
+    register_r: 57
+    register_ah: 70
+    register_bh: 70
+    register_rh: 70
+    register_al: 77
+    register_bl: 77
+    register_rl: 77
+    ar1_register__increment: 84
+    register_register__increment_ar1: 87
+    register_ah__increment: 93
+    register_bh__increment: 93
+    register_rh__increment: 93
+    ja_register__increment_ar2: 107
+    register_al__increment: 100
+    register_bl__increment: 100
+    register_rl__increment: 100
 }
 
 .instruction cimf {
