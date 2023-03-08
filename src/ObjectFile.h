@@ -52,15 +52,18 @@ public:
         std::shared_ptr<Expression> value;
     };
 
+    ObjectFile();
+
     Object* create_object(symbol_t section, Object::Visibility visibility, Token name);
 
     void add_constant(symbol_t name, Object::Visibility visibility, std::shared_ptr<Expression> value);
     void add_object_file(const ObjectFile& file);
 
     [[nodiscard]] const Object* object(symbol_t name) const;
+    [[nodiscard]] std::vector<Object*> all_objects();
 
-    Environment* global_environment() const;
-    Environment* local_environment() const;
+    std::shared_ptr<Environment> global_environment;
+    std::shared_ptr<Environment> local_environment;
 
     void evaluate(const Environment& environment);
     void export_constants(Environment& environment) const;
@@ -69,8 +72,12 @@ public:
     void serialize(std::ostream& stream) const;
 
 private:
-    std::map<symbol_t, Object> objects;
-    std::map<symbol_t, Constant> constants;
+    void add_to_environment(const Constant& constant) { add_to_environment(constant.name, constant.visibility, constant.value);}
+    void add_to_environment(Object* object);
+    void add_to_environment(symbol_t name, Object::Visibility visibility, std::shared_ptr<Expression> value);
+
+    std::unordered_map<symbol_t, Object> objects;
+    std::unordered_map<symbol_t, Constant> constants;
 };
 
 std::ostream& operator<<(std::ostream& stream, const ObjectFile& list);

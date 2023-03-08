@@ -34,7 +34,6 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "Command.h"
 #include "ObjectFileParser.h"
-#include "Exception.h"
 
 class xlr8_ar: public Command {
 public:
@@ -59,15 +58,13 @@ int main(int argc, char *argv[]) {
 
 void xlr8_ar::process() {
     auto parser = ObjectFileParser();
-    auto environment = Environment();
 
     for (const auto &file_name: arguments.arguments) {
         auto file = parser.parse(file_name);
-        file.export_constants(environment);
         library.add_object_file(file);
     }
 
-    library.evaluate(environment);
+    library.evaluate(*(library.local_environment));
     library.remove_local_constants();
 }
 

@@ -30,14 +30,59 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include "Linker.h"
+#include "ObjectExpression.h"
 
 void Linker::link() {
-    // TODO: resolve constants
-    // TODO: resolve object
+    program.evaluate(*program.local_environment);
+
+    for (auto& library: libraries) {
+        library.evaluate(*library.local_environment);
+        program.evaluate(*library.global_environment);
+    }
+
+    std::unordered_set<Object*> new_objects;
+
+    // Collect all objects from main program.
+    for (auto object : program.all_objects()) {
+        if (add_object(object)) {
+            new_objects.insert(object);
+        }
+    }
+
+    // Collect all referenced objects.
+    while (!new_objects.empty()) {
+        auto objects = new_objects;
+        new_objects.clear();
+        for (auto object : objects) {
+            for (const auto& expression: object->data) {
+                for (auto sub_expression: *expression) {
+                    if (sub_expression->type() == Expression::OBJECT) {
+                        auto sub_object = dynamic_cast<ObjectExpression*>(sub_expression)->object;
+                        if (add_object(sub_object)) {
+                            new_objects.insert(sub_object);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // TODO: check for unresolved symbols
+
     // TODO: place objects
-    // TODO: resolve object addresses
+
+    // resolve object addresses
+    auto empty_environment = Environment();
+    for (auto& pair : objects_by_section) {
+        pair.second->data.evaluate(empty_environment);
+    }
+
 }
 
 void Linker::output(const std::string &file_name) const {
     // TODO: implement
+}
+
+bool Linker::add_object(Object *object) {
+    return objects_by_section.insert({object->section, object}).second;
 }

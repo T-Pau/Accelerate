@@ -45,6 +45,7 @@ public:
     explicit Environment(std::shared_ptr<Environment> next): next(std::move(next)) {}
 
     void add(symbol_t name, std::shared_ptr<Expression> value) { variables[name] = std::move(value);}
+    void remove(symbol_t name);
     void set(symbol_t name, const std::shared_ptr<Expression>& value);
     std::shared_ptr<Expression> operator[](symbol_t name) const;
 

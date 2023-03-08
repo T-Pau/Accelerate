@@ -63,3 +63,7 @@ bool Environment::update(symbol_t name, const std::shared_ptr<Expression>& value
         return false;
     }
 }
+
+void Environment::remove(symbol_t name) {
+    variables.erase(name);
+}

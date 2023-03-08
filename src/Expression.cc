@@ -83,4 +83,17 @@ std::vector<symbol_t> Expression::get_variables() const {
 }
 
 
-
+Expression::Iterator &Expression::Iterator::operator++() {
+    while (!layers.empty()) {
+        auto last = layers.back();
+        last.current_child = last.node->iterate(last.current_child);
+        if (last.current_child != nullptr) {
+            layers.emplace_back(last.current_child);
+            break;
+        }
+        else {
+            layers.pop_back();
+        }
+    }
+    return *this;
+}

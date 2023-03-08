@@ -37,7 +37,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 class ObjectExpression: public Expression {
 public:
-    explicit ObjectExpression(const Object* object): object(object) {}
+    explicit ObjectExpression(Object* object): object(object) {}
 
     [[nodiscard]] Type type() const override {return OBJECT;}
 
@@ -47,14 +47,13 @@ public:
     void replace_variables(symbol_t (*transform)(symbol_t)) override {}
     void collect_variables(std::vector<symbol_t>& variables) const override {}
 
+    Object* object;
+
 protected:
     [[nodiscard]] std::shared_ptr<Expression> evaluate(const Environment &environment) const override {return {};}
     [[nodiscard]] std::shared_ptr<Expression> clone() const override;
 
     void serialize_sub(std::ostream& stream) const override {stream << object->name.as_symbol();}
-
-private:
-    const Object* object;
 };
 
 #endif // LINKER_OBJECT_EXPRESSION_H

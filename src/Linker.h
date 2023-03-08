@@ -44,7 +44,7 @@ public:
     Linker() = default;
     Linker(MemoryMap map, CPU cpu): map(std::move(map)), cpu(std::move(cpu)) {}
 
-    void add_file(ObjectFile file) {files.emplace_back(std::move(file));}
+    void add_file(const ObjectFile& file) {program.add_object_file(file);}
     void add_library(ObjectFile library) {libraries.emplace_back(std::move(library));}
 
     void link();
@@ -55,10 +55,10 @@ private:
     MemoryMap map;
     CPU cpu;
 
-    std::vector<ObjectFile> files;
+    ObjectFile program;
     std::vector<ObjectFile> libraries;
 
-    std::vector<Object*> objects;
+    bool add_object(Object* object);
 
     std::unordered_map<symbol_t, Object*> objects_by_section;
 };

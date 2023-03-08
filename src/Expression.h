@@ -49,6 +49,39 @@ public:
         VARIABLE
     };
 
+    class Iterator {
+    public:
+        using iterator_category = std::forward_iterator_tag;
+        using value_type = Expression*;
+        using pointer = Expression**;
+        using reference = Expression*&;
+
+        Iterator() = default;
+        explicit Iterator(Expression*expression){ layers.emplace_back(expression);}
+
+        reference operator*() { return layers.back().node;}
+        pointer operator->() { return &layers.back().node;}
+
+        Iterator& operator++();
+        Iterator operator++(int) {auto tmp = *this; ++(*this); return tmp;}
+
+        bool operator==(const Iterator& other) const {return layers == other.layers;}
+        bool operator!=(const Iterator& other) const { return !(*this == other);}
+
+    private:
+        class Layer {
+        public:
+            explicit Layer(Expression* node): node(node) {}
+            bool operator==(const Layer& other) const {return node == other.node && current_child == other.current_child;}
+            Expression* node;
+            Expression* current_child = nullptr;
+        };
+        std::vector<Layer> layers;
+    };
+
+    Iterator begin() {return Iterator(this);}
+    Iterator end() {return {};}
+
     [[nodiscard]] virtual Type type() const = 0;
     [[nodiscard]] virtual bool has_value() const {return false;}
     [[nodiscard]] virtual int64_t value() const {return 0;}
@@ -71,6 +104,7 @@ public:
     Location location;
 
 protected:
+    virtual Expression* iterate(Expression* last) const {return nullptr;}
     virtual void serialize_sub(std::ostream& stream) const = 0;
 
 private:
