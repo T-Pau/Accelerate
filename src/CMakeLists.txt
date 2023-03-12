@@ -26,6 +26,7 @@ add_library(xlr8 STATIC
         Linker.cc
         ObjectExpression.cc
         Location.cc
+        Memory.cc
         MemoryMap.cc
         MemoryMapParser.cc
         Node.cc

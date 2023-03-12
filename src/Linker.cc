@@ -77,6 +77,7 @@ void Linker::link() {
         pair.second->data.evaluate(empty_environment);
     }
 
+    // TODO: copy object data to memory banks
 }
 
 void Linker::output(const std::string &file_name) const {

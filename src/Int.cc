@@ -22,3 +22,15 @@ size_t Int::minimum_byte_size(int64_t value) {
 void Int::encode(std::vector<uint8_t> &bytes, int64_t value, uint64_t byte_order) {
 
 }
+
+size_t Int::align(size_t value, size_t alignment) {
+    if (alignment == 0) {
+        return value;
+    }
+
+    size_t rest = value % alignment;
+    if (rest == 0) {
+        return value;
+    }
+    return value + (alignment - rest);
+}

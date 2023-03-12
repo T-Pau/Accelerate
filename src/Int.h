@@ -12,6 +12,8 @@ class Int {
 public:
     static void encode(std::vector<uint8_t>& bytes, int64_t value, uint64_t byte_order);
     static size_t minimum_byte_size(int64_t value);
+
+    static size_t align(size_t value, size_t alignment);
 };
 
 

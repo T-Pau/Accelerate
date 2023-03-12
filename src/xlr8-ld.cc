@@ -88,14 +88,14 @@ void xlr8_ld::process() {
         auto file = parser.parse(file_name);
 
         auto extension = std::filesystem::path(file_name).extension();
-        if (extension == "o") {
+        if (extension == ".o") {
             linker.add_file(file);
         }
-        else if (extension == "lib") {
+        else if (extension == ".lib") {
             linker.add_library(file);
         }
         else {
-            throw Exception("unrecognized file type '.%s'", extension.c_str());
+            throw Exception("unrecognized file type '%s'", extension.c_str());
         }
     }
 
