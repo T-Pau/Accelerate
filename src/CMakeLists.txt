@@ -36,6 +36,7 @@ add_library(xlr8 STATIC
         ParseException.cc
         ParsedValue.cc
         Path.cc
+        Range.cc
         SymbolTable.cc
         Token.cc
         TokenGroup.cc

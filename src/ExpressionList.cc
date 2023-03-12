@@ -59,8 +59,8 @@ void ExpressionList::serialize(std::ostream &stream) const {
     }
 }
 
-std::vector<uint8_t> ExpressionList::bytes(uint64_t byte_order) const {
-    std::vector<uint8_t> data;
+std::string ExpressionList::bytes(uint64_t byte_order) const {
+    std::string data;
 
     for (const auto& expression: expressions) {
         if (!expression->has_value()) {
@@ -71,7 +71,7 @@ std::vector<uint8_t> ExpressionList::bytes(uint64_t byte_order) const {
             size = expression->minimum_byte_size();
         }
 
-        Int::encode(data, expression->value(), byte_order);
+        Int::encode(data, expression->value(), size, byte_order);
     }
 
     return data;
@@ -94,7 +94,7 @@ ExpressionList& ExpressionList::operator=(const ExpressionList &other) {
     return *this;
 }
 
-ExpressionList& ExpressionList::operator=(ExpressionList &&other) {
+ExpressionList& ExpressionList::operator=(ExpressionList &&other) noexcept {
     if (this != &other) {
         expressions = std::move(other.expressions);
     }

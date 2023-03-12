@@ -27,5 +27,21 @@ const MemoryMap::Section *MemoryMap::section(symbol_t name) const {
     }
 }
 
+Memory MemoryMap::initialize_memory() const {
+    std::vector<Range> bank_ranges;
+
+    for (auto const& section: sections) {
+        for (auto const& block: section.second.blocks) {
+            if (bank_ranges.size() < block.bank + 1) {
+                bank_ranges.resize(block.bank + 1);
+            }
+            bank_ranges[block.bank] = bank_ranges[block.bank].add(block.range);
+            auto& bank_range = bank_ranges[block.bank];
+        }
+    }
+
+    return Memory(bank_ranges);
+}
+
 
 

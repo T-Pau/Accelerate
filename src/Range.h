@@ -1,5 +1,5 @@
 /*
-Linker.h -- 
+Range.h -- 
 
 Copyright (C) Dieter Baron
 
@@ -29,41 +29,31 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef LINKER_H
-#define LINKER_H
+#ifndef ACCELERATE_RANGE_H
+#define ACCELERATE_RANGE_H
 
-#include <unordered_set>
-#include <vector>
+#include <cstdint>
 
-#include "CPU.h"
-#include "MemoryMap.h"
-#include "ObjectFile.h"
-
-class Linker {
+class Range {
 public:
-    Linker() = default;
-    Linker(MemoryMap map_, CPU cpu): map(std::move(map_)), cpu(std::move(cpu)), memory(map.initialize_memory()) {}
+    Range() = default;
+    Range(uint64_t start, uint64_t size): start(start), size(size) {}
 
-    void add_file(const ObjectFile& file) {program.add_object_file(file);}
-    void add_library(ObjectFile library) {libraries.emplace_back(std::move(library));}
+    [[nodiscard]] bool empty() const {return size == 0;}
+    [[nodiscard]] uint64_t end() const {return start + size;}
+    [[nodiscard]] Range intersect(const Range& other) const;
+    [[nodiscard]] Range add(const Range& other) const;
 
-    void link();
-    void output(const std::string& file_name) const;
+    void add_left(uint64_t amount);
+    void add_right(uint64_t amount) {size += amount;}
+    void remove_left(uint64_t amount);
+    void remove_right(uint64_t amount);
+    void set_start(uint64_t new_start);
+    void set_end(uint64_t new_end);
 
-private:
-    MemoryMap map;
-    CPU cpu;
-
-    ObjectFile program;
-    std::vector<ObjectFile> libraries;
-
-    bool add_object(Object* object);
-
-    std::unordered_set<Object*> objects;
-
-    Memory memory;
-
+    uint64_t start = 0;
+    uint64_t size = 0;
 };
 
 
-#endif // LINKER_H
+#endif //ACCELERATE_RANGE_H

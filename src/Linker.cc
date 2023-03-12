@@ -53,11 +53,11 @@ void Linker::link() {
     while (!new_objects.empty()) {
         auto objects = new_objects;
         new_objects.clear();
-        for (auto object : objects) {
-            for (const auto& expression: object->data) {
+        for (auto object: objects) {
+            for (const auto &expression: object->data) {
                 for (auto sub_expression: *expression) {
                     if (sub_expression->type() == Expression::OBJECT) {
-                        auto sub_object = dynamic_cast<ObjectExpression*>(sub_expression)->object;
+                        auto sub_object = dynamic_cast<ObjectExpression *>(sub_expression)->object;
                         if (add_object(sub_object)) {
                             new_objects.insert(sub_object);
                         }
@@ -67,17 +67,20 @@ void Linker::link() {
         }
     }
 
-    // TODO: check for unresolved symbols
+    for (auto object : objects) {
+        if (!object->bank.has_value() || object->address.has_value()) {
+            // TODO: unresolved symbol
+            continue;
+        }
+    }
 
     // TODO: place objects
 
-    // resolve object addresses
     auto empty_environment = Environment();
-    for (auto& pair : objects_by_section) {
-        pair.second->data.evaluate(empty_environment);
+    for (auto object : objects) {
+        object->data.evaluate(empty_environment);
+        memory[object->bank.value()].copy(object->address.value(), object->data.bytes(cpu.byte_order));
     }
-
-    // TODO: copy object data to memory banks
 }
 
 void Linker::output(const std::string &file_name) const {
@@ -85,5 +88,5 @@ void Linker::output(const std::string &file_name) const {
 }
 
 bool Linker::add_object(Object *object) {
-    return objects_by_section.insert({object->section, object}).second;
+    return objects.insert(object).second;
 }

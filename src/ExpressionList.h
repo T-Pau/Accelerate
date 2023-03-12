@@ -43,7 +43,7 @@ public:
     ExpressionList(const ExpressionList& other) {*this = other;}
     ExpressionList(ExpressionList&& other) noexcept {*this = std::move(other);}
     ExpressionList& operator=(const ExpressionList& other);
-    ExpressionList& operator=(ExpressionList&& other);
+    ExpressionList& operator=(ExpressionList&& other) noexcept ;
 
     [[nodiscard]] bool empty() const {return expressions.empty();}
     [[nodiscard]] size_t byte_size() const;
@@ -53,7 +53,7 @@ public:
     void evaluate(const Environment& environment);
 
     void serialize(std::ostream& stream) const;
-    [[nodiscard]] std::vector<uint8_t> bytes(uint64_t byte_order) const;
+    [[nodiscard]] std::string bytes(uint64_t byte_order) const;
 
 
     std::vector<std::shared_ptr<Expression>> expressions;

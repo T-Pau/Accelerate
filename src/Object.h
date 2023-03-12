@@ -37,6 +37,7 @@ public:
     Token name;
     uint64_t alignment = 0;
     uint64_t size = 0;
+    std::optional<uint64_t> bank;
     std::optional<uint64_t> address;
 
     ExpressionList data;

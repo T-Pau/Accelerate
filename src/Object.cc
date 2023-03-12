@@ -3,6 +3,7 @@
 //
 
 #include "Object.h"
+#include "Exception.h"
 
 std::ostream& operator<<(std::ostream& stream, const std::shared_ptr<Object>& object) {
     object->serialize(stream);
@@ -54,4 +55,3 @@ void Object::append(const std::shared_ptr<Expression> &expression) {
     data.append(expression);
     size = data.byte_size();
 }
-

@@ -36,6 +36,8 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <string>
 #include <vector>
 
+#include "Range.h"
+
 class Memory {
 public:
     enum Allocation {
@@ -44,26 +46,15 @@ public:
         RESERVED
     };
 
-    class Range {
-    public:
-        Range(size_t start, size_t end): start(start), end(end) {}
-
-        [[nodiscard]] size_t size() const {return end - start;}
-        [[nodiscard]] Range intersect(const Range& other) const;
-
-        size_t start;
-        size_t end;
-    };
-
     class Bank {
     public:
         explicit Bank(Range range);
 
-        size_t allocate(const Range& allowed_range, size_t alignment, const std::string& data);
-        size_t reserve(const Range& allowed_range, size_t alignment, size_t size) {return allocate(allowed_range, RESERVED, alignment, size);}
+        uint64_t allocate(const Range& allowed_range, Allocation allocation, uint64_t alignment, uint64_t size);
+        void copy(uint64_t start, const std::string& data);
 
-        [[nodiscard]] size_t data_start() const;
-        [[nodiscard]] size_t data_end() const;
+        [[nodiscard]] uint64_t data_start() const;
+        [[nodiscard]] uint64_t data_end() const;
 
     private:
         class Block {
@@ -74,12 +65,16 @@ public:
             Range range;
         };
 
-        size_t allocate(const Range& allowed_range, Allocation allocation, size_t alignment, size_t size);
 
         std::string memory;
         Range range;
         std::list<Block> blocks;
     };
+
+    Memory() = default;
+    explicit Memory(const std::vector<Range>& bank_ranges);
+
+    Bank& operator[](uint64_t bank) {return banks[bank];}
 
 private:
     std::vector<Bank> banks;

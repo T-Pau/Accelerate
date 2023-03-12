@@ -9,6 +9,7 @@
 #include <unordered_map>
 #include <vector>
 
+#include "Memory.h"
 #include "SymbolTable.h"
 
 class MemoryMap {
@@ -21,11 +22,10 @@ public:
 
     class Block {
     public:
-        Block(uint64_t bank, uint64_t start, uint64_t size): bank(bank), start(start), size(size) {}
+        Block(uint64_t bank, uint64_t start, uint64_t size): bank(bank), range(start, size) {}
 
         uint64_t bank;
-        uint64_t start;
-        uint64_t size;
+        Range range;
     };
 
     class Section {
@@ -39,6 +39,7 @@ public:
 
     [[nodiscard]] const std::vector<Block>* segment(symbol_t name) const;
     [[nodiscard]] const Section* section(symbol_t name) const;
+    [[nodiscard]] Memory initialize_memory() const;
 
     void add_section(symbol_t name, Section section) {sections[name] = std::move(section);}
     void add_segment(symbol_t name, std::vector<Block> segment) {segments[name] = std::move(segment);}
