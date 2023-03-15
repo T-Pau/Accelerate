@@ -56,6 +56,7 @@ private:
 
 std::vector<Commandline::Option> xlr8_ld::options = {
         Commandline::Option("cpu", "file", "read CPU definition from FILE"),
+        Commandline::Option("library-directory", 'L', "directory", "search for libraries in DIRECTORY"),
         Commandline::Option("map", "file", "read memory map from FILE")
 };
 

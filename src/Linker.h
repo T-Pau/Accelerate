@@ -48,7 +48,7 @@ public:
     void add_library(ObjectFile library) {libraries.emplace_back(std::move(library));}
 
     void link();
-    void output(const std::string& file_name) const;
+    void output(const std::string& file_name);
 
 private:
     MemoryMap map;

@@ -93,3 +93,10 @@ Range Range::add(const Range &other) const {
 
     return {new_start, new_size};
 }
+
+bool Range::operator<(const Range &other) const {
+    if (start != other.start) {
+        return start < other.start;
+    }
+    return size < other.size;
+}

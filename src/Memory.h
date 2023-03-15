@@ -33,6 +33,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define ACCELERATE_MEMORY_H
 
 #include <list>
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -50,11 +51,12 @@ public:
     public:
         explicit Bank(Range range);
 
-        uint64_t allocate(const Range& allowed_range, Allocation allocation, uint64_t alignment, uint64_t size);
+        std::optional<uint64_t> allocate(const Range& allowed_range, Allocation allocation, uint64_t alignment, uint64_t size);
         void copy(uint64_t start, const std::string& data);
 
-        [[nodiscard]] uint64_t data_start() const;
-        [[nodiscard]] uint64_t data_end() const;
+        [[nodiscard]] Range data_range() const;
+
+        std::string data(const Range& range) const;
 
     private:
         class Block {
@@ -64,7 +66,6 @@ public:
             Allocation allocation;
             Range range;
         };
-
 
         std::string memory;
         Range range;

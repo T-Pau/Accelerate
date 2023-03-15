@@ -123,7 +123,7 @@ void MemoryMapParser::parse_section() {
         blocks = parse_address((*parameters)[token_address].get());
     }
 
-    map.add_section(name.as_symbol(), MemoryMap::Section(type, std::move(blocks)));
+    map.add_section(MemoryMap::Section(name.as_symbol(), type, std::move(blocks)));
 }
 
 

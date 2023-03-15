@@ -29,8 +29,10 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+#include <fstream>
 #include "Linker.h"
 #include "ObjectExpression.h"
+#include "FileReader.h"
 
 void Linker::link() {
     program.evaluate(*program.local_environment);
@@ -67,24 +69,51 @@ void Linker::link() {
         }
     }
 
-    for (auto object : objects) {
+    for (auto object: objects) {
         if (!object->bank.has_value() || object->address.has_value()) {
             // TODO: unresolved symbol
             continue;
         }
     }
 
-    // TODO: place objects
+    // TODO: sort objects
+    for (auto object: objects) {
+        auto section = map.section(object->section);
+        for (const auto& block: section->blocks) {
+            auto address = memory[block.bank].allocate(block.range, object->is_reservation() ? Memory::RESERVED : Memory::DATA, object->alignment, object->size);
+            if (address.has_value()) {
+                object->bank = block.bank;
+                object->address = address.value();
+                break;
+            }
+        }
+        if (!object->address.has_value()) {
+            FileReader::global.error({}, "no space left in section '%s'", SymbolTable::global[section->name].c_str());
+        }
+    }
 
-    auto empty_environment = Environment();
-    for (auto object : objects) {
-        object->data.evaluate(empty_environment);
-        memory[object->bank.value()].copy(object->address.value(), object->data.bytes(cpu.byte_order));
+    if (!FileReader::global.had_error()) {
+        auto empty_environment = Environment();
+        for (auto object: objects) {
+            object->data.evaluate(empty_environment);
+            memory[object->bank.value()].copy(object->address.value(), object->data.bytes(cpu.byte_order));
+        }
     }
 }
 
-void Linker::output(const std::string &file_name) const {
-    // TODO: implement
+void Linker::output(const std::string &file_name) {
+    // TODO: implement properly
+    auto stream = std::ofstream(file_name);
+
+    auto data_range = memory[0].data_range();
+
+    if (!data_range.empty()) {
+        std::string start_address;
+
+        Int::encode(start_address, static_cast<int64_t >(data_range.start), 2, cpu.byte_order);
+        stream << start_address;
+        stream << memory[0].data(data_range);
+    }
 }
 
 bool Linker::add_object(Object *object) {

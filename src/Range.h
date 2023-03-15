@@ -44,6 +44,10 @@ public:
     [[nodiscard]] Range intersect(const Range& other) const;
     [[nodiscard]] Range add(const Range& other) const;
 
+    bool operator==(const Range& other) const {return start == other.start && size == other.size;}
+    bool operator<(const Range& other) const;
+    bool operator!=(const Range& other) const {return !(*this == other);}
+
     void add_left(uint64_t amount);
     void add_right(uint64_t amount) {size += amount;}
     void remove_left(uint64_t amount);

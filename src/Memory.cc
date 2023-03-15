@@ -30,7 +30,6 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include "Memory.h"
-#include "Exception.h"
 #include "Int.h"
 
 Memory::Bank::Bank(Range range): range(range) {
@@ -42,9 +41,9 @@ void Memory::Bank::copy(uint64_t address, const std::string& data) {
     memory.replace(address, data.size(), data);
 }
 
-uint64_t Memory::Bank::allocate(const Range &allowed_range, Memory::Allocation allocation, uint64_t alignment, uint64_t size) {
+std::optional<uint64_t> Memory::Bank::allocate(const Range &allowed_range, Memory::Allocation allocation, uint64_t alignment, uint64_t size) {
     if (allowed_range.size < size) {
-        throw Exception("out of memory");
+        return {};
     }
 
     auto it = blocks.begin();
@@ -91,29 +90,35 @@ uint64_t Memory::Bank::allocate(const Range &allowed_range, Memory::Allocation a
         return available_range.start;
     }
 
-    throw Exception("out of memory");
+    return {};
 }
 
-uint64_t Memory::Bank::data_start() const {
-    for (const auto& block: blocks) {
-        if (block.allocation == DATA) {
-            return block.range.start;
-        }
-    }
-
-    return std::numeric_limits<uint64_t>::max();
-}
-
-uint64_t Memory::Bank::data_end() const {
+Range Memory::Bank::data_range() const {
+    bool have_data = false;
+    uint64_t start = 0;
     uint64_t end = 0;
 
     for (const auto& block: blocks) {
         if (block.allocation == DATA) {
+            if (!have_data) {
+                have_data = true;
+                start = block.range.start;
+            }
             end = block.range.end();
         }
     }
 
-    return end;
+    if (have_data) {
+        return {start, end - start};
+    }
+    else {
+        return {};
+    }
+}
+
+
+std::string Memory::Bank::data(const Range& range) const {
+    return memory.substr(range.start, range.size);
 }
 
 
