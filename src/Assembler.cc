@@ -310,109 +310,125 @@ void Assembler::parse_instruction(const Token& name) {
 
     // TODO: do in priority order (e. g. zero_page before absolute)
     auto found = false;
-    auto matched = false;
-    for (const auto& match: matches ) {
-        if (instruction->has_addressing_mode(match.addressing_mode)) {
-            // TODO: check argument ranges
-            found = true;
-            auto fits = true;
+    auto list = ExpressionList();
+    size_t assumed_size = 0;
 
-            auto environment = Environment(current_environment); // TODO: include outer environment
+    for (const auto& match: matches) {
+        if (!instruction->has_addressing_mode(match.addressing_mode)) {
+            continue;
+        }
 
-            const auto addressing_mode = cpu.addressing_mode(match.addressing_mode);
-            const auto& notation = addressing_mode->notations[match.notation_index];
-            auto it_notation = notation.elements.begin();
-            auto it_arguments = arguments.begin();
-            while (fits && it_notation != notation.elements.end()) {
-                if (it_notation->is_argument()) {
-                    auto argument_type = addressing_mode->argument(it_notation->symbol);
-                    switch (argument_type->type()) {
-                        case ArgumentType::ENUM: {
-                            if ((*it_arguments)->type() != Node::KEYWORD) {
-                                throw ParseException((*it_arguments)->get_location(), "enum argument is not a keyword");
-                            }
-                            auto enum_type = dynamic_cast<const ArgumentTypeEnum *>(argument_type);
-                            auto name = std::dynamic_pointer_cast<TokenNode>(*it_arguments)->as_symbol();
-                            if (!enum_type->has_entry(name)) {
-                                throw ParseException((*it_arguments)->get_location(), "invalid enum argument");
-                            }
-                            environment.add(it_notation->symbol, std::make_shared<IntegerExpression>(enum_type->entry(name)));
-                            break;
+        found = true;
+        auto fits = true;
+        auto current_assumed_size = std::numeric_limits<size_t>::max();
+
+        auto environment = Environment(current_environment); // TODO: include outer environment
+
+        const auto addressing_mode = cpu.addressing_mode(match.addressing_mode);
+        const auto& notation = addressing_mode->notations[match.notation_index];
+        auto it_notation = notation.elements.begin();
+        auto it_arguments = arguments.begin();
+        while (fits && it_notation != notation.elements.end()) {
+            if (it_notation->is_argument()) {
+                auto argument_type = addressing_mode->argument(it_notation->symbol);
+                switch (argument_type->type()) {
+                    case ArgumentType::ENUM: {
+                        if ((*it_arguments)->type() != Node::KEYWORD) {
+                            throw ParseException((*it_arguments)->get_location(), "enum argument is not a keyword");
                         }
-
-                        case ArgumentType::MAP: {
-                            if ((*it_arguments)->type() != Node::EXPRESSION) {
-                                throw ParseException((*it_arguments)->get_location(), "map argument is not an expression");
-                            }
-                            auto expression = std::dynamic_pointer_cast<ExpressionNode>(*it_arguments)->expression;
-                            if (!expression->has_value()) {
-                                throw ParseException((*it_arguments)->get_location(), "map argument is not an integer");
-                            }
-                            auto map_type = dynamic_cast<const ArgumentTypeMap *>(argument_type);
-                            auto value = expression->value();
-                            if (!map_type->has_entry(value)) {
-                                throw ParseException((*it_arguments)->get_location(), "invalid map argument");
-                            }
-                            environment.add(it_notation->symbol, std::make_shared<IntegerExpression>(map_type->entry(value)));
-                            break;
+                        auto enum_type = dynamic_cast<const ArgumentTypeEnum *>(argument_type);
+                        auto name = std::dynamic_pointer_cast<TokenNode>(*it_arguments)->as_symbol();
+                        if (!enum_type->has_entry(name)) {
+                            throw ParseException((*it_arguments)->get_location(), "invalid enum argument");
                         }
-
-                        case ArgumentType::RANGE:
-                            auto range_type = dynamic_cast<const ArgumentTypeRange *>(argument_type);
-
-                            if ((*it_arguments)->type() != Node::EXPRESSION) {
-                                throw ParseException((*it_arguments)->get_location(), "range argument is not an expression");
-                            }
-                            auto expression = std::dynamic_pointer_cast<ExpressionNode>(*it_arguments)->expression;
-                            if (expression->minimum_byte_size() > range_type->byte_size()) {
-                                fits = false;
-                                break;
-                            }
-                            expression->set_byte_size(range_type->byte_size());
-                            environment.add(it_notation->symbol, expression);
-                            break;
+                        environment.add(it_notation->symbol, std::make_shared<IntegerExpression>(enum_type->entry(name)));
+                        break;
                     }
+
+                    case ArgumentType::MAP: {
+                        if ((*it_arguments)->type() != Node::EXPRESSION) {
+                            throw ParseException((*it_arguments)->get_location(), "map argument is not an expression");
+                        }
+                        auto expression = std::dynamic_pointer_cast<ExpressionNode>(*it_arguments)->expression;
+                        if (!expression->has_value()) {
+                            throw ParseException((*it_arguments)->get_location(), "map argument is not an integer");
+                        }
+                        auto map_type = dynamic_cast<const ArgumentTypeMap *>(argument_type);
+                        auto value = expression->value();
+                        if (!map_type->has_entry(value)) {
+                            throw ParseException((*it_arguments)->get_location(), "invalid map argument");
+                        }
+                        environment.add(it_notation->symbol, std::make_shared<IntegerExpression>(map_type->entry(value)));
+                        break;
+                    }
+
+                    case ArgumentType::RANGE:
+                        auto range_type = dynamic_cast<const ArgumentTypeRange *>(argument_type);
+
+                        if ((*it_arguments)->type() != Node::EXPRESSION) {
+                            throw ParseException((*it_arguments)->get_location(), "range argument is not an expression");
+                        }
+                        auto expression = std::dynamic_pointer_cast<ExpressionNode>(*it_arguments)->expression;
+                        auto expression_size = expression->minimum_byte_size();
+                        if (expression_size == 0) {
+                            current_assumed_size = std::min(current_assumed_size, range_type->byte_size());
+                        }
+                        else if (expression->minimum_byte_size() > range_type->byte_size()) {
+                            fits = false;
+                            break;
+                        }
+                        expression->set_byte_size(range_type->byte_size());
+                        environment.add(it_notation->symbol, expression);
+                        break;
                 }
-
-                it_notation++;
-                it_arguments++;
             }
 
-            if (!fits) {
-                // TODO: store details
-                continue;
-            }
+            it_notation++;
+            it_arguments++;
+        }
 
-            environment.add(symbol_opcode, std::make_shared<IntegerExpression>(instruction->opcode(match.addressing_mode)));
-            environment.add(symbol_pc, get_pc());
+        if (!fits) {
+            // TODO: store details
+            continue;
+        }
 
-            auto list = ExpressionList();
+        environment.add(symbol_opcode, std::make_shared<IntegerExpression>(instruction->opcode(match.addressing_mode)));
+        environment.add(symbol_pc, get_pc());
 
-            for (const auto& expression: addressing_mode->encoding) {
-                try {
-                    auto value = Expression::evaluate(expression, environment);
-                    list.append(value);
-                }
-                catch (ParseException &ex) {
-                    fits = false;
-                    // TODO: store detail
-                }
+        auto current_list = ExpressionList();
+
+        for (const auto& expression: addressing_mode->encoding) {
+            try {
+                auto value = Expression::evaluate(expression, environment);
+                current_list.append(value);
             }
-            if (!fits) {
-                continue;
+            catch (ParseException &ex) {
+                fits = false;
+                // TODO: store detail
             }
-            current_object->append(list);
-            // std::cout << " ; " << name.as_string() << " " << SymbolTable::global[match.addressing_mode] << std::endl;
-            matched = true;
-            break;
+        }
+        if (!fits) {
+            continue;
+        }
+
+        if (current_assumed_size > assumed_size) {
+            list = std::move(current_list);
+            assumed_size = current_assumed_size;
+            if (assumed_size == std::numeric_limits<size_t>::max()) {
+                break;
+            }
         }
     }
+
     if (!found) {
         throw ParseException(name, "invalid addressing mode for instruction");
     }
-    if (!matched) {
+
+    if (assumed_size == 0) {
         throw ParseException(name, "arguments out of range"); // TODO: more details
     }
+
+    current_object->append(list);
 }
 
 std::shared_ptr<Node> Assembler::parse_instruction_argument(const Token& token) {
