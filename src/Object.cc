@@ -55,3 +55,9 @@ void Object::append(const std::shared_ptr<Expression> &expression) {
     data.append(expression);
     size = data.byte_size();
 }
+
+Object::Object(const ObjectFile *owner, const Object *object): owner(owner), section(object->section), visibility(object->visibility), name(object->name), size(object->size) {
+    if (!object->is_reservation()) {
+        append(object->data);
+    }
+}

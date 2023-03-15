@@ -20,8 +20,13 @@ size_t Int::minimum_byte_size(int64_t value) {
 }
 
 void Int::encode(std::string &bytes, int64_t value, uint64_t size, uint64_t byte_order) {
-    for (uint64_t index = 0; index < size; index++) {
-        uint64_t byte_index = (byte_order / 10 ^ index)  % 10;
+    uint64_t mask = 10000000;
+    for (auto index = 0; index < 8; index += 1) {
+        uint64_t byte_index = (byte_order / mask) % 10 - 1;
+        mask /= 10;
+        if (byte_index >= size) {
+            continue;
+        }
         uint64_t byte = (value >> (byte_index * 8)) & 0xff;
         bytes += static_cast<char>(byte);
     }

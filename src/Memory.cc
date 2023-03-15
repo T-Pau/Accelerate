@@ -30,6 +30,9 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include "Memory.h"
+
+#include <ostream>
+
 #include "Int.h"
 
 Memory::Bank::Bank(Range range): range(range) {
@@ -46,9 +49,7 @@ std::optional<uint64_t> Memory::Bank::allocate(const Range &allowed_range, Memor
         return {};
     }
 
-    auto it = blocks.begin();
-
-    while (it != blocks.end()) {
+    for (auto it = blocks.begin(); it != blocks.end(); it++) {
         if (it->allocation != FREE) {
             continue;
         }
@@ -69,7 +70,7 @@ std::optional<uint64_t> Memory::Bank::allocate(const Range &allowed_range, Memor
             auto old_start = it->range.start;
             it->range.set_start(available_range.start + size);
             it = blocks.insert(it, Block(allocation, {available_range.start, size}));
-            blocks.insert(it, Block(FREE, {old_start, available_range.start}));
+            blocks.insert(it, Block(FREE, {old_start, available_range.start - old_start}));
         }
 
         if (it != blocks.begin()) {
@@ -119,6 +120,25 @@ Range Memory::Bank::data_range() const {
 
 std::string Memory::Bank::data(const Range& range) const {
     return memory.substr(range.start, range.size);
+}
+
+void Memory::Bank::debug_blocks(std::ostream& stream) const {
+    stream << "allocation blocks:" << std::endl;
+    for (const auto& block: blocks) {
+        stream << "  " << block.range.start << "-" << block.range.end() << ": ";
+        switch (block.allocation) {
+            case DATA:
+                stream << "data";
+                break;
+            case FREE:
+                stream << "free";
+                break;
+            case RESERVED:
+                stream << "reserved";
+                break;
+        }
+        stream << std::endl;
+    }
 }
 
 

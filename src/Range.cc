@@ -69,6 +69,7 @@ void Range::set_start(uint64_t new_start) {
     if (new_start > end()) {
         throw Exception("out of memory");
     }
+    size += start - new_start;
     start = new_start;
 }
 

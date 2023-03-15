@@ -74,6 +74,8 @@ ObjectFileParser::ObjectFileParser() {
 }
 
 ObjectFile ObjectFileParser::parse(const std::string &filename) {
+    file = ObjectFile();
+
     if (!parse_file(filename)) {
         throw Exception("can't parse object file '%s'", filename.c_str());
     }

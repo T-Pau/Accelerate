@@ -45,3 +45,12 @@ size_t ObjectExpression::minimum_byte_size() const {
         return 0;
     }
 }
+
+std::shared_ptr<Expression> ObjectExpression::evaluate(const Environment &environment) const {
+    if (!had_value && object->has_address()) {
+        return clone();
+    }
+    else {
+        return {};
+    }
+}

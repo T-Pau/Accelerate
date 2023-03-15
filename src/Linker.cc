@@ -78,6 +78,10 @@ void Linker::link() {
 
     // TODO: sort objects
     for (auto object: objects) {
+        if (object->size == 0) {
+            FileReader::global.error({}, "object '%s' has unknown size", object->name.as_string().c_str());
+            continue;
+        }
         auto section = map.section(object->section);
         for (const auto& block: section->blocks) {
             auto address = memory[block.bank].allocate(block.range, object->is_reservation() ? Memory::RESERVED : Memory::DATA, object->alignment, object->size);
@@ -89,15 +93,18 @@ void Linker::link() {
         }
         if (!object->address.has_value()) {
             FileReader::global.error({}, "no space left in section '%s'", SymbolTable::global[section->name].c_str());
+            continue;
         }
     }
 
-    if (!FileReader::global.had_error()) {
-        auto empty_environment = Environment();
-        for (auto object: objects) {
-            object->data.evaluate(empty_environment);
-            memory[object->bank.value()].copy(object->address.value(), object->data.bytes(cpu.byte_order));
-        }
+    if (FileReader::global.had_error()) {
+        return;
+    }
+
+    auto empty_environment = Environment();
+    for (auto object: objects) {
+        object->data.evaluate(empty_environment);
+        memory[object->bank.value()].copy(object->address.value(), object->data.bytes(cpu.byte_order));
     }
 }
 

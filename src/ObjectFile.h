@@ -57,6 +57,7 @@ public:
     Object* create_object(symbol_t section, Object::Visibility visibility, Token name);
 
     void add_constant(symbol_t name, Object::Visibility visibility, std::shared_ptr<Expression> value);
+    void add_object(const Object* object);
     void add_object_file(const ObjectFile& file);
 
     [[nodiscard]] const Object* object(symbol_t name) const;
@@ -72,6 +73,7 @@ public:
     void serialize(std::ostream& stream) const;
 
 private:
+    Object* insert_object(Object object);
     void add_to_environment(const Constant& constant) { add_to_environment(constant.name, constant.visibility, constant.value);}
     void add_to_environment(Object* object);
     void add_to_environment(symbol_t name, Object::Visibility visibility, std::shared_ptr<Expression> value);

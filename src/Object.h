@@ -21,6 +21,7 @@ public:
     };
 
     Object(const ObjectFile* owner, symbol_t section, Visibility visibility, Token name): owner(owner), section(section), visibility(visibility), name(name) {}
+    Object(const ObjectFile* owner, const Object* object);
 
     [[nodiscard]] bool is_reservation() const {return data.empty();}
     [[nodiscard]] bool empty() const {return is_reservation() && size == 0;}

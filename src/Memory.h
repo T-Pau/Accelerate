@@ -56,7 +56,9 @@ public:
 
         [[nodiscard]] Range data_range() const;
 
-        std::string data(const Range& range) const;
+        [[nodiscard]] std::string data(const Range& range) const;
+
+        void debug_blocks(std::ostream& stream) const;
 
     private:
         class Block {

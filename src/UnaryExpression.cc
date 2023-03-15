@@ -72,7 +72,9 @@ std::shared_ptr<Expression> UnaryExpression::create(Operation operation, std::sh
         node = std::make_shared<UnaryExpression>(operation, operand);
     }
 
-    node->set_byte_size(byte_size);
+    if (byte_size != 0) {
+        node->set_byte_size(byte_size);
+    }
     return node;
 }
 

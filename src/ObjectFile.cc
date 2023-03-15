@@ -71,7 +71,7 @@ void ObjectFile::add_constant(symbol_t name, Object::Visibility visibility, std:
     auto pair = constants.insert({name, Constant(name, visibility, std::move(value))});
 
     if (!pair.second) {
-        throw ParseException(Location(), "duplicate symbol");
+        throw ParseException(Location(), "duplicate symbol '%s'", SymbolTable::global[name].c_str());
     }
 
     add_to_environment(pair.first->second);
@@ -82,11 +82,8 @@ void ObjectFile::add_object_file(const ObjectFile &file) {
         add_constant(pair.second.name, pair.second.visibility, pair.second.value);
     }
     for (const auto& pair: file.objects) {
-        auto foo = objects.insert(pair);
-        if (!foo.second) {
-            throw ParseException(Location(), "duplicate object");
-        }
-        add_to_environment(&foo.first->second);
+        auto own_object = insert_object({this, &pair.second});
+        add_to_environment(own_object);
     }
 }
 
@@ -131,11 +128,7 @@ const Object* ObjectFile::object(symbol_t name) const {
 
 
 Object *ObjectFile::create_object(symbol_t section, Object::Visibility visibility, Token name) {
-    auto pair = objects.insert({name.as_symbol(), {this, section, visibility, name}});
-    if (!pair.second) {
-        throw ParseException(name, "redefinition of object");
-    }
-    return &pair.first->second;
+    return insert_object({this, section, visibility, name});
 }
 
 ObjectFile::ObjectFile() {
@@ -164,6 +157,20 @@ std::vector<Object *> ObjectFile::all_objects() {
     }
 
     return v;
+}
+
+void ObjectFile::add_object(const Object *object) {
+    insert_object(Object(this, object));
+}
+
+Object* ObjectFile::insert_object(Object object) {
+    auto name = object.name;
+    auto pair = objects.insert({object.name.as_symbol(), std::move(object)});
+    if (!pair.second) {
+        throw ParseException(name, "redefinition of object");
+    }
+    return &pair.first->second;
+
 }
 
 

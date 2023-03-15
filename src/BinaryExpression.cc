@@ -114,8 +114,8 @@ std::shared_ptr<Expression> BinaryExpression::create(const std::shared_ptr<Expre
     std::shared_ptr<Expression> node;
 
     if (left->has_value() && right->has_value()) {
-        auto left_value = std::dynamic_pointer_cast<IntegerExpression>(left)->value();
-        auto right_value = std::dynamic_pointer_cast<IntegerExpression>(right)->value();
+        auto left_value = left->value();
+        auto right_value = right->value();
         int64_t value;
 
         switch (operation) {
