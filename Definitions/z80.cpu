@@ -551,7 +551,7 @@
     arguments {
         address: word ; TODO: has to be close enough to .pc
     }
-    encoding: .opcode, address - .pc - 2
+    encoding: .opcode, address - .pc - 2 :1
 }
 
 .addressing_mode restart_address {

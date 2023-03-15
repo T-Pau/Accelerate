@@ -237,7 +237,7 @@ void Assembler::parse_symbol_body() {
 }
 
 void Assembler::parse_directive(const Token& directive) {
-    // TODO: use table of directory parsing methods
+    // TODO: use table of directive parsing methods
     if (directive == token_data) {
         current_object->append(ExpressionParser(tokenizer).parse_list());
     }
@@ -317,7 +317,6 @@ void Assembler::parse_instruction(const Token& name) {
         throw ParseException(name, "addressing mode not recognized");
     }
 
-    // TODO: do in priority order (e. g. zero_page before absolute)
     auto found = false;
     auto list = ExpressionList();
     size_t assumed_size = 0;
