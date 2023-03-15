@@ -82,7 +82,6 @@ void Linker::link() {
             FileReader::global.error({}, "object '%s' has unknown size", object->name.as_string().c_str());
             continue;
         }
-        std::cout << object->name.as_string() << " = ";
         auto section = map.section(object->section);
         for (const auto& block: section->blocks) {
             auto address = memory[block.bank].allocate(block.range, object->is_reservation() ? Memory::RESERVED : Memory::DATA, object->alignment, object->size);
@@ -96,8 +95,6 @@ void Linker::link() {
             FileReader::global.error({}, "no space left in section '%s'", SymbolTable::global[section->name].c_str());
             continue;
         }
-        std::cout << object->address.value() << std::endl;
-        memory[object->bank.value()].debug_blocks(std::cout);
     }
 
     if (FileReader::global.had_error()) {
