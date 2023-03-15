@@ -81,6 +81,7 @@ private:
     static Token token_colon;
     static Token token_curly_brace_close;
     static Token token_curly_brace_open;
+    static Token token_data;
     static Token token_equals;
     static Token token_global;
     static Token token_local;

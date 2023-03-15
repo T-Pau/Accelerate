@@ -38,6 +38,9 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 Range Range::intersect(const Range &other) const {
     auto new_start = std::max(start, other.start);
     auto new_end = std::min(end(), other.end());
+    if (new_end < new_start) {
+        return {};
+    }
     auto new_size = std::max(new_end - new_start, static_cast<uint64_t>(0));
 
     return {new_start, new_size};

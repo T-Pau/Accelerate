@@ -6,8 +6,12 @@
     ]
 }
 
+.section basic {
+    address: $0801 - $0820
+}
+
 .segment program {
-    address: $0801 - $7fff
+    address: $0820 - $7fff
 }
 
 .section code {

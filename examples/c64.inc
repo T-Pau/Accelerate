@@ -65,3 +65,5 @@
 .global VIC_SPRITE_7_COLOR = VIC + $2e
 .global VIC_C128_KEYBOARD = VIC + $2f
 .global VIC_C128_SPEED = VIC + $30
+
+.global CHROUT = $ffd2

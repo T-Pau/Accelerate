@@ -51,6 +51,7 @@ Token Assembler::token_brace_open;
 Token Assembler::token_colon;
 Token Assembler::token_curly_brace_close;
 Token Assembler::token_curly_brace_open;
+Token Assembler::token_data;
 Token Assembler::token_equals;
 Token Assembler::token_global;
 Token Assembler::token_local;
@@ -68,6 +69,7 @@ void Assembler::initialize() {
         token_colon = Token(Token::PUNCTUATION, {}, SymbolTable::global.add(":"));
         token_curly_brace_close = Token(Token::PUNCTUATION, {}, SymbolTable::global.add("}"));
         token_curly_brace_open = Token(Token::PUNCTUATION, {}, SymbolTable::global.add("{"));
+        token_data = Token(Token::DIRECTIVE, {}, SymbolTable::global.add(".data"));
         token_equals = Token(Token::PUNCTUATION, {}, SymbolTable::global.add("="));
         token_global = Token(Token::DIRECTIVE, {}, SymbolTable::global.add(".global"));
         token_local = Token(Token::DIRECTIVE, {}, SymbolTable::global.add(".local"));
@@ -84,6 +86,7 @@ ObjectFile Assembler::parse(const std::string &file_name) {
     ExpressionParser::setup(tokenizer);
     tokenizer.add_punctuations({"{", "}", "=", ":"});
     tokenizer.add_literal(token_align);
+    tokenizer.add_literal(token_data);
     tokenizer.add_literal(token_global);
     tokenizer.add_literal(token_local);
     tokenizer.add_literal(token_reserve);
@@ -234,8 +237,14 @@ void Assembler::parse_symbol_body() {
 }
 
 void Assembler::parse_directive(const Token& directive) {
-    // TODO: implement
-    tokenizer.skip_until(TokenGroup::newline, true);
+    // TODO: use table of directory parsing methods
+    if (directive == token_data) {
+        current_object->append(ExpressionParser(tokenizer).parse_list());
+    }
+    else {
+        // TODO: implement
+        tokenizer.skip_until(TokenGroup::newline, true);
+    }
 }
 
 void Assembler::parse_instruction(const Token& name) {
@@ -434,6 +443,11 @@ void Assembler::parse_instruction(const Token& name) {
 std::shared_ptr<Node> Assembler::parse_instruction_argument(const Token& token) {
     switch (token.get_type()) {
         case Token::PUNCTUATION:
+            if (cpu.uses_punctuation(token.as_symbol())) {
+                return std::make_shared<TokenNode>(token);
+            }
+            break;
+
         case Token::KEYWORD:
             // TODO: check it's used by CPU, throw otherwise
             return std::make_shared<TokenNode>(token);
@@ -443,9 +457,11 @@ std::shared_ptr<Node> Assembler::parse_instruction_argument(const Token& token) 
             throw ParseException(token, "unexpected %s", token.type_name());
 
         default:
-            tokenizer.unget(token);
-            return std::make_shared<ExpressionNode>(ExpressionParser(tokenizer).parse());
+            break;
     }
+
+    tokenizer.unget(token);
+    return std::make_shared<ExpressionNode>(ExpressionParser(tokenizer).parse());
 }
 
 
@@ -500,6 +516,7 @@ void Assembler::parse_symbol(Object::Visibility visibility, const Token &name) {
             // TODO: error if .reserved
             current_environment = std::make_shared<Environment>(file_environment);
             parse_symbol_body();
+            current_object->data.evaluate(*current_environment);
             current_environment = file_environment;
             break;
         }

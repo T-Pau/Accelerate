@@ -37,10 +37,10 @@ std::shared_ptr<Expression> UnaryExpression::create(Operation operation, std::sh
     std::shared_ptr<Expression> node;
 
     if (operation == PLUS) {
-        return operand;
+        return operand; // TODO: set byte_size
     }
     else if (operand->has_value()) {
-        auto value = std::dynamic_pointer_cast<IntegerExpression>(operand)->value();
+        auto value = operand->value();
         switch (operation) {
             case PLUS:
                 break;
@@ -78,7 +78,20 @@ std::shared_ptr<Expression> UnaryExpression::create(Operation operation, std::sh
     return node;
 }
 
-UnaryExpression::UnaryExpression(Operation operation, std::shared_ptr<Expression>operand) : operation(operation), operand(std::move(operand)) {}
+UnaryExpression::UnaryExpression(Operation operation, std::shared_ptr<Expression>operand) : operation(operation), operand(std::move(operand)) {
+    switch (operation) {
+        case BANK_BYTE:
+        case HIGH_BYTE:
+        case LOW_BYTE:
+            set_byte_size(1);
+            break;
+
+        case BITWISE_NOT:
+        case MINUS:
+        case PLUS:
+            break;
+    }
+}
 
 std::shared_ptr<Expression> UnaryExpression::evaluate(const Environment &environment) const {
     auto new_operand = operand->evaluate(environment);
