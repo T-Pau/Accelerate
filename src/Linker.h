@@ -35,14 +35,13 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <unordered_set>
 #include <vector>
 
-#include "CPU.h"
-#include "MemoryMap.h"
+#include "Target.h"
 #include "ObjectFile.h"
 
 class Linker {
 public:
     Linker() = default;
-    Linker(MemoryMap map_, CPU cpu): map(std::move(map_)), cpu(std::move(cpu)), memory(map.initialize_memory()) {}
+    explicit Linker(Target target_): target(std::move(target_)), memory(target.map.initialize_memory()) {}
 
     void add_file(const ObjectFile& file) {program.add_object_file(file);}
     void add_library(ObjectFile library) {libraries.emplace_back(std::move(library));}
@@ -51,8 +50,7 @@ public:
     void output(const std::string& file_name);
 
 private:
-    MemoryMap map;
-    CPU cpu;
+    Target target;
 
     ObjectFile program;
     std::vector<ObjectFile> libraries;

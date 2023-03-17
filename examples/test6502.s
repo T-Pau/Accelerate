@@ -2,7 +2,7 @@
 START_PAGE = $10
 END_PAGE = $80
 
-.section bss
+.section zero_page
 
 .local screen .reserve 2
 .local address .reserve 2
@@ -10,8 +10,8 @@ END_PAGE = $80
 .section code
 
 .global start {
-    ldx #00
-    ldy #f80
+    ldx #$00
+    ldy #$f8
     stx screen
     sty screen + 1
     ldy #$10
@@ -87,7 +87,7 @@ end:
     tax
     lda hex_digit,x
     ldy #0
-    sta (output),y
+    sta (screen),y
     jmp skip
 }
 

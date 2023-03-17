@@ -302,8 +302,7 @@ void TokenizerFile::preprocess(const std::vector<Token>& tokens) {
         }
 
         try {
-            auto filename = filename_token.as_string();
-            auto file = path->find(filename, SymbolTable::global[current_source->location().file]);
+            auto file = find_file(filename_token.as_string());
             if (!file.has_value()) {
                 throw ParseException(filename_token, "file not found");
             }
@@ -329,6 +328,10 @@ bool TokenizerFile::is_identifier(const std::string &s) {
         return false;
     }
     return true;
+}
+
+std::optional<std::string> TokenizerFile::find_file(const std::string &file_name) {
+    return path->find(file_name, SymbolTable::global[current_source->location().file]);
 }
 
 

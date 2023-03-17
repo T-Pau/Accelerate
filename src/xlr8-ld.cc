@@ -36,7 +36,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "CPUParser.h"
 #include "ObjectFileParser.h"
 #include "Exception.h"
-#include "MemoryMapParser.h"
+#include "TargetParser.h"
 #include "Linker.h"
 
 class xlr8_ld: public Command {
@@ -55,9 +55,8 @@ private:
 };
 
 std::vector<Commandline::Option> xlr8_ld::options = {
-        Commandline::Option("cpu", "file", "read CPU definition from FILE"),
+        Commandline::Option("target", "file", "read target definition from FILE"),
         Commandline::Option("library-directory", 'L', "directory", "search for libraries in DIRECTORY"),
-        Commandline::Option("map", "file", "read memory map from FILE")
 };
 
 
@@ -69,19 +68,13 @@ int main(int argc, char *argv[]) {
 
 
 void xlr8_ld::process() {
-    auto cpu_file = arguments.find_first("cpu");
-    if (!cpu_file.has_value()) {
-        throw Exception("missing option --cpu");
+    auto target_file = arguments.find_first("target");
+    if (!target_file.has_value()) {
+        throw Exception("missing option --target");
     }
-    auto cpu = CPUParser().parse(cpu_file.value());
+    auto target = TargetParser().parse(target_file.value());
 
-    auto map_file = arguments.find_first("map");
-    if (!map_file.has_value()) {
-        throw Exception("missing option --map");
-    }
-    auto map = MemoryMapParser().parse(map_file.value());
-
-    linker = Linker(std::move(map), std::move(cpu));
+    linker = Linker(std::move(target));
 
     auto parser = ObjectFileParser();
 

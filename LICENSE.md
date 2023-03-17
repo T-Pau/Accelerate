@@ -1,4 +1,4 @@
-Copyright (C) Dieter Baron
+Copyright (C) 2023 Dieter Baron
 
 The authors can be contacted at <accelerate@tpau.group>
 

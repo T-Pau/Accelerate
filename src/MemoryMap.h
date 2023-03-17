@@ -45,24 +45,11 @@ public:
         size_t size = 0;
     };
 
-    class OutputElement {
-    public:
-        enum Type {
-            DATA,
-            MEMORY
-        };
-
-        OutputElement(Type type, ExpressionList arguments): type(type), arguments(std::move(arguments)) {}
-
-        Type type;
-        ExpressionList arguments;
-    };
 
     [[nodiscard]] const std::vector<Block>* segment(symbol_t name) const;
     [[nodiscard]] const Section* section(symbol_t name) const;
     [[nodiscard]] Memory initialize_memory() const;
 
-    void add_output(OutputElement element) {output.emplace_back(std::move(element));}
     void add_section(Section section) {sections[section.name] = std::move(section);}
     void add_segment(symbol_t name, std::vector<Block> segment) {segments[name] = std::move(segment);}
 
@@ -70,8 +57,6 @@ public:
 
     std::unordered_map<symbol_t, Section> sections;
     std::unordered_map<symbol_t, std::vector<Block>> segments;
-
-    std::vector<OutputElement> output;
 };
 
 

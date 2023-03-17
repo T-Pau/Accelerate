@@ -1,3 +1,5 @@
+.cpu "65c02"
+
 .section zero_page {
     type: reserve_only
     address: $02 - $ff

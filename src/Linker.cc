@@ -34,6 +34,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ObjectExpression.h"
 #include "FileReader.h"
 #include "IntegerExpression.h"
+#include "Exception.h"
 
 void Linker::link() {
     program.evaluate(*program.local_environment);
@@ -54,9 +55,9 @@ void Linker::link() {
 
     // Collect all referenced objects.
     while (!new_objects.empty()) {
-        auto objects = new_objects;
+        auto current_objects = new_objects;
         new_objects.clear();
-        for (auto object: objects) {
+        for (auto object: current_objects) {
             for (const auto &expression: object->data) {
                 for (auto sub_expression: *expression) {
                     if (sub_expression->type() == Expression::OBJECT) {
@@ -83,7 +84,7 @@ void Linker::link() {
             FileReader::global.error({}, "object '%s' has unknown size", object->name.as_string().c_str());
             continue;
         }
-        auto section = map.section(object->section);
+        auto section = target.map.section(object->section);
         for (const auto& block: section->blocks) {
             auto address = memory[block.bank].allocate(block.range, object->is_reservation() ? Memory::RESERVED : Memory::DATA, object->alignment, object->size);
             if (address.has_value()) {
@@ -104,8 +105,13 @@ void Linker::link() {
 
     auto empty_environment = Environment();
     for (auto object: objects) {
-        object->data.evaluate(empty_environment);
-        memory[object->bank.value()].copy(object->address.value(), object->data.bytes(cpu.byte_order));
+        try {
+            object->data.evaluate(empty_environment);
+            memory[object->bank.value()].copy(object->address.value(), object->data.bytes(target.cpu.byte_order));
+        }
+        catch (Exception& ex) {
+            FileReader::global.error(Location(), "can't evaluate '%s': %s", object->name.as_string().c_str(), ex.what());
+        }
     }
 }
 
@@ -127,15 +133,15 @@ void Linker::output(const std::string &file_name) {
 
     auto stream = std::ofstream(file_name);
 
-    for (const auto& element: map.output) {
+    for (const auto& element: target.output_elements) {
         auto arguments = element.arguments;
         arguments.evaluate(environment);
         switch (element.type) {
-            case MemoryMap::OutputElement::DATA:
-                stream << arguments.bytes(cpu.byte_order);
+            case OutputElement::DATA:
+                stream << arguments.bytes(target.cpu.byte_order);
                 break;
 
-            case MemoryMap::OutputElement::MEMORY: {
+            case OutputElement::MEMORY: {
                 int64_t bank = 0;
                 size_t index = 0;
                 if (arguments.expressions.size() == 3) {

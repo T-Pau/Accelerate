@@ -6,9 +6,9 @@
 #include <vector>
 
 #include "Assembler.h"
-#include "CPUParser.h"
 #include "Command.h"
 #include "Exception.h"
+#include "TargetParser.h"
 
 class xlr8_as: public Command {
 public:
@@ -36,7 +36,7 @@ int main(int argc, char *argv[]) {
 
 
 std::vector<Commandline::Option> xlr8_as::options = {
-        Commandline::Option("cpu", "file", "read CPU definition from FILE")
+        Commandline::Option("target", "file", "read target definition from FILE")
 };
 
 
@@ -45,15 +45,14 @@ std::string xlr8_as::default_output_file() {
 }
 
 void xlr8_as::process() {
-    auto cpu_file = arguments.find_first("cpu");
-    if (!cpu_file.has_value()) {
-        throw Exception("missing --cpu option");
+    auto target_file = arguments.find_first("target");
+    if (!target_file.has_value()) {
+        throw Exception("missing --target option");
     }
 
-    auto parser = CPUParser();
-    auto cpu = parser.parse(cpu_file.value());
+    auto target = TargetParser().parse(target_file.value());
 
-    auto assembler = Assembler(cpu);
+    auto assembler = Assembler(target.cpu);
     source = assembler.parse(arguments.arguments[0]);
 }
 

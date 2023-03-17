@@ -28,16 +28,18 @@ add_library(xlr8 STATIC
         Location.cc
         Memory.cc
         MemoryMap.cc
-        MemoryMapParser.cc
         Node.cc
         Object.cc
         ObjectFile.cc
         ObjectFileParser.cc
+        OutputElement.cc
         ParseException.cc
         ParsedValue.cc
         Path.cc
         Range.cc
         SymbolTable.cc
+        Target.cc
+        TargetParser.cc
         Token.cc
         TokenGroup.cc
         TokenNode.cc

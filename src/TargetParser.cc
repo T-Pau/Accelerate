@@ -1,5 +1,5 @@
 /*
-MemoryMapParser.cc -- 
+TargetParser.cc --
 
 Copyright (C) Dieter Baron
 
@@ -29,38 +29,42 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "MemoryMapParser.h"
+#include "TargetParser.h"
+
+#include "CPUParser.h"
 #include "Exception.h"
 #include "ParseException.h"
 #include "FileReader.h"
 #include "ExpressionParser.h"
 
-bool MemoryMapParser::initialized = false;
-std::unordered_map<symbol_t, void (MemoryMapParser::*)()> MemoryMapParser::parser_methods;
-Token MemoryMapParser::token_address;
-Token MemoryMapParser::token_colon;
-Token MemoryMapParser::token_data;
-Token MemoryMapParser::token_memory;
-Token MemoryMapParser::token_minus;
-Token MemoryMapParser::token_output;
-Token MemoryMapParser::token_read_only;
-Token MemoryMapParser::token_read_write;
-Token MemoryMapParser::token_reserve_only;
-Token MemoryMapParser::token_section;
-Token MemoryMapParser::token_segment;
-Token MemoryMapParser::token_segment_name;
-Token MemoryMapParser::token_type;
+bool TargetParser::initialized = false;
+std::unordered_map<symbol_t, void (TargetParser::*)()> TargetParser::parser_methods;
+Token TargetParser::token_address;
+Token TargetParser::token_colon;
+Token TargetParser::token_cpu;
+Token TargetParser::token_data;
+Token TargetParser::token_memory;
+Token TargetParser::token_minus;
+Token TargetParser::token_output;
+Token TargetParser::token_read_only;
+Token TargetParser::token_read_write;
+Token TargetParser::token_reserve_only;
+Token TargetParser::token_section;
+Token TargetParser::token_segment;
+Token TargetParser::token_segment_name;
+Token TargetParser::token_type;
 
 
-MemoryMapParser::MemoryMapParser() {
+TargetParser::TargetParser() {
     initialize();
 }
 
 
-void MemoryMapParser::initialize() {
+void TargetParser::initialize() {
     if (!initialized) {
         token_address = Token(Token::NAME, {}, SymbolTable::global.add("address"));
         token_colon = Token(Token::PUNCTUATION, {}, SymbolTable::global.add(":"));
+        token_cpu = Token(Token::DIRECTIVE, {}, SymbolTable::global.add("cpu"));
         token_data = Token(Token::DIRECTIVE, {}, SymbolTable::global.add("data"));
         token_memory = Token(Token::DIRECTIVE, {}, SymbolTable::global.add("memory"));
         token_minus = Token(Token::PUNCTUATION, {}, SymbolTable::global.add("-"));
@@ -73,24 +77,34 @@ void MemoryMapParser::initialize() {
         token_segment_name = Token(Token::NAME, {}, SymbolTable::global.add("segment"));
         token_type = Token(Token::NAME, {}, SymbolTable::global.add("type"));
 
-        parser_methods[token_output.as_symbol()] = &MemoryMapParser::parse_output;
-        parser_methods[token_section.as_symbol()] = &MemoryMapParser::parse_section;
-        parser_methods[token_segment.as_symbol()] = &MemoryMapParser::parse_segment;
+        parser_methods[token_cpu.as_symbol()] = &TargetParser::parse_cpu;
+        parser_methods[token_output.as_symbol()] = &TargetParser::parse_output;
+        parser_methods[token_section.as_symbol()] = &TargetParser::parse_section;
+        parser_methods[token_segment.as_symbol()] = &TargetParser::parse_segment;
 
         initialized = true;
     }
 }
 
 
-MemoryMap MemoryMapParser::parse(const std::string &file_name) {
+Target TargetParser::parse(const std::string &file_name) {
+    target = Target();
+    had_cpu = false;
+    section_names.clear();
+    segment_names.clear();
+
     if (!parse_file(file_name)) {
-        throw Exception("can't parse object file '%s'", file_name.c_str());
+        throw Exception("can't parse target file '%s'", file_name.c_str());
     }
-    return map;
+
+    if (!had_cpu) {
+        throw ParseException(Location(), "missing CPU declaration");
+    }
+    return std::move(target);
 }
 
 
-void MemoryMapParser::parse_directive(const Token &directive) {
+void TargetParser::parse_directive(const Token &directive) {
     auto it = parser_methods.find(directive.as_symbol());
     if (it == parser_methods.end()) {
         throw ParseException(directive, "unknown directive");
@@ -99,7 +113,7 @@ void MemoryMapParser::parse_directive(const Token &directive) {
 }
 
 
-void MemoryMapParser::parse_output() {
+void TargetParser::parse_output() {
     auto token = tokenizer.next();
     if (token != ParsedValue::token_curly_open) {
         tokenizer.skip_until(TokenGroup::newline, true);
@@ -111,23 +125,23 @@ void MemoryMapParser::parse_output() {
             tokenizer.skip(TokenGroup::newline);
             token = tokenizer.next();
 
-            auto type = MemoryMap::OutputElement::DATA;
+            OutputElement::Type type;
 
             if (token == ParsedValue::token_curly_close) {
                 tokenizer.skip(TokenGroup::newline);
                 break;
             }
             else if (token == token_data) {
-                type = MemoryMap::OutputElement::DATA;
+                type = OutputElement::DATA;
             }
             else if (token == token_memory) {
-                type = MemoryMap::OutputElement::MEMORY;
+                type = OutputElement::MEMORY;
             }
             else {
                 throw ParseException(token, "unexpected %s", token.type_name());
             }
 
-            map.add_output(MemoryMap::OutputElement(type, ExpressionParser(tokenizer).parse_list()));
+            target.add_output_element(OutputElement(type, ExpressionParser(tokenizer).parse_list()));
         }
         catch (ParseException &ex) {
             FileReader::global.error(ex.location, "%s", ex.what());
@@ -137,7 +151,7 @@ void MemoryMapParser::parse_output() {
 }
 
 
-void MemoryMapParser::parse_section() {
+void TargetParser::parse_section() {
     auto name = tokenizer.expect(Token::NAME, TokenGroup::newline);
     auto parse_value = ParsedValue::parse(tokenizer);
     auto parameters = parse_value->as_dictionary();
@@ -160,7 +174,7 @@ void MemoryMapParser::parse_section() {
             throw ParseException(name, "segment and address are mutually exclusive");
         }
 
-        auto segment_blocks = map.segment(segment->as_singular_scalar()->token().as_symbol());
+        auto segment_blocks = target.map.segment(segment->as_singular_scalar()->token().as_symbol());
         if (segment_blocks == nullptr) {
             throw ParseException(segment->as_singular_scalar()->token(), "unknown segment");
         }
@@ -170,11 +184,11 @@ void MemoryMapParser::parse_section() {
         blocks = parse_address((*parameters)[token_address].get());
     }
 
-    map.add_section(MemoryMap::Section(name.as_symbol(), type, std::move(blocks)));
+    target.map.add_section(MemoryMap::Section(name.as_symbol(), type, std::move(blocks)));
 }
 
 
-void MemoryMapParser::parse_segment() {
+void TargetParser::parse_segment() {
     auto name = tokenizer.expect(Token::NAME, TokenGroup::newline);
     auto parse_value = ParsedValue::parse(tokenizer);
     auto parameters = parse_value->as_dictionary();
@@ -184,11 +198,11 @@ void MemoryMapParser::parse_segment() {
     }
     segment_names.insert(name);
 
-    map.add_segment(name.as_symbol(), parse_address((*parameters)[token_address].get()));
+    target.map.add_segment(name.as_symbol(), parse_address((*parameters)[token_address].get()));
 }
 
 
-std::vector<MemoryMap::Block> MemoryMapParser::parse_address(const ParsedValue *address) {
+std::vector<MemoryMap::Block> TargetParser::parse_address(const ParsedValue *address) {
     auto blocks = std::vector<MemoryMap::Block>();
 
     if (address->is_array()) {
@@ -204,7 +218,7 @@ std::vector<MemoryMap::Block> MemoryMapParser::parse_address(const ParsedValue *
 }
 
 
-MemoryMap::AccessType MemoryMapParser::parse_type(Token type) {
+MemoryMap::AccessType TargetParser::parse_type(Token type) {
     if (type == token_reserve_only) {
         return MemoryMap::RESERVE_ONLY;
     }
@@ -219,7 +233,7 @@ MemoryMap::AccessType MemoryMapParser::parse_type(Token type) {
     }
 }
 
-MemoryMap::Block MemoryMapParser::parse_single_address(const ParsedScalar *address) {
+MemoryMap::Block TargetParser::parse_single_address(const ParsedScalar *address) {
     size_t index = 0;
     uint64_t bank = 0;
 
@@ -254,4 +268,16 @@ MemoryMap::Block MemoryMapParser::parse_single_address(const ParsedScalar *addre
     }
 
     return {bank, start, size};
+}
+
+void TargetParser::parse_cpu() {
+    auto token = tokenizer.expect(Token::STRING, TokenGroup::newline);
+
+    auto file = tokenizer.find_file(token.as_string() + ".cpu");
+    if (!file.has_value()) {
+        throw ParseException(token, "unknown CPU");
+    }
+
+    had_cpu = true;
+    target.cpu = CPUParser().parse(file.value());
 }

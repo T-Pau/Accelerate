@@ -1,5 +1,5 @@
 /*
-MemoryMapParser.h -- 
+TargetParser.h --
 
 Copyright (C) Dieter Baron
 
@@ -29,24 +29,25 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef MEMORY_MAP_PARSER_H
-#define MEMORY_MAP_PARSER_H
+#ifndef TARGET_PARSER_H
+#define TARGET_PARSER_H
 
 
 #include "FileParser.h"
-#include "MemoryMap.h"
 #include "ParsedValue.h"
+#include "Target.h"
 
-class MemoryMapParser: public FileParser {
+class TargetParser: public FileParser {
 public:
-    MemoryMapParser();
+    TargetParser();
 
-    MemoryMap parse(const std::string& file_name);
+    Target parse(const std::string& file_name);
 
 protected:
     void parse_directive(const Token& directive) override;
 
 private:
+    void parse_cpu();
     void parse_output();
     void parse_section();
     void parse_segment();
@@ -55,15 +56,17 @@ private:
     static MemoryMap::Block parse_single_address(const ParsedScalar* address);
     static MemoryMap::AccessType parse_type(Token type);
 
-    MemoryMap map;
+    Target target;
     std::unordered_set<Token> section_names;
     std::unordered_set<Token> segment_names;
+    bool had_cpu = false;
 
     static void initialize();
     static bool initialized;
-    static std::unordered_map<symbol_t, void (MemoryMapParser::*)()> parser_methods;
+    static std::unordered_map<symbol_t, void (TargetParser::*)()> parser_methods;
     static Token token_address;
     static Token token_colon;
+    static Token token_cpu;
     static Token token_data;
     static Token token_memory;
     static Token token_minus;
@@ -78,4 +81,4 @@ private:
 };
 
 
-#endif // MEMORY_MAP_PARSER_H
+#endif // TARGET_PARSER_H

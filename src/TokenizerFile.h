@@ -48,6 +48,7 @@ public:
     void push(const std::string& filename);
 
     [[nodiscard]] Location current_location() const;
+    std::optional<std::string> find_file(const std::string& file_name);
 
     void add_punctuations(const std::unordered_set<std::string>& names);
     void add_literal(const Token& token) { add_literal(token.get_type(), token.as_string());}

@@ -1,3 +1,5 @@
+.cpu "6502"
+
 .section zero_page {
     type: reserve_only
     address [
