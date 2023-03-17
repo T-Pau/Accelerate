@@ -33,6 +33,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Linker.h"
 #include "ObjectExpression.h"
 #include "FileReader.h"
+#include "IntegerExpression.h"
 
 void Linker::link() {
     program.evaluate(*program.local_environment);
@@ -109,17 +110,45 @@ void Linker::link() {
 }
 
 void Linker::output(const std::string &file_name) {
-    // TODO: implement properly
-    auto stream = std::ofstream(file_name);
+    auto environment = Environment();
 
+    for (const auto& object: objects) {
+        if (object->has_address()) {
+            environment.add(object->name.as_symbol(), std::make_shared<IntegerExpression>(object->address.value()));
+        }
+    }
+
+    // TODO: support for multiple banks
     auto data_range = memory[0].data_range();
 
-    if (!data_range.empty()) {
-        std::string start_address;
+    environment.add(SymbolTable::global.add("data_start"), std::make_shared<IntegerExpression>(data_range.start));
+    environment.add(SymbolTable::global.add("data_end"), std::make_shared<IntegerExpression>(data_range.end()));
+    environment.add(SymbolTable::global.add("data_size"), std::make_shared<IntegerExpression>(data_range.size));
 
-        Int::encode(start_address, static_cast<int64_t >(data_range.start), 2, cpu.byte_order);
-        stream << start_address;
-        stream << memory[0].data(data_range);
+    auto stream = std::ofstream(file_name);
+
+    for (const auto& element: map.output) {
+        auto arguments = element.arguments;
+        arguments.evaluate(environment);
+        switch (element.type) {
+            case MemoryMap::OutputElement::DATA:
+                stream << arguments.bytes(cpu.byte_order);
+                break;
+
+            case MemoryMap::OutputElement::MEMORY: {
+                int64_t bank = 0;
+                size_t index = 0;
+                if (arguments.expressions.size() == 3) {
+                    bank = arguments.expressions[0]->value();
+                    index += 1;
+                }
+                int64_t start = arguments.expressions[index]->value();
+                int64_t end = arguments.expressions[index + 1]->value();
+
+                stream << memory[bank].data(Range(start, end - start));
+                break;
+            }
+        }
     }
 }
 

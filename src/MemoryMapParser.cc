@@ -32,12 +32,17 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "MemoryMapParser.h"
 #include "Exception.h"
 #include "ParseException.h"
+#include "FileReader.h"
+#include "ExpressionParser.h"
 
 bool MemoryMapParser::initialized = false;
 std::unordered_map<symbol_t, void (MemoryMapParser::*)()> MemoryMapParser::parser_methods;
 Token MemoryMapParser::token_address;
 Token MemoryMapParser::token_colon;
+Token MemoryMapParser::token_data;
+Token MemoryMapParser::token_memory;
 Token MemoryMapParser::token_minus;
+Token MemoryMapParser::token_output;
 Token MemoryMapParser::token_read_only;
 Token MemoryMapParser::token_read_write;
 Token MemoryMapParser::token_reserve_only;
@@ -56,7 +61,10 @@ void MemoryMapParser::initialize() {
     if (!initialized) {
         token_address = Token(Token::NAME, {}, SymbolTable::global.add("address"));
         token_colon = Token(Token::PUNCTUATION, {}, SymbolTable::global.add(":"));
+        token_data = Token(Token::DIRECTIVE, {}, SymbolTable::global.add("data"));
+        token_memory = Token(Token::DIRECTIVE, {}, SymbolTable::global.add("memory"));
         token_minus = Token(Token::PUNCTUATION, {}, SymbolTable::global.add("-"));
+        token_output = Token(Token::DIRECTIVE, {}, SymbolTable::global.add("output"));
         token_read_only = Token(Token::NAME, {}, SymbolTable::global.add("read_only"));
         token_read_write = Token(Token::NAME, {}, SymbolTable::global.add("read_write"));
         token_reserve_only = Token(Token::NAME, {}, SymbolTable::global.add("reserve_only"));
@@ -65,6 +73,7 @@ void MemoryMapParser::initialize() {
         token_segment_name = Token(Token::NAME, {}, SymbolTable::global.add("segment"));
         token_type = Token(Token::NAME, {}, SymbolTable::global.add("type"));
 
+        parser_methods[token_output.as_symbol()] = &MemoryMapParser::parse_output;
         parser_methods[token_section.as_symbol()] = &MemoryMapParser::parse_section;
         parser_methods[token_segment.as_symbol()] = &MemoryMapParser::parse_segment;
 
@@ -87,6 +96,44 @@ void MemoryMapParser::parse_directive(const Token &directive) {
         throw ParseException(directive, "unknown directive");
     }
     (this->*it->second)();
+}
+
+
+void MemoryMapParser::parse_output() {
+    auto token = tokenizer.next();
+    if (token != ParsedValue::token_curly_open) {
+        tokenizer.skip_until(TokenGroup::newline, true);
+        throw ParseException(token, "expected '{'");
+    }
+
+    while (!tokenizer.ended()) {
+        try {
+            tokenizer.skip(TokenGroup::newline);
+            token = tokenizer.next();
+
+            auto type = MemoryMap::OutputElement::DATA;
+
+            if (token == ParsedValue::token_curly_close) {
+                tokenizer.skip(TokenGroup::newline);
+                break;
+            }
+            else if (token == token_data) {
+                type = MemoryMap::OutputElement::DATA;
+            }
+            else if (token == token_memory) {
+                type = MemoryMap::OutputElement::MEMORY;
+            }
+            else {
+                throw ParseException(token, "unexpected %s", token.type_name());
+            }
+
+            map.add_output(MemoryMap::OutputElement(type, ExpressionParser(tokenizer).parse_list()));
+        }
+        catch (ParseException &ex) {
+            FileReader::global.error(ex.location, "%s", ex.what());
+            tokenizer.skip_until(TokenGroup::newline, true);
+        }
+    }
 }
 
 

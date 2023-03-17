@@ -47,6 +47,7 @@ protected:
     void parse_directive(const Token& directive) override;
 
 private:
+    void parse_output();
     void parse_section();
     void parse_segment();
 
@@ -63,7 +64,10 @@ private:
     static std::unordered_map<symbol_t, void (MemoryMapParser::*)()> parser_methods;
     static Token token_address;
     static Token token_colon;
+    static Token token_data;
+    static Token token_memory;
     static Token token_minus;
+    static Token token_output;
     static Token token_read_only;
     static Token token_read_write;
     static Token token_reserve_only;

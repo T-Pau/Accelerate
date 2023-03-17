@@ -1,17 +1,10 @@
 .section zero_page {
     type: reserve_only
-    address [
-        : $02
-        : $fb - $fe
-    ]
-}
-
-.section basic {
-    address: $0801 - $0820
+    address: $02 - $ff
 }
 
 .segment program {
-    address: $0820 - $7fff
+    address: $0202 - $efff
 }
 
 .section code {
@@ -25,4 +18,8 @@
 .section bss {
     type: reserve_only
     segment: program
+}
+
+.output {
+    .memory $0202, data_end
 }
