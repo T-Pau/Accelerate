@@ -1,5 +1,7 @@
 .cpu "z80"
 
+.extension "bin"
+
 .segment program {
     address: $0205 - $efff
 }

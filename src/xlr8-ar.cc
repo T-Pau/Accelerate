@@ -34,6 +34,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "Command.h"
 #include "ObjectFileParser.h"
+#include "Exception.h"
 
 class xlr8_ar: public Command {
 public:
@@ -57,6 +58,10 @@ int main(int argc, char *argv[]) {
 
 
 void xlr8_ar::process() {
+    if (!output_file.has_value()) {
+        throw Exception("missing option --output");
+    }
+
     auto parser = ObjectFileParser();
 
     for (const auto &file_name: arguments.arguments) {
@@ -70,6 +75,6 @@ void xlr8_ar::process() {
 
 
 void xlr8_ar::create_output() {
-    auto stream = std::ofstream(output_file);
+    auto stream = std::ofstream(output_file.value());
     stream << library;
 }

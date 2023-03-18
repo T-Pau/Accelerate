@@ -41,4 +41,6 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 std::string string_format(const char *format, ...) PRINTF_LIKE(1, 2);
 std::string string_format_v(const char *format, va_list ap);
 
+std::string default_output_filename(const std::string& file_name, const std::string& extension);
+
 #endif // UTIL_H

@@ -1,5 +1,7 @@
 .cpu "65c02"
 
+.extension "bin"
+
 .section zero_page {
     type: reserve_only
     address: $02 - $ff

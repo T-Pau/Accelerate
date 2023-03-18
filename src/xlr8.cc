@@ -29,6 +29,7 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+#include <fstream>
 #include <vector>
 
 #include "Command.h"
@@ -38,6 +39,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "TargetParser.h"
 #include "Linker.h"
 #include "Assembler.h"
+#include "Util.h"
 
 class xlr8: public Command {
 public:
@@ -69,6 +71,7 @@ private:
 
 std::vector<Commandline::Option> xlr8::options = {
         Commandline::Option("compile", 'c', "compile only, don't link"),
+        Commandline::Option("include-directory", 'I', "directory", "search for sources in DIRECTORY"),
         Commandline::Option("library-directory", 'L', "directory", "search for libraries in DIRECTORY"),
         Commandline::Option("target", "file", "read target definition from FILE"),
 };
@@ -123,7 +126,7 @@ void xlr8::process() {
             if (extension == ".s") {
                 files.emplace_back(file_name, Assembler(linker.target.cpu).parse(file_name));
             }
-            if (extension == ".o") {
+            else if (extension == ".o") {
                 if (!do_link) {
                     throw Exception("not linking, object file not used");
                 }
@@ -145,10 +148,34 @@ void xlr8::process() {
     }
 
     if (!ok) {
-        return; // TODO: propagate error
+        throw Exception();
     }
 
-    if (!do_link) {
+    switch (files.size()) {
+        case 0:
+            throw Exception("no sources given");
+
+        case 1:
+            if (!output_file.has_value()) {
+                set_output_file(files[0].name, linker.target.extension);
+            }
+            break;
+
+        default:
+            if (do_link) {
+                if (!output_file.has_value()) {
+                    throw Exception("option --output required with multiple source files");
+                }
+            }
+            else {
+                if (output_file.has_value()) {
+                    throw Exception("option --output not allowed when assembling multiple source files");
+                }
+            }
+            break;
+    }
+
+    if (do_link) {
         for (const auto& file: files) {
             linker.add_file(file.file);
         }
@@ -158,10 +185,14 @@ void xlr8::process() {
 
 
 void xlr8::create_output() {
-    if (!do_link) {
-        linker.output(output_file);
+    if (do_link) {
+        linker.output(output_file.value());
     }
     else {
-        // TODO: write files
+        for (const auto& file: files) {
+            auto file_name = output_file.has_value() ? output_file.value() : default_output_filename(file.name, "o");
+            auto stream = std::ofstream(file_name);
+            stream << file.file;
+        }
     }
 }

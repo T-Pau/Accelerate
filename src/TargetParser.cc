@@ -43,6 +43,7 @@ Token TargetParser::token_address;
 Token TargetParser::token_colon;
 Token TargetParser::token_cpu;
 Token TargetParser::token_data;
+Token TargetParser::token_extension;
 Token TargetParser::token_memory;
 Token TargetParser::token_minus;
 Token TargetParser::token_output;
@@ -66,6 +67,7 @@ void TargetParser::initialize() {
         token_colon = Token(Token::PUNCTUATION, {}, SymbolTable::global.add(":"));
         token_cpu = Token(Token::DIRECTIVE, {}, SymbolTable::global.add("cpu"));
         token_data = Token(Token::DIRECTIVE, {}, SymbolTable::global.add("data"));
+        token_extension = Token(Token::DIRECTIVE, {}, SymbolTable::global.add("extension"));
         token_memory = Token(Token::DIRECTIVE, {}, SymbolTable::global.add("memory"));
         token_minus = Token(Token::PUNCTUATION, {}, SymbolTable::global.add("-"));
         token_output = Token(Token::DIRECTIVE, {}, SymbolTable::global.add("output"));
@@ -78,6 +80,7 @@ void TargetParser::initialize() {
         token_type = Token(Token::NAME, {}, SymbolTable::global.add("type"));
 
         parser_methods[token_cpu.as_symbol()] = &TargetParser::parse_cpu;
+        parser_methods[token_extension.as_symbol()] = &TargetParser::parse_extension;
         parser_methods[token_output.as_symbol()] = &TargetParser::parse_output;
         parser_methods[token_section.as_symbol()] = &TargetParser::parse_section;
         parser_methods[token_segment.as_symbol()] = &TargetParser::parse_segment;
@@ -280,4 +283,10 @@ void TargetParser::parse_cpu() {
 
     had_cpu = true;
     target.cpu = CPUParser().parse(file.value());
+}
+
+void TargetParser::parse_extension() {
+    auto token = tokenizer.expect(Token::STRING, TokenGroup::newline);
+
+    target.extension = token.as_string();
 }

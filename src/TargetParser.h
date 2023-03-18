@@ -48,6 +48,7 @@ protected:
 
 private:
     void parse_cpu();
+    void parse_extension();
     void parse_output();
     void parse_section();
     void parse_segment();
@@ -68,6 +69,7 @@ private:
     static Token token_colon;
     static Token token_cpu;
     static Token token_data;
+    static Token token_extension;
     static Token token_memory;
     static Token token_minus;
     static Token token_output;

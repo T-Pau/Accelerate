@@ -46,13 +46,14 @@ public:
 protected:
     virtual void process() = 0;
     virtual void create_output() = 0;
-    virtual std::string default_output_file() {return "";}
     virtual size_t minimum_arguments() {return 0;}
     virtual size_t maximum_arguments() {return std::numeric_limits<size_t>::max();}
 
+    void set_output_file(const std::string& file_name, const std::string& extension);
+
     Commandline commandline;
     ParsedCommandline arguments;
-    std::string output_file;
+    std::optional<std::string> output_file;
 
 private:
     static std::vector<Commandline::Option> standard_options;

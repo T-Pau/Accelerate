@@ -39,6 +39,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "FileReader.h"
 #include "Exception.h"
+#include "Util.h"
 
 std::string Command::header = " -- " PACKAGE " by T'Pau";
 std::string Command::footer = "Report bugs to " PACKAGE_BUGREPORT ".";
@@ -67,16 +68,7 @@ int Command::run(int argc, char *const *argv) {
             throw Exception();
         }
 
-        auto output = arguments.find_first("output");
-        if (output.has_value()) {
-            output_file = output.value();
-        }
-        else {
-            output_file = default_output_file();
-            if (output_file.empty()) {
-                throw Exception("missing --output option");
-            }
-        }
+        output_file = arguments.find_first("output");
 
         process();
 
@@ -88,9 +80,12 @@ int Command::run(int argc, char *const *argv) {
 
         auto depfile = arguments.find_first("depfile");
         if (depfile.has_value()) {
+            if (!output_file.has_value()) {
+                throw Exception("can't create depfile with multiple outputs");
+            }
             auto stream = std::ofstream(depfile.value());
 
-            stream << output_file << ":";
+            stream << output_file.value() << ":";
             for (const auto& file_name: FileReader::global.file_names()) {
                 stream << " " << file_name;
             }
@@ -105,4 +100,8 @@ int Command::run(int argc, char *const *argv) {
     }
 
     return 0;
+}
+
+void Command::set_output_file(const std::string &file_name, const std::string &extension) {
+    output_file = default_output_filename(file_name, extension);
 }

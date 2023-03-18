@@ -1,5 +1,7 @@
 .cpu "6502"
 
+.extension "prg"
+
 .section zero_page {
     type: reserve_only
     address [

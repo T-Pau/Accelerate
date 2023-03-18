@@ -98,5 +98,5 @@ void xlr8_ld::process() {
 
 
 void xlr8_ld::create_output() {
-    linker.output(output_file);
+    linker.output(output_file.value());
 }

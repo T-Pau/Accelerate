@@ -31,6 +31,8 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "Util.h"
 
+#include <filesystem>
+
 std::string string_format(const char *format, ...) {
     va_list ap;
     va_start(ap, format);
@@ -60,4 +62,9 @@ std::string string_format_v(const char *format, va_list ap) {
             size *= 2;
         }
     }
+}
+
+
+std::string default_output_filename(const std::string& file_name, const std::string& extension) {
+    return std::filesystem::path(file_name).stem().filename().string() + "." + extension;
 }

@@ -20,6 +20,8 @@ public:
     MemoryMap map;
 
     std::vector<OutputElement> output_elements;
+
+    std::string extension = "bin";
 };
 
 
