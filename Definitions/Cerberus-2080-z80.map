@@ -1,0 +1,23 @@
+.cpu "z80"
+
+.segment program {
+    address: $0205 - $efff
+}
+
+.section code {
+    segment: program
+}
+
+.section data {
+    segment: program
+}
+
+.section bss {
+    type: reserve_only
+    segment: program
+}
+
+.output {
+    .data $c3, start
+    .memory $0205, data_end
+}

@@ -49,8 +49,9 @@ public:
     void link();
     void output(const std::string& file_name);
 
-private:
     Target target;
+
+private:
 
     ObjectFile program;
     std::vector<ObjectFile> libraries;

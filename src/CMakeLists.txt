@@ -2,7 +2,7 @@ if(NOT HAVE_GETOPT_LONG)
     list(APPEND COMPATIBILITY getopt_long.cc)
 endif()
 
-add_library(xlr8 STATIC
+add_library(xlr8-library STATIC
         AddressingMode.cc
         AddressingModeMatcher.cc
         ArgumentType.cc
@@ -52,11 +52,11 @@ add_library(xlr8 STATIC
         ${COMPATIBILITY}
 )
 
-target_include_directories(xlr8 PRIVATE ${PROJECT_BINARY_DIR})
+target_include_directories(xlr8-library PRIVATE ${PROJECT_BINARY_DIR})
 
-foreach(PROGRAM xlr8-ar xlr8-as xlr8-ld)
+foreach(PROGRAM xlr8 xlr8-ar xlr8-as xlr8-ld)
     ADD_EXECUTABLE(${PROGRAM} ${PROGRAM}.cc)
     target_include_directories(${PROGRAM} PRIVATE ${PROJECT_BINARY_DIR})
-    target_link_libraries(${PROGRAM} xlr8)
+    target_link_libraries(${PROGRAM} xlr8-library)
     INSTALL(TARGETS ${PROGRAM} RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 endforeach()

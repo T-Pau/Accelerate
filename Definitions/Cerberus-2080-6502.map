@@ -23,6 +23,6 @@
 }
 
 .output {
-    .data $4c, <start, >start
+    .data $4c, start
     .memory $0205, data_end
 }

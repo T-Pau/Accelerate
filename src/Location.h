@@ -40,6 +40,7 @@ class Location {
 public:
     Location() = default;
 
+    explicit Location(const std::string& file_name): file(SymbolTable::global.add(file_name)) {}
     Location(symbol_t file, size_t line_number, size_t start_column, size_t end_column) : file(file), start_line_number(line_number), start_column(start_column), end_column(end_column) {}
 
     void extend(const Location& end);

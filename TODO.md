@@ -7,7 +7,6 @@
 - Allow specifying libraries in map file.
 - Support for text. (How to specify encoding?)
 - Support for integer as ASCII (e. g. for start sys).
-- Specify CPU in map file, rename map to target, specify in assembler as well.
 - Check for objects in unknown sections. 
 
 ## Older Items
