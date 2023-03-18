@@ -156,7 +156,7 @@ void xlr8::process() {
             throw Exception("no sources given");
 
         case 1:
-            if (!output_file.has_value()) {
+            if (do_link && !output_file.has_value()) {
                 set_output_file(files[0].name, linker.target.extension);
             }
             break;
