@@ -13,7 +13,6 @@
 
 class Target {
 public:
-
     void add_output_element(OutputElement element) {output_elements.emplace_back(std::move(element));}
 
     CPU cpu;

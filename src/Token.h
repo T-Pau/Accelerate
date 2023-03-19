@@ -57,7 +57,7 @@ public:
     Token(Type type, Location location): type(type), location(location) {}
     Token(Type type, Location location, const std::string& name): Token(type, location) {value.symbol = SymbolTable::global.add(name);}
     Token(Type type, Location location, symbol_t symbol): Token(type, location) {value.symbol = symbol;}
-    Token(Type type, Location location, uint64_t integer): Token(type, location) {value.integer = integer;}
+    Token(Type type, Location location, uint64_t integer, uint64_t byte_size_ = 0): Token(type, location) {value.integer = integer; byte_size = byte_size_;}
     Token(Type type, Location location, double real): Token(type, location) {value.real = real;}
 
     explicit operator bool() const {return type != END;}
@@ -81,6 +81,7 @@ public:
     static const char* type_name(Type type);
 
     Location location;
+    uint64_t byte_size = 0;
 
 private:
     Type type;

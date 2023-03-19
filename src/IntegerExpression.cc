@@ -38,7 +38,7 @@ IntegerExpression::IntegerExpression(const Token &token) {
         throw ParseException(token, "internal error: can't create integer node from %s", token.type_name());
     }
     value_ = static_cast<int64_t>(token.as_integer()); // TODO: handle overflow
-    set_byte_size(Int::minimum_byte_size(value_));
+    set_byte_size(token.byte_size > 0 ? token.byte_size : Int::minimum_byte_size(value_));
 }
 
 

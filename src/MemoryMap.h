@@ -46,6 +46,7 @@ public:
     };
 
 
+    [[nodiscard]] bool has_section(symbol_t name) const {return section(name) != nullptr;}
     [[nodiscard]] const std::vector<Block>* segment(symbol_t name) const;
     [[nodiscard]] const Section* section(symbol_t name) const;
     [[nodiscard]] Memory initialize_memory() const;

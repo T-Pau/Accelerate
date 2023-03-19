@@ -33,13 +33,13 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define ASSEMBLER_H
 
 #include "ObjectFile.h"
-#include "CPU.h"
+#include "Target.h"
 #include "TokenizerFile.h"
 #include "Object.h"
 
 class Assembler {
 public:
-    explicit Assembler(const CPU& cpu): cpu(cpu) {}
+    explicit Assembler(const Target& target): target(target) {}
 
     ObjectFile parse(const std::string& file_name);
 
@@ -59,7 +59,7 @@ private:
 
     static Object::Visibility visibility_value(const Token& token);
 
-    const CPU& cpu;
+    const Target& target;
 
     symbol_t current_section = 0;
     Object* current_object;

@@ -1,7 +1,6 @@
 ## Missing Features
 
 - Evaluate program/library constants in output elements.
-- Add $ to special variables in output elements. (Needs support in tokenizer.)
 - Differentiate between signed and unsigned size constraints (`:-1` for signed byte).
 - Add optional priorities to sections.
 - Allow specifying libraries in map file.

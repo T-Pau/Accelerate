@@ -43,6 +43,10 @@ public:
 
     Target parse(const std::string& file_name);
 
+    static Token token_data_end;
+    static Token token_data_start;
+    static Token token_data_size;
+
 protected:
     void parse_directive(const Token& directive) override;
 

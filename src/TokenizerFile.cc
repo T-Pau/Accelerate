@@ -31,9 +31,11 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "TokenizerFile.h"
 
+#include <utility>
+
 #include "FileReader.h"
+#include "Int.h"
 #include "ParseException.h"
-#include "Util.h"
 
 bool TokenizerFile::initialized = false;
 Token TokenizerFile::token_include;
@@ -156,7 +158,8 @@ Token TokenizerFile::next_raw() {
 }
 
 Token TokenizerFile::parse_number(unsigned int base, Location location) {
-    auto empty = true;
+    uint64_t size = 0;
+    auto leading_zero = false;
     uint64_t integer = 0;
 
     while (true) {
@@ -166,16 +169,24 @@ Token TokenizerFile::parse_number(unsigned int base, Location location) {
         // TODO: real numbers
         if (digit < 0 || digit >= base) {
             current_source->unget();
-            if (empty) {
+            if (size == 0) {
                 throw ParseException(location, "empty integer");
             }
-            return {Token::INTEGER, location, integer};
+            uint64_t byte_size = 0;
+            if (size > 1 && leading_zero) {
+                byte_size = Int::minimum_byte_size((1 << size * (base == 16 ? 4 : 1)) - 1);
+            }
+            return {Token::INTEGER, location, integer, byte_size};
         }
 
-        empty = false;
+        if (size == 0 && digit == 0 && (base == 2 || base == 16)) {
+            leading_zero = true;
+        }
+        size += 1;
         integer = integer * base + digit;
     }
 }
+
 
 int TokenizerFile::convert_digit(int c) {
     if (isdigit(c)) {
@@ -275,7 +286,7 @@ void TokenizerFile::add_punctuations(const std::unordered_set<std::string> &name
     }
 }
 
-TokenizerFile::TokenizerFile(std::shared_ptr<const Path> path, bool use_preprocessor): path(path), use_preprocessor(use_preprocessor) {
+TokenizerFile::TokenizerFile(std::shared_ptr<const Path> path, bool use_preprocessor): path(std::move(path)), use_preprocessor(use_preprocessor) {
     if (use_preprocessor) {
         if (!initialized) {
             token_include = Token(Token::PREPROCESSOR, {}, SymbolTable::global.add(".include"));

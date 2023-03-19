@@ -35,6 +35,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "FileReader.h"
 #include "IntegerExpression.h"
 #include "Exception.h"
+#include "TargetParser.h"
 
 void Linker::link() {
     program.evaluate(*program.local_environment);
@@ -127,9 +128,9 @@ void Linker::output(const std::string &file_name) {
     // TODO: support for multiple banks
     auto data_range = memory[0].data_range();
 
-    environment.add(SymbolTable::global.add("data_start"), std::make_shared<IntegerExpression>(data_range.start));
-    environment.add(SymbolTable::global.add("data_end"), std::make_shared<IntegerExpression>(data_range.end()));
-    environment.add(SymbolTable::global.add("data_size"), std::make_shared<IntegerExpression>(data_range.size));
+    environment.add(TargetParser::token_data_end.as_symbol(), std::make_shared<IntegerExpression>(data_range.end()));
+    environment.add(TargetParser::token_data_size.as_symbol(), std::make_shared<IntegerExpression>(data_range.size));
+    environment.add(TargetParser::token_data_start.as_symbol(), std::make_shared<IntegerExpression>(data_range.start));
 
     auto stream = std::ofstream(file_name);
 

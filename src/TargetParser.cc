@@ -43,6 +43,9 @@ Token TargetParser::token_address;
 Token TargetParser::token_colon;
 Token TargetParser::token_cpu;
 Token TargetParser::token_data;
+Token TargetParser::token_data_end;
+Token TargetParser::token_data_size;
+Token TargetParser::token_data_start;
 Token TargetParser::token_extension;
 Token TargetParser::token_memory;
 Token TargetParser::token_minus;
@@ -58,6 +61,10 @@ Token TargetParser::token_type;
 
 TargetParser::TargetParser() {
     initialize();
+
+    tokenizer.add_literal(token_data_end);
+    tokenizer.add_literal(token_data_size);
+    tokenizer.add_literal(token_data_start);
 }
 
 
@@ -67,6 +74,9 @@ void TargetParser::initialize() {
         token_colon = Token(Token::PUNCTUATION, {}, SymbolTable::global.add(":"));
         token_cpu = Token(Token::DIRECTIVE, {}, SymbolTable::global.add("cpu"));
         token_data = Token(Token::DIRECTIVE, {}, SymbolTable::global.add("data"));
+        token_data_end = Token(Token::NAME, {}, SymbolTable::global.add(".data_end"));
+        token_data_size = Token(Token::NAME, {}, SymbolTable::global.add(".data_size"));
+        token_data_start = Token(Token::NAME, {}, SymbolTable::global.add(".data_start"));
         token_extension = Token(Token::DIRECTIVE, {}, SymbolTable::global.add("extension"));
         token_memory = Token(Token::DIRECTIVE, {}, SymbolTable::global.add("memory"));
         token_minus = Token(Token::PUNCTUATION, {}, SymbolTable::global.add("-"));

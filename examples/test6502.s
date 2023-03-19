@@ -7,6 +7,7 @@ END_PAGE = $80
 .local screen .reserve 2
 .local address .reserve 2
 
+
 .section code
 
 .global start {
@@ -27,6 +28,7 @@ loop:
     beq ok
     jsr error
 ok:
+    inc $fcaf
     iny
     beq loop
     inc address    
