@@ -1,6 +1,33 @@
-//
-// Created by Dieter Baron on 24.01.23.
-//
+/*
+MemoryMap.cc --
+
+Copyright (C) Dieter Baron
+
+The authors can be contacted at <assembler@tpau.group>
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions
+are met:
+
+1. Redistributions of source code must retain the above copyright
+   notice, this list of conditions and the following disclaimer.
+
+2. The names of the authors may not be used to endorse or promote
+  products derived from this software without specific prior
+  written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE AUTHORS "AS IS" AND ANY EXPRESS
+OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHORS BE LIABLE FOR ANY
+DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE
+GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER
+IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
+IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+*/
 
 #include "MemoryMap.h"
 #include "Exception.h"
@@ -16,6 +43,7 @@ const std::vector<MemoryMap::Block> *MemoryMap::segment(symbol_t name) const {
     }
 }
 
+
 const MemoryMap::Section *MemoryMap::section(symbol_t name) const {
     auto it = sections.find(name);
 
@@ -26,6 +54,7 @@ const MemoryMap::Section *MemoryMap::section(symbol_t name) const {
         return &it->second;
     }
 }
+
 
 Memory MemoryMap::initialize_memory() const {
     std::vector<Range> bank_ranges;
@@ -77,19 +106,29 @@ bool MemoryMap::Block::operator<(const MemoryMap::Block &other) const {
     return range < other.range;
 }
 
+
 bool MemoryMap::Block::operator==(const MemoryMap::Block &other) const {
     return bank == other.bank && range == other.range;
 }
 
+
 MemoryMap::Section::Section(symbol_t name, MemoryMap::AccessType access, std::vector<Block> raw_blocks): name(name), access(access) {
     std::sort(raw_blocks.begin(), raw_blocks.end());
-    // TODO: remove overlaps
-    blocks = std::move(raw_blocks);
-    size = 0;
-    for (const auto& block: blocks) {
-        size += block.range.size;
+    Block* previous = nullptr;
+
+    for (const auto& block: raw_blocks) {
+        if (previous != nullptr && block.bank == previous->bank && block.range.start <= previous->range.end()) {
+            size += block.range.end() - previous->range.end();
+            previous->range.set_end(block.range.end());
+        }
+        else {
+            size += block.range.size;
+            previous = &blocks.emplace_back(block);
+        }
+        address_size = std::max(address_size, Int::minimum_byte_size(static_cast<int64_t>(previous->range.end() - 1)));
     }
 }
+
 
 bool MemoryMap::Section::operator<(const MemoryMap::Section &other) const {
     if (size != other.size) {
