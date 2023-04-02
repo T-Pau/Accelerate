@@ -69,24 +69,24 @@ TargetParser::TargetParser() {
 
 void TargetParser::initialize() {
     if (!initialized) {
-        token_address = Token(Token::NAME, {}, "address");
-        token_colon = Token(Token::PUNCTUATION, {}, ":");
-        token_cpu = Token(Token::DIRECTIVE, {}, "cpu");
-        token_data = Token(Token::DIRECTIVE, {}, "data");
-        token_data_end = Token(Token::NAME, {}, ".data_end");
-        token_data_size = Token(Token::NAME, {}, ".data_size");
-        token_data_start = Token(Token::NAME, {}, ".data_start");
-        token_extension = Token(Token::DIRECTIVE, {}, "extension");
-        token_memory = Token(Token::DIRECTIVE, {}, "memory");
-        token_minus = Token(Token::PUNCTUATION, {}, "-");
-        token_output = Token(Token::DIRECTIVE, {}, "output");
-        token_read_only = Token(Token::NAME, {}, "read_only");
-        token_read_write = Token(Token::NAME, {}, "read_write");
-        token_reserve_only = Token(Token::NAME, {}, "reserve_only");
-        token_section = Token(Token::DIRECTIVE, {}, "section");
-        token_segment = Token(Token::DIRECTIVE, {}, "segment");
-        token_segment_name = Token(Token::NAME, {}, "segment");
-        token_type = Token(Token::NAME, {}, "type");
+        token_address = Token(Token::NAME, "address");
+        token_colon = Token(Token::PUNCTUATION, ":");
+        token_cpu = Token(Token::DIRECTIVE, "cpu");
+        token_data = Token(Token::DIRECTIVE, "data");
+        token_data_end = Token(Token::NAME, ".data_end");
+        token_data_size = Token(Token::NAME, ".data_size");
+        token_data_start = Token(Token::NAME, ".data_start");
+        token_extension = Token(Token::DIRECTIVE, "extension");
+        token_memory = Token(Token::DIRECTIVE, "memory");
+        token_minus = Token(Token::PUNCTUATION, "-");
+        token_output = Token(Token::DIRECTIVE, "output");
+        token_read_only = Token(Token::NAME, "read_only");
+        token_read_write = Token(Token::NAME, "read_write");
+        token_reserve_only = Token(Token::NAME, "reserve_only");
+        token_section = Token(Token::DIRECTIVE, "section");
+        token_segment = Token(Token::DIRECTIVE, "segment");
+        token_segment_name = Token(Token::NAME, "segment");
+        token_type = Token(Token::NAME, "type");
 
         parser_methods[token_cpu.as_symbol()] = &TargetParser::parse_cpu;
         parser_methods[token_extension.as_symbol()] = &TargetParser::parse_extension;

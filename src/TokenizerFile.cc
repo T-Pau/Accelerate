@@ -289,7 +289,7 @@ void TokenizerFile::add_punctuations(const std::unordered_set<std::string> &name
 TokenizerFile::TokenizerFile(std::shared_ptr<const Path> path, bool use_preprocessor): path(std::move(path)), use_preprocessor(use_preprocessor) {
     if (use_preprocessor) {
         if (!initialized) {
-            token_include = Token(Token::PREPROCESSOR, {}, ".include");
+            token_include = Token(Token::PREPROCESSOR, ".include");
             initialized = true;
         }
         matcher.add(".include", Token::PREPROCESSOR);

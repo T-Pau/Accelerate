@@ -42,11 +42,11 @@ Token ParsedValue::token_square_open;
 
 void ParsedValue::initialize() {
     if (!initialized) {
-        token_colon = Token(Token::PUNCTUATION, {}, ":");
-        token_curly_close = Token(Token::PUNCTUATION, {}, "}");
-        token_curly_open = Token(Token::PUNCTUATION, {}, "{");
-        token_square_close = Token(Token::PUNCTUATION, {}, "]");
-        token_square_open = Token(Token::PUNCTUATION, {}, "[");
+        token_colon = Token(Token::PUNCTUATION, ":");
+        token_curly_close = Token(Token::PUNCTUATION, "}");
+        token_curly_open = Token(Token::PUNCTUATION, "{");
+        token_square_close = Token(Token::PUNCTUATION, "]");
+        token_square_open = Token(Token::PUNCTUATION, "[");
 
         start_group = TokenGroup({}, {token_colon, token_curly_open, token_square_open}, "object start");
 

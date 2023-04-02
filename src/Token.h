@@ -55,7 +55,7 @@ public:
 
     Token(): type(END) {}
     Token(Type type, Location location): type(type), location(location) {}
-    Token(Type type, Location location, const std::string& name): Token(type, location) {value.symbol = name;}
+    Token(Type type, const std::string& name): Token(type, Location()) {value.symbol = name;}
     Token(Type type, Location location, Symbol symbol): Token(type, location) {value.symbol = symbol;}
     Token(Type type, Location location, uint64_t integer, uint64_t byte_size_ = 0): Token(type, location) {value.integer = integer; byte_size = byte_size_;}
     Token(Type type, Location location, double real): Token(type, location) {value.real = real;}

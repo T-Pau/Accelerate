@@ -63,18 +63,18 @@ void Assembler::initialize() {
     if (!initialized) {
         symbol_opcode = ".opcode";
         symbol_pc = ".pc";
-        token_align = Token(Token::DIRECTIVE, {}, ".align");
-        token_brace_close = Token(Token::PUNCTUATION, {}, ")");
-        token_brace_open = Token(Token::PUNCTUATION, {}, "(");
-        token_colon = Token(Token::PUNCTUATION, {}, ":");
-        token_curly_brace_close = Token(Token::PUNCTUATION, {}, "}");
-        token_curly_brace_open = Token(Token::PUNCTUATION, {}, "{");
-        token_data = Token(Token::DIRECTIVE, {}, ".data");
-        token_equals = Token(Token::PUNCTUATION, {}, "=");
-        token_global = Token(Token::DIRECTIVE, {}, ".global");
-        token_local = Token(Token::DIRECTIVE, {}, ".local");
-        token_reserve = Token(Token::DIRECTIVE, {}, ".reserve");
-        token_section = Token(Token::DIRECTIVE, {}, ".section");
+        token_align = Token(Token::DIRECTIVE, ".align");
+        token_brace_close = Token(Token::PUNCTUATION, ")");
+        token_brace_open = Token(Token::PUNCTUATION, "(");
+        token_colon = Token(Token::PUNCTUATION, ":");
+        token_curly_brace_close = Token(Token::PUNCTUATION, "}");
+        token_curly_brace_open = Token(Token::PUNCTUATION, "{");
+        token_data = Token(Token::DIRECTIVE, ".data");
+        token_equals = Token(Token::PUNCTUATION, "=");
+        token_global = Token(Token::DIRECTIVE, ".global");
+        token_local = Token(Token::DIRECTIVE, ".local");
+        token_reserve = Token(Token::DIRECTIVE, ".reserve");
+        token_section = Token(Token::DIRECTIVE, ".section");
 
         initialized = true;
     }

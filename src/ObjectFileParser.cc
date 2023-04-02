@@ -53,18 +53,18 @@ Token ObjectFileParser::token_visibility;
 
 void ObjectFileParser::initialize() {
     if (!initialized) {
-        token_alignment = Token(Token::NAME, {}, Symbol("alignment"));
-        token_constant = Token(Token::DIRECTIVE, {}, "constant");
-        token_data = Token(Token::NAME, {}, "data");
-        token_format_version = Token(Token::DIRECTIVE, {}, "format_version");
-        token_global = Token(Token::NAME, {}, "global");
-        token_local = Token(Token::NAME, {}, "local");
-        token_object = Token(Token::DIRECTIVE, {}, "object");
-        token_section = Token(Token::NAME, {}, "section");
-        token_size = Token(Token::NAME, {}, "size");
-        token_target = Token(Token::DIRECTIVE, {}, "target");
-        token_value = Token(Token::NAME, {}, "value");
-        token_visibility = Token(Token::NAME, {}, "visibility");
+        token_alignment = Token(Token::NAME, "alignment");
+        token_constant = Token(Token::DIRECTIVE, "constant");
+        token_data = Token(Token::NAME, "data");
+        token_format_version = Token(Token::DIRECTIVE, "format_version");
+        token_global = Token(Token::NAME, "global");
+        token_local = Token(Token::NAME, "local");
+        token_object = Token(Token::DIRECTIVE, "object");
+        token_section = Token(Token::NAME, "section");
+        token_size = Token(Token::NAME, "size");
+        token_target = Token(Token::DIRECTIVE, "target");
+        token_value = Token(Token::NAME, "value");
+        token_visibility = Token(Token::NAME, "visibility");
 
         parser_methods[token_format_version.as_symbol()] = &ObjectFileParser::parse_format_version;
         parser_methods[token_constant.as_symbol()] = &ObjectFileParser::parse_constant;

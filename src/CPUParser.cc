@@ -56,15 +56,15 @@ Token CPUParser::token_punctuation;
 
 void CPUParser::initialize() {
     if (!initialized) {
-        token_arguments = Token(Token::NAME, {}, "arguments");
-        token_comma = Token(Token::PUNCTUATION, {}, ",");
-        token_encoding = Token(Token::NAME, {}, "encoding");
-        token_keywords = Token(Token::NAME, {}, "keywords");
-        token_minus = Token(Token::PUNCTUATION, {}, "-");
-        token_notation = Token(Token::NAME, {}, "notation");
-        token_opcode = Token(Token::NAME, {}, ".opcode");
-        token_pc = Token(Token::NAME, {}, ".pc");
-        token_punctuation = Token(Token::NAME, {}, "punctuation");
+        token_arguments = Token(Token::NAME, "arguments");
+        token_comma = Token(Token::PUNCTUATION, ",");
+        token_encoding = Token(Token::NAME, "encoding");
+        token_keywords = Token(Token::NAME, "keywords");
+        token_minus = Token(Token::PUNCTUATION, "-");
+        token_notation = Token(Token::NAME, "notation");
+        token_opcode = Token(Token::NAME, ".opcode");
+        token_pc = Token(Token::NAME, ".pc");
+        token_punctuation = Token(Token::NAME, "punctuation");
 
         parser_methods[Symbol("byte_order")] = &CPUParser::parse_byte_order;
         parser_methods[Symbol("addressing_mode")] = &CPUParser::parse_addressing_mode;
@@ -272,7 +272,7 @@ void CPUParser::parse_syntax() {
             if (!value.is_string()) {
                 throw ParseException(value, "expected string");
             }
-            cpu.add_reserved_word(value.as_string());
+            cpu.add_reserved_word(value.as_symbol());
             tokenizer.add_literal(Token::NAME, value.as_string());
         }
     }
@@ -281,7 +281,7 @@ void CPUParser::parse_syntax() {
             if (!value.is_string()) {
                 throw ParseException(value, "expected string");
             }
-            cpu.add_punctuation(value.as_string());
+            cpu.add_punctuation(value.as_symbol());
             tokenizer.add_literal(Token::PUNCTUATION, value.as_string());
         }
     }
@@ -401,5 +401,5 @@ Symbol CPUParser::argument_symbol(Symbol symbol) {
     if (name.front() == '.') {
         return symbol;
     }
-    return "$" + name;
+    return Symbol("$" + name);
 }
