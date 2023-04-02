@@ -45,10 +45,10 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 class TokenizerFile: public Tokenizer {
 public:
     explicit TokenizerFile(std::shared_ptr<const Path> path = std::make_shared<const Path>(), bool use_preprocessor = true);
-    void push(const std::string& filename);
+    void push(Symbol filename);
 
     [[nodiscard]] Location current_location() const;
-    std::optional<std::string> find_file(const std::string& file_name);
+    Symbol find_file(Symbol file_name);
 
     void add_punctuations(const std::unordered_set<std::string>& names);
     void add_literal(const Token& token) { add_literal(token.get_type(), token.as_string());}
@@ -61,7 +61,7 @@ protected:
 private:
     class Source {
     public:
-        Source(symbol_t file, const std::vector<std::string>& lines) : file(file), lines(lines) {}
+        Source(Symbol file, const std::vector<std::string>& lines) : file(file), lines(lines) {}
 
         int next();
         void unget();
@@ -72,7 +72,7 @@ private:
         void reset_to(const Location& new_location);
 
     private:
-        symbol_t file;
+        Symbol file;
         const std::vector<std::string>& lines;
         size_t line = 0;
         size_t column = 0;

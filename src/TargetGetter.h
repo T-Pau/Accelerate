@@ -1,9 +1,9 @@
 /*
-Instruction.h -- Assembly Instruction
+TargetGetter.h -- 
 
 Copyright (C) Dieter Baron
 
-The authors can be contacted at <accelerate@tpau.group>
+The authors can be contacted at <assembler@tpau.group>
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions
@@ -29,21 +29,20 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef INSTRUCTION_H
-#define INSTRUCTION_H
+#ifndef TARGET_GETTER_H
+#define TARGET_GETTER_H
 
-#include <string>
+#include "Getter.h"
+#include "Target.h"
+#include "TargetParser.h"
 
-#include "Expression.h"
-#include "Symbol.h"
-
-class Instruction {
+class TargetGetter: public Getter<Target> {
 public:
-    bool has_addressing_mode(Symbol addressing_mode) const {return opcodes.find(addressing_mode) != opcodes.end();}
-    uint64_t opcode(Symbol addressing_mode) const;
+    static TargetGetter global;
 
-    std::unordered_map<Symbol, uint64_t> opcodes; // keys are addressing modes
+protected:
+    Target parse(Symbol filename) override {return TargetParser().parse(filename);}
 };
 
 
-#endif // INSTRUCTION_H
+#endif // TARGET_GETTER_H

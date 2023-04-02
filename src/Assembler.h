@@ -41,7 +41,7 @@ class Assembler {
 public:
     explicit Assembler(const Target& target): target(target) {}
 
-    ObjectFile parse(const std::string& file_name);
+    ObjectFile parse(Symbol file_name);
 
 private:
     void parse_assignment(Object::Visibility visibility, const Token& name);
@@ -61,7 +61,7 @@ private:
 
     const Target& target;
 
-    symbol_t current_section = 0;
+    Symbol current_section;
     Object* current_object;
     std::shared_ptr<Environment> file_environment;
     std::shared_ptr<Environment> current_environment;
@@ -72,8 +72,8 @@ private:
     static void initialize();
     static bool initialized;
 
-    static symbol_t symbol_opcode;
-    static symbol_t symbol_pc;
+    static Symbol symbol_opcode;
+    static Symbol symbol_pc;
 
     static Token token_align;
     static Token token_brace_close;

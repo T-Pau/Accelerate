@@ -41,7 +41,7 @@ class TargetParser: public FileParser {
 public:
     TargetParser();
 
-    Target parse(const std::string& file_name);
+    Target parse(Symbol file_name);
 
     static Token token_data_end;
     static Token token_data_start;
@@ -68,7 +68,7 @@ private:
 
     static void initialize();
     static bool initialized;
-    static std::unordered_map<symbol_t, void (TargetParser::*)()> parser_methods;
+    static std::unordered_map<Symbol, void (TargetParser::*)()> parser_methods;
     static Token token_address;
     static Token token_colon;
     static Token token_cpu;

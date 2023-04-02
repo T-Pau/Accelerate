@@ -40,8 +40,8 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 class Linker {
 public:
-    Linker() = default;
-    explicit Linker(Target target_): target(std::move(target_)), memory(target.map.initialize_memory()) {}
+    Linker(): target(Target::empty) {}
+    explicit Linker(const Target& target): target(target), memory(target.map.initialize_memory()) {}
 
     void add_file(const ObjectFile& file) {program.add_object_file(file);}
     void add_library(ObjectFile library) {libraries.emplace_back(std::move(library));}
@@ -49,7 +49,7 @@ public:
     void link();
     void output(const std::string& file_name);
 
-    Target target;
+    const Target& target;
 
 private:
 
@@ -61,8 +61,6 @@ private:
     std::unordered_set<Object*> objects;
 
     Memory memory;
-
 };
-
 
 #endif // LINKER_H

@@ -20,7 +20,7 @@ public:
         GLOBAL
     };
 
-    Object(const ObjectFile* owner, symbol_t section, Visibility visibility, Token name): owner(owner), section(section), visibility(visibility), name(name) {}
+    Object(const ObjectFile* owner, Symbol section, Visibility visibility, Token name): owner(owner), section(section), visibility(visibility), name(name) {}
     Object(const ObjectFile* owner, const Object* object);
 
     [[nodiscard]] bool is_reservation() const {return data.empty();}
@@ -33,7 +33,7 @@ public:
     void append(const std::shared_ptr<Expression>& expression);
 
     const ObjectFile* owner;
-    symbol_t section;
+    Symbol section;
     Visibility visibility;
     Token name;
     uint64_t alignment = 0;

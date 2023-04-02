@@ -34,7 +34,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "CPU.h"
 #include "FileReader.h"
-#include "SymbolTable.h"
+#include "Symbol.h"
 #include "TokenizerFile.h"
 #include "FileParser.h"
 
@@ -42,7 +42,7 @@ class CPUParser: public FileParser {
 public:
     CPUParser();
 
-    CPU parse(const std::string& file_name);
+    CPU parse(Symbol file_name);
 
 protected:
     void parse_directive(const Token& directive) override;
@@ -54,7 +54,7 @@ private:
     void parse_instruction();
     void parse_syntax();
 
-    static symbol_t argument_symbol(symbol_t name);
+    static Symbol argument_symbol(Symbol name);
 
     AddressingMode::Notation parse_addressing_mode_notation(const AddressingMode& addressing_mode, const ParsedScalar* parameters);
 
@@ -62,8 +62,8 @@ private:
     std::unique_ptr<ArgumentType> parse_argument_type_map(const Token& name, const ParsedValue* parameters);
     std::unique_ptr<ArgumentType> parse_argument_type_range(const Token& name, const ParsedValue* parameters);
 
-    static std::unordered_map<symbol_t, std::unique_ptr<ArgumentType> (CPUParser::*)(const Token& name, const ParsedValue* parameters)> argument_type_parser_methods;
-    static std::unordered_map<symbol_t, void (CPUParser::*)()> parser_methods;
+    static std::unordered_map<Symbol, std::unique_ptr<ArgumentType> (CPUParser::*)(const Token& name, const ParsedValue* parameters)> argument_type_parser_methods;
+    static std::unordered_map<Symbol, void (CPUParser::*)()> parser_methods;
 
     CPU cpu;
 

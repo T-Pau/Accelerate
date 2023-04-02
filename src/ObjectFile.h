@@ -35,32 +35,33 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <map>
 #include <utility>
 
-#include "SymbolTable.h"
+#include "Symbol.h"
 #include "Object.h"
+#include "Target.h"
 
 class ObjectFile {
 public:
     class Constant {
     public:
         Constant() = default;
-        Constant(symbol_t name, Object::Visibility visibility, std::shared_ptr<Expression> value): name(name), visibility(visibility), value(std::move(value)) {}
+        Constant(Symbol name, Object::Visibility visibility, std::shared_ptr<Expression> value): name(name), visibility(visibility), value(std::move(value)) {}
 
         void serialize(std::ostream& stream) const;
 
-        symbol_t name = 0;
+        Symbol name;
         Object::Visibility visibility = Object::NONE;
         std::shared_ptr<Expression> value;
     };
 
-    ObjectFile();
+    ObjectFile() noexcept;
 
-    Object* create_object(symbol_t section, Object::Visibility visibility, Token name);
+    Object* create_object(Symbol section, Object::Visibility visibility, Token name);
 
-    void add_constant(symbol_t name, Object::Visibility visibility, std::shared_ptr<Expression> value);
+    void add_constant(Symbol name, Object::Visibility visibility, std::shared_ptr<Expression> value);
     void add_object(const Object* object);
     void add_object_file(const ObjectFile& file);
 
-    [[nodiscard]] const Object* object(symbol_t name) const;
+    [[nodiscard]] const Object* object(Symbol name) const;
     [[nodiscard]] std::vector<Object*> all_objects();
 
     std::shared_ptr<Environment> global_environment;
@@ -72,14 +73,19 @@ public:
 
     void serialize(std::ostream& stream) const;
 
+    const Target* target = &Target::empty;
+
+    static const unsigned int format_version_major;
+    static const unsigned int format_version_minor;
+
 private:
     Object* insert_object(Object object);
     void add_to_environment(const Constant& constant) { add_to_environment(constant.name, constant.visibility, constant.value);}
     void add_to_environment(Object* object);
-    void add_to_environment(symbol_t name, Object::Visibility visibility, std::shared_ptr<Expression> value);
+    void add_to_environment(Symbol name, Object::Visibility visibility, std::shared_ptr<Expression> value);
 
-    std::unordered_map<symbol_t, Object> objects;
-    std::unordered_map<symbol_t, Constant> constants;
+    std::unordered_map<Symbol, Object> objects;
+    std::unordered_map<Symbol, Constant> constants;
 };
 
 std::ostream& operator<<(std::ostream& stream, const ObjectFile& list);

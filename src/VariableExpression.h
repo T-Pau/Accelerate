@@ -37,25 +37,25 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 class VariableExpression: public Expression {
 public:
     explicit VariableExpression(const Token& token);
-    explicit VariableExpression(symbol_t symbol): symbol(symbol) {}
+    explicit VariableExpression(Symbol symbol): symbol(symbol) {}
 
     [[nodiscard]] Type type() const override {return VARIABLE;}
 
     [[nodiscard]] size_t minimum_byte_size() const override {return 0;} // TODO
-    void replace_variables(symbol_t (*transform)(symbol_t)) override;
+    void replace_variables(Symbol (*transform)(Symbol)) override;
 
-    [[nodiscard]] symbol_t variable() const {return symbol;}
+    [[nodiscard]] Symbol variable() const {return symbol;}
 
-    void collect_variables(std::vector<symbol_t>& variables) const override {variables.emplace_back(symbol);}
+    void collect_variables(std::vector<Symbol>& variables) const override {variables.emplace_back(symbol);}
 
 protected:
     [[nodiscard]] std::shared_ptr<Expression> evaluate(const Environment &environment) const override;
     [[nodiscard]] std::shared_ptr<Expression> clone() const override;
 
-    void serialize_sub(std::ostream& stream) const override {stream << SymbolTable::global[symbol];}
+    void serialize_sub(std::ostream& stream) const override {stream << symbol.str();}
 
 private:
-    symbol_t symbol;
+    Symbol symbol;
 };
 
 #endif // VARIABLE_EXPRESSION_H

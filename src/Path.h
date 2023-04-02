@@ -9,13 +9,15 @@
 #include <optional>
 #include <vector>
 
+#include "Symbol.h"
+
 class Path {
 public:
-    void prepend_directory(std::string name) {directories.emplace(directories.begin(), std::move(name));}
     void append_directory(std::string name) {directories.emplace_back(std::move(name));}
+    void prepend_directory(std::string name) {directories.emplace(directories.begin(), std::move(name));}
 
     [[nodiscard]] bool empty() const {return directories.empty();}
-    [[nodiscard]] std::optional<std::string> find(const std::string& name, const std::string& base = "") const;
+    [[nodiscard]] Symbol find(Symbol name, Symbol base = {}) const;
 
 private:
     std::vector<std::filesystem::path> directories;

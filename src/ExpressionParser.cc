@@ -62,22 +62,22 @@ void ExpressionParser::initialize() {
         return;
     }
 
-    token_ampersand = Token(Token::PUNCTUATION, {}, SymbolTable::global.add("&"));
-    token_caret = Token(Token::PUNCTUATION, {}, SymbolTable::global.add("^"));
-    token_comma = Token(Token::PUNCTUATION, {}, SymbolTable::global.add(","));
-    token_colon = Token(Token::PUNCTUATION, {}, SymbolTable::global.add(":"));
-    token_double_greater = Token(Token::PUNCTUATION, {}, SymbolTable::global.add(">>"));
-    token_double_less = Token(Token::PUNCTUATION, {}, SymbolTable::global.add("<<"));
-    token_greater = Token(Token::PUNCTUATION, {}, SymbolTable::global.add(">"));
-    token_less = Token(Token::PUNCTUATION, {}, SymbolTable::global.add("<"));
-    token_minus = Token(Token::PUNCTUATION, {}, SymbolTable::global.add("-"));
-    token_paren_close = Token(Token::PUNCTUATION, {}, SymbolTable::global.add(")"));
-    token_paren_open = Token(Token::PUNCTUATION, {}, SymbolTable::global.add("("));
-    token_pipe = Token(Token::PUNCTUATION, {}, SymbolTable::global.add("|"));
-    token_plus = Token(Token::PUNCTUATION, {}, SymbolTable::global.add("+"));
-    token_slash = Token(Token::PUNCTUATION, {}, SymbolTable::global.add("/"));
-    token_star = Token(Token::PUNCTUATION, {}, SymbolTable::global.add("*"));
-    token_tilde = Token(Token::PUNCTUATION, {}, SymbolTable::global.add("~"));
+    token_ampersand = Token(Token::PUNCTUATION, {}, "&");
+    token_caret = Token(Token::PUNCTUATION, {}, "^");
+    token_comma = Token(Token::PUNCTUATION, {}, ",");
+    token_colon = Token(Token::PUNCTUATION, {}, ":");
+    token_double_greater = Token(Token::PUNCTUATION, {}, ">>");
+    token_double_less = Token(Token::PUNCTUATION, {}, "<<");
+    token_greater = Token(Token::PUNCTUATION, {}, ">");
+    token_less = Token(Token::PUNCTUATION, {}, "<");
+    token_minus = Token(Token::PUNCTUATION, {}, "-");
+    token_paren_close = Token(Token::PUNCTUATION, {}, ")");
+    token_paren_open = Token(Token::PUNCTUATION, {}, "(");
+    token_pipe = Token(Token::PUNCTUATION, {}, "|");
+    token_plus = Token(Token::PUNCTUATION, {}, "+");
+    token_slash = Token(Token::PUNCTUATION, {}, "/");
+    token_star = Token(Token::PUNCTUATION, {}, "*");
+    token_tilde = Token(Token::PUNCTUATION, {}, "~");
 
     unary_operators = {
             {token_plus,    UnaryExpression::PLUS},

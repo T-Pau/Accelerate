@@ -32,7 +32,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "AddressingMode.h"
 
 
-const ArgumentType *AddressingMode::argument(symbol_t name) const {
+const ArgumentType *AddressingMode::argument(Symbol name) const {
     auto it = arguments.find(name);
     if (it == arguments.end()) {
         return nullptr;

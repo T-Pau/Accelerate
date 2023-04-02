@@ -86,7 +86,7 @@ public:
     [[nodiscard]] virtual bool has_value() const {return false;}
     [[nodiscard]] virtual int64_t value() const {return 0;}
     [[nodiscard]] virtual size_t minimum_byte_size() const = 0;
-    virtual void replace_variables(symbol_t (*transform)(symbol_t)) = 0;
+    virtual void replace_variables(Symbol (*transform)(Symbol)) = 0;
 
     [[nodiscard]] size_t byte_size() const {return byte_size_;}
     void set_byte_size(size_t size);
@@ -94,12 +94,12 @@ public:
     static std::shared_ptr<Expression> evaluate(std::shared_ptr<Expression> node, const Environment& environment);
 
     void serialize(std::ostream& stream) const;
-    [[nodiscard]] std::vector<symbol_t> get_variables() const;
+    [[nodiscard]] std::vector<Symbol> get_variables() const;
 
     [[nodiscard]] virtual std::shared_ptr<Expression> evaluate(const Environment& environment) const = 0;
     [[nodiscard]] virtual std::shared_ptr<Expression> clone() const = 0;
 
-    virtual void collect_variables(std::vector<symbol_t>& variables) const = 0;
+    virtual void collect_variables(std::vector<Symbol>& variables) const = 0;
 
     Location location;
 

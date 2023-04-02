@@ -35,7 +35,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <unordered_map>
 
 #include "Int.h"
-#include "SymbolTable.h"
+#include "Symbol.h"
 
 class ArgumentType {
 public:
@@ -55,10 +55,10 @@ class ArgumentTypeEnum: public ArgumentType {
 public:
     [[nodiscard]] Type type() const override {return ENUM;}
 
-    [[nodiscard]] bool has_entry(symbol_t name) const {return entries.find(name) != entries.end();}
-    [[nodiscard]] uint64_t entry(symbol_t name) const;
+    [[nodiscard]] bool has_entry(Symbol name) const {return entries.find(name) != entries.end();}
+    [[nodiscard]] uint64_t entry(Symbol name) const;
 
-    std::unordered_map<symbol_t, uint64_t> entries;
+    std::unordered_map<Symbol, uint64_t> entries;
 };
 
 
@@ -68,8 +68,8 @@ class ArgumentTypeMap: public ArgumentType {
 public:
     [[nodiscard]] Type type() const override {return MAP;}
 
-    [[nodiscard]] bool has_entry(symbol_t name) const {return entries.find(name) != entries.end();}
-    [[nodiscard]] uint64_t entry(symbol_t name) const;
+    [[nodiscard]] bool has_entry(uint64_t value) const {return entries.find(value) != entries.end();}
+    [[nodiscard]] uint64_t entry(uint64_t value) const;
 
     std::unordered_map<uint64_t, uint64_t> entries;
 };

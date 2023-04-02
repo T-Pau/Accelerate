@@ -105,7 +105,7 @@ const std::string &Token::as_string() const {
         case STRING:
         case KEYWORD:
         case INSTRUCTION:
-            return SymbolTable::global[value.symbol];
+            return value.symbol.str();
 
         case INTEGER:
         case REAL:
@@ -115,7 +115,7 @@ const std::string &Token::as_string() const {
     }
 }
 
-symbol_t Token::as_symbol() const {
+Symbol Token::as_symbol() const {
     switch (type) {
         case NAME:
         case DIRECTIVE:
@@ -130,6 +130,6 @@ symbol_t Token::as_symbol() const {
         case REAL:
         case END:
         case NEWLINE:
-            return 0;
+            return {};
     }
 }

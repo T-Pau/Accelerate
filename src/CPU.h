@@ -34,7 +34,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <unordered_map>
 
-#include "SymbolTable.h"
+#include "Symbol.h"
 #include "AddressingMode.h"
 #include "ArgumentType.h"
 #include "Instruction.h"
@@ -46,30 +46,30 @@ class CPU {
 public:
     uint64_t byte_order;
 
-    [[nodiscard]] const AddressingMode* addressing_mode(symbol_t name) const;
-    [[nodiscard]] const ArgumentType* argument_type(symbol_t name) const;
-    [[nodiscard]] const Instruction* instruction(symbol_t name) const;
+    [[nodiscard]] const AddressingMode* addressing_mode(Symbol name) const;
+    [[nodiscard]] const ArgumentType* argument_type(Symbol name) const;
+    [[nodiscard]] const Instruction* instruction(Symbol name) const;
 
     [[nodiscard]] std::unordered_set<AddressingModeMatcherResult> match_addressing_modes(const std::vector<std::shared_ptr<Node>>& arguments) const {return addressing_mode_matcher.match(arguments);}
 
     void setup(TokenizerFile& tokenizer) const;
 
-    [[nodiscard]] bool uses_empty_mnemonic() const {return instructions.find(0) != instructions.end();}
-    [[nodiscard]] bool uses_braces() const {return uses_punctuation(SymbolTable::global["("]);}
-    [[nodiscard]] bool uses_punctuation(symbol_t symbol) const {return punctuation.find(symbol) != punctuation.end();}
+    [[nodiscard]] bool uses_empty_mnemonic() const {return instructions.find(Symbol()) != instructions.end();}
+    [[nodiscard]] bool uses_braces() const {return uses_punctuation(Symbol("("));}
+    [[nodiscard]] bool uses_punctuation(Symbol symbol) const {return punctuation.find(symbol) != punctuation.end();}
 
 private:
-    std::unordered_map<symbol_t, AddressingMode> addressing_modes;
-    std::unordered_map<symbol_t, std::unique_ptr<ArgumentType>> argument_types;
-    std::unordered_map<symbol_t, Instruction> instructions;
-    std::unordered_set<symbol_t> reserved_words;
-    std::unordered_set<symbol_t> punctuation;
+    std::unordered_map<Symbol, AddressingMode> addressing_modes;
+    std::unordered_map<Symbol, std::unique_ptr<ArgumentType>> argument_types;
+    std::unordered_map<Symbol, Instruction> instructions;
+    std::unordered_set<Symbol> reserved_words;
+    std::unordered_set<Symbol> punctuation;
     AddressingModeMatcher addressing_mode_matcher;
 
-    void add_addressing_mode(symbol_t name, AddressingMode addressing_mode);
-    void add_argument_type(symbol_t name, std::unique_ptr<ArgumentType> argument_type);
-    void add_reserved_word(symbol_t word) {reserved_words.insert(word);}
-    void add_punctuation(symbol_t name) {punctuation.insert(name);}
+    void add_addressing_mode(Symbol name, AddressingMode addressing_mode);
+    void add_argument_type(Symbol name, std::unique_ptr<ArgumentType> argument_type);
+    void add_reserved_word(Symbol word) {reserved_words.insert(word);}
+    void add_punctuation(Symbol name) {punctuation.insert(name);}
 
     friend CPUParser;
 };

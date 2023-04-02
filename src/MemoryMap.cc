@@ -32,7 +32,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "MemoryMap.h"
 #include "Exception.h"
 
-const std::vector<MemoryMap::Block> *MemoryMap::segment(symbol_t name) const {
+const std::vector<MemoryMap::Block> *MemoryMap::segment(Symbol name) const {
     auto it = segments.find(name);
 
     if (it == segments.end()) {
@@ -44,7 +44,7 @@ const std::vector<MemoryMap::Block> *MemoryMap::segment(symbol_t name) const {
 }
 
 
-const MemoryMap::Section *MemoryMap::section(symbol_t name) const {
+const MemoryMap::Section *MemoryMap::section(Symbol name) const {
     auto it = sections.find(name);
 
     if (it == sections.end()) {
@@ -98,6 +98,24 @@ bool MemoryMap::access_type_less(MemoryMap::AccessType a, MemoryMap::AccessType 
     }
 }
 
+bool MemoryMap::is_abstract() const {
+    return std::any_of(sections.begin(), sections.end(), [](const auto& pair){return pair.second.size == 0;});
+}
+
+bool MemoryMap::is_compatible_with(const MemoryMap &other) const {
+    return std::all_of(other.sections.begin(), other.sections.end(), [this](const auto& pair) {
+        auto& other_section = pair.second;
+        auto this_section = section(pair.first);
+        if (this_section == nullptr) {
+            return false;
+        }
+        if (this_section->address_size != other_section.address_size || this_section->access != other_section.access) {
+            return false;
+        }
+        return true;
+    });
+}
+
 
 bool MemoryMap::Block::operator<(const MemoryMap::Block &other) const {
     if (bank != other.bank) {
@@ -112,7 +130,7 @@ bool MemoryMap::Block::operator==(const MemoryMap::Block &other) const {
 }
 
 
-MemoryMap::Section::Section(symbol_t name, MemoryMap::AccessType access, std::vector<Block> raw_blocks): name(name), access(access) {
+MemoryMap::Section::Section(Symbol name, MemoryMap::AccessType access, std::vector<Block> raw_blocks): name(name), access(access) {
     std::sort(raw_blocks.begin(), raw_blocks.end());
     Block* previous = nullptr;
 
@@ -153,7 +171,7 @@ bool MemoryMap::Section::operator<(const MemoryMap::Section &other) const {
         if (it_other != other.blocks.end()) {
             return true;
         }
-        return SymbolTable::global_less(name, other.name);
+        return name < other.name;
     }
 
     return false;

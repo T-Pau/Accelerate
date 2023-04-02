@@ -35,7 +35,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ArgumentType.h"
 #include "Expression.h"
 #include "ParsedValue.h"
-#include "SymbolTable.h"
+#include "Symbol.h"
 #include "Token.h"
 #include "ExpressionList.h"
 
@@ -50,22 +50,22 @@ public:
         };
         class Element {
         public:
-            Element(Type type, symbol_t symbol): type(type), symbol(symbol) {}
+            Element(Type type, Symbol symbol): type(type), symbol(symbol) {}
 
             [[nodiscard]] bool is_argument() const {return type == ARGUMENT;}
 
             Type type;
-            symbol_t symbol;
+            Symbol symbol;
         };
 
         std::vector<Element> elements;
     };
 
-    [[nodiscard]] const ArgumentType* argument(symbol_t name) const;
-    [[nodiscard]] bool has_argument(symbol_t name) const {return argument(name) != nullptr;}
+    [[nodiscard]] const ArgumentType* argument(Symbol name) const;
+    [[nodiscard]] bool has_argument(Symbol name) const {return argument(name) != nullptr;}
 
     std::vector<Notation> notations;
-    std::unordered_map<symbol_t, const ArgumentType*> arguments;
+    std::unordered_map<Symbol, const ArgumentType*> arguments;
     ExpressionList encoding;
 
     void add_notation(Notation notation) {notations.emplace_back(std::move(notation));}

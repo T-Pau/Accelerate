@@ -40,12 +40,12 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 bool TokenizerFile::initialized = false;
 Token TokenizerFile::token_include;
 
-void TokenizerFile::push(const std::string& file_name) {
+void TokenizerFile::push(Symbol file_name) {
     const auto& lines = FileReader::global.read(file_name);
     if (lines.empty()) {
         return;
     }
-    sources.emplace_back(SymbolTable::global[file_name], lines);
+    sources.emplace_back(file_name, lines);
     current_source = &sources[sources.size() - 1];
 }
 
@@ -89,7 +89,7 @@ Token TokenizerFile::next_raw() {
         if (type.has_value()) {
             current_source->expand_location(location);
             last_was_newline = false;
-            return {type.value(), location, SymbolTable::global.add(name)};
+            return {type.value(), location, name};
         }
 
         current_source->reset_to(location);
@@ -218,7 +218,7 @@ Token TokenizerFile::parse_name(Token::Type type, Location location) {
             if (name.empty()) {
                 throw ParseException(location, "empty directive");
             }
-            return {type, location, SymbolTable::global.add(name)};
+            return {type, location, name};
         }
     }
 
@@ -237,7 +237,7 @@ Token TokenizerFile::parse_string(Location location) {
 
             case '"':
                 current_source->expand_location(location);
-                return {Token::STRING, location, SymbolTable::global.add(value)};
+                return {Token::STRING, location, value};
 
             case '\\': {
                 current_source->expand_location(location);
@@ -289,7 +289,7 @@ void TokenizerFile::add_punctuations(const std::unordered_set<std::string> &name
 TokenizerFile::TokenizerFile(std::shared_ptr<const Path> path, bool use_preprocessor): path(std::move(path)), use_preprocessor(use_preprocessor) {
     if (use_preprocessor) {
         if (!initialized) {
-            token_include = Token(Token::PREPROCESSOR, {}, SymbolTable::global.add(".include"));
+            token_include = Token(Token::PREPROCESSOR, {}, ".include");
             initialized = true;
         }
         matcher.add(".include", Token::PREPROCESSOR);
@@ -313,11 +313,11 @@ void TokenizerFile::preprocess(const std::vector<Token>& tokens) {
         }
 
         try {
-            auto file = find_file(filename_token.as_string());
-            if (!file.has_value()) {
+            auto file = find_file(filename_token.as_symbol());
+            if (file.empty()) {
                 throw ParseException(filename_token, "file not found");
             }
-            push(file.value());
+            push(file);
         }
         catch (Exception& ex) {
             throw ParseException(filename_token, "%s", ex.what());
@@ -341,8 +341,8 @@ bool TokenizerFile::is_identifier(const std::string &s) {
     return true;
 }
 
-std::optional<std::string> TokenizerFile::find_file(const std::string &file_name) {
-    return path->find(file_name, SymbolTable::global[current_source->location().file]);
+Symbol TokenizerFile::find_file(Symbol file_name) {
+    return path->find(file_name, current_source->location().file);
 }
 
 

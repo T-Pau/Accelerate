@@ -33,7 +33,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "Exception.h"
 
-uint64_t ArgumentTypeEnum::entry(symbol_t name) const {
+uint64_t ArgumentTypeEnum::entry(Symbol name) const {
     auto it = entries.find(name);
 
     if (it == entries.end()) {
@@ -45,8 +45,8 @@ uint64_t ArgumentTypeEnum::entry(symbol_t name) const {
 }
 
 
-uint64_t ArgumentTypeMap::entry(symbol_t name) const {
-    auto it = entries.find(name);
+uint64_t ArgumentTypeMap::entry(uint64_t value) const {
+    auto it = entries.find(value);
 
     if (it == entries.end()) {
         throw Exception("invalid value for argument");

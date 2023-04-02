@@ -1,9 +1,9 @@
 /*
-SymbolTable.cc -- Map Strings to Integers
+Getter.h -- 
 
 Copyright (C) Dieter Baron
 
-The authors can be contacted at <accelerate@tpau.group>
+The authors can be contacted at <assembler@tpau.group>
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions
@@ -29,46 +29,38 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "SymbolTable.h"
+#ifndef GETTER_H
+#define GETTER_H
+
+#include <string>
 
 #include "Exception.h"
+#include "Path.h"
+#include "Symbol.h"
 
-SymbolTable SymbolTable::global;
-
-SymbolTable::SymbolTable(const std::vector<std::string> &initial_symbols) {
-    for (const auto& symbol: initial_symbols) {
-        add(symbol);
+template <typename T>
+class Getter {
+public:
+    const T& get(const std::string& filename) {return get(Symbol(filename));}
+    const T& get(Symbol name) {
+        auto it = instances.find(name);
+        if (it != instances.end()) {
+            return it->second;
+        }
+        auto pair = instances.insert({name, parse(name)});
+        if (!pair.second) {
+            throw Exception("internal error: can't insert '%s'", name.c_str());
+        }
+        return pair.first->second;
     }
-}
 
-symbol_t SymbolTable::add(const std::string &name) {
-    auto it = symbols.find(name);
-    if (it == symbols.end()) {
-        auto symbol = names.size();
-        names.push_back(name);
-        symbols[name] = symbol;
-        return symbol;
-    }
-    else {
-        return it->second;
-    }
-}
+    Path path;
 
-symbol_t SymbolTable::operator[](const std::string &name) const {
-    auto it = symbols.find(name);
-    if (it == symbols.end()) {
-        throw Exception("unknown symbol '%s'", name.c_str());
-    }
-    return it->second;
-}
+protected:
+    virtual T parse(Symbol filename) = 0;
 
-const std::string &SymbolTable::operator[](symbol_t symbol) const {
-    if (symbol >= names.size()) {
-        throw Exception("unknown symbol %u", symbol);
-    }
-    return names[symbol];
-}
+private:
+    std::unordered_map<Symbol, T> instances;
+};
 
-bool SymbolTable::global_less(symbol_t a, symbol_t b) {
-    return SymbolTable::global[a] < SymbolTable::global[b];
-}
+#endif // GETTER_H

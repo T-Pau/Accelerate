@@ -35,35 +35,42 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ParseException.h"
 #include "ExpressionParser.h"
 #include "TokenizerSequence.h"
+#include "TargetGetter.h"
 
 bool ObjectFileParser::initialized = false;
-std::unordered_map<symbol_t, void (ObjectFileParser::*)()> ObjectFileParser::parser_methods;
+std::unordered_map<Symbol, void (ObjectFileParser::*)()> ObjectFileParser::parser_methods;
 Token ObjectFileParser::token_alignment;
 Token ObjectFileParser::token_constant;
 Token ObjectFileParser::token_data;
+Token ObjectFileParser::token_format_version;
 Token ObjectFileParser::token_global;
 Token ObjectFileParser::token_local;
 Token ObjectFileParser::token_object;
 Token ObjectFileParser::token_section;
 Token ObjectFileParser::token_size;
+Token ObjectFileParser::token_target;
 Token ObjectFileParser::token_value;
 Token ObjectFileParser::token_visibility;
 
 void ObjectFileParser::initialize() {
     if (!initialized) {
-        token_alignment = Token(Token::NAME, {}, SymbolTable::global.add("alignment"));
-        token_constant = Token(Token::DIRECTIVE, {}, SymbolTable::global.add("constant"));
-        token_data = Token(Token::NAME, {}, SymbolTable::global.add("data"));
-        token_global = Token(Token::NAME, {}, SymbolTable::global.add("global"));
-        token_local = Token(Token::NAME, {}, SymbolTable::global.add("local"));
-        token_object = Token(Token::DIRECTIVE, {}, SymbolTable::global.add("object"));
-        token_section = Token(Token::NAME, {}, SymbolTable::global.add("section"));
-        token_size = Token(Token::NAME, {}, SymbolTable::global.add("size"));
-        token_value = Token(Token::NAME, {}, SymbolTable::global.add("value"));
-        token_visibility = Token(Token::NAME, {}, SymbolTable::global.add("visibility"));
+        token_alignment = Token(Token::NAME, {}, Symbol("alignment"));
+        token_constant = Token(Token::DIRECTIVE, {}, "constant");
+        token_data = Token(Token::NAME, {}, "data");
+        token_format_version = Token(Token::DIRECTIVE, {}, "format_version");
+        token_global = Token(Token::NAME, {}, "global");
+        token_local = Token(Token::NAME, {}, "local");
+        token_object = Token(Token::DIRECTIVE, {}, "object");
+        token_section = Token(Token::NAME, {}, "section");
+        token_size = Token(Token::NAME, {}, "size");
+        token_target = Token(Token::DIRECTIVE, {}, "target");
+        token_value = Token(Token::NAME, {}, "value");
+        token_visibility = Token(Token::NAME, {}, "visibility");
 
+        parser_methods[token_format_version.as_symbol()] = &ObjectFileParser::parse_format_version;
         parser_methods[token_constant.as_symbol()] = &ObjectFileParser::parse_constant;
         parser_methods[token_object.as_symbol()] = &ObjectFileParser::parse_object;
+        parser_methods[token_target.as_symbol()] = &ObjectFileParser::parse_target;
 
         initialized = true;
     }
@@ -73,7 +80,7 @@ ObjectFileParser::ObjectFileParser() {
     initialize();
 }
 
-ObjectFile ObjectFileParser::parse(const std::string &filename) {
+ObjectFile ObjectFileParser::parse(Symbol filename) {
     file = ObjectFile();
 
     if (!parse_file(filename)) {
@@ -149,4 +156,12 @@ Object::Visibility ObjectFileParser::visibility_from_name(Token name) {
     }
 }
 
+void ObjectFileParser::parse_format_version() {
+    // TODO: implement
+}
 
+void ObjectFileParser::parse_target() {
+    auto name = tokenizer.expect(Token::STRING, TokenGroup::newline);
+
+    file.target = &TargetGetter::global.get(name.as_symbol());
+}

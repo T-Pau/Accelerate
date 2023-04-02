@@ -74,8 +74,8 @@ void Expression::serialize(std::ostream &stream) const {
     }
 }
 
-std::vector<symbol_t> Expression::get_variables() const {
-    auto variables = std::vector<symbol_t>();
+std::vector<Symbol> Expression::get_variables() const {
+    auto variables = std::vector<Symbol>();
 
     collect_variables(variables);
 

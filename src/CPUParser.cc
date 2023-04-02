@@ -40,8 +40,8 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "VariableExpression.h"
 
 
-std::unordered_map<symbol_t, std::unique_ptr<ArgumentType> (CPUParser::*)(const Token& name, const ParsedValue* parameters)> CPUParser::argument_type_parser_methods;
-std::unordered_map<symbol_t, void (CPUParser::*)()> CPUParser::parser_methods;
+std::unordered_map<Symbol, std::unique_ptr<ArgumentType> (CPUParser::*)(const Token& name, const ParsedValue* parameters)> CPUParser::argument_type_parser_methods;
+std::unordered_map<Symbol, void (CPUParser::*)()> CPUParser::parser_methods;
 
 bool CPUParser::initialized = false;
 Token CPUParser::token_arguments;
@@ -66,15 +66,15 @@ void CPUParser::initialize() {
         token_pc = Token(Token::NAME, {}, ".pc");
         token_punctuation = Token(Token::NAME, {}, "punctuation");
 
-        parser_methods[SymbolTable::global.add("byte_order")] = &CPUParser::parse_byte_order;
-        parser_methods[SymbolTable::global.add("addressing_mode")] = &CPUParser::parse_addressing_mode;
-        parser_methods[SymbolTable::global.add("argument_type")] = &CPUParser::parse_argument_type;
-        parser_methods[SymbolTable::global.add("instruction")] = &CPUParser::parse_instruction;
-        parser_methods[SymbolTable::global.add("syntax")] = &CPUParser::parse_syntax;
+        parser_methods[Symbol("byte_order")] = &CPUParser::parse_byte_order;
+        parser_methods[Symbol("addressing_mode")] = &CPUParser::parse_addressing_mode;
+        parser_methods[Symbol("argument_type")] = &CPUParser::parse_argument_type;
+        parser_methods[Symbol("instruction")] = &CPUParser::parse_instruction;
+        parser_methods[Symbol("syntax")] = &CPUParser::parse_syntax;
 
-        argument_type_parser_methods[SymbolTable::global.add("enum")] = &CPUParser::parse_argument_type_enum;
-        argument_type_parser_methods[SymbolTable::global.add("map")] = &CPUParser::parse_argument_type_map;
-        argument_type_parser_methods[SymbolTable::global.add("range")] = &CPUParser::parse_argument_type_range;
+        argument_type_parser_methods[Symbol("enum")] = &CPUParser::parse_argument_type_enum;
+        argument_type_parser_methods[Symbol("map")] = &CPUParser::parse_argument_type_map;
+        argument_type_parser_methods[Symbol("range")] = &CPUParser::parse_argument_type_range;
 
         initialized = true;
     }
@@ -89,7 +89,7 @@ CPUParser::CPUParser() {
 }
 
 
-CPU CPUParser::parse(const std::string &file_name) {
+CPU CPUParser::parse(Symbol file_name) {
     cpu = CPU();
 
     if (!parse_file(file_name)) {
@@ -227,7 +227,7 @@ void CPUParser::parse_instruction() {
 
     if (name == ParsedValue::token_curly_open) {
         tokenizer.unget(name);
-        name = Token(Token::NAME, name.location, static_cast<symbol_t>(0));
+        name = Token(Token::NAME, name.location, static_cast<Symbol>(0));
     }
     else if (name.get_type() != Token::NAME) {
         throw ParseException(name, "expected name or '{'");
@@ -272,7 +272,7 @@ void CPUParser::parse_syntax() {
             if (!value.is_string()) {
                 throw ParseException(value, "expected string");
             }
-            cpu.add_reserved_word(SymbolTable::global.add(value.as_string()));
+            cpu.add_reserved_word(value.as_string());
             tokenizer.add_literal(Token::NAME, value.as_string());
         }
     }
@@ -281,7 +281,7 @@ void CPUParser::parse_syntax() {
             if (!value.is_string()) {
                 throw ParseException(value, "expected string");
             }
-            cpu.add_punctuation(SymbolTable::global.add(value.as_string()));
+            cpu.add_punctuation(value.as_string());
             tokenizer.add_literal(Token::PUNCTUATION, value.as_string());
         }
     }
@@ -396,10 +396,10 @@ AddressingMode::Notation CPUParser::parse_addressing_mode_notation(const Address
 }
 
 
-symbol_t CPUParser::argument_symbol(symbol_t symbol) {
-    auto name = SymbolTable::global[symbol];
+Symbol CPUParser::argument_symbol(Symbol symbol) {
+    auto name = symbol.str();
     if (name.front() == '.') {
         return symbol;
     }
-    return SymbolTable::global.add("$" + name);
+    return "$" + name;
 }

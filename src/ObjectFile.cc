@@ -35,6 +35,9 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <utility>
 
+const unsigned int ObjectFile::format_version_major = 1;
+const unsigned int ObjectFile::format_version_minor = 0;
+
 std::ostream& operator<<(std::ostream& stream, const ObjectFile& file) {
     file.serialize(stream);
     return stream;
@@ -46,11 +49,16 @@ std::ostream& operator<<(std::ostream& stream, const ObjectFile::Constant& file)
 }
 
 void ObjectFile::serialize(std::ostream &stream) const {
-    auto names = std::vector<symbol_t>();
+    stream << ".format_version " << format_version_major << "." << format_version_minor << std::endl << std::endl;
+    if (!target->name.empty()) {
+        stream << ".target \"" << target->name.str() << "\"" << std::endl << std::endl;
+    }
+
+    auto names = std::vector<Symbol>();
     for (const auto& pair: constants) {
         names.emplace_back(pair.first);
     }
-    std::sort(names.begin(), names.end(), SymbolTable::global_less);
+    std::sort(names.begin(), names.end());
 
     for (auto name: names) {
         stream << constants.find(name)->second;
@@ -60,18 +68,18 @@ void ObjectFile::serialize(std::ostream &stream) const {
     for (const auto& pair: objects) {
         names.emplace_back(pair.first);
     }
-    std::sort(names.begin(), names.end(), SymbolTable::global_less);
+    std::sort(names.begin(), names.end());
 
     for (auto name: names) {
         stream << objects.find(name)->second;
     }
 }
 
-void ObjectFile::add_constant(symbol_t name, Object::Visibility visibility, std::shared_ptr<Expression> value) {
+void ObjectFile::add_constant(Symbol name, Object::Visibility visibility, std::shared_ptr<Expression> value) {
     auto pair = constants.insert({name, Constant(name, visibility, std::move(value))});
 
     if (!pair.second) {
-        throw ParseException(Location(), "duplicate symbol '%s'", SymbolTable::global[name].c_str());
+        throw ParseException(Location(), "duplicate symbol '%s'", name.c_str());
     }
 
     add_to_environment(pair.first->second);
@@ -115,7 +123,7 @@ void ObjectFile::remove_local_constants() {
 }
 
 
-const Object* ObjectFile::object(symbol_t name) const {
+const Object* ObjectFile::object(Symbol name) const {
     auto it = objects.find(name);
 
     if (it != objects.end()) {
@@ -127,11 +135,11 @@ const Object* ObjectFile::object(symbol_t name) const {
 }
 
 
-Object *ObjectFile::create_object(symbol_t section, Object::Visibility visibility, Token name) {
+Object *ObjectFile::create_object(Symbol section, Object::Visibility visibility, Token name) {
     return insert_object({this, section, visibility, name});
 }
 
-ObjectFile::ObjectFile() {
+ObjectFile::ObjectFile() noexcept {
     global_environment = std::make_shared<Environment>();
     local_environment = std::make_shared<Environment>(global_environment);
 }
@@ -140,7 +148,7 @@ void ObjectFile::add_to_environment(Object *object) {
     add_to_environment(object->name.as_symbol(), object->visibility, std::make_shared<ObjectExpression>(object));
 }
 
-void ObjectFile::add_to_environment(symbol_t name, Object::Visibility visibility, std::shared_ptr<Expression> value) {
+void ObjectFile::add_to_environment(Symbol name, Object::Visibility visibility, std::shared_ptr<Expression> value) {
     if (visibility == Object::GLOBAL) {
         global_environment->add(name, std::move(value));
     }
@@ -175,7 +183,7 @@ Object* ObjectFile::insert_object(Object object) {
 
 
 void ObjectFile::Constant::serialize(std::ostream &stream) const {
-    stream << ".constant " << SymbolTable::global[name] << " {" << std::endl;
+    stream << ".constant " << name << " {" << std::endl;
     stream << "    visibility: " << visibility << std::endl;
     stream << "    value: " << value << std::endl;
     stream << "}" << std::endl;

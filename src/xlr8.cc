@@ -32,13 +32,14 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <fstream>
 #include <vector>
 
-#include "Command.h"
-#include "CPUParser.h"
-#include "ObjectFileParser.h"
-#include "Exception.h"
-#include "TargetParser.h"
-#include "Linker.h"
 #include "Assembler.h"
+#include "CPUParser.h"
+#include "Command.h"
+#include "Exception.h"
+#include "LibraryGetter.h"
+#include "Linker.h"
+#include "ObjectFileParser.h"
+#include "TargetGetter.h"
 #include "Util.h"
 
 class xlr8: public Command {
@@ -62,7 +63,7 @@ private:
 
     bool do_link = true;
 
-    Linker linker;
+    std::unique_ptr<Linker> linker;
     Path library_path;
     Path include_path;
 
@@ -85,7 +86,7 @@ int main(int argc, char *argv[]) {
 
 
 void xlr8::process() {
-    auto had_target = false;
+    std::optional<std::string> target;
     auto ok = true;
 
     for (const auto& option: arguments.options) {
@@ -100,8 +101,7 @@ void xlr8::process() {
                 library_path.append_directory(option.argument);
             }
             else if (option.name == "target") {
-                had_target = true;
-                linker = Linker(TargetParser().parse(option.argument));
+                target = option.argument;
             }
         }
         catch (Exception& ex) {
@@ -110,33 +110,40 @@ void xlr8::process() {
         }
     }
 
-    if (!had_target) {
+    if (!do_link && !library_path.empty()) {
+        FileReader::global.warning({}, "not linking, --library-path not used");
+    }
+
+    // TODO: append default paths
+
+    LibraryGetter::global.path = library_path;
+    TargetGetter::global.path = library_path;
+
+    if (!target.has_value()) {
         FileReader::global.error({}, "missing --target option");
         ok = false;
     }
 
-    if (!do_link && !library_path.empty()) {
-        FileReader::global.warning({}, "not linking, --library-path not used");
-    }
+    linker = std::make_unique<Linker>(TargetGetter::global.get(target.value()));
 
     for (const auto &file_name: arguments.arguments) {
         try {
             auto extension = std::filesystem::path(file_name).extension();
 
             if (extension == ".s") {
-                files.emplace_back(file_name, Assembler(linker.target).parse(file_name));
+                files.emplace_back(file_name, Assembler(linker->target).parse(Symbol(file_name)));
             }
             else if (extension == ".o") {
                 if (!do_link) {
                     throw Exception("not linking, object file not used");
                 }
-                files.emplace_back(file_name, ObjectFileParser().parse(file_name));
+                files.emplace_back(file_name, ObjectFileParser().parse(Symbol(file_name)));
             }
             else if (extension == ".lib") {
                 if (!do_link) {
                     throw Exception("not linking, library not used");
                 }
-                linker.add_library(ObjectFileParser().parse(file_name));
+                linker->add_library(LibraryGetter::global.get(file_name));
             }
             else {
                 throw Exception("unrecognized file type '%s'", extension.c_str());
@@ -157,7 +164,7 @@ void xlr8::process() {
 
         case 1:
             if (do_link && !output_file.has_value()) {
-                set_output_file(files[0].name, linker.target.extension);
+                set_output_file(files[0].name, linker->target.extension);
             }
             break;
 
@@ -177,16 +184,16 @@ void xlr8::process() {
 
     if (do_link) {
         for (const auto& file: files) {
-            linker.add_file(file.file);
+            linker->add_file(file.file);
         }
-        linker.link();
+        linker->link();
     }
 }
 
 
 void xlr8::create_output() {
     if (do_link) {
-        linker.output(output_file.value());
+        linker->output(output_file.value());
     }
     else {
         for (const auto& file: files) {

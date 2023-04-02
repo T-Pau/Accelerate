@@ -43,8 +43,8 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "VariableExpression.h"
 
 bool Assembler::initialized = false;
-symbol_t Assembler::symbol_opcode;
-symbol_t Assembler::symbol_pc;
+Symbol Assembler::symbol_opcode;
+Symbol Assembler::symbol_pc;
 Token Assembler::token_align;
 Token Assembler::token_brace_close;
 Token Assembler::token_brace_open;
@@ -61,26 +61,26 @@ Token Assembler::token_section;
 
 void Assembler::initialize() {
     if (!initialized) {
-        symbol_opcode = SymbolTable::global.add(".opcode");
-        symbol_pc = SymbolTable::global.add(".pc");
-        token_align = Token(Token::DIRECTIVE, {}, SymbolTable::global.add(".align"));
-        token_brace_close = Token(Token::PUNCTUATION, {}, SymbolTable::global.add(")"));
-        token_brace_open = Token(Token::PUNCTUATION, {}, SymbolTable::global.add("("));
-        token_colon = Token(Token::PUNCTUATION, {}, SymbolTable::global.add(":"));
-        token_curly_brace_close = Token(Token::PUNCTUATION, {}, SymbolTable::global.add("}"));
-        token_curly_brace_open = Token(Token::PUNCTUATION, {}, SymbolTable::global.add("{"));
-        token_data = Token(Token::DIRECTIVE, {}, SymbolTable::global.add(".data"));
-        token_equals = Token(Token::PUNCTUATION, {}, SymbolTable::global.add("="));
-        token_global = Token(Token::DIRECTIVE, {}, SymbolTable::global.add(".global"));
-        token_local = Token(Token::DIRECTIVE, {}, SymbolTable::global.add(".local"));
-        token_reserve = Token(Token::DIRECTIVE, {}, SymbolTable::global.add(".reserve"));
-        token_section = Token(Token::DIRECTIVE, {}, SymbolTable::global.add(".section"));
+        symbol_opcode = ".opcode";
+        symbol_pc = ".pc";
+        token_align = Token(Token::DIRECTIVE, {}, ".align");
+        token_brace_close = Token(Token::PUNCTUATION, {}, ")");
+        token_brace_open = Token(Token::PUNCTUATION, {}, "(");
+        token_colon = Token(Token::PUNCTUATION, {}, ":");
+        token_curly_brace_close = Token(Token::PUNCTUATION, {}, "}");
+        token_curly_brace_open = Token(Token::PUNCTUATION, {}, "{");
+        token_data = Token(Token::DIRECTIVE, {}, ".data");
+        token_equals = Token(Token::PUNCTUATION, {}, "=");
+        token_global = Token(Token::DIRECTIVE, {}, ".global");
+        token_local = Token(Token::DIRECTIVE, {}, ".local");
+        token_reserve = Token(Token::DIRECTIVE, {}, ".reserve");
+        token_section = Token(Token::DIRECTIVE, {}, ".section");
 
         initialized = true;
     }
 }
 
-ObjectFile Assembler::parse(const std::string &file_name) {
+ObjectFile Assembler::parse(Symbol file_name) {
     initialize();
     target.cpu.setup(tokenizer);
     ExpressionParser::setup(tokenizer);
@@ -92,6 +92,8 @@ ObjectFile Assembler::parse(const std::string &file_name) {
     tokenizer.add_literal(token_reserve);
     tokenizer.add_literal(token_section);
     tokenizer.push(file_name);
+
+    object_file.target = &target;
 
     file_environment = std::make_shared<Environment>();
     current_environment = file_environment;
@@ -211,7 +213,7 @@ void Assembler::parse_symbol_body() {
                     else {
                         if (target.cpu.uses_empty_mnemonic()) {
                             tokenizer.unget(token);
-                            parse_instruction(Token(Token::NAME, token.location, static_cast<symbol_t >(0)));
+                            parse_instruction(Token(Token::NAME, token.location, Symbol()));
                         }
                         else {
                             throw ParseException(token, "unexpected %s", token.type_name());
@@ -222,7 +224,7 @@ void Assembler::parse_symbol_body() {
                 default:
                     if (target.cpu.uses_empty_mnemonic()) {
                         tokenizer.unget(token);
-                        parse_instruction(Token(Token::NAME, token.location, static_cast<symbol_t >(0)));
+                        parse_instruction(Token(Token::NAME, token.location, Symbol()));
                     }
                     else {
                         throw ParseException(token, "unexpected %s", token.type_name());
@@ -547,7 +549,7 @@ void Assembler::parse_symbol(Object::Visibility visibility, const Token &name) {
         }
     }
 
-    if (current_section == 0) {
+    if (current_section.empty()) {
         throw ParseException(name, "symbol outside section");
     }
     if (current_object->empty()) {

@@ -1,9 +1,9 @@
 /*
-Instruction.h -- Assembly Instruction
+Getter.cc -- 
 
 Copyright (C) Dieter Baron
 
-The authors can be contacted at <accelerate@tpau.group>
+The authors can be contacted at <assembler@tpau.group>
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions
@@ -29,21 +29,5 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef INSTRUCTION_H
-#define INSTRUCTION_H
+#include "Getter.h"
 
-#include <string>
-
-#include "Expression.h"
-#include "Symbol.h"
-
-class Instruction {
-public:
-    bool has_addressing_mode(Symbol addressing_mode) const {return opcodes.find(addressing_mode) != opcodes.end();}
-    uint64_t opcode(Symbol addressing_mode) const;
-
-    std::unordered_map<Symbol, uint64_t> opcodes; // keys are addressing modes
-};
-
-
-#endif // INSTRUCTION_H

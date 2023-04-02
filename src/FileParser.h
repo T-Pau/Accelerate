@@ -43,7 +43,7 @@ public:
 protected:
     TokenizerFile tokenizer;
 
-    bool parse_file(const std::string& file_name);
+    bool parse_file(Symbol file_name);
 
     virtual void parse_directive(const Token& directive) = 0;
 

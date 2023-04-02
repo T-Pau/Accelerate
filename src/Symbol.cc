@@ -1,5 +1,5 @@
 /*
-Instruction.h -- Assembly Instruction
+Symbol.cc -- Map Strings to Integers
 
 Copyright (C) Dieter Baron
 
@@ -29,21 +29,38 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef INSTRUCTION_H
-#define INSTRUCTION_H
-
-#include <string>
-
-#include "Expression.h"
 #include "Symbol.h"
 
-class Instruction {
-public:
-    bool has_addressing_mode(Symbol addressing_mode) const {return opcodes.find(addressing_mode) != opcodes.end();}
-    uint64_t opcode(Symbol addressing_mode) const;
+#include "Exception.h"
 
-    std::unordered_map<Symbol, uint64_t> opcodes; // keys are addressing modes
+std::unordered_map<std::string, uint32_t> Symbol::symbols = {
+        {"", 0}
+};
+std::vector<std::string> Symbol::names = {
+        ""
 };
 
 
-#endif // INSTRUCTION_H
+Symbol::Symbol(const std::string &name) {
+    auto it = symbols.find(name);
+    if (it == symbols.end()) {
+        id = names.size();
+        names.push_back(name);
+        symbols[name] = id;
+    }
+    else {
+        id = it->second;
+    }
+}
+
+
+Symbol& Symbol::operator=(const std::string& name) {
+    *this = Symbol(name);
+    return *this;
+}
+
+
+std::ostream& operator<<(std::ostream& stream, const Symbol& symbol) {
+    stream << symbol.str();
+    return stream;
+}

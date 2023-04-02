@@ -35,7 +35,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <unordered_set>
 
 #include "Location.h"
-#include "SymbolTable.h"
+#include "Symbol.h"
 
 class Token {
 public:
@@ -55,8 +55,8 @@ public:
 
     Token(): type(END) {}
     Token(Type type, Location location): type(type), location(location) {}
-    Token(Type type, Location location, const std::string& name): Token(type, location) {value.symbol = SymbolTable::global.add(name);}
-    Token(Type type, Location location, symbol_t symbol): Token(type, location) {value.symbol = symbol;}
+    Token(Type type, Location location, const std::string& name): Token(type, location) {value.symbol = name;}
+    Token(Type type, Location location, Symbol symbol): Token(type, location) {value.symbol = symbol;}
     Token(Type type, Location location, uint64_t integer, uint64_t byte_size_ = 0): Token(type, location) {value.integer = integer; byte_size = byte_size_;}
     Token(Type type, Location location, double real): Token(type, location) {value.real = real;}
 
@@ -74,7 +74,7 @@ public:
     [[nodiscard]] const char* type_name() const {return type_name(type);}
 
     [[nodiscard]] const std::string& as_string() const;
-    [[nodiscard]] symbol_t as_symbol() const;
+    [[nodiscard]] Symbol as_symbol() const;
     [[nodiscard]] uint64_t as_integer() const {return type == INTEGER ? value.integer : 0;}
     [[nodiscard]] double as_real() const {return type == REAL ? value.real : 0.0;}
 
@@ -88,7 +88,7 @@ private:
     union {
         uint64_t integer;
         double real;
-        symbol_t symbol;
+        Symbol symbol;
     } value = {0};
 
     static const std::string empty_string;
@@ -108,7 +108,7 @@ struct std::hash<Token>
             case Token::PREPROCESSOR:
             case Token::PUNCTUATION:
             case Token::STRING:
-                h2 = std::hash<symbol_t>{}(token.as_symbol());
+                h2 = std::hash<Symbol>{}(token.as_symbol());
                 break;
 
             case Token::INTEGER:

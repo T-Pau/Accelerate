@@ -36,7 +36,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <unordered_set>
 
 #include "Node.h"
-#include "SymbolTable.h"
+#include "Symbol.h"
 #include "AddressingMode.h"
 
 class AddressingModeMatcherElement {
@@ -47,15 +47,16 @@ public:
         INTEGER
     };
 
-    AddressingModeMatcherElement(Type type, symbol_t symbol): type(type), symbol(symbol) {}
+    AddressingModeMatcherElement(Type type, Symbol symbol): type(type), symbol(symbol) {}
+    AddressingModeMatcherElement(): type(INTEGER) {}
     explicit AddressingModeMatcherElement(Node* node);
 
     bool operator==(const AddressingModeMatcherElement& other) const;
 
     Type type = INTEGER;
-    symbol_t symbol = 0;
+    Symbol symbol;
 
-    static std::vector<AddressingModeMatcherElement> elements_for(const AddressingMode::Notation::Element& element, const std::unordered_map<symbol_t, const ArgumentType*>& arguments);
+    static std::vector<AddressingModeMatcherElement> elements_for(const AddressingMode::Notation::Element& element, const std::unordered_map<Symbol, const ArgumentType*>& arguments);
 };
 
 
@@ -71,7 +72,7 @@ struct std::hash<AddressingModeMatcherElement>
 
             case AddressingModeMatcherElement::KEYWORD:
             case AddressingModeMatcherElement::PUNCTUATION:
-                h2 = std::hash<symbol_t>{}(element.symbol);
+                h2 = std::hash<Symbol>{}(element.symbol);
                 break;
         }
         return h1 ^ (h2 << 1);
@@ -81,10 +82,10 @@ struct std::hash<AddressingModeMatcherElement>
 
 class AddressingModeMatcherResult {
 public:
-    AddressingModeMatcherResult(symbol_t addressing_mode, size_t notation_index): addressing_mode(addressing_mode), notation_index(notation_index) {}
+    AddressingModeMatcherResult(Symbol addressing_mode, size_t notation_index): addressing_mode(addressing_mode), notation_index(notation_index) {}
     bool operator==(const AddressingModeMatcherResult& other) const {return addressing_mode == other.addressing_mode && notation_index == other.notation_index;}
 
-    symbol_t addressing_mode;
+    Symbol addressing_mode;
     size_t notation_index;
 };
 
@@ -93,7 +94,7 @@ template<>
 struct std::hash<AddressingModeMatcherResult>
 {
     std::size_t operator()(AddressingModeMatcherResult const& result) const noexcept {
-        return std::hash<symbol_t>{}(result.addressing_mode) ^ (std::hash<size_t>{}(result.notation_index) << 1);
+        return std::hash<Symbol>{}(result.addressing_mode) ^ (std::hash<size_t>{}(result.notation_index) << 1);
     }
 };
 
@@ -102,12 +103,12 @@ class AddressingModeMatcher {
 public:
     [[nodiscard]] std::unordered_set<AddressingModeMatcherResult> match(const std::vector<std::shared_ptr<Node>>& nodes) const;
 
-    void add_notation(symbol_t addressing_mode, size_t notation_index, const AddressingMode::Notation& notation, const std::unordered_map<symbol_t, const ArgumentType*>& arguments);
+    void add_notation(Symbol addressing_mode, size_t notation_index, const AddressingMode::Notation& notation, const std::unordered_map<Symbol, const ArgumentType*>& arguments);
 
 private:
     class MatcherNode {
     public:
-        void add_notation(const AddressingModeMatcherResult& result, std::vector<AddressingMode::Notation::Element>::const_iterator current, std::vector<AddressingMode::Notation::Element>::const_iterator end, const std::unordered_map<symbol_t, const ArgumentType*>& arguments);
+        void add_notation(const AddressingModeMatcherResult& result, std::vector<AddressingMode::Notation::Element>::const_iterator current, std::vector<AddressingMode::Notation::Element>::const_iterator end, const std::unordered_map<Symbol, const ArgumentType*>& arguments);
 
         std::unordered_set<AddressingModeMatcherResult> results;
         std::unordered_map<AddressingModeMatcherElement, MatcherNode> next;

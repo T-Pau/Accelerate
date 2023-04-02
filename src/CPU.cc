@@ -31,7 +31,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "CPU.h"
 
-void CPU::add_addressing_mode(symbol_t name, AddressingMode mode) {
+void CPU::add_addressing_mode(Symbol name, AddressingMode mode) {
     addressing_modes[name] = std::move(mode);
 
     const auto& addressing_mode = addressing_modes[name];
@@ -44,7 +44,7 @@ void CPU::add_addressing_mode(symbol_t name, AddressingMode mode) {
 }
 
 
-const AddressingMode *CPU::addressing_mode(symbol_t name) const {
+const AddressingMode *CPU::addressing_mode(Symbol name) const {
     auto it = addressing_modes.find(name);
     if (it == addressing_modes.end()) {
         return nullptr;
@@ -55,7 +55,7 @@ const AddressingMode *CPU::addressing_mode(symbol_t name) const {
 }
 
 
-const ArgumentType *CPU::argument_type(symbol_t name) const {
+const ArgumentType *CPU::argument_type(Symbol name) const {
     auto it = argument_types.find(name);
     if (it == argument_types.end()) {
         return nullptr;
@@ -65,11 +65,11 @@ const ArgumentType *CPU::argument_type(symbol_t name) const {
     }
 }
 
-void CPU::add_argument_type(symbol_t name, std::unique_ptr<ArgumentType> argument_type) {
+void CPU::add_argument_type(Symbol name, std::unique_ptr<ArgumentType> argument_type) {
     argument_types[name] = std::move(argument_type);
 }
 
-const Instruction *CPU::instruction(symbol_t name) const {
+const Instruction *CPU::instruction(Symbol name) const {
     auto it = instructions.find(name);
 
     if (it == instructions.end()) {
@@ -82,14 +82,14 @@ const Instruction *CPU::instruction(symbol_t name) const {
 
 void CPU::setup(TokenizerFile& tokenizer) const {
     for (const auto& item: reserved_words) {
-        tokenizer.add_literal(Token::KEYWORD, SymbolTable::global[item]);
+        tokenizer.add_literal(Token::KEYWORD, item.str());
     }
     for (const auto& item: punctuation) {
-        tokenizer.add_literal(Token::PUNCTUATION, SymbolTable::global[item]);
+        tokenizer.add_literal(Token::PUNCTUATION, item.str());
     }
     for (const auto& pair: instructions) {
-        if (pair.first != 0) {
-            tokenizer.add_literal(Token::INSTRUCTION, SymbolTable::global[pair.first]);
+        if (!pair.first.empty()) {
+            tokenizer.add_literal(Token::INSTRUCTION, pair.first.str());
         }
     }
 }

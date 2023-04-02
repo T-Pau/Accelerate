@@ -67,7 +67,7 @@ std::shared_ptr<Expression> VariableExpression::evaluate(const Environment &envi
     }
 }
 
-void VariableExpression::replace_variables(symbol_t (*transform)(symbol_t)) {
+void VariableExpression::replace_variables(Symbol (*transform)(Symbol)) {
     symbol = transform(symbol);
 }
 

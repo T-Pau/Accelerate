@@ -3,3 +3,5 @@
 //
 
 #include "Target.h"
+
+const Target Target::empty;

@@ -44,9 +44,9 @@ public:
     [[nodiscard]] bool has_value() const override {return true;}
     [[nodiscard]] int64_t value() const override {return value_;}
     [[nodiscard]] size_t minimum_byte_size() const override {return Int::minimum_byte_size(value());}
-    void replace_variables(symbol_t (*transform)(symbol_t)) override {}
+    void replace_variables(Symbol (*transform)(Symbol)) override {}
 
-    void collect_variables(std::vector<symbol_t>& variables) const override {}
+    void collect_variables(std::vector<Symbol>& variables) const override {}
 
 protected:
     [[nodiscard]] std::shared_ptr<Expression> evaluate(const Environment &environment) const override {return {};}

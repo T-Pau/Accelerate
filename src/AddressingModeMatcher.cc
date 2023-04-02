@@ -33,11 +33,11 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ParseException.h"
 #include "TokenNode.h"
 
-void AddressingModeMatcher::add_notation(symbol_t addressing_mode, size_t notation_index, const AddressingMode::Notation &notation, const std::unordered_map<symbol_t, const ArgumentType*>& arguments) {
+void AddressingModeMatcher::add_notation(Symbol addressing_mode, size_t notation_index, const AddressingMode::Notation &notation, const std::unordered_map<Symbol, const ArgumentType*>& arguments) {
     start.add_notation(AddressingModeMatcherResult(addressing_mode, notation_index), notation.elements.begin(), notation.elements.end(), arguments);
 }
 
-void AddressingModeMatcher::MatcherNode::add_notation(const AddressingModeMatcherResult& result, std::vector<AddressingMode::Notation::Element>::const_iterator current, std::vector<AddressingMode::Notation::Element>::const_iterator end, const std::unordered_map<symbol_t, const ArgumentType*>& arguments) {
+void AddressingModeMatcher::MatcherNode::add_notation(const AddressingModeMatcherResult& result, std::vector<AddressingMode::Notation::Element>::const_iterator current, std::vector<AddressingMode::Notation::Element>::const_iterator end, const std::unordered_map<Symbol, const ArgumentType*>& arguments) {
     if (current == end) {
         results.insert(result);
         return;
@@ -81,21 +81,21 @@ bool AddressingModeMatcherElement::operator==(const AddressingModeMatcherElement
 
 
 std::vector<AddressingModeMatcherElement>
-AddressingModeMatcherElement::elements_for(const AddressingMode::Notation::Element &element, const std::unordered_map<symbol_t, const ArgumentType*>& arguments) {
+AddressingModeMatcherElement::elements_for(const AddressingMode::Notation::Element &element, const std::unordered_map<Symbol, const ArgumentType*>& arguments) {
     std::vector<AddressingModeMatcherElement> elements;
 
     switch (element.type) {
         case AddressingMode::Notation::ARGUMENT: {
             auto it = arguments.find(element.symbol);
             if (it == arguments.end()) {
-                throw Exception("unknown argument '%s'", SymbolTable::global[element.symbol].c_str());
+                throw Exception("unknown argument '%s'", element.symbol.c_str());
             }
 
             auto argument_type = it->second;
             switch (argument_type->type()) {
                 case ArgumentType::RANGE:
                 case ArgumentType::MAP:
-                    elements.emplace_back(INTEGER, 0);
+                    elements.emplace_back();
                     break;
 
                 case ArgumentType::ENUM:

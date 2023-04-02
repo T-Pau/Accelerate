@@ -38,7 +38,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "Memory.h"
 #include "ExpressionList.h"
-#include "SymbolTable.h"
+#include "Symbol.h"
 
 class MemoryMap {
 public:
@@ -62,13 +62,14 @@ public:
     class Section {
     public:
         Section() = default;
-        Section(symbol_t name, AccessType access, std::vector<Block> raw_blocks);
+        Section(size_t address_size): address_size(address_size) {}
+        Section(Symbol name, AccessType access, std::vector<Block> raw_blocks);
 
         bool operator<(const Section& other) const;
 
         [[nodiscard]] bool empty() const {return blocks.empty();}
 
-        symbol_t name = 0;
+        Symbol name;
         AccessType access = READ_WRITE;
         std::vector<Block> blocks;
         size_t size = 0;
@@ -76,18 +77,20 @@ public:
     };
 
 
-    [[nodiscard]] bool has_section(symbol_t name) const {return section(name) != nullptr;}
-    [[nodiscard]] const std::vector<Block>* segment(symbol_t name) const;
-    [[nodiscard]] const Section* section(symbol_t name) const;
+    [[nodiscard]] bool is_abstract() const;
+    [[nodiscard]] bool is_compatible_with(const MemoryMap& other) const;
+    [[nodiscard]] bool has_section(Symbol name) const {return section(name) != nullptr;}
+    [[nodiscard]] const std::vector<Block>* segment(Symbol name) const;
+    [[nodiscard]] const Section* section(Symbol name) const;
     [[nodiscard]] Memory initialize_memory() const;
 
     void add_section(Section section) {sections[section.name] = std::move(section);}
-    void add_segment(symbol_t name, std::vector<Block> segment) {segments[name] = std::move(segment);}
+    void add_segment(Symbol name, std::vector<Block> segment) {segments[name] = std::move(segment);}
 
     static bool access_type_less(AccessType a, AccessType b);
 
-    std::unordered_map<symbol_t, Section> sections;
-    std::unordered_map<symbol_t, std::vector<Block>> segments;
+    std::unordered_map<Symbol, Section> sections;
+    std::unordered_map<Symbol, std::vector<Block>> segments;
 };
 
 

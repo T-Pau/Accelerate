@@ -32,7 +32,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Instruction.h"
 #include "Exception.h"
 
-uint64_t Instruction::opcode(symbol_t addressing_mode) const {
+uint64_t Instruction::opcode(Symbol addressing_mode) const {
     auto it = opcodes.find(addressing_mode);
     if (it == opcodes.end()) {
         throw Exception("invalid addressing mode");

@@ -44,8 +44,8 @@ public:
     [[nodiscard]] bool has_value() const override {return object->has_address();}
     [[nodiscard]] int64_t value() const override {return has_value() ? static_cast<int64_t>(object->address.value()) : 0;}
     [[nodiscard]] size_t minimum_byte_size() const override;
-    void replace_variables(symbol_t (*transform)(symbol_t)) override {}
-    void collect_variables(std::vector<symbol_t>& variables) const override {}
+    void replace_variables(Symbol (*transform)(Symbol)) override {}
+    void collect_variables(std::vector<Symbol>& variables) const override {}
 
     Object* object;
 
@@ -53,7 +53,7 @@ protected:
     [[nodiscard]] std::shared_ptr<Expression> evaluate(const Environment &environment) const override;
     [[nodiscard]] std::shared_ptr<Expression> clone() const override;
 
-    void serialize_sub(std::ostream& stream) const override {stream << object->name.as_symbol();}
+    void serialize_sub(std::ostream& stream) const override {stream << object->name.as_string();}
 
 private:
     bool had_value;

@@ -35,7 +35,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <memory>
 #include <utility>
 
-#include "SymbolTable.h"
+#include "Symbol.h"
 
 class Expression;
 
@@ -44,15 +44,15 @@ public:
     Environment() = default;
     explicit Environment(std::shared_ptr<Environment> next): next(std::move(next)) {}
 
-    void add(symbol_t name, std::shared_ptr<Expression> value) { variables[name] = std::move(value);}
-    void remove(symbol_t name);
-    void set(symbol_t name, const std::shared_ptr<Expression>& value);
-    std::shared_ptr<Expression> operator[](symbol_t name) const;
+    void add(Symbol name, std::shared_ptr<Expression> value) { variables[name] = std::move(value);}
+    void remove(Symbol name);
+    void set(Symbol name, const std::shared_ptr<Expression>& value);
+    std::shared_ptr<Expression> operator[](Symbol name) const;
 
 private:
-    bool update(symbol_t name, const std::shared_ptr<Expression>& value);
+    bool update(Symbol name, const std::shared_ptr<Expression>& value);
 
-    std::unordered_map<symbol_t, std::shared_ptr<Expression>> variables;
+    std::unordered_map<Symbol, std::shared_ptr<Expression>> variables;
     std::shared_ptr<Environment> next;
 };
 

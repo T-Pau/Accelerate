@@ -38,7 +38,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ExpressionParser.h"
 
 bool TargetParser::initialized = false;
-std::unordered_map<symbol_t, void (TargetParser::*)()> TargetParser::parser_methods;
+std::unordered_map<Symbol, void (TargetParser::*)()> TargetParser::parser_methods;
 Token TargetParser::token_address;
 Token TargetParser::token_colon;
 Token TargetParser::token_cpu;
@@ -70,24 +70,24 @@ TargetParser::TargetParser() {
 
 void TargetParser::initialize() {
     if (!initialized) {
-        token_address = Token(Token::NAME, {}, SymbolTable::global.add("address"));
-        token_colon = Token(Token::PUNCTUATION, {}, SymbolTable::global.add(":"));
-        token_cpu = Token(Token::DIRECTIVE, {}, SymbolTable::global.add("cpu"));
-        token_data = Token(Token::DIRECTIVE, {}, SymbolTable::global.add("data"));
-        token_data_end = Token(Token::NAME, {}, SymbolTable::global.add(".data_end"));
-        token_data_size = Token(Token::NAME, {}, SymbolTable::global.add(".data_size"));
-        token_data_start = Token(Token::NAME, {}, SymbolTable::global.add(".data_start"));
-        token_extension = Token(Token::DIRECTIVE, {}, SymbolTable::global.add("extension"));
-        token_memory = Token(Token::DIRECTIVE, {}, SymbolTable::global.add("memory"));
-        token_minus = Token(Token::PUNCTUATION, {}, SymbolTable::global.add("-"));
-        token_output = Token(Token::DIRECTIVE, {}, SymbolTable::global.add("output"));
-        token_read_only = Token(Token::NAME, {}, SymbolTable::global.add("read_only"));
-        token_read_write = Token(Token::NAME, {}, SymbolTable::global.add("read_write"));
-        token_reserve_only = Token(Token::NAME, {}, SymbolTable::global.add("reserve_only"));
-        token_section = Token(Token::DIRECTIVE, {}, SymbolTable::global.add("section"));
-        token_segment = Token(Token::DIRECTIVE, {}, SymbolTable::global.add("segment"));
-        token_segment_name = Token(Token::NAME, {}, SymbolTable::global.add("segment"));
-        token_type = Token(Token::NAME, {}, SymbolTable::global.add("type"));
+        token_address = Token(Token::NAME, {}, "address");
+        token_colon = Token(Token::PUNCTUATION, {}, ":");
+        token_cpu = Token(Token::DIRECTIVE, {}, "cpu");
+        token_data = Token(Token::DIRECTIVE, {}, "data");
+        token_data_end = Token(Token::NAME, {}, ".data_end");
+        token_data_size = Token(Token::NAME, {}, ".data_size");
+        token_data_start = Token(Token::NAME, {}, ".data_start");
+        token_extension = Token(Token::DIRECTIVE, {}, "extension");
+        token_memory = Token(Token::DIRECTIVE, {}, "memory");
+        token_minus = Token(Token::PUNCTUATION, {}, "-");
+        token_output = Token(Token::DIRECTIVE, {}, "output");
+        token_read_only = Token(Token::NAME, {}, "read_only");
+        token_read_write = Token(Token::NAME, {}, "read_write");
+        token_reserve_only = Token(Token::NAME, {}, "reserve_only");
+        token_section = Token(Token::DIRECTIVE, {}, "section");
+        token_segment = Token(Token::DIRECTIVE, {}, "segment");
+        token_segment_name = Token(Token::NAME, {}, "segment");
+        token_type = Token(Token::NAME, {}, "type");
 
         parser_methods[token_cpu.as_symbol()] = &TargetParser::parse_cpu;
         parser_methods[token_extension.as_symbol()] = &TargetParser::parse_extension;
@@ -100,7 +100,7 @@ void TargetParser::initialize() {
 }
 
 
-Target TargetParser::parse(const std::string &file_name) {
+Target TargetParser::parse(Symbol file_name) {
     target = Target();
     had_cpu = false;
     section_names.clear();
@@ -286,13 +286,13 @@ MemoryMap::Block TargetParser::parse_single_address(const ParsedScalar *address)
 void TargetParser::parse_cpu() {
     auto token = tokenizer.expect(Token::STRING, TokenGroup::newline);
 
-    auto file = tokenizer.find_file(token.as_string() + ".cpu");
-    if (!file.has_value()) {
+    auto file = tokenizer.find_file(Symbol(token.as_string() + ".cpu"));
+    if (file.empty()) {
         throw ParseException(token, "unknown CPU");
     }
 
     had_cpu = true;
-    target.cpu = CPUParser().parse(file.value());
+    target.cpu = CPUParser().parse(file);
 }
 
 void TargetParser::parse_extension() {

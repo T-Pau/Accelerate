@@ -20,11 +20,13 @@ add_library(xlr8-library STATIC
         ExpressionParser.cc
         FileParser.cc
         FileReader.cc
+        Getter.cc
         Instruction.cc
         Int.cc
         IntegerExpression.cc
         Linker.cc
         ObjectExpression.cc
+        LibraryGetter.cc
         Location.cc
         Memory.cc
         MemoryMap.cc
@@ -37,8 +39,9 @@ add_library(xlr8-library STATIC
         ParsedValue.cc
         Path.cc
         Range.cc
-        SymbolTable.cc
+        Symbol.cc
         Target.cc
+        TargetGetter.cc
         TargetParser.cc
         Token.cc
         TokenGroup.cc

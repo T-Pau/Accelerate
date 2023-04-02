@@ -65,7 +65,7 @@ void xlr8_ar::process() {
     auto parser = ObjectFileParser();
 
     for (const auto &file_name: arguments.arguments) {
-        auto file = parser.parse(file_name);
+        auto file = parser.parse(Symbol(file_name));
         library.add_object_file(file);
     }
 

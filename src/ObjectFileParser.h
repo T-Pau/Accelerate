@@ -42,7 +42,7 @@ class ObjectFileParser: public FileParser {
 public:
     ObjectFileParser();
 
-    ObjectFile parse(const std::string& filename);
+    ObjectFile parse(Symbol filename);
 
 protected:
     void parse_directive(const Token& directive) override;
@@ -51,22 +51,26 @@ private:
     ObjectFile file;
 
     void parse_constant();
+    void parse_format_version();
     void parse_object();
+    void parse_target();
 
     static Object::Visibility visibility_from_name(Token name);
 
     static void initialize();
 
     static bool initialized;
-    static std::unordered_map<symbol_t, void (ObjectFileParser::*)()> parser_methods;
+    static std::unordered_map<Symbol, void (ObjectFileParser::*)()> parser_methods;
     static Token token_alignment;
     static Token token_constant;
     static Token token_data;
+    static Token token_format_version;
     static Token token_global;
     static Token token_local;
     static Token token_object;
     static Token token_section;
     static Token token_size;
+    static Token token_target;
     static Token token_value;
     static Token token_visibility;
 };

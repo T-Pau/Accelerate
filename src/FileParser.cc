@@ -43,7 +43,7 @@ FileParser::FileParser() {
     ExpressionParser::setup(tokenizer);
 }
 
-bool FileParser::parse_file(const std::string& file_name) {
+bool FileParser::parse_file(Symbol file_name) {
     tokenizer.push(file_name);
 
     auto ok = true;

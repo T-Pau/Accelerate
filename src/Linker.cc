@@ -95,7 +95,7 @@ void Linker::link() {
             }
         }
         if (!object->address.has_value()) {
-            FileReader::global.error({}, "no space left in section '%s'", SymbolTable::global[section->name].c_str());
+            FileReader::global.error({}, "no space left in section '%s'", section->name.c_str());
             continue;
         }
     }

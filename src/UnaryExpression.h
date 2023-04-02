@@ -50,9 +50,9 @@ public:
 
     [[nodiscard]] Type type() const override {return UNARY;}
     [[nodiscard]] size_t minimum_byte_size() const override;
-    void replace_variables(symbol_t (*transform)(symbol_t)) override {operand->replace_variables(transform);}
+    void replace_variables(Symbol (*transform)(Symbol)) override {operand->replace_variables(transform);}
 
-    void collect_variables(std::vector<symbol_t>& variables) const override { operand->collect_variables(variables);}
+    void collect_variables(std::vector<Symbol>& variables) const override { operand->collect_variables(variables);}
 
 protected:
     [[nodiscard]] std::shared_ptr<Expression> evaluate(const Environment &environment) const override;

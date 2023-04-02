@@ -40,14 +40,13 @@ FileReader FileReader::global;
 
 std::vector<std::string> FileReader::empty_file;
 
-const std::vector<std::string>& FileReader::read(const std::string& file_name, bool optional) {
-    auto file = SymbolTable::global.add(file_name);
-    auto it = files.find(file);
+const std::vector<std::string>& FileReader::read(Symbol file_name, bool optional) {
+    auto it = files.find(file_name);
     if (it != files.end()) {
         return it->second;
     }
 
-    std::ifstream input_file(file_name);
+    std::ifstream input_file(file_name.str());
     if (input_file) {
         std::vector<std::string> lines;
         std::string s;
@@ -55,8 +54,8 @@ const std::vector<std::string>& FileReader::read(const std::string& file_name, b
             lines.push_back(s);
         }
 
-        files[file] = std::move(lines);
-        return files[file];
+        files[file_name] = std::move(lines);
+        return files[file_name];
     }
     else if (errno == EEXIST && optional) {
         return empty_file;
@@ -68,15 +67,15 @@ const std::vector<std::string>& FileReader::read(const std::string& file_name, b
 
 }
 
-const std::string &FileReader::get_line(symbol_t file, size_t line_number) const {
+const std::string &FileReader::get_line(Symbol file, size_t line_number) const {
     auto it = files.find(file);
 
     if (it == files.end()) {
-        throw Exception("unknown file '%s'", SymbolTable::global[file].c_str());
+        throw Exception("unknown file '%s'",file.c_str());
     }
 
     if (line_number == 0 || line_number > it->second.size()) {
-        throw Exception("line integer %zu out of range in '%s'", line_number, SymbolTable::global[file].c_str());
+        throw Exception("line integer %zu out of range in '%s'", line_number, file.c_str());
     }
 
     return it->second[line_number - 1];
@@ -157,7 +156,7 @@ std::vector<std::string> FileReader::file_names() const {
     auto file_names = std::vector<std::string>();
 
     for (const auto& pair: files) {
-        file_names.emplace_back(SymbolTable::global[pair.first]);
+        file_names.emplace_back(pair.first.str());
     }
 
     std::sort(file_names.begin(), file_names.end());
