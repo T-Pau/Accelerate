@@ -1,5 +1,5 @@
 /*
-Getter.h -- 
+CPUGetter.cc -- 
 
 Copyright (C) Dieter Baron
 
@@ -29,37 +29,6 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef GETTER_H
-#define GETTER_H
+#include "CPUGetter.h"
 
-#include <string>
-
-#include "Exception.h"
-#include "Path.h"
-#include "Symbol.h"
-
-template <typename T>
-class Getter {
-public:
-    const T& get(Symbol name) {
-        auto it = instances.find(name);
-        if (it != instances.end()) {
-            return it->second;
-        }
-        auto pair = instances.insert({name, parse(name)});
-        if (!pair.second) {
-            throw Exception("internal error: can't insert '%s'", name.c_str());
-        }
-        return pair.first->second;
-    }
-
-    Path path;
-
-protected:
-    virtual T parse(Symbol filename) = 0;
-
-private:
-    std::unordered_map<Symbol, T> instances;
-};
-
-#endif // GETTER_H
+CPUGetter CPUGetter::global;

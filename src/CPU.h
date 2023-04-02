@@ -44,7 +44,12 @@ class CPUParser;
 
 class CPU {
 public:
-    uint64_t byte_order;
+    static const CPU& get(Symbol name);
+    static const CPU empty;
+
+    [[nodiscard]] bool is_compatible_with(const CPU& other) const; // this has everything from other
+
+    uint64_t byte_order = 0;
 
     [[nodiscard]] const AddressingMode* addressing_mode(Symbol name) const;
     [[nodiscard]] const ArgumentType* argument_type(Symbol name) const;

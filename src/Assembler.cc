@@ -82,7 +82,7 @@ void Assembler::initialize() {
 
 ObjectFile Assembler::parse(Symbol file_name) {
     initialize();
-    target.cpu.setup(tokenizer);
+    target.cpu->setup(tokenizer);
     ExpressionParser::setup(tokenizer);
     tokenizer.add_punctuations({"{", "}", "=", ":"});
     tokenizer.add_literal(token_align);
@@ -211,7 +211,7 @@ void Assembler::parse_symbol_body() {
                         return;
                     }
                     else {
-                        if (target.cpu.uses_empty_mnemonic()) {
+                        if (target.cpu->uses_empty_mnemonic()) {
                             tokenizer.unget(token);
                             parse_instruction(Token(Token::NAME, token.location, Symbol()));
                         }
@@ -222,7 +222,7 @@ void Assembler::parse_symbol_body() {
                     break;
 
                 default:
-                    if (target.cpu.uses_empty_mnemonic()) {
+                    if (target.cpu->uses_empty_mnemonic()) {
                         tokenizer.unget(token);
                         parse_instruction(Token(Token::NAME, token.location, Symbol()));
                     }
@@ -250,7 +250,7 @@ void Assembler::parse_directive(const Token& directive) {
 }
 
 void Assembler::parse_instruction(const Token& name) {
-    const auto& instruction = target.cpu.instruction(name.as_symbol());
+    const auto& instruction = target.cpu->instruction(name.as_symbol());
     if (instruction == nullptr) {
         tokenizer.skip_until(TokenGroup::newline, true);
         throw ParseException(name, "unknown instruction '%s'", name.as_string().c_str());
@@ -260,7 +260,7 @@ void Assembler::parse_instruction(const Token& name) {
 
     Token token;
     while ((token = tokenizer.next()) && !token.is_newline()) {
-        if (target.cpu.uses_braces() && token == token_brace_open) {
+        if (target.cpu->uses_braces() && token == token_brace_open) {
             auto node = parse_instruction_argument(tokenizer.next());
             if (node->type() != Node::EXPRESSION) {
                 // place '(' non-expression
@@ -289,7 +289,7 @@ void Assembler::parse_instruction(const Token& name) {
 
                     tokenizer.unget(token3);
 
-                    if (!token3.is_punctuation() || target.cpu.uses_punctuation(token3.as_symbol())) {
+                    if (!token3.is_punctuation() || target.cpu->uses_punctuation(token3.as_symbol())) {
                         // place '(' expression ')' that is not part of larger expression
                         arguments.emplace_back(parse_instruction_argument(token));
                         arguments.emplace_back(node);
@@ -314,7 +314,7 @@ void Assembler::parse_instruction(const Token& name) {
         }
     }
 
-    auto matches = target.cpu.match_addressing_modes(arguments);
+    auto matches = target.cpu->match_addressing_modes(arguments);
     if (matches.empty()) {
         throw ParseException(name, "addressing mode not recognized");
     }
@@ -334,7 +334,7 @@ void Assembler::parse_instruction(const Token& name) {
 
         auto environment = Environment(current_environment); // TODO: include outer environment
 
-        const auto addressing_mode = target.cpu.addressing_mode(match.addressing_mode);
+        const auto addressing_mode = target.cpu->addressing_mode(match.addressing_mode);
         const auto& notation = addressing_mode->notations[match.notation_index];
         auto it_notation = notation.elements.begin();
         auto it_arguments = arguments.begin();
@@ -444,7 +444,7 @@ void Assembler::parse_instruction(const Token& name) {
 std::shared_ptr<Node> Assembler::parse_instruction_argument(const Token& token) {
     switch (token.get_type()) {
         case Token::PUNCTUATION:
-            if (target.cpu.uses_punctuation(token.as_symbol())) {
+            if (target.cpu->uses_punctuation(token.as_symbol())) {
                 return std::make_shared<TokenNode>(token);
             }
             break;

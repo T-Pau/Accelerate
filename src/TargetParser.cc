@@ -31,7 +31,6 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "TargetParser.h"
 
-#include "CPUParser.h"
 #include "Exception.h"
 #include "ParseException.h"
 #include "FileReader.h"
@@ -102,6 +101,7 @@ void TargetParser::initialize() {
 
 Target TargetParser::parse(Symbol file_name) {
     target = Target();
+    target.name = file_name;
     had_cpu = false;
     section_names.clear();
     segment_names.clear();
@@ -292,7 +292,7 @@ void TargetParser::parse_cpu() {
     }
 
     had_cpu = true;
-    target.cpu = CPUParser().parse(file);
+    target.cpu = &CPU::get(file);
 }
 
 void TargetParser::parse_extension() {

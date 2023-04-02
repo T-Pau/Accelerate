@@ -31,6 +31,10 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "CPU.h"
 
+#include "CPUGetter.h"
+
+const CPU CPU::empty = CPU();
+
 void CPU::add_addressing_mode(Symbol name, AddressingMode mode) {
     addressing_modes[name] = std::move(mode);
 
@@ -92,5 +96,23 @@ void CPU::setup(TokenizerFile& tokenizer) const {
             tokenizer.add_literal(Token::INSTRUCTION, pair.first.str());
         }
     }
+}
+
+const CPU &CPU::get(Symbol name) {
+    return CPUGetter::global.get(name);
+}
+
+bool CPU::is_compatible_with(const CPU &other) const {
+    if (other.byte_order == 0) {
+        // empty CPU
+        return true;
+    }
+    if (byte_order != other.byte_order) {
+        return false;
+    }
+
+    // TODO: compare instructions
+
+    return true;
 }
 

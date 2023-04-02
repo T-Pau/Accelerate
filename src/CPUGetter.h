@@ -1,5 +1,5 @@
 /*
-Getter.h -- 
+CPUGetter.h -- 
 
 Copyright (C) Dieter Baron
 
@@ -29,37 +29,20 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef GETTER_H
-#define GETTER_H
+#ifndef CPU_GETTER_H
+#define CPU_GETTER_H
 
-#include <string>
+#include "Getter.h"
+#include "CPU.h"
+#include "CPUParser.h"
 
-#include "Exception.h"
-#include "Path.h"
-#include "Symbol.h"
-
-template <typename T>
-class Getter {
+class CPUGetter: public Getter<CPU> {
 public:
-    const T& get(Symbol name) {
-        auto it = instances.find(name);
-        if (it != instances.end()) {
-            return it->second;
-        }
-        auto pair = instances.insert({name, parse(name)});
-        if (!pair.second) {
-            throw Exception("internal error: can't insert '%s'", name.c_str());
-        }
-        return pair.first->second;
-    }
-
-    Path path;
+    static CPUGetter global;
 
 protected:
-    virtual T parse(Symbol filename) = 0;
-
-private:
-    std::unordered_map<Symbol, T> instances;
+    CPU parse(Symbol filename) override {return CPUParser().parse(filename);}
 };
 
-#endif // GETTER_H
+
+#endif // CPU_GETTER_H

@@ -35,7 +35,6 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ParseException.h"
 #include "ExpressionParser.h"
 #include "TokenizerSequence.h"
-#include "TargetGetter.h"
 
 bool ObjectFileParser::initialized = false;
 std::unordered_map<Symbol, void (ObjectFileParser::*)()> ObjectFileParser::parser_methods;
@@ -163,5 +162,5 @@ void ObjectFileParser::parse_format_version() {
 void ObjectFileParser::parse_target() {
     auto name = tokenizer.expect(Token::STRING, TokenGroup::newline);
 
-    file.target = &TargetGetter::global.get(name.as_symbol());
+    file.target = &Target::get(name.as_symbol());
 }

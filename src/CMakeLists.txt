@@ -9,6 +9,7 @@ add_library(xlr8-library STATIC
         Assembler.cc
         BinaryExpression.cc
         CPU.cc
+        CPUGetter.cc
         CPUParser.cc
         Command.cc
         Commandline.cc

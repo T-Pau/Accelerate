@@ -13,15 +13,18 @@
 
 class Target {
 public:
-    Target() {}
+    Target() = default;
     explicit Target(Symbol name): name(name) {}
 
+    static const Target& get(Symbol name);
     static const Target empty;
+
+    [[nodiscard]] bool is_compatible_with(const Target& other) const; // this has everything from other
 
     void add_output_element(OutputElement element) {output_elements.emplace_back(std::move(element));}
 
     Symbol name;
-    CPU cpu;
+    const CPU* cpu = &CPU::empty;
     MemoryMap map;
 
     std::vector<OutputElement> output_elements;

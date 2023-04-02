@@ -108,7 +108,7 @@ void Linker::link() {
     for (auto object: objects) {
         try {
             object->data.evaluate(empty_environment);
-            memory[object->bank.value()].copy(object->address.value(), object->data.bytes(target.cpu.byte_order));
+            memory[object->bank.value()].copy(object->address.value(), object->data.bytes(target.cpu->byte_order));
         }
         catch (Exception& ex) {
             FileReader::global.error(Location(), "can't evaluate '%s': %s", object->name.as_string().c_str(), ex.what());
@@ -139,7 +139,7 @@ void Linker::output(const std::string &file_name) {
         arguments.evaluate(environment);
         switch (element.type) {
             case OutputElement::DATA:
-                stream << arguments.bytes(target.cpu.byte_order);
+                stream << arguments.bytes(target.cpu->byte_order);
                 break;
 
             case OutputElement::MEMORY: {

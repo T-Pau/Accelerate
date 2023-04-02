@@ -124,7 +124,7 @@ void xlr8::process() {
         ok = false;
     }
 
-    linker = std::make_unique<Linker>(TargetGetter::global.get(target.value()));
+    linker = std::make_unique<Linker>(Target::get(target.value()));
 
     for (const auto &file_name: arguments.arguments) {
         try {

@@ -78,7 +78,7 @@ public:
 
 
     [[nodiscard]] bool is_abstract() const;
-    [[nodiscard]] bool is_compatible_with(const MemoryMap& other) const;
+    [[nodiscard]] bool is_compatible_with(const MemoryMap& other) const; // this has everything from other
     [[nodiscard]] bool has_section(Symbol name) const {return section(name) != nullptr;}
     [[nodiscard]] const std::vector<Block>* segment(Symbol name) const;
     [[nodiscard]] const Section* section(Symbol name) const;
