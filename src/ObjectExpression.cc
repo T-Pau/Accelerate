@@ -41,6 +41,9 @@ size_t ObjectExpression::minimum_byte_size() const {
     if (has_value()) {
         return Int::minimum_byte_size(value());
     }
+    else if (object->section != nullptr) {
+        return object->section->address_size;
+    }
     else {
         return 0;
     }
@@ -48,6 +51,7 @@ size_t ObjectExpression::minimum_byte_size() const {
 
 std::shared_ptr<Expression> ObjectExpression::evaluate(const Environment &environment) const {
     if (!had_value && object->has_address()) {
+        // TODO: return IntegerExpression
         return clone();
     }
     else {

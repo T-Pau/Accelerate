@@ -2,6 +2,8 @@
 START_PAGE = $10
 END_PAGE = $80
 
+SCREEN = $f800
+
 .section zero_page
 
 .local screen .reserve 2
@@ -11,8 +13,8 @@ END_PAGE = $80
 .section code
 
 .global start {
-    ldx #$00
-    ldy #$f8
+    ldx #<SCREEN
+    ldy #>SCREEN
     stx screen
     sty screen + 1
     ldy #$10

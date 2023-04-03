@@ -55,7 +55,7 @@ public:
 
     ObjectFile() noexcept;
 
-    Object* create_object(Symbol section, Object::Visibility visibility, Token name);
+    Object* create_object(Symbol section_name, Object::Visibility visibility, Token name);
 
     void add_constant(Symbol name, Object::Visibility visibility, std::shared_ptr<Expression> value);
     void add_object(const Object* object);

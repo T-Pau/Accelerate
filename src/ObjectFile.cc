@@ -91,7 +91,6 @@ void ObjectFile::add_object_file(const ObjectFile &file) {
     }
     for (const auto& pair: file.objects) {
         auto own_object = insert_object({this, &pair.second});
-        add_to_environment(own_object);
     }
 }
 
@@ -135,7 +134,11 @@ const Object* ObjectFile::object(Symbol name) const {
 }
 
 
-Object *ObjectFile::create_object(Symbol section, Object::Visibility visibility, Token name) {
+Object *ObjectFile::create_object(Symbol section_name, Object::Visibility visibility, Token name) {
+    auto section = target->map.section(section_name);
+    if (section == nullptr) {
+        throw ParseException(name, "unknown section '%s'", section_name.c_str());
+    }
     return insert_object({this, section, visibility, name});
 }
 
@@ -177,7 +180,9 @@ Object* ObjectFile::insert_object(Object object) {
     if (!pair.second) {
         throw ParseException(name, "redefinition of object");
     }
-    return &pair.first->second;
+    auto own_object = &pair.first->second;
+    add_to_environment(own_object);
+    return own_object;
 
 }
 

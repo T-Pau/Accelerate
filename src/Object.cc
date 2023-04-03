@@ -36,7 +36,7 @@ void Object::serialize(std::ostream &stream) const {
     if (alignment > 0) {
         stream << "    alignment: " << alignment << std::endl;
     }
-    stream << "    section: " << section << std::endl;
+    stream << "    section: " << section->name << std::endl;
     stream << "    size: " << size << std::endl;
     stream << "    visibility: " << visibility << std::endl;
     if (!data.empty()) {

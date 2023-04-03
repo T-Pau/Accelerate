@@ -101,12 +101,29 @@ size_t BinaryExpression::minimum_byte_size() const {
     auto left_size = left->minimum_byte_size();
     auto right_size = right->minimum_byte_size();
 
-    // TODO: be more accurate
-
     if (left_size == 0 || right_size == 0) {
         return 0;
     }
-    return std::max(left_size, right_size);
+
+    switch (operation) {
+        case ADD:
+        case SUBTRACT:
+        case DIVIDE:
+        case MULTIPLY:
+        case SHIFT_RIGHT:
+            return 0;
+
+        case BITWISE_AND:
+        case BITWISE_OR:
+        case BITWISE_XOR:
+            return std::max(left_size, right_size);
+
+        case MODULO:
+            return right_size;
+
+        case SHIFT_LEFT:
+            return left_size;
+    }
 }
 
 
