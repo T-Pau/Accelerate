@@ -1,0 +1,3 @@
+program xlr8
+arguments --help
+return 0

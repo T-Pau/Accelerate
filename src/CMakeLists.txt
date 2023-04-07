@@ -51,6 +51,7 @@ add_library(xlr8-library STATIC
         TokenizerFile.cc
         TokenizerSequence.cc
         UnaryExpression.cc
+        Value.cc
         VariableExpression.cc
         Util.cc
         ${COMPATIBILITY}
