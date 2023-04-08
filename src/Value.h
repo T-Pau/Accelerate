@@ -54,7 +54,7 @@ public:
 
     [[nodiscard]] Type type() const {return type_;}
     [[nodiscard]] std::string type_name() const;
-    [[nodiscard]] bool bolean_value() const;
+    [[nodiscard]] bool boolean_value() const;
     [[nodiscard]] double float_value() const;
     [[nodiscard]] int64_t signed_value() const;
     [[nodiscard]] uint64_t unsigned_value() const;
@@ -63,6 +63,14 @@ public:
     Value operator-(const Value& other) const;
     Value operator/(const Value& other) const;
     Value operator*(const Value& other) const;
+    Value operator|(const Value& other) const;
+    Value operator&(const Value& other) const;
+    Value operator^(const Value& other) const;
+    //Value operator%(const Value& other) const;
+    Value operator<<(const Value& other) const;
+    Value operator>>(const Value& other) const;
+    Value operator&&(const Value& other) const;
+    Value operator||(const Value& other) const;
 
 private:
     Type type_;
@@ -72,6 +80,14 @@ private:
         int64_t signed_value_;
         uint64_t unsigned_value_;
     };
+
+    [[nodiscard]] static uint64_t negate_signed(int64_t value);
+    [[nodiscard]] static int64_t negate_unsigned(uint64_t value);
+    [[nodiscard]] static uint64_t add_unsigned(uint64_t a, uint64_t b);
+    [[nodiscard]] static int64_t add_signed(int64_t a, int64_t b);
+    [[nodiscard]] static uint64_t multiply_unsigned(uint64_t a, uint64_t b);
+    [[nodiscard]] static int64_t shift_left_signed(int64_t a, uint64_t b);
+    [[nodiscard]] static uint64_t shift_left_unsigned(uint64_t a, uint64_t b);
 };
 
 #endif // VALUE_H
