@@ -37,18 +37,25 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Exception.h"
 
 
+Value::Value(int64_t value) {
+    if (value < 0) {
+        type_ = SIGNED;
+        signed_value_ = value;
+    }
+    else {
+        type_ = UNSIGNED;
+        unsigned_value_ = static_cast<uint64_t>(value);
+    }
+}
+
+
 uint64_t Value::unsigned_value() const {
     switch (type()) {
         case BOOLEAN:
         case FLOAT:
+        case SIGNED:
         case VOID:
             throw Exception("can't convert value of type %s to unsigned", type_name().c_str());
-
-        case SIGNED:
-            if (signed_value_ < 0) {
-                throw Exception("can't convert negative value to unsigned");
-            }
-            return static_cast<uint64_t>(signed_value_);
 
         case UNSIGNED:
             return unsigned_value_;
@@ -108,7 +115,7 @@ bool Value::bolean_value() const {
             return unsigned_value_ != 0;
 
         case VOID:
-            throw Exception("can't convert value of type %s to float", type_name().c_str());
+            throw Exception("can't convert value of type %s to boolean", type_name().c_str());
     }
 }
 
@@ -125,5 +132,63 @@ std::string Value::type_name() const {
             return "unsigned";
         case VOID:
             return "void";
+    }
+}
+
+Value Value::operator+(const Value &other) const {
+    switch (type()) {
+        case BOOLEAN:
+        case VOID:
+            throw Exception("can't add %s", type_name().c_str());
+
+        case FLOAT:
+            return Value(float_value_ + other.float_value());
+
+        case SIGNED:
+            switch (other.type()) {
+                case BOOLEAN:
+                case VOID:
+                    throw Exception("can't add %s", other.type_name().c_str());
+
+                case FLOAT:
+                    return Value(float_value() + other.float_value_);
+
+                case SIGNED: {
+                    auto value = signed_value_ + other.signed_value();
+                    if (value > signed_value_) {
+                        throw Exception("result too small");
+                    }
+                    return Value(value);
+                }
+
+                case UNSIGNED:
+                    // TODO: check for overflow
+                    return Value(signed_value_ + other.unsigned_value());
+            }
+            break;
+
+        case UNSIGNED:
+            switch (other.type()) {
+                case BOOLEAN:
+                case VOID:
+                    throw Exception("can't add %s", other.type_name().c_str());
+
+                case FLOAT:
+                    return Value(float_value() + other.float_value_);
+
+                case SIGNED: {
+                    // TODO: check for overflow
+                    return Value(signed_value_ + other.unsigned_value());
+                }
+
+                case UNSIGNED: {
+                    auto value = unsigned_value_ + other.unsigned_value();
+                    if (value < unsigned_value_) {
+                        throw Exception("result too large");
+                    }
+                    return Value(value);
+                }
+            }
+            break;
     }
 }

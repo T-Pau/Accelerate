@@ -48,7 +48,7 @@ public:
     
     explicit Value(): type_(VOID), unsigned_value_(0) {}
     explicit Value(uint64_t value): type_(UNSIGNED), unsigned_value_(value) {}
-    explicit Value(int64_t value): type_(SIGNED), signed_value_(value) {}
+    explicit Value(int64_t value);
     explicit Value(bool value): type_(BOOLEAN), boolean_value_(value) {}
     explicit Value(double value): type_(FLOAT), float_value_(value) {}
 
@@ -58,6 +58,11 @@ public:
     [[nodiscard]] double float_value() const;
     [[nodiscard]] int64_t signed_value() const;
     [[nodiscard]] uint64_t unsigned_value() const;
+
+    Value operator+(const Value& other) const;
+    Value operator-(const Value& other) const;
+    Value operator/(const Value& other) const;
+    Value operator*(const Value& other) const;
 
 private:
     Type type_;
