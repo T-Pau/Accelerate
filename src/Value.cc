@@ -134,16 +134,16 @@ std::string Value::type_name() const {
 }
 
 Value Value::operator+(const Value &other) const {
-    if (type() == FLOAT || other.type() == FLOAT) {
+    if (is_float() || other.is_float()) {
         return Value(float_value() + other.float_value());
     }
-    else if (type() == UNSIGNED && other.type() == UNSIGNED) {
+    else if (is_unsigned() && other.is_unsigned()) {
         return Value(add_unsigned(unsigned_value_, other.unsigned_value_));
     }
-    else if (type() == SIGNED && other.type() == SIGNED) {
+    else if (is_signed() && other.is_signed()) {
         return Value(add_signed(signed_value_, other.signed_value_));
     }
-    else if (type() == SIGNED && other.type() == UNSIGNED) {
+    else if (is_signed() && other.is_unsigned()) {
         auto negated_this = negate_signed(signed_value_);
         if (negated_this >= other.unsigned_value_) {
             return Value(other.unsigned_value_ - negated_this);
@@ -152,7 +152,7 @@ Value Value::operator+(const Value &other) const {
             return Value(negate_unsigned(negated_this - other.unsigned_value_));
         }
     }
-    else if (type() == UNSIGNED && other.type() == SIGNED) {
+    else if (is_unsigned() && other.is_signed()) {
         auto negated_other = negate_signed(other.signed_value_);
         if (negated_other >= unsigned_value_) {
             return Value(unsigned_value_ - negated_other);
@@ -167,10 +167,10 @@ Value Value::operator+(const Value &other) const {
 }
 
 Value Value::operator-(const Value &other) const {
-    if (type() == FLOAT || other.type() == FLOAT) {
+    if (is_float() || other.is_float()) {
         return Value(float_value() - other.float_value());
     }
-    else if (type() == UNSIGNED && other.type() == UNSIGNED) {
+    else if (is_unsigned() && other.is_unsigned()) {
         if (unsigned_value_ >= other.unsigned_value_) {
             return Value(unsigned_value_ - other.unsigned_value_);
         }
@@ -178,13 +178,13 @@ Value Value::operator-(const Value &other) const {
             return Value(negate_unsigned(other.unsigned_value_ - unsigned_value_));
         }
     }
-    else if (type() == SIGNED && other.type() == SIGNED) {
+    else if (is_signed() && other.is_signed()) {
         return Value(signed_value_ - other.signed_value_);
     }
-    else if (type() == SIGNED && other.type() == UNSIGNED) {
+    else if (is_signed() && other.is_unsigned()) {
         return Value(add_signed(signed_value_, negate_unsigned(other.unsigned_value_)));
     }
-    else if (type() == UNSIGNED && other.type() == SIGNED) {
+    else if (is_unsigned() && other.is_signed()) {
         return Value(add_unsigned(unsigned_value_, negate_signed(other.signed_value_)));
     }
     else {
@@ -193,19 +193,19 @@ Value Value::operator-(const Value &other) const {
 }
 
 Value Value::operator/(const Value &other) const {
-    if (type() == FLOAT || other.type() == FLOAT) {
+    if (is_float() || other.is_float()) {
         return Value(float_value() / other.float_value());
     }
-    else if (type() == UNSIGNED && other.type() == UNSIGNED) {
+    else if (is_unsigned() && other.is_unsigned()) {
         return Value(unsigned_value_ / other.unsigned_value_);
     }
-    else if (type() == SIGNED && other.type() == SIGNED) {
+    else if (is_signed() && other.is_signed()) {
         return Value(signed_value_ / other.signed_value_);
     }
-    else if (type() == SIGNED && other.type() == UNSIGNED) {
+    else if (is_signed() && other.is_unsigned()) {
         return Value(negate_unsigned(negate_signed(signed_value_) / other.unsigned_value_));
     }
-    else if (type() == UNSIGNED && other.type() == SIGNED) {
+    else if (is_unsigned() && other.is_signed()) {
         return Value(negate_unsigned(unsigned_value_ / negate_signed(other.signed_value_)));
     }
     else {
@@ -215,19 +215,19 @@ Value Value::operator/(const Value &other) const {
 
 
 Value Value::operator*(const Value &other) const {
-    if (type() == FLOAT || other.type() == FLOAT) {
+    if (is_float() || other.is_float()) {
         return Value(float_value() * other.float_value());
     }
-    else if (type() == UNSIGNED && other.type() == UNSIGNED) {
+    else if (is_unsigned() && other.is_unsigned()) {
         return Value(multiply_unsigned(unsigned_value_, other.unsigned_value_));
     }
-    else if (type() == SIGNED && other.type() == SIGNED) {
+    else if (is_signed() && other.is_signed()) {
         return Value(multiply_unsigned(negate_signed(signed_value_), negate_signed(other.signed_value_)));
     }
-    else if (type() == SIGNED && other.type() == UNSIGNED) {
+    else if (is_signed() && other.is_unsigned()) {
         return Value(negate_unsigned(multiply_unsigned(negate_signed(signed_value_), other.unsigned_value_)));
     }
-    else if (type() == UNSIGNED && other.type() == SIGNED) {
+    else if (is_unsigned() && other.is_signed()) {
         return Value(negate_unsigned(multiply_unsigned(unsigned_value_, negate_signed(other.signed_value_))));
     }
     else {
@@ -278,7 +278,7 @@ uint64_t Value::multiply_unsigned(uint64_t a, uint64_t b) {
 }
 
 Value Value::operator|(const Value &other) const {
-    if (type() == UNSIGNED && other.type() == UNSIGNED) {
+    if (is_unsigned() && other.is_unsigned()) {
         return Value(unsigned_value_ | other.unsigned_value_);
     }
     else {
@@ -288,7 +288,7 @@ Value Value::operator|(const Value &other) const {
 
 
 Value Value::operator&(const Value &other) const {
-    if (type() == UNSIGNED && other.type() == UNSIGNED) {
+    if (is_unsigned() && other.is_unsigned()) {
         return Value(unsigned_value_ & other.unsigned_value_);
     }
     else {
@@ -298,7 +298,7 @@ Value Value::operator&(const Value &other) const {
 
 
 Value Value::operator^(const Value &other) const {
-    if (type() == UNSIGNED && other.type() == UNSIGNED) {
+    if (is_unsigned() && other.is_unsigned()) {
         return Value(unsigned_value_ ^ other.unsigned_value_);
     }
     else {
@@ -315,10 +315,10 @@ Value Value::operator||(const Value &other) const {
 }
 
 Value Value::operator>>(const Value &other) const {
-    if (type() == UNSIGNED && other.type() == UNSIGNED) {
+    if (is_unsigned() && other.is_unsigned()) {
         return Value(unsigned_value_ >> other.unsigned_value_);
     }
-    else if (type() == SIGNED && other.type() == UNSIGNED) {
+    else if (is_signed() && other.is_unsigned()) {
         if (other.unsigned_value_ > std::numeric_limits<int64_t>::max()) {
             return Value(static_cast<uint64_t>(0));
         }
@@ -326,10 +326,10 @@ Value Value::operator>>(const Value &other) const {
             return Value(signed_value_ >> static_cast<int64_t>(other.unsigned_value_));
         }
     }
-    else if (type() == UNSIGNED && other.type() == SIGNED) {
+    else if (is_unsigned() && other.is_signed()) {
         return Value(shift_left_unsigned(unsigned_value_, negate_signed(other.signed_value_)));
     }
-    else if (type() == SIGNED && other.type() == SIGNED) {
+    else if (is_signed() && other.is_signed()) {
         return Value(shift_left_signed(signed_value_, negate_signed(other.signed_value_)));
     }
     else {
@@ -353,10 +353,10 @@ int64_t Value::shift_left_signed(int64_t a, uint64_t b) {
 }
 
 Value Value::operator<<(const Value &other) const {
-    if (type() == UNSIGNED && other.type() == UNSIGNED) {
+    if (is_unsigned() && other.is_unsigned()) {
         return Value(shift_left_unsigned(unsigned_value_, other.unsigned_value_));
     }
-    else if (type() == SIGNED && other.type() == UNSIGNED) {
+    else if (is_signed() && other.is_unsigned()) {
         if (other.unsigned_value_ > std::numeric_limits<int64_t>::max()) {
             throw Exception("integer overflow");
         }
@@ -364,13 +364,150 @@ Value Value::operator<<(const Value &other) const {
             return Value(shift_left_signed(signed_value_, static_cast<int64_t>(other.unsigned_value_)));
         }
     }
-    else if (type() == UNSIGNED && other.type() == SIGNED) {
+    else if (is_unsigned() && other.is_signed()) {
         return Value(unsigned_value_ >> negate_signed(other.signed_value_));
     }
-    else if (type() == SIGNED && other.type() == SIGNED) {
+    else if (is_signed() && other.is_signed()) {
         return Value(signed_value_ >> negate_signed(other.signed_value_));
     }
     else {
         throw Exception("can't shift %s and %s", type_name().c_str(), other.type_name().c_str());
+    }
+}
+
+bool Value::operator==(const Value &other) const {
+    switch (type()) {
+        case BOOLEAN:
+            return other.is_boolean() && boolean_value_ == other.boolean_value_;
+
+        case FLOAT:
+            return other.is_number() && float_value_ == other.float_value();
+
+        case SIGNED:
+            return other.is_signed() && signed_value_ == other.signed_value_;
+
+        case UNSIGNED:
+            return other.is_unsigned() && unsigned_value_ == other.unsigned_value_;
+
+        case VOID:
+            return other.is_void();
+    }
+}
+
+bool Value::operator<(const Value &other) const {
+    switch (type()) {
+        case BOOLEAN:
+        case VOID:
+            return false;
+
+        case FLOAT:
+            return other.is_number() && float_value_ < other.float_value();
+
+        case SIGNED:
+            return (other.is_signed() && signed_value_ < other.signed_value_) || other.is_unsigned();
+
+        case UNSIGNED:
+            return other.is_unsigned() && unsigned_value_ < other.unsigned_value_;
+    }
+}
+
+
+bool Value::operator<=(const Value &other) const {
+    switch (type()) {
+        case BOOLEAN:
+        case VOID:
+            return false;
+
+        case FLOAT:
+            return other.is_number() && float_value_ <= other.float_value();
+
+        case SIGNED:
+            return (other.is_signed() && signed_value_ <= other.signed_value_) || other.is_unsigned();
+
+        case UNSIGNED:
+            return other.is_unsigned() && unsigned_value_ <= other.unsigned_value_;
+    }
+}
+
+size_t Value::minimum_byte_size() const {
+    switch (type()) {
+        case BOOLEAN:
+        case FLOAT:
+        case VOID:
+            return 0;
+
+        case SIGNED:
+            return Int::minimum_byte_size(signed_value_);
+
+        case UNSIGNED:
+            return Int::minimum_byte_size(unsigned_value_);
+    }
+}
+
+Value Value::operator%(const Value &other) const {
+    if (is_unsigned() && other.is_unsigned()) {
+        return Value(unsigned_value_ % other.unsigned_value_);
+    }
+    // TODO: signed
+    else {
+        throw Exception("can't compute modulus of %s and %s", type_name().c_str(), other.type_name().c_str());
+    }
+}
+
+/*Value &Value::operator=(const Value &other) {
+    type_ = other.type();
+    switch (other.type()) {
+        case BOOLEAN:
+            boolean_value_ = other.boolean_value_;
+            break;
+
+        case FLOAT:
+            float_value_ = other.float_value_;
+            break;
+
+        case SIGNED:
+            signed_value_ = other.signed_value_;
+            break;
+
+        case UNSIGNED:
+            unsigned_value_ = other.unsigned_value_;
+            break;
+
+        case VOID:
+            break;
+    }
+
+    return *this;
+}*/
+
+Value Value::operator-() const {
+    switch (type()) {
+        case BOOLEAN:
+        case VOID:
+            throw Exception("can't negate %s", type_name().c_str());
+
+        case FLOAT:
+            return Value(-float_value_);
+
+        case SIGNED:
+            return Value(negate_signed(signed_value_));
+
+        case UNSIGNED:
+            return Value(negate_unsigned(unsigned_value_));
+    }
+}
+
+Value Value::operator~() const {
+    switch (type()) {
+        case BOOLEAN:
+        case FLOAT:
+        case VOID:
+            throw Exception("can't bitwise negate %s", type_name().c_str());
+
+        case SIGNED:
+            return Value(~signed_value_);
+
+        case UNSIGNED:
+            return Value(~unsigned_value_);
     }
 }

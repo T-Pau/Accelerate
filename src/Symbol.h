@@ -39,7 +39,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 class Symbol {
 public:
     Symbol(): id(0) {}
-    Symbol(const std::string& name);
+    explicit Symbol(const std::string& name);
     Symbol& operator=(const std::string& name);
 
 

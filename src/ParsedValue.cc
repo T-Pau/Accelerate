@@ -80,7 +80,7 @@ std::shared_ptr<ParsedValue> ParsedValue::parse(Tokenizer &tokenizer) {
     return object;
 }
 
-void ParsedValue::setup(TokenizerFile &tokenizer) {
+void ParsedValue::setup(FileTokenizer &tokenizer) {
     tokenizer.add_punctuations({"{", "}", "[", "]", ":"});
 }
 

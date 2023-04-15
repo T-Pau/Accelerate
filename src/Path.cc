@@ -28,3 +28,27 @@ Symbol Path::find(Symbol name, Symbol base) const {
 
     return {};
 }
+
+
+void Path::append_path(const Path &path, const std::string &subdirectory) {
+    for (const auto& directory: path.directories) {
+        if (!subdirectory.empty()) {
+            append_directory(directory / subdirectory);
+        }
+        else {
+            append_directory(directory);
+        }
+    }
+}
+
+
+void Path::prepend_path(const Path &path, const std::string &subdirectory) {
+    for (const auto& directory: path.directories) {
+        if (!subdirectory.empty()) {
+            prepend_directory(directory / subdirectory);
+        }
+        else {
+            prepend_directory(directory);
+        }
+    }
+}

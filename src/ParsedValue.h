@@ -36,7 +36,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <vector>
 
 #include "Token.h"
-#include "TokenizerFile.h"
+#include "FileTokenizer.h"
 #include "TokenGroup.h"
 
 class ParsedArray;
@@ -54,7 +54,7 @@ public:
 
     [[nodiscard]] virtual Type type() const = 0;
 
-    static void setup(TokenizerFile& tokenizer);
+    static void setup(FileTokenizer& tokenizer);
     static std::shared_ptr<ParsedValue> parse(Tokenizer& tokenizer);
 
     [[nodiscard]] const ParsedArray* as_array() const;

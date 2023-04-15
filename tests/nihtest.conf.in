@@ -3,3 +3,7 @@ features-files = @CMAKE_BINARY_DIR@/config.h
 test-input-directories = @CMAKE_CURRENT_SOURCE_DIR@
 program-directories = @CMAKE_CURRENT_BINARY_DIR@
     @CMAKE_BINARY_DIR@/src
+default-program = xlr8
+
+[setenv]
+XLR8_SYSTEM_DIRECTORY = @CMAKE_SOURCE_DIR@/share

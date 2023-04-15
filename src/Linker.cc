@@ -33,7 +33,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Linker.h"
 #include "ObjectExpression.h"
 #include "FileReader.h"
-#include "IntegerExpression.h"
+#include "ValueExpression.h"
 #include "Exception.h"
 #include "TargetParser.h"
 
@@ -120,16 +120,16 @@ void Linker::output(const std::string &file_name) {
 
     for (const auto& object: objects) {
         if (object->has_address()) {
-            environment.add(object->name.as_symbol(), std::make_shared<IntegerExpression>(object->address.value()));
+            environment.add(object->name.as_symbol(), std::make_shared<ValueExpression>(object->address.value()));
         }
     }
 
     // TODO: support for multiple banks
     auto data_range = memory[0].data_range();
 
-    environment.add(TargetParser::token_data_end.as_symbol(), std::make_shared<IntegerExpression>(data_range.end()));
-    environment.add(TargetParser::token_data_size.as_symbol(), std::make_shared<IntegerExpression>(data_range.size));
-    environment.add(TargetParser::token_data_start.as_symbol(), std::make_shared<IntegerExpression>(data_range.start));
+    environment.add(TargetParser::token_data_end.as_symbol(), std::make_shared<ValueExpression>(data_range.end()));
+    environment.add(TargetParser::token_data_size.as_symbol(), std::make_shared<ValueExpression>(data_range.size));
+    environment.add(TargetParser::token_data_start.as_symbol(), std::make_shared<ValueExpression>(data_range.start));
 
     auto stream = std::ofstream(file_name);
 
@@ -142,14 +142,14 @@ void Linker::output(const std::string &file_name) {
                 break;
 
             case OutputElement::MEMORY: {
-                int64_t bank = 0;
+                uint64_t bank = 0;
                 size_t index = 0;
                 if (arguments.expressions.size() == 3) {
-                    bank = arguments.expressions[0]->value();
+                    bank = arguments.expressions[0]->value().unsigned_value();
                     index += 1;
                 }
-                int64_t start = arguments.expressions[index]->value();
-                int64_t end = arguments.expressions[index + 1]->value();
+                uint64_t start = arguments.expressions[index]->value().unsigned_value();
+                uint64_t end = arguments.expressions[index + 1]->value().unsigned_value();
 
                 stream << memory[bank].data(Range(start, end - start));
                 break;

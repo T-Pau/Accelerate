@@ -42,7 +42,7 @@ public:
     [[nodiscard]] Type type() const override {return OBJECT;}
 
     [[nodiscard]] bool has_value() const override {return object->has_address();}
-    [[nodiscard]] int64_t value() const override {return has_value() ? static_cast<int64_t>(object->address.value()) : 0;}
+    [[nodiscard]] Value value() const override {return has_value() ? Value(object->address.value()) : Value();}
     [[nodiscard]] size_t minimum_byte_size() const override;
     void replace_variables(Symbol (*transform)(Symbol)) override {}
     void collect_variables(std::vector<Symbol>& variables) const override {}

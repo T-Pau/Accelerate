@@ -55,7 +55,7 @@ private:
     void parse_object();
     void parse_target();
 
-    static Object::Visibility visibility_from_name(Token name);
+    static Object::Visibility visibility_from_name(const Token& name);
 
     static void initialize();
 

@@ -84,7 +84,7 @@ const Instruction *CPU::instruction(Symbol name) const {
     }
 }
 
-void CPU::setup(TokenizerFile& tokenizer) const {
+void CPU::setup(FileTokenizer& tokenizer) const {
     for (const auto& item: reserved_words) {
         tokenizer.add_literal(Token::KEYWORD, item.str());
     }
@@ -98,8 +98,8 @@ void CPU::setup(TokenizerFile& tokenizer) const {
     }
 }
 
-const CPU &CPU::get(Symbol name) {
-    return CPUGetter::global.get(name);
+const CPU &CPU::get(Symbol name, Symbol base) {
+    return CPUGetter::global.get(name, base);
 }
 
 bool CPU::is_compatible_with(const CPU &other) const {

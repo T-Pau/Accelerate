@@ -35,7 +35,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "CPU.h"
 #include "FileReader.h"
 #include "Symbol.h"
-#include "TokenizerFile.h"
+#include "FileTokenizer.h"
 #include "FileParser.h"
 
 class CPUParser: public FileParser {

@@ -41,7 +41,8 @@ public:
     static LibraryGetter global;
 
 protected:
-    ObjectFile parse(Symbol filename) override {return ObjectFileParser().parse(filename);}
+    std::string filename_extension() const override {return ".lib";}
+    ObjectFile parse(Symbol name, Symbol filename) override {return ObjectFileParser().parse(filename);}
 };
 
 #endif // LIBRARY_GETTER_H

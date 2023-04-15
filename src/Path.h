@@ -13,8 +13,11 @@
 
 class Path {
 public:
-    void append_directory(std::string name) {directories.emplace_back(std::move(name));}
-    void prepend_directory(std::string name) {directories.emplace(directories.begin(), std::move(name));}
+    void append_directory(std::filesystem::path directory) {directories.emplace_back(std::move(directory));}
+    void prepend_directory(std::filesystem::path directory) {directories.emplace(directories.begin(), std::move(directory));}
+
+    void prepend_path(const Path& path, const std::string& subdirectory = "");
+    void append_path(const Path& path, const std::string& subdirectory = "");
 
     [[nodiscard]] bool empty() const {return directories.empty();}
     [[nodiscard]] Symbol find(Symbol name, Symbol base = {}) const;

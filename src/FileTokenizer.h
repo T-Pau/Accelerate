@@ -29,8 +29,8 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef TOKENIZER_FILE_H
-#define TOKENIZER_FILE_H
+#ifndef FILE_TOKENIZER_H
+#define FILE_TOKENIZER_H
 
 #include <string>
 #include <unordered_map>
@@ -42,12 +42,13 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Location.h"
 #include "Path.h"
 
-class TokenizerFile: public Tokenizer {
+class FileTokenizer: public Tokenizer {
 public:
-    explicit TokenizerFile(std::shared_ptr<const Path> path = std::make_shared<const Path>(), bool use_preprocessor = true);
+    explicit FileTokenizer(std::shared_ptr<const Path> path = std::make_shared<const Path>(), bool use_preprocessor = true);
     void push(Symbol filename);
 
     [[nodiscard]] Location current_location() const;
+    [[nodiscard]] Symbol current_file() const {return current_source ? current_source->file() : Symbol();}
     Symbol find_file(Symbol file_name);
 
     void add_punctuations(const std::unordered_set<std::string>& names);
@@ -61,18 +62,19 @@ protected:
 private:
     class Source {
     public:
-        Source(Symbol file, const std::vector<std::string>& lines) : file(file), lines(lines) {}
+        Source(Symbol file, const std::vector<std::string>& lines) : file_(file), lines(lines) {}
 
         int next();
         void unget();
 
-        [[nodiscard]] Location location() const { return {file, line + 1, column, column}; }
+        [[nodiscard]] Symbol file() const {return file_;}
+        [[nodiscard]] Location location() const { return {file(), line + 1, column, column}; }
         void expand_location(Location& location) const { location.end_column = column; }
 
         void reset_to(const Location& new_location);
 
     private:
-        Symbol file;
+        Symbol file_;
         const std::vector<std::string>& lines;
         size_t line = 0;
         size_t column = 0;
@@ -115,4 +117,4 @@ private:
     bool last_was_newline = true;
 };
 
-#endif // TOKENIZER_FILE_H
+#endif // FILE_TOKENIZER_H

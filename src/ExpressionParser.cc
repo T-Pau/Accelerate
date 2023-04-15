@@ -31,7 +31,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "ExpressionParser.h"
 
-#include "IntegerExpression.h"
+#include "ValueExpression.h"
 #include "ParseException.h"
 #include "VariableExpression.h"
 
@@ -108,7 +108,7 @@ ExpressionParser::Element ExpressionParser::next_element() {
     auto token = tokenizer.next();
 
     if (token.is_integer()) {
-        return {std::make_shared<IntegerExpression>(token), 0};
+        return {std::make_shared<ValueExpression>(token), 0};
     }
     else if (token.is_name()) {
         return {std::make_shared<VariableExpression>(token), 0};
@@ -151,7 +151,7 @@ ExpressionParser::Element ExpressionParser::next_element() {
 }
 
 
-void ExpressionParser::setup(TokenizerFile &tokenizer) {
+void ExpressionParser::setup(FileTokenizer &tokenizer) {
     tokenizer.add_punctuations({"+", "-", "~", "<", ">", "*", "/", /* mod */ "&", "^", "<<", ">>", "|", "(", ")", ":", ","});
     initialize();
 }
@@ -299,10 +299,10 @@ void ExpressionParser::reduce_binary(int up_to_level) {
 
         switch (operation.operation.binary.type) {
             case BinaryOperator::SIZE:
-                if (!top.node->has_value()) {
-                    throw ParseException(top.node->location, "size not a constant expression");
+                if (!top.node->has_value() || !top.node->value().is_integer()) {
+                    throw ParseException(top.node->location, "size not a constant integer expression");
                 }
-                left.node->set_byte_size(top.node->value());
+                left.node->set_byte_size(top.node->value().unsigned_value());
                 top = left;
                 break;
 

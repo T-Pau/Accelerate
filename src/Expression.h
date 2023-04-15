@@ -36,14 +36,14 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "Environment.h"
 #include "Node.h"
-#include "TokenizerFile.h"
+#include "FileTokenizer.h"
 #include "Int.h"
 
 class Expression {
 public:
     enum Type {
         BINARY,
-        INTEGER,
+        VALUE,
         OBJECT,
         UNARY,
         VARIABLE
@@ -84,7 +84,7 @@ public:
 
     [[nodiscard]] virtual Type type() const = 0;
     [[nodiscard]] virtual bool has_value() const {return false;}
-    [[nodiscard]] virtual int64_t value() const {return 0;}
+    [[nodiscard]] virtual Value value() const {return Value();}
     [[nodiscard]] virtual size_t minimum_byte_size() const = 0;
     virtual void replace_variables(Symbol (*transform)(Symbol)) = 0;
 

@@ -1,5 +1,5 @@
 /*
-TokenizerSequence.h -- 
+SequenceTokenizer.h --
 
 Copyright (C) Dieter Baron
 
@@ -29,16 +29,16 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef TOKENIZER_SEQUENCE_H
-#define TOKENIZER_SEQUENCE_H
+#ifndef SEQUENCE_TOKENIZER_H
+#define SEQUENCE_TOKENIZER_H
 
 #include <vector>
 
 #include "Tokenizer.h"
 
-class TokenizerSequence: public Tokenizer {
+class SequenceTokenizer: public Tokenizer {
 public:
-    explicit TokenizerSequence(std::vector<Token> tokens): tokens(std::move(tokens)) {current_position = this->tokens.begin();}
+    explicit SequenceTokenizer(std::vector<Token> tokens): tokens(std::move(tokens)) { current_position = this->tokens.begin();}
 
 protected:
     [[nodiscard]] bool sub_ended() const override {return current_position == tokens.end();}
@@ -51,4 +51,4 @@ private:
 };
 
 
-#endif // TOKENIZER_SEQUENCE_H
+#endif // SEQUENCE_TOKENIZER_H

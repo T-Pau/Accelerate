@@ -35,6 +35,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ParseException.h"
 #include "FileReader.h"
 #include "ExpressionParser.h"
+#include "TargetGetter.h"
 
 bool TargetParser::initialized = false;
 std::unordered_map<Symbol, void (TargetParser::*)()> TargetParser::parser_methods;
@@ -58,7 +59,7 @@ Token TargetParser::token_segment_name;
 Token TargetParser::token_type;
 
 
-TargetParser::TargetParser() {
+TargetParser::TargetParser(): FileParser(TargetGetter::global.path) {
     initialize();
 
     tokenizer.add_literal(token_data_end);
@@ -99,9 +100,9 @@ void TargetParser::initialize() {
 }
 
 
-Target TargetParser::parse(Symbol file_name) {
+Target TargetParser::parse(Symbol name, Symbol file_name) {
     target = Target();
-    target.name = file_name;
+    target.name = name;
     had_cpu = false;
     section_names.clear();
     segment_names.clear();
@@ -253,28 +254,28 @@ MemoryMap::Block TargetParser::parse_single_address(const ParsedScalar *address)
     if (address->size() > 2 && (*address)[1] == token_colon) {
         auto bank_token = (*address)[0];
 
-        if (!bank_token.is_integer()) {
-            throw ParseException(bank_token, "integer expected");
+        if (!bank_token.is_unsigned()) {
+            throw ParseException(bank_token, "unsigned integer expected");
         }
-        bank = bank_token.as_integer();
+        bank = bank_token.as_unsigned();
         index = 2;
     }
     if (address->size() < index + 1) {
         throw ParseException(address->location, "missing address");
     }
     auto start_token = (*address)[index];
-    if (!start_token.is_integer()) {
-        throw ParseException(start_token, "integer expected");
+    if (!start_token.is_unsigned()) {
+        throw ParseException(start_token, "unsigned integer expected");
     }
-    auto start = start_token.as_integer();
+    auto start = start_token.as_unsigned();
     uint64_t size = 1;
 
     if (address->size() == index + 3 && (*address)[index + 1] == token_minus) {
         auto end_token = (*address)[index + 2];
-        if (!end_token.is_integer()) {
-            throw ParseException(start_token, "integer expected");
+        if (!end_token.is_unsigned()) {
+            throw ParseException(start_token, "unsigned integer expected");
         }
-        size = end_token.as_integer() - start + 1;
+        size = end_token.as_unsigned() - start + 1;
     }
     else if (address->size() != index + 1) {
         throw ParseException(address->location, "invalid address specification");
@@ -284,15 +285,15 @@ MemoryMap::Block TargetParser::parse_single_address(const ParsedScalar *address)
 }
 
 void TargetParser::parse_cpu() {
-    auto token = tokenizer.expect(Token::STRING, TokenGroup::newline);
+    auto name = tokenizer.expect(Token::STRING, TokenGroup::newline);
 
-    auto file = tokenizer.find_file(Symbol(token.as_string() + ".cpu"));
-    if (file.empty()) {
-        throw ParseException(token, "unknown CPU");
+    try {
+        had_cpu = true;
+        target.cpu = &CPU::get(name.as_symbol(), tokenizer.current_file());
     }
-
-    had_cpu = true;
-    target.cpu = &CPU::get(file);
+    catch (Exception &ex) {
+        throw ParseException(name, "%s", ex.what());
+    }
 }
 
 void TargetParser::parse_extension() {

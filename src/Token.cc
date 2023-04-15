@@ -53,14 +53,11 @@ const char* Token::type_name(Type type) {
         case NEWLINE:
             return "newline";
 
-        case INTEGER:
-            return "number";
+        case VALUE:
+            return "value";
 
         case STRING:
             return "string";
-
-        case REAL:
-            return "real";
 
         case KEYWORD:
             return "keyword";
@@ -82,13 +79,10 @@ bool Token::operator==(const Token &other) const {
         case PUNCTUATION:
         case INSTRUCTION:
         case STRING:
-            return value.symbol == other.value.symbol;
+            return symbol == other.symbol;
 
-        case INTEGER:
-            return value.integer == other.value.integer;
-
-        case REAL:
-            return value.real == other.value.real;
+        case VALUE:
+            return value == other.value;
 
         case END:
         case NEWLINE:
@@ -105,10 +99,9 @@ const std::string &Token::as_string() const {
         case STRING:
         case KEYWORD:
         case INSTRUCTION:
-            return value.symbol.str();
+            return symbol.str();
 
-        case INTEGER:
-        case REAL:
+        case VALUE:
         case END:
         case NEWLINE:
             return empty_string;
@@ -124,12 +117,36 @@ Symbol Token::as_symbol() const {
         case STRING:
         case KEYWORD:
         case INSTRUCTION:
-            return value.symbol;
+            return symbol;
 
-        case INTEGER:
-        case REAL:
+        case VALUE:
         case END:
         case NEWLINE:
             return {};
     }
 }
+
+/*Token& Token::operator=(const Token& other) {
+    type = other.type;
+    switch (type) {
+        case DIRECTIVE:
+        case PUNCTUATION:
+        case NAME:
+        case PREPROCESSOR:
+        case STRING:
+        case KEYWORD:
+        case INSTRUCTION:
+            symbol = other.symbol;
+            break;
+
+        case VALUE:
+            value = other.value;
+            break;
+
+        case END:
+        case NEWLINE:
+            break;
+    }
+
+    return *this;
+}*/

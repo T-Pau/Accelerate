@@ -36,6 +36,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "Location.h"
 #include "Symbol.h"
+#include "Value.h"
 
 class Token {
 public:
@@ -45,27 +46,32 @@ public:
         NAME,
         END,
         NEWLINE,
-        INTEGER,
         PREPROCESSOR,
-        REAL,
         STRING,
         KEYWORD,
-        INSTRUCTION
+        INSTRUCTION,
+        VALUE
     };
 
     Token(): type(END) {}
     Token(Type type, Location location): type(type), location(location) {}
-    Token(Type type, const std::string& name): Token(type, Location()) {value.symbol = name;}
-    Token(Type type, Location location, Symbol symbol): Token(type, location) {value.symbol = symbol;}
-    Token(Type type, Location location, uint64_t integer, uint64_t byte_size_ = 0): Token(type, location) {value.integer = integer; byte_size = byte_size_;}
-    Token(Type type, Location location, double real): Token(type, location) {value.real = real;}
+    Token(Type type, const std::string& name): Token(type, Location()) {symbol = Symbol(name);}
+    Token(Type type, Location location, Symbol symbol_): Token(type, location) {symbol = symbol_;}
+    Token(Type type, Location location, const std::string& string): Token(type, location, Symbol(string)) {}
+    Token(Type type, Location location, uint64_t integer, uint64_t byte_size_ = 0): Token(type, location) {value = Value(integer); byte_size = byte_size_;}
+    Token(Type type, Location location, double real): Token(type, location) {value = Value(real);}
+//    Token(const Token& other): type(other.type) {*this = other;}
+
+//    Token& operator=(const Token& other);
 
     explicit operator bool() const {return type != END;}
     bool operator==(const Token& other) const;
     bool operator!=(const Token& other) const {return !((*this)==other);}
     [[nodiscard]] Type get_type() const {return type;}
     [[nodiscard]] bool is_directive() const {return type == DIRECTIVE;}
-    [[nodiscard]] bool is_integer() const {return type == INTEGER;}
+    [[nodiscard]] bool is_value() const {return type == VALUE;}
+    [[nodiscard]] bool is_integer() const {return is_value() && value.is_integer();}
+    [[nodiscard]] bool is_unsigned() const {return is_value() && value.is_unsigned();}
     [[nodiscard]] bool is_name() const {return type == NAME;}
     [[nodiscard]] bool is_newline() const {return type == NEWLINE;}
     [[nodiscard]] bool is_preprocessor() const {return type == PREPROCESSOR;}
@@ -75,8 +81,8 @@ public:
 
     [[nodiscard]] const std::string& as_string() const;
     [[nodiscard]] Symbol as_symbol() const;
-    [[nodiscard]] uint64_t as_integer() const {return type == INTEGER ? value.integer : 0;}
-    [[nodiscard]] double as_real() const {return type == REAL ? value.real : 0.0;}
+    [[nodiscard]] uint64_t as_unsigned() const {return is_unsigned() ? value.unsigned_value() : 0;}
+    [[nodiscard]] Value as_value() const {return is_value() ? value : Value();}
 
     static const char* type_name(Type type);
 
@@ -86,10 +92,9 @@ public:
 private:
     Type type;
     union {
-        uint64_t integer;
-        double real;
+        Value value;
         Symbol symbol;
-    } value = {0};
+    };
 
     static const std::string empty_string;
 };
@@ -111,12 +116,8 @@ struct std::hash<Token>
                 h2 = std::hash<Symbol>{}(token.as_symbol());
                 break;
 
-            case Token::INTEGER:
-                h2 = std::hash<uint64_t>{}(token.as_integer());
-                break;
-
-            case Token::REAL:
-                h2 = std::hash<double>{}(token.as_real());
+            case Token::VALUE:
+                h2 = std::hash<Value>{}(token.as_value());
                 break;
 
             case Token::END:

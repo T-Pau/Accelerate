@@ -51,6 +51,17 @@ public:
     explicit Value(int64_t value);
     explicit Value(bool value): type_(BOOLEAN), boolean_value_(value) {}
     explicit Value(double value): type_(FLOAT), float_value_(value) {}
+    Value(const Value&other) = default;
+
+//    Value& operator=(const Value& other);
+
+    [[nodiscard]] bool is_boolean() const {return type() == BOOLEAN;}
+    [[nodiscard]] bool is_float() const {return type() == FLOAT;}
+    [[nodiscard]] bool is_integer() const {return type() == SIGNED || type() == UNSIGNED;}
+    [[nodiscard]] bool is_number() const {return is_integer() || is_float();}
+    [[nodiscard]] bool is_signed() const {return type() == SIGNED;}
+    [[nodiscard]] bool is_unsigned() const {return type() == UNSIGNED;}
+    [[nodiscard]] bool is_void() const {return type() == VOID;}
 
     [[nodiscard]] Type type() const {return type_;}
     [[nodiscard]] std::string type_name() const;
@@ -59,18 +70,31 @@ public:
     [[nodiscard]] int64_t signed_value() const;
     [[nodiscard]] uint64_t unsigned_value() const;
 
+    bool operator==(const Value& other) const;
+    bool operator!=(const Value& other) const {return !(*this == other);}
+    bool operator<(const Value& other) const;
+    bool operator>(const Value& other) const {return other < *this;}
+    bool operator<=(const Value& other) const;
+    bool operator>=(const Value& other) const {return other <= *this;}
+
+    Value operator-() const;
+    Value operator~() const;
     Value operator+(const Value& other) const;
     Value operator-(const Value& other) const;
     Value operator/(const Value& other) const;
     Value operator*(const Value& other) const;
     Value operator|(const Value& other) const;
     Value operator&(const Value& other) const;
+    Value operator&(uint64_t other) const {return *this & Value(other);}
     Value operator^(const Value& other) const;
-    //Value operator%(const Value& other) const;
+    Value operator%(const Value& other) const;
     Value operator<<(const Value& other) const;
     Value operator>>(const Value& other) const;
+    Value operator>>(uint64_t other) const {return *this >> Value(other);}
     Value operator&&(const Value& other) const;
     Value operator||(const Value& other) const;
+
+    [[nodiscard]] size_t minimum_byte_size() const;
 
 private:
     Type type_;
@@ -88,6 +112,24 @@ private:
     [[nodiscard]] static uint64_t multiply_unsigned(uint64_t a, uint64_t b);
     [[nodiscard]] static int64_t shift_left_signed(int64_t a, uint64_t b);
     [[nodiscard]] static uint64_t shift_left_unsigned(uint64_t a, uint64_t b);
+};
+
+template<>
+struct std::hash<Value> {
+    std::size_t operator()(Value const &value) const noexcept {
+        switch (value.type()) {
+            case Value::BOOLEAN:
+                return std::hash<bool>{}(value.boolean_value());
+            case Value::FLOAT:
+                return std::hash<double>{}(value.float_value());
+            case Value::SIGNED:
+                return std::hash<::int64_t>{}(value.signed_value());
+            case Value::UNSIGNED:
+                return std::hash<::uint64_t>{}(value.unsigned_value());
+            case Value::VOID:
+                return 0;
+        }
+    }
 };
 
 #endif // VALUE_H

@@ -36,6 +36,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "Int.h"
 #include "Symbol.h"
+#include "Value.h"
 
 class ArgumentType {
 public:
@@ -56,9 +57,9 @@ public:
     [[nodiscard]] Type type() const override {return ENUM;}
 
     [[nodiscard]] bool has_entry(Symbol name) const {return entries.find(name) != entries.end();}
-    [[nodiscard]] uint64_t entry(Symbol name) const;
+    [[nodiscard]] Value entry(Symbol name) const;
 
-    std::unordered_map<Symbol, uint64_t> entries;
+    std::unordered_map<Symbol, Value> entries;
 };
 
 
@@ -68,10 +69,10 @@ class ArgumentTypeMap: public ArgumentType {
 public:
     [[nodiscard]] Type type() const override {return MAP;}
 
-    [[nodiscard]] bool has_entry(uint64_t value) const {return entries.find(value) != entries.end();}
-    [[nodiscard]] uint64_t entry(uint64_t value) const;
+    [[nodiscard]] bool has_entry(Value value) const {return entries.find(value) != entries.end();}
+    [[nodiscard]] Value entry(Value value) const;
 
-    std::unordered_map<uint64_t, uint64_t> entries;
+    std::unordered_map<Value, Value> entries;
 };
 
 
@@ -81,10 +82,10 @@ class ArgumentTypeRange: public ArgumentType {
 public:
     [[nodiscard]] Type type() const override {return RANGE;}
 
-    [[nodiscard]] size_t byte_size() const {return Int::minimum_byte_size(upper_bound);} // TODO: Take lower_bound into account.
+    [[nodiscard]] size_t byte_size() const {return upper_bound.minimum_byte_size();} // TODO: Take lower_bound into account.
 
-    int64_t lower_bound;
-    int64_t upper_bound;
+    Value lower_bound;
+    Value upper_bound;
 };
 
 #endif // ARGUMENT_TYPE_H

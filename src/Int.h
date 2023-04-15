@@ -10,8 +10,10 @@
 
 class Int {
 public:
-    static void encode(std::string& bytes, int64_t value, uint64_t size, uint64_t byte_order);
+    static void encode(std::string& bytes, int64_t value, uint64_t size, uint64_t byte_order) {encode(bytes, static_cast<uint64_t>(value), size > 0 ? size : minimum_byte_size(value), byte_order);}
+    static void encode(std::string& bytes, uint64_t value, uint64_t size, uint64_t byte_order);
     static size_t minimum_byte_size(int64_t value);
+    static size_t minimum_byte_size(uint64_t value);
 
     static size_t align(size_t value, size_t alignment);
 };

@@ -29,7 +29,7 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "TokenizerFile.h"
+#include "FileTokenizer.h"
 
 #include <utility>
 
@@ -37,10 +37,10 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Int.h"
 #include "ParseException.h"
 
-bool TokenizerFile::initialized = false;
-Token TokenizerFile::token_include;
+bool FileTokenizer::initialized = false;
+Token FileTokenizer::token_include;
 
-void TokenizerFile::push(Symbol file_name) {
+void FileTokenizer::push(Symbol file_name) {
     const auto& lines = FileReader::global.read(file_name);
     if (lines.empty()) {
         return;
@@ -49,7 +49,7 @@ void TokenizerFile::push(Symbol file_name) {
     current_source = &sources[sources.size() - 1];
 }
 
-Token TokenizerFile::sub_next() {
+Token FileTokenizer::sub_next() {
     while (true) {
         bool beginning_of_line = last_was_newline;
 
@@ -76,7 +76,7 @@ Token TokenizerFile::sub_next() {
     }
 }
 
-Token TokenizerFile::next_raw() {
+Token FileTokenizer::next_raw() {
     if (current_source == nullptr) {
         return {};
     }
@@ -157,7 +157,7 @@ Token TokenizerFile::next_raw() {
     }
 }
 
-Token TokenizerFile::parse_number(unsigned int base, Location location) {
+Token FileTokenizer::parse_number(unsigned int base, Location location) {
     uint64_t size = 0;
     auto leading_zero = false;
     uint64_t integer = 0;
@@ -174,9 +174,9 @@ Token TokenizerFile::parse_number(unsigned int base, Location location) {
             }
             uint64_t byte_size = 0;
             if (size > 1 && leading_zero) {
-                byte_size = Int::minimum_byte_size((1 << size * (base == 16 ? 4 : 1)) - 1);
+                byte_size = Int::minimum_byte_size(static_cast<uint64_t>((1 << size * (base == 16 ? 4 : 1)) - 1));
             }
-            return {Token::INTEGER, location, integer, byte_size};
+            return {Token::VALUE, location, integer, byte_size};
         }
 
         if (size == 0 && digit == 0 && (base == 2 || base == 16)) {
@@ -188,7 +188,7 @@ Token TokenizerFile::parse_number(unsigned int base, Location location) {
 }
 
 
-int TokenizerFile::convert_digit(int c) {
+int FileTokenizer::convert_digit(int c) {
     if (isdigit(c)) {
         return c - '0';
     }
@@ -203,7 +203,7 @@ int TokenizerFile::convert_digit(int c) {
     }
 }
 
-Token TokenizerFile::parse_name(Token::Type type, Location location) {
+Token FileTokenizer::parse_name(Token::Type type, Location location) {
     std::string name;
 
     while (true) {
@@ -221,10 +221,10 @@ Token TokenizerFile::parse_name(Token::Type type, Location location) {
             return {type, location, name};
         }
     }
-
 }
 
-Token TokenizerFile::parse_string(Location location) {
+
+Token FileTokenizer::parse_string(Location location) {
     std::string value;
 
     while (true) {
@@ -237,7 +237,7 @@ Token TokenizerFile::parse_string(Location location) {
 
             case '"':
                 current_source->expand_location(location);
-                return {Token::STRING, location, value};
+                return {Token::STRING, location, Symbol(value)};
 
             case '\\': {
                 current_source->expand_location(location);
@@ -271,7 +271,7 @@ Token TokenizerFile::parse_string(Location location) {
     }
 }
 
-Location TokenizerFile::current_location() const{
+Location FileTokenizer::current_location() const{
     if (current_source == nullptr) {
         return {};
     }
@@ -280,13 +280,13 @@ Location TokenizerFile::current_location() const{
     }
 }
 
-void TokenizerFile::add_punctuations(const std::unordered_set<std::string> &names) {
+void FileTokenizer::add_punctuations(const std::unordered_set<std::string> &names) {
     for (const auto& name: names) {
         add_literal(Token::PUNCTUATION, name);
     }
 }
 
-TokenizerFile::TokenizerFile(std::shared_ptr<const Path> path, bool use_preprocessor): path(std::move(path)), use_preprocessor(use_preprocessor) {
+FileTokenizer::FileTokenizer(std::shared_ptr<const Path> path, bool use_preprocessor): path(std::move(path)), use_preprocessor(use_preprocessor) {
     if (use_preprocessor) {
         if (!initialized) {
             token_include = Token(Token::PREPROCESSOR, ".include");
@@ -296,7 +296,7 @@ TokenizerFile::TokenizerFile(std::shared_ptr<const Path> path, bool use_preproce
     }
 }
 
-void TokenizerFile::preprocess(const std::vector<Token>& tokens) {
+void FileTokenizer::preprocess(const std::vector<Token>& tokens) {
     const auto& directive = tokens.front();
 
     if (directive == token_include) {
@@ -328,7 +328,7 @@ void TokenizerFile::preprocess(const std::vector<Token>& tokens) {
     }
 }
 
-bool TokenizerFile::is_identifier(const std::string &s) {
+bool FileTokenizer::is_identifier(const std::string &s) {
     if (s.empty()) {
         return false;
     }
@@ -341,12 +341,12 @@ bool TokenizerFile::is_identifier(const std::string &s) {
     return true;
 }
 
-Symbol TokenizerFile::find_file(Symbol file_name) {
+Symbol FileTokenizer::find_file(Symbol file_name) {
     return path->find(file_name, current_source->location().file);
 }
 
 
-int TokenizerFile::Source::next() {
+int FileTokenizer::Source::next() {
     if (line >= lines.size()) {
         return EOF;
     }
@@ -362,7 +362,7 @@ int TokenizerFile::Source::next() {
     return c;
 }
 
-void TokenizerFile::Source::unget() {
+void FileTokenizer::Source::unget() {
     if (column == 0) {
         if (line > 0) {
             line -= 1;
@@ -374,8 +374,8 @@ void TokenizerFile::Source::unget() {
     }
 }
 
-void TokenizerFile::Source::reset_to(const Location &new_location) {
-    if (new_location.file != file) {
+void FileTokenizer::Source::reset_to(const Location &new_location) {
+    if (new_location.file != file_) {
         throw ParseException(location(), "can't reset to new_location in different file");
     }
     line = new_location.start_line_number - 1;
@@ -383,7 +383,7 @@ void TokenizerFile::Source::reset_to(const Location &new_location) {
 }
 
 
-std::optional<Token::Type> TokenizerFile::MatcherNode::match(TokenizerFile::Source &source, std::string& name) {
+std::optional<Token::Type> FileTokenizer::MatcherNode::match(FileTokenizer::Source &source, std::string& name) {
     auto c = source.next();
     if (c == EOF) {
         if (name.empty()) {
@@ -425,7 +425,7 @@ std::optional<Token::Type> TokenizerFile::MatcherNode::match(TokenizerFile::Sour
 }
 
 
-void TokenizerFile::MatcherNode::add(const char *string, Token::Type type, bool match_in_word_) {
+void FileTokenizer::MatcherNode::add(const char *string, Token::Type type, bool match_in_word_) {
     if (string[0] == '\0') {
         if (match_type.has_value() && (match_type.value() != type || match_in_word != match_in_word_)) {
             throw Exception("literal already defined with different type"); // TODO: include more detail

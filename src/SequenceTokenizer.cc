@@ -1,9 +1,9 @@
 /*
-IntegerExpression.h -- 
+SequenceTokenizer.cc --
 
 Copyright (C) Dieter Baron
 
-The authors can be contacted at <assembler@tpau.group>
+The authors can be contacted at <accelerate@tpau.group>
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions
@@ -29,33 +29,13 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef INTEGER_EXPRESSION_H
-#define INTEGER_EXPRESSION_H
+#include "SequenceTokenizer.h"
 
-#include "Expression.h"
-
-class IntegerExpression: public Expression {
-public:
-    explicit IntegerExpression(const Token& token);
-    explicit IntegerExpression(int64_t value): value_(value) {set_byte_size(Int::minimum_byte_size(value));}
-
-    [[nodiscard]] Type type() const override {return INTEGER;}
-
-    [[nodiscard]] bool has_value() const override {return true;}
-    [[nodiscard]] int64_t value() const override {return value_;}
-    [[nodiscard]] size_t minimum_byte_size() const override {return Int::minimum_byte_size(value());}
-    void replace_variables(Symbol (*transform)(Symbol)) override {}
-
-    void collect_variables(std::vector<Symbol>& variables) const override {}
-
-protected:
-    [[nodiscard]] std::shared_ptr<Expression> evaluate(const Environment &environment) const override {return {};}
-    [[nodiscard]] std::shared_ptr<Expression> clone() const override;
-
-    void serialize_sub(std::ostream& stream) const override;
-
-private:
-    int64_t value_;
-};
-
-#endif // INTEGER_EXPRESSION_H
+Token SequenceTokenizer::sub_next() {
+    if (current_position == tokens.end()) {
+        return {};
+    }
+    else {
+        return *current_position++;
+    }
+}

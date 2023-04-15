@@ -30,13 +30,14 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include "CPUParser.h"
-#include "TokenizerFile.h"
-#include "Exception.h"
-#include "ParseException.h"
+
 #include "AddressingMode.h"
-#include "ParsedValue.h"
-#include "TokenizerSequence.h"
+#include "CPUGetter.h"
+#include "Exception.h"
 #include "ExpressionParser.h"
+#include "ParseException.h"
+#include "ParsedValue.h"
+#include "SequenceTokenizer.h"
 #include "VariableExpression.h"
 
 
@@ -80,7 +81,7 @@ void CPUParser::initialize() {
     }
 }
 
-CPUParser::CPUParser() {
+CPUParser::CPUParser(): FileParser(CPUGetter::global.path) {
     initialize();
 
     tokenizer.add_punctuations({"-", ","});
@@ -93,7 +94,7 @@ CPU CPUParser::parse(Symbol file_name) {
     cpu = CPU();
 
     if (!parse_file(file_name)) {
-        throw Exception("can't parse object file '%s'", file_name.c_str());
+        throw Exception("can't parse CPU file '%s'", file_name.c_str());
     }
     return std::move(cpu);
 }
@@ -175,7 +176,7 @@ void CPUParser::parse_addressing_mode() {
         addressing_mode.encoding = {std::make_shared<VariableExpression>(token_opcode)};
     }
     else if (encoding_definition->is_scalar()) {
-        auto encoding_tokenizer = TokenizerSequence(encoding_definition->as_scalar()->tokens);
+        auto encoding_tokenizer = SequenceTokenizer(encoding_definition->as_scalar()->tokens);
         auto encoding = ExpressionParser(encoding_tokenizer).parse_list();
 
         for (auto& expression: encoding) {
@@ -215,10 +216,10 @@ void CPUParser::parse_argument_type() {
 }
 
 void CPUParser::parse_byte_order() {
-    Token byte_order = tokenizer.expect(Token::INTEGER, group_directive);
+    Token byte_order = tokenizer.expect(Token::VALUE, group_directive);
     tokenizer.skip(Token::NEWLINE);
 
-    cpu.byte_order = byte_order.as_integer();
+    cpu.byte_order = byte_order.as_unsigned();
 }
 
 
@@ -227,7 +228,7 @@ void CPUParser::parse_instruction() {
 
     if (name == ParsedValue::token_curly_open) {
         tokenizer.unget(name);
-        name = Token(Token::NAME, name.location, static_cast<Symbol>(0));
+        name = Token(Token::NAME, name.location, Symbol());
     }
     else if (name.get_type() != Token::NAME) {
         throw ParseException(name, "expected name or '{'");
@@ -251,10 +252,10 @@ void CPUParser::parse_instruction() {
         if (it != instruction.opcodes.end()) {
             throw ParseException(pair.first, "redefinition of addressing mode");
         }
-        if (!pair.second->is_singular_scalar() || !pair.second->as_scalar()->token().is_integer()) {
-            throw ParseException(pair.second->location, "opcode must be integer");
+        if (!pair.second->is_singular_scalar() || !pair.second->as_scalar()->token().is_unsigned()) {
+            throw ParseException(pair.second->location, "opcode must be unsigned integer");
         }
-        instruction.opcodes[pair.first.as_symbol()] = pair.second->as_scalar()->token().as_integer();
+        instruction.opcodes[pair.first.as_symbol()] = pair.second->as_scalar()->token().as_unsigned();
     }
 }
 
@@ -308,7 +309,7 @@ std::unique_ptr<ArgumentType> CPUParser::parse_argument_type_enum(const Token& n
         }
         auto symbol = pair.first.as_symbol();
         cpu.add_reserved_word(symbol);
-        argument_type->entries[symbol] = value.as_integer();
+        argument_type->entries[symbol] = value.as_value();
     }
 
     return argument_type;
@@ -332,7 +333,7 @@ std::unique_ptr<ArgumentType> CPUParser::parse_argument_type_map(const Token& na
         if (!value.is_integer()) {
             throw ParseException(pair.first, "key for enum argument type '%s' must be integer", name.as_string().c_str());
         }
-        argument_type->entries[pair.first.as_integer()] = value.as_integer();
+        argument_type->entries[pair.first.as_value()] = value.as_value();
     }
 
     return argument_type;
@@ -347,9 +348,8 @@ std::unique_ptr<ArgumentType> CPUParser::parse_argument_type_range(const Token& 
     auto limits = parameters->as_scalar();
     if (limits->size() == 3) {
         if ((*limits)[0].is_integer() && (*limits)[1] == token_comma && (*limits)[2].is_integer()) {
-            // TODO: check for overflow
-            argument_type->lower_bound = static_cast<int64_t>((*limits)[0].as_integer());
-            argument_type->upper_bound = (*limits)[2].as_integer();
+            argument_type->lower_bound = (*limits)[0].as_value();
+            argument_type->upper_bound = (*limits)[2].as_value();
         }
         else {
             throw ParseException(limits->location, "invalid definition of range argument type '%s'", name.as_string().c_str());
@@ -357,9 +357,8 @@ std::unique_ptr<ArgumentType> CPUParser::parse_argument_type_range(const Token& 
     }
     else if (limits->size() == 4) {
         if ((*limits)[0] == token_minus && (*limits)[1].is_integer() && (*limits)[2] == token_comma && (*limits)[3].is_integer()) {
-            // TODO: check for overflow
-            argument_type->lower_bound = -static_cast<int64_t>((*limits)[1].as_integer());
-            argument_type->upper_bound = (*limits)[3].as_integer();
+            argument_type->lower_bound = -(*limits)[1].as_value();
+            argument_type->upper_bound = (*limits)[3].as_value();
         }
         else {
             throw ParseException(limits->location, "invalid definition of range argument type '%s'", name.as_string().c_str());

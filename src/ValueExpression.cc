@@ -1,9 +1,9 @@
 /*
-TokenizerSequence.cc -- 
+ValueExpression.cc --
 
 Copyright (C) Dieter Baron
 
-The authors can be contacted at <accelerate@tpau.group>
+The authors can be contacted at <assembler@tpau.group>
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions
@@ -29,13 +29,35 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "TokenizerSequence.h"
+#include "ValueExpression.h"
 
-Token TokenizerSequence::sub_next() {
-    if (current_position == tokens.end()) {
-        return {};
+#include "ParseException.h"
+
+ValueExpression::ValueExpression(const Token &token) {
+    if (!token.is_value()) {
+        throw ParseException(token, "internal error: can't create value node from %s", token.type_name());
+    }
+    value_ = token.as_value();
+    set_byte_size(token.byte_size > 0 ? token.byte_size : value_.minimum_byte_size());
+}
+
+
+std::shared_ptr<Expression> ValueExpression::clone() const {
+    auto node = std::make_shared<ValueExpression>(value());
+    node->set_byte_size(byte_size());
+    return node;
+}
+
+
+void ValueExpression::serialize_sub(std::ostream &stream) const {
+    auto width = static_cast<int>(byte_size() > 0 ? byte_size() : minimum_byte_size()) * 2;
+    uint64_t v;
+    if (value().is_signed()) {
+        stream << "-";
+        v = -value().signed_value();
     }
     else {
-        return *current_position++;
+        v = value().unsigned_value();
     }
+    stream << "$" << std::setfill('0') << std::setw(width) << std::hex << v << std::dec;
 }

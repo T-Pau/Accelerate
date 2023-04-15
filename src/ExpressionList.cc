@@ -71,7 +71,16 @@ std::string ExpressionList::bytes(uint64_t byte_order) const {
             size = expression->minimum_byte_size();
         }
 
-        Int::encode(data, expression->value(), size, byte_order);
+        auto value = expression->value();
+        if (value.is_unsigned()) {
+            Int::encode(data, value.unsigned_value(), size, byte_order);
+        }
+        else if (value.is_signed()) {
+            Int::encode(data, value.signed_value(), size, byte_order);
+        }
+        else {
+            throw ParseException(expression->location, "can't encode %s", value.type_name().c_str());
+        }
     }
 
     return data;

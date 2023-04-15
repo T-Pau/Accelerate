@@ -17,6 +17,7 @@ public:
     explicit Target(Symbol name): name(name) {}
 
     static const Target& get(Symbol name);
+    static const Target& get(const std::string& name) {return get(Symbol(name));}
     static const Target empty;
 
     [[nodiscard]] bool is_compatible_with(const Target& other) const; // this has everything from other

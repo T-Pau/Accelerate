@@ -41,7 +41,8 @@ public:
     static TargetGetter global;
 
 protected:
-    Target parse(Symbol filename) override {return TargetParser().parse(filename);}
+    [[nodiscard]] std::string filename_extension() const override {return ".target";}
+    Target parse(Symbol name, Symbol filename) override {return TargetParser().parse(name, filename);}
 };
 
 

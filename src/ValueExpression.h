@@ -1,5 +1,5 @@
 /*
-IntegerExpression.cc -- 
+ValueExpression.h --
 
 Copyright (C) Dieter Baron
 
@@ -29,30 +29,34 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "IntegerExpression.h"
+#ifndef VALUE_EXPRESSION_H
+#define VALUE_EXPRESSION_H
 
-#include "ParseException.h"
+#include "Expression.h"
 
-IntegerExpression::IntegerExpression(const Token &token) {
-    if (!token.is_integer()) {
-        throw ParseException(token, "internal error: can't create integer node from %s", token.type_name());
-    }
-    value_ = static_cast<int64_t>(token.as_integer()); // TODO: handle overflow
-    set_byte_size(token.byte_size > 0 ? token.byte_size : Int::minimum_byte_size(value_));
-}
+class ValueExpression: public Expression {
+public:
+    explicit ValueExpression(const Token& token);
+    explicit ValueExpression(Value value): value_(value) {set_byte_size(value.minimum_byte_size());}
+    explicit ValueExpression(uint64_t value): ValueExpression(Value(value)) {}
 
+    [[nodiscard]] Type type() const override {return VALUE;}
 
-std::shared_ptr<Expression> IntegerExpression::clone() const {
-    auto node = std::make_shared<IntegerExpression>(value());
-    node->set_byte_size(byte_size());
-    return node;
-}
+    [[nodiscard]] bool has_value() const override {return true;}
+    [[nodiscard]] Value value() const override {return value_;}
+    [[nodiscard]] size_t minimum_byte_size() const override {return value().minimum_byte_size();}
+    void replace_variables(Symbol (*transform)(Symbol)) override {}
 
+    void collect_variables(std::vector<Symbol>& variables) const override {}
 
-void IntegerExpression::serialize_sub(std::ostream &stream) const {
-    auto width = static_cast<int>(byte_size() > 0 ? byte_size() : minimum_byte_size()) * 2;
-    if (value() < 0) {
-        stream << "-";
-    }
-    stream << "$" << std::setfill('0') << std::setw(width) << std::hex << std::abs(value()) << std::dec;
-}
+protected:
+    [[nodiscard]] std::shared_ptr<Expression> evaluate(const Environment &environment) const override {return {};}
+    [[nodiscard]] std::shared_ptr<Expression> clone() const override;
+
+    void serialize_sub(std::ostream& stream) const override;
+
+private:
+    Value value_;
+};
+
+#endif // VALUE_EXPRESSION_H

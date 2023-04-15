@@ -34,7 +34,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "ObjectFile.h"
 #include "Target.h"
-#include "TokenizerFile.h"
+#include "FileTokenizer.h"
 #include "Object.h"
 
 class Assembler {
@@ -66,7 +66,7 @@ private:
     std::shared_ptr<Environment> file_environment;
     std::shared_ptr<Environment> current_environment;
 
-    TokenizerFile tokenizer;
+    FileTokenizer tokenizer;
     ObjectFile object_file;
 
     static void initialize();

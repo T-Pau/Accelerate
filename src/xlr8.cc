@@ -41,6 +41,8 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ObjectFileParser.h"
 #include "TargetGetter.h"
 #include "Util.h"
+#include "config.h"
+#include "CPUGetter.h"
 
 class xlr8: public Command {
 public:
@@ -66,6 +68,7 @@ private:
     std::unique_ptr<Linker> linker;
     Path library_path;
     Path include_path;
+    Path system_path;
 
     std::vector<File> files;
 };
@@ -74,6 +77,7 @@ std::vector<Commandline::Option> xlr8::options = {
         Commandline::Option("compile", 'c', "compile only, don't link"),
         Commandline::Option("include-directory", 'I', "directory", "search for sources in DIRECTORY"),
         Commandline::Option("library-directory", 'L', "directory", "search for libraries in DIRECTORY"),
+        Commandline::Option("system-directory", "directory", "search for system files in DIRECTORY"),
         Commandline::Option("target", "file", "read target definition from FILE"),
 };
 
@@ -100,6 +104,9 @@ void xlr8::process() {
             else if (option.name == "library-directory") {
                 library_path.append_directory(option.argument);
             }
+            else if (option.name == "system-directory") {
+                system_path.append_directory(option.argument);
+            }
             else if (option.name == "target") {
                 target = option.argument;
             }
@@ -114,10 +121,13 @@ void xlr8::process() {
         FileReader::global.warning({}, "not linking, --library-path not used");
     }
 
-    // TODO: append default paths
+    system_path.append_path(include_path);
+    auto system_directory = getenv("XLR8_SYSTEM_DIRECTORY");
+    system_path.append_directory(system_directory ? system_directory : SYSTEM_DIRECTORY);
 
-    LibraryGetter::global.path = library_path;
-    TargetGetter::global.path = library_path;
+    LibraryGetter::global.path->append_path(library_path);
+    TargetGetter::global.path->append_path(system_path, "target");
+    CPUGetter::global.path->append_path(system_path, "cpu");
 
     if (!target.has_value()) {
         FileReader::global.error({}, "missing --target option");

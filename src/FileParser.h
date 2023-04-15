@@ -34,14 +34,17 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <unordered_map>
 
-#include "TokenizerFile.h"
+#include "FileTokenizer.h"
+#include "Path.h"
 
 class FileParser {
 public:
-    FileParser();
+    explicit FileParser(std::shared_ptr<Path> path = std::make_shared<Path>());
+
+    std::shared_ptr<Path> path;
 
 protected:
-    TokenizerFile tokenizer;
+    FileTokenizer tokenizer;
 
     bool parse_file(Symbol file_name);
 

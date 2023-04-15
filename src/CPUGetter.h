@@ -41,7 +41,8 @@ public:
     static CPUGetter global;
 
 protected:
-    CPU parse(Symbol filename) override {return CPUParser().parse(filename);}
+    std::string filename_extension() const override {return ".cpu";}
+    CPU parse(Symbol name, Symbol filename) override {return CPUParser().parse(filename);}
 };
 
 

@@ -31,7 +31,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "BinaryExpression.h"
 
-#include "IntegerExpression.h"
+#include "ValueExpression.h"
 #include "VariableExpression.h"
 
 BinaryExpression::BinaryExpression(std::shared_ptr<Expression> left, Operation operation,
@@ -133,7 +133,7 @@ std::shared_ptr<Expression> BinaryExpression::create(const std::shared_ptr<Expre
     if (left->has_value() && right->has_value()) {
         auto left_value = left->value();
         auto right_value = right->value();
-        int64_t value;
+        Value value;
 
         switch (operation) {
             case ADD:
@@ -179,21 +179,59 @@ std::shared_ptr<Expression> BinaryExpression::create(const std::shared_ptr<Expre
 
         // TODO: check byte_size
 
-        node = std::make_shared<IntegerExpression>(value);
+        node = std::make_shared<ValueExpression>(value);
     }
-    else if (operation == SUBTRACT && left->type() == BINARY && right->type() == BINARY) {
-        // This special case is for resolving relative addressing within an object: (object_name + N) - (object_name + M)
-        auto left_binary = std::dynamic_pointer_cast<BinaryExpression>(left);
-        auto right_binary = std::dynamic_pointer_cast<BinaryExpression>(right);
+    else if (operation == SUBTRACT) {
+        // This special case is for resolving relative addressing within an object.
+        if (left->type() == BINARY && right->type() == BINARY) {
+            // (object_name + N) - (object_name + M) -> N - M
+            auto left_binary = std::dynamic_pointer_cast<BinaryExpression>(left);
+            auto right_binary = std::dynamic_pointer_cast<BinaryExpression>(right);
 
-        if (left_binary->operation == ADD && right_binary->operation == ADD && left_binary->left->type() == VARIABLE && right_binary->left->type() == VARIABLE) {
-            auto left_left = std::dynamic_pointer_cast<VariableExpression>(left_binary->left);
-            auto right_left = std::dynamic_pointer_cast<VariableExpression>(right_binary->left);
-            if (left_left->variable() == right_left->variable()) {
-                node = create(left_binary->right, operation, right_binary->right, byte_size);
+            if (left_binary->operation == ADD && right_binary->operation == ADD &&
+                left_binary->left->type() == VARIABLE && right_binary->left->type() == VARIABLE) {
+                auto left_left = std::dynamic_pointer_cast<VariableExpression>(left_binary->left);
+                auto right_left = std::dynamic_pointer_cast<VariableExpression>(right_binary->left);
+                if (left_left->variable() == right_left->variable()) {
+                    node = create(left_binary->right, operation, right_binary->right, byte_size);
+                }
+            }
+        }
+        else if (left->type() == VARIABLE && right->type() == BINARY) {
+            // object_name - (object_name + M) -> M
+            auto left_variable = std::dynamic_pointer_cast<VariableExpression>(left);
+            auto right_binary = std::dynamic_pointer_cast<BinaryExpression>(right);
+
+            if (right_binary->operation == ADD && right_binary->left->type() == VARIABLE) {
+                auto right_left = std::dynamic_pointer_cast<VariableExpression>(right_binary->left);
+                if (left_variable->variable() == right_left->variable()) {
+                    node = right_binary->right->clone();
+                }
+            }
+        }
+        else if (left->type() == BINARY && right->type() == VARIABLE) {
+            // (object_name + N) - object_name -> N
+            auto left_binary = std::dynamic_pointer_cast<BinaryExpression>(left);
+            auto right_variable = std::dynamic_pointer_cast<VariableExpression>(right);
+
+            if (left_binary->operation == ADD && left_binary->left->type() == VARIABLE) {
+                auto left_left = std::dynamic_pointer_cast<VariableExpression>(left_binary->left);
+                if (left_left->variable() == right_variable->variable()) {
+                    node = left_binary->right->clone();
+                }
+            }
+        }
+        else if (left->type() == VARIABLE && right->type() == VARIABLE) {
+            // object_name - object_name -> 0
+            auto left_variable = std::dynamic_pointer_cast<VariableExpression>(left);
+            auto right_variable = std::dynamic_pointer_cast<VariableExpression>(right);
+            if (left_variable->variable() == right_variable->variable()) {
+                node = std::make_shared<ValueExpression>(0);
             }
         }
     }
+
+    // TODO: optimization for + or - 0, * or / 1
 
     if (!node) {
         node = std::make_shared<BinaryExpression>(left, operation, right);

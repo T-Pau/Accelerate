@@ -21,10 +21,9 @@ add_library(xlr8-library STATIC
         ExpressionParser.cc
         FileParser.cc
         FileReader.cc
-        Getter.cc
         Instruction.cc
         Int.cc
-        IntegerExpression.cc
+        ValueExpression.cc
         Linker.cc
         ObjectExpression.cc
         LibraryGetter.cc
@@ -48,8 +47,8 @@ add_library(xlr8-library STATIC
         TokenGroup.cc
         TokenNode.cc
         Tokenizer.cc
-        TokenizerFile.cc
-        TokenizerSequence.cc
+        FileTokenizer.cc
+        SequenceTokenizer.cc
         UnaryExpression.cc
         Value.cc
         VariableExpression.cc

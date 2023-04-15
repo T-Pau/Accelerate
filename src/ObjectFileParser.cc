@@ -34,7 +34,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ParsedValue.h"
 #include "ParseException.h"
 #include "ExpressionParser.h"
-#include "TokenizerSequence.h"
+#include "SequenceTokenizer.h"
 
 bool ObjectFileParser::initialized = false;
 std::unordered_map<Symbol, void (ObjectFileParser::*)()> ObjectFileParser::parser_methods;
@@ -103,7 +103,7 @@ void ObjectFileParser::parse_constant() {
 
     auto value = (*parameters)[token_value]->as_scalar();
     auto visibility = visibility_from_name((*parameters)[token_visibility]->as_singular_scalar()->token());
-    auto value_tokenizer = TokenizerSequence(value->tokens);
+    auto value_tokenizer = SequenceTokenizer(value->tokens);
     file.add_constant(name.as_symbol(), visibility, ExpressionParser(value_tokenizer).parse());
 }
 
@@ -124,26 +124,26 @@ void ObjectFileParser::parse_object() {
     auto alignment_value = parameters->get_optional(token_alignment);
     if (alignment_value != nullptr) {
         auto alignment = alignment_value->as_singular_scalar()->token();
-        if (!alignment.is_integer()) {
-            throw ParseException(alignment, "integer expected");
+        if (!alignment.is_unsigned()) {
+            throw ParseException(alignment, "unsigned integer expected");
         }
-        object->alignment = alignment.as_integer();
+        object->alignment = alignment.as_unsigned();
     }
 
     auto size = (*parameters)[token_size]->as_singular_scalar()->token();
-    if (!size.is_integer()) {
-        throw ParseException(size, "integer expected");
+    if (!size.is_unsigned()) {
+        throw ParseException(size, "unsigned integer expected");
     }
-    object->size = size.as_integer();
+    object->size = size.as_unsigned();
 
     auto data_value = parameters->get_optional(token_data);
     if (data_value != nullptr) {
-        auto tokenizer = TokenizerSequence(data_value->as_scalar()->tokens);
+        auto tokenizer = SequenceTokenizer(data_value->as_scalar()->tokens);
         object->append(ExpressionParser(tokenizer).parse_list());
     }
 }
 
-Object::Visibility ObjectFileParser::visibility_from_name(Token name) {
+Object::Visibility ObjectFileParser::visibility_from_name(const Token& name) {
     if (name == token_global) {
         return Object::GLOBAL;
     }

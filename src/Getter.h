@@ -41,22 +41,34 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 template <typename T>
 class Getter {
 public:
-    const T& get(Symbol name) {
-        auto it = instances.find(name);
+    const T& get(Symbol name, Symbol base = {}) {
+        auto base_filename = name.str();
+        if (!base_filename.ends_with(filename_extension())) {
+            base_filename += filename_extension();
+        }
+        auto filename = path->find(Symbol(base_filename), base);
+        if (filename.empty()) {
+            throw Exception("cannot find %s", base_filename.c_str());
+        }
+
+        auto it = instances.find(filename);
         if (it != instances.end()) {
             return it->second;
         }
-        auto pair = instances.insert({name, parse(name)});
+        auto pair = instances.insert({filename, parse(name, filename)});
         if (!pair.second) {
             throw Exception("internal error: can't insert '%s'", name.c_str());
         }
         return pair.first->second;
     }
 
-    Path path;
+    const T& get(const std::string& name) {return get(Symbol(name));}
+
+    std::shared_ptr<Path> path = std::make_shared<Path>();
 
 protected:
-    virtual T parse(Symbol filename) = 0;
+    [[nodiscard]] virtual std::string filename_extension() const = 0;
+    virtual T parse(Symbol name, Symbol filename) = 0;
 
 private:
     std::unordered_map<Symbol, T> instances;

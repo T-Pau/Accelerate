@@ -31,7 +31,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "UnaryExpression.h"
 
-#include "IntegerExpression.h"
+#include "ValueExpression.h"
 
 std::shared_ptr<Expression> UnaryExpression::create(Operation operation, std::shared_ptr<Expression> operand, size_t byte_size) {
     std::shared_ptr<Expression> node;
@@ -54,7 +54,7 @@ std::shared_ptr<Expression> UnaryExpression::create(Operation operation, std::sh
                 break;
 
             case LOW_BYTE:
-                value =value & 0xff;
+                value = value & 0xff;
                 break;
 
             case HIGH_BYTE:
@@ -66,7 +66,7 @@ std::shared_ptr<Expression> UnaryExpression::create(Operation operation, std::sh
                 break;
         }
 
-        node = std::make_shared<IntegerExpression>(value);
+        node = std::make_shared<ValueExpression>(value);
     }
     else {
         node = std::make_shared<UnaryExpression>(operation, operand);

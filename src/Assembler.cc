@@ -39,7 +39,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "TokenNode.h"
 #include "ExpressionParser.h"
 #include "ExpressionNode.h"
-#include "IntegerExpression.h"
+#include "ValueExpression.h"
 #include "VariableExpression.h"
 
 bool Assembler::initialized = false;
@@ -151,9 +151,8 @@ ObjectFile Assembler::parse(Symbol file_name) {
                     throw ParseException(token, "instruction not allowed outside symbol");
 
                 case Token::PUNCTUATION:
-                case Token::INTEGER:
+                case Token::VALUE:
                 case Token::PREPROCESSOR:
-                case Token::REAL:
                 case Token::STRING:
                 case Token::KEYWORD:
                     throw ParseException(token, "unexpected %s", token.type_name());
@@ -351,7 +350,7 @@ void Assembler::parse_instruction(const Token& name) {
                         if (!enum_type->has_entry(value_name)) {
                             throw ParseException((*it_arguments)->get_location(), "invalid enum argument");
                         }
-                        environment.add(it_notation->symbol, std::make_shared<IntegerExpression>(enum_type->entry(value_name)));
+                        environment.add(it_notation->symbol, std::make_shared<ValueExpression>(enum_type->entry(value_name)));
                         break;
                     }
 
@@ -368,7 +367,7 @@ void Assembler::parse_instruction(const Token& name) {
                         if (!map_type->has_entry(value)) {
                             throw ParseException((*it_arguments)->get_location(), "invalid map argument");
                         }
-                        environment.add(it_notation->symbol, std::make_shared<IntegerExpression>(map_type->entry(value)));
+                        environment.add(it_notation->symbol, std::make_shared<ValueExpression>(map_type->entry(value)));
                         break;
                     }
 
@@ -402,7 +401,7 @@ void Assembler::parse_instruction(const Token& name) {
             continue;
         }
 
-        environment.add(symbol_opcode, std::make_shared<IntegerExpression>(instruction->opcode(match.addressing_mode)));
+        environment.add(symbol_opcode, std::make_shared<ValueExpression>(instruction->opcode(match.addressing_mode)));
         environment.add(symbol_pc, get_pc());
 
         auto current_list = ExpressionList();
@@ -532,16 +531,16 @@ void Assembler::parse_symbol(Object::Visibility visibility, const Token &name) {
             value = Expression::evaluate(value, *file_environment);
 
             if (token == token_align) {
-                if (!value->has_value()) {
-                    throw ParseException(value->location, "alignment must be constant value");
+                if (!value->has_value() || !value->value().is_unsigned()) {
+                    throw ParseException(value->location, "alignment must be constant unsigned integer");
                 }
-                current_object->alignment = value->value();
+                current_object->alignment = value->value().unsigned_value();
             }
             else {
-                if (!value->has_value()) {
+                if (!value->has_value() || !value->value().is_unsigned()) {
                     throw ParseException(value->location, "reservation must be constant value");
                 }
-                current_object->size = value->value();
+                current_object->size = value->value().unsigned_value();
             }
         }
         else {
@@ -561,5 +560,5 @@ void Assembler::parse_symbol(Object::Visibility visibility, const Token &name) {
 }
 
 std::shared_ptr<Expression> Assembler::get_pc() const {
-    return BinaryExpression::create(std::make_shared<VariableExpression>(current_object->name), BinaryExpression::ADD, std::make_shared<IntegerExpression>(current_object->size));
+    return BinaryExpression::create(std::make_shared<VariableExpression>(current_object->name), BinaryExpression::ADD, std::make_shared<ValueExpression>(current_object->size));
 }

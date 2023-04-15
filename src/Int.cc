@@ -4,7 +4,7 @@
 
 #include "Int.h"
 
-size_t Int::minimum_byte_size(int64_t value) {
+size_t Int::minimum_byte_size(uint64_t value) {
     if (value > std::numeric_limits<uint32_t>::max()) {
         return 8;
     }
@@ -19,7 +19,38 @@ size_t Int::minimum_byte_size(int64_t value) {
     }
 }
 
-void Int::encode(std::string &bytes, int64_t value, uint64_t size, uint64_t byte_order) {
+size_t Int::minimum_byte_size(int64_t value) {
+    if (value >= 0) {
+        if (value > std::numeric_limits<int32_t>::max()) {
+            return 8;
+        }
+        else if (value > std::numeric_limits<int16_t>::max()) {
+            return 4;
+        }
+        else if (value > std::numeric_limits<int8_t>::max()) {
+            return 2;
+        }
+        else {
+            return 1;
+        }
+    }
+    else {
+        if (value < std::numeric_limits<int32_t>::min()) {
+            return 8;
+        }
+        else if (value < std::numeric_limits<int16_t>::min()) {
+            return 4;
+        }
+        else if (value < std::numeric_limits<int8_t>::min()) {
+            return 2;
+        }
+        else {
+            return 1;
+        }
+    }
+}
+
+void Int::encode(std::string &bytes, uint64_t value, uint64_t size, uint64_t byte_order) {
     uint64_t mask = 10000000;
     for (auto index = 0; index < 8; index += 1) {
         uint64_t byte_index = (byte_order / mask) % 10 - 1;

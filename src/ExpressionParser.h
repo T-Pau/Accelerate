@@ -44,7 +44,7 @@ class ExpressionParser {
 public:
     explicit ExpressionParser(Tokenizer& tokenizer) : tokenizer(tokenizer) {}
 
-    static void setup(TokenizerFile& tokenizer);
+    static void setup(FileTokenizer& tokenizer);
 
     std::shared_ptr<Expression> parse() { top = Element({}, START); return do_parse();}
     std::shared_ptr<Expression> parse(const std::shared_ptr<Expression>& left) { top = Element(left, 0); return do_parse();}

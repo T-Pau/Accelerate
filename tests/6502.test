@@ -1,0 +1,112 @@
+description Test 6502 CPU definition
+arguments -c --target 6502 6502.s
+file 6502.s <inline>
+.section code
+.global test_adc {
+    adc #$12
+    adc $12
+    adc $12,x
+    adc $1234
+    adc $1234,x
+    adc $1234,y
+    adc ($12,x)
+    adc ($12),y
+}
+.global test_and {
+    and #$12
+    and $12
+    and $12,x
+    and $1234
+    and $1234,x
+    and $1234,y
+    and ($12,x)
+    and ($12),y
+}
+.global test_asl {
+    asl
+    asl a
+    asl $12
+    asl $12,x
+    asl $1234
+    asl $1234,x
+}
+.global test_bcc {
+    bcc test_bcc
+}
+.global test_bcs {
+    bcs test_bcs
+}
+.global test_beq {
+    beq test_beq
+}
+.global test_bit {
+    bit $12
+    bit $1234
+}
+.global test_bmi {
+    bmi test_bmi
+}
+.global test_bne {
+    bne test_bne
+}
+end-of-inline-data
+file 6502.o {} <inline>
+.format_version 1.0
+
+.target "6502"
+
+.object test_adc {
+    section: code
+    size: 19
+    visibility: global
+    data: $69, $12, $65, $12, $75, $12, $6d, $1234, $7d, $1234, $79, $1234, $61, $12, $71, $12
+}
+.object test_and {
+    section: code
+    size: 19
+    visibility: global
+    data: $29, $12, $25, $12, $35, $12, $2d, $1234, $3d, $1234, $39, $1234, $21, $12, $31, $12
+}
+.object test_asl {
+    section: code
+    size: 12
+    visibility: global
+    data: $0a, $0a, $06, $12, $16, $12, $0e, $1234, $1e, $1234
+}
+.object test_bcc {
+    section: code
+    size: 2
+    visibility: global
+    data: $90, -$02
+}
+.object test_bcs {
+    section: code
+    size: 2
+    visibility: global
+    data: $b0, -$02
+}
+.object test_beq {
+    section: code
+    size: 2
+    visibility: global
+    data: $f0, -$02
+}
+.object test_bit {
+    section: code
+    size: 5
+    visibility: global
+    data: $24, $12, $2c, $1234
+}
+.object test_bmi {
+    section: code
+    size: 2
+    visibility: global
+    data: $30, -$02
+}
+.object test_bne {
+    section: code
+    size: 2
+    visibility: global
+    data: $d0, -$02
+}
+end-of-inline-data

@@ -41,7 +41,7 @@ class TargetParser: public FileParser {
 public:
     TargetParser();
 
-    Target parse(Symbol file_name);
+    Target parse(Symbol name, Symbol file_name);
 
     static Token token_data_end;
     static Token token_data_start;

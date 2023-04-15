@@ -44,7 +44,7 @@ class CPUParser;
 
 class CPU {
 public:
-    static const CPU& get(Symbol name);
+    static const CPU& get(Symbol name, Symbol base = {});
     static const CPU empty;
 
     [[nodiscard]] bool is_compatible_with(const CPU& other) const; // this has everything from other
@@ -57,7 +57,7 @@ public:
 
     [[nodiscard]] std::unordered_set<AddressingModeMatcherResult> match_addressing_modes(const std::vector<std::shared_ptr<Node>>& arguments) const {return addressing_mode_matcher.match(arguments);}
 
-    void setup(TokenizerFile& tokenizer) const;
+    void setup(FileTokenizer& tokenizer) const;
 
     [[nodiscard]] bool uses_empty_mnemonic() const {return instructions.find(Symbol()) != instructions.end();}
     [[nodiscard]] bool uses_braces() const {return uses_punctuation(Symbol("("));}
