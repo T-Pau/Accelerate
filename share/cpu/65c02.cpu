@@ -29,76 +29,98 @@
 
 .include "6502.cpu"
 
+.addressing_mode zero_page_indirect {
+    notation: (address)
+    arguments {
+        address: byte
+    }
+    encoding: .opcode, address
+}
+
+.addressing_mode absolute_x_indexed_indirect {
+    notation: (address,x)
+    arguments {
+        address: word
+    }
+    encoding: .opcode, address
+}
+
 .instruction adc {
-    indirect: $72
+    zero_page_indirect: $72
 }
 
 .instruction and {
-    indirect: $32
+    zero_page_indirect: $32
 }
 
 .instruction bbr0 {
-    zero_page: $0f
+    relative: $0f
 }
 
 .instruction bbr1 {
-    zero_page: $1f
+    relative: $1f
 }
 
 .instruction bbr2 {
-    zero_page: $2f
+    relative: $2f
 }
 
 .instruction bbr3 {
-    zero_page: $3f
+    relative: $3f
 }
 
 .instruction bbr4 {
-    zero_page: $4f
+    relative: $4f
 }
 
 .instruction bbr5 {
-    zero_page: $5f
+    relative: $5f
 }
 
 .instruction bbr6 {
-    zero_page: $6f
+    relative: $6f
 }
 
 .instruction bbr7 {
-    zero_page: $7f
+    relative: $7f
 }
 
 .instruction bbs0 {
-    zero_page: $8f
+    relative: $8f
 }
 
 .instruction bbs1 {
-    zero_page: $9f
+    relative: $9f
 }
 
 .instruction bbs2 {
-    zero_page: $af
+    relative: $af
 }
 
 .instruction bbs3 {
-    zero_page: $bf
+    relative: $bf
 }
 
 .instruction bbs4 {
-    zero_page: $cf
+    relative: $cf
 }
 
 .instruction bbs5 {
-    zero_page: $df
+    relative: $df
 }
 
 .instruction bbs6 {
-    zero_page: $ef
+    relative: $ef
 }
 
 .instruction bbs7 {
-    zero_page: $ff
+    relative: $ff
+}
+
+.instruction bit {
+    immediate: $89
+    zero_page_x_indexed: $34
+    absolute_x_indexed: $3c
 }
 
 .instruction bra {
@@ -106,11 +128,7 @@
 }
 
 .instruction cmp {
-    indirect: $d2
-}
-
-.instruction dea {
-    implied: $3a
+    zero_page_indirect: $d2
 }
 
 .instruction dec {
@@ -118,7 +136,7 @@
 }
 
 .instruction eor {
-    indirect: $52
+    zero_page_indirect: $52
 }
 
 .instruction ina {
@@ -130,15 +148,15 @@
 }
 
 .instruction jmp {
-    x_indexed_indirect: $7c
+    absolute_x_indexed_indirect: $7c
 }
 
 .instruction lda {
-    indirect: $b2
+    zero_page_indirect: $b2
 }
 
 .instruction ora {
-    indirect: $12
+    zero_page_indirect: $12
 }
 
 .instruction phx {
@@ -190,7 +208,7 @@
 }
 
 .instruction sbc {
-    indirect: $f2
+    zero_page_indirect: $f2
 }
 
 .instruction smb0 {
@@ -226,7 +244,7 @@
 }
 
 .instruction sta {
-    indirect: $92
+    zero_page_indirect: $92
 }
 
 .instruction stp {
