@@ -316,7 +316,7 @@
 
 .instruction ldy {
     absolute: $ac
-    absolute_y_indexed: $bc
+    absolute_x_indexed: $bc
     immediate: $a0
     zero_page: $a4
     zero_page_x_indexed: $b4
@@ -370,8 +370,8 @@
 }
 
 .instruction ror {
-    absolute: $7e
-    absolute_x_indexed: $6e
+    absolute: $6e
+    absolute_x_indexed: $7e
     accumulator: $6a
     zero_page: $66
     zero_page_x_indexed: $76
