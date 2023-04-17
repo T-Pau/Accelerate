@@ -78,7 +78,7 @@
     encoding: .opcode, address - .pc - 2 : 1
 }
 
-.addressing_mode indirect {
+.addressing_mode absolute_indirect {
     notation: (address)
     arguments {
         address: word
@@ -288,7 +288,7 @@
 
 .instruction jmp {
     absolute: $4c
-    indirect: $6c
+    absolute_indirect: $6c
 }
 
 .instruction jsr {

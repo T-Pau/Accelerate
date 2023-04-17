@@ -1,0 +1,1230 @@
+description Test 4510 CPU definition
+arguments -c --target 4510 4510.s
+file 4510.s <inline>
+.section code
+.global test_adc {
+    adc #$12
+    adc $12
+    adc $12,x
+    adc $1234
+    adc $1234,x
+    adc $1234,y
+    adc ($12,x)
+    adc ($12),y
+    adc ($12),z
+}
+.global test_and {
+    and #$12
+    and $12
+    and $12,x
+    and $1234
+    and $1234,x
+    and $1234,y
+    and ($12,x)
+    and ($12),y
+    and ($12),z
+}
+.global test_asl {
+    asl
+    asl a
+    asl $12
+    asl $12,x
+    asl $1234
+    asl $1234,x
+}
+.global test_asr {
+    asr
+    asr a
+    asr $12
+    asr $12,x
+}
+.global test_asw {
+    asw $1234
+}
+.global test_bbr0 {
+    bbr0 test_bbr0
+}
+.global test_bbr1 {
+    bbr1 test_bbr1
+}
+.global test_bbr2 {
+    bbr2 test_bbr2
+}
+.global test_bbr3 {
+    bbr3 test_bbr3
+}
+.global test_bbr4 {
+    bbr4 test_bbr4
+}
+.global test_bbr5 {
+    bbr5 test_bbr5
+}
+.global test_bbr6 {
+    bbr6 test_bbr6
+}
+.global test_bbr7 {
+    bbr7 test_bbr7
+}
+.global test_bbs0 {
+    bbs0 test_bbs0
+}
+.global test_bbs1 {
+    bbs1 test_bbs1
+}
+.global test_bbs2 {
+    bbs2 test_bbs2
+}
+.global test_bbs3 {
+    bbs3 test_bbs3
+}
+.global test_bbs4 {
+    bbs4 test_bbs4
+}
+.global test_bbs5 {
+    bbs5 test_bbs5
+}
+.global test_bbs6 {
+    bbs6 test_bbs6
+}
+.global test_bbs7 {
+    bbs7 test_bbs7
+}
+.global test_bcc {
+    bcc test_bcc
+    bcc $1234
+}
+.global test_bcs {
+    bcs test_bcs
+    bcs $1234
+}
+.global test_beq {
+    beq test_beq
+    beq $1234
+}
+.global test_bit {
+    bit #$12
+    bit $12
+    bit $12,x
+    bit $1234
+    bit $1234,x
+}
+.global test_bmi {
+    bmi test_bmi
+    bmi $1234
+}
+.global test_bne {
+    bne test_bne
+    bne $1234
+}
+.global test_bpl {
+    bpl test_bpl
+    bpl $1234
+}
+.global test_brk {
+    brk
+}
+.global test_bru {
+    bru test_bru
+    bru $1234
+}
+.global test_bsr {
+    bsr $1234
+}
+.global test_bvc {
+    bvc test_bvc
+    bvc $1234
+}
+.global test_bvs {
+    bvs test_bvs
+    bvs $1234
+}
+.global test_clc {
+    clc
+}
+.global test_cld {
+    cld
+}
+.global test_cle {
+    cle
+}
+.global test_cli {
+    cli
+}
+.global test_clv {
+    clv
+}
+.global test_cmp {
+    cmp #$12
+    cmp $12
+    cmp $12,x
+    cmp $1234
+    cmp $1234,x
+    cmp $1234,y
+    cmp ($12,x)
+    cmp ($12),y
+    cmp ($12),z
+}
+.global test_cpx {
+    cpx #$12
+    cpx $12
+    cpx $1234
+}
+.global test_cpy {
+    cpy #$12
+    cpy $12
+    cpy $1234
+}
+.global test_cpz {
+    cpz #$12
+    cpz $12
+    cpz $1234
+}
+.global test_dec {
+    dec
+    dec a
+    dec $12
+    dec $12,x
+    dec $1234
+    dec $1234,x
+}
+.global test_dew {
+    dew $12
+}
+.global test_dex {
+    dex
+}
+.global test_dey {
+    dey
+}
+.global test_dez {
+    dez
+}
+.global test_eor {
+    eor #$12
+    eor $12
+    eor $12,x
+    eor $1234
+    eor $1234,x
+    eor $1234,y
+    eor ($12,x)
+    eor ($12),y
+    eor ($12),z
+}
+.global test_inc {
+    inc
+    inc a
+    inc $12
+    inc $12,x
+    inc $1234
+    inc $1234,x
+}
+.global test_inw {
+    inw $12
+}
+.global test_inx {
+    inx
+}
+.global test_iny {
+    iny
+}
+.global test_inz {
+    inz
+}
+.global test_jmp {
+    jmp $1234
+    jmp ($1234)
+    jmp ($1234,x)
+}
+.global test_jsr {
+    jsr $1234
+    jsr ($1234)
+    jsr ($1234,x)
+}
+.global test_lda {
+    lda #$12
+    lda $12
+    lda $12,x
+    lda $1234
+    lda $1234,x
+    lda $1234,y
+    lda ($12,x)
+    lda ($12),y
+    lda ($12),z
+    lda ($12,sp),y
+}
+.global test_ldx {
+    ldx #$12
+    ldx $12
+    ldx $12,y
+    ldx $1234
+    ldx $1234,y
+}
+.global test_ldy {
+    ldy #$12
+    ldy $12
+    ldy $12,x
+    ldy $1234
+    ldy $1234,x
+}
+.global test_ldz {
+    ldz #$12
+    ldz $1234
+    ldz $1234,x
+}
+.global test_lsr {
+    lsr
+    lsr a
+    lsr $12
+    lsr $12,x
+    lsr $1234
+    lsr $1234,x
+}
+.global test_map {
+    map
+}
+.global test_neg {
+    neg
+    neg a
+}
+.global test_nop {
+    nop
+}
+.global test_ora {
+    ora #$12
+    ora $12
+    ora $12,x
+    ora $1234
+    ora $1234,x
+    ora $1234,y
+    ora ($12,x)
+    ora ($12),y
+    ora ($12),z
+}
+.global test_pha {
+    pha
+}
+.global test_php {
+    php
+}
+.global test_phw {
+    phw #$1234
+    phw $1234
+}
+.global test_phx {
+    phx
+}
+.global test_phy {
+    phy
+}
+.global test_phz {
+    phz
+}
+.global test_pla {
+    pla
+}
+.global test_plp {
+    plp
+}
+.global test_plx {
+    plx
+}
+.global test_ply {
+    ply
+}
+.global test_plz {
+    plz
+}
+.global test_rmb0 {
+    rmb0 $12
+}
+.global test_rmb1 {
+    rmb1 $12
+}
+.global test_rmb2 {
+    rmb2 $12
+}
+.global test_rmb3 {
+    rmb3 $12
+}
+.global test_rmb4 {
+    rmb4 $12
+}
+.global test_rmb5 {
+    rmb5 $12
+}
+.global test_rmb6 {
+    rmb6 $12
+}
+.global test_rmb7 {
+    rmb7 $12
+}
+.global test_rol {
+    rol
+    rol a
+    rol $12
+    rol $12,x
+    rol $1234
+    rol $1234,x
+}
+.global test_ror {
+    ror
+    ror a
+    ror $12
+    ror $12,x
+    ror $1234
+    ror $1234,x
+}
+.global test_row {
+    row $1234
+}
+.global test_rti {
+    rti
+}
+.global test_rtn {
+    rtn #$12
+}
+.global test_rts {
+    rts
+}
+.global test_sbc {
+    sbc #$12
+    sbc $12
+    sbc $12,x
+    sbc $1234
+    sbc $1234,x
+    sbc $1234,y
+    sbc ($12,x)
+    sbc ($12),y
+    sbc ($12),z
+}
+.global test_sec {
+    sec
+}
+.global test_sed {
+    sed
+}
+.global test_see {
+    see
+}
+.global test_sei {
+    sei
+}
+.global test_smb0 {
+    smb0 $12
+}
+.global test_smb1 {
+    smb1 $12
+}
+.global test_smb2 {
+    smb2 $12
+}
+.global test_smb3 {
+    smb3 $12
+}
+.global test_smb4 {
+    smb4 $12
+}
+.global test_smb5 {
+    smb5 $12
+}
+.global test_smb6 {
+    smb6 $12
+}
+.global test_smb7 {
+    smb7 $12
+}
+.global test_sta {
+    sta $12
+    sta $12,x
+    sta $1234
+    sta $1234,x
+    sta $1234,y
+    sta ($12,x)
+    sta ($12),y
+    sta ($12),z
+    sta ($12,sp),y
+}
+.global test_stx {
+    stx $12
+    stx $12,y
+    stx $1234
+    stx $1234,y
+}
+.global test_sty {
+    sty $12
+    sty $12,x
+    sty $1234
+    sty $1234,x
+}
+.global test_stz {
+    stz $12
+    stz $12,x
+    stz $1234
+    stz $1234,x
+}
+.global test_tab {
+    tab
+}
+.global test_tax {
+    tax
+}
+.global test_tay {
+    tay
+}
+.global test_taz {
+    taz
+}
+.global test_tba {
+    tba
+}
+.global test_trb {
+    trb $12
+    trb $1234
+}
+.global test_tsb {
+    tsb $12
+    tsb $1234
+}
+.global test_tsx {
+    tsx
+}
+.global test_tsy {
+    tsy
+}
+.global test_txa {
+    txa
+}
+.global test_txs {
+    txs
+}
+.global test_tya {
+    tya
+}
+.global test_tys {
+    tys
+}
+.global test_tza {
+    tza
+}
+end-of-inline-data
+file 4510.o {} <inline>
+.format_version 1.0
+
+.target "4510"
+
+.object test_adc {
+    section: code
+    size: 21
+    visibility: global
+    data: $69, $12, $65, $12, $75, $12, $6d, $1234, $7d, $1234, $79, $1234, $61, $12, $71, $12, $72, $12
+}
+.object test_and {
+    section: code
+    size: 21
+    visibility: global
+    data: $29, $12, $25, $12, $35, $12, $2d, $1234, $3d, $1234, $39, $1234, $21, $12, $31, $12, $32, $12
+}
+.object test_asl {
+    section: code
+    size: 12
+    visibility: global
+    data: $0a, $0a, $06, $12, $16, $12, $0e, $1234, $1e, $1234
+}
+.object test_asr {
+    section: code
+    size: 6
+    visibility: global
+    data: $43, $43, $44, $12, $54, $12
+}
+.object test_asw {
+    section: code
+    size: 3
+    visibility: global
+    data: $cb, $1234
+}
+.object test_bbr0 {
+    section: code
+    size: 2
+    visibility: global
+    data: $0f, -$02
+}
+.object test_bbr1 {
+    section: code
+    size: 2
+    visibility: global
+    data: $1f, -$02
+}
+.object test_bbr2 {
+    section: code
+    size: 2
+    visibility: global
+    data: $2f, -$02
+}
+.object test_bbr3 {
+    section: code
+    size: 2
+    visibility: global
+    data: $3f, -$02
+}
+.object test_bbr4 {
+    section: code
+    size: 2
+    visibility: global
+    data: $4f, -$02
+}
+.object test_bbr5 {
+    section: code
+    size: 2
+    visibility: global
+    data: $5f, -$02
+}
+.object test_bbr6 {
+    section: code
+    size: 2
+    visibility: global
+    data: $6f, -$02
+}
+.object test_bbr7 {
+    section: code
+    size: 2
+    visibility: global
+    data: $7f, -$02
+}
+.object test_bbs0 {
+    section: code
+    size: 2
+    visibility: global
+    data: $8f, -$02
+}
+.object test_bbs1 {
+    section: code
+    size: 2
+    visibility: global
+    data: $9f, -$02
+}
+.object test_bbs2 {
+    section: code
+    size: 2
+    visibility: global
+    data: $af, -$02
+}
+.object test_bbs3 {
+    section: code
+    size: 2
+    visibility: global
+    data: $bf, -$02
+}
+.object test_bbs4 {
+    section: code
+    size: 2
+    visibility: global
+    data: $cf, -$02
+}
+.object test_bbs5 {
+    section: code
+    size: 2
+    visibility: global
+    data: $df, -$02
+}
+.object test_bbs6 {
+    section: code
+    size: 2
+    visibility: global
+    data: $ef, -$02
+}
+.object test_bbs7 {
+    section: code
+    size: 2
+    visibility: global
+    data: $ff, -$02
+}
+.object test_bcc {
+    section: code
+    size: 5
+    visibility: global
+    data: $90, -$02, $93, (($1234-(test_bcc+$02))-$02)
+}
+.object test_bcs {
+    section: code
+    size: 5
+    visibility: global
+    data: $b0, -$02, $b3, (($1234-(test_bcs+$02))-$02)
+}
+.object test_beq {
+    section: code
+    size: 5
+    visibility: global
+    data: $f0, -$02, $f3, (($1234-(test_beq+$02))-$02)
+}
+.object test_bit {
+    section: code
+    size: 12
+    visibility: global
+    data: $89, $12, $24, $12, $34, $12, $2c, $1234, $3c, $1234
+}
+.object test_bmi {
+    section: code
+    size: 5
+    visibility: global
+    data: $30, -$02, $33, (($1234-(test_bmi+$02))-$02)
+}
+.object test_bne {
+    section: code
+    size: 5
+    visibility: global
+    data: $d0, -$02, $d3, (($1234-(test_bne+$02))-$02)
+}
+.object test_bpl {
+    section: code
+    size: 5
+    visibility: global
+    data: $10, -$02, $13, (($1234-(test_bpl+$02))-$02)
+}
+.object test_brk {
+    section: code
+    size: 1
+    visibility: global
+    data: $00
+}
+.object test_bsr {
+    section: code
+    size: 3
+    visibility: global
+    data: $63, (($1234-(test_bsr+$00))-$02):2
+}
+.object test_bvc {
+    section: code
+    size: 5
+    visibility: global
+    data: $50, -$02, $53, (($1234-(test_bvc+$02))-$02)
+}
+.object test_bvs {
+    section: code
+    size: 5
+    visibility: global
+    data: $70, -$02, $73, (($1234-(test_bvs+$02))-$02)
+}
+.object test_clc {
+    section: code
+    size: 1
+    visibility: global
+    data: $18
+}
+.object test_cld {
+    section: code
+    size: 1
+    visibility: global
+    data: $d8
+}
+.object test_cle {
+    section: code
+    size: 1
+    visibility: global
+    data: $02
+}
+.object test_cli {
+    section: code
+    size: 1
+    visibility: global
+    data: $58
+}
+.object test_clv {
+    section: code
+    size: 1
+    visibility: global
+    data: $b8
+}
+.object test_cmp {
+    section: code
+    size: 21
+    visibility: global
+    data: $c9, $12, $c5, $12, $d5, $12, $cd, $1234, $dd, $1234, $d9, $1234, $c1, $12, $d1, $12, $d2, $12
+}
+.object test_cpx {
+    section: code
+    size: 7
+    visibility: global
+    data: $e0, $12, $e4, $12, $ec, $1234
+}
+.object test_cpy {
+    section: code
+    size: 7
+    visibility: global
+    data: $c0, $12, $c4, $12, $cc, $1234
+}
+.object test_cpz {
+    section: code
+    size: 7
+    visibility: global
+    data: $c2, $12, $d4, $12, $dc, $1234
+}
+.object test_dec {
+    section: code
+    size: 12
+    visibility: global
+    data: $3a, $3a, $c6, $12, $d6, $12, $ce, $1234, $de, $1234
+}
+.object test_dew {
+    section: code
+    size: 2
+    visibility: global
+    data: $c3, $12
+}
+.object test_dex {
+    section: code
+    size: 1
+    visibility: global
+    data: $ca
+}
+.object test_dey {
+    section: code
+    size: 1
+    visibility: global
+    data: $88
+}
+.object test_dez {
+    section: code
+    size: 1
+    visibility: global
+    data: $3b
+}
+.object test_eor {
+    section: code
+    size: 21
+    visibility: global
+    data: $49, $12, $45, $12, $55, $12, $4d, $1234, $5d, $1234, $59, $1234, $41, $12, $51, $12, $52, $12
+}
+.object test_inc {
+    section: code
+    size: 12
+    visibility: global
+    data: $1a, $1a, $e6, $12, $f6, $12, $ee, $1234, $fe, $1234
+}
+.object test_inw {
+    section: code
+    size: 2
+    visibility: global
+    data: $e3, $12
+}
+
+.object test_inx {
+    section: code
+    size: 1
+    visibility: global
+    data: $e8
+}
+.object test_iny {
+    section: code
+    size: 1
+    visibility: global
+    data: $c8
+}
+.object test_inz {
+    section: code
+    size: 1
+    visibility: global
+    data: $1b
+}
+.object test_jmp {
+    section: code
+    size: 9
+    visibility: global
+    data: $4c, $1234, $6c, $1234, $7c, $1234
+}
+.object test_jsr {
+    section: code
+    size: 9
+    visibility: global
+    data: $20, $1234, $22, $1234, $23, $1234
+}
+.object test_lda {
+    section: code
+    size: 23
+    visibility: global
+    data: $a9, $12, $a5, $12, $b5, $12, $ad, $1234, $bd, $1234, $b9, $1234, $a1, $12, $b1, $12, $b2, $12, $e2, $12
+}
+.object test_ldx {
+    section: code
+    size: 12
+    visibility: global
+    data: $a2, $12, $a6, $12, $b6, $12, $ae, $1234, $be, $1234
+}
+.object test_ldy {
+    section: code
+    size: 12
+    visibility: global
+    data: $a0, $12, $a4, $12, $b4, $12, $ac, $1234, $bc, $1234
+}
+.object test_ldz {
+    section: code
+    size: 8
+    visibility: global
+    data: $a3, $12, $ab, $1234, $bb, $1234
+}
+.object test_lsr {
+    section: code
+    size: 12
+    visibility: global
+    data: $4a, $4a, $46, $12, $56, $12, $4e, $1234, $5e, $1234
+}
+.object test_map {
+    section: code
+    size: 1
+    visibility: global
+    data: $5c
+}
+.object test_neg {
+    section: code
+    size: 2
+    visibility: global
+    data: $42, $42
+}
+.object test_nop {
+    section: code
+    size: 1
+    visibility: global
+    data: $ea
+}
+.object test_ora {
+    section: code
+    size: 21
+    visibility: global
+    data: $09, $12, $05, $12, $15, $12, $0d, $1234, $1d, $1234, $19, $1234, $01, $12, $11, $12, $12, $12
+}
+.object test_pha {
+    section: code
+    size: 1
+    visibility: global
+    data: $48
+}
+.object test_php {
+    section: code
+    size: 1
+    visibility: global
+    data: $08
+}
+.object test_phw {
+    section: code
+    size: 6
+    visibility: global
+    data: $f4, $1234, $fc, $1234
+}
+.object test_phx {
+    section: code
+    size: 1
+    visibility: global
+    data: $da
+}
+.object test_phy {
+    section: code
+    size: 1
+    visibility: global
+    data: $5a
+}
+.object test_phz {
+    section: code
+    size: 1
+    visibility: global
+    data: $db
+}
+.object test_pla {
+    section: code
+    size: 1
+    visibility: global
+    data: $68
+}
+.object test_plp {
+    section: code
+    size: 1
+    visibility: global
+    data: $28
+}
+.object test_plx {
+    section: code
+    size: 1
+    visibility: global
+    data: $fa
+}
+.object test_ply {
+    section: code
+    size: 1
+    visibility: global
+    data: $7a
+}
+.object test_plz {
+    section: code
+    size: 1
+    visibility: global
+    data: $fb
+}
+.object test_rmb0 {
+    section: code
+    size: 2
+    visibility: global
+    data: $07, $12
+}
+.object test_rmb1 {
+    section: code
+    size: 2
+    visibility: global
+    data: $17, $12
+}
+.object test_rmb2 {
+    section: code
+    size: 2
+    visibility: global
+    data: $27, $12
+}
+.object test_rmb3 {
+    section: code
+    size: 2
+    visibility: global
+    data: $37, $12
+}
+.object test_rmb4 {
+    section: code
+    size: 2
+    visibility: global
+    data: $47, $12
+}
+.object test_rmb5 {
+    section: code
+    size: 2
+    visibility: global
+    data: $57, $12
+}
+.object test_rmb6 {
+    section: code
+    size: 2
+    visibility: global
+    data: $67, $12
+}
+.object test_rmb7 {
+    section: code
+    size: 2
+    visibility: global
+    data: $77, $12
+}
+.object test_rol {
+    section: code
+    size: 12
+    visibility: global
+    data: $2a, $2a, $26, $12, $36, $12, $2e, $1234, $3e, $1234
+}
+.object test_ror {
+    section: code
+    size: 12
+    visibility: global
+    data: $6a, $6a, $66, $12, $76, $12, $6e, $1234, $7e, $1234
+}
+.object test_row {
+    section: code
+    size: 3
+    visibility: global
+    data: $eb, $1234
+}
+.object test_rti {
+    section: code
+    size: 1
+    visibility: global
+    data: $40
+}
+.object test_rtn {
+    section: code
+    size: 2
+    visibility: global
+    data: $62, $12
+}
+.object test_rts {
+    section: code
+    size: 1
+    visibility: global
+    data: $60
+}
+.object test_sbc {
+    section: code
+    size: 21
+    visibility: global
+    data: $e9, $12, $e5, $12, $f5, $12, $ed, $1234, $fd, $1234, $f9, $1234, $e1, $12, $f1, $12, $f2, $12
+}
+.object test_sec {
+    section: code
+    size: 1
+    visibility: global
+    data: $38
+}
+.object test_sed {
+    section: code
+    size: 1
+    visibility: global
+    data: $f8
+}
+.object test_see {
+    section: code
+    size: 1
+    visibility: global
+    data: $03
+}
+.object test_sei {
+    section: code
+    size: 1
+    visibility: global
+    data: $78
+}
+.object test_smb0 {
+    section: code
+    size: 2
+    visibility: global
+    data: $87, $12
+}
+.object test_smb1 {
+    section: code
+    size: 2
+    visibility: global
+    data: $97, $12
+}
+.object test_smb2 {
+    section: code
+    size: 2
+    visibility: global
+    data: $a7, $12
+}
+.object test_smb3 {
+    section: code
+    size: 2
+    visibility: global
+    data: $b7, $12
+}
+.object test_smb4 {
+    section: code
+    size: 2
+    visibility: global
+    data: $c7, $12
+}
+.object test_smb5 {
+    section: code
+    size: 2
+    visibility: global
+    data: $d7, $12
+}
+.object test_smb6 {
+    section: code
+    size: 2
+    visibility: global
+    data: $e7, $12
+}
+.object test_smb7 {
+    section: code
+    size: 2
+    visibility: global
+    data: $f7, $12
+}
+.object test_sta {
+    section: code
+    size: 21
+    visibility: global
+    data: $85, $12, $95, $12, $8d, $1234, $9d, $1234, $99, $1234, $81, $12, $91, $12, $92, $12, $82, $12
+}
+.object test_stx {
+    section: code
+    size: 10
+    visibility: global
+    data: $86, $12, $96, $12, $8e, $1234, $9b, $1234
+}
+.object test_sty {
+    section: code
+    size: 10
+    visibility: global
+    data: $84, $12, $94, $12, $8c, $1234, $8b, $1234
+}
+.object test_stz {
+    section: code
+    size: 10
+    visibility: global
+    data: $64, $12, $74, $12, $9c, $1234, $9e, $1234
+}
+.object test_tab {
+    section: code
+    size: 1
+    visibility: global
+    data: $5b
+}
+.object test_tax {
+    section: code
+    size: 1
+    visibility: global
+    data: $aa
+}
+.object test_tay {
+    section: code
+    size: 1
+    visibility: global
+    data: $a8
+}
+.object test_taz {
+    section: code
+    size: 1
+    visibility: global
+    data: $4b
+}
+.object test_tba {
+    section: code
+    size: 1
+    visibility: global
+    data: $7b
+}
+.object test_trb {
+    section: code
+    size: 5
+    visibility: global
+    data: $14, $12, $1c, $1234
+}
+.object test_tsb {
+    section: code
+    size: 5
+    visibility: global
+    data: $04, $12, $0c, $1234
+}
+.object test_tsx {
+    section: code
+    size: 1
+    visibility: global
+    data: $ba
+}
+.object test_tsy {
+    section: code
+    size: 1
+    visibility: global
+    data: $0b
+}
+.object test_txa {
+    section: code
+    size: 1
+    visibility: global
+    data: $8a
+}
+.object test_txs {
+    section: code
+    size: 1
+    visibility: global
+    data: $9a
+}
+.object test_tya {
+    section: code
+    size: 1
+    visibility: global
+    data: $98
+}
+.object test_tys {
+    section: code
+    size: 1
+    visibility: global
+    data: $2b
+}
+.object test_tza {
+    section: code
+    size: 1
+    visibility: global
+    data: $6b
+}
+end-of-inline-data

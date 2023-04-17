@@ -1,0 +1,22 @@
+.cpu "4510"
+
+.section zero_page {
+    address: $00 - $ff
+}
+
+.segment program {
+    address: $200 - $ffff
+}
+
+.section code {
+    segment: program
+}
+
+.section data {
+    segment: program
+}
+
+.section bss {
+    type: reserve_only
+    segment: program
+}

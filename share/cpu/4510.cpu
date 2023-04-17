@@ -1,0 +1,446 @@
+; 4510.cpu -- CPU definition for 4510
+;
+; Copyright (C) Dieter Baron
+;
+; The authors can be contacted at <accelerate@tpau.group>
+;
+; Redistribution and use in source and binary forms, with or without
+; modification, are permitted provided that the following conditions
+; are met:
+;
+; 1. Redistributions of source code must retain the above copyright
+;    notice, this list of conditions and the following disclaimer.
+;
+; 2. The names of the authors may not be used to endorse or promote
+;   products derived from this software without specific prior
+;   written permission.
+;
+; THIS SOFTWARE IS PROVIDED BY THE AUTHORS "AS IS" AND ANY EXPRESS
+; OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+; WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+; ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHORS BE LIABLE FOR ANY
+; DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+; DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE
+; GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+; INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER
+; IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+; OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
+; IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+.include "6502.cpu"
+
+.addressing_mode immediate_word {
+    notation: #value
+    arguments {
+        value: word
+    }
+    encoding: .opcode, value
+}
+
+.addressing_mode indirect_z_indexed {
+    notation: (address),z
+    arguments {
+        address: byte
+    }
+    encoding: .opcode, address
+}
+
+.addressing_mode stack_vector_indirect_y_indexed {
+    notation: (address,sp),y
+    arguments {
+        address: byte
+    }
+    encoding: .opcode, address
+}
+
+.addressing_mode relative_word {
+    notation: address
+    arguments {
+        address: word
+    }
+    encoding: .opcode, address - .pc - 2 : 2
+}
+
+.addressing_mode zero_page_relative {
+    notation: address1, address2
+    arguments {
+        address1: byte
+        address2: word
+    }
+    encoding: .opcode, address1, address2 - .pc - 2 : 1
+}
+
+.addressing_mode absolute_x_indexed_indirect {
+    notation: (address,x)
+    arguments {
+        address: word
+    }
+    encoding: .opcode, address
+}
+
+.instruction adc {
+    indirect_z_indexed: $72
+}
+
+.instruction and {
+    indirect_z_indexed: $32
+}
+
+.instruction asr {
+    accumulator: $43
+    zero_page: $44
+    zero_page_x_indexed: $54
+}
+
+.instruction asw {
+    absolute: $cb
+}
+
+.instruction bbr0 {
+    relative: $0f
+}
+
+.instruction bbr1 {
+    relative: $1f
+}
+
+.instruction bbr2 {
+    relative: $2f
+}
+
+.instruction bbr3 {
+    relative: $3f
+}
+
+.instruction bbr4 {
+    relative: $4f
+}
+
+.instruction bbr5 {
+    relative: $5f
+}
+
+.instruction bbr6 {
+    relative: $6f
+}
+
+.instruction bbr7 {
+    relative: $7f
+}
+
+.instruction bbs0 {
+    relative: $8f
+}
+
+.instruction bbs1 {
+    relative: $9f
+}
+
+.instruction bbs2 {
+    relative: $af
+}
+
+.instruction bbs3 {
+    relative: $bf
+}
+
+.instruction bbs4 {
+    relative: $cf
+}
+
+.instruction bbs5 {
+    relative: $df
+}
+
+.instruction bbs6 {
+    relative: $ef
+}
+
+.instruction bbs7 {
+    relative: $ff
+}
+
+.instruction bcc {
+    relative_word: $93
+}
+
+.instruction bcs {
+    relative_word: $b3
+}
+
+.instruction beq {
+    relative_word: $f3
+}
+
+.instruction bit {
+    immediate: $89
+    zero_page_x_indexed: $34
+    absolute_x_indexed: $3c
+}
+
+.instruction bmi {
+    relative_word: $33
+}
+
+.instruction bne {
+    relative_word: $d3
+}
+
+.instruction bpl {
+    relative_word: $13
+}
+
+.instruction bsr {
+    relative_word: $63
+}
+
+.instruction bru {
+    relative: $80
+    relative_word: $83
+}
+
+.instruction bvc {
+    relative_word:$53
+}
+
+.instruction bvs {
+    relative_word: $73
+}
+
+.instruction cle {
+    implied: $02
+}
+
+.instruction cmp {
+    indirect_z_indexed: $d2
+}
+
+.instruction cpz {
+    absolute: $dc
+    immediate: $c2
+    zero_page: $d4
+}
+
+.instruction dec {
+    accumulator: $3a
+}
+
+.instruction dew {
+    zero_page: $c3
+}
+
+.instruction dez {
+    implied: $3b
+}
+
+.instruction eor {
+    indirect_z_indexed: $52
+}
+
+.instruction inc {
+    accumulator: $1a
+}
+
+.instruction inw {
+    zero_page: $e3
+}
+
+.instruction inz {
+    implied: $1b
+}
+
+.instruction jmp {
+    absolute_x_indexed_indirect: $7c
+}
+
+.instruction jsr {
+    absolute_indirect: $22
+    absolute_x_indexed_indirect: $23
+}
+
+.instruction lda {
+    indirect_z_indexed: $b2
+    stack_vector_indirect_y_indexed: $e2
+}
+
+.instruction ldz {
+    absolute: $ab
+    absolute_x_indexed: $bb
+    immediate: $a3
+}
+
+.instruction map {
+    implied: $5c
+}
+
+.instruction neg {
+    accumulator: $42
+}
+
+.instruction ora {
+    indirect_z_indexed: $12
+}
+
+.instruction phw {
+    immediate_word: $f4
+    absolute: $fc
+}
+
+.instruction phx {
+    implied: $da
+}
+
+.instruction phy {
+    implied: $5a
+}
+
+.instruction phz {
+    implied: $db
+}
+
+.instruction plx {
+    implied: $fa
+}
+
+.instruction ply {
+    implied: $7a
+}
+
+.instruction plz {
+    implied: $fb
+}
+
+.instruction rmb0 {
+    zero_page: $07
+}
+
+.instruction rmb1 {
+    zero_page: $17
+}
+
+.instruction rmb2 {
+    zero_page: $27
+}
+
+.instruction rmb3 {
+    zero_page: $37
+}
+
+.instruction rmb4 {
+    zero_page: $47
+}
+
+.instruction rmb5 {
+    zero_page: $57
+}
+
+.instruction rmb6 {
+    zero_page: $67
+}
+
+.instruction rmb7 {
+    zero_page: $77
+}
+
+.instruction row {
+    absolute: $eb
+}
+
+.instruction rtn {
+    immediate: $62
+}
+
+.instruction sbc {
+    indirect_z_indexed: $f2
+}
+
+.instruction see {
+    implied: $03
+}
+
+.instruction smb0 {
+    zero_page: $87
+}
+
+.instruction smb1 {
+    zero_page: $97
+}
+
+.instruction smb2 {
+    zero_page: $a7
+}
+
+.instruction smb3 {
+    zero_page: $b7
+}
+
+.instruction smb4 {
+    zero_page: $c7
+}
+
+.instruction smb5 {
+    zero_page: $d7
+}
+
+.instruction smb6 {
+    zero_page: $e7
+}
+
+.instruction smb7 {
+    zero_page: $f7
+}
+
+.instruction sta {
+    indirect_z_indexed: $92
+    stack_vector_indirect_y_indexed: $82
+}
+
+.instruction stx {
+    absolute_y_indexed: $9b
+}
+
+.instruction sty {
+    absolute_x_indexed: $8b
+}
+
+.instruction stz {
+    absolute: $9c
+    absolute_x_indexed: $9e
+    zero_page: $64
+    zero_page_x_indexed: $74
+}
+
+.instruction tab {
+    implied: $5b
+}
+
+.instruction taz {
+    implied: $4b
+}
+
+.instruction tba {
+    implied: $7b
+}
+
+.instruction trb {
+    absolute: $1c
+    zero_page: $14
+}
+
+.instruction tsb {
+    absolute: $0c
+    zero_page: $04
+}
+
+.instruction tsy {
+    implied: $0b
+}
+
+.instruction tys {
+    implied: $2b
+}
+
+.instruction tza {
+    implied: $6b
+}
+
