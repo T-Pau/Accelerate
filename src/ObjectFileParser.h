@@ -68,8 +68,8 @@ private:
     static Token token_global;
     static Token token_local;
     static Token token_object;
+    static Token token_reserve;
     static Token token_section;
-    static Token token_size;
     static Token token_target;
     static Token token_value;
     static Token token_visibility;

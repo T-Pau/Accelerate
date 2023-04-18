@@ -1,36 +1,73 @@
-description Test 65c02 CPU definition
-arguments -c --target 65c02 65c02.s
-file 65c02.s <inline>
+description Test 45gs02 CPU definition
+arguments -c --target 45gs02 45gs02.s
+file 45gs02.s <inline>
 .section code
 .global test_adc {
+    adc #$12
+    adc $12
+    adc $12,x
     adc $1234
     adc $1234,x
     adc $1234,y
-    adc #$12
-    adc $12
     adc ($12,x)
-    adc $12,x
-    adc ($12)
     adc ($12),y
+    adc ($12),z
+    adc [$12],z
+}
+.global test_adcq {
+    adcq $12
+    adcq $1234
+    adcq ($12)
+    adcq [$12]
 }
 .global test_and {
+    and #$12
+    and $12
+    and $12,x
     and $1234
     and $1234,x
     and $1234,y
-    and #$12
-    and $12
     and ($12,x)
-    and $12,x
-    and ($12)
     and ($12),y
+    and ($12),z
+    and [$12],z
+}
+.global test_andq {
+    andq $12
+    andq $1234
+    andq ($12)
+    andq [$12]
 }
 .global test_asl {
-    asl $1234
-    asl $1234,x
     asl
     asl a
     asl $12
     asl $12,x
+    asl $1234
+    asl $1234,x
+}
+.global test_aslq {
+    aslq $12
+    aslq
+    aslq q
+    aslq $1234
+    aslq $12,x
+    aslq $1234,x
+}
+.global test_asr {
+    asr
+    asr a
+    asr $12
+    asr $12,x
+}
+.global test_asrq {
+    asrq
+    asrq q
+    asrq $12
+    asrq $12,x
+}
+.global test_asw {
+    asw $1234
 }
 .global test_bbr0 {
     bbr0 test_bbr0
@@ -82,46 +119,69 @@ file 65c02.s <inline>
 }
 .global test_bcc {
     bcc test_bcc
+    bcc $1234
 }
 .global test_bcs {
     bcs test_bcs
+    bcs $1234
 }
 .global test_beq {
     beq test_beq
+    beq $1234
 }
 .global test_bit {
-    bit $1234
-    bit $1234,x
     bit #$12
     bit $12
     bit $12,x
+    bit $1234
+    bit $1234,x
+}
+.global test_bitq {
+    bitq $12
+    bitq $1234
 }
 .global test_bmi {
     bmi test_bmi
+    bmi $1234
 }
 .global test_bne {
     bne test_bne
+    bne $1234
 }
 .global test_bpl {
     bpl test_bpl
+    bpl $1234
 }
 .global test_bra {
     bra test_bra
+    bra $1234
 }
 .global test_brk {
     brk
 }
+.global test_bru {
+    bru test_bru
+    bru $1234
+}
+.global test_bsr {
+    bsr $1234
+}
 .global test_bvc {
     bvc test_bvc
+    bvc $1234
 }
 .global test_bvs {
     bvs test_bvs
+    bvs $1234
 }
 .global test_clc {
     clc
 }
 .global test_cld {
     cld
+}
+.global test_cle {
+    cle
 }
 .global test_cli {
     cli
@@ -130,33 +190,56 @@ file 65c02.s <inline>
     clv
 }
 .global test_cmp {
+    cmp #$12
+    cmp $12
+    cmp $12,x
     cmp $1234
     cmp $1234,x
     cmp $1234,y
-    cmp #$12
-    cmp $12
     cmp ($12,x)
-    cmp $12,x
-    cmp ($12)
     cmp ($12),y
+    cmp ($12),z
+    cmp [$12],z
+}
+.global test_cmpq {
+    cmpq $12
+    cmpq $1234
+    cmpq ($12)
+    cmpq [$12]
 }
 .global test_cpx {
-    cpx $1234
     cpx #$12
     cpx $12
+    cpx $1234
 }
 .global test_cpy {
-    cpy $1234
     cpy #$12
     cpy $12
+    cpy $1234
+}
+.global test_cpz {
+    cpz #$12
+    cpz $12
+    cpz $1234
 }
 .global test_dec {
-    dec $1234
-    dec $1234,x
     dec
     dec a
     dec $12
     dec $12,x
+    dec $1234
+    dec $1234,x
+}
+.global test_deq {
+    deq
+    deq q
+    deq $12
+    deq $1234
+    deq $12,x
+    deq $1234,x
+}
+.global test_dew {
+    dew $12
 }
 .global test_dex {
     dex
@@ -164,24 +247,45 @@ file 65c02.s <inline>
 .global test_dey {
     dey
 }
+.global test_dez {
+    dez
+}
 .global test_eor {
+    eor #$12
+    eor $12
+    eor $12,x
     eor $1234
     eor $1234,x
     eor $1234,y
-    eor #$12
-    eor $12
     eor ($12,x)
-    eor $12,x
-    eor ($12)
     eor ($12),y
+    eor ($12),z
+    eor [$12],z
+}
+.global test_eorq{
+    eorq $12
+    eorq $1234
+    eorq ($12)
+    eorq [$12]
 }
 .global test_inc {
-    inc $1234
-    inc $1234,x
     inc
     inc a
     inc $12
     inc $12,x
+    inc $1234
+    inc $1234,x
+}
+.global test_inq {
+    inq
+    inq q
+    inq $12
+    inq $1234
+    inq $12,x
+    inq $1234,x
+}
+.global test_inw {
+    inw $12
 }
 .global test_inx {
     inx
@@ -189,60 +293,100 @@ file 65c02.s <inline>
 .global test_iny {
     iny
 }
+.global test_inz {
+    inz
+}
 .global test_jmp {
     jmp $1234
-    jmp ($1234,x)
     jmp ($1234)
+    jmp ($1234,x)
 }
 .global test_jsr {
     jsr $1234
+    jsr ($1234)
+    jsr ($1234,x)
 }
 .global test_lda {
+    lda #$12
+    lda $12
+    lda $12,x
     lda $1234
     lda $1234,x
     lda $1234,y
-    lda #$12
-    lda $12
     lda ($12,x)
-    lda $12,x
-    lda ($12)
     lda ($12),y
+    lda ($12),z
+    lda ($12,sp),y
+    lda [$12],z
+}
+.global test_ldq {
+    ldq $12
+    ldq $1234
+    ldq ($12),z
+    ldq [$12],z
 }
 .global test_ldx {
-    ldx $1234
-    ldx $1234,y
     ldx #$12
     ldx $12
     ldx $12,y
+    ldx $1234
+    ldx $1234,y
 }
 .global test_ldy {
-    ldy $1234
-    ldy $1234,x
     ldy #$12
     ldy $12
     ldy $12,x
+    ldy $1234
+    ldy $1234,x
+}
+.global test_ldz {
+    ldz #$12
+    ldz $1234
+    ldz $1234,x
 }
 .global test_lsr {
-    lsr $1234
-    lsr $1234,x
     lsr
     lsr a
     lsr $12
     lsr $12,x
+    lsr $1234
+    lsr $1234,x
+}
+.global test_lsrq {
+    lsrq $12
+    lsrq
+    lsrq q
+    lsrq $1234
+    lsrq $12,x
+    lsrq $1234,x
+}
+.global test_map {
+    map
+}
+.global test_neg {
+    neg
+    neg a
 }
 .global test_nop {
     nop
 }
 .global test_ora {
+    ora #$12
+    ora $12
+    ora $12,x
     ora $1234
     ora $1234,x
     ora $1234,y
-    ora #$12
-    ora $12
     ora ($12,x)
-    ora $12,x
-    ora ($12)
     ora ($12),y
+    ora ($12),z
+    ora [$12],z
+}
+.global test_orq {
+    orq $12
+    orq $1234
+    orq ($12)
+    orq [$12]
 }
 .global test_pha {
     pha
@@ -250,11 +394,18 @@ file 65c02.s <inline>
 .global test_php {
     php
 }
+.global test_phw {
+    phw #$1234
+    phw $1234
+}
 .global test_phx {
     phx
 }
 .global test_phy {
     phy
+}
+.global test_phz {
+    phz
 }
 .global test_pla {
     pla
@@ -267,6 +418,9 @@ file 65c02.s <inline>
 }
 .global test_ply {
     ply
+}
+.global test_plz {
+    plz
 }
 .global test_rmb0 {
     rmb0 $12
@@ -293,43 +447,75 @@ file 65c02.s <inline>
     rmb7 $12
 }
 .global test_rol {
-    rol $1234
-    rol $1234,x
     rol
     rol a
     rol $12
     rol $12,x
+    rol $1234
+    rol $1234,x
+}
+.global test_rolq {
+    rolq $12
+    rolq
+    rolq q
+    rolq $1234
+    rolq $12,x
+    rolq $1234,x
 }
 .global test_ror {
-    ror $1234
-    ror $1234,x
     ror
     ror a
     ror $12
     ror $12,x
+    ror $1234
+    ror $1234,x
+}
+.global test_rorq {
+    rorq $12
+    rorq
+    rorq q
+    rorq $1234
+    rorq $12,x
+    rorq $1234,x
+}
+.global test_row {
+    row $1234
 }
 .global test_rti {
     rti
+}
+.global test_rtn {
+    rtn #$12
 }
 .global test_rts {
     rts
 }
 .global test_sbc {
+    sbc #$12
+    sbc $12
+    sbc $12,x
     sbc $1234
     sbc $1234,x
     sbc $1234,y
-    sbc #$12
-    sbc $12
     sbc ($12,x)
-    sbc $12,x
-    sbc ($12)
     sbc ($12),y
+    sbc ($12),z
+    sbc [$12],z
+}
+.global test_sbcq {
+    sbcq $12
+    sbcq $1234
+    sbcq ($12)
+    sbcq [$12]
 }
 .global test_sec {
     sec
 }
 .global test_sed {
     sed
+}
+.global test_see {
+    see
 }
 .global test_sei {
     sei
@@ -359,33 +545,43 @@ file 65c02.s <inline>
     smb7 $12
 }
 .global test_sta {
+    sta $12
+    sta $12,x
     sta $1234
     sta $1234,x
     sta $1234,y
-    sta $12
     sta ($12,x)
-    sta $12,x
-    sta ($12)
     sta ($12),y
+    sta ($12),z
+    sta ($12,sp),y
+    sta [$12],z
 }
-.global test_stp {
-    stp
+.global test_stq {
+    stq $12
+    stq $1234
+    stq ($12)
+    stq [$12]
 }
 .global test_stx {
-    stx $1234
     stx $12
     stx $12,y
+    stx $1234
+    stx $1234,y
 }
 .global test_sty {
-    sty $1234
     sty $12
     sty $12,x
+    sty $1234
+    sty $1234,x
 }
 .global test_stz {
-    stz $1234
-    stz $1234,x
     stz $12
     stz $12,x
+    stz $1234
+    stz $1234,x
+}
+.global test_tab {
+    tab
 }
 .global test_tax {
     tax
@@ -393,16 +589,25 @@ file 65c02.s <inline>
 .global test_tay {
     tay
 }
+.global test_taz {
+    taz
+}
+.global test_tba {
+    tba
+}
 .global test_trb {
-    trb $1234
     trb $12
+    trb $1234
 }
 .global test_tsb {
-    tsb $1234
     tsb $12
+    tsb $1234
 }
 .global test_tsx {
     tsx
+}
+.global test_tsy {
+    tsy
 }
 .global test_txa {
     txa
@@ -413,29 +618,62 @@ file 65c02.s <inline>
 .global test_tya {
     tya
 }
-.global test_wai {
-    wai
+.global test_tys {
+    tys
+}
+.global test_tza {
+    tza
 }
 end-of-inline-data
-file 65c02.o {} <inline>
+file 45gs02.o {} <inline>
 .format_version 1.0
 
-.target "65c02"
+.target "45gs02"
 
 .object test_adc {
     section: code
     visibility: global
-    data: $6d, $1234, $7d, $1234, $79, $1234, $69, $12, $65, $12, $61, $12, $75, $12, $72, $12, $71, $12
+    data: $69, $12, $65, $12, $75, $12, $6d, $1234, $7d, $1234, $79, $1234, $61, $12, $71, $12, $72, $12, $ea, $72, $12
+}
+.object test_adcq {
+    section: code
+    visibility: global
+    data: $42, $42, $65, $12, $42, $42, $6d, $1234, $42, $42, $72, $12, $42, $42, $ea, $72, $12
 }
 .object test_and {
     section: code
     visibility: global
-    data: $2d, $1234, $3d, $1234, $39, $1234, $29, $12, $25, $12, $21, $12, $35, $12, $32, $12, $31, $12
+    data: $29, $12, $25, $12, $35, $12, $2d, $1234, $3d, $1234, $39, $1234, $21, $12, $31, $12, $32, $12, $ea, $32, $12
+}
+.object test_andq {
+    section: code
+    visibility: global
+    data: $42, $42, $25, $12, $42, $42, $2d, $1234, $42, $42, $32, $12, $42, $42, $ea, $32, $12
 }
 .object test_asl {
     section: code
     visibility: global
-    data: $0e, $1234, $1e, $1234, $0a, $0a, $06, $12, $16, $12
+    data: $0a, $0a, $06, $12, $16, $12, $0e, $1234, $1e, $1234
+}
+.object test_aslq {
+    section: code
+    visibility: global
+    data: $42, $42, $06, $12, $42, $42, $0a, $42, $42, $0a, $42, $42, $0e, $1234, $42, $42, $16, $12, $42, $42, $1e, $1234
+}
+.object test_asr {
+    section: code
+    visibility: global
+    data: $43, $43, $44, $12, $54, $12
+}
+.object test_asrq {
+    section: code
+    visibility: global
+    data: $42, $42, $43, $42, $42, $43, $42, $42, $44, $12, $42, $42, $54, $12
+}
+.object test_asw {
+    section: code
+    visibility: global
+    data: $cb, $1234
 }
 .object test_bbr0 {
     section: code
@@ -520,57 +758,72 @@ file 65c02.o {} <inline>
 .object test_bcc {
     section: code
     visibility: global
-    data: $90, -$02
+    data: $90, -$02, $93, (($1234-(test_bcc+$02))-$02)
 }
 .object test_bcs {
     section: code
     visibility: global
-    data: $b0, -$02
+    data: $b0, -$02, $b3, (($1234-(test_bcs+$02))-$02)
 }
 .object test_beq {
     section: code
     visibility: global
-    data: $f0, -$02
+    data: $f0, -$02, $f3, (($1234-(test_beq+$02))-$02)
 }
 .object test_bit {
     section: code
     visibility: global
-    data: $2c, $1234, $3c, $1234, $89, $12, $24, $12, $34, $12
+    data: $89, $12, $24, $12, $34, $12, $2c, $1234, $3c, $1234
+}
+.object test_bitq {
+    section: code
+    visibility: global
+    data: $42, $42, $24, $12, $42, $42, $2c, $1234
 }
 .object test_bmi {
     section: code
     visibility: global
-    data: $30, -$02
+    data: $30, -$02, $33, (($1234-(test_bmi+$02))-$02)
 }
 .object test_bne {
     section: code
     visibility: global
-    data: $d0, -$02
+    data: $d0, -$02, $d3, (($1234-(test_bne+$02))-$02)
 }
 .object test_bpl {
     section: code
     visibility: global
-    data: $10, -$02
+    data: $10, -$02, $13, (($1234-(test_bpl+$02))-$02)
 }
 .object test_bra {
     section: code
     visibility: global
-    data: $80, -$02
+    data: $50, -$02, $53, (($1234-(test_bra+$02))-$02)
 }
 .object test_brk {
     section: code
     visibility: global
     data: $00
 }
+.object test_bru {
+    section: code
+    visibility: global
+    data: $50, -$02, $53, (($1234-(test_bru+$02))-$02)
+}
+.object test_bsr {
+    section: code
+    visibility: global
+    data: $63, (($1234-(test_bsr+$00))-$02):2
+}
 .object test_bvc {
     section: code
     visibility: global
-    data: $50, -$02
+    data: $50, -$02, $53, (($1234-(test_bvc+$02))-$02)
 }
 .object test_bvs {
     section: code
     visibility: global
-    data: $70, -$02
+    data: $70, -$02, $73, (($1234-(test_bvs+$02))-$02)
 }
 .object test_clc {
     section: code
@@ -581,6 +834,11 @@ file 65c02.o {} <inline>
     section: code
     visibility: global
     data: $d8
+}
+.object test_cle {
+    section: code
+    visibility: global
+    data: $02
 }
 .object test_cli {
     section: code
@@ -595,22 +853,42 @@ file 65c02.o {} <inline>
 .object test_cmp {
     section: code
     visibility: global
-    data: $cd, $1234, $dd, $1234, $d9, $1234, $c9, $12, $c5, $12, $c1, $12, $d5, $12, $d2, $12, $d1, $12
+    data: $c9, $12, $c5, $12, $d5, $12, $cd, $1234, $dd, $1234, $d9, $1234, $c1, $12, $d1, $12, $d2, $12, $ea, $d2, $12
+}
+.object test_cmpq {
+    section: code
+    visibility: global
+    data: $42, $42, $c5, $12, $42, $42, $cd, $1234, $42, $42, $d2, $12, $42, $42, $ea, $d2, $12
 }
 .object test_cpx {
     section: code
     visibility: global
-    data: $ec, $1234, $e0, $12, $e4, $12
+    data: $e0, $12, $e4, $12, $ec, $1234
 }
 .object test_cpy {
     section: code
     visibility: global
-    data: $cc, $1234, $c0, $12, $c4, $12
+    data: $c0, $12, $c4, $12, $cc, $1234
+}
+.object test_cpz {
+    section: code
+    visibility: global
+    data: $c2, $12, $d4, $12, $dc, $1234
 }
 .object test_dec {
     section: code
     visibility: global
-    data: $ce, $1234, $de, $1234, $3a, $3a, $c6, $12, $d6, $12
+    data: $3a, $3a, $c6, $12, $d6, $12, $ce, $1234, $de, $1234
+}
+.object test_deq {
+    section: code
+    visibility: global
+    data: $42, $42, $3a, $42, $42, $3a, $42, $42, $c6, $12, $42, $42, $ce, $1234, $42, $42, $d6, $12, $42, $42, $de, $1234
+}
+.object test_dew {
+    section: code
+    visibility: global
+    data: $c3, $12
 }
 .object test_dex {
     section: code
@@ -622,16 +900,37 @@ file 65c02.o {} <inline>
     visibility: global
     data: $88
 }
+.object test_dez {
+    section: code
+    visibility: global
+    data: $3b
+}
 .object test_eor {
     section: code
     visibility: global
-    data: $4d, $1234, $5d, $1234, $59, $1234, $49, $12, $45, $12, $41, $12, $55, $12, $52, $12, $51, $12
+    data: $49, $12, $45, $12, $55, $12, $4d, $1234, $5d, $1234, $59, $1234, $41, $12, $51, $12, $52, $12, $ea, $52, $12
+}
+.object test_eorq {
+    section: code
+    visibility: global
+    data: $42, $42, $45, $12, $42, $42, $4d, $1234, $42, $42, $52, $12, $42, $42, $ea, $52, $12
 }
 .object test_inc {
     section: code
     visibility: global
-    data: $ee, $1234, $fe, $1234, $1a, $1a, $e6, $12, $f6, $12
+    data: $1a, $1a, $e6, $12, $f6, $12, $ee, $1234, $fe, $1234
 }
+.object test_inq {
+    section: code
+    visibility: global
+    data: $42, $42, $1a, $42, $42, $1a, $42, $42, $e6, $12, $42, $42, $ee, $1234, $42, $42, $f6, $12, $42, $42, $fe, $1234
+}
+.object test_inw {
+    section: code
+    visibility: global
+    data: $e3, $12
+}
+
 .object test_inx {
     section: code
     visibility: global
@@ -642,35 +941,65 @@ file 65c02.o {} <inline>
     visibility: global
     data: $c8
 }
+.object test_inz {
+    section: code
+    visibility: global
+    data: $1b
+}
 .object test_jmp {
     section: code
     visibility: global
-    data: $4c, $1234, $7c, $1234, $6c, $1234
+    data: $4c, $1234, $6c, $1234, $7c, $1234
 }
 .object test_jsr {
     section: code
     visibility: global
-    data: $20, $1234
+    data: $20, $1234, $22, $1234, $23, $1234
 }
 .object test_lda {
     section: code
     visibility: global
-    data: $ad, $1234, $bd, $1234, $b9, $1234, $a9, $12, $a5, $12, $a1, $12, $b5, $12, $b2, $12, $b1, $12
+    data: $a9, $12, $a5, $12, $b5, $12, $ad, $1234, $bd, $1234, $b9, $1234, $a1, $12, $b1, $12, $b2, $12, $e2, $12, $ea, $b2, $12
+}
+.object test_ldq {
+    section: code
+    visibility: global
+    data: $42, $42, $a5, $12, $42, $42, $ad, $1234, $42, $42, $b2, $12, $42, $42, $ea, $b2, $12
 }
 .object test_ldx {
     section: code
     visibility: global
-    data: $ae, $1234, $be, $1234, $a2, $12, $a6, $12, $b6, $12
+    data: $a2, $12, $a6, $12, $b6, $12, $ae, $1234, $be, $1234
 }
 .object test_ldy {
     section: code
     visibility: global
-    data: $ac, $1234, $bc, $1234, $a0, $12, $a4, $12, $b4, $12
+    data: $a0, $12, $a4, $12, $b4, $12, $ac, $1234, $bc, $1234
+}
+.object test_ldz {
+    section: code
+    visibility: global
+    data: $a3, $12, $ab, $1234, $bb, $1234
 }
 .object test_lsr {
     section: code
     visibility: global
-    data: $4e, $1234, $5e, $1234, $4a, $4a, $46, $12, $56, $12
+    data: $4a, $4a, $46, $12, $56, $12, $4e, $1234, $5e, $1234
+}
+.object test_lsrq {
+    section: code
+    visibility: global
+    data: $42, $42, $46, $12, $42, $42, $4a, $42, $42, $4a, $42, $42, $4e, $1234, $42, $42, $56, $12, $42, $42, $5e, $1234
+}
+.object test_map {
+    section: code
+    visibility: global
+    data: $5c
+}
+.object test_neg {
+    section: code
+    visibility: global
+    data: $42, $42
 }
 .object test_nop {
     section: code
@@ -680,7 +1009,12 @@ file 65c02.o {} <inline>
 .object test_ora {
     section: code
     visibility: global
-    data: $0d, $1234, $1d, $1234, $19, $1234, $09, $12, $05, $12, $01, $12, $15, $12, $12, $12, $11, $12
+    data: $09, $12, $05, $12, $15, $12, $0d, $1234, $1d, $1234, $19, $1234, $01, $12, $11, $12, $12, $12, $ea, $12, $12
+}
+.object test_orq {
+    section: code
+    visibility: global
+    data: $42, $42, $05, $12, $42, $42, $0d, $1234, $42, $42, $12, $12, $42, $42, $ea, $12, $12
 }
 .object test_pha {
     section: code
@@ -692,6 +1026,11 @@ file 65c02.o {} <inline>
     visibility: global
     data: $08
 }
+.object test_phw {
+    section: code
+    visibility: global
+    data: $f4, $1234, $fc, $1234
+}
 .object test_phx {
     section: code
     visibility: global
@@ -701,6 +1040,11 @@ file 65c02.o {} <inline>
     section: code
     visibility: global
     data: $5a
+}
+.object test_phz {
+    section: code
+    visibility: global
+    data: $db
 }
 .object test_pla {
     section: code
@@ -721,6 +1065,11 @@ file 65c02.o {} <inline>
     section: code
     visibility: global
     data: $7a
+}
+.object test_plz {
+    section: code
+    visibility: global
+    data: $fb
 }
 .object test_rmb0 {
     section: code
@@ -765,17 +1114,37 @@ file 65c02.o {} <inline>
 .object test_rol {
     section: code
     visibility: global
-    data: $2e, $1234, $3e, $1234, $2a, $2a, $26, $12, $36, $12
+    data: $2a, $2a, $26, $12, $36, $12, $2e, $1234, $3e, $1234
+}
+.object test_rolq {
+    section: code
+    visibility: global
+    data: $42, $42, $26, $12, $42, $42, $2a, $42, $42, $2a, $42, $42, $2e, $1234, $42, $42, $36, $12, $42, $42, $3e, $1234
 }
 .object test_ror {
     section: code
     visibility: global
-    data: $6e, $1234, $7e, $1234, $6a, $6a, $66, $12, $76, $12
+    data: $6a, $6a, $66, $12, $76, $12, $6e, $1234, $7e, $1234
+}
+.object test_rorq {
+    section: code
+    visibility: global
+    data: $42, $42, $66, $12, $42, $42, $6a, $42, $42, $6a, $42, $42, $6e, $1234, $42, $42, $76, $12, $42, $42, $7e, $1234
+}
+.object test_row {
+    section: code
+    visibility: global
+    data: $eb, $1234
 }
 .object test_rti {
     section: code
     visibility: global
     data: $40
+}
+.object test_rtn {
+    section: code
+    visibility: global
+    data: $62, $12
 }
 .object test_rts {
     section: code
@@ -785,7 +1154,12 @@ file 65c02.o {} <inline>
 .object test_sbc {
     section: code
     visibility: global
-    data: $ed, $1234, $fd, $1234, $f9, $1234, $e9, $12, $e5, $12, $e1, $12, $f5, $12, $f2, $12, $f1, $12
+    data: $e9, $12, $e5, $12, $f5, $12, $ed, $1234, $fd, $1234, $f9, $1234, $e1, $12, $f1, $12, $f2, $12, $ea, $f2, $12
+}
+.object test_sbcq {
+    section: code
+    visibility: global
+    data: $42, $42, $e5, $12, $42, $42, $ed, $1234, $42, $42, $f2, $12, $42, $42, $ea, $f2, $12
 }
 .object test_sec {
     section: code
@@ -796,6 +1170,11 @@ file 65c02.o {} <inline>
     section: code
     visibility: global
     data: $f8
+}
+.object test_see {
+    section: code
+    visibility: global
+    data: $03
 }
 .object test_sei {
     section: code
@@ -845,27 +1224,32 @@ file 65c02.o {} <inline>
 .object test_sta {
     section: code
     visibility: global
-    data: $8d, $1234, $9d, $1234, $99, $1234, $85, $12, $81, $12, $95, $12, $92, $12, $91, $12
+    data: $85, $12, $95, $12, $8d, $1234, $9d, $1234, $99, $1234, $81, $12, $91, $12, $92, $12, $82, $12, $ea, $92, $12
 }
-.object test_stp {
+.object test_stq {
     section: code
     visibility: global
-    data: $db
+    data: $42, $42, $85, $12, $42, $42, $8d, $1234, $42, $42, $92, $12, $42, $42, $ea, $92, $12
 }
 .object test_stx {
     section: code
     visibility: global
-    data: $8e, $1234, $86, $12, $96, $12
+    data: $86, $12, $96, $12, $8e, $1234, $9b, $1234
 }
 .object test_sty {
     section: code
     visibility: global
-    data: $8c, $1234, $84, $12, $94, $12
+    data: $84, $12, $94, $12, $8c, $1234, $8b, $1234
 }
 .object test_stz {
     section: code
     visibility: global
-    data: $9c, $1234, $9e, $1234, $64, $12, $74, $12
+    data: $64, $12, $74, $12, $9c, $1234, $9e, $1234
+}
+.object test_tab {
+    section: code
+    visibility: global
+    data: $5b
 }
 .object test_tax {
     section: code
@@ -877,20 +1261,35 @@ file 65c02.o {} <inline>
     visibility: global
     data: $a8
 }
+.object test_taz {
+    section: code
+    visibility: global
+    data: $4b
+}
+.object test_tba {
+    section: code
+    visibility: global
+    data: $7b
+}
 .object test_trb {
     section: code
     visibility: global
-    data: $1c, $1234, $14, $12
+    data: $14, $12, $1c, $1234
 }
 .object test_tsb {
     section: code
     visibility: global
-    data: $0c, $1234, $04, $12
+    data: $04, $12, $0c, $1234
 }
 .object test_tsx {
     section: code
     visibility: global
     data: $ba
+}
+.object test_tsy {
+    section: code
+    visibility: global
+    data: $0b
 }
 .object test_txa {
     section: code
@@ -907,9 +1306,14 @@ file 65c02.o {} <inline>
     visibility: global
     data: $98
 }
-.object test_wai {
+.object test_tys {
     section: code
     visibility: global
-    data: $cb
+    data: $2b
+}
+.object test_tza {
+    section: code
+    visibility: global
+    data: $6b
 }
 end-of-inline-data

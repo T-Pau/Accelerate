@@ -45,8 +45,8 @@ Token ObjectFileParser::token_format_version;
 Token ObjectFileParser::token_global;
 Token ObjectFileParser::token_local;
 Token ObjectFileParser::token_object;
+Token ObjectFileParser::token_reserve;
 Token ObjectFileParser::token_section;
-Token ObjectFileParser::token_size;
 Token ObjectFileParser::token_target;
 Token ObjectFileParser::token_value;
 Token ObjectFileParser::token_visibility;
@@ -61,7 +61,7 @@ void ObjectFileParser::initialize() {
         token_local = Token(Token::NAME, "local");
         token_object = Token(Token::DIRECTIVE, "object");
         token_section = Token(Token::NAME, "section");
-        token_size = Token(Token::NAME, "size");
+        token_reserve = Token(Token::NAME, "size");
         token_target = Token(Token::DIRECTIVE, "target");
         token_value = Token(Token::NAME, "value");
         token_visibility = Token(Token::NAME, "visibility");
@@ -122,7 +122,7 @@ void ObjectFileParser::parse_object() {
     auto object = file.create_object(section.as_symbol(), visibility, name);
 
     auto alignment_value = parameters->get_optional(token_alignment);
-    if (alignment_value != nullptr) {
+    if (alignment_value) {
         auto alignment = alignment_value->as_singular_scalar()->token();
         if (!alignment.is_unsigned()) {
             throw ParseException(alignment, "unsigned integer expected");
@@ -130,11 +130,14 @@ void ObjectFileParser::parse_object() {
         object->alignment = alignment.as_unsigned();
     }
 
-    auto size = (*parameters)[token_size]->as_singular_scalar()->token();
-    if (!size.is_unsigned()) {
-        throw ParseException(size, "unsigned integer expected");
+    auto reserve_value = parameters->get_optional(token_reserve);
+    if (reserve_value) {
+        auto reserve = reserve_value->as_singular_scalar()->token();
+        if (!reserve.is_unsigned()) {
+            throw ParseException(reserve, "unsigned integer expected");
+        }
+        object->size = reserve.as_unsigned();
     }
-    object->size = size.as_unsigned();
 
     auto data_value = parameters->get_optional(token_data);
     if (data_value != nullptr) {

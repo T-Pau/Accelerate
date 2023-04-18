@@ -190,6 +190,11 @@
     relative_word: $13
 }
 
+.instruction bra {
+    relative: $80
+    relative_word: $83
+}
+
 .instruction bsr {
     relative_word: $63
 }

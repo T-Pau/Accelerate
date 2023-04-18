@@ -1,0 +1,261 @@
+; 45gs02.cpu -- CPU definition for 45gs02
+;
+; Copyright (C) Dieter Baron
+;
+; The authors can be contacted at <accelerate@tpau.group>
+;
+; Redistribution and use in source and binary forms, with or without
+; modification, are permitted provided that the following conditions
+; are met:
+;
+; 1. Redistributions of source code must retain the above copyright
+;    notice, this list of conditions and the following disclaimer.
+;
+; 2. The names of the authors may not be used to endorse or promote
+;   products derived from this software without specific prior
+;   written permission.
+;
+; THIS SOFTWARE IS PROVIDED BY THE AUTHORS "AS IS" AND ANY EXPRESS
+; OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+; WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+; ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHORS BE LIABLE FOR ANY
+; DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+; DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE
+; GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+; INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER
+; IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+; OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
+; IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+.include "4510.cpu"
+
+.syntax punctuation: "[" "]"
+
+.addressing_mode q {
+    notation [
+        :
+        : q
+    ]
+    encoding: $42, $42, .opcode
+
+}
+
+.addressing_mode zero_page_quad {
+    notation: address
+    arguments {
+        address: byte
+    }
+    encoding: $42, $42, .opcode, address
+}
+
+.addressing_mode zero_page_quad_x_indexed {
+    notation: address,x
+    arguments {
+        address: byte
+    }
+    encoding: $42, $42, .opcode, address
+}
+
+.addressing_mode absolute_quad {
+    notation: address
+    arguments {
+        address: word
+    }
+    encoding: $42, $42, .opcode, address
+}
+
+.addressing_mode absolute_quad_x_indexed {
+    notation: address,x
+    arguments {
+        address: word
+    }
+    encoding: $42, $42, .opcode, address
+}
+
+.addressing_mode quad_indirect_z_indexed {
+    notation: (address),z
+    arguments {
+        address: byte
+    }
+    encoding: $42, $42, .opcode, address
+}
+
+.addressing_mode quad_zero_page_z_indexed {
+    notation: [address],z
+    arguments {
+        address: byte
+    }
+    encoding: $ea, .opcode, address
+}
+
+
+.addressing_mode quad_zero_page_quad_z_indexed {
+    notation: [address],z
+    arguments {
+        address: byte
+    }
+    encoding: $42, $42, $ea, .opcode, address
+}
+
+.addressing_mode zero_page_indirect_quad {
+    notation: (address)
+    arguments {
+        address: byte
+    }
+    encoding: $42, $42, .opcode, address
+}
+
+.addressing_mode quad_zero_page_indirect_quad {
+    notation: [address]
+    arguments {
+        address: byte
+    }
+    encoding: $42, $42, $ea, .opcode, address
+}
+
+.instruction adc {
+    quad_zero_page_z_indexed: $72
+}
+
+.instruction adcq {
+    zero_page_quad: $65
+    absolute_quad: $6d
+    zero_page_indirect_quad: $72
+    quad_zero_page_indirect_quad: $72
+}
+
+.instruction and {
+        quad_zero_page_z_indexed: $32
+}
+
+.instruction andq {
+    zero_page_quad: $25
+    absolute_quad: $2d
+    zero_page_indirect_quad: $32
+    quad_zero_page_indirect_quad: $32
+}
+
+.instruction aslq {
+    zero_page_quad: $06
+    q: $0a
+    absolute_quad: $0e
+    zero_page_quad_x_indexed: $16
+    absolute_quad_x_indexed: $1e
+}
+
+.instruction asrq {
+    q: $43
+    zero_page_quad: $44
+    zero_page_quad_x_indexed: $54
+}
+
+.instruction bitq {
+    zero_page_quad: $24
+    absolute_quad: $2c
+}
+
+.instruction cmp {
+    quad_zero_page_z_indexed: $d2
+}
+
+.instruction cmpq {
+    zero_page_quad: $c5
+    absolute_quad: $cd
+    zero_page_indirect_quad: $d2
+    quad_zero_page_indirect_quad: $d2
+}
+
+.instruction deq {
+    q: $3a
+    zero_page_quad: $c6
+    absolute_quad: $ce
+    zero_page_quad_x_indexed: $d6
+    absolute_quad_x_indexed: $de
+}
+
+.instruction eor {
+    quad_zero_page_z_indexed: $52
+}
+
+.instruction eorq {
+    zero_page_quad: $45
+    absolute_quad: $4d
+    zero_page_indirect_quad: $52
+    quad_zero_page_indirect_quad: $52
+}
+
+.instruction inq {
+    q: $1a
+    zero_page_quad: $e6
+    absolute_quad: $ee
+    zero_page_quad_x_indexed: $f6
+    absolute_quad_x_indexed: $fe
+}
+
+.instruction lda {
+    quad_zero_page_z_indexed: $b2
+}
+
+.instruction ldq {
+    zero_page_quad: $a5
+    absolute_quad: $ad
+    quad_indirect_z_indexed: $b2
+    quad_zero_page_quad_z_indexed: $b2
+}
+
+.instruction lsrq {
+    zero_page_quad: $46
+    q: $4a
+    absolute_quad: $4e
+    zero_page_quad_x_indexed: $56
+    absolute_quad_x_indexed: $5e
+}
+
+.instruction ora {
+    quad_zero_page_z_indexed: $12
+}
+
+.instruction orq {
+    zero_page_quad: $05
+    absolute_quad: $0d
+    zero_page_indirect_quad: $12
+    quad_zero_page_indirect_quad: $12
+}
+
+.instruction rolq {
+    zero_page_quad: $26
+    q: $2a
+    absolute_quad: $2e
+    zero_page_quad_x_indexed: $36
+    absolute_quad_x_indexed: $3e
+}
+
+.instruction rorq {
+    zero_page_quad: $66
+    q: $6a
+    absolute_quad: $6e
+    zero_page_quad_x_indexed: $76
+    absolute_quad_x_indexed: $7e
+}
+
+.instruction sbc {
+    quad_zero_page_z_indexed: $f2
+}
+
+.instruction sbcq {
+    zero_page_quad: $e5
+    absolute_quad: $ed
+    zero_page_indirect_quad: $f2
+    quad_zero_page_indirect_quad: $f2
+}
+
+.instruction sta {
+    quad_zero_page_z_indexed: $92
+}
+
+.instruction stq {
+    zero_page_quad: $85
+    absolute_quad: $8d
+    zero_page_indirect_quad: $92
+    quad_zero_page_indirect_quad: $92
+}
