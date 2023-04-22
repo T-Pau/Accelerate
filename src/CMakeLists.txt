@@ -13,6 +13,7 @@ add_library(xlr8-library STATIC
         CPUParser.cc
         Command.cc
         Commandline.cc
+        Encoding.cc
         Environment.cc
         Exception.cc
         ExpressionList.cc
