@@ -43,6 +43,9 @@ public:
 
     ObjectFile parse(Symbol file_name);
 
+    static Symbol symbol_opcode;
+    static Symbol symbol_pc;
+
 private:
     void parse_assignment(Object::Visibility visibility, const Token& name);
     void parse_directive(const Token& directive);
@@ -71,9 +74,6 @@ private:
 
     static void initialize();
     static bool initialized;
-
-    static Symbol symbol_opcode;
-    static Symbol symbol_pc;
 
     static Token token_align;
     static Token token_brace_close;

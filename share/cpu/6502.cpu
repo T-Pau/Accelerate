@@ -33,7 +33,7 @@
 
 .argument_type byte range: 0, $ff
 
-.argument_type word range: 0, $ffff
+.argument_type word any
 
 .addressing_mode accumulator {
     notation [
@@ -67,7 +67,7 @@
     arguments {
         address: word
     }
-    encoding: .opcode, address
+    encoding: .opcode, address:2
 }
 
 .addressing_mode relative {
@@ -75,7 +75,7 @@
     arguments {
         address: word
     }
-    encoding: .opcode, address - .pc - 2 : 1
+    encoding: .opcode, address - .pc - 2 :-1
 }
 
 .addressing_mode absolute_indirect {
@@ -83,7 +83,7 @@
     arguments {
         address: word
     }
-    encoding: .opcode, address
+    encoding: .opcode, address:2
 }
 
 .addressing_mode zero_page_x_indexed {
@@ -107,7 +107,7 @@
     arguments {
         address: word
     }
-    encoding: .opcode, address
+    encoding: .opcode, address:2
 }
 
 .addressing_mode absolute_y_indexed {
@@ -115,7 +115,7 @@
     arguments {
         address: word
     }
-    encoding: .opcode, address
+    encoding: .opcode, address:2
 }
 
 .addressing_mode x_indexed_indirect {

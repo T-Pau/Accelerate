@@ -38,6 +38,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Token.h"
 #include "FileTokenizer.h"
 #include "TokenGroup.h"
+#include "BodyElement.h"
 
 class ParsedArray;
 class ParsedDictionary;
@@ -47,6 +48,7 @@ class ParsedValue {
 public:
     enum Type {
         ARRAY,
+        BODY,
         DICTIONARY,
         SCALAR_LIST,
         SCALAR_SINGULAR
@@ -62,6 +64,7 @@ public:
     [[nodiscard]] const ParsedScalar* as_scalar() const;
     [[nodiscard]] const ParsedScalar* as_singular_scalar() const;
     [[nodiscard]] bool is_array() const {return type() == ARRAY;}
+    [[nodiscard]] bool is_body() const {return type() == BODY;}
     [[nodiscard]] bool is_dictionary() const {return type() == DICTIONARY;}
     [[nodiscard]] bool is_scalar() const {return type() == SCALAR_SINGULAR || type() == SCALAR_LIST;}
     [[nodiscard]] bool is_singular_scalar() const {return type() == SCALAR_SINGULAR;}
@@ -97,6 +100,16 @@ public:
     std::vector<std::shared_ptr<ParsedValue>>::iterator end() {return entries.end();}
     [[nodiscard]] std::vector<std::shared_ptr<ParsedValue>>::const_iterator begin() const {return entries.begin();}
     [[nodiscard]] std::vector<std::shared_ptr<ParsedValue>>::const_iterator end() const {return entries.end();}
+};
+
+
+class ParsedBody: public ParsedValue {
+public:
+    explicit ParsedBody(Tokenizer& tokenizer) {} // TODO
+
+    std::shared_ptr<BodyElement> body;
+
+    [[nodiscard]] Type type() const override {return BODY;}
 };
 
 

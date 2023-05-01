@@ -89,18 +89,16 @@ void ExpressionParser::initialize() {
     };
 
     binary_operators = {
-            {token_colon, BinaryOperator(BinaryOperator::SIZE, BinaryExpression::ADD, 0)},
+            {token_plus, BinaryOperator(BinaryExpression::ADD, 1)},
+            {token_minus, BinaryOperator(BinaryExpression::SUBTRACT, 1)},
+            {token_pipe, BinaryOperator(BinaryExpression::BITWISE_OR, 1)},
 
-            {token_plus, BinaryOperator(BinaryOperator::OPERATION, BinaryExpression::ADD, 1)},
-            {token_minus, BinaryOperator(BinaryOperator::OPERATION, BinaryExpression::SUBTRACT, 1)},
-            {token_pipe, BinaryOperator(BinaryOperator::OPERATION, BinaryExpression::BITWISE_OR, 1)},
-
-            {token_star, BinaryOperator(BinaryOperator::OPERATION, BinaryExpression::MULTIPLY, 2)},
-            {token_slash, BinaryOperator(BinaryOperator::OPERATION, BinaryExpression::DIVIDE, 2)},
-            {token_ampersand, BinaryOperator(BinaryOperator::OPERATION, BinaryExpression::BITWISE_AND, 2)},
-            {token_caret, BinaryOperator(BinaryOperator::OPERATION, BinaryExpression::BITWISE_XOR, 2)},
-            {token_double_less, BinaryOperator(BinaryOperator::OPERATION, BinaryExpression::SHIFT_LEFT, 2)},
-            {token_double_greater, BinaryOperator(BinaryOperator::OPERATION, BinaryExpression::SHIFT_RIGHT, 2)}
+            {token_star, BinaryOperator(BinaryExpression::MULTIPLY, 2)},
+            {token_slash, BinaryOperator(BinaryExpression::DIVIDE, 2)},
+            {token_ampersand, BinaryOperator(BinaryExpression::BITWISE_AND, 2)},
+            {token_caret, BinaryOperator(BinaryExpression::BITWISE_XOR, 2)},
+            {token_double_less, BinaryOperator(BinaryExpression::SHIFT_LEFT, 2)},
+            {token_double_greater, BinaryOperator(BinaryExpression::SHIFT_RIGHT, 2)}
     };
 }
 
@@ -284,7 +282,7 @@ void ExpressionParser::reduce_unary(const ExpressionParser::Element& next) {
     if (top.type != UNARY_OPERATOR || next.type != OPERAND) {
         throw Exception("internal error: invalid element types in reduce_unary");
     }
-    top = Element(UnaryExpression::create(top.operation.unary, next.node, 0), 0);
+    top = Element(UnaryExpression::create(top.operation.unary, next.node), 0);
 }
 
 void ExpressionParser::reduce_binary(int up_to_level) {
@@ -297,19 +295,7 @@ void ExpressionParser::reduce_binary(int up_to_level) {
             break;
         }
 
-        switch (operation.operation.binary.type) {
-            case BinaryOperator::SIZE:
-                if (!top.node->has_value() || !top.node->value().is_integer()) {
-                    throw ParseException(top.node->location, "size not a constant integer expression");
-                }
-                left.node->set_byte_size(top.node->value().unsigned_value());
-                top = left;
-                break;
-
-            case BinaryOperator::OPERATION:
-                top = Element(BinaryExpression::create(left.node, operation.operation.binary.operation, top.node, 0), operation.level);
-                break;
-        }
+        top = Element(BinaryExpression::create(left.node, operation.operation.binary.operation, top.node), operation.level);
 
         stack.pop_back();
         stack.pop_back();
@@ -324,21 +310,48 @@ void ExpressionParser::shift(ExpressionParser::Element next) {
 }
 
 
-ExpressionList ExpressionParser::parse_list() {
-    ExpressionList list;
+std::unique_ptr<DataBodyElement> ExpressionParser::parse_list() {
+    auto list = std::make_unique<DataBodyElement>();
 
     while (true) {
-        list.expressions.emplace_back(parse());
+        auto expression = parse();
+        auto encoding = std::optional<Encoding>();
+
         auto token = tokenizer.next();
+
+        if (token == token_colon) {
+            encoding = parse_encoding();
+            token = tokenizer.next();
+        }
+
+        list->append(expression, encoding);
+
         if (!token || token.is_newline()) {
             break;
         }
         else if (token != token_comma) {
-            throw ParseException(token, "expected ',' or newline");
+            throw ParseException(token, "expected ':', ',', or newline");
         }
     }
 
     return list;
+}
+
+Encoding ExpressionParser::parse_encoding() {
+    auto token = tokenizer.next();
+
+    auto type = Encoding::UNSIGNED;
+
+    if (token == token_minus) {
+        type = Encoding::SIGNED;
+        token = tokenizer.next();
+    }
+
+    if (token.is_unsigned()) {
+        return {type, token.as_unsigned()};
+    }
+
+    throw ParseException(token, "expected integer");
 }
 
 

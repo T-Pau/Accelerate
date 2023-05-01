@@ -1,5 +1,5 @@
 /*
-TokenNode.cc --
+BodyBlock.h --
 
 Copyright (C) Dieter Baron
 
@@ -29,20 +29,34 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "ParseException.h"
-#include "TokenNode.h"
+#ifndef BODY_BLOCK_H
+#define BODY_BLOCK_H
 
-TokenNode::TokenNode(const Token &token): token(token) {
-    switch (token.get_type()) {
-        case Token::PUNCTUATION:
-            node_type = PUNCTUATION;
-            break;
+#include "BodyElement.h"
+#include "Environment.h"
 
-        case Token::KEYWORD:
-            node_type = KEYWORD;
-            break;
+#include <vector>
 
-        default:
-            throw ParseException(token, "internal error: can't create TokenNode from %s", token.type_name());
-    }
-}
+class BodyBlock: public BodyElement {
+public:
+    BodyBlock() = default;
+    explicit BodyBlock(std::vector<std::shared_ptr<BodyElement>> elements): elements(std::move(elements)) {}
+
+    [[nodiscard]] std::shared_ptr<BodyElement> append_sub(std::shared_ptr<BodyElement> body, std::shared_ptr<BodyElement> element) override;
+    [[nodiscard]] std::shared_ptr<BodyElement> clone() const override {return std::make_shared<BodyBlock>(elements);}
+    [[nodiscard]] bool empty() const override {return elements.empty();}
+    void encode(std::string &bytes) const override;
+    [[nodiscard]] std::shared_ptr<BodyElement> evaluate(const Environment& environment) const override;
+    [[nodiscard]] uint64_t maximum_size() const override;
+    [[nodiscard]] uint64_t minimum_size() const override;
+    [[nodiscard]] std::optional<uint64_t> size() const override;
+
+    void serialize(std::ostream& stream) const override;
+
+private:
+    std::vector<std::shared_ptr<BodyElement>> elements;
+};
+
+std::ostream& operator<<(std::ostream& stream, const BodyBlock& block);
+
+#endif // BODY_BLOCK_H

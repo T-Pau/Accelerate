@@ -31,7 +31,6 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "Expression.h"
 
-#include <utility>
 #include "ParseException.h"
 
 
@@ -59,19 +58,8 @@ std::shared_ptr<Expression> Expression::evaluate(std::shared_ptr<Expression> nod
 }
 
 
-
-void Expression::set_byte_size(size_t size) {
-    if (size != 0 && minimum_byte_size() != 0 && size < minimum_byte_size()) {
-        throw ParseException(location, "value overflow");
-    }
-    byte_size_ = size;
-}
-
 void Expression::serialize(std::ostream &stream) const {
     serialize_sub(stream);
-    if (byte_size() != 0 && (minimum_byte_size() == 0 || minimum_byte_size() != byte_size())) {
-        stream << ":" << byte_size();
-    }
 }
 
 std::vector<Symbol> Expression::get_variables() const {

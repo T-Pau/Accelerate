@@ -46,6 +46,7 @@ std::unordered_map<Symbol, void (CPUParser::*)()> CPUParser::parser_methods;
 
 bool CPUParser::initialized = false;
 Token CPUParser::token_arguments;
+Token CPUParser::token_any;
 Token CPUParser::token_comma;
 Token CPUParser::token_encoding;
 Token CPUParser::token_keywords;
@@ -58,6 +59,7 @@ Token CPUParser::token_punctuation;
 void CPUParser::initialize() {
     if (!initialized) {
         token_arguments = Token(Token::NAME, "arguments");
+        token_any = Token(Token::NAME, "any");
         token_comma = Token(Token::PUNCTUATION, ",");
         token_encoding = Token(Token::NAME, "encoding");
         token_keywords = Token(Token::NAME, "keywords");
@@ -173,44 +175,64 @@ void CPUParser::parse_addressing_mode() {
 
     auto encoding_definition = definition->get_optional(token_encoding);
     if (encoding_definition == nullptr) {
-        addressing_mode.encoding = {std::make_shared<VariableExpression>(token_opcode)};
+        auto encoding = std::make_unique<DataBodyElement>();
+        encoding->append(std::make_shared<VariableExpression>(token_opcode));
+        addressing_mode.encoding = std::move(encoding);
     }
     else if (encoding_definition->is_scalar()) {
-        auto encoding_tokenizer = SequenceTokenizer(encoding_definition->as_scalar()->tokens);
-        auto encoding = ExpressionParser(encoding_tokenizer).parse_list();
+        auto encoding_tokens = std::vector<Token>();
 
-        for (auto& expression: encoding) {
-            expression->replace_variables(argument_symbol);
+        for (auto const& token: encoding_definition->as_scalar()->tokens) {
+            if (token.is_name() && !(token == token_opcode || token == token_pc)) {
+                auto argument_name = argument_symbol(token.as_symbol());
+                if (!addressing_mode.has_argument(argument_name)) {
+                    throw ParseException(token, "unknown argument in encoding");
+                }
+                encoding_tokens.emplace_back(Token::NAME, token.location, argument_name);
+            }
+            else {
+                encoding_tokens.emplace_back(token);
+            }
         }
-        addressing_mode.encoding = encoding;
+
+        auto encoding_tokenizer = SequenceTokenizer(encoding_tokens);
+        addressing_mode.encoding = ExpressionParser(encoding_tokenizer).parse_list();
     }
     else {
         throw ParseException(name, "invalid encoding for addressing mode '%s'", name.as_string().c_str());
     }
 
-    cpu.add_addressing_mode(name.as_symbol(), addressing_mode);
+    cpu.add_addressing_mode(name.as_symbol(), std::move(addressing_mode));
 }
 
 
 void CPUParser::parse_argument_type() {
     Token name = tokenizer.expect(Token::NAME, group_directive);
     Token type = tokenizer.expect(Token::NAME, group_directive);
-    auto parameters = ParsedValue::parse(tokenizer);
 
-    {
-        auto it = argument_type_names.find(name);
-        if (it != argument_type_names.end()) {
-            throw ParseException(type, "duplicate definition of argument type '%s'", name.as_string().c_str());
-            // TODO: attach note it->second,  previously defined here
+    auto argument_type = std::unique_ptr<ArgumentType>();
+
+    if (type == token_any) {
+        argument_type = std::make_unique<ArgumentTypeAny>(name.as_symbol());
+    }
+    else {
+        auto parameters = ParsedValue::parse(tokenizer);
+
+        {
+            auto it = argument_type_names.find(name);
+            if (it != argument_type_names.end()) {
+                throw ParseException(type, "duplicate definition of argument type '%s'", name.as_string().c_str());
+                // TODO: attach note it->second,  previously defined here
+            }
+            argument_type_names.insert(name);
         }
-        argument_type_names.insert(name);
-    }
 
-    auto it = argument_type_parser_methods.find(type.as_symbol());
-    if (it == argument_type_parser_methods.end()) {
-        throw ParseException(type, "unknown argument type '%s'", type.as_string().c_str());
+        auto it = argument_type_parser_methods.find(type.as_symbol());
+        if (it == argument_type_parser_methods.end()) {
+            throw ParseException(type, "unknown argument type '%s'", type.as_string().c_str());
+        }
+        argument_type = (this->*it->second)(name, parameters.get());
     }
-    auto argument_type = (this->*it->second)(name, parameters.get());
 
     cpu.add_argument_type(name.as_symbol(), std::move(argument_type));
 }
@@ -290,7 +312,7 @@ void CPUParser::parse_syntax() {
 
 
 std::unique_ptr<ArgumentType> CPUParser::parse_argument_type_enum(const Token& name, const ParsedValue *parameters) {
-    auto argument_type = std::make_unique<ArgumentTypeEnum>();
+    auto argument_type = std::make_unique<ArgumentTypeEnum>(name.as_symbol());
 
     if (!parameters->is_dictionary()) {
         throw ParseException(parameters->location, "definition of enum argument type '%s' must be dictionary", name.as_string().c_str());
@@ -316,7 +338,7 @@ std::unique_ptr<ArgumentType> CPUParser::parse_argument_type_enum(const Token& n
 }
 
 std::unique_ptr<ArgumentType> CPUParser::parse_argument_type_map(const Token& name, const ParsedValue *parameters) {
-    auto argument_type = std::make_unique<ArgumentTypeMap>();
+    auto argument_type = std::make_unique<ArgumentTypeMap>(name.as_symbol());
 
     if (!parameters->is_dictionary()) {
         throw ParseException(parameters->location, "definition of map argument type '%s' must be dictionary", name.as_string().c_str());
@@ -340,7 +362,7 @@ std::unique_ptr<ArgumentType> CPUParser::parse_argument_type_map(const Token& na
 }
 
 std::unique_ptr<ArgumentType> CPUParser::parse_argument_type_range(const Token& name, const ParsedValue *parameters) {
-    auto argument_type = std::make_unique<ArgumentTypeRange>();
+    auto argument_type = std::make_unique<ArgumentTypeRange>(name.as_symbol());
 
     if (!parameters->is_scalar()) {
         throw ParseException(parameters->location, "definition of range argument type '%s' must be scalar", name.as_string().c_str());

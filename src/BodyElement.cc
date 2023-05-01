@@ -1,5 +1,5 @@
 /*
-ValueExpression.cc --
+BodyElement.cc --
 
 Copyright (C) Dieter Baron
 
@@ -29,27 +29,52 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "ValueExpression.h"
+#include "BodyElement.h"
+#include "BodyBlock.h"
 
-#include "ParseException.h"
-
-ValueExpression::ValueExpression(const Token &token) {
-    if (!token.is_value()) {
-        throw ParseException(token, "internal error: can't create value node from %s", token.type_name());
-    }
-    value_ = token.as_value();
+std::ostream& operator<<(std::ostream& stream, const BodyElement& element) {
+    element.serialize(stream);
+    return stream;
 }
 
-
-void ValueExpression::serialize_sub(std::ostream &stream) const {
-    auto width = static_cast<int>(value()->default_size()) * 2;
-    uint64_t v;
-    if (value()->is_signed()) {
-        stream << "-";
-        v = -value()->signed_value();
+std::shared_ptr<BodyElement>
+BodyElement::evaluate(std::shared_ptr<BodyElement> element, const Environment &environment) {
+    auto new_element = element->evaluate(environment);
+    if (new_element) {
+        return new_element;
     }
     else {
-        v = value()->unsigned_value();
+        return element;
     }
-    stream << "$" << std::setfill('0') << std::setw(width) << std::hex << v << std::dec;
+}
+
+std::shared_ptr<BodyElement> BodyElement::append(const std::shared_ptr<BodyElement>& body, const std::shared_ptr<BodyElement>& element) {
+    if (element->empty()) {
+        return body;
+    }
+    if (!body) {
+        return element;
+    }
+
+    auto new_body = body->append_sub(body, element);
+    if (new_body) {
+        return new_body;
+    }
+    else {
+        return std::make_shared<BodyBlock>(std::vector<std::shared_ptr<BodyElement>>({body, element}));
+    }
+}
+
+std::shared_ptr<BodyElement> BodyElement::make_unique(std::shared_ptr<BodyElement> element) {
+    if (element.use_count() < 2) {
+        return element;
+    }
+    else {
+        return element->clone();
+    }
+}
+
+std::ostream& operator<<(std::ostream& stream, const std::shared_ptr<BodyElement>& element) {
+    stream << *element;
+    return stream;
 }

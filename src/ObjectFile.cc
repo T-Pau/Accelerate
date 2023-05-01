@@ -91,6 +91,7 @@ void ObjectFile::add_object_file(const ObjectFile &file) {
     }
     for (const auto& pair: file.objects) {
         auto own_object = insert_object({this, &pair.second});
+        add_object(own_object);
     }
 }
 
@@ -99,7 +100,7 @@ void ObjectFile::evaluate(const Environment &environment) {
         pair.second.value = Expression::evaluate(pair.second.value, environment);
     }
     for (auto& pair: objects) {
-        pair.second.data.evaluate(environment);
+        pair.second.data = BodyElement::evaluate(pair.second.data, environment);
     }
 }
 
@@ -163,6 +164,7 @@ void ObjectFile::add_to_environment(Symbol name, Object::Visibility visibility, 
 std::vector<Object *> ObjectFile::all_objects() {
     std::vector<Object*> v;
 
+    v.reserve(objects.size());
     for (auto& pair: objects) {
         v.emplace_back(&pair.second);
     }

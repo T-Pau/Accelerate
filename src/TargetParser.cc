@@ -155,7 +155,8 @@ void TargetParser::parse_output() {
                 throw ParseException(token, "unexpected %s", token.type_name());
             }
 
-            target.add_output_element(OutputElement(type, ExpressionParser(tokenizer).parse_list()));
+            // TODO
+            //target.add_output_element(OutputElement(type, ExpressionParser(tokenizer).parse_list()));
         }
         catch (ParseException &ex) {
             FileReader::global.error(ex.location, "%s", ex.what());

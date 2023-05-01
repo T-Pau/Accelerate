@@ -1,5 +1,5 @@
 /*
-BinaryExpression.h -- 
+InRangeExpression.h --
 
 Copyright (C) Dieter Baron
 
@@ -29,47 +29,34 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef BINARY_EXPRESSION_H
-#define BINARY_EXPRESSION_H
+#ifndef FITS_EXPRESSION_H
+#define FITS_EXPRESSION_H
 
+#include "ArgumentType.h"
 #include "Expression.h"
 
-class BinaryExpression: public Expression {
+#include <utility>
+
+class InRangeExpression: public Expression {
 public:
-    enum Operation {
-        ADD,
-        BITWISE_AND,
-        BITWISE_OR,
-        BITWISE_XOR,
-        DIVIDE,
-        LOGICAL_AND,
-        LOGICAL_OR,
-        MODULO,
-        MULTIPLY,
-        SHIFT_LEFT,
-        SHIFT_RIGHT,
-        SUBTRACT
-    };
+    InRangeExpression(std::shared_ptr<Expression> lower_bound, std::shared_ptr<Expression> upper_bound, std::shared_ptr<Expression> argument): lower_bound(std::move(lower_bound)), upper_bound(std::move(upper_bound)), argument(std::move(argument)) {}
+    [[nodiscard]] std::shared_ptr<Expression> static create(const std::shared_ptr<Expression>& lower_bound, const std::shared_ptr<Expression>& upper_bound, const std::shared_ptr<Expression>& argument);
 
-    BinaryExpression(std::shared_ptr<Expression>  left, Operation operation, std::shared_ptr<Expression> right);
-    [[nodiscard]] std::shared_ptr<Expression> static create(const std::shared_ptr<Expression>& left, Operation operation, const std::shared_ptr<Expression>& right);
+    [[nodiscard]] Type type() const override {return FUNCTION;}
+    [[nodiscard]] std::optional<Value> minimum_value() const override {return {};}
+    [[nodiscard]] std::optional<Value> maximum_value() const override {return {};}
 
-    [[nodiscard]] Type type() const override {return BINARY;}
-    [[nodiscard]] std::optional<Value> minimum_value() const override;
-    [[nodiscard]] std::optional<Value> maximum_value() const override;
-
-    void collect_variables(std::vector<Symbol>& variables) const override {left->collect_variables(variables); right->collect_variables(variables);}
+    void collect_variables(std::vector<Symbol>& variables) const override;
 
 protected:
     [[nodiscard]] std::shared_ptr<Expression> evaluate(const Environment &environment) const override;
-
     void serialize_sub(std::ostream& stream) const override;
 
 private:
-    Operation operation;
-    std::shared_ptr<Expression> left;
-    std::shared_ptr<Expression> right;
+    std::shared_ptr<Expression> lower_bound;
+    std::shared_ptr<Expression> upper_bound;
+    std::shared_ptr<Expression> argument;
 };
 
 
-#endif // BINARY_EXPRESSION_H
+#endif // FITS_EXPRESSION_H

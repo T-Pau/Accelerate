@@ -72,6 +72,7 @@ private:
 
     static void initialize();
     static bool initialized;
+    static Token token_any;
     static Token token_arguments;
     static Token token_comma;
     static Token token_encoding;

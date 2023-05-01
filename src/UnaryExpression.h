@@ -45,18 +45,17 @@ public:
         PLUS
     };
 
-    UnaryExpression(Operation operation, std::shared_ptr<Expression>operand);
-    [[nodiscard]] std::shared_ptr<Expression> static create(Operation operation, std::shared_ptr<Expression> operand, size_t byte_size);
+    UnaryExpression(Operation operation, std::shared_ptr<Expression>operand) : operation(operation), operand(std::move(operand)) {}
+    [[nodiscard]] std::shared_ptr<Expression> static create(Operation operation, std::shared_ptr<Expression> operand);
 
     [[nodiscard]] Type type() const override {return UNARY;}
-    [[nodiscard]] size_t minimum_byte_size() const override;
-    void replace_variables(Symbol (*transform)(Symbol)) override {operand->replace_variables(transform);}
 
     void collect_variables(std::vector<Symbol>& variables) const override { operand->collect_variables(variables);}
 
 protected:
     [[nodiscard]] std::shared_ptr<Expression> evaluate(const Environment &environment) const override;
-    [[nodiscard]] std::shared_ptr<Expression> clone() const override {return create(operation, operand, byte_size());}
+    [[nodiscard]] std::optional<Value> minimum_value() const override;
+    [[nodiscard]] std::optional<Value> maximum_value() const override;
 
     void serialize_sub(std::ostream& stream) const override;
 

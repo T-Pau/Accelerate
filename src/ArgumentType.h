@@ -34,6 +34,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <unordered_map>
 
+#include "Expression.h"
 #include "Int.h"
 #include "Symbol.h"
 #include "Value.h"
@@ -41,23 +42,39 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 class ArgumentType {
 public:
     enum Type {
-        RANGE,
+        ANY,
         ENUM,
-        MAP
+        MAP,
+        RANGE
     };
+
+    ArgumentType(Symbol name): name(name) {}
 
     virtual ~ArgumentType() = default;
 
     [[nodiscard]] virtual Type type() const = 0;
+    [[nodiscard]] virtual std::optional<bool> fits(const std::shared_ptr<Expression>& expression) const = 0;
+
+    Symbol name;
 };
 
+class ArgumentTypeAny: public ArgumentType {
+public:
+    ArgumentTypeAny(Symbol name): ArgumentType(name) {}
+
+    [[nodiscard]] Type type() const override {return ANY;}
+    [[nodiscard]] std::optional<bool> fits(const std::shared_ptr<Expression> &expression) const override {return true;}
+};
 
 class ArgumentTypeEnum: public ArgumentType {
 public:
+    ArgumentTypeEnum(Symbol name): ArgumentType(name) {}
+
     [[nodiscard]] Type type() const override {return ENUM;}
 
     [[nodiscard]] bool has_entry(Symbol name) const {return entries.find(name) != entries.end();}
     [[nodiscard]] Value entry(Symbol name) const;
+    [[nodiscard]] std::optional<bool> fits(const std::shared_ptr<Expression>& expression) const override {return false;}
 
     std::unordered_map<Symbol, Value> entries;
 };
@@ -67,10 +84,13 @@ public:
 
 class ArgumentTypeMap: public ArgumentType {
 public:
+    ArgumentTypeMap(Symbol name): ArgumentType(name) {}
+
     [[nodiscard]] Type type() const override {return MAP;}
 
     [[nodiscard]] bool has_entry(Value value) const {return entries.find(value) != entries.end();}
     [[nodiscard]] Value entry(Value value) const;
+    [[nodiscard]] std::optional<bool> fits(const std::shared_ptr<Expression>& expression) const override;
 
     std::unordered_map<Value, Value> entries;
 };
@@ -80,9 +100,10 @@ public:
 
 class ArgumentTypeRange: public ArgumentType {
 public:
-    [[nodiscard]] Type type() const override {return RANGE;}
+    ArgumentTypeRange(Symbol name): ArgumentType(name) {}
 
-    [[nodiscard]] size_t byte_size() const {return upper_bound.minimum_byte_size();} // TODO: Take lower_bound into account.
+    [[nodiscard]] Type type() const override {return RANGE;}
+    [[nodiscard]] std::optional<bool> fits(const std::shared_ptr<Expression>& expression) const override;
 
     Value lower_bound;
     Value upper_bound;

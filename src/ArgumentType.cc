@@ -55,3 +55,30 @@ Value ArgumentTypeMap::entry(Value value) const {
         return it->second;
     }
 }
+
+std::optional<bool> ArgumentTypeMap::fits(const std::shared_ptr<Expression> &expression) const {
+    if (expression->has_value()) {
+        return has_entry(*expression->value());
+    }
+    else {
+        return {};
+    }
+}
+
+std::optional<bool> ArgumentTypeRange::fits(const std::shared_ptr<Expression> &expression) const {
+    auto minimum_value = expression->minimum_value();
+    auto maximum_value = expression->maximum_value();
+
+    if (!minimum_value.has_value() || !maximum_value.has_value()) {
+        return {};
+    }
+    else if (*maximum_value < lower_bound || *minimum_value > upper_bound) {
+        return false;
+    }
+    else if (*minimum_value >= lower_bound && *maximum_value <= upper_bound) {
+        return true;
+    }
+    else {
+        return {};
+    }
+}

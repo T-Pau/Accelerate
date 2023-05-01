@@ -30,7 +30,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include "MemoryMap.h"
-#include "Exception.h"
+#include "Int.h"
 
 const std::vector<MemoryMap::Block> *MemoryMap::segment(Symbol name) const {
     auto it = segments.find(name);
@@ -109,7 +109,7 @@ bool MemoryMap::is_compatible_with(const MemoryMap &other) const {
         if (this_section == nullptr) {
             return false;
         }
-        if (this_section->address_size != other_section.address_size || this_section->access != other_section.access) {
+        if (this_section->access != other_section.access) {
             return false;
         }
         return true;
@@ -143,7 +143,6 @@ MemoryMap::Section::Section(Symbol name, MemoryMap::AccessType access, std::vect
             size += block.range.size;
             previous = &blocks.emplace_back(block);
         }
-        address_size = std::max(address_size, Int::minimum_byte_size(static_cast<int64_t>(previous->range.end() - 1)));
     }
 }
 

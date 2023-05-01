@@ -47,8 +47,8 @@ public:
     };
     
     explicit Value(): type_(VOID), unsigned_value_(0) {}
-    explicit Value(uint64_t value): type_(UNSIGNED), unsigned_value_(value) {}
-    explicit Value(int64_t value);
+    explicit Value(uint64_t value, uint64_t default_size = 0): type_(UNSIGNED), unsigned_value_(value), explicit_default_size(default_size) {}
+    explicit Value(int64_t value, uint64_t default_size = 0);
     explicit Value(bool value): type_(BOOLEAN), boolean_value_(value) {}
     explicit Value(double value): type_(FLOAT), float_value_(value) {}
     Value(const Value&other) = default;
@@ -69,6 +69,9 @@ public:
     [[nodiscard]] double float_value() const;
     [[nodiscard]] int64_t signed_value() const;
     [[nodiscard]] uint64_t unsigned_value() const;
+    [[nodiscard]] uint64_t default_size() const;
+
+    explicit operator bool() const {return boolean_value();}
 
     bool operator==(const Value& other) const;
     bool operator!=(const Value& other) const {return !(*this == other);}
@@ -94,8 +97,6 @@ public:
     Value operator&&(const Value& other) const;
     Value operator||(const Value& other) const;
 
-    [[nodiscard]] size_t minimum_byte_size() const;
-
 private:
     Type type_;
     union {
@@ -104,6 +105,7 @@ private:
         int64_t signed_value_;
         uint64_t unsigned_value_;
     };
+    uint64_t explicit_default_size = 0;
 
     [[nodiscard]] static uint64_t negate_signed(int64_t value);
     [[nodiscard]] static int64_t negate_unsigned(uint64_t value);
@@ -131,5 +133,18 @@ struct std::hash<Value> {
         }
     }
 };
+
+std::optional<Value> operator+(const std::optional<Value> a, const std::optional<Value> b);
+std::optional<Value> operator-(const std::optional<Value> a, const std::optional<Value> b);
+std::optional<Value> operator*(const std::optional<Value> a, const std::optional<Value> b);
+std::optional<Value> operator/(const std::optional<Value> a, const std::optional<Value> b);
+std::optional<Value> operator&&(const std::optional<Value> a, const std::optional<Value> b);
+std::optional<Value> operator||(const std::optional<Value> a, const std::optional<Value> b);
+
+
+bool operator>(const std::optional<Value> a, const std::optional<Value> b);
+bool operator<(const std::optional<Value> a, const std::optional<Value> b);
+bool operator>=(const std::optional<Value> a, const std::optional<Value> b);
+bool operator<=(const std::optional<Value> a, const std::optional<Value> b);
 
 #endif // VALUE_H

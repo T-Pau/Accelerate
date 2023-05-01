@@ -93,6 +93,7 @@ AddressingModeMatcherElement::elements_for(const AddressingMode::Notation::Eleme
 
             auto argument_type = it->second;
             switch (argument_type->type()) {
+                case ArgumentType::ANY:
                 case ArgumentType::RANGE:
                 case ArgumentType::MAP:
                     elements.emplace_back();

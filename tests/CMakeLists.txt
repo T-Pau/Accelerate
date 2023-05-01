@@ -1,7 +1,5 @@
 
 set(XFAIL_TESTS
-        4510.test
-        45gs02.test
 )
 
 file(GLOB TESTS ${CMAKE_CURRENT_SOURCE_DIR}/*.test)

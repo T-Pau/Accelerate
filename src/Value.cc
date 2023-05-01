@@ -35,7 +35,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Exception.h"
 
 
-Value::Value(int64_t value) {
+Value::Value(int64_t value, uint64_t default_size): explicit_default_size(default_size) {
     if (value < 0) {
         type_ = SIGNED;
         signed_value_ = value;
@@ -193,6 +193,9 @@ Value Value::operator-(const Value &other) const {
 }
 
 Value Value::operator/(const Value &other) const {
+    if ((other.is_float() && other.float_value() == 0.0) || (other.is_unsigned() && other.unsigned_value() == 0)) {
+        throw Exception("division by zero");
+    }
     if (is_float() || other.is_float()) {
         return Value(float_value() / other.float_value());
     }
@@ -429,21 +432,6 @@ bool Value::operator<=(const Value &other) const {
     }
 }
 
-size_t Value::minimum_byte_size() const {
-    switch (type()) {
-        case BOOLEAN:
-        case FLOAT:
-        case VOID:
-            return 0;
-
-        case SIGNED:
-            return Int::minimum_byte_size(signed_value_);
-
-        case UNSIGNED:
-            return Int::minimum_byte_size(unsigned_value_);
-    }
-}
-
 Value Value::operator%(const Value &other) const {
     if (is_unsigned() && other.is_unsigned()) {
         return Value(unsigned_value_ % other.unsigned_value_);
@@ -511,3 +499,113 @@ Value Value::operator~() const {
             return Value(~unsigned_value_);
     }
 }
+
+uint64_t Value::default_size() const {
+    uint64_t implicit_default_size;
+
+    switch (type()) {
+        case BOOLEAN:
+        case VOID:
+        case FLOAT:
+            implicit_default_size = 0;
+            break;
+
+        case SIGNED:
+            implicit_default_size = Int::minimum_byte_size(signed_value_);
+            break;
+
+        case UNSIGNED:
+            implicit_default_size = Int::minimum_byte_size(unsigned_value_);
+            break;
+    }
+
+    return std::max(implicit_default_size, explicit_default_size);
+}
+
+
+std::optional<Value> operator+(const std::optional<Value> a, const std::optional<Value> b) {
+    if (a.has_value() && b.has_value()) {
+        return *a + *b;
+    }
+    else {
+        return {};
+    }
+}
+
+
+std::optional<Value> operator-(const std::optional<Value> a, const std::optional<Value> b) {
+    if (a.has_value() && b.has_value()) {
+        return *a - *b;
+    }
+    else {
+        return {};
+    }
+}
+
+
+std::optional<Value> operator*(const std::optional<Value> a, const std::optional<Value> b) {
+    if (a.has_value() && b.has_value()) {
+        return *a * *b;
+    }
+    else {
+        return {};
+    }
+}
+
+
+std::optional<Value> operator/(const std::optional<Value> a, const std::optional<Value> b) {
+    if (a.has_value() && b.has_value()) {
+        return *a / *b;
+    }
+    else {
+        return {};
+    }
+}
+
+std::optional<Value> operator&&(const std::optional<Value> a, const std::optional<Value> b) {
+    if (a.has_value() && b.has_value()) {
+        return *a && *b;
+    }
+    else {
+        return {};
+    }
+}
+
+std::optional<Value> operator||(const std::optional<Value> a, const std::optional<Value> b) {
+    if (a.has_value() && b.has_value()) {
+        return *a || *b;
+    }
+    else {
+        return {};
+    }
+}
+
+
+bool operator>(const std::optional<Value> a, const std::optional<Value> b) {
+    if (!a.has_value() || !b.has_value()) {
+        return false;
+    }
+    return *a > *b;
+}
+
+bool operator<(const std::optional<Value> a, const std::optional<Value> b) {
+    if (!a.has_value() || !b.has_value()) {
+        return false;
+    }
+    return *a < *b;
+}
+
+bool operator>=(const std::optional<Value> a, const std::optional<Value> b) {
+    if (!a.has_value() || !b.has_value()) {
+        return false;
+    }
+    return *a >= *b;
+}
+
+bool operator<=(const std::optional<Value> a, const std::optional<Value> b) {
+    if (!a.has_value() || !b.has_value()) {
+        return false;
+    }
+    return *a <= *b;
+}
+

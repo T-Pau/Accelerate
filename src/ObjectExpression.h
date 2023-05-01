@@ -37,26 +37,25 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 class ObjectExpression: public Expression {
 public:
-    explicit ObjectExpression(Object* object): object(object), had_value(object->has_address()) {}
+    explicit ObjectExpression(Object* object): object(object) {}
+    [[nodiscard]] static std::shared_ptr<Expression> create(Object* object);
 
     [[nodiscard]] Type type() const override {return OBJECT;}
 
     [[nodiscard]] bool has_value() const override {return object->has_address();}
-    [[nodiscard]] Value value() const override {return has_value() ? Value(object->address.value()) : Value();}
-    [[nodiscard]] size_t minimum_byte_size() const override;
-    void replace_variables(Symbol (*transform)(Symbol)) override {}
+    [[nodiscard]] std::optional<Value> value() const override;
     void collect_variables(std::vector<Symbol>& variables) const override {}
 
     Object* object;
 
 protected:
     [[nodiscard]] std::shared_ptr<Expression> evaluate(const Environment &environment) const override;
-    [[nodiscard]] std::shared_ptr<Expression> clone() const override;
+    [[nodiscard]] std::optional<Value> maximum_value() const override;
+    [[nodiscard]] std::optional<Value> minimum_value() const override;
 
     void serialize_sub(std::ostream& stream) const override {stream << object->name.as_string();}
 
 private:
-    bool had_value;
 };
 
 #endif // LINKER_OBJECT_EXPRESSION_H

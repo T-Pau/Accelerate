@@ -58,7 +58,7 @@ public:
     Token(Type type, const std::string& name): Token(type, Location()) {symbol = Symbol(name);}
     Token(Type type, Location location, Symbol symbol_): Token(type, location) {symbol = symbol_;}
     Token(Type type, Location location, const std::string& string): Token(type, location, Symbol(string)) {}
-    Token(Type type, Location location, uint64_t integer, uint64_t byte_size_ = 0): Token(type, location) {value = Value(integer); byte_size = byte_size_;}
+    Token(Type type, Location location, uint64_t integer, uint64_t default_size = 0): Token(type, location) {value = Value(integer, default_size);}
     Token(Type type, Location location, double real): Token(type, location) {value = Value(real);}
 //    Token(const Token& other): type(other.type) {*this = other;}
 
@@ -87,7 +87,6 @@ public:
     static const char* type_name(Type type);
 
     Location location;
-    uint64_t byte_size = 0;
 
 private:
     Type type;

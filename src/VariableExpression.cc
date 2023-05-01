@@ -33,13 +33,6 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "ParseException.h"
 
-std::shared_ptr<Expression> VariableExpression::clone() const {
-    auto node = std::make_shared<VariableExpression>(symbol);
-    node->set_byte_size(byte_size());
-    return node;
-}
-
-
 
 VariableExpression::VariableExpression(const Token &token) {
     if (!token.is_name()) {
@@ -54,20 +47,11 @@ std::shared_ptr<Expression> VariableExpression::evaluate(const Environment &envi
 
     if (value) {
         // TODO: Detect loops
-        auto node = Expression::evaluate(value, environment);
-
-        if (byte_size() != 0 && node->byte_size() != byte_size()) {
-            node = node->clone();
-            node->set_byte_size(byte_size());
-        }
-        return node;
+        return Expression::evaluate(value, environment);
     }
     else {
         return {};
     }
 }
 
-void VariableExpression::replace_variables(Symbol (*transform)(Symbol)) {
-    symbol = transform(symbol);
-}
 

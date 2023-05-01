@@ -37,7 +37,6 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <vector>
 
 #include "Memory.h"
-#include "ExpressionList.h"
 #include "Symbol.h"
 
 class MemoryMap {
@@ -62,18 +61,18 @@ public:
     class Section {
     public:
         Section() = default;
-        Section(size_t address_size): address_size(address_size) {}
         Section(Symbol name, AccessType access, std::vector<Block> raw_blocks);
 
         bool operator<(const Section& other) const;
 
         [[nodiscard]] bool empty() const {return blocks.empty();}
+        [[nodiscard]] uint64_t maximum_address() const {return empty() ? 0 : blocks.back().range.end();}
+        [[nodiscard]] uint64_t minimum_address() const {return empty() ? 0 : blocks.front().range.start;}
 
         Symbol name;
         AccessType access = READ_WRITE;
         std::vector<Block> blocks;
         size_t size = 0;
-        size_t address_size = 0;
     };
 
 

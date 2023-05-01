@@ -55,6 +55,7 @@ void Linker::link() {
     }
 
     // Collect all referenced objects.
+#if 0
     while (!new_objects.empty()) {
         auto current_objects = new_objects;
         new_objects.clear();
@@ -71,6 +72,7 @@ void Linker::link() {
             }
         }
     }
+#endif
 
     for (auto object: objects) {
         if (!object->bank.has_value() || object->address.has_value()) {
@@ -106,8 +108,10 @@ void Linker::link() {
     auto empty_environment = Environment();
     for (auto object: objects) {
         try {
-            object->data.evaluate(empty_environment);
-            memory[object->bank.value()].copy(object->address.value(), object->data.bytes(target.cpu->byte_order));
+            object->evaluate(empty_environment);
+            std::string bytes;
+            object->data->encode(bytes);
+            memory[object->bank.value()].copy(object->address.value(), bytes);
         }
         catch (Exception& ex) {
             FileReader::global.error(Location(), "can't evaluate '%s': %s", object->name.as_string().c_str(), ex.what());
@@ -133,6 +137,7 @@ void Linker::output(const std::string &file_name) {
 
     auto stream = std::ofstream(file_name);
 
+#if 0
     for (const auto& element: target.output_elements) {
         auto arguments = element.arguments;
         arguments.evaluate(environment);
@@ -156,6 +161,7 @@ void Linker::output(const std::string &file_name) {
             }
         }
     }
+#endif
 }
 
 bool Linker::add_object(Object *object) {

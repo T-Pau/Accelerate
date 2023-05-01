@@ -33,11 +33,11 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define ADDRESSING_MODE_H
 
 #include "ArgumentType.h"
+#include "DataBodyElement.h"
 #include "Expression.h"
 #include "ParsedValue.h"
 #include "Symbol.h"
 #include "Token.h"
-#include "ExpressionList.h"
 
 class AddressingMode {
 public:
@@ -66,7 +66,7 @@ public:
 
     std::vector<Notation> notations;
     std::unordered_map<Symbol, const ArgumentType*> arguments;
-    ExpressionList encoding;
+    std::shared_ptr<DataBodyElement> encoding;
 
     void add_notation(Notation notation) {notations.emplace_back(std::move(notation));}
 };

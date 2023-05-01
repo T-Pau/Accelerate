@@ -43,6 +43,7 @@ class Expression {
 public:
     enum Type {
         BINARY,
+        FUNCTION,
         VALUE,
         OBJECT,
         UNARY,
@@ -83,13 +84,10 @@ public:
     Iterator end() {return {};}
 
     [[nodiscard]] virtual Type type() const = 0;
-    [[nodiscard]] virtual bool has_value() const {return false;}
-    [[nodiscard]] virtual Value value() const {return Value();}
-    [[nodiscard]] virtual size_t minimum_byte_size() const = 0;
-    virtual void replace_variables(Symbol (*transform)(Symbol)) = 0;
-
-    [[nodiscard]] size_t byte_size() const {return byte_size_;}
-    void set_byte_size(size_t size);
+    [[nodiscard]] virtual bool has_value() const {return value().has_value();}
+    [[nodiscard]] virtual std::optional<Value> value() const {return {};}
+    [[nodiscard]] virtual std::optional<Value> minimum_value() const {return value();}
+    [[nodiscard]] virtual std::optional<Value> maximum_value() const {return value();}
 
     static std::shared_ptr<Expression> evaluate(std::shared_ptr<Expression> node, const Environment& environment);
 
@@ -97,7 +95,6 @@ public:
     [[nodiscard]] std::vector<Symbol> get_variables() const;
 
     [[nodiscard]] virtual std::shared_ptr<Expression> evaluate(const Environment& environment) const = 0;
-    [[nodiscard]] virtual std::shared_ptr<Expression> clone() const = 0;
 
     virtual void collect_variables(std::vector<Symbol>& variables) const = 0;
 
@@ -106,9 +103,6 @@ public:
 protected:
     virtual Expression* iterate(Expression* last) const {return nullptr;}
     virtual void serialize_sub(std::ostream& stream) const = 0;
-
-private:
-    size_t byte_size_ = 0;
 };
 
 std::ostream& operator<<(std::ostream& stream, const std::shared_ptr<Expression>& node);

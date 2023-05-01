@@ -31,30 +31,49 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "ObjectExpression.h"
 
-std::shared_ptr<Expression> ObjectExpression::clone() const {
-    auto node = std::make_shared<ObjectExpression>(object);
-    node->set_byte_size(byte_size());
-    return node;
-}
-
-size_t ObjectExpression::minimum_byte_size() const {
-    if (has_value()) {
-        return Int::minimum_byte_size(value().unsigned_value());
-    }
-    else if (object->section != nullptr) {
-        return object->section->address_size;
-    }
-    else {
-        return 0;
-    }
-}
+#include "ValueExpression.h"
 
 std::shared_ptr<Expression> ObjectExpression::evaluate(const Environment &environment) const {
-    if (!had_value && object->has_address()) {
-        // TODO: return ValueExpression
-        return clone();
+    if (object->has_address()) {
+        return std::make_shared<ValueExpression>(object->address.value());
     }
     else {
         return {};
+    }
+}
+
+std::optional<Value> ObjectExpression::value() const {
+    if (has_value()) {
+        return Value(object->address.value());
+    }
+    else {
+        return {};
+    }
+}
+
+std::shared_ptr<Expression> ObjectExpression::create(Object *object) {
+    if (object->has_address()) {
+        return std::make_shared<ValueExpression>(object->address.value());
+    }
+    else {
+        return std::make_shared<ObjectExpression>(object);
+    }
+}
+
+std::optional<Value> ObjectExpression::maximum_value() const {
+    if (has_value()) {
+        return value();
+    }
+    else {
+        return Value(object->section->maximum_address() - object->data->minimum_size());
+    }
+}
+
+std::optional<Value> ObjectExpression::minimum_value() const {
+    if (has_value()) {
+        return value();
+    }
+    else {
+        return Value(object->section->minimum_address());
     }
 }

@@ -37,21 +37,20 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 class ValueExpression: public Expression {
 public:
     explicit ValueExpression(const Token& token);
-    explicit ValueExpression(Value value): value_(value) {set_byte_size(value.minimum_byte_size());}
+    explicit ValueExpression(Value value): value_(value) {}
     explicit ValueExpression(uint64_t value): ValueExpression(Value(value)) {}
 
     [[nodiscard]] Type type() const override {return VALUE;}
 
     [[nodiscard]] bool has_value() const override {return true;}
-    [[nodiscard]] Value value() const override {return value_;}
-    [[nodiscard]] size_t minimum_byte_size() const override {return value().minimum_byte_size();}
-    void replace_variables(Symbol (*transform)(Symbol)) override {}
+    [[nodiscard]] std::optional<Value> value() const override {return value_;}
+    [[nodiscard]] std::optional<Value> minimum_value() const override {return value_;}
+    [[nodiscard]] std::optional<Value> maximum_value() const override {return value_;}
 
     void collect_variables(std::vector<Symbol>& variables) const override {}
 
 protected:
     [[nodiscard]] std::shared_ptr<Expression> evaluate(const Environment &environment) const override {return {};}
-    [[nodiscard]] std::shared_ptr<Expression> clone() const override;
 
     void serialize_sub(std::ostream& stream) const override;
 

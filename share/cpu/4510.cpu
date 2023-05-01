@@ -34,7 +34,7 @@
     arguments {
         value: word
     }
-    encoding: .opcode, value
+    encoding: .opcode, value:2
 }
 
 .addressing_mode indirect_z_indexed {
@@ -58,7 +58,7 @@
     arguments {
         address: word
     }
-    encoding: .opcode, address - .pc - 2 : 2
+    encoding: .opcode, address - .pc - 2 :-2
 }
 
 .addressing_mode zero_page_relative {
@@ -67,7 +67,7 @@
         address1: byte
         address2: word
     }
-    encoding: .opcode, address1, address2 - .pc - 2 : 1
+    encoding: .opcode, address1, address2 - .pc - 2 :-1
 }
 
 .addressing_mode absolute_x_indexed_indirect {
@@ -75,7 +75,7 @@
     arguments {
         address: word
     }
-    encoding: .opcode, address
+    encoding: .opcode, address:2
 }
 
 .instruction adc {

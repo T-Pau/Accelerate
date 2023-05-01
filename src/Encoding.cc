@@ -63,35 +63,18 @@ void Encoding::encode(std::string &bytes, const Value &value) const {
 bool Encoding::fits(const Value &value) const {
     switch (type) {
         case SIGNED:
-            if (!value.is_integer()) {
-                return false;
-            }
-            else if (value.is_signed()) {
-                return value.signed_value() >= -(static_cast<uint64_t>(1) << (size * 8 - 1));
-            }
-            else {
-                return value.signed_value() < static_cast<int64_t>(1) << (size * 8 - 1);
-            }
         case UNSIGNED:
-            if (!value.is_unsigned()) {
-                return false;
-            }
-            else if (size == 8) {
-                return true;
-            }
-            else {
-                return value.unsigned_value() < static_cast<uint64_t>(1) << (size * 8);
-            }
+            return value.is_integer() && value >= minimum_value() && value <= maximum_value();
     }
 }
 
 bool Encoding::is_natural_encoding(const Value &value) const {
     switch (type) {
         case SIGNED:
-            return value.is_signed() && Int::minimum_byte_size(value.signed_value()) == size && byte_order == default_byte_order;
+            return value.is_signed() && value.default_size() == size && byte_order == default_byte_order;
 
         case UNSIGNED:
-            return value.is_unsigned() && Int::minimum_byte_size(value.unsigned_value()) == size && byte_order == default_byte_order;
+            return value.is_unsigned() && value.default_size() == size && byte_order == default_byte_order;
     }
 }
 
@@ -106,4 +89,51 @@ void Encoding::serialize(std::ostream &stream) const {
             break;
     }
     // TODO: encode byte_order if byte_order != default_byte_order
+}
+
+Encoding::Encoding(const Value value) {
+    switch (value.type()) {
+        case Value::BOOLEAN:
+        case Value::FLOAT:
+        case Value::VOID:
+            throw Exception("can't encode %s", value.type_name().c_str());
+
+        case Value::SIGNED:
+            type = SIGNED;
+            size = Int::minimum_byte_size(value.signed_value());
+            byte_order = default_byte_order;
+            break;
+
+        case Value::UNSIGNED:
+            type = UNSIGNED;
+            size = Int::minimum_byte_size(value.unsigned_value());
+            byte_order = default_byte_order;
+            break;
+    }
+}
+
+std::optional<Value> Encoding::minimum_value() const {
+    switch (type) {
+        case SIGNED:
+            if (size == 8) {
+                return Value(std::numeric_limits<int64_t>::min());
+            }
+            return Value(-(static_cast<int64_t>(1) << (size * 8 - 1)));
+
+        case UNSIGNED:
+            return Value(uint64_t(0));
+    }
+}
+
+std::optional<Value> Encoding::maximum_value() const {
+    switch (type) {
+        case SIGNED:
+            return Value((int64_t(1) << (size * 8 - 1)) - 1);
+
+        case UNSIGNED:
+            if (size == 8) {
+                return Value(std::numeric_limits<uint64_t>::max());
+            }
+            return Value((uint64_t(1) << (size * 8)) - 1);
+    }
 }

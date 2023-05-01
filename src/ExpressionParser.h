@@ -36,9 +36,10 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <utility>
 
 #include "BinaryExpression.h"
-#include "ExpressionList.h"
 #include "Tokenizer.h"
 #include "UnaryExpression.h"
+#include "Encoding.h"
+#include "DataBodyElement.h"
 
 class ExpressionParser {
 public:
@@ -48,18 +49,13 @@ public:
 
     std::shared_ptr<Expression> parse() { top = Element({}, START); return do_parse();}
     std::shared_ptr<Expression> parse(const std::shared_ptr<Expression>& left) { top = Element(left, 0); return do_parse();}
-    ExpressionList parse_list();
+    std::unique_ptr<DataBodyElement> parse_list();
 
 private:
     class BinaryOperator {
     public:
-        enum Type {
-            SIZE,
-            OPERATION
-        };
-        BinaryOperator(Type type, BinaryExpression::Operation operation, int level): type(type), operation(operation), level(level) {}
+        BinaryOperator(BinaryExpression::Operation operation, int level): operation(operation), level(level) {}
 
-        Type type;
         BinaryExpression::Operation operation;
         int level;
     };
@@ -100,6 +96,7 @@ private:
 
     std::shared_ptr<Expression> do_parse();
     Element next_element();
+    Encoding parse_encoding();
     void reduce_binary(int up_to_level);
     void reduce_unary(const Element& next);
     void shift(Element next);

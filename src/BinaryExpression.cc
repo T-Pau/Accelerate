@@ -46,7 +46,7 @@ std::shared_ptr<Expression> BinaryExpression::evaluate(const Environment &enviro
         return {};
     }
 
-    return create(new_left ? new_left : left, operation, new_right ? new_right : right, byte_size());
+    return create(new_left ? new_left : left, operation, new_right ? new_right : right);
 }
 
 void BinaryExpression::serialize_sub(std::ostream &stream) const {
@@ -73,6 +73,14 @@ void BinaryExpression::serialize_sub(std::ostream &stream) const {
             stream << '/';
             break;
 
+        case LOGICAL_AND:
+            stream << "&&";
+            break;
+
+        case LOGICAL_OR:
+            stream << "||";
+            break;
+
         case MODULO:
             stream << '%';
             break;
@@ -97,42 +105,11 @@ void BinaryExpression::serialize_sub(std::ostream &stream) const {
     stream << right << ')';
 }
 
-size_t BinaryExpression::minimum_byte_size() const {
-    auto left_size = left->minimum_byte_size();
-    auto right_size = right->minimum_byte_size();
 
-    if (left_size == 0 || right_size == 0) {
-        return 0;
-    }
-
-    switch (operation) {
-        case ADD:
-        case SUBTRACT:
-        case DIVIDE:
-        case MULTIPLY:
-        case SHIFT_RIGHT:
-            return 0;
-
-        case BITWISE_AND:
-        case BITWISE_OR:
-        case BITWISE_XOR:
-            return std::max(left_size, right_size);
-
-        case MODULO:
-            return right_size;
-
-        case SHIFT_LEFT:
-            return left_size;
-    }
-}
-
-
-std::shared_ptr<Expression> BinaryExpression::create(const std::shared_ptr<Expression>& left, Operation operation, const std::shared_ptr<Expression>& right, size_t byte_size) {
-    std::shared_ptr<Expression> node;
-
+std::shared_ptr<Expression> BinaryExpression::create(const std::shared_ptr<Expression>& left, Operation operation, const std::shared_ptr<Expression>& right) {
     if (left->has_value() && right->has_value()) {
-        auto left_value = left->value();
-        auto right_value = right->value();
+        auto left_value = left->value().value();
+        auto right_value = right->value().value();
         Value value;
 
         switch (operation) {
@@ -153,7 +130,7 @@ std::shared_ptr<Expression> BinaryExpression::create(const std::shared_ptr<Expre
                 break;
 
             case BITWISE_XOR:
-                value = left_value ^ right_value; // TODO: mask with size
+                value = left_value ^ right_value;
                 break;
 
             case BITWISE_AND:
@@ -163,6 +140,13 @@ std::shared_ptr<Expression> BinaryExpression::create(const std::shared_ptr<Expre
             case BITWISE_OR:
                 value = left_value | right_value;
                 break;
+
+            case LOGICAL_AND:
+                value = left_value && right_value;
+                break;
+
+            case LOGICAL_OR:
+                value = left_value || right_value;
 
             case MULTIPLY:
                 value = left_value * right_value;
@@ -177,68 +161,131 @@ std::shared_ptr<Expression> BinaryExpression::create(const std::shared_ptr<Expre
                 break;
         }
 
-        // TODO: check byte_size
-
-        node = std::make_shared<ValueExpression>(value);
+        return std::make_shared<ValueExpression>(value);
     }
-    else if (operation == SUBTRACT) {
-        // This special case is for resolving relative addressing within an object.
-        if (left->type() == BINARY && right->type() == BINARY) {
-            // (object_name + N) - (object_name + M) -> N - M
-            auto left_binary = std::dynamic_pointer_cast<BinaryExpression>(left);
-            auto right_binary = std::dynamic_pointer_cast<BinaryExpression>(right);
+    else {
+        switch (operation) {
+            case SUBTRACT: {
+                // This special case is for resolving relative addressing within an object.
+                if (left->type() == BINARY && right->type() == BINARY) {
+                    // (object_name + N) - (object_name + M) -> N - M
+                    auto left_binary = std::dynamic_pointer_cast<BinaryExpression>(left);
+                    auto right_binary = std::dynamic_pointer_cast<BinaryExpression>(right);
 
-            if (left_binary->operation == ADD && right_binary->operation == ADD &&
-                left_binary->left->type() == VARIABLE && right_binary->left->type() == VARIABLE) {
-                auto left_left = std::dynamic_pointer_cast<VariableExpression>(left_binary->left);
-                auto right_left = std::dynamic_pointer_cast<VariableExpression>(right_binary->left);
-                if (left_left->variable() == right_left->variable()) {
-                    node = create(left_binary->right, operation, right_binary->right, byte_size);
+                    if (left_binary->operation == ADD && right_binary->operation == ADD &&
+                        left_binary->left->type() == VARIABLE && right_binary->left->type() == VARIABLE) {
+                        auto left_left = std::dynamic_pointer_cast<VariableExpression>(left_binary->left);
+                        auto right_left = std::dynamic_pointer_cast<VariableExpression>(right_binary->left);
+                        if (left_left->variable() == right_left->variable()) {
+                            return create(left_binary->right, operation, right_binary->right);
+                        }
+                    }
                 }
-            }
-        }
-        else if (left->type() == VARIABLE && right->type() == BINARY) {
-            // object_name - (object_name + M) -> M
-            auto left_variable = std::dynamic_pointer_cast<VariableExpression>(left);
-            auto right_binary = std::dynamic_pointer_cast<BinaryExpression>(right);
+                else if (left->type() == VARIABLE && right->type() == BINARY) {
+                    // object_name - (object_name + M) -> M
+                    auto left_variable = std::dynamic_pointer_cast<VariableExpression>(left);
+                    auto right_binary = std::dynamic_pointer_cast<BinaryExpression>(right);
 
-            if (right_binary->operation == ADD && right_binary->left->type() == VARIABLE) {
-                auto right_left = std::dynamic_pointer_cast<VariableExpression>(right_binary->left);
-                if (left_variable->variable() == right_left->variable()) {
-                    node = right_binary->right->clone();
+                    if (right_binary->operation == ADD && right_binary->left->type() == VARIABLE) {
+                        auto right_left = std::dynamic_pointer_cast<VariableExpression>(right_binary->left);
+                        if (left_variable->variable() == right_left->variable()) {
+                            return right_binary->right;
+                        }
+                    }
                 }
-            }
-        }
-        else if (left->type() == BINARY && right->type() == VARIABLE) {
-            // (object_name + N) - object_name -> N
-            auto left_binary = std::dynamic_pointer_cast<BinaryExpression>(left);
-            auto right_variable = std::dynamic_pointer_cast<VariableExpression>(right);
+                else if (left->type() == BINARY && right->type() == VARIABLE) {
+                    // (object_name + N) - object_name -> N
+                    auto left_binary = std::dynamic_pointer_cast<BinaryExpression>(left);
+                    auto right_variable = std::dynamic_pointer_cast<VariableExpression>(right);
 
-            if (left_binary->operation == ADD && left_binary->left->type() == VARIABLE) {
-                auto left_left = std::dynamic_pointer_cast<VariableExpression>(left_binary->left);
-                if (left_left->variable() == right_variable->variable()) {
-                    node = left_binary->right->clone();
+                    if (left_binary->operation == ADD && left_binary->left->type() == VARIABLE) {
+                        auto left_left = std::dynamic_pointer_cast<VariableExpression>(left_binary->left);
+                        if (left_left->variable() == right_variable->variable()) {
+                            return left_binary->right;
+                        }
+                    }
                 }
+                else if (left->type() == VARIABLE && right->type() == VARIABLE) {
+                    // object_name - object_name -> 0
+                    auto left_variable = std::dynamic_pointer_cast<VariableExpression>(left);
+                    auto right_variable = std::dynamic_pointer_cast<VariableExpression>(right);
+                    if (left_variable->variable() == right_variable->variable()) {
+                        return std::make_shared<ValueExpression>(0);
+                    }
+                }
+                break;
             }
+
+            case LOGICAL_AND:
+                if (left->has_value() && *left->value()) {
+                    return right;
+                }
+                if (right->has_value() && *right->value()) {
+                    return left;
+                }
+                break;
+
+            case LOGICAL_OR:
+                if (left->has_value() && !*left->value()) {
+                    return right;
+                }
+                if (right->has_value() && !*right->value()) {
+                    return left;
+                }
+                break;
+
+            // TODO: optimization for + or - 0, * or / 1
+            default:
+                break;
         }
-        else if (left->type() == VARIABLE && right->type() == VARIABLE) {
-            // object_name - object_name -> 0
-            auto left_variable = std::dynamic_pointer_cast<VariableExpression>(left);
-            auto right_variable = std::dynamic_pointer_cast<VariableExpression>(right);
-            if (left_variable->variable() == right_variable->variable()) {
-                node = std::make_shared<ValueExpression>(0);
-            }
-        }
     }
+    return std::make_shared<BinaryExpression>(left, operation, right);
+}
 
-    // TODO: optimization for + or - 0, * or / 1
+std::optional<Value> BinaryExpression::minimum_value() const {
+    switch (operation) {
+        case ADD:
+            return left->minimum_value() + right->minimum_value();
+            break;
 
-    if (!node) {
-        node = std::make_shared<BinaryExpression>(left, operation, right);
+        // TODO: calculate for more operations
+        case BITWISE_AND:
+        case BITWISE_OR:
+        case BITWISE_XOR:
+        case DIVIDE:
+        case MODULO:
+        case MULTIPLY:
+        case SHIFT_LEFT:
+        case SHIFT_RIGHT:
+        case LOGICAL_AND:
+        case LOGICAL_OR:
+            return {};
+
+        case SUBTRACT:
+            return left->minimum_value() - right->maximum_value();
     }
+}
 
-    if (byte_size) {
-        node->set_byte_size(byte_size);
+std::optional<Value> BinaryExpression::maximum_value() const {
+    switch (operation) {
+        case ADD:
+            return left->maximum_value() + right->maximum_value();
+            break;
+
+            // TODO: calculate for more operations
+        case BITWISE_AND:
+        case BITWISE_OR:
+        case BITWISE_XOR:
+        case DIVIDE:
+        case MODULO:
+        case MULTIPLY:
+        case SHIFT_LEFT:
+        case SHIFT_RIGHT:
+        case LOGICAL_AND:
+        case LOGICAL_OR:
+            return {};
+
+        case SUBTRACT:
+            return left->maximum_value() - right->minimum_value();
     }
-    return node;
 }

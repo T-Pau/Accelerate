@@ -34,6 +34,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <string>
 
+#include "Expression.h"
 #include "Value.h"
 
 class Encoding {
@@ -44,12 +45,16 @@ public:
     };
 
     Encoding(Type type, size_t size, uint64_t byte_order = default_byte_order): type(type), size(size), byte_order(byte_order) {}
+    Encoding(const Value value);
 
     [[nodiscard]] size_t byte_size() const {return size;}
     void encode(std::string& bytes, const Value& value) const;
     [[nodiscard]] bool fits(const Value& value) const;
     [[nodiscard]] bool is_natural_encoding(const Value& value) const;
     void serialize(std::ostream& stream) const;
+
+    std::optional<Value> maximum_value() const;
+    std::optional<Value> minimum_value() const;
 
     bool operator==(const Encoding& other) const;
     bool operator!=(const Encoding& other) const {return !(*this == other);}
