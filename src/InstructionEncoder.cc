@@ -39,6 +39,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ValueExpression.h"
 #include "ExpressionNode.h"
 #include "BinaryExpression.h"
+#include "Util.h"
 
 std::shared_ptr<BodyElement>
 InstructionEncoder::encode(const Token& name, const std::vector<std::shared_ptr<Node>>& arguments, const std::shared_ptr<Environment>& environment) {
@@ -54,8 +55,11 @@ InstructionEncoder::encode(const Token& name, const std::vector<std::shared_ptr<
 
     auto variants = std::vector<Variant>();
 
+    auto supported = false;
+
     for (const auto &match: matches) {
         if (instruction->has_addressing_mode(match.addressing_mode)) {
+            supported = true;
             auto variant = encode(instruction, match, arguments, environment);
             auto constraint =  variant.argument_constraints->value() && variant.encoding_constraints->value();
 
@@ -70,8 +74,21 @@ InstructionEncoder::encode(const Token& name, const std::vector<std::shared_ptr<
     }
 
     if (variants.empty()) {
-        // TODO: store best matching error
-        throw ParseException(name, "can't encode");
+        if (supported) {
+            throw ParseException(name, "arguments out of range");
+        }
+        else {
+            if (matches.size() == 1) {
+                throw ParseException(name, "instruction %s doesn't support addressing mode %s", name.as_string().c_str(), matches.begin()->addressing_mode.c_str());
+            } else {
+                auto modes = std::vector<Symbol>();
+                for (const auto &match: matches) {
+                    modes.emplace_back(match.addressing_mode);
+                }
+                std::sort(modes.begin(), modes.end());
+                throw ParseException(name, "instruction %s doesn't support any of the addressing modes %s", name.as_string().c_str(), join(modes).c_str());
+            }
+        }
     }
     else if (variants.size() == 1) {
         auto constraints = variants.front().argument_constraints;

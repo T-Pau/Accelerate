@@ -37,9 +37,12 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <cstdarg>
 
 #include "printf_like.h"
+#include "Symbol.h"
 
 std::string string_format(const char *format, ...) PRINTF_LIKE(1, 2);
 std::string string_format_v(const char *format, va_list ap);
+
+std::string join(const std::vector<Symbol>& symbols, const std::string& separator = ", ");
 
 std::string default_output_filename(const std::string& file_name, const std::string& extension);
 
