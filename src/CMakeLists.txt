@@ -24,20 +24,22 @@ add_library(xlr8-library STATIC
         ExpressionParser.cc
         FileParser.cc
         FileReader.cc
-        InRangeExpression.cc
+        FileTokenizer.cc
         IfBodyElement.cc
+        InRangeExpression.cc
         Instruction.cc
         InstructionEncoder.cc
         Int.cc
-        ValueExpression.cc
-        Linker.cc
-        ObjectExpression.cc
+        LabelBodyElement.cc
+        LabelExpression.cc
         LibraryGetter.cc
+        Linker.cc
         Location.cc
         Memory.cc
         MemoryMap.cc
         Node.cc
         Object.cc
+        ObjectExpression.cc
         ObjectFile.cc
         ObjectFileParser.cc
         OutputElement.cc
@@ -45,6 +47,7 @@ add_library(xlr8-library STATIC
         ParsedValue.cc
         Path.cc
         Range.cc
+        SequenceTokenizer.cc
         Symbol.cc
         Target.cc
         TargetGetter.cc
@@ -53,12 +56,11 @@ add_library(xlr8-library STATIC
         TokenGroup.cc
         TokenNode.cc
         Tokenizer.cc
-        FileTokenizer.cc
-        SequenceTokenizer.cc
         UnaryExpression.cc
-        Value.cc
-        VariableExpression.cc
         Util.cc
+        Value.cc
+        ValueExpression.cc
+        VariableExpression.cc
         ${COMPATIBILITY}
 )
 

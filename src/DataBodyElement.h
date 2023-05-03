@@ -45,6 +45,8 @@ public:
         Datum(std::shared_ptr<Expression> expression, std::optional<Encoding> encoding): expression(std::move(expression)), encoding(encoding) {}
 
         [[nodiscard]] std::optional<uint64_t> size() const;
+        [[nodiscard]] uint64_t maximum_size() const {return size().value_or(8);}
+        [[nodiscard]] uint64_t minimum_size() const {return size().value_or(1);}
 
         std::shared_ptr<Expression> expression;
         std::optional<Encoding> encoding;
@@ -58,7 +60,7 @@ public:
     [[nodiscard]] std::shared_ptr<BodyElement> clone() const override {return std::make_shared<DataBodyElement>(data);}
     [[nodiscard]] bool empty() const override {return data.empty();}
     void encode(std::string &bytes) const override;
-    [[nodiscard]] std::shared_ptr<BodyElement> evaluate(const Environment &environment) const override;
+    [[nodiscard]] EvaluationResult evaluate(const Environment &environment, uint64_t minimum_offset, uint64_t maximum_offset) const override;
     [[nodiscard]] uint64_t maximum_size() const override;
     [[nodiscard]] uint64_t minimum_size() const override;
     [[nodiscard]] std::optional<uint64_t> size() const override;

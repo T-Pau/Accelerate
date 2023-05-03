@@ -36,16 +36,20 @@ std::ostream& operator<<(std::ostream& stream, const BodyBlock& block) {
     return stream;
 }
 
-std::shared_ptr<BodyElement> BodyBlock::evaluate(const Environment &environment) const {
+BodyElement::EvaluationResult BodyBlock::evaluate(const Environment &environment, uint64_t minimum_offset, uint64_t maximum_offset) const {
+    auto result = EvaluationResult(minimum_offset, maximum_offset);
+
     auto new_elements = std::vector<std::shared_ptr<BodyElement>>();
     auto changed = false;
 
     for (auto& element: elements) {
-        auto new_element = element->evaluate(environment);
-        if (new_element) {
+        auto sub_result = element->evaluate(environment, result.minimum_offset, result.maximum_offset);
+        if (sub_result.element) {
             changed = true;
-            if (!new_element->empty()) {
-                new_elements.emplace_back(new_element);
+            if (!sub_result.element->empty()) {
+                new_elements.emplace_back(sub_result.element);
+                result.minimum_offset += sub_result.minimum_offset;
+                result.maximum_offset += sub_result.maximum_offset;
             }
         }
         else {
@@ -54,16 +58,20 @@ std::shared_ptr<BodyElement> BodyBlock::evaluate(const Environment &environment)
             }
             else {
                 new_elements.emplace_back(element);
+                result.minimum_offset += element->minimum_size();
+                result.maximum_offset += element->maximum_size();
             }
         }
     }
 
     if (changed) {
-        return std::make_shared<BodyBlock>(new_elements);
+        result.element = std::make_shared<BodyBlock>(new_elements);
     }
-    else {
-        return {};
-    }
+
+    // minimum_size = result.minimum_offset - minimum_offset;
+    // maximum_size = result.maximum_offset - maximum_offset;
+
+    return result;
 }
 
 void BodyBlock::serialize(std::ostream &stream) const {

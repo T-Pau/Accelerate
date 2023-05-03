@@ -33,6 +33,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define BODY_ELEMENT_H
 
 #include <optional>
+#include <utility>
 #include "Environment.h"
 
 class CPU;
@@ -44,6 +45,18 @@ public:
         IF
     };
 
+    class EvaluationResult {
+    public:
+        EvaluationResult() = default;
+        EvaluationResult(std::shared_ptr<BodyElement> element, uint64_t offset): element(std::move(element)), minimum_offset(offset), maximum_offset(offset) {}
+        EvaluationResult(std::shared_ptr<BodyElement> element, uint64_t minimum_offset, uint64_t maximum_offset): element(std::move(element)), minimum_offset(minimum_offset), maximum_offset(maximum_offset) {}
+        EvaluationResult(uint64_t minimum_offset, uint64_t maximum_offset): minimum_offset(minimum_offset), maximum_offset(maximum_offset) {}
+
+        std::shared_ptr<BodyElement> element;
+        uint64_t minimum_offset = 0;
+        uint64_t maximum_offset = 0;
+    };
+
     static std::shared_ptr<BodyElement> append(const std::shared_ptr<BodyElement>& body, const std::shared_ptr<BodyElement>& element);
     static std::shared_ptr<BodyElement> evaluate(std::shared_ptr<BodyElement> element, const Environment& environment);
     static std::shared_ptr<BodyElement> make_unique(std::shared_ptr<BodyElement> element);
@@ -51,7 +64,7 @@ public:
     virtual void encode(std::string& bytes) const = 0;
     [[nodiscard]] virtual std::shared_ptr<BodyElement> clone() const = 0;
     [[nodiscard]] virtual bool empty() const = 0;
-    [[nodiscard]] virtual std::shared_ptr<BodyElement> evaluate(const Environment& environment) const = 0;
+    [[nodiscard]] virtual EvaluationResult evaluate(const Environment &environment, uint64_t minimum_offset, uint64_t maximum_offset) const = 0;
     [[nodiscard]] virtual uint64_t maximum_size() const = 0;
     [[nodiscard]] virtual uint64_t minimum_size() const = 0;
     [[nodiscard]] virtual std::optional<uint64_t> size() const = 0;

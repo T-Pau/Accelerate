@@ -50,8 +50,7 @@ uint64_t DataBodyElement::maximum_size() const {
     size_t size = 0;
 
     for (const auto& datum: data) {
-        auto datum_size = datum.size();
-        size += datum_size.value_or(8);
+        size += datum.maximum_size();
     }
 
     return size;
@@ -61,14 +60,15 @@ uint64_t DataBodyElement::minimum_size() const {
     size_t size = 0;
 
     for (const auto& datum: data) {
-        auto datum_size = datum.size();
-        size += datum_size.value_or(0);
+        size += datum.minimum_size();
     }
 
     return size;
 }
 
-std::shared_ptr<BodyElement> DataBodyElement::evaluate(const Environment &environment) const {
+BodyElement::EvaluationResult DataBodyElement::evaluate(const Environment &environment, uint64_t minimum_offset, uint64_t maximum_offset) const {
+    auto result = EvaluationResult(minimum_offset, maximum_offset);
+
     auto new_data = std::vector<Datum>();
     auto changed = false;
 
@@ -81,14 +81,18 @@ std::shared_ptr<BodyElement> DataBodyElement::evaluate(const Environment &enviro
         else {
             new_data.emplace_back(datum);
         }
+        result.minimum_offset += new_data.back().minimum_size();
+        result.maximum_offset += new_data.back().maximum_size();
     }
 
     if (changed) {
-        return std::make_shared<DataBodyElement>(new_data);
+        result.element = std::make_shared<DataBodyElement>(new_data);
     }
-    else {
-        return {};
-    }
+
+    // minimum_size = result.minimum_offset - minimum_offset;
+    // maximum_size = result.maximum_offset - maximum_offset;
+
+    return result;
 }
 
 void DataBodyElement::serialize(std::ostream &stream) const {

@@ -39,9 +39,9 @@ std::ostream& operator<<(std::ostream& stream, const BodyElement& element) {
 
 std::shared_ptr<BodyElement>
 BodyElement::evaluate(std::shared_ptr<BodyElement> element, const Environment &environment) {
-    auto new_element = element->evaluate(environment);
-    if (new_element) {
-        return new_element;
+    auto result = element->evaluate(environment, 0, 0);
+    if (result.element) {
+        return result.element;
     }
     else {
         return element;

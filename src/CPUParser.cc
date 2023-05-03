@@ -183,6 +183,9 @@ void CPUParser::parse_addressing_mode() {
         auto encoding_tokens = std::vector<Token>();
 
         for (auto const& token: encoding_definition->as_scalar()->tokens) {
+            if (token == token_pc) {
+                addressing_mode.uses_pc = true;
+            }
             if (token.is_name() && !(token == token_opcode || token == token_pc)) {
                 auto argument_name = argument_symbol(token.as_symbol());
                 if (!addressing_mode.has_argument(argument_name)) {

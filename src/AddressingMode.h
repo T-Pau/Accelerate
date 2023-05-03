@@ -64,6 +64,7 @@ public:
     [[nodiscard]] const ArgumentType* argument(Symbol name) const;
     [[nodiscard]] bool has_argument(Symbol name) const {return argument(name) != nullptr;}
 
+    bool uses_pc = false;
     std::vector<Notation> notations;
     std::unordered_map<Symbol, const ArgumentType*> arguments;
     std::shared_ptr<DataBodyElement> encoding;

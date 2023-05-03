@@ -47,7 +47,8 @@ public:
         VALUE,
         OBJECT,
         UNARY,
-        VARIABLE
+        VARIABLE,
+        LABEL
     };
 
     class Iterator {

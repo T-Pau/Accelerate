@@ -31,7 +31,9 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "IfBodyElement.h"
 
-std::shared_ptr<BodyElement> IfBodyElement::evaluate(const Environment &environment) const {
+BodyElement::EvaluationResult IfBodyElement::evaluate(const Environment &environment, uint64_t minimum_offset, uint64_t maximum_offset) const {
+    auto result = EvaluationResult(std::numeric_limits<uint64_t>::max(), 0);
+
     auto new_clauses = std::vector<Clause>();
     auto changed = false;
     auto first = true;
@@ -49,15 +51,15 @@ std::shared_ptr<BodyElement> IfBodyElement::evaluate(const Environment &environm
         else {
             new_expression = clause.condition;
         }
-        auto new_body = BodyElement::evaluate(clause.body, environment);
-        if (new_body) {
+        auto sub_result = clause.body->evaluate(environment, minimum_offset, maximum_offset);
+        if (sub_result.element) {
             changed = true;
         }
         else {
-            new_body = clause.body;
+            sub_result.element = clause.body;
         }
 
-        if (new_body->empty()) {
+        if (sub_result.element->empty()) {
             changed = true;
             continue;
         }
@@ -67,10 +69,13 @@ std::shared_ptr<BodyElement> IfBodyElement::evaluate(const Environment &environm
                 continue;
             }
             else if (first) {
-                return new_body;
+                return sub_result;
             }
         }
-        new_clauses.emplace_back(new_expression, new_body);
+        new_clauses.emplace_back(new_expression, sub_result.element);
+
+        result.minimum_offset = std::min(result.minimum_offset, sub_result.minimum_offset);
+        result.maximum_offset = std::max(result.maximum_offset, sub_result.maximum_offset);
 
         if (new_expression->has_value() && *new_expression->value()) {
             ignore = true;
@@ -79,12 +84,16 @@ std::shared_ptr<BodyElement> IfBodyElement::evaluate(const Environment &environm
         first = false;
     }
 
+    if (new_clauses.empty()) {
+        result.minimum_offset = minimum_offset;
+        result.maximum_offset = maximum_offset;
+    }
+
     if (changed) {
-        return std::make_shared<IfBodyElement>(new_clauses);
+        result.element = std::make_shared<IfBodyElement>(new_clauses);
     }
-    else {
-        return {};
-    }
+
+    return result;
 }
 
 void IfBodyElement::serialize(std::ostream &stream) const {
