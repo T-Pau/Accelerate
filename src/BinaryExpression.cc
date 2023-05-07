@@ -33,6 +33,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "ValueExpression.h"
 #include "VariableExpression.h"
+#include "UnaryExpression.h"
 
 BinaryExpression::BinaryExpression(std::shared_ptr<Expression> left, Operation operation,
                                    std::shared_ptr<Expression> right): left(std::move(left)), operation(operation), right(std::move(right)) {}
@@ -182,14 +183,14 @@ std::shared_ptr<Expression> BinaryExpression::create(const std::shared_ptr<Expre
                     }
                 }
                 else if (left->type() == VARIABLE && right->type() == BINARY) {
-                    // object_name - (object_name + M) -> M
+                    // object_name - (object_name + M) -> -M
                     auto left_variable = std::dynamic_pointer_cast<VariableExpression>(left);
                     auto right_binary = std::dynamic_pointer_cast<BinaryExpression>(right);
 
                     if (right_binary->operation == ADD && right_binary->left->type() == VARIABLE) {
                         auto right_left = std::dynamic_pointer_cast<VariableExpression>(right_binary->left);
                         if (left_variable->variable() == right_left->variable()) {
-                            return right_binary->right;
+                            return UnaryExpression::create(UnaryExpression::MINUS, right_binary->right);
                         }
                     }
                 }
