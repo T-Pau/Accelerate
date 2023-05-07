@@ -45,7 +45,7 @@ std::ostream& operator<< (std::ostream& stream, const Object& object) {
 
 std::ostream& operator<< (std::ostream& stream, Object::Visibility visibility) {
     switch  (visibility) {
-        case Object::NONE:
+        case Object::OBJECT:
             stream << "none";
             break;
         case Object::LOCAL:

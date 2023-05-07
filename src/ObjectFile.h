@@ -49,7 +49,7 @@ public:
         void serialize(std::ostream& stream) const;
 
         Symbol name;
-        Object::Visibility visibility = Object::NONE;
+        Object::Visibility visibility = Object::OBJECT;
         std::shared_ptr<Expression> value;
     };
 

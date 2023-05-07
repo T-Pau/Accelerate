@@ -39,9 +39,10 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "TokenNode.h"
 #include "ExpressionParser.h"
 #include "ExpressionNode.h"
-#include "ValueExpression.h"
 #include "VariableExpression.h"
 #include "InstructionEncoder.h"
+#include "LabelBodyElement.h"
+#include "LabelExpression.h"
 
 bool Assembler::initialized = false;
 Symbol Assembler::symbol_opcode;
@@ -109,7 +110,7 @@ ObjectFile Assembler::parse(Symbol file_name) {
 
                 case Token::DIRECTIVE: {
                     auto visibility = visibility_value(token);
-                    if (visibility != Object::NONE) {
+                    if (visibility != Object::OBJECT) {
                         auto name = tokenizer.next();
                         if (name.get_type() != Token::NAME) {
                             throw ParseException(name, "name expected");
@@ -136,7 +137,7 @@ ObjectFile Assembler::parse(Symbol file_name) {
                 case Token::NAME: {
                     auto token2 = tokenizer.next();
                     if (token2 == token_equals) {
-                        parse_assignment(Object::NONE, token);
+                        parse_assignment(Object::OBJECT, token);
                         break;
                     }
                     else {
@@ -186,10 +187,10 @@ void Assembler::parse_symbol_body() {
                 case Token::NAME: {
                     auto token2 = tokenizer.next();
                     if (token2 == token_colon) {
-                        parse_label(Object::NONE, token);
+                        parse_label(Object::OBJECT, token);
                     }
                     else if (token2 == token_equals) {
-                        parse_assignment(Object::NONE, token);
+                        parse_assignment(Object::OBJECT, token);
                     }
                     else {
                         tokenizer.unget(token2);
@@ -309,15 +310,29 @@ void Assembler::parse_instruction(const Token& name) {
     }
 
     auto encoder = InstructionEncoder(target);
-    // TODO: hack, needs proper solution that works if size is unknown
     auto instruction_environment = std::make_shared<Environment>(current_environment);
-    auto offset = current_object->data ? current_object->data->size() : 0;
-    if (offset.has_value()) {
-        instruction_environment->add(symbol_pc, std::make_shared<BinaryExpression>(std::make_shared<VariableExpression>(current_object->name.as_symbol()), BinaryExpression::ADD, std::make_shared<ValueExpression>(Value(*offset))));
+    auto label = get_trailing_label();
+    auto anonymous_label = std::shared_ptr<LabelBodyElement>();
+    if (!label) {
+        anonymous_label = create_anonymous_label();
+        label = anonymous_label;
     }
+    instruction_environment->add(symbol_pc, std::make_shared<BinaryExpression>(std::make_shared<VariableExpression>(current_object->name.as_symbol()), BinaryExpression::ADD, std::make_shared<LabelExpression>(label)));
+
     auto instruction = encoder.encode(name, arguments, instruction_environment);
 
+    label = {};
+    if (anonymous_label && !anonymous_label.unique()) {
+        current_object->append(anonymous_label);
+    }
+
     current_object->append(instruction);
+}
+
+std::shared_ptr<LabelBodyElement> Assembler::create_anonymous_label() const {
+    auto line_number = tokenizer.current_location().start_line_number;
+    auto name = Symbol(".label_" + std::to_string(line_number));
+    return std::make_shared<LabelBodyElement>(name, current_object->minimum_size(), current_object->maximum_size());
 }
 
 std::shared_ptr<Node> Assembler::parse_instruction_argument(const Token& token) {
@@ -346,13 +361,16 @@ std::shared_ptr<Node> Assembler::parse_instruction_argument(const Token& token) 
 
 
 void Assembler::parse_label(Object::Visibility visibility, const Token& name) {
-    add_constant(visibility, name, get_pc());
+    auto label = std::make_shared<LabelBodyElement>(name.as_symbol(), current_object->minimum_size(), current_object->maximum_size());
+    current_object->append(label);
+    add_constant(visibility, name, get_pc(label));
+    add_constant(Object::OBJECT, Token(Token::NAME, name.location, Symbol(".label_offset(" + name.as_string() + ")")), std::make_shared<LabelExpression>(label));
 }
 
 void Assembler::add_constant(Object::Visibility visibility, const Token& name, std::shared_ptr<Expression> value) {
     auto evaluated_value = Expression::evaluate(std::move(value), *current_environment);
     switch (visibility) {
-        case Object::NONE:
+        case Object::OBJECT:
             break;
         case Object::LOCAL:
         case Object::GLOBAL:
@@ -383,7 +401,7 @@ Object::Visibility Assembler::visibility_value(const Token& token) {
         return Object::GLOBAL;
     }
     else {
-        return Object::NONE;
+        return Object::OBJECT;
     }
 }
 
@@ -440,6 +458,24 @@ void Assembler::parse_symbol(Object::Visibility visibility, const Token &name) {
     // TODO: error if data in unsaved section
 }
 
-std::shared_ptr<Expression> Assembler::get_pc() const {
-    return BinaryExpression::create(std::make_shared<VariableExpression>(current_object->name), BinaryExpression::ADD, std::make_shared<ValueExpression>(current_object->size));
+std::shared_ptr<Expression> Assembler::get_pc(const std::shared_ptr<LabelBodyElement>& label) const {
+    return BinaryExpression::create(std::make_shared<VariableExpression>(current_object->name), BinaryExpression::ADD, std::make_shared<LabelExpression>(label));
+}
+
+std::shared_ptr<LabelBodyElement> Assembler::get_trailing_label() const {
+    if (current_object == nullptr || ! current_object->data) {
+        return {};
+    }
+
+    auto label = std::dynamic_pointer_cast<LabelBodyElement>(current_object->data);
+    if (label) {
+        return label;
+    }
+
+    auto block = std::dynamic_pointer_cast<BodyBlock>(current_object->data);
+    if (block) {
+        return std::dynamic_pointer_cast<LabelBodyElement>(block->back());
+    }
+
+    return {};
 }

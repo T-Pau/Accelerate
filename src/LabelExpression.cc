@@ -27,5 +27,5 @@ std::shared_ptr<Expression> LabelExpression::evaluate(const Environment &environ
 }
 
 void LabelExpression::serialize_sub(std::ostream &stream) const {
-    stream << label->name;
+    stream << ".label_offset(" << label->name << ")";
 }

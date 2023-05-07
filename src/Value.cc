@@ -250,7 +250,7 @@ uint64_t Value::negate_signed(int64_t value) {
 
 int64_t Value::negate_unsigned(uint64_t value) {
     auto negated_value = -static_cast<int64_t>(value);
-    if (negated_value >= 0) {
+    if (negated_value > 0) {
         throw Exception("integer overflow");
     }
     return negated_value;

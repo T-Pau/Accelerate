@@ -43,7 +43,7 @@ class ObjectFile;
 class Object {
 public:
     enum Visibility {
-        NONE,
+        OBJECT,
         LOCAL,
         GLOBAL
     };
@@ -59,6 +59,8 @@ public:
     void serialize(std::ostream& stream) const;
 
     void append(const std::shared_ptr<BodyElement>& element);
+    uint64_t minimum_size() const {return data ? data->minimum_size() : 0;}
+    uint64_t maximum_size() const {return data ? data->maximum_size() : 0;}
 
     const ObjectFile* owner;
     const MemoryMap::Section* section;
