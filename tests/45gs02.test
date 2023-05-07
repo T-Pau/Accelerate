@@ -634,1009 +634,1009 @@ file 45gs02.o {} <inline>
     section: code
     visibility: global
     body {{
-.data $69, $12, $65, $12, $75, $12, $6d, $1234, $7d, $1234, $79, $1234, $61, $12, $71, $12, $72, $12, $ea, $72, $12
+        .data $69, $12, $65, $12, $75, $12, $6d, $1234, $7d, $1234, $79, $1234, $61, $12, $71, $12, $72, $12, $ea, $72, $12
     }}
 }
 .object test_adcq {
     section: code
     visibility: global
     body {{
-.data $42, $42, $65, $12, $42, $42, $6d, $1234, $42, $42, $72, $12, $42, $42, $ea, $72, $12
+        .data $42, $42, $65, $12, $42, $42, $6d, $1234, $42, $42, $72, $12, $42, $42, $ea, $72, $12
     }}
 }
 .object test_and {
     section: code
     visibility: global
     body {{
-.data $29, $12, $25, $12, $35, $12, $2d, $1234, $3d, $1234, $39, $1234, $21, $12, $31, $12, $32, $12, $ea, $32, $12
+        .data $29, $12, $25, $12, $35, $12, $2d, $1234, $3d, $1234, $39, $1234, $21, $12, $31, $12, $32, $12, $ea, $32, $12
     }}
 }
 .object test_andq {
     section: code
     visibility: global
     body {{
-.data $42, $42, $25, $12, $42, $42, $2d, $1234, $42, $42, $32, $12, $42, $42, $ea, $32, $12
+        .data $42, $42, $25, $12, $42, $42, $2d, $1234, $42, $42, $32, $12, $42, $42, $ea, $32, $12
     }}
 }
 .object test_asl {
     section: code
     visibility: global
     body {{
-.data $0a, $0a, $06, $12, $16, $12, $0e, $1234, $1e, $1234
+        .data $0a, $0a, $06, $12, $16, $12, $0e, $1234, $1e, $1234
     }}
 }
 .object test_aslq {
     section: code
     visibility: global
     body {{
-.data $42, $42, $06, $12, $42, $42, $0a, $42, $42, $0a, $42, $42, $0e, $1234, $42, $42, $16, $12, $42, $42, $1e, $1234
+        .data $42, $42, $06, $12, $42, $42, $0a, $42, $42, $0a, $42, $42, $0e, $1234, $42, $42, $16, $12, $42, $42, $1e, $1234
     }}
 }
 .object test_asr {
     section: code
     visibility: global
     body {{
-.data $43, $43, $44, $12, $54, $12
+        .data $43, $43, $44, $12, $54, $12
     }}
 }
 .object test_asrq {
     section: code
     visibility: global
     body {{
-.data $42, $42, $43, $42, $42, $43, $42, $42, $44, $12, $42, $42, $54, $12
+        .data $42, $42, $43, $42, $42, $43, $42, $42, $44, $12, $42, $42, $54, $12
     }}
 }
 .object test_asw {
     section: code
     visibility: global
     body {{
-.data $cb, $1234
+        .data $cb, $1234
     }}
 }
 .object test_bbr0 {
     section: code
     visibility: global
     body {{
-.data $0f, -$02
+        .data $0f, -$02
     }}
 }
 .object test_bbr1 {
     section: code
     visibility: global
     body {{
-.data $1f, -$02
+        .data $1f, -$02
     }}
 }
 .object test_bbr2 {
     section: code
     visibility: global
     body {{
-.data $2f, -$02
+        .data $2f, -$02
     }}
 }
 .object test_bbr3 {
     section: code
     visibility: global
     body {{
-.data $3f, -$02
+        .data $3f, -$02
     }}
 }
 .object test_bbr4 {
     section: code
     visibility: global
     body {{
-.data $4f, -$02
+        .data $4f, -$02
     }}
 }
 .object test_bbr5 {
     section: code
     visibility: global
     body {{
-.data $5f, -$02
+        .data $5f, -$02
     }}
 }
 .object test_bbr6 {
     section: code
     visibility: global
     body {{
-.data $6f, -$02
+        .data $6f, -$02
     }}
 }
 .object test_bbr7 {
     section: code
     visibility: global
     body {{
-.data $7f, -$02
+        .data $7f, -$02
     }}
 }
 .object test_bbs0 {
     section: code
     visibility: global
     body {{
-.data $8f, -$02
+        .data $8f, -$02
     }}
 }
 .object test_bbs1 {
     section: code
     visibility: global
     body {{
-.data $9f, -$02
+        .data $9f, -$02
     }}
 }
 .object test_bbs2 {
     section: code
     visibility: global
     body {{
-.data $af, -$02
+        .data $af, -$02
     }}
 }
 .object test_bbs3 {
     section: code
     visibility: global
     body {{
-.data $bf, -$02
+        .data $bf, -$02
     }}
 }
 .object test_bbs4 {
     section: code
     visibility: global
     body {{
-.data $cf, -$02
+        .data $cf, -$02
     }}
 }
 .object test_bbs5 {
     section: code
     visibility: global
     body {{
-.data $df, -$02
+        .data $df, -$02
     }}
 }
 .object test_bbs6 {
     section: code
     visibility: global
     body {{
-.data $ef, -$02
+        .data $ef, -$02
     }}
 }
 .object test_bbs7 {
     section: code
     visibility: global
     body {{
-.data $ff, -$02
+        .data $ff, -$02
     }}
 }
 .object test_bcc {
     section: code
     visibility: global
     body {{
-.data $90, -$02
-.if .in_range(-$80, $7f, (($1234-(test_bcc+$02))-$02))
-.data $90, (($1234-(test_bcc+$02))-$02):-1
-.else
-.data $93, (($1234-(test_bcc+$02))-$02):-2
-.end
+        .data $90, -$02
+        .if .in_range(-$80, $7f, (($1234-(test_bcc+$02))-$02))
+          .data $90, (($1234-(test_bcc+$02))-$02):-1
+        .else
+          .data $93, (($1234-(test_bcc+$02))-$02):-2
+        .end
     }}
 }
 .object test_bcs {
     section: code
     visibility: global
     body {{
-.data $b0, -$02
-.if .in_range(-$80, $7f, (($1234-(test_bcs+$02))-$02))
-.data $b0, (($1234-(test_bcs+$02))-$02):-1
-.else
-.data $b3, (($1234-(test_bcs+$02))-$02):-2
-.end
+        .data $b0, -$02
+        .if .in_range(-$80, $7f, (($1234-(test_bcs+$02))-$02))
+          .data $b0, (($1234-(test_bcs+$02))-$02):-1
+        .else
+          .data $b3, (($1234-(test_bcs+$02))-$02):-2
+        .end
     }}
 }
 .object test_beq {
     section: code
     visibility: global
     body {{
-.data $f0, -$02
-.if .in_range(-$80, $7f, (($1234-(test_beq+$02))-$02))
-.data $f0, (($1234-(test_beq+$02))-$02):-1
-.else
-.data $f3, (($1234-(test_beq+$02))-$02):-2
-.end
+        .data $f0, -$02
+        .if .in_range(-$80, $7f, (($1234-(test_beq+$02))-$02))
+          .data $f0, (($1234-(test_beq+$02))-$02):-1
+        .else
+          .data $f3, (($1234-(test_beq+$02))-$02):-2
+        .end
     }}
 }
 .object test_bit {
     section: code
     visibility: global
     body {{
-.data $89, $12, $24, $12, $34, $12, $2c, $1234, $3c, $1234
+        .data $89, $12, $24, $12, $34, $12, $2c, $1234, $3c, $1234
     }}
 }
 .object test_bitq {
     section: code
     visibility: global
     body {{
-.data $42, $42, $24, $12, $42, $42, $2c, $1234
+        .data $42, $42, $24, $12, $42, $42, $2c, $1234
     }}
 }
 .object test_bmi {
     section: code
     visibility: global
     body {{
-.data $30, -$02
-.if .in_range(-$80, $7f, (($1234-(test_bmi+$02))-$02))
-.data $30, (($1234-(test_bmi+$02))-$02):-1
-.else
-.data $33, (($1234-(test_bmi+$02))-$02):-2
-.end
+        .data $30, -$02
+        .if .in_range(-$80, $7f, (($1234-(test_bmi+$02))-$02))
+          .data $30, (($1234-(test_bmi+$02))-$02):-1
+        .else
+          .data $33, (($1234-(test_bmi+$02))-$02):-2
+        .end
     }}
 }
 .object test_bne {
     section: code
     visibility: global
     body {{
-.data $d0, -$02
-.if .in_range(-$80, $7f, (($1234-(test_bne+$02))-$02))
-.data $d0, (($1234-(test_bne+$02))-$02):-1
-.else
-.data $d3, (($1234-(test_bne+$02))-$02):-2
-.end
+        .data $d0, -$02
+        .if .in_range(-$80, $7f, (($1234-(test_bne+$02))-$02))
+          .data $d0, (($1234-(test_bne+$02))-$02):-1
+        .else
+          .data $d3, (($1234-(test_bne+$02))-$02):-2
+        .end
     }}
 }
 .object test_bpl {
     section: code
     visibility: global
     body {{
-.data $10, -$02
-.if .in_range(-$80, $7f, (($1234-(test_bpl+$02))-$02))
-.data $10, (($1234-(test_bpl+$02))-$02):-1
-.else
-.data $13, (($1234-(test_bpl+$02))-$02):-2
-.end
+        .data $10, -$02
+        .if .in_range(-$80, $7f, (($1234-(test_bpl+$02))-$02))
+          .data $10, (($1234-(test_bpl+$02))-$02):-1
+        .else
+          .data $13, (($1234-(test_bpl+$02))-$02):-2
+        .end
     }}
 }
 .object test_bra {
     section: code
     visibility: global
     body {{
-.data $80, -$02
-.if .in_range(-$80, $7f, (($1234-(test_bra+$02))-$02))
-.data $80, (($1234-(test_bra+$02))-$02):-1
-.else
-.data $83, (($1234-(test_bra+$02))-$02):-2
-.end
+        .data $80, -$02
+        .if .in_range(-$80, $7f, (($1234-(test_bra+$02))-$02))
+          .data $80, (($1234-(test_bra+$02))-$02):-1
+        .else
+          .data $83, (($1234-(test_bra+$02))-$02):-2
+        .end
     }}
 }
 .object test_brk {
     section: code
     visibility: global
     body {{
-.data $00
+        .data $00
     }}
 }
 .object test_bru {
     section: code
     visibility: global
     body {{
-.data $80, -$02
-.if .in_range(-$80, $7f, (($1234-(test_bru+$02))-$02))
-.data $80, (($1234-(test_bru+$02))-$02):-1
-.else
-.data $83, (($1234-(test_bru+$02))-$02):-2
-.end
+        .data $80, -$02
+        .if .in_range(-$80, $7f, (($1234-(test_bru+$02))-$02))
+          .data $80, (($1234-(test_bru+$02))-$02):-1
+        .else
+          .data $83, (($1234-(test_bru+$02))-$02):-2
+        .end
     }}
 }
 .object test_bsr {
     section: code
     visibility: global
     body {{
-.data $63, (($1234-(test_bsr+$00))-$02):-2
+        .data $63, (($1234-(test_bsr+$00))-$02):-2
     }}
 }
 .object test_bvc {
     section: code
     visibility: global
     body {{
-.data $50, -$02
-.if .in_range(-$80, $7f, (($1234-(test_bvc+$02))-$02))
-.data $50, (($1234-(test_bvc+$02))-$02):-1
-.else
-.data $53, (($1234-(test_bvc+$02))-$02):-2
-.end
+        .data $50, -$02
+        .if .in_range(-$80, $7f, (($1234-(test_bvc+$02))-$02))
+          .data $50, (($1234-(test_bvc+$02))-$02):-1
+        .else
+          .data $53, (($1234-(test_bvc+$02))-$02):-2
+        .end
     }}
 }
 .object test_bvs {
     section: code
     visibility: global
     body {{
-.data $70, -$02
-.if .in_range(-$80, $7f, (($1234-(test_bvs+$02))-$02))
-.data $70, (($1234-(test_bvs+$02))-$02):-1
-.else
-.data $73, (($1234-(test_bvs+$02))-$02):-2
-.end
+        .data $70, -$02
+        .if .in_range(-$80, $7f, (($1234-(test_bvs+$02))-$02))
+          .data $70, (($1234-(test_bvs+$02))-$02):-1
+        .else
+          .data $73, (($1234-(test_bvs+$02))-$02):-2
+        .end
     }}
 }
 .object test_clc {
     section: code
     visibility: global
     body {{
-.data $18
+        .data $18
     }}
 }
 .object test_cld {
     section: code
     visibility: global
     body {{
-.data $d8
+        .data $d8
     }}
 }
 .object test_cle {
     section: code
     visibility: global
     body {{
-.data $02
+        .data $02
     }}
 }
 .object test_cli {
     section: code
     visibility: global
     body {{
-.data $58
+        .data $58
     }}
 }
 .object test_clv {
     section: code
     visibility: global
     body {{
-.data $b8
+        .data $b8
     }}
 }
 .object test_cmp {
     section: code
     visibility: global
     body {{
-.data $c9, $12, $c5, $12, $d5, $12, $cd, $1234, $dd, $1234, $d9, $1234, $c1, $12, $d1, $12, $d2, $12, $ea, $d2, $12
+        .data $c9, $12, $c5, $12, $d5, $12, $cd, $1234, $dd, $1234, $d9, $1234, $c1, $12, $d1, $12, $d2, $12, $ea, $d2, $12
     }}
 }
 .object test_cmpq {
     section: code
     visibility: global
     body {{
-.data $42, $42, $c5, $12, $42, $42, $cd, $1234, $42, $42, $d2, $12, $42, $42, $ea, $d2, $12
+        .data $42, $42, $c5, $12, $42, $42, $cd, $1234, $42, $42, $d2, $12, $42, $42, $ea, $d2, $12
     }}
 }
 .object test_cpx {
     section: code
     visibility: global
     body {{
-.data $e0, $12, $e4, $12, $ec, $1234
+        .data $e0, $12, $e4, $12, $ec, $1234
     }}
 }
 .object test_cpy {
     section: code
     visibility: global
     body {{
-.data $c0, $12, $c4, $12, $cc, $1234
+        .data $c0, $12, $c4, $12, $cc, $1234
     }}
 }
 .object test_cpz {
     section: code
     visibility: global
     body {{
-.data $c2, $12, $d4, $12, $dc, $1234
+        .data $c2, $12, $d4, $12, $dc, $1234
     }}
 }
 .object test_dec {
     section: code
     visibility: global
     body {{
-.data $3a, $3a, $c6, $12, $d6, $12, $ce, $1234, $de, $1234
+        .data $3a, $3a, $c6, $12, $d6, $12, $ce, $1234, $de, $1234
     }}
 }
 .object test_deq {
     section: code
     visibility: global
     body {{
-.data $42, $42, $3a, $42, $42, $3a, $42, $42, $c6, $12, $42, $42, $ce, $1234, $42, $42, $d6, $12, $42, $42, $de, $1234
+        .data $42, $42, $3a, $42, $42, $3a, $42, $42, $c6, $12, $42, $42, $ce, $1234, $42, $42, $d6, $12, $42, $42, $de, $1234
     }}
 }
 .object test_dew {
     section: code
     visibility: global
     body {{
-.data $c3, $12
+        .data $c3, $12
     }}
 }
 .object test_dex {
     section: code
     visibility: global
     body {{
-.data $ca
+        .data $ca
     }}
 }
 .object test_dey {
     section: code
     visibility: global
     body {{
-.data $88
+        .data $88
     }}
 }
 .object test_dez {
     section: code
     visibility: global
     body {{
-.data $3b
+        .data $3b
     }}
 }
 .object test_eor {
     section: code
     visibility: global
     body {{
-.data $49, $12, $45, $12, $55, $12, $4d, $1234, $5d, $1234, $59, $1234, $41, $12, $51, $12, $52, $12, $ea, $52, $12
+        .data $49, $12, $45, $12, $55, $12, $4d, $1234, $5d, $1234, $59, $1234, $41, $12, $51, $12, $52, $12, $ea, $52, $12
     }}
 }
 .object test_eorq {
     section: code
     visibility: global
     body {{
-.data $42, $42, $45, $12, $42, $42, $4d, $1234, $42, $42, $52, $12, $42, $42, $ea, $52, $12
+        .data $42, $42, $45, $12, $42, $42, $4d, $1234, $42, $42, $52, $12, $42, $42, $ea, $52, $12
     }}
 }
 .object test_inc {
     section: code
     visibility: global
     body {{
-.data $1a, $1a, $e6, $12, $f6, $12, $ee, $1234, $fe, $1234
+        .data $1a, $1a, $e6, $12, $f6, $12, $ee, $1234, $fe, $1234
     }}
 }
 .object test_inq {
     section: code
     visibility: global
     body {{
-.data $42, $42, $1a, $42, $42, $1a, $42, $42, $e6, $12, $42, $42, $ee, $1234, $42, $42, $f6, $12, $42, $42, $fe, $1234
+        .data $42, $42, $1a, $42, $42, $1a, $42, $42, $e6, $12, $42, $42, $ee, $1234, $42, $42, $f6, $12, $42, $42, $fe, $1234
     }}
 }
 .object test_inw {
     section: code
     visibility: global
     body {{
-.data $e3, $12
+        .data $e3, $12
     }}
 }
 .object test_inx {
     section: code
     visibility: global
     body {{
-.data $e8
+        .data $e8
     }}
 }
 .object test_iny {
     section: code
     visibility: global
     body {{
-.data $c8
+        .data $c8
     }}
 }
 .object test_inz {
     section: code
     visibility: global
     body {{
-.data $1b
+        .data $1b
     }}
 }
 .object test_jmp {
     section: code
     visibility: global
     body {{
-.data $4c, $1234, $6c, $1234, $7c, $1234
+        .data $4c, $1234, $6c, $1234, $7c, $1234
     }}
 }
 .object test_jsr {
     section: code
     visibility: global
     body {{
-.data $20, $1234, $22, $1234, $23, $1234
+        .data $20, $1234, $22, $1234, $23, $1234
     }}
 }
 .object test_lda {
     section: code
     visibility: global
     body {{
-.data $a9, $12, $a5, $12, $b5, $12, $ad, $1234, $bd, $1234, $b9, $1234, $a1, $12, $b1, $12, $b2, $12, $e2, $12, $ea, $b2, $12
+        .data $a9, $12, $a5, $12, $b5, $12, $ad, $1234, $bd, $1234, $b9, $1234, $a1, $12, $b1, $12, $b2, $12, $e2, $12, $ea, $b2, $12
     }}
 }
 .object test_ldq {
     section: code
     visibility: global
     body {{
-.data $42, $42, $a5, $12, $42, $42, $ad, $1234, $42, $42, $b2, $12, $42, $42, $ea, $b2, $12
+        .data $42, $42, $a5, $12, $42, $42, $ad, $1234, $42, $42, $b2, $12, $42, $42, $ea, $b2, $12
     }}
 }
 .object test_ldx {
     section: code
     visibility: global
     body {{
-.data $a2, $12, $a6, $12, $b6, $12, $ae, $1234, $be, $1234
+        .data $a2, $12, $a6, $12, $b6, $12, $ae, $1234, $be, $1234
     }}
 }
 .object test_ldy {
     section: code
     visibility: global
     body {{
-.data $a0, $12, $a4, $12, $b4, $12, $ac, $1234, $bc, $1234
+        .data $a0, $12, $a4, $12, $b4, $12, $ac, $1234, $bc, $1234
     }}
 }
 .object test_ldz {
     section: code
     visibility: global
     body {{
-.data $a3, $12, $ab, $1234, $bb, $1234
+        .data $a3, $12, $ab, $1234, $bb, $1234
     }}
 }
 .object test_lsr {
     section: code
     visibility: global
     body {{
-.data $4a, $4a, $46, $12, $56, $12, $4e, $1234, $5e, $1234
+        .data $4a, $4a, $46, $12, $56, $12, $4e, $1234, $5e, $1234
     }}
 }
 .object test_lsrq {
     section: code
     visibility: global
     body {{
-.data $42, $42, $46, $12, $42, $42, $4a, $42, $42, $4a, $42, $42, $4e, $1234, $42, $42, $56, $12, $42, $42, $5e, $1234
+        .data $42, $42, $46, $12, $42, $42, $4a, $42, $42, $4a, $42, $42, $4e, $1234, $42, $42, $56, $12, $42, $42, $5e, $1234
     }}
 }
 .object test_map {
     section: code
     visibility: global
     body {{
-.data $5c
+        .data $5c
     }}
 }
 .object test_neg {
     section: code
     visibility: global
     body {{
-.data $42, $42
+        .data $42, $42
     }}
 }
 .object test_nop {
     section: code
     visibility: global
     body {{
-.data $ea
+        .data $ea
     }}
 }
 .object test_ora {
     section: code
     visibility: global
     body {{
-.data $09, $12, $05, $12, $15, $12, $0d, $1234, $1d, $1234, $19, $1234, $01, $12, $11, $12, $12, $12, $ea, $12, $12
+        .data $09, $12, $05, $12, $15, $12, $0d, $1234, $1d, $1234, $19, $1234, $01, $12, $11, $12, $12, $12, $ea, $12, $12
     }}
 }
 .object test_orq {
     section: code
     visibility: global
     body {{
-.data $42, $42, $05, $12, $42, $42, $0d, $1234, $42, $42, $12, $12, $42, $42, $ea, $12, $12
+        .data $42, $42, $05, $12, $42, $42, $0d, $1234, $42, $42, $12, $12, $42, $42, $ea, $12, $12
     }}
 }
 .object test_pha {
     section: code
     visibility: global
     body {{
-.data $48
+        .data $48
     }}
 }
 .object test_php {
     section: code
     visibility: global
     body {{
-.data $08
+        .data $08
     }}
 }
 .object test_phw {
     section: code
     visibility: global
     body {{
-.data $f4, $1234, $fc, $1234
+        .data $f4, $1234, $fc, $1234
     }}
 }
 .object test_phx {
     section: code
     visibility: global
     body {{
-.data $da
+        .data $da
     }}
 }
 .object test_phy {
     section: code
     visibility: global
     body {{
-.data $5a
+        .data $5a
     }}
 }
 .object test_phz {
     section: code
     visibility: global
     body {{
-.data $db
+        .data $db
     }}
 }
 .object test_pla {
     section: code
     visibility: global
     body {{
-.data $68
+        .data $68
     }}
 }
 .object test_plp {
     section: code
     visibility: global
     body {{
-.data $28
+        .data $28
     }}
 }
 .object test_plx {
     section: code
     visibility: global
     body {{
-.data $fa
+        .data $fa
     }}
 }
 .object test_ply {
     section: code
     visibility: global
     body {{
-.data $7a
+        .data $7a
     }}
 }
 .object test_plz {
     section: code
     visibility: global
     body {{
-.data $fb
+        .data $fb
     }}
 }
 .object test_rmb0 {
     section: code
     visibility: global
     body {{
-.data $07, $12
+        .data $07, $12
     }}
 }
 .object test_rmb1 {
     section: code
     visibility: global
     body {{
-.data $17, $12
+        .data $17, $12
     }}
 }
 .object test_rmb2 {
     section: code
     visibility: global
     body {{
-.data $27, $12
+        .data $27, $12
     }}
 }
 .object test_rmb3 {
     section: code
     visibility: global
     body {{
-.data $37, $12
+        .data $37, $12
     }}
 }
 .object test_rmb4 {
     section: code
     visibility: global
     body {{
-.data $47, $12
+        .data $47, $12
     }}
 }
 .object test_rmb5 {
     section: code
     visibility: global
     body {{
-.data $57, $12
+        .data $57, $12
     }}
 }
 .object test_rmb6 {
     section: code
     visibility: global
     body {{
-.data $67, $12
+        .data $67, $12
     }}
 }
 .object test_rmb7 {
     section: code
     visibility: global
     body {{
-.data $77, $12
+        .data $77, $12
     }}
 }
 .object test_rol {
     section: code
     visibility: global
     body {{
-.data $2a, $2a, $26, $12, $36, $12, $2e, $1234, $3e, $1234
+        .data $2a, $2a, $26, $12, $36, $12, $2e, $1234, $3e, $1234
     }}
 }
 .object test_rolq {
     section: code
     visibility: global
     body {{
-.data $42, $42, $26, $12, $42, $42, $2a, $42, $42, $2a, $42, $42, $2e, $1234, $42, $42, $36, $12, $42, $42, $3e, $1234
+        .data $42, $42, $26, $12, $42, $42, $2a, $42, $42, $2a, $42, $42, $2e, $1234, $42, $42, $36, $12, $42, $42, $3e, $1234
     }}
 }
 .object test_ror {
     section: code
     visibility: global
     body {{
-.data $6a, $6a, $66, $12, $76, $12, $6e, $1234, $7e, $1234
+        .data $6a, $6a, $66, $12, $76, $12, $6e, $1234, $7e, $1234
     }}
 }
 .object test_rorq {
     section: code
     visibility: global
     body {{
-.data $42, $42, $66, $12, $42, $42, $6a, $42, $42, $6a, $42, $42, $6e, $1234, $42, $42, $76, $12, $42, $42, $7e, $1234
+        .data $42, $42, $66, $12, $42, $42, $6a, $42, $42, $6a, $42, $42, $6e, $1234, $42, $42, $76, $12, $42, $42, $7e, $1234
     }}
 }
 .object test_row {
     section: code
     visibility: global
     body {{
-.data $eb, $1234
+        .data $eb, $1234
     }}
 }
 .object test_rti {
     section: code
     visibility: global
     body {{
-.data $40
+        .data $40
     }}
 }
 .object test_rtn {
     section: code
     visibility: global
     body {{
-.data $62, $12
+        .data $62, $12
     }}
 }
 .object test_rts {
     section: code
     visibility: global
     body {{
-.data $60
+        .data $60
     }}
 }
 .object test_sbc {
     section: code
     visibility: global
     body {{
-.data $e9, $12, $e5, $12, $f5, $12, $ed, $1234, $fd, $1234, $f9, $1234, $e1, $12, $f1, $12, $f2, $12, $ea, $f2, $12
+        .data $e9, $12, $e5, $12, $f5, $12, $ed, $1234, $fd, $1234, $f9, $1234, $e1, $12, $f1, $12, $f2, $12, $ea, $f2, $12
     }}
 }
 .object test_sbcq {
     section: code
     visibility: global
     body {{
-.data $42, $42, $e5, $12, $42, $42, $ed, $1234, $42, $42, $f2, $12, $42, $42, $ea, $f2, $12
+        .data $42, $42, $e5, $12, $42, $42, $ed, $1234, $42, $42, $f2, $12, $42, $42, $ea, $f2, $12
     }}
 }
 .object test_sec {
     section: code
     visibility: global
     body {{
-.data $38
+        .data $38
     }}
 }
 .object test_sed {
     section: code
     visibility: global
     body {{
-.data $f8
+        .data $f8
     }}
 }
 .object test_see {
     section: code
     visibility: global
     body {{
-.data $03
+        .data $03
     }}
 }
 .object test_sei {
     section: code
     visibility: global
     body {{
-.data $78
+        .data $78
     }}
 }
 .object test_smb0 {
     section: code
     visibility: global
     body {{
-.data $87, $12
+        .data $87, $12
     }}
 }
 .object test_smb1 {
     section: code
     visibility: global
     body {{
-.data $97, $12
+        .data $97, $12
     }}
 }
 .object test_smb2 {
     section: code
     visibility: global
     body {{
-.data $a7, $12
+        .data $a7, $12
     }}
 }
 .object test_smb3 {
     section: code
     visibility: global
     body {{
-.data $b7, $12
+        .data $b7, $12
     }}
 }
 .object test_smb4 {
     section: code
     visibility: global
     body {{
-.data $c7, $12
+        .data $c7, $12
     }}
 }
 .object test_smb5 {
     section: code
     visibility: global
     body {{
-.data $d7, $12
+        .data $d7, $12
     }}
 }
 .object test_smb6 {
     section: code
     visibility: global
     body {{
-.data $e7, $12
+        .data $e7, $12
     }}
 }
 .object test_smb7 {
     section: code
     visibility: global
     body {{
-.data $f7, $12
+        .data $f7, $12
     }}
 }
 .object test_sta {
     section: code
     visibility: global
     body {{
-.data $85, $12, $95, $12, $8d, $1234, $9d, $1234, $99, $1234, $81, $12, $91, $12, $92, $12, $82, $12, $ea, $92, $12
+        .data $85, $12, $95, $12, $8d, $1234, $9d, $1234, $99, $1234, $81, $12, $91, $12, $92, $12, $82, $12, $ea, $92, $12
     }}
 }
 .object test_stq {
     section: code
     visibility: global
     body {{
-.data $42, $42, $85, $12, $42, $42, $8d, $1234, $42, $42, $92, $12, $42, $42, $ea, $92, $12
+        .data $42, $42, $85, $12, $42, $42, $8d, $1234, $42, $42, $92, $12, $42, $42, $ea, $92, $12
     }}
 }
 .object test_stx {
     section: code
     visibility: global
     body {{
-.data $86, $12, $96, $12, $8e, $1234, $9b, $1234
+        .data $86, $12, $96, $12, $8e, $1234, $9b, $1234
     }}
 }
 .object test_sty {
     section: code
     visibility: global
     body {{
-.data $84, $12, $94, $12, $8c, $1234, $8b, $1234
+        .data $84, $12, $94, $12, $8c, $1234, $8b, $1234
     }}
 }
 .object test_stz {
     section: code
     visibility: global
     body {{
-.data $64, $12, $74, $12, $9c, $1234, $9e, $1234
+        .data $64, $12, $74, $12, $9c, $1234, $9e, $1234
     }}
 }
 .object test_tab {
     section: code
     visibility: global
     body {{
-.data $5b
+        .data $5b
     }}
 }
 .object test_tax {
     section: code
     visibility: global
     body {{
-.data $aa
+        .data $aa
     }}
 }
 .object test_tay {
     section: code
     visibility: global
     body {{
-.data $a8
+        .data $a8
     }}
 }
 .object test_taz {
     section: code
     visibility: global
     body {{
-.data $4b
+        .data $4b
     }}
 }
 .object test_tba {
     section: code
     visibility: global
     body {{
-.data $7b
+        .data $7b
     }}
 }
 .object test_trb {
     section: code
     visibility: global
     body {{
-.data $14, $12, $1c, $1234
+        .data $14, $12, $1c, $1234
     }}
 }
 .object test_tsb {
     section: code
     visibility: global
     body {{
-.data $04, $12, $0c, $1234
+        .data $04, $12, $0c, $1234
     }}
 }
 .object test_tsx {
     section: code
     visibility: global
     body {{
-.data $ba
+        .data $ba
     }}
 }
 .object test_tsy {
     section: code
     visibility: global
     body {{
-.data $0b
+        .data $0b
     }}
 }
 .object test_txa {
     section: code
     visibility: global
     body {{
-.data $8a
+        .data $8a
     }}
 }
 .object test_txs {
     section: code
     visibility: global
     body {{
-.data $9a
+        .data $9a
     }}
 }
 .object test_tya {
     section: code
     visibility: global
     body {{
-.data $98
+        .data $98
     }}
 }
 .object test_tys {
     section: code
     visibility: global
     body {{
-.data $2b
+        .data $2b
     }}
 }
 .object test_tza {
     section: code
     visibility: global
     body {{
-.data $6b
+        .data $6b
     }}
 }
 end-of-inline-data

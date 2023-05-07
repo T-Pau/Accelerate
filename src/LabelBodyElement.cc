@@ -13,7 +13,13 @@ std::optional<Value> LabelBodyElement::value() const {
     }
 }
 
-void LabelBodyElement::serialize(std::ostream &stream) const {
+void LabelBodyElement::serialize(std::ostream &stream, const std::string& prefix) const {
+    if (prefix.ends_with("  ")) {
+        stream << prefix.substr(0, prefix.size() - 2);
+    }
+    else {
+        stream << prefix;
+    }
     stream << name << ":" << std::endl;
 }
 

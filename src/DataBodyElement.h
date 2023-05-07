@@ -65,7 +65,7 @@ public:
     [[nodiscard]] uint64_t minimum_size() const override;
     [[nodiscard]] std::optional<uint64_t> size() const override;
 
-    void serialize(std::ostream &stream) const override;
+    void serialize(std::ostream &stream, const std::string& prefix = "") const override;
 
     std::vector<Datum> data;
 };

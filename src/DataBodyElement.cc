@@ -95,8 +95,8 @@ BodyElement::EvaluationResult DataBodyElement::evaluate(const Environment &envir
     return result;
 }
 
-void DataBodyElement::serialize(std::ostream &stream) const {
-    stream << ".data ";
+void DataBodyElement::serialize(std::ostream &stream, const std::string& prefix) const {
+    stream << prefix << ".data ";
     auto first = true;
     for (auto& datum: data) {
         if (first) {

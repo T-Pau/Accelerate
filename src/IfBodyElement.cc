@@ -96,35 +96,36 @@ BodyElement::EvaluationResult IfBodyElement::evaluate(const Environment &environ
     return result;
 }
 
-void IfBodyElement::serialize(std::ostream &stream) const {
+void IfBodyElement::serialize(std::ostream &stream, const std::string& prefix) const {
     if (empty()) {
         return;
     }
     if (clauses.front()) {
-        stream << clauses.front().body;
+        clauses.front().body->serialize(stream, prefix);
+        return;
     }
 
     auto first = true;
     for (auto& clause: clauses) {
         if (clause) {
-            stream << ".else" << std::endl;
+            stream << prefix << ".else" << std::endl;
         }
         else {
             if (first) {
-                stream << ".if ";
+                stream << prefix << ".if ";
             }
             else {
-                stream << ".else if ";
+                stream << prefix << ".else if ";
             }
             stream << clause.condition << std::endl;
         }
 
-        stream << clause.body;
+        clause.body->serialize(stream, prefix + "  ");
 
         first = false;
     }
 
-    stream << ".end" << std::endl;
+    stream << prefix << ".end" << std::endl;
 }
 
 std::optional<uint64_t> IfBodyElement::size() const {

@@ -74,9 +74,9 @@ BodyElement::EvaluationResult BodyBlock::evaluate(const Environment &environment
     return result;
 }
 
-void BodyBlock::serialize(std::ostream &stream) const {
+void BodyBlock::serialize(std::ostream &stream, const std::string& prefix) const {
     for (auto& element: elements) {
-        stream << *element;
+        element->serialize(stream, prefix);
     }
 }
 

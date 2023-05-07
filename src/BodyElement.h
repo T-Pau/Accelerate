@@ -69,7 +69,7 @@ public:
     [[nodiscard]] virtual uint64_t minimum_size() const = 0;
     [[nodiscard]] virtual std::optional<uint64_t> size() const = 0;
 
-    virtual void serialize(std::ostream& stream) const = 0;
+    virtual void serialize(std::ostream& stream, const std::string& prefix = "") const = 0;
 
 protected:
     [[nodiscard]] virtual std::shared_ptr<BodyElement> append_sub(std::shared_ptr<BodyElement> body, std::shared_ptr<BodyElement> element) {return {};}
