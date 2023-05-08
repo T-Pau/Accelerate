@@ -329,7 +329,7 @@ std::shared_ptr<Expression> ExpressionParser::do_parse() {
 }
 
 void ExpressionParser::reduce_unary(const ExpressionParser::Element& next) {
-    if (top.type != UNARY_OPERATOR || next.type != OPERAND) {
+    if (top.type != UNARY_OPERATOR || !next.is_operand()) {
         throw Exception("internal error: invalid element types in reduce_unary");
     }
     top = Element(UnaryExpression::create(top.operation.unary, next.node), 0);
