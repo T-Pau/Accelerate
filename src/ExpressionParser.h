@@ -40,6 +40,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "UnaryExpression.h"
 #include "Encoding.h"
 #include "DataBodyElement.h"
+#include "VariableExpression.h"
 
 class ExpressionParser {
 public:
@@ -61,28 +62,34 @@ private:
     };
 
     enum ElementType {
+        ARGUMENT_LIST,
         BINARY_OPERATOR,
+        COMMA,
         END,
-        UNARY_OPERATOR,
+        NAME,
         OPERAND,
         PARENTHESIS_CLOSED,
         PARENTHESIS_OPEN,
-        START
+        START,
+        UNARY_OPERATOR
     };
 
     class Element {
     public:
+        explicit Element(const Token& token): type(NAME), node(std::make_shared<VariableExpression>(token.as_symbol())), level(0), location(token.location) {}
         Element(const std::shared_ptr<Expression>& node, int level): type(OPERAND), node(node), level(level), location(node->location) {}
         Element(Location location, BinaryOperator binary);
         Element(Location location, UnaryExpression::Operation unary);
         explicit Element(Location location, ElementType type): type(type), location(location) {}
 
         [[nodiscard]] const char* description() const;
+        [[nodiscard]] bool is_operand() const {return type == OPERAND || type == NAME;}
 
         ElementType type;
         int level = 0;
 
         std::shared_ptr<Expression> node;
+        std::vector<std::shared_ptr<Expression>> arguments;
         union {
             int none;
             BinaryOperator binary;
@@ -97,7 +104,9 @@ private:
     std::shared_ptr<Expression> do_parse();
     Element next_element();
     Encoding parse_encoding();
+    void reduce_argument_list();
     void reduce_binary(int up_to_level);
+    void reduce_function_call();
     void reduce_unary(const Element& next);
     void shift(Element next);
 

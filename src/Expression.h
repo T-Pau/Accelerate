@@ -44,11 +44,11 @@ public:
     enum Type {
         BINARY,
         FUNCTION,
-        VALUE,
+        LABEL,
         OBJECT,
         UNARY,
-        VARIABLE,
-        LABEL
+        VALUE,
+        VARIABLE
     };
 
     class Iterator {

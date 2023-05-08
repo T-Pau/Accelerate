@@ -34,6 +34,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ValueExpression.h"
 #include "ParseException.h"
 #include "VariableExpression.h"
+#include "FunctionExpression.h"
 
 
 bool ExpressionParser::initialized;
@@ -109,7 +110,10 @@ ExpressionParser::Element ExpressionParser::next_element() {
         return {std::make_shared<ValueExpression>(token), 0};
     }
     else if (token.is_name()) {
-        return {std::make_shared<VariableExpression>(token), 0};
+        return Element(token);
+    }
+    else if (token == token_comma) {
+        return Element(token.location, COMMA);
     }
     else if (token == token_paren_close) {
         return Element(token.location, PARENTHESIS_CLOSED);
@@ -119,6 +123,7 @@ ExpressionParser::Element ExpressionParser::next_element() {
     }
     else {
         switch (top.type) {
+            case ARGUMENT_LIST:
             case BINARY_OPERATOR:
             case PARENTHESIS_OPEN:
             case START: {
@@ -129,6 +134,7 @@ ExpressionParser::Element ExpressionParser::next_element() {
                 break;
             }
 
+            case NAME:
             case OPERAND:
             case PARENTHESIS_CLOSED: {
                 auto it = binary_operators.find(token);
@@ -138,6 +144,7 @@ ExpressionParser::Element ExpressionParser::next_element() {
                 break;
             }
 
+            case COMMA:
             case END:
             case UNARY_OPERATOR:
                 break;
@@ -164,23 +171,27 @@ std::shared_ptr<Expression> ExpressionParser::do_parse() {
             case BINARY_OPERATOR: {
                 switch (next.type) {
                     case BINARY_OPERATOR:
+                    case COMMA:
                     case END:
                     case PARENTHESIS_CLOSED:
                         throw ParseException(next.location, "unexpected %s", next.description());
 
+                    case NAME:
                     case OPERAND:
                     case PARENTHESIS_OPEN:
                     case UNARY_OPERATOR:
                         shift(next);
                         break;
 
+                    case ARGUMENT_LIST:
                     case START:
-                        // can't happen: next can never be start
+                        // can't happen: next can never be argument_list or start
                         break;
                 }
                 break;
             }
 
+            case COMMA:
             case END:
             case PARENTHESIS_CLOSED:
                 // can't happen: these are never put on stack
@@ -189,11 +200,13 @@ std::shared_ptr<Expression> ExpressionParser::do_parse() {
             case UNARY_OPERATOR: {
                 switch (next.type) {
                     case BINARY_OPERATOR:
+                    case COMMA:
                     case END:
                     case PARENTHESIS_CLOSED:
                     case UNARY_OPERATOR:
                         throw ParseException(next.location, "unexpected %s", next.description());
 
+                    case NAME:
                     case OPERAND:
                         reduce_unary(next);
                         break;
@@ -202,15 +215,23 @@ std::shared_ptr<Expression> ExpressionParser::do_parse() {
                         shift(next);
                         break;
 
+                    case ARGUMENT_LIST:
                     case START:
-                        // can't happen: next can never be start
+                        // can't happen: next can never be argument_list or start
                         break;
                 }
                 break;
             }
 
+            case NAME:
+                if (next.type == PARENTHESIS_OPEN) {
+                    shift(Element(next.location, ARGUMENT_LIST));
+                    break;
+                }
+                // fallthrough
             case OPERAND: {
                 switch (next.type) {
+                    case NAME:
                     case OPERAND:
                     case PARENTHESIS_OPEN:
                     case UNARY_OPERATOR:
@@ -220,6 +241,21 @@ std::shared_ptr<Expression> ExpressionParser::do_parse() {
                         reduce_binary(next.level);
                         shift(next);
                         break;
+
+                    case COMMA: {
+                        reduce_binary(0);
+                        if (!stack.empty()) {
+                            if (stack.back().type == ARGUMENT_LIST) {
+                                reduce_argument_list();
+                                break;
+                            }
+                            throw ParseException(stack.back().location, "unmatched '('");
+                        }
+                        auto token = token_comma;
+                        token.location = next.location;
+                        tokenizer.unget(token);
+                        return top.node;
+                    }
 
                     case END:
                         reduce_binary(0);
@@ -239,37 +275,51 @@ std::shared_ptr<Expression> ExpressionParser::do_parse() {
                         else if (stack.back().type == PARENTHESIS_OPEN) {
                             stack.pop_back();
                         }
+                        else if (stack.back().type == ARGUMENT_LIST) {
+                            reduce_argument_list();
+                            reduce_function_call();
+                        }
                         else {
                             throw ParseException(next.location, "unmatched ')'");
                         }
                         break;
 
+                    case ARGUMENT_LIST:
                     case START:
-                        // can't happen: next can never be start
+                        // can't happen: next can never be argument_list or start
                         break;
                 }
                 break;
             }
 
+            case ARGUMENT_LIST:
             case PARENTHESIS_OPEN:
             case START: {
                 switch (next.type) {
-                    case BINARY_OPERATOR:
-                    case END:
                     case PARENTHESIS_CLOSED:
+                        if (top.type == ARGUMENT_LIST) {
+                            reduce_function_call();
+                            break;
+                        }
+                        // fallthrough
+                    case BINARY_OPERATOR:
+                    case COMMA:
+                    case END:
                         if (top.type == START && next.type == END) {
                             throw ParseException(next.location, "expected expression");
                         }
                         throw ParseException(next.location, "unexpected %s", next.description());
 
+                    case NAME:
                     case OPERAND:
                     case PARENTHESIS_OPEN:
                     case UNARY_OPERATOR:
                         shift(next);
                         break;
 
+                    case ARGUMENT_LIST:
                     case START:
-                        // can't happen: next can never be start
+                        // can't happen: next can never be argument_list or start
                         break;
                 }
                 break;
@@ -286,11 +336,11 @@ void ExpressionParser::reduce_unary(const ExpressionParser::Element& next) {
 }
 
 void ExpressionParser::reduce_binary(int up_to_level) {
-    while (top.type == OPERAND && stack.size() >= 2) {
+    while (top.is_operand() && stack.size() >= 2) {
         const auto& operation = stack[stack.size() - 1];
         const auto& left = stack[stack.size() - 2];
 
-        if (operation.type != BINARY_OPERATOR || operation.level < up_to_level || left.type != OPERAND) {
+        if (operation.type != BINARY_OPERATOR || operation.level < up_to_level || !left.is_operand()) {
             // TODO: error?
             break;
         }
@@ -354,14 +404,37 @@ Encoding ExpressionParser::parse_encoding() {
     throw ParseException(token, "expected integer");
 }
 
+void ExpressionParser::reduce_argument_list() {
+    auto previous = stack.back();
+    previous.arguments.emplace_back(top.node);
+    top = previous;
+    stack.pop_back();
+}
+
+void ExpressionParser::reduce_function_call() {
+    auto previous = stack.back();
+    auto name = std::dynamic_pointer_cast<VariableExpression>(previous.node)->variable();
+    top = Element(std::make_shared<FunctionExpression>(name, top.arguments), 0);
+    stack.pop_back();
+}
+
 
 const char *ExpressionParser::Element::description() const {
     switch (type) {
+        case ARGUMENT_LIST:
+            return "argument list";
+
         case BINARY_OPERATOR:
             return "binary operator";
 
+        case COMMA:
+            return ",";
+
         case END:
             return "end of expression";
+
+        case NAME:
+            return "name";
 
         case UNARY_OPERATOR:
             return "unary operator";
