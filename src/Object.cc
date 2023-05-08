@@ -66,9 +66,9 @@ void Object::serialize(std::ostream &stream) const {
     stream << "    section: " << section->name << std::endl;
     stream << "    visibility: " << visibility << std::endl;
     if (!data->empty()) {
-        stream << "    body {{" << std::endl;
+        stream << "    body <" << std::endl;
         data->serialize(stream, "        ");
-        stream << "    }}" << std::endl;
+        stream << "    >" << std::endl;
     }
     else {
         stream << "    reserve: " << size << std::endl;

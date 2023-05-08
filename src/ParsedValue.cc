@@ -34,6 +34,8 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 bool ParsedValue::initialized = false;
 TokenGroup ParsedValue::start_group;
+Token ParsedValue::token_angle_close;
+Token ParsedValue::token_angle_open;
 Token ParsedValue::token_colon;
 Token ParsedValue::token_curly_close;
 Token ParsedValue::token_curly_open;
@@ -42,13 +44,15 @@ Token ParsedValue::token_square_open;
 
 void ParsedValue::initialize() {
     if (!initialized) {
+        token_angle_close = Token(Token::PUNCTUATION, ">");
+        token_angle_open = Token(Token::PUNCTUATION, "<");
         token_colon = Token(Token::PUNCTUATION, ":");
         token_curly_close = Token(Token::PUNCTUATION, "}");
         token_curly_open = Token(Token::PUNCTUATION, "{");
         token_square_close = Token(Token::PUNCTUATION, "]");
         token_square_open = Token(Token::PUNCTUATION, "[");
 
-        start_group = TokenGroup({}, {token_colon, token_curly_open, token_square_open}, "object start");
+        start_group = TokenGroup({}, {token_angle_open, token_colon, token_curly_open, token_square_open}, "object start");
 
         initialized = true;
     }
@@ -62,7 +66,10 @@ std::shared_ptr<ParsedValue> ParsedValue::parse(Tokenizer &tokenizer) {
 
     std::shared_ptr<ParsedValue> object;
 
-    if (token == token_colon) {
+    if (token == token_angle_open) {
+        object = std::make_shared<ParsedBody>(tokenizer);
+    }
+    else if (token == token_colon) {
         object = std::make_shared<ParsedScalar>(tokenizer);
     }
     else if (token == token_curly_open) {
@@ -174,4 +181,18 @@ std::shared_ptr<ParsedValue> ParsedDictionary::operator[](const Token& token) co
 ParsedScalar::ParsedScalar(Tokenizer &tokenizer) {
     tokens = tokenizer.collect_until(Token::NEWLINE);
     tokenizer.skip(Token::NEWLINE);
+}
+
+
+ParsedBody::ParsedBody(Tokenizer &tokenizer) {
+    // TODO: implement properly
+    while (true) {
+        auto token = tokenizer.next();
+        if (!token) {
+            throw ParseException(token.location, "missing '>'");
+        }
+        if (token == token_angle_close) {
+            break;
+        }
+    }
 }

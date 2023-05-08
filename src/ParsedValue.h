@@ -78,6 +78,8 @@ protected:
     static void initialize();
     static bool initialized;
     static TokenGroup start_group;
+    static Token token_angle_close;
+    static Token token_angle_open;
     static Token token_colon;
     static Token token_square_close;
     static Token token_square_open;
@@ -105,7 +107,7 @@ public:
 
 class ParsedBody: public ParsedValue {
 public:
-    explicit ParsedBody(Tokenizer& tokenizer) {} // TODO
+    explicit ParsedBody(Tokenizer& tokenizer);
 
     std::shared_ptr<BodyElement> body;
 
