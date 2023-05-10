@@ -40,6 +40,7 @@ add_library(xlr8-library STATIC
         Linker.cc
         Location.cc
         Memory.cc
+        MemoryBodyElement.cc
         MemoryMap.cc
         Node.cc
         Object.cc

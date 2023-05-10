@@ -153,3 +153,10 @@ Token Tokenizer::peek() {
     unget(token);
     return token;
 }
+
+void Tokenizer::expect(Token token) {
+    auto got = next();
+    if (got != token) {
+        throw ParseException(got, "expected %s", token.as_string().c_str());
+    }
+}

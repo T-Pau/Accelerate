@@ -17,7 +17,7 @@
 class BodyParser {
 public:
     explicit BodyParser(Tokenizer& tokenizer): end_token(Token::greater), tokenizer(tokenizer) {} // ParsedValue
-    BodyParser(Tokenizer& tokenizer, Symbol object_name, const CPU* cpu): allow_memory(true), cpu(cpu), object_name(object_name), tokenizer(tokenizer) {} // Target
+    BodyParser(Tokenizer& tokenizer, const CPU* cpu): allow_memory(true), cpu(cpu), tokenizer(tokenizer) {} // Target
     BodyParser(Tokenizer& tokenizer, Symbol object_name, const CPU* cpu, ObjectFile* object_file, std::shared_ptr<Environment> environment): cpu(cpu), environment(std::move(environment)), object_name(object_name), object_file(object_file), tokenizer(tokenizer) {} // Assembler
 
     static void setup(FileTokenizer& tokenizer);
@@ -27,7 +27,7 @@ public:
 private:
     bool allow_memory = false;
     const CPU* cpu = nullptr;
-    std::shared_ptr<Environment> environment;
+    std::shared_ptr<Environment> environment = std::make_shared<Environment>();
     Token end_token = Token::curly_close;
     Symbol object_name;
     ObjectFile* object_file = nullptr;
@@ -40,6 +40,7 @@ private:
     Body *current_body = nullptr;
 
     [[nodiscard]] bool allow_instructions() const {return cpu != nullptr;}
+    [[nodiscard]] bool allow_labels() const {return !object_name.empty();}
     void parse_assignment(Object::Visibility visibility, const Token& name);
     void parse_directive(const Token& directive);
     void parse_instruction(const Token& name);

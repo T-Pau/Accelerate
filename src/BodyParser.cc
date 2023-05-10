@@ -13,14 +13,15 @@
 #include "InstructionEncoder.h"
 #include "LabelExpression.h"
 #include "TokenNode.h"
+#include "MemoryBodyElement.h"
 
 const Symbol BodyParser::symbol_pc = Symbol(".pc");
-const Token BodyParser::token_data = Token(Token::DIRECTIVE, ".data");
-const Token BodyParser::token_end = Token(Token::DIRECTIVE, ".end");
-const Token BodyParser::token_else = Token(Token::DIRECTIVE, ".else");
-const Token BodyParser::token_else_if = Token(Token::DIRECTIVE, ".else_if");
-const Token BodyParser::token_if = Token(Token::DIRECTIVE, ".if");
-const Token BodyParser::token_memory = Token(Token::DIRECTIVE, ".memory");
+const Token BodyParser::token_data = Token(Token::DIRECTIVE, "data");
+const Token BodyParser::token_end = Token(Token::DIRECTIVE, "end");
+const Token BodyParser::token_else = Token(Token::DIRECTIVE, "else");
+const Token BodyParser::token_else_if = Token(Token::DIRECTIVE, "else_if");
+const Token BodyParser::token_if = Token(Token::DIRECTIVE, "if");
+const Token BodyParser::token_memory = Token(Token::DIRECTIVE, "memory");
 
 const std::unordered_map<Symbol, void (BodyParser::*)()> BodyParser::directive_parser_methods = {
         { token_data.as_symbol(), &BodyParser::parse_data },
@@ -219,7 +220,11 @@ void BodyParser::parse_label(Object::Visibility visibility, const Token& name) {
 
 
 void BodyParser::parse_memory() {
-    // TODO: implement
+    auto expression_parser = ExpressionParser(tokenizer);
+    auto start_address = expression_parser.parse();
+    tokenizer.expect(Token::comma);
+    auto end_address = expression_parser.parse();
+    current_body->append(std::make_shared<MemoryBodyElement>(start_address, end_address));
 }
 
 void BodyParser::parse_assignment(Object::Visibility visibility, const Token &name) {

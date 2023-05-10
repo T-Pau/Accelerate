@@ -36,6 +36,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "FileReader.h"
 #include "ExpressionParser.h"
 #include "TargetGetter.h"
+#include "BodyParser.h"
 
 bool TargetParser::initialized = false;
 std::unordered_map<Symbol, void (TargetParser::*)()> TargetParser::parser_methods;
@@ -129,40 +130,12 @@ void TargetParser::parse_directive(const Token &directive) {
 
 void TargetParser::parse_output() {
     auto token = tokenizer.next();
-    if (token != ParsedValue::token_curly_open) {
+    if (token != Token::curly_open) {
         tokenizer.skip_until(TokenGroup::newline, true);
         throw ParseException(token, "expected '{'");
     }
 
-    while (!tokenizer.ended()) {
-        try {
-            tokenizer.skip(TokenGroup::newline);
-            token = tokenizer.next();
-
-            OutputElement::Type type;
-
-            if (token == ParsedValue::token_curly_close) {
-                tokenizer.skip(TokenGroup::newline);
-                break;
-            }
-            else if (token == token_data) {
-                type = OutputElement::DATA;
-            }
-            else if (token == token_memory) {
-                type = OutputElement::MEMORY;
-            }
-            else {
-                throw ParseException(token, "unexpected %s", token.type_name());
-            }
-
-            // TODO
-            //target.add_output_element(OutputElement(type, ExpressionParser(tokenizer).parse_list()));
-        }
-        catch (ParseException &ex) {
-            FileReader::global.error(ex.location, "%s", ex.what());
-            tokenizer.skip_until(TokenGroup::newline, true);
-        }
-    }
+    target.output = BodyParser(tokenizer, target.cpu).parse();
 }
 
 

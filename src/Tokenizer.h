@@ -47,6 +47,7 @@ public:
     std::vector<Token> collect_until(const TokenGroup& types);
     Token expect(Token::Type type, const TokenGroup& synchronize);
     Token expect(const TokenGroup& types, const TokenGroup& synchronize);
+    void expect(Token token);
     void expect_litearls(const std::vector<Token::Type>& types, const TokenGroup& synchronize);
     void skip_until(const TokenGroup& types, bool including_terminator = false);
     void skip(const TokenGroup& types);

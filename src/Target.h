@@ -49,16 +49,13 @@ public:
 
     [[nodiscard]] bool is_compatible_with(const Target& other) const; // this has everything from other
 
-    void add_output_element(OutputElement element) {output_elements.emplace_back(std::move(element));}
-
     Symbol name;
     const CPU* cpu = &CPU::empty;
     MemoryMap map;
 
-    std::vector<OutputElement> output_elements;
+    Body output;
 
     std::string extension = "bin";
-
 };
 
 #endif // TARGET_H
