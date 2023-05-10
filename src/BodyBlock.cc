@@ -30,9 +30,10 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include "BodyBlock.h"
+#include "DataBodyElement.h"
 
 std::ostream& operator<<(std::ostream& stream, const BodyBlock& block) {
-    block.serialize(stream);
+    block.serialize(stream, "");
     return stream;
 }
 
@@ -46,22 +47,28 @@ BodyElement::EvaluationResult BodyBlock::evaluate(const Environment &environment
         auto sub_result = element->evaluate(environment, result.minimum_offset, result.maximum_offset);
         if (sub_result.element) {
             changed = true;
-            if (!sub_result.element->empty()) {
-                new_elements.emplace_back(sub_result.element);
-                result.minimum_offset += sub_result.minimum_offset;
-                result.maximum_offset += sub_result.maximum_offset;
-            }
         }
         else {
-            if (element->empty()) {
+            sub_result.element = element;
+        }
+
+        if (sub_result.element->empty()) {
+            changed = true;
+            continue;
+        }
+
+        if (!new_elements.empty()) {
+            auto combined = new_elements.back()->append_sub(new_elements.back(), sub_result.element);
+            if (combined) {
                 changed = true;
-            }
-            else {
-                new_elements.emplace_back(element);
-                result.minimum_offset += element->minimum_size();
-                result.maximum_offset += element->maximum_size();
+                new_elements.pop_back();
+                sub_result.element = combined;
             }
         }
+
+        result.minimum_offset += element->minimum_size();
+        result.maximum_offset += element->maximum_size();
+        new_elements.emplace_back(sub_result.element);
     }
 
     if (changed) {

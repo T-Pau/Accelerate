@@ -117,8 +117,7 @@ void DataBodyElement::serialize(std::ostream &stream, const std::string& prefix)
     stream << std::endl;
 }
 
-std::shared_ptr<BodyElement>
-DataBodyElement::append_sub(std::shared_ptr<BodyElement> body, std::shared_ptr<BodyElement> element) {
+std::shared_ptr<BodyElement> DataBodyElement::append_sub(std::shared_ptr<BodyElement> body, std::shared_ptr<BodyElement> element) {
     auto data_element = std::dynamic_pointer_cast<DataBodyElement>(element);
 
     if (!data_element) {

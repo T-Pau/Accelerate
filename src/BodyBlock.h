@@ -53,7 +53,7 @@ public:
     [[nodiscard]] std::optional<uint64_t> size() const override;
     [[nodiscard]] std::shared_ptr<BodyElement> back() const {return elements.empty() ? nullptr : elements.back();}
 
-    void serialize(std::ostream& stream, const std::string& prefix = "") const override;
+    void serialize(std::ostream& stream, const std::string& prefix) const override;
 
 private:
     std::vector<std::shared_ptr<BodyElement>> elements;

@@ -5,8 +5,8 @@
 #include "LabelBodyElement.h"
 
 std::optional<Value> LabelBodyElement::value() const {
-    if (minimum_offset == maximum_offset) {
-        return Value(minimum_offset);
+    if (offset.minimum == offset.maximum) {
+        return Value(offset.minimum);
     }
     else {
         return {};
@@ -24,8 +24,17 @@ void LabelBodyElement::serialize(std::ostream &stream, const std::string& prefix
 }
 
 BodyElement::EvaluationResult LabelBodyElement::evaluate(const Environment &environment, uint64_t new_minimum_offset, uint64_t new_maximum_offset) const {
-    minimum_offset = new_minimum_offset;
-    maximum_offset = new_maximum_offset;
+    offset.minimum = new_minimum_offset;
+    offset.maximum = new_maximum_offset;
 
-    return {{}, minimum_offset, maximum_offset};
+    return {{}, new_minimum_offset, new_maximum_offset};
+}
+
+std::optional<Value> LabelBodyElement::maximum_value() const {
+    if (offset.maximum) {
+        return Value(*offset.maximum);
+    }
+    else {
+        return {};
+    }
 }

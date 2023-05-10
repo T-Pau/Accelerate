@@ -110,7 +110,7 @@ void Linker::link() {
         try {
             object->evaluate(empty_environment);
             std::string bytes;
-            object->data->encode(bytes);
+            object->body.encode(bytes);
             memory[object->bank.value()].copy(object->address.value(), bytes);
         }
         catch (Exception& ex) {

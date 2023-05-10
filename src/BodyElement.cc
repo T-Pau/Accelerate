@@ -33,12 +33,11 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "BodyBlock.h"
 
 std::ostream& operator<<(std::ostream& stream, const BodyElement& element) {
-    element.serialize(stream);
+    element.serialize(stream, "");
     return stream;
 }
 
-std::shared_ptr<BodyElement>
-BodyElement::evaluate(std::shared_ptr<BodyElement> element, const Environment &environment) {
+std::shared_ptr<BodyElement> BodyElement::evaluate(std::shared_ptr<BodyElement> element, const Environment &environment) {
     auto result = element->evaluate(environment, 0, 0);
     if (result.element) {
         return result.element;

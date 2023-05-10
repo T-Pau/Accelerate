@@ -43,12 +43,12 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 std::shared_ptr<BodyElement>
 InstructionEncoder::encode(const Token& name, const std::vector<std::shared_ptr<Node>>& arguments, const std::shared_ptr<Environment>& environment) {
-    const auto instruction = target.cpu->instruction(name.as_symbol());
+    const auto instruction = cpu->instruction(name.as_symbol());
     if (instruction == nullptr) {
         throw ParseException(name, "unknown instruction '%s'", name.as_string().c_str());
     }
 
-    auto matches = target.cpu->match_addressing_modes(arguments);
+    auto matches = cpu->match_addressing_modes(arguments);
     if (matches.empty()) {
         throw ParseException(name, "addressing mode not recognized");
     }
@@ -104,7 +104,7 @@ InstructionEncoder::encode(const Token& name, const std::vector<std::shared_ptr<
         if (&variant != &variants.back()) {
             constraints = BinaryExpression::create(constraints, BinaryExpression::LOGICAL_AND, variant.encoding_constraints);
         }
-        body->append(constraints, variant.data);
+        body->append(constraints, Body(variant.data));
     }
 
     // TODO: add error clause
@@ -115,7 +115,7 @@ InstructionEncoder::encode(const Token& name, const std::vector<std::shared_ptr<
 InstructionEncoder::Variant InstructionEncoder::encode(const Instruction* instruction, const AddressingModeMatcherResult& match, const std::vector<std::shared_ptr<Node>>& arguments, std::shared_ptr<Environment> outer_environment) const {
     auto environment = Environment(std::move(outer_environment));
 
-    const auto addressing_mode = target.cpu->addressing_mode(match.addressing_mode);
+    const auto addressing_mode = cpu->addressing_mode(match.addressing_mode);
     const auto& notation = addressing_mode->notations[match.notation_index];
     auto it_notation = notation.elements.begin();
     auto it_arguments = arguments.begin();

@@ -56,7 +56,6 @@ public:
     explicit DataBodyElement(std::vector<Datum> data): data(std::move(data)) {}
 
     void append(const std::shared_ptr<Expression>& expression, std::optional<Encoding> encoding = {}) {data.emplace_back(expression, encoding);}
-    [[nodiscard]] std::shared_ptr<BodyElement> append_sub(std::shared_ptr<BodyElement> body, std::shared_ptr<BodyElement> element) override;
     [[nodiscard]] std::shared_ptr<BodyElement> clone() const override {return std::make_shared<DataBodyElement>(data);}
     [[nodiscard]] bool empty() const override {return data.empty();}
     void encode(std::string &bytes) const override;
@@ -65,9 +64,13 @@ public:
     [[nodiscard]] uint64_t minimum_size() const override;
     [[nodiscard]] std::optional<uint64_t> size() const override;
 
-    void serialize(std::ostream &stream, const std::string& prefix = "") const override;
+    void serialize(std::ostream &stream, const std::string& prefix) const override;
 
     std::vector<Datum> data;
+
+protected:
+    [[nodiscard]] std::shared_ptr<BodyElement> append_sub(std::shared_ptr<BodyElement> body, std::shared_ptr<BodyElement> element) override;
+
 };
 
 

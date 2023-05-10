@@ -34,7 +34,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <vector>
 
-#include "BodyBlock.h"
+#include "Body.h"
 #include "MemoryMap.h"
 #include "Token.h"
 
@@ -52,15 +52,11 @@ public:
     Object(const ObjectFile* owner, const Object* object);
 
     void evaluate(const Environment& environment);
-    [[nodiscard]] bool is_reservation() const {return data->empty();}
+    [[nodiscard]] bool is_reservation() const {return body.empty();}
     [[nodiscard]] bool empty() const {return is_reservation() && size == 0;}
     [[nodiscard]] bool has_address() const {return address.has_value();}
 
     void serialize(std::ostream& stream) const;
-
-    void append(const std::shared_ptr<BodyElement>& element);
-    uint64_t minimum_size() const {return data ? data->minimum_size() : 0;}
-    uint64_t maximum_size() const {return data ? data->maximum_size() : 0;}
 
     const ObjectFile* owner;
     const MemoryMap::Section* section;
@@ -71,7 +67,7 @@ public:
     std::optional<uint64_t> bank;
     std::optional<uint64_t> address;
 
-    std::shared_ptr<BodyElement> data;
+    Body body;
 };
 
 std::ostream& operator<<(std::ostream& stream, const std::shared_ptr<Object>& node);

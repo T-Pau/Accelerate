@@ -34,6 +34,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <memory>
 #include <utility>
 
+#include "BodyParser.h"
 #include "ParseException.h"
 #include "FileReader.h"
 #include "TokenNode.h"
@@ -46,15 +47,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 bool Assembler::initialized = false;
 Symbol Assembler::symbol_opcode;
-Symbol Assembler::symbol_pc;
 Token Assembler::token_align;
-Token Assembler::token_brace_close;
-Token Assembler::token_brace_open;
-Token Assembler::token_colon;
-Token Assembler::token_curly_brace_close;
-Token Assembler::token_curly_brace_open;
-Token Assembler::token_data;
-Token Assembler::token_equals;
 Token Assembler::token_global;
 Token Assembler::token_local;
 Token Assembler::token_reserve;
@@ -64,15 +57,7 @@ Token Assembler::token_section;
 void Assembler::initialize() {
     if (!initialized) {
         symbol_opcode = ".opcode";
-        symbol_pc = ".pc";
         token_align = Token(Token::DIRECTIVE, ".align");
-        token_brace_close = Token(Token::PUNCTUATION, ")");
-        token_brace_open = Token(Token::PUNCTUATION, "(");
-        token_colon = Token(Token::PUNCTUATION, ":");
-        token_curly_brace_close = Token(Token::PUNCTUATION, "}");
-        token_curly_brace_open = Token(Token::PUNCTUATION, "{");
-        token_data = Token(Token::DIRECTIVE, ".data");
-        token_equals = Token(Token::PUNCTUATION, "=");
         token_global = Token(Token::DIRECTIVE, ".global");
         token_local = Token(Token::DIRECTIVE, ".local");
         token_reserve = Token(Token::DIRECTIVE, ".reserve");
@@ -86,9 +71,10 @@ ObjectFile Assembler::parse(Symbol file_name) {
     initialize();
     target.cpu->setup(tokenizer);
     ExpressionParser::setup(tokenizer);
+    BodyParser::setup(tokenizer);
     tokenizer.add_punctuations({"{", "}", "=", ":"});
     tokenizer.add_literal(token_align);
-    tokenizer.add_literal(token_data);
+//    tokenizer.add_literal(token_data);
     tokenizer.add_literal(token_global);
     tokenizer.add_literal(token_local);
     tokenizer.add_literal(token_reserve);
@@ -116,7 +102,7 @@ ObjectFile Assembler::parse(Symbol file_name) {
                             throw ParseException(name, "name expected");
                         }
                         auto token2 = tokenizer.next();
-                        if (token2 == token_equals) {
+                        if (token2 == Token::equals) {
                             parse_assignment(visibility, name);
                         }
                         else {
@@ -136,7 +122,7 @@ ObjectFile Assembler::parse(Symbol file_name) {
 
                 case Token::NAME: {
                     auto token2 = tokenizer.next();
-                    if (token2 == token_equals) {
+                    if (token2 == Token::equals) {
                         parse_assignment(Object::OBJECT, token);
                         break;
                     }
@@ -172,6 +158,9 @@ ObjectFile Assembler::parse(Symbol file_name) {
 }
 
 void Assembler::parse_symbol_body() {
+    current_object->body = BodyParser(tokenizer, current_object->name.as_symbol(), target.cpu, &object_file, current_environment).parse();;
+
+#if 0
     while (!tokenizer.ended()) {
         try {
             auto token = tokenizer.next();
@@ -186,10 +175,10 @@ void Assembler::parse_symbol_body() {
 
                 case Token::NAME: {
                     auto token2 = tokenizer.next();
-                    if (token2 == token_colon) {
+                    if (token2 == Token::colon) {
                         parse_label(Object::OBJECT, token);
                     }
-                    else if (token2 == token_equals) {
+                    else if (token2 == Token::equals) {
                         parse_assignment(Object::OBJECT, token);
                     }
                     else {
@@ -208,7 +197,7 @@ void Assembler::parse_symbol_body() {
                     break;
 
                 case Token::PUNCTUATION:
-                    if (token == token_curly_brace_close) {
+                    if (token == Token::curly_close) {
                         return;
                     }
                     else {
@@ -237,135 +226,9 @@ void Assembler::parse_symbol_body() {
             FileReader::global.error(ex.location, "%s", ex.what());
         }
     }
+#endif
 }
 
-void Assembler::parse_directive(const Token& directive) {
-    // TODO: use table of directive parsing methods
-    if (directive == token_data) {
-        current_object->append(ExpressionParser(tokenizer).parse_list());
-    }
-    else {
-        // TODO: implement
-        tokenizer.skip_until(TokenGroup::newline, true);
-    }
-}
-
-void Assembler::parse_instruction(const Token& name) {
-    std::vector<std::shared_ptr<Node>> arguments;
-
-    Token token;
-    while ((token = tokenizer.next()) && !token.is_newline()) {
-        if (target.cpu->uses_braces() && token == token_brace_open) {
-            auto node = parse_instruction_argument(tokenizer.next());
-            if (node->type() != Node::EXPRESSION) {
-                // place '(' non-expression
-                arguments.emplace_back(parse_instruction_argument(token));
-                arguments.emplace_back(node);
-            }
-            else {
-                auto token2 = tokenizer.next();
-                if (token2.is_newline()) {
-                    arguments.emplace_back(node);
-                    // place trailing '(' expression
-                    arguments.emplace_back(parse_instruction_argument(token));
-                    arguments.emplace_back(node);
-                    break;
-                }
-                else if (token2 == token_brace_close) {
-                    auto token3 = tokenizer.next();
-
-                    if (token3.is_newline()) {
-                        // place trailing '(' expression ')'
-                        arguments.emplace_back(parse_instruction_argument(token));
-                        arguments.emplace_back(node);
-                        arguments.emplace_back(parse_instruction_argument(token2));
-                        break;
-                    }
-
-                    tokenizer.unget(token3);
-
-                    if (!token3.is_punctuation() || target.cpu->uses_punctuation(token3.as_symbol())) {
-                        // place '(' expression ')' that is not part of larger expression
-                        arguments.emplace_back(parse_instruction_argument(token));
-                        arguments.emplace_back(node);
-                        arguments.emplace_back(parse_instruction_argument(token2));
-
-                    }
-                    else {
-                        // '(' expression ')' is part of larger expression
-                        arguments.emplace_back(std::make_shared<ExpressionNode>(ExpressionParser(tokenizer).parse(std::dynamic_pointer_cast<Expression>(node))));
-                    }
-                }
-                else {
-                    tokenizer.unget(token2);
-                    // place '(' expression that is not followed by ')'
-                    arguments.emplace_back(parse_instruction_argument(token_brace_open));
-                    arguments.emplace_back(node);
-                }
-            }
-        }
-        else {
-            arguments.emplace_back(parse_instruction_argument(token));
-        }
-    }
-
-    auto encoder = InstructionEncoder(target);
-    auto instruction_environment = std::make_shared<Environment>(current_environment);
-    auto label = get_trailing_label();
-    auto anonymous_label = std::shared_ptr<LabelBodyElement>();
-    if (!label) {
-        anonymous_label = create_anonymous_label();
-        label = anonymous_label;
-    }
-    instruction_environment->add(symbol_pc, std::make_shared<BinaryExpression>(std::make_shared<VariableExpression>(current_object->name.as_symbol()), BinaryExpression::ADD, std::make_shared<LabelExpression>(label)));
-
-    auto instruction = encoder.encode(name, arguments, instruction_environment);
-
-    label = {};
-    if (anonymous_label && !anonymous_label.unique()) {
-        current_object->append(anonymous_label);
-    }
-
-    current_object->append(instruction);
-}
-
-std::shared_ptr<LabelBodyElement> Assembler::create_anonymous_label() const {
-    auto line_number = tokenizer.current_location().start_line_number;
-    auto name = Symbol(".label_" + std::to_string(line_number));
-    return std::make_shared<LabelBodyElement>(name, current_object->minimum_size(), current_object->maximum_size());
-}
-
-std::shared_ptr<Node> Assembler::parse_instruction_argument(const Token& token) {
-    switch (token.get_type()) {
-        case Token::PUNCTUATION:
-            if (target.cpu->uses_punctuation(token.as_symbol())) {
-                return std::make_shared<TokenNode>(token);
-            }
-            break;
-
-        case Token::KEYWORD:
-            // TODO: check it's used by target.cpu, throw otherwise
-            return std::make_shared<TokenNode>(token);
-
-        case Token::DIRECTIVE:
-        case Token::INSTRUCTION:
-            throw ParseException(token, "unexpected %s", token.type_name());
-
-        default:
-            break;
-    }
-
-    tokenizer.unget(token);
-    return std::make_shared<ExpressionNode>(ExpressionParser(tokenizer).parse());
-}
-
-
-void Assembler::parse_label(Object::Visibility visibility, const Token& name) {
-    auto label = std::make_shared<LabelBodyElement>(name.as_symbol(), current_object->minimum_size(), current_object->maximum_size());
-    current_object->append(label);
-    add_constant(visibility, name, get_pc(label));
-    add_constant(Object::OBJECT, Token(Token::NAME, name.location, Symbol(".label_offset(" + name.as_string() + ")")), std::make_shared<LabelExpression>(label));
-}
 
 void Assembler::add_constant(Object::Visibility visibility, const Token& name, std::shared_ptr<Expression> value) {
     auto evaluated_value = Expression::evaluate(std::move(value), *current_environment);
@@ -414,7 +277,7 @@ void Assembler::parse_symbol(Object::Visibility visibility, const Token &name) {
             tokenizer.unget(token);
             break;
         }
-        else if (token == token_curly_brace_open) {
+        else if (token == Token::curly_open) {
             // TODO: error if .reserved
             current_environment = std::make_shared<Environment>(file_environment);
             parse_symbol_body();
@@ -456,26 +319,4 @@ void Assembler::parse_symbol(Object::Visibility visibility, const Token &name) {
 
     // TODO: warn if reserved in saved section
     // TODO: error if data in unsaved section
-}
-
-std::shared_ptr<Expression> Assembler::get_pc(const std::shared_ptr<LabelBodyElement>& label) const {
-    return BinaryExpression::create(std::make_shared<VariableExpression>(current_object->name), BinaryExpression::ADD, std::make_shared<LabelExpression>(label));
-}
-
-std::shared_ptr<LabelBodyElement> Assembler::get_trailing_label() const {
-    if (current_object == nullptr || ! current_object->data) {
-        return {};
-    }
-
-    auto label = std::dynamic_pointer_cast<LabelBodyElement>(current_object->data);
-    if (label) {
-        return label;
-    }
-
-    auto block = std::dynamic_pointer_cast<BodyBlock>(current_object->data);
-    if (block) {
-        return std::dynamic_pointer_cast<LabelBodyElement>(block->back());
-    }
-
-    return {};
 }

@@ -65,9 +65,9 @@ void Object::serialize(std::ostream &stream) const {
     }
     stream << "    section: " << section->name << std::endl;
     stream << "    visibility: " << visibility << std::endl;
-    if (!data->empty()) {
+    if (!body.empty()) {
         stream << "    body <" << std::endl;
-        data->serialize(stream, "        ");
+        body.serialize(stream, "        ");
         stream << "    >" << std::endl;
     }
     else {
@@ -75,10 +75,6 @@ void Object::serialize(std::ostream &stream) const {
     }
 
     stream << "}" << std::endl;
-}
-
-void Object::append(const std::shared_ptr<BodyElement>& element) {
-    data = BodyElement::append(data, element);
 }
 
 Object::Object(const ObjectFile *owner, const Object *object): owner(owner), section(object->section), visibility(object->visibility), name(object->name), size(object->size) {
@@ -89,5 +85,5 @@ Object::Object(const ObjectFile *owner, const Object *object): owner(owner), sec
 }
 
 void Object::evaluate(const Environment &environment) {
-    data = BodyElement::evaluate(data, environment);
+    body.evaluate(environment);
 }

@@ -45,7 +45,6 @@ public:
     ObjectFile parse(Symbol file_name);
 
     static Symbol symbol_opcode;
-    static Symbol symbol_pc;
 
 private:
     void parse_assignment(Object::Visibility visibility, const Token& name);
@@ -79,13 +78,7 @@ private:
     static bool initialized;
 
     static Token token_align;
-    static Token token_brace_close;
-    static Token token_brace_open;
-    static Token token_colon;
-    static Token token_curly_brace_close;
-    static Token token_curly_brace_open;
     static Token token_data;
-    static Token token_equals;
     static Token token_global;
     static Token token_local;
     static Token token_reserve;

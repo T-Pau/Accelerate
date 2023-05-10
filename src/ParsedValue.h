@@ -39,6 +39,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "FileTokenizer.h"
 #include "TokenGroup.h"
 #include "BodyElement.h"
+#include "Body.h"
 
 class ParsedArray;
 class ParsedDictionary;
@@ -109,7 +110,7 @@ class ParsedBody: public ParsedValue {
 public:
     explicit ParsedBody(Tokenizer& tokenizer);
 
-    std::shared_ptr<BodyElement> body;
+    Body body;
 
     [[nodiscard]] Type type() const override {return BODY;}
 };

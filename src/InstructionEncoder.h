@@ -38,11 +38,12 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "DataBodyElement.h"
 #include "InRangeExpression.h"
 #include "ValueExpression.h"
+#include "LabelBodyElement.h"
 
 
 class InstructionEncoder {
 public:
-    explicit InstructionEncoder(const Target& target): target(target) {}
+    InstructionEncoder(const CPU* cpu): cpu(cpu) {}
 
     [[nodiscard]] std::shared_ptr<BodyElement> encode(const Token& name, const std::vector<std::shared_ptr<Node>>& arguments, const std::shared_ptr<Environment>& environment);
 
@@ -56,7 +57,7 @@ private:
         void add_argument_constraint(const std::shared_ptr<Expression>& sub_constraint) {return add_constraint(argument_constraints, sub_constraint);}
         void add_encoding_constraint(const std::shared_ptr<Expression>& sub_constraint) {return add_constraint(encoding_constraints, sub_constraint);}
 
-        operator bool() const;
+        explicit operator bool() const;
 
     private:
         static void add_constraint(std::shared_ptr<Expression>& constraint, const std::shared_ptr<Expression>& sub_constraint);
@@ -64,7 +65,7 @@ private:
 
     Variant encode(const Instruction* instruction, const AddressingModeMatcherResult& match, const std::vector<std::shared_ptr<Node>>& arguments, std::shared_ptr<Environment> outer_environment) const;
 
-    const Target& target;
+    const CPU* cpu;
 };
 
 #endif // INSTRUCTION_ENCODER_H

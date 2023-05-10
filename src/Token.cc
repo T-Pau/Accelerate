@@ -33,6 +33,16 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 const std::string Token::empty_string;
 
+const Token Token::colon = Token(PUNCTUATION, ":");
+const Token Token::comma = Token(PUNCTUATION, ",");
+const Token Token::curly_close = Token(PUNCTUATION, "}");
+const Token Token::curly_open = Token(PUNCTUATION, "{");
+const Token Token::equals = Token(PUNCTUATION, "=");
+const Token Token::greater = Token(PUNCTUATION, ">");
+const Token Token::less = Token(PUNCTUATION, "<");
+const Token Token::paren_close = Token(PUNCTUATION, ")");
+const Token Token::paren_open = Token(PUNCTUATION, "(");
+
 const char* Token::type_name(Type type) {
     switch (type) {
         case PREPROCESSOR:

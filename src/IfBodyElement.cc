@@ -51,12 +51,12 @@ BodyElement::EvaluationResult IfBodyElement::evaluate(const Environment &environ
         else {
             new_expression = clause.condition;
         }
-        auto sub_result = clause.body->evaluate(environment, minimum_offset, maximum_offset);
+        auto sub_result = clause.body.elements->evaluate(environment, minimum_offset, maximum_offset);
         if (sub_result.element) {
             changed = true;
         }
         else {
-            sub_result.element = clause.body;
+            sub_result.element = clause.body.elements;
         }
 
         if (sub_result.element->empty()) {
@@ -72,7 +72,7 @@ BodyElement::EvaluationResult IfBodyElement::evaluate(const Environment &environ
                 return sub_result;
             }
         }
-        new_clauses.emplace_back(new_expression, sub_result.element);
+        new_clauses.emplace_back(new_expression, Body(sub_result.element));
 
         result.minimum_offset = std::min(result.minimum_offset, sub_result.minimum_offset);
         result.maximum_offset = std::max(result.maximum_offset, sub_result.maximum_offset);
@@ -101,7 +101,7 @@ void IfBodyElement::serialize(std::ostream &stream, const std::string& prefix) c
         return;
     }
     if (clauses.front()) {
-        clauses.front().body->serialize(stream, prefix);
+        clauses.front().body.serialize(stream, prefix);
         return;
     }
 
@@ -120,7 +120,7 @@ void IfBodyElement::serialize(std::ostream &stream, const std::string& prefix) c
             stream << clause.condition << std::endl;
         }
 
-        clause.body->serialize(stream, prefix + "  ");
+        clause.body.serialize(stream, prefix + "  ");
 
         first = false;
     }
@@ -137,7 +137,7 @@ std::optional<uint64_t> IfBodyElement::size() const {
 
     auto first = true;
     for (auto &clause: clauses) {
-        auto current_size = clause.body->size();
+        auto current_size = clause.body.size();
         if (first) {
             common_size = current_size;
         }
@@ -166,7 +166,7 @@ uint64_t IfBodyElement::maximum_size() const {
 
     auto first = true;
     for (auto &clause: clauses) {
-        auto current_size = clause.body->minimum_size();
+        auto current_size = clause.body.minimum_size();
         if (first) {
             common_size = current_size;
         }
@@ -192,7 +192,7 @@ uint64_t IfBodyElement::minimum_size() const {
 
     auto first = true;
     for (auto &clause: clauses) {
-        auto current_size = clause.body->minimum_size();
+        auto current_size = clause.body.minimum_size();
         if (first) {
             common_size = current_size;
         }

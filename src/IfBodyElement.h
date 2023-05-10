@@ -33,7 +33,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define IF_BODY_ELEMENT_H
 
 #include "BodyElement.h"
-#include "BodyBlock.h"
+#include "Body.h"
 #include "Expression.h"
 #include "Exception.h"
 
@@ -41,27 +41,26 @@ class IfBodyElement: public BodyElement {
 public:
     class Clause {
     public:
-        Clause(std::shared_ptr<Expression> condition, std::shared_ptr<BodyElement> body): condition(std::move(condition)), body(std::move(body)) {}
+        Clause(std::shared_ptr<Expression> condition, Body body): condition(std::move(condition)), body(std::move(body)) {}
 
         explicit operator bool() const {return condition->has_value() && *condition->value();}
         std::shared_ptr<Expression> condition;
-        std::shared_ptr<BodyElement> body;
+        Body body;
     };
 
     IfBodyElement() = default;
     explicit IfBodyElement(std::vector<Clause> clauses): clauses(std::move(clauses)) {}
 
-    void append(const std::shared_ptr<Expression>& condition, const std::shared_ptr<BodyElement>& body) {clauses.emplace_back(condition, body);}
-    [[nodiscard]] std::shared_ptr<BodyElement> clone() const override {return std::make_shared<IfBodyElement>(clauses);}
+    void append(const std::shared_ptr<Expression>& condition, Body body) {clauses.emplace_back(condition, std::move(body));}
+    [[nodiscard]] std::shared_ptr<BodyElement> clone() const override {return std::make_shared<IfBodyElement>(clauses);} // TODO: this doesn't copy clauses
     [[nodiscard]] bool empty() const override {return clauses.empty();}
     void encode(std::string &bytes) const override {throw Exception("unresolved if");}
-    [[nodiscard]] EvaluationResult
-    evaluate(const Environment &environment, uint64_t minimum_offset, uint64_t maximum_offset) const override;
+    [[nodiscard]] EvaluationResult evaluate(const Environment &environment, uint64_t minimum_offset, uint64_t maximum_offset) const override;
     [[nodiscard]] uint64_t maximum_size() const override;
     [[nodiscard]] uint64_t minimum_size() const override;
     [[nodiscard]] std::optional<uint64_t> size() const override;
 
-    void serialize(std::ostream &stream, const std::string& prefix = "") const override;
+    void serialize(std::ostream &stream, const std::string& prefix) const override;
 
 private:
     std::vector<Clause> clauses;

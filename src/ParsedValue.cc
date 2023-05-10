@@ -31,6 +31,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "ParsedValue.h"
 #include "ParseException.h"
+#include "BodyParser.h"
 
 bool ParsedValue::initialized = false;
 TokenGroup ParsedValue::start_group;
@@ -185,14 +186,7 @@ ParsedScalar::ParsedScalar(Tokenizer &tokenizer) {
 
 
 ParsedBody::ParsedBody(Tokenizer &tokenizer) {
-    // TODO: implement properly
-    while (true) {
-        auto token = tokenizer.next();
-        if (!token) {
-            throw ParseException(token.location, "missing '>'");
-        }
-        if (token == token_angle_close) {
-            break;
-        }
-    }
+    auto parser = BodyParser(tokenizer);
+
+    body = parser.parse();
 }

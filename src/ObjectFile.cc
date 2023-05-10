@@ -100,7 +100,7 @@ void ObjectFile::evaluate(const Environment &environment) {
         pair.second.value = Expression::evaluate(pair.second.value, environment);
     }
     for (auto& pair: objects) {
-        pair.second.data = BodyElement::evaluate(pair.second.data, environment);
+        pair.second.body.evaluate(environment);
     }
 }
 

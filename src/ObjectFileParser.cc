@@ -142,7 +142,7 @@ void ObjectFileParser::parse_object() {
     auto data_value = parameters->get_optional(token_data);
     if (data_value != nullptr) {
         auto tokenizer = SequenceTokenizer(data_value->as_scalar()->tokens);
-        object->append(ExpressionParser(tokenizer).parse_list());
+        object->body.append(ExpressionParser(tokenizer).parse_list());
     }
 }
 

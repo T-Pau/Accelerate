@@ -8,8 +8,10 @@ add_library(xlr8-library STATIC
         ArgumentType.cc
         Assembler.cc
         BinaryExpression.cc
+        Body.cc
         BodyBlock.cc
         BodyElement.cc
+        BodyParser.cc
         CPU.cc
         CPUGetter.cc
         CPUParser.cc
@@ -49,6 +51,7 @@ add_library(xlr8-library STATIC
         Path.cc
         Range.cc
         SequenceTokenizer.cc
+        SizeRange.cc
         Symbol.cc
         Target.cc
         TargetGetter.cc
