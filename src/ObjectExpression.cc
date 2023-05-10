@@ -33,9 +33,9 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "ValueExpression.h"
 
-std::shared_ptr<Expression> ObjectExpression::evaluate(const Environment &environment) const {
+std::optional<Expression> ObjectExpression::evaluated(const Environment &environment) const {
     if (object->has_address()) {
-        return std::make_shared<ValueExpression>(object->address.value());
+        return Expression(object->address.value());
     }
     else {
         return {};
@@ -51,12 +51,12 @@ std::optional<Value> ObjectExpression::value() const {
     }
 }
 
-std::shared_ptr<Expression> ObjectExpression::create(Object *object) {
+Expression ObjectExpression::create(Object *object) {
     if (object->has_address()) {
-        return std::make_shared<ValueExpression>(object->address.value());
+        return Expression(object->address.value());
     }
     else {
-        return std::make_shared<ObjectExpression>(object);
+        return Expression(std::make_shared<ObjectExpression>(object));
     }
 }
 

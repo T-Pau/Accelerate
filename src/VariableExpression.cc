@@ -31,27 +31,19 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "VariableExpression.h"
 
+#include "Environment.h"
 #include "ParseException.h"
 
 
-VariableExpression::VariableExpression(const Token &token) {
-    if (!token.is_name()) {
-        throw ParseException(token, "internal error: creating VariableExpression from non-name token");
-    }
-    location = token.location;
-    symbol = token.as_symbol();
-}
-
-std::shared_ptr<Expression> VariableExpression::evaluate(const Environment &environment) const {
+std::optional<Expression> VariableExpression::evaluated(const Environment &environment) const {
     auto value = environment[symbol];
 
     if (value) {
-        // TODO: Detect loops
-        return Expression::evaluate(value, environment);
+        auto new_value = *value;
+        new_value.evaluate(environment);
+        return new_value;
     }
     else {
         return {};
     }
 }
-
-

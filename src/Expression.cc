@@ -1,87 +1,54 @@
-/*
-Expression.cc -- Abstract Base Class of Expression Nodes
-
-Copyright (C) Dieter Baron
-
-The authors can be contacted at <accelerate@tpau.group>
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions
-are met:
-
-1. Redistributions of source code must retain the above copyright
-   notice, this list of conditions and the following disclaimer.
-
-2. The names of the authors may not be used to endorse or promote
-  products derived from this software without specific prior
-  written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE AUTHORS "AS IS" AND ANY EXPRESS
-OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
-ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHORS BE LIABLE FOR ANY
-DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
-DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE
-GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
-INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER
-IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
-OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
-IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-*/
+//
+// Created by Dieter Baron on 10.05.23.
+//
 
 #include "Expression.h"
 
-#include "ParseException.h"
+#include "BinaryExpression.h"
+#include "FunctionExpression.h"
+#include "UnaryExpression.h"
+#include "ValueExpression.h"
+#include "VariableExpression.h"
+#include "ObjectExpression.h"
 
-
-std::ostream& operator<<(std::ostream& stream, const std::shared_ptr<Expression>& node) {
-    node->serialize(stream);
-    return stream;
-}
-
-
-std::ostream& operator<< (std::ostream& stream, const Expression& node) {
-    node.serialize(stream);
-    return stream;
-}
-
-
-std::shared_ptr<Expression> Expression::evaluate(std::shared_ptr<Expression> node, const Environment &environment) {
-    auto new_node = node->evaluate(environment);
-
-    if (!new_node) {
-        return node;
+Expression::Expression(const Expression &left, Expression::BinaryOperation operation, const Expression &right): expression(BinaryExpression::create(left, operation, right).expression) {}
+Expression::Expression(Expression::UnaryOperation operation, const Expression &operand): expression(UnaryExpression::create(operation, operand).expression) {}
+Expression::Expression(const Token& token) {
+    if (token.is_name()) {
+        expression = std::make_shared<VariableExpression>(token.as_symbol());
     }
     else {
-        return new_node;
+        expression = std::make_shared<ValueExpression>(token);
     }
 }
+Expression::Expression(Symbol name): expression(std::make_shared<VariableExpression>(name)) {}
+Expression::Expression(Value value): expression(std::make_shared<ValueExpression>(value)) {}
+Expression::Expression(Symbol name, const std::vector<Expression>& arguments): expression(FunctionExpression::create(name, arguments).expression) {}
+Expression::Expression(Object* object): expression(ObjectExpression::create(object).expression) {}
+const BinaryExpression *Expression::as_binary() const {
+    return std::dynamic_pointer_cast<BinaryExpression>(expression).get();
+}
 
+const VariableExpression *Expression::as_variable() const {
+    return std::dynamic_pointer_cast<VariableExpression>(expression).get();
+}
+
+bool Expression::evaluate(const Environment &environment) {
+    auto new_expression = expression->evaluated(environment);
+    if (new_expression.has_value()) {
+        *this = *new_expression;
+    }
+    return new_expression.has_value();
+}
 
 void Expression::serialize(std::ostream &stream) const {
-    serialize_sub(stream);
-}
-
-std::vector<Symbol> Expression::get_variables() const {
-    auto variables = std::vector<Symbol>();
-
-    collect_variables(variables);
-
-    return variables;
-}
-
-
-Expression::Iterator &Expression::Iterator::operator++() {
-    while (!layers.empty()) {
-        auto last = layers.back();
-        last.current_child = last.node->iterate(last.current_child);
-        if (last.current_child != nullptr) {
-            layers.emplace_back(last.current_child);
-            break;
-        }
-        else {
-            layers.pop_back();
-        }
+    if (expression) {
+        expression->serialize(stream);
     }
-    return *this;
+}
+
+
+std::ostream& operator<<(std::ostream& stream, const Expression& expression) {
+    expression.serialize(stream);
+    return stream;
 }

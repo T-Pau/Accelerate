@@ -73,10 +73,10 @@ BodyElement::EvaluationResult DataBodyElement::evaluate(const Environment &envir
     auto changed = false;
 
     for (auto& datum: data) {
-        auto new_expression = datum.expression->evaluate(environment);
+        auto new_expression = datum.expression.evaluated(environment);
         if (new_expression) {
             changed = true;
-            new_data.emplace_back(new_expression, datum.encoding);
+            new_data.emplace_back(*new_expression, datum.encoding);
         }
         else {
             new_data.emplace_back(datum);
@@ -107,7 +107,7 @@ void DataBodyElement::serialize(std::ostream &stream, const std::string& prefix)
         }
         stream << datum.expression;
         if (datum.encoding.has_value()) {
-            auto value = datum.expression->value();
+            auto value = datum.expression.value();
             if (!value.has_value() || !datum.encoding->is_natural_encoding(*value)) {
                 stream << *datum.encoding;
             }
@@ -133,7 +133,7 @@ std::shared_ptr<BodyElement> DataBodyElement::append_sub(std::shared_ptr<BodyEle
 
 void DataBodyElement::encode(std::string &bytes) const {
     for (auto& datum: data) {
-        auto value = datum.expression->value();
+        auto value = datum.expression.value();
         if (!value.has_value()) {
             throw Exception("unknown value");
         }
@@ -152,7 +152,7 @@ std::optional<uint64_t> DataBodyElement::Datum::size() const {
         return encoding->byte_size();
     }
     else {
-        const auto& value = expression->value();
+        const auto& value = expression.value();
         if (value.has_value()) {
             return value->default_size();
         }

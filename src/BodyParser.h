@@ -46,11 +46,11 @@ private:
     std::shared_ptr<Node> parse_instruction_argument(const Token& token);
     void parse_label(Object::Visibility visibility, const Token& name);
 
-    void add_constant(Object::Visibility visibility, Token name, const std::shared_ptr<Expression>& value);
+    void add_constant(Object::Visibility visibility, Token name, const Expression& value);
     [[nodiscard]] SizeRange current_size() const;
-    [[nodiscard]] std::shared_ptr<Expression> get_pc(const std::shared_ptr<LabelBodyElement>& label) const;
+    [[nodiscard]] Expression get_pc(const std::shared_ptr<LabelBodyElement>& label) const;
     [[nodiscard]] std::shared_ptr<LabelBodyElement> get_label(bool& is_anonymous);
-    void push_clause(std::shared_ptr<Expression> condition);
+    void push_clause(Expression condition);
     void push_body(Body* new_body);
     void pop_body();
 

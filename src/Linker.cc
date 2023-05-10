@@ -62,7 +62,7 @@ void Linker::link() {
         for (auto object: current_objects) {
             for (const auto &expression: object->data) {
                 for (auto sub_expression: *expression) {
-                    if (sub_expression->type() == Expression::OBJECT) {
+                    if (sub_expression->type() == BaseExpression::OBJECT) {
                         auto sub_object = dynamic_cast<ObjectExpression *>(sub_expression)->object;
                         if (add_object(sub_object)) {
                             new_objects.insert(sub_object);
@@ -114,7 +114,7 @@ void Linker::link() {
             memory[object->bank.value()].copy(object->address.value(), bytes);
         }
         catch (Exception& ex) {
-            FileReader::global.error(Location(), "can't evaluate '%s': %s", object->name.as_string().c_str(), ex.what());
+            FileReader::global.error(Location(), "can't evaluated '%s': %s", object->name.as_string().c_str(), ex.what());
         }
     }
 }
@@ -124,16 +124,16 @@ void Linker::output(const std::string &file_name) {
 
     for (const auto& object: objects) {
         if (object->has_address()) {
-            environment.add(object->name.as_symbol(), std::make_shared<ValueExpression>(object->address.value()));
+            environment.add(object->name.as_symbol(), Expression(object->address.value()));
         }
     }
 
     // TODO: support for multiple banks
     auto data_range = memory[0].data_range();
 
-    environment.add(TargetParser::token_data_end.as_symbol(), std::make_shared<ValueExpression>(data_range.end()));
-    environment.add(TargetParser::token_data_size.as_symbol(), std::make_shared<ValueExpression>(data_range.size));
-    environment.add(TargetParser::token_data_start.as_symbol(), std::make_shared<ValueExpression>(data_range.start));
+    environment.add(TargetParser::token_data_end.as_symbol(), Expression(data_range.end()));
+    environment.add(TargetParser::token_data_size.as_symbol(), Expression(data_range.size));
+    environment.add(TargetParser::token_data_start.as_symbol(), Expression(data_range.start));
 
     auto stream = std::ofstream(file_name);
 

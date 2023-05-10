@@ -34,7 +34,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "ArgumentType.h"
 #include "DataBodyElement.h"
-#include "Expression.h"
+#include "BaseExpression.h"
 #include "ParsedValue.h"
 #include "Symbol.h"
 #include "Token.h"

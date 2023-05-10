@@ -34,24 +34,24 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "BodyElement.h"
 #include "Body.h"
-#include "Expression.h"
+#include "BaseExpression.h"
 #include "Exception.h"
 
 class IfBodyElement: public BodyElement {
 public:
     class Clause {
     public:
-        Clause(std::shared_ptr<Expression> condition, Body body): condition(std::move(condition)), body(std::move(body)) {}
+        Clause(Expression condition, Body body): condition(std::move(condition)), body(std::move(body)) {}
 
-        explicit operator bool() const {return condition->has_value() && *condition->value();}
-        std::shared_ptr<Expression> condition;
+        explicit operator bool() const {return condition.has_value() && *condition.value();}
+        Expression condition;
         Body body;
     };
 
     IfBodyElement() = default;
     explicit IfBodyElement(std::vector<Clause> clauses): clauses(std::move(clauses)) {}
 
-    void append(const std::shared_ptr<Expression>& condition, Body body) {clauses.emplace_back(condition, std::move(body));}
+    void append(const Expression& condition, Body body) {clauses.emplace_back(condition, std::move(body));}
     [[nodiscard]] std::shared_ptr<BodyElement> clone() const override {return std::make_shared<IfBodyElement>(clauses);} // TODO: this doesn't copy clauses
     [[nodiscard]] bool empty() const override {return clauses.empty();}
     void encode(std::string &bytes) const override {throw Exception("unresolved if");}

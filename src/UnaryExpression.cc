@@ -33,57 +33,55 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "ValueExpression.h"
 
-std::shared_ptr<Expression> UnaryExpression::create(Operation operation, std::shared_ptr<Expression> operand) {
-    std::shared_ptr<Expression> node;
+Expression UnaryExpression::create(Expression::UnaryOperation operation, Expression operand) {
+    std::shared_ptr<BaseExpression> node;
 
-    if (operation == PLUS) {
+    if (operation == Expression::UnaryOperation::PLUS) {
         return operand;
     }
-    else if (operand->has_value()) {
-        auto value = operand->value().value();
+    else if (operand.has_value()) {
+        auto value = *operand.value();
         switch (operation) {
-            case PLUS:
+            case Expression::UnaryOperation::PLUS:
                 break;
 
-            case MINUS:
+            case Expression::UnaryOperation::MINUS:
                 value = -value;
                 break;
 
-            case BITWISE_NOT:
+            case Expression::UnaryOperation::BITWISE_NOT:
                 value = ~value; // TODO: mask to size
                 break;
 
-            case LOW_BYTE:
+            case Expression::UnaryOperation::LOW_BYTE:
                 value = value & 0xff;
                 break;
 
-            case HIGH_BYTE:
+            case Expression::UnaryOperation::HIGH_BYTE:
                 value = (value >> 8) & 0xff;
                 break;
 
-            case BANK_BYTE:
+            case Expression::UnaryOperation::BANK_BYTE:
                 value = (value >> 16) & 0xff;
                 break;
         }
 
-        node = std::make_shared<ValueExpression>(value);
+        return Expression(value);
     }
     else {
-        node = std::make_shared<UnaryExpression>(operation, operand);
+        return Expression(std::make_shared<UnaryExpression>(operation, operand));
     }
-
-    return node;
 }
 
 
-std::shared_ptr<Expression> UnaryExpression::evaluate(const Environment &environment) const {
-    auto new_operand = operand->evaluate(environment);
+std::optional<Expression> UnaryExpression::evaluated(const Environment &environment) const {
+    auto new_operand = operand.evaluated(environment);
 
     if (!new_operand) {
         return {};
     }
 
-    return create(operation, new_operand ? new_operand : operand);
+    return Expression(operation, new_operand ? *new_operand : operand);
 }
 
 
@@ -91,27 +89,27 @@ std::shared_ptr<Expression> UnaryExpression::evaluate(const Environment &environ
 
 void UnaryExpression::serialize_sub(std::ostream &stream) const {
     switch (operation) {
-        case BANK_BYTE:
+        case Expression::UnaryOperation::BANK_BYTE:
             stream << '^';
             break;
 
-        case BITWISE_NOT:
+        case Expression::UnaryOperation::BITWISE_NOT:
             stream << '~';
             break;
 
-        case HIGH_BYTE:
+        case Expression::UnaryOperation::HIGH_BYTE:
             stream << '>';
             break;
 
-        case LOW_BYTE:
+        case Expression::UnaryOperation::LOW_BYTE:
             stream << '<';
             break;
 
-        case MINUS:
+        case Expression::UnaryOperation::MINUS:
             stream << '-';
             break;
 
-        case PLUS:
+        case Expression::UnaryOperation::PLUS:
             break;
     }
 
@@ -121,16 +119,16 @@ void UnaryExpression::serialize_sub(std::ostream &stream) const {
 
 std::optional<Value> UnaryExpression::minimum_value() const {
     switch (operation) {
-        case BANK_BYTE:
-        case HIGH_BYTE:
-        case LOW_BYTE:
+        case Expression::UnaryOperation::BANK_BYTE:
+        case Expression::UnaryOperation::HIGH_BYTE:
+        case Expression::UnaryOperation::LOW_BYTE:
             return Value(static_cast<uint64_t>(0));
 
-        case BITWISE_NOT:
+        case Expression::UnaryOperation::BITWISE_NOT:
             return {};
 
-        case MINUS: {
-            auto v = operand->maximum_value();
+        case Expression::UnaryOperation::MINUS: {
+            auto v = operand.maximum_value();
             if (v.has_value()) {
                 return -v.value();
             }
@@ -139,24 +137,24 @@ std::optional<Value> UnaryExpression::minimum_value() const {
             }
         }
 
-        case PLUS:
-            return operand->minimum_value();
+        case Expression::UnaryOperation::PLUS:
+            return operand.minimum_value();
     }
 }
 
 
 std::optional<Value> UnaryExpression::maximum_value() const {
     switch (operation) {
-        case BANK_BYTE:
-        case HIGH_BYTE:
-        case LOW_BYTE:
+        case Expression::UnaryOperation::BANK_BYTE:
+        case Expression::UnaryOperation::HIGH_BYTE:
+        case Expression::UnaryOperation::LOW_BYTE:
             return Value(static_cast<uint64_t>(0xff));
 
-        case BITWISE_NOT:
+        case Expression::UnaryOperation::BITWISE_NOT:
             return {};
 
-        case MINUS: {
-            auto v = operand->minimum_value();
+        case Expression::UnaryOperation::MINUS: {
+            auto v = operand.minimum_value();
             if (v.has_value()) {
                 return -v.value();
             }
@@ -165,7 +163,7 @@ std::optional<Value> UnaryExpression::maximum_value() const {
             }
         }
 
-        case PLUS:
-            return operand->maximum_value();
+        case Expression::UnaryOperation::PLUS:
+            return operand.maximum_value();
     }
 }

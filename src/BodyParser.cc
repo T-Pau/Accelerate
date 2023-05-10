@@ -115,7 +115,7 @@ Body BodyParser::parse() {
     throw ParseException(Location(), "unclosed body"); // TODO: location
 }
 
-void BodyParser::add_constant(Object::Visibility visibility, Token name, const std::shared_ptr<Expression>& value) {
+void BodyParser::add_constant(Object::Visibility visibility, Token name, const Expression& value) {
     if (visibility != Object::OBJECT) {
         if (!object_file) {
             throw ParseException(name, "unsupported visibility");
@@ -139,8 +139,8 @@ std::shared_ptr<LabelBodyElement> BodyParser::get_label(bool& is_anonymous) {
 }
 
 
-std::shared_ptr<Expression> BodyParser::get_pc(const std::shared_ptr<LabelBodyElement>& label) const {
-    return BinaryExpression::create(std::make_shared<VariableExpression>(object_name), BinaryExpression::ADD, std::make_shared<LabelExpression>(label));
+Expression BodyParser::get_pc(const std::shared_ptr<LabelBodyElement>& label) const {
+    return {Expression(object_name), Expression::BinaryOperation::ADD, Expression(std::make_shared<LabelExpression>(label))};
 }
 
 
@@ -161,7 +161,7 @@ void BodyParser::parse_else() {
     if (ifs.empty()) {
         throw Exception(".else outside .if");
     }
-    push_clause(std::make_shared<ValueExpression>(Value(true)));
+    push_clause(Expression(Value(true)));
 }
 
 void BodyParser::parse_else_if() {
@@ -214,7 +214,7 @@ void BodyParser::parse_label(Object::Visibility visibility, const Token& name) {
     auto label = std::make_shared<LabelBodyElement>(name.as_symbol(), SizeRange(current_body->minimum_size()));
     current_body->append(label);
     add_constant(visibility, name, get_pc(label));
-    environment->add(Symbol(".label_offset(" + name.as_string() + ")"), std::make_shared<LabelExpression>(label));
+    environment->add(Symbol(".label_offset(" + name.as_string() + ")"), Expression(std::make_shared<LabelExpression>(label)));
 }
 
 
@@ -269,7 +269,7 @@ void BodyParser::parse_instruction(const Token &name) {
                     }
                     else {
                         // '(' expression ')' is part of larger expression
-                        arguments.emplace_back(std::make_shared<ExpressionNode>(ExpressionParser(tokenizer).parse(std::dynamic_pointer_cast<Expression>(node))));
+                        arguments.emplace_back(std::make_shared<ExpressionNode>(ExpressionParser(tokenizer).parse(std::dynamic_pointer_cast<ExpressionNode>(node)->expression)));
                     }
                 }
                 else {
@@ -293,8 +293,7 @@ void BodyParser::parse_instruction(const Token &name) {
     {
         auto instruction_environment = std::make_shared<Environment>(environment);
         instruction_environment->add(symbol_pc, get_pc(label));
-        instruction_environment->add(Symbol(".label_offset(" + label->name.str() + ")"),
-                                     std::make_shared<LabelExpression>(label));
+        instruction_environment->add(Symbol(".label_offset(" + label->name.str() + ")"), Expression(std::make_shared<LabelExpression>(label)));
         instruction = encoder.encode(name, arguments, instruction_environment);
     }
     if (is_anonymous_label) {
@@ -324,7 +323,7 @@ void BodyParser::pop_body() {
     current_body = bodies.back();
 }
 
-void BodyParser::push_clause(std::shared_ptr<Expression> condition) {
+void BodyParser::push_clause(Expression condition) {
     ifs.back().emplace_back(IfBodyElement::Clause(std::move(condition), {}));
     push_body(&ifs.back().back().body);
 }

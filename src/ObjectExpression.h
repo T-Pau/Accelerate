@@ -29,16 +29,16 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef LINKER_OBJECT_EXPRESSION_H
-#define LINKER_OBJECT_EXPRESSION_H
+#ifndef OBJECT_EXPRESSION_H
+#define OBJECT_EXPRESSION_H
 
-#include "Expression.h"
+#include "BaseExpression.h"
 #include "Object.h"
 
-class ObjectExpression: public Expression {
+class ObjectExpression: public BaseExpression {
 public:
     explicit ObjectExpression(Object* object): object(object) {}
-    [[nodiscard]] static std::shared_ptr<Expression> create(Object* object);
+    [[nodiscard]] static Expression create(Object* object);
 
     [[nodiscard]] Type type() const override {return OBJECT;}
 
@@ -49,7 +49,7 @@ public:
     Object* object;
 
 protected:
-    [[nodiscard]] std::shared_ptr<Expression> evaluate(const Environment &environment) const override;
+    [[nodiscard]] std::optional<Expression> evaluated(const Environment &environment) const override;
     [[nodiscard]] std::optional<Value> maximum_value() const override;
     [[nodiscard]] std::optional<Value> minimum_value() const override;
 
@@ -58,4 +58,4 @@ protected:
 private:
 };
 
-#endif // LINKER_OBJECT_EXPRESSION_H
+#endif // OBJECT_EXPRESSION_H

@@ -1,9 +1,9 @@
 /*
-ExpressionNode.h -- 
+BaseExpression.cc -- Abstract Base Class of BaseExpression Nodes
 
 Copyright (C) Dieter Baron
 
-The authors can be contacted at <assembler@tpau.group>
+The authors can be contacted at <accelerate@tpau.group>
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions
@@ -29,21 +29,40 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef EXPRESSION_NODE_H
-#define EXPRESSION_NODE_H
+#include "BaseExpression.h"
 
 #include "Expression.h"
-#include "Node.h"
-
-class ExpressionNode: public Node {
-public:
-    explicit ExpressionNode(Expression expression): expression(std::move(expression)) {}
-
-    [[nodiscard]] Type type() const override {return EXPRESSION;}
-    [[nodiscard]] const Location& get_location() const override {return expression.location();}
-
-    Expression expression;
-};
+#include "ParseException.h"
 
 
-#endif //EXPRESSION_NODE_H
+std::ostream& operator<<(std::ostream& stream, const std::shared_ptr<BaseExpression>& node) {
+    node->serialize(stream);
+    return stream;
+}
+
+
+std::ostream& operator<< (std::ostream& stream, const BaseExpression& node) {
+    node.serialize(stream);
+    return stream;
+}
+
+
+void BaseExpression::serialize(std::ostream &stream) const {
+    serialize_sub(stream);
+}
+
+
+BaseExpression::Iterator &BaseExpression::Iterator::operator++() {
+    while (!layers.empty()) {
+        auto last = layers.back();
+        last.current_child = last.node->iterate(last.current_child);
+        if (last.current_child != nullptr) {
+            layers.emplace_back(last.current_child);
+            break;
+        }
+        else {
+            layers.pop_back();
+        }
+    }
+    return *this;
+}

@@ -43,24 +43,24 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 class InstructionEncoder {
 public:
-    InstructionEncoder(const CPU* cpu): cpu(cpu) {}
+    explicit InstructionEncoder(const CPU* cpu): cpu(cpu) {}
 
     [[nodiscard]] std::shared_ptr<BodyElement> encode(const Token& name, const std::vector<std::shared_ptr<Node>>& arguments, const std::shared_ptr<Environment>& environment);
 
 private:
     class Variant {
     public:
-        std::shared_ptr<Expression> argument_constraints = std::make_shared<ValueExpression>(Value(true));
-        std::shared_ptr<Expression> encoding_constraints = std::make_shared<ValueExpression>(Value(true));
+        Expression argument_constraints = Expression(Value(true));
+        Expression encoding_constraints = Expression(Value(true));
         std::shared_ptr<BodyElement> data;
 
-        void add_argument_constraint(const std::shared_ptr<Expression>& sub_constraint) {return add_constraint(argument_constraints, sub_constraint);}
-        void add_encoding_constraint(const std::shared_ptr<Expression>& sub_constraint) {return add_constraint(encoding_constraints, sub_constraint);}
+        void add_argument_constraint(const Expression& sub_constraint) {return add_constraint(argument_constraints, sub_constraint);}
+        void add_encoding_constraint(const Expression& sub_constraint) {return add_constraint(encoding_constraints, sub_constraint);}
 
         explicit operator bool() const;
 
     private:
-        static void add_constraint(std::shared_ptr<Expression>& constraint, const std::shared_ptr<Expression>& sub_constraint);
+        static void add_constraint(Expression& constraint, const Expression& sub_constraint);
     };
 
     Variant encode(const Instruction* instruction, const AddressingModeMatcherResult& match, const std::vector<std::shared_ptr<Node>>& arguments, std::shared_ptr<Environment> outer_environment) const;

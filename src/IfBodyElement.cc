@@ -44,13 +44,8 @@ BodyElement::EvaluationResult IfBodyElement::evaluate(const Environment &environ
             changed = true;
             break;
         }
-        auto new_expression = clause.condition->evaluate(environment);
-        if (new_expression) {
-            changed = true;
-        }
-        else {
-            new_expression = clause.condition;
-        }
+        auto new_expression = clause.condition;
+        changed = new_expression.evaluate(environment) || changed;
         auto sub_result = clause.body.elements->evaluate(environment, minimum_offset, maximum_offset);
         if (sub_result.element) {
             changed = true;
@@ -64,8 +59,8 @@ BodyElement::EvaluationResult IfBodyElement::evaluate(const Environment &environ
             continue;
         }
 
-        if (new_expression->has_value()) {
-            if (!*new_expression->value()) {
+        if (new_expression.has_value()) {
+            if (!*new_expression.value()) {
                 continue;
             }
             else if (first) {
@@ -77,7 +72,7 @@ BodyElement::EvaluationResult IfBodyElement::evaluate(const Environment &environ
         result.minimum_offset = std::min(result.minimum_offset, sub_result.minimum_offset);
         result.maximum_offset = std::max(result.maximum_offset, sub_result.maximum_offset);
 
-        if (new_expression->has_value() && *new_expression->value()) {
+        if (new_expression.has_value() && *new_expression.value()) {
             ignore = true;
         }
 

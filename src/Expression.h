@@ -1,112 +1,81 @@
-/*
-Expression.h -- Abstract Base Class of Expression Nodes
-
-Copyright (C) Dieter Baron
-
-The authors can be contacted at <accelerate@tpau.group>
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions
-are met:
-
-1. Redistributions of source code must retain the above copyright
-   notice, this list of conditions and the following disclaimer.
-
-2. The names of the authors may not be used to endorse or promote
-  products derived from this software without specific prior
-  written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE AUTHORS "AS IS" AND ANY EXPRESS
-OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
-ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHORS BE LIABLE FOR ANY
-DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
-DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE
-GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
-INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER
-IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
-OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
-IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-*/
+//
+// Created by Dieter Baron on 10.05.23.
+//
 
 #ifndef EXPRESSION_H
 #define EXPRESSION_H
 
-#include <cstddef>
+#include "BaseExpression.h"
+#include "VoidExpression.h"
 
-#include "Environment.h"
-#include "Node.h"
-#include "FileTokenizer.h"
-#include "Int.h"
+class BinaryExpression;
+class Object;
+class VariableExpression;
 
 class Expression {
 public:
-    enum Type {
-        BINARY,
-        FUNCTION,
-        LABEL,
-        OBJECT,
-        UNARY,
-        VALUE,
-        VARIABLE
+    enum BinaryOperation {
+        ADD,
+        BITWISE_AND,
+        BITWISE_OR,
+        BITWISE_XOR,
+        DIVIDE,
+        LOGICAL_AND,
+        LOGICAL_OR,
+        MODULO,
+        MULTIPLY,
+        SHIFT_LEFT,
+        SHIFT_RIGHT,
+        SUBTRACT
+    };
+    enum UnaryOperation {
+        BANK_BYTE,
+        BITWISE_NOT,
+        HIGH_BYTE,
+        LOW_BYTE,
+        MINUS,
+        PLUS
     };
 
-    class Iterator {
-    public:
-        using iterator_category = std::forward_iterator_tag;
-        using value_type = Expression*;
-        using pointer = Expression**;
-        using reference = Expression*&;
+    Expression() = default;
+    explicit Expression(const std::shared_ptr<BaseExpression>& expression_) {if (expression_) {expression = expression_;}}
 
-        Iterator() = default;
-        explicit Iterator(Expression*expression){ layers.emplace_back(expression);}
+    // Binary
+    Expression(const Expression& left, BinaryOperation operation, const Expression& right);
+    // Function
+    Expression(Symbol name, const std::vector<Expression>& arguments);
+    // Object
+    Expression(Object* object);
+    // Unary
+    Expression(UnaryOperation operation, const Expression& operand);
+    // Value
+    explicit Expression(uint64_t value): Expression(Value(value)) {}
+    explicit Expression(Value value);
+    // Variable
+    explicit Expression(Symbol name);
+    // Variable or Value
+    explicit Expression(const Token& value);
 
-        reference operator*() { return layers.back().node;}
-        pointer operator->() { return &layers.back().node;}
-
-        Iterator& operator++();
-        Iterator operator++(int) {auto tmp = *this; ++(*this); return tmp;}
-
-        bool operator==(const Iterator& other) const {return layers == other.layers;}
-        bool operator!=(const Iterator& other) const { return !(*this == other);}
-
-    private:
-        class Layer {
-        public:
-            explicit Layer(Expression* node): node(node) {}
-            bool operator==(const Layer& other) const {return node == other.node && current_child == other.current_child;}
-            Expression* node;
-            Expression* current_child = nullptr;
-        };
-        std::vector<Layer> layers;
-    };
-
-    Iterator begin() {return Iterator(this);}
-    Iterator end() {return {};}
-
-    [[nodiscard]] virtual Type type() const = 0;
-    [[nodiscard]] virtual bool has_value() const {return value().has_value();}
-    [[nodiscard]] virtual std::optional<Value> value() const {return {};}
-    [[nodiscard]] virtual std::optional<Value> minimum_value() const {return value();}
-    [[nodiscard]] virtual std::optional<Value> maximum_value() const {return value();}
-
-    static std::shared_ptr<Expression> evaluate(std::shared_ptr<Expression> node, const Environment& environment);
-
+    [[nodiscard]] const BinaryExpression* as_binary() const;
+    [[nodiscard]] const VariableExpression* as_variable() const;
+    void collect_variables(std::vector<Symbol>& variables) const {expression->collect_variables(variables);}
+    bool evaluate(const Environment& environment);
+    [[nodiscard]] std::shared_ptr<BaseExpression> get_expression() const {return expression;}
+    [[nodiscard]] bool has_value() const {return value().has_value();}
+    [[nodiscard]] bool is_binary() const {return expression->type() == BaseExpression::BINARY;}
+    [[nodiscard]] bool is_variable() const {return expression->type() == BaseExpression::VARIABLE;}
+    [[nodiscard]] const Location& location() const {return expression->location;}
+    [[nodiscard]] std::optional<Value> maximum_value() const {return expression->maximum_value();}
+    [[nodiscard]] std::optional<Value> minimum_value() const {return expression->minimum_value();}
     void serialize(std::ostream& stream) const;
-    [[nodiscard]] std::vector<Symbol> get_variables() const;
+    [[nodiscard]] std::optional<Value> value() const {return expression->value();}
 
-    [[nodiscard]] virtual std::shared_ptr<Expression> evaluate(const Environment& environment) const = 0;
+    [[nodiscard]] std::optional<Expression> evaluated(const Environment& environment) const {return expression->evaluated(environment);}
 
-    virtual void collect_variables(std::vector<Symbol>& variables) const = 0;
-
-    Location location;
-
-protected:
-    virtual Expression* iterate(Expression* last) const {return nullptr;}
-    virtual void serialize_sub(std::ostream& stream) const = 0;
+private:
+    std::shared_ptr<BaseExpression> expression = std::make_shared<VoidExpression>();
 };
 
-std::ostream& operator<<(std::ostream& stream, const std::shared_ptr<Expression>& node);
-std::ostream& operator<<(std::ostream& stream, const Expression& node);
+std::ostream& operator<<(std::ostream& stream, const Expression& expression);
 
 #endif // EXPRESSION_H

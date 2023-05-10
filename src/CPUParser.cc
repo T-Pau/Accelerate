@@ -176,7 +176,7 @@ void CPUParser::parse_addressing_mode() {
     auto encoding_definition = definition->get_optional(token_encoding);
     if (encoding_definition == nullptr) {
         auto encoding = std::make_unique<DataBodyElement>();
-        encoding->append(std::make_shared<VariableExpression>(token_opcode));
+        encoding->append(Expression(token_opcode));
         addressing_mode.encoding = std::move(encoding);
     }
     else if (encoding_definition->is_scalar()) {

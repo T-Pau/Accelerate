@@ -4,6 +4,8 @@
 
 #include "FunctionExpression.h"
 
+#include "Expression.h"
+
 void FunctionExpression::serialize_sub(std::ostream &stream) const {
     stream << name << "(";
     auto first = true;
@@ -19,16 +21,16 @@ void FunctionExpression::serialize_sub(std::ostream &stream) const {
 
 void FunctionExpression::collect_variables(std::vector<Symbol> &variables) const {
     for (auto& argument: arguments) {
-        argument->collect_variables(variables);
+        argument.collect_variables(variables);
     }
 }
 
-std::shared_ptr<Expression> FunctionExpression::create(Symbol name, const std::vector<std::shared_ptr<Expression>> &arguments) {
+Expression FunctionExpression::create(Symbol name, const std::vector<Expression> &arguments) {
     // TODO: built in functions
-    return std::make_shared<FunctionExpression>(name, arguments);
+    return Expression(std::make_shared<FunctionExpression>(name, arguments));
 }
 
-std::shared_ptr<Expression> FunctionExpression::evaluate(const Environment &environment) const {
+std::optional<Expression> FunctionExpression::evaluated(const Environment &environment) const {
     // TODO: implement
-    return std::shared_ptr<Expression>();
+    return {};
 }

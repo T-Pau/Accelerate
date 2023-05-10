@@ -32,9 +32,10 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef VALUE_EXPRESSION_H
 #define VALUE_EXPRESSION_H
 
+#include "BaseExpression.h"
 #include "Expression.h"
 
-class ValueExpression: public Expression {
+class ValueExpression: public BaseExpression {
 public:
     explicit ValueExpression(const Token& token);
     explicit ValueExpression(Value value): value_(value) {}
@@ -50,7 +51,7 @@ public:
     void collect_variables(std::vector<Symbol>& variables) const override {}
 
 protected:
-    [[nodiscard]] std::shared_ptr<Expression> evaluate(const Environment &environment) const override {return {};}
+    [[nodiscard]] std::optional<Expression> evaluated(const Environment &environment) const override {return {};}
 
     void serialize_sub(std::ostream& stream) const override;
 

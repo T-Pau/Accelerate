@@ -48,16 +48,16 @@ public:
 
     static void setup(FileTokenizer& tokenizer);
 
-    std::shared_ptr<Expression> parse() { top = Element({}, START); return do_parse();}
-    std::shared_ptr<Expression> parse(const std::shared_ptr<Expression>& left) { top = Element(left, 0); return do_parse();}
+    Expression parse() { top = Element({}, START); return do_parse();}
+    Expression parse(Expression& left) { top = Element(left, 0); return do_parse();}
     std::unique_ptr<DataBodyElement> parse_list();
 
 private:
     class BinaryOperator {
     public:
-        BinaryOperator(BinaryExpression::Operation operation, int level): operation(operation), level(level) {}
+        BinaryOperator(Expression::BinaryOperation operation, int level): operation(operation), level(level) {}
 
-        BinaryExpression::Operation operation;
+        Expression::BinaryOperation operation;
         int level;
     };
 
@@ -77,9 +77,9 @@ private:
     class Element {
     public:
         explicit Element(const Token& token): type(NAME), node(std::make_shared<VariableExpression>(token.as_symbol())), level(0), location(token.location) {}
-        Element(const std::shared_ptr<Expression>& node, int level): type(OPERAND), node(node), level(level), location(node->location) {}
+        Element(const Expression& node, int level): type(OPERAND), node(node), level(level), location(node.location()) {}
         Element(Location location, BinaryOperator binary);
-        Element(Location location, UnaryExpression::Operation unary);
+        Element(Location location, Expression::UnaryOperation unary);
         explicit Element(Location location, ElementType type): type(type), location(location) {}
 
         [[nodiscard]] const char* description() const;
@@ -88,12 +88,12 @@ private:
         ElementType type;
         int level = 0;
 
-        std::shared_ptr<Expression> node;
-        std::vector<std::shared_ptr<Expression>> arguments;
+        Expression node;
+        std::vector<Expression> arguments;
         union {
             int none;
             BinaryOperator binary;
-            UnaryExpression::Operation unary;
+            Expression::UnaryOperation unary;
         } operation = {0};
 
         Location location;
@@ -101,7 +101,7 @@ private:
 
     static void initialize();
 
-    std::shared_ptr<Expression> do_parse();
+    Expression do_parse();
     Element next_element();
     Encoding parse_encoding();
     void reduce_argument_list();
@@ -134,7 +134,7 @@ private:
     static Token token_tilde;
 
     static std::unordered_map<Token, BinaryOperator> binary_operators;
-    static std::unordered_map<Token, UnaryExpression::Operation> unary_operators;
+    static std::unordered_map<Token, Expression::UnaryOperation> unary_operators;
 };
 
 

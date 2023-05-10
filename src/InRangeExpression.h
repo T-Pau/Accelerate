@@ -37,10 +37,10 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <utility>
 
-class InRangeExpression: public Expression {
+class InRangeExpression: public BaseExpression {
 public:
-    InRangeExpression(std::shared_ptr<Expression> lower_bound, std::shared_ptr<Expression> upper_bound, std::shared_ptr<Expression> argument): lower_bound(std::move(lower_bound)), upper_bound(std::move(upper_bound)), argument(std::move(argument)) {}
-    [[nodiscard]] std::shared_ptr<Expression> static create(const std::shared_ptr<Expression>& lower_bound, const std::shared_ptr<Expression>& upper_bound, const std::shared_ptr<Expression>& argument);
+    InRangeExpression(Expression lower_bound, Expression upper_bound, Expression argument): lower_bound(std::move(lower_bound)), upper_bound(std::move(upper_bound)), argument(std::move(argument)) {}
+    [[nodiscard]] Expression static create(const Expression& lower_bound, const Expression& upper_bound, const Expression& argument);
 
     [[nodiscard]] Type type() const override {return FUNCTION;}
     [[nodiscard]] std::optional<Value> minimum_value() const override {return {};}
@@ -49,13 +49,13 @@ public:
     void collect_variables(std::vector<Symbol>& variables) const override;
 
 protected:
-    [[nodiscard]] std::shared_ptr<Expression> evaluate(const Environment &environment) const override;
+    [[nodiscard]] std::optional<Expression> evaluated(const Environment &environment) const override;
     void serialize_sub(std::ostream& stream) const override;
 
 private:
-    std::shared_ptr<Expression> lower_bound;
-    std::shared_ptr<Expression> upper_bound;
-    std::shared_ptr<Expression> argument;
+    Expression lower_bound;
+    Expression upper_bound;
+    Expression argument;
 };
 
 

@@ -33,9 +33,6 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "ValueExpression.h"
 #include "ParseException.h"
-#include "VariableExpression.h"
-#include "FunctionExpression.h"
-
 
 bool ExpressionParser::initialized;
 Token ExpressionParser::token_ampersand;
@@ -56,7 +53,7 @@ Token ExpressionParser::token_star;
 Token ExpressionParser::token_tilde;
 
 std::unordered_map<Token, ExpressionParser::BinaryOperator> ExpressionParser::binary_operators;
-std::unordered_map<Token, UnaryExpression::Operation> ExpressionParser::unary_operators;
+std::unordered_map<Token, Expression::UnaryOperation> ExpressionParser::unary_operators;
 
 void ExpressionParser::initialize() {
     if (initialized) {
@@ -81,25 +78,25 @@ void ExpressionParser::initialize() {
     token_tilde = Token(Token::PUNCTUATION, "~");
 
     unary_operators = {
-            {token_plus,    UnaryExpression::PLUS},
-            {token_minus,   UnaryExpression::MINUS},
-            {token_caret,   UnaryExpression::BANK_BYTE},
-            {token_less,    UnaryExpression::LOW_BYTE},
-            {token_greater, UnaryExpression::HIGH_BYTE},
-            {token_tilde,   UnaryExpression::BITWISE_NOT}
+            {token_plus,    Expression::UnaryOperation::PLUS},
+            {token_minus,   Expression::UnaryOperation::MINUS},
+            {token_caret,   Expression::UnaryOperation::BANK_BYTE},
+            {token_less,    Expression::UnaryOperation::LOW_BYTE},
+            {token_greater, Expression::UnaryOperation::HIGH_BYTE},
+            {token_tilde,   Expression::UnaryOperation::BITWISE_NOT}
     };
 
     binary_operators = {
-            {token_plus, BinaryOperator(BinaryExpression::ADD, 1)},
-            {token_minus, BinaryOperator(BinaryExpression::SUBTRACT, 1)},
-            {token_pipe, BinaryOperator(BinaryExpression::BITWISE_OR, 1)},
+            {token_plus, BinaryOperator(Expression::BinaryOperation::ADD, 1)},
+            {token_minus, BinaryOperator(Expression::BinaryOperation::SUBTRACT, 1)},
+            {token_pipe, BinaryOperator(Expression::BinaryOperation::BITWISE_OR, 1)},
 
-            {token_star, BinaryOperator(BinaryExpression::MULTIPLY, 2)},
-            {token_slash, BinaryOperator(BinaryExpression::DIVIDE, 2)},
-            {token_ampersand, BinaryOperator(BinaryExpression::BITWISE_AND, 2)},
-            {token_caret, BinaryOperator(BinaryExpression::BITWISE_XOR, 2)},
-            {token_double_less, BinaryOperator(BinaryExpression::SHIFT_LEFT, 2)},
-            {token_double_greater, BinaryOperator(BinaryExpression::SHIFT_RIGHT, 2)}
+            {token_star, BinaryOperator(Expression::BinaryOperation::MULTIPLY, 2)},
+            {token_slash, BinaryOperator(Expression::BinaryOperation::DIVIDE, 2)},
+            {token_ampersand, BinaryOperator(Expression::BinaryOperation::BITWISE_AND, 2)},
+            {token_caret, BinaryOperator(Expression::BinaryOperation::BITWISE_XOR, 2)},
+            {token_double_less, BinaryOperator(Expression::BinaryOperation::SHIFT_LEFT, 2)},
+            {token_double_greater, BinaryOperator(Expression::BinaryOperation::SHIFT_RIGHT, 2)}
     };
 }
 
@@ -107,7 +104,7 @@ ExpressionParser::Element ExpressionParser::next_element() {
     auto token = tokenizer.next();
 
     if (token.is_integer()) {
-        return {std::make_shared<ValueExpression>(token), 0};
+        return {Expression(token), 0};
     }
     else if (token.is_name()) {
         return Element(token);
@@ -161,7 +158,7 @@ void ExpressionParser::setup(FileTokenizer &tokenizer) {
     initialize();
 }
 
-std::shared_ptr<Expression> ExpressionParser::do_parse() {
+Expression ExpressionParser::do_parse() {
     stack.clear();
 
     while (true) {
@@ -332,7 +329,7 @@ void ExpressionParser::reduce_unary(const ExpressionParser::Element& next) {
     if (top.type != UNARY_OPERATOR || !next.is_operand()) {
         throw Exception("internal error: invalid element types in reduce_unary");
     }
-    top = Element(UnaryExpression::create(top.operation.unary, next.node), 0);
+    top = Element(Expression(top.operation.unary, next.node), 0);
 }
 
 void ExpressionParser::reduce_binary(int up_to_level) {
@@ -345,7 +342,7 @@ void ExpressionParser::reduce_binary(int up_to_level) {
             break;
         }
 
-        top = Element(BinaryExpression::create(left.node, operation.operation.binary.operation, top.node), operation.level);
+        top = Element(Expression(left.node, operation.operation.binary.operation, top.node), operation.level);
 
         stack.pop_back();
         stack.pop_back();
@@ -413,8 +410,8 @@ void ExpressionParser::reduce_argument_list() {
 
 void ExpressionParser::reduce_function_call() {
     auto previous = stack.back();
-    auto name = std::dynamic_pointer_cast<VariableExpression>(previous.node)->variable();
-    top = Element(std::make_shared<FunctionExpression>(name, top.arguments), 0);
+    auto name = previous.node.as_variable();
+    top = Element(Expression(name->variable(), top.arguments), 0);
     stack.pop_back();
 }
 
@@ -457,6 +454,6 @@ ExpressionParser::Element::Element(Location location, ExpressionParser::BinaryOp
     operation.binary = binary;
 }
 
-ExpressionParser::Element::Element(Location location, UnaryExpression::Operation unary): type(UNARY_OPERATOR), level(0), location(location) {
+ExpressionParser::Element::Element(Location location, Expression::UnaryOperation unary): type(UNARY_OPERATOR), level(0), location(location) {
     operation.unary = unary;
 }

@@ -32,43 +32,31 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef BINARY_EXPRESSION_H
 #define BINARY_EXPRESSION_H
 
+#include "BaseExpression.h"
 #include "Expression.h"
 
-class BinaryExpression: public Expression {
+class BinaryExpression: public BaseExpression {
 public:
-    enum Operation {
-        ADD,
-        BITWISE_AND,
-        BITWISE_OR,
-        BITWISE_XOR,
-        DIVIDE,
-        LOGICAL_AND,
-        LOGICAL_OR,
-        MODULO,
-        MULTIPLY,
-        SHIFT_LEFT,
-        SHIFT_RIGHT,
-        SUBTRACT
-    };
-
-    BinaryExpression(std::shared_ptr<Expression>  left, Operation operation, std::shared_ptr<Expression> right);
-    [[nodiscard]] std::shared_ptr<Expression> static create(const std::shared_ptr<Expression>& left, Operation operation, const std::shared_ptr<Expression>& right);
+    BinaryExpression(Expression left, Expression::BinaryOperation operation, Expression right): left(std::move(left)), operation(operation), right(std::move(right)) {}
 
     [[nodiscard]] Type type() const override {return BINARY;}
     [[nodiscard]] std::optional<Value> minimum_value() const override;
     [[nodiscard]] std::optional<Value> maximum_value() const override;
 
-    void collect_variables(std::vector<Symbol>& variables) const override {left->collect_variables(variables); right->collect_variables(variables);}
+    void collect_variables(std::vector<Symbol>& variables) const override {left.collect_variables(variables); right.collect_variables(variables);}
 
 protected:
-    [[nodiscard]] std::shared_ptr<Expression> evaluate(const Environment &environment) const override;
+    [[nodiscard]] Expression static create(const Expression& left, Expression::BinaryOperation operation, const Expression& right);
+    [[nodiscard]] std::optional<Expression> evaluated(const Environment &environment) const override;
 
     void serialize_sub(std::ostream& stream) const override;
 
+    friend class Expression;
+
 private:
-    Operation operation;
-    std::shared_ptr<Expression> left;
-    std::shared_ptr<Expression> right;
+    Expression::BinaryOperation operation;
+    Expression left;
+    Expression right;
 };
 
 

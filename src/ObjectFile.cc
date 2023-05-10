@@ -75,7 +75,7 @@ void ObjectFile::serialize(std::ostream &stream) const {
     }
 }
 
-void ObjectFile::add_constant(Symbol name, Object::Visibility visibility, std::shared_ptr<Expression> value) {
+void ObjectFile::add_constant(Symbol name, Object::Visibility visibility, Expression value) {
     auto pair = constants.insert({name, Constant(name, visibility, std::move(value))});
 
     if (!pair.second) {
@@ -97,7 +97,7 @@ void ObjectFile::add_object_file(const ObjectFile &file) {
 
 void ObjectFile::evaluate(const Environment &environment) {
     for (auto& pair: constants) {
-        pair.second.value = Expression::evaluate(pair.second.value, environment);
+        pair.second.value.evaluate(environment);
     }
     for (auto& pair: objects) {
         pair.second.body.evaluate(environment);
@@ -149,10 +149,10 @@ ObjectFile::ObjectFile() noexcept {
 }
 
 void ObjectFile::add_to_environment(Object *object) {
-    add_to_environment(object->name.as_symbol(), object->visibility, std::make_shared<ObjectExpression>(object));
+    add_to_environment(object->name.as_symbol(), object->visibility, Expression(object));
 }
 
-void ObjectFile::add_to_environment(Symbol name, Object::Visibility visibility, std::shared_ptr<Expression> value) {
+void ObjectFile::add_to_environment(Symbol name, Object::Visibility visibility, Expression value) {
     if (visibility == Object::GLOBAL) {
         global_environment->add(name, std::move(value));
     }

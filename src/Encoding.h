@@ -34,7 +34,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <string>
 
-#include "Expression.h"
+#include "BaseExpression.h"
 #include "Value.h"
 
 class Encoding {

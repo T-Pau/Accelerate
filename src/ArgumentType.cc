@@ -56,7 +56,7 @@ Value ArgumentTypeMap::entry(Value value) const {
     }
 }
 
-std::optional<bool> ArgumentTypeMap::fits(const std::shared_ptr<Expression> &expression) const {
+std::optional<bool> ArgumentTypeMap::fits(const std::shared_ptr<BaseExpression> &expression) const {
     if (expression->has_value()) {
         return has_entry(*expression->value());
     }
@@ -65,7 +65,7 @@ std::optional<bool> ArgumentTypeMap::fits(const std::shared_ptr<Expression> &exp
     }
 }
 
-std::optional<bool> ArgumentTypeRange::fits(const std::shared_ptr<Expression> &expression) const {
+std::optional<bool> ArgumentTypeRange::fits(const std::shared_ptr<BaseExpression> &expression) const {
     auto minimum_value = expression->minimum_value();
     auto maximum_value = expression->maximum_value();
 

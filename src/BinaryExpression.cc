@@ -31,74 +31,68 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "BinaryExpression.h"
 
-#include "ValueExpression.h"
 #include "VariableExpression.h"
-#include "UnaryExpression.h"
 
-BinaryExpression::BinaryExpression(std::shared_ptr<Expression> left, Operation operation,
-                                   std::shared_ptr<Expression> right): left(std::move(left)), operation(operation), right(std::move(right)) {}
-
-
-std::shared_ptr<Expression> BinaryExpression::evaluate(const Environment &environment) const {
-    auto new_left = left->evaluate(environment);
-    auto new_right= right->evaluate(environment);
+std::optional<Expression> BinaryExpression::evaluated(const Environment &environment) const {
+    auto new_left = left.evaluated(environment);
+    auto new_right= right.evaluated(environment);
 
     if (!new_left && !new_right) {
         return {};
     }
 
-    return create(new_left ? new_left : left, operation, new_right ? new_right : right);
+    return Expression(new_left.value_or(left), operation, new_right.value_or(right));
 }
 
 void BinaryExpression::serialize_sub(std::ostream &stream) const {
     stream << '(' << left;
 
     switch (operation) {
-        case ADD:
+        case Expression::BinaryOperation::ADD:
             stream << '+';
             break;
 
-        case BITWISE_AND:
+        case Expression::BinaryOperation::BITWISE_AND:
             stream << '&';
             break;
 
-        case BITWISE_OR:
+        case Expression::BinaryOperation::BITWISE_OR:
             stream << '|';
             break;
 
-        case BITWISE_XOR:
+        case Expression::BinaryOperation::BITWISE_XOR:
             stream << '^';
             break;
 
-        case DIVIDE:
+        case Expression::BinaryOperation::DIVIDE:
             stream << '/';
             break;
 
-        case LOGICAL_AND:
+        case Expression::BinaryOperation::LOGICAL_AND:
             stream << "&&";
             break;
 
-        case LOGICAL_OR:
+        case Expression::BinaryOperation::LOGICAL_OR:
             stream << "||";
             break;
 
-        case MODULO:
+        case Expression::BinaryOperation::MODULO:
             stream << '%';
             break;
 
-        case MULTIPLY:
+        case Expression::BinaryOperation::MULTIPLY:
             stream << '*';
             break;
 
-        case SHIFT_LEFT:
+        case Expression::BinaryOperation::SHIFT_LEFT:
             stream << "<<";
             break;
 
-        case SHIFT_RIGHT:
+        case Expression::BinaryOperation::SHIFT_RIGHT:
             stream << ">>";
             break;
 
-        case SUBTRACT:
+        case Expression::BinaryOperation::SUBTRACT:
             stream << '-';
             break;
     }
@@ -107,130 +101,131 @@ void BinaryExpression::serialize_sub(std::ostream &stream) const {
 }
 
 
-std::shared_ptr<Expression> BinaryExpression::create(const std::shared_ptr<Expression>& left, Operation operation, const std::shared_ptr<Expression>& right) {
-    if (left->has_value() && right->has_value()) {
-        auto left_value = left->value().value();
-        auto right_value = right->value().value();
+Expression BinaryExpression::create(const Expression& left, Expression::BinaryOperation operation, const Expression& right) {
+    if (left.has_value() && right.has_value()) {
+        auto left_value = *left.value();
+        auto right_value = *right.value();
         Value value;
 
         switch (operation) {
-            case ADD:
+            case Expression::BinaryOperation::ADD:
                 value = left_value + right_value;
                 break;
 
-            case SUBTRACT:
+            case Expression::BinaryOperation::SUBTRACT:
                 value = left_value - right_value;
                 break;
 
-            case SHIFT_RIGHT:
+            case Expression::BinaryOperation::SHIFT_RIGHT:
                 value = left_value >> right_value;
                 break;
 
-            case SHIFT_LEFT:
+            case Expression::BinaryOperation::SHIFT_LEFT:
                 value = left_value << right_value;
                 break;
 
-            case BITWISE_XOR:
+            case Expression::BinaryOperation::BITWISE_XOR:
                 value = left_value ^ right_value;
                 break;
 
-            case BITWISE_AND:
+            case Expression::BinaryOperation::BITWISE_AND:
                 value = left_value & right_value;
                 break;
 
-            case BITWISE_OR:
+            case Expression::BinaryOperation::BITWISE_OR:
                 value = left_value | right_value;
                 break;
 
-            case LOGICAL_AND:
+            case Expression::BinaryOperation::LOGICAL_AND:
                 value = left_value && right_value;
                 break;
 
-            case LOGICAL_OR:
+            case Expression::BinaryOperation::LOGICAL_OR:
                 value = left_value || right_value;
+                break;
 
-            case MULTIPLY:
+            case Expression::BinaryOperation::MULTIPLY:
                 value = left_value * right_value;
                 break;
 
-            case DIVIDE:
+            case Expression::BinaryOperation::DIVIDE:
                 value = left_value / right_value;
                 break;
 
-            case MODULO:
+            case Expression::BinaryOperation::MODULO:
                 value = left_value % right_value;
                 break;
         }
 
-        return std::make_shared<ValueExpression>(value);
+        return Expression(value);
     }
     else {
         switch (operation) {
-            case SUBTRACT: {
+            case Expression::BinaryOperation::SUBTRACT: {
                 // This special case is for resolving relative addressing within an object.
-                if (left->type() == BINARY && right->type() == BINARY) {
+                if (left.is_binary() && right.is_binary()) {
                     // (object_name + N) - (object_name + M) -> N - M
-                    auto left_binary = std::dynamic_pointer_cast<BinaryExpression>(left);
-                    auto right_binary = std::dynamic_pointer_cast<BinaryExpression>(right);
+                    auto left_binary = left.as_binary();
+                    auto right_binary = right.as_binary();
 
-                    if (left_binary->operation == ADD && right_binary->operation == ADD &&
-                        left_binary->left->type() == VARIABLE && right_binary->left->type() == VARIABLE) {
-                        auto left_left = std::dynamic_pointer_cast<VariableExpression>(left_binary->left);
-                        auto right_left = std::dynamic_pointer_cast<VariableExpression>(right_binary->left);
+                    if (left_binary->operation == Expression::BinaryOperation::ADD && right_binary->operation == Expression::BinaryOperation::ADD &&
+                        left_binary->left.is_variable() && right_binary->left.is_variable()) {
+                        auto left_left = left_binary->left.as_variable();
+                        auto right_left = right_binary->left.as_variable();
                         if (left_left->variable() == right_left->variable()) {
-                            return create(left_binary->right, operation, right_binary->right);
+                            return {left_binary->right, operation, right_binary->right};
                         }
                     }
                 }
-                else if (left->type() == VARIABLE && right->type() == BINARY) {
+                else if (left.is_variable() && right.is_binary()) {
                     // object_name - (object_name + M) -> -M
-                    auto left_variable = std::dynamic_pointer_cast<VariableExpression>(left);
-                    auto right_binary = std::dynamic_pointer_cast<BinaryExpression>(right);
+                    auto left_variable = left.as_variable();
+                    auto right_binary = right.as_binary();
 
-                    if (right_binary->operation == ADD && right_binary->left->type() == VARIABLE) {
-                        auto right_left = std::dynamic_pointer_cast<VariableExpression>(right_binary->left);
+                    if (right_binary->operation == Expression::BinaryOperation::ADD && right_binary->left.is_variable()) {
+                        auto right_left = right_binary->left.as_variable();
                         if (left_variable->variable() == right_left->variable()) {
-                            return UnaryExpression::create(UnaryExpression::MINUS, right_binary->right);
+                            return {Expression::UnaryOperation::MINUS, right_binary->right};
                         }
                     }
                 }
-                else if (left->type() == BINARY && right->type() == VARIABLE) {
+                else if (left.is_binary() && right.is_variable()) {
                     // (object_name + N) - object_name -> N
-                    auto left_binary = std::dynamic_pointer_cast<BinaryExpression>(left);
-                    auto right_variable = std::dynamic_pointer_cast<VariableExpression>(right);
+                    auto left_binary = left.as_binary();
+                    auto right_variable = right.as_variable();
 
-                    if (left_binary->operation == ADD && left_binary->left->type() == VARIABLE) {
-                        auto left_left = std::dynamic_pointer_cast<VariableExpression>(left_binary->left);
+                    if (left_binary->operation == Expression::BinaryOperation::ADD && left_binary->left.is_variable()) {
+                        auto left_left = left_binary->left.as_variable();
                         if (left_left->variable() == right_variable->variable()) {
                             return left_binary->right;
                         }
                     }
                 }
-                else if (left->type() == VARIABLE && right->type() == VARIABLE) {
+                else if (left.is_variable() && right.is_variable()) {
                     // object_name - object_name -> 0
-                    auto left_variable = std::dynamic_pointer_cast<VariableExpression>(left);
-                    auto right_variable = std::dynamic_pointer_cast<VariableExpression>(right);
+                    auto left_variable = left.as_variable();
+                    auto right_variable = right.as_variable();
                     if (left_variable->variable() == right_variable->variable()) {
-                        return std::make_shared<ValueExpression>(0);
+                        return Expression(uint64_t(0));
                     }
                 }
                 break;
             }
 
-            case LOGICAL_AND:
-                if (left->has_value() && *left->value()) {
+            case Expression::BinaryOperation::LOGICAL_AND:
+                if (left.has_value() && *left.value()) {
                     return right;
                 }
-                if (right->has_value() && *right->value()) {
+                if (right.has_value() && *right.value()) {
                     return left;
                 }
                 break;
 
-            case LOGICAL_OR:
-                if (left->has_value() && !*left->value()) {
+            case Expression::BinaryOperation::LOGICAL_OR:
+                if (left.has_value() && !*left.value()) {
                     return right;
                 }
-                if (right->has_value() && !*right->value()) {
+                if (right.has_value() && !*right.value()) {
                     return left;
                 }
                 break;
@@ -240,53 +235,51 @@ std::shared_ptr<Expression> BinaryExpression::create(const std::shared_ptr<Expre
                 break;
         }
     }
-    return std::make_shared<BinaryExpression>(left, operation, right);
+    return Expression(std::make_shared<BinaryExpression>(left, operation, right));
 }
 
 std::optional<Value> BinaryExpression::minimum_value() const {
     switch (operation) {
-        case ADD:
-            return left->minimum_value() + right->minimum_value();
-            break;
+        case Expression::BinaryOperation::ADD:
+            return left.minimum_value() + right.minimum_value();
 
         // TODO: calculate for more operations
-        case BITWISE_AND:
-        case BITWISE_OR:
-        case BITWISE_XOR:
-        case DIVIDE:
-        case MODULO:
-        case MULTIPLY:
-        case SHIFT_LEFT:
-        case SHIFT_RIGHT:
-        case LOGICAL_AND:
-        case LOGICAL_OR:
+        case Expression::BinaryOperation::BITWISE_AND:
+        case Expression::BinaryOperation::BITWISE_OR:
+        case Expression::BinaryOperation::BITWISE_XOR:
+        case Expression::BinaryOperation::DIVIDE:
+        case Expression::BinaryOperation::MODULO:
+        case Expression::BinaryOperation::MULTIPLY:
+        case Expression::BinaryOperation::SHIFT_LEFT:
+        case Expression::BinaryOperation::SHIFT_RIGHT:
+        case Expression::BinaryOperation::LOGICAL_AND:
+        case Expression::BinaryOperation::LOGICAL_OR:
             return {};
 
-        case SUBTRACT:
-            return left->minimum_value() - right->maximum_value();
+        case Expression::BinaryOperation::SUBTRACT:
+            return left.minimum_value() - right.maximum_value();
     }
 }
 
 std::optional<Value> BinaryExpression::maximum_value() const {
     switch (operation) {
-        case ADD:
-            return left->maximum_value() + right->maximum_value();
-            break;
+        case Expression::BinaryOperation::ADD:
+            return left.maximum_value() + right.maximum_value();
 
             // TODO: calculate for more operations
-        case BITWISE_AND:
-        case BITWISE_OR:
-        case BITWISE_XOR:
-        case DIVIDE:
-        case MODULO:
-        case MULTIPLY:
-        case SHIFT_LEFT:
-        case SHIFT_RIGHT:
-        case LOGICAL_AND:
-        case LOGICAL_OR:
+        case Expression::BinaryOperation::BITWISE_AND:
+        case Expression::BinaryOperation::BITWISE_OR:
+        case Expression::BinaryOperation::BITWISE_XOR:
+        case Expression::BinaryOperation::DIVIDE:
+        case Expression::BinaryOperation::MODULO:
+        case Expression::BinaryOperation::MULTIPLY:
+        case Expression::BinaryOperation::SHIFT_LEFT:
+        case Expression::BinaryOperation::SHIFT_RIGHT:
+        case Expression::BinaryOperation::LOGICAL_AND:
+        case Expression::BinaryOperation::LOGICAL_OR:
             return {};
 
-        case SUBTRACT:
-            return left->maximum_value() - right->minimum_value();
+        case Expression::BinaryOperation::SUBTRACT:
+            return left.maximum_value() - right.minimum_value();
     }
 }

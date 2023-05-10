@@ -32,11 +32,11 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef VARIABLE_EXPRESSION_H
 #define VARIABLE_EXPRESSION_H
 
+#include "BaseExpression.h"
 #include "Expression.h"
 
-class VariableExpression: public Expression {
+class VariableExpression: public BaseExpression {
 public:
-    explicit VariableExpression(const Token& token);
     explicit VariableExpression(Symbol symbol): symbol(symbol) {}
 
     [[nodiscard]] Type type() const override {return VARIABLE;}
@@ -46,9 +46,11 @@ public:
     void collect_variables(std::vector<Symbol>& variables) const override {variables.emplace_back(symbol);}
 
 protected:
-    [[nodiscard]] std::shared_ptr<Expression> evaluate(const Environment &environment) const override;
+    [[nodiscard]] std::optional<Expression> evaluated(const Environment &environment) const override;
 
     void serialize_sub(std::ostream& stream) const override {stream << symbol.str();}
+
+    friend class Expression;
 
 private:
     Symbol symbol;

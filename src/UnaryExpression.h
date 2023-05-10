@@ -32,36 +32,30 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef UNARY_EXPRESSION_H
 #define UNARY_EXPRESSION_H
 
+#include "BaseExpression.h"
 #include "Expression.h"
 
-class UnaryExpression: public Expression {
+class UnaryExpression: public BaseExpression {
 public:
-    enum Operation {
-        BANK_BYTE,
-        BITWISE_NOT,
-        HIGH_BYTE,
-        LOW_BYTE,
-        MINUS,
-        PLUS
-    };
-
-    UnaryExpression(Operation operation, std::shared_ptr<Expression>operand) : operation(operation), operand(std::move(operand)) {}
-    [[nodiscard]] std::shared_ptr<Expression> static create(Operation operation, std::shared_ptr<Expression> operand);
+    UnaryExpression(Expression::UnaryOperation operation, Expression operand) : operation(operation), operand(std::move(operand)) {}
 
     [[nodiscard]] Type type() const override {return UNARY;}
 
-    void collect_variables(std::vector<Symbol>& variables) const override { operand->collect_variables(variables);}
+    void collect_variables(std::vector<Symbol>& variables) const override { operand.collect_variables(variables);}
 
 protected:
-    [[nodiscard]] std::shared_ptr<Expression> evaluate(const Environment &environment) const override;
+    [[nodiscard]] static Expression create(Expression::UnaryOperation operation, Expression operand);
+    [[nodiscard]] std::optional<Expression> evaluated(const Environment &environment) const override;
     [[nodiscard]] std::optional<Value> minimum_value() const override;
     [[nodiscard]] std::optional<Value> maximum_value() const override;
 
     void serialize_sub(std::ostream& stream) const override;
 
+    friend Expression;
+
 private:
-    Operation operation;
-    std::shared_ptr<Expression> operand;
+    Expression::UnaryOperation operation;
+    Expression operand;
 };
 
 

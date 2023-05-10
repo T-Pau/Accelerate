@@ -32,7 +32,6 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Assembler.h"
 
 #include <memory>
-#include <utility>
 
 #include "BodyParser.h"
 #include "ParseException.h"
@@ -41,9 +40,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ExpressionParser.h"
 #include "ExpressionNode.h"
 #include "VariableExpression.h"
-#include "InstructionEncoder.h"
 #include "LabelBodyElement.h"
-#include "LabelExpression.h"
 
 bool Assembler::initialized = false;
 Symbol Assembler::symbol_opcode;
@@ -159,88 +156,20 @@ ObjectFile Assembler::parse(Symbol file_name) {
 
 void Assembler::parse_symbol_body() {
     current_object->body = BodyParser(tokenizer, current_object->name.as_symbol(), target.cpu, &object_file, current_environment).parse();;
-
-#if 0
-    while (!tokenizer.ended()) {
-        try {
-            auto token = tokenizer.next();
-
-            switch (token.get_type()) {
-                case Token::END:
-                    throw ParseException(token, "unclosed symbol body");
-
-                case Token::DIRECTIVE:
-                    parse_directive(token);
-                    break;
-
-                case Token::NAME: {
-                    auto token2 = tokenizer.next();
-                    if (token2 == Token::colon) {
-                        parse_label(Object::OBJECT, token);
-                    }
-                    else if (token2 == Token::equals) {
-                        parse_assignment(Object::OBJECT, token);
-                    }
-                    else {
-                        tokenizer.unget(token2);
-                        throw ParseException(token, "unexpected name");
-                    }
-                    break;
-                }
-
-                case Token::INSTRUCTION:
-                    parse_instruction(token);
-                    break;
-
-                case Token::NEWLINE:
-                    // ignore
-                    break;
-
-                case Token::PUNCTUATION:
-                    if (token == Token::curly_close) {
-                        return;
-                    }
-                    else {
-                        if (target.cpu->uses_empty_mnemonic()) {
-                            tokenizer.unget(token);
-                            parse_instruction(Token(Token::NAME, token.location, Symbol()));
-                        }
-                        else {
-                            throw ParseException(token, "unexpected %s", token.type_name());
-                        }
-                    }
-                    break;
-
-                default:
-                    if (target.cpu->uses_empty_mnemonic()) {
-                        tokenizer.unget(token);
-                        parse_instruction(Token(Token::NAME, token.location, Symbol()));
-                    }
-                    else {
-                        throw ParseException(token, "unexpected %s", token.type_name());
-                    }
-                    break;
-            }
-        }
-        catch (ParseException& ex) {
-            FileReader::global.error(ex.location, "%s", ex.what());
-        }
-    }
-#endif
 }
 
 
-void Assembler::add_constant(Object::Visibility visibility, const Token& name, std::shared_ptr<Expression> value) {
-    auto evaluated_value = Expression::evaluate(std::move(value), *current_environment);
+void Assembler::add_constant(Object::Visibility visibility, const Token& name, Expression value) {
+    value.evaluate(*current_environment);
     switch (visibility) {
         case Object::OBJECT:
             break;
         case Object::LOCAL:
         case Object::GLOBAL:
-            object_file.add_constant(name.as_symbol(), visibility, evaluated_value);
+            object_file.add_constant(name.as_symbol(), visibility, value);
             break;
     }
-    current_environment->add(name.as_symbol(), evaluated_value);
+    current_environment->add(name.as_symbol(), value);
 }
 
 void Assembler::parse_assignment(Object::Visibility visibility, const Token &name) {
@@ -289,18 +218,18 @@ void Assembler::parse_symbol(Object::Visibility visibility, const Token &name) {
         else if (token == token_align || token == token_reserve) {
             auto expression = ExpressionParser(tokenizer).parse();
 
-            expression = Expression::evaluate(expression, *file_environment);
-            auto value = expression->value();
+            expression.evaluate(*file_environment);
+            auto value = expression.value();
 
             if (token == token_align) {
                 if (!value.has_value() || !value->is_unsigned()) {
-                    throw ParseException(expression->location, "alignment must be constant unsigned integer");
+                    throw ParseException(expression.location(), "alignment must be constant unsigned integer");
                 }
                 current_object->alignment = value->unsigned_value();
             }
             else {
                 if (!value.has_value() || !value->is_unsigned()) {
-                    throw ParseException(expression->location, "reservation must be constant expression");
+                    throw ParseException(expression.location(), "reservation must be constant expression");
                 }
                 current_object->size = value->unsigned_value();
             }

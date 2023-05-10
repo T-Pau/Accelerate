@@ -61,7 +61,7 @@ InstructionEncoder::encode(const Token& name, const std::vector<std::shared_ptr<
         if (instruction->has_addressing_mode(match.addressing_mode)) {
             supported = true;
             auto variant = encode(instruction, match, arguments, environment);
-            auto constraint =  variant.argument_constraints->value() && variant.encoding_constraints->value();
+            auto constraint =  variant.argument_constraints.value() && variant.encoding_constraints.value();
 
             if (constraint.has_value() && !*constraint) {
                 continue;
@@ -92,7 +92,7 @@ InstructionEncoder::encode(const Token& name, const std::vector<std::shared_ptr<
     }
     else if (variants.size() == 1) {
         auto constraints = variants.front().argument_constraints;
-        if (constraints->has_value() && constraints->value()->boolean_value()) {
+        if (constraints.has_value() && constraints.value()->boolean_value()) {
             return variants.front().data;
         }
     }
@@ -102,7 +102,7 @@ InstructionEncoder::encode(const Token& name, const std::vector<std::shared_ptr<
     for (const auto &variant: variants) {
         auto constraints = variant.argument_constraints;
         if (&variant != &variants.back()) {
-            constraints = BinaryExpression::create(constraints, BinaryExpression::LOGICAL_AND, variant.encoding_constraints);
+            constraints = Expression(constraints, Expression::BinaryOperation::LOGICAL_AND, variant.encoding_constraints);
         }
         body->append(constraints, Body(variant.data));
     }
@@ -145,7 +145,7 @@ InstructionEncoder::Variant InstructionEncoder::encode(const Instruction* instru
                     if (!enum_type->has_entry(value_name)) {
                         throw ParseException((*it_arguments)->get_location(), "invalid enum argument");
                     }
-                    environment.add(it_notation->symbol, std::make_shared<ValueExpression>(enum_type->entry(value_name)));
+                    environment.add(it_notation->symbol, Expression(enum_type->entry(value_name)));
                     break;
                 }
 
@@ -154,15 +154,15 @@ InstructionEncoder::Variant InstructionEncoder::encode(const Instruction* instru
                         throw ParseException((*it_arguments)->get_location(), "map argument is not an expression");
                     }
                     auto expression = std::dynamic_pointer_cast<ExpressionNode>(*it_arguments)->expression;
-                    if (!expression->has_value()) {
+                    if (!expression.has_value()) {
                         throw ParseException((*it_arguments)->get_location(), "map argument is not an integer");
                     }
                     auto map_type = dynamic_cast<const ArgumentTypeMap*>(argument_type);
-                    auto value = expression->value().value();
+                    auto value = expression.value().value();
                     if (!map_type->has_entry(value)) {
                         throw ParseException((*it_arguments)->get_location(), "invalid map argument");
                     }
-                    environment.add(it_notation->symbol, std::make_shared<ValueExpression>(map_type->entry(value)));
+                    environment.add(it_notation->symbol, Expression(map_type->entry(value)));
                     break;
                 }
 
@@ -174,7 +174,7 @@ InstructionEncoder::Variant InstructionEncoder::encode(const Instruction* instru
                     }
                     auto expression = std::dynamic_pointer_cast<ExpressionNode>(*it_arguments)->expression;
 
-                    variant.add_argument_constraint(InRangeExpression::create(std::make_shared<ValueExpression>(range_type->lower_bound), std::make_shared<ValueExpression>(range_type->upper_bound), expression));
+                    variant.add_argument_constraint(InRangeExpression::create(Expression(range_type->lower_bound), Expression(range_type->upper_bound), expression));
                     environment.add(it_notation->symbol, expression);
                     break;
             }
@@ -184,8 +184,7 @@ InstructionEncoder::Variant InstructionEncoder::encode(const Instruction* instru
         it_arguments++;
     }
 
-    environment.add(Assembler::symbol_opcode, std::make_shared<ValueExpression>(instruction->opcode(match.addressing_mode)));
-    //TODO: environment.add(symbol_pc, get_pc());
+    environment.add(Assembler::symbol_opcode, Expression(instruction->opcode(match.addressing_mode)));
 
     variant.data = BodyElement::evaluate(addressing_mode->encoding, environment);
 
@@ -195,7 +194,7 @@ InstructionEncoder::Variant InstructionEncoder::encode(const Instruction* instru
             auto lower = datum.encoding->minimum_value();
             auto upper = datum.encoding->maximum_value();
             if (lower.has_value() && upper.has_value()) {
-                variant.add_encoding_constraint(InRangeExpression::create(std::make_shared<ValueExpression>(*lower), std::make_shared<ValueExpression>(*upper), datum.expression));
+                variant.add_encoding_constraint(InRangeExpression::create(Expression(*lower), Expression(*upper), datum.expression));
             }
         }
     }
@@ -203,12 +202,12 @@ InstructionEncoder::Variant InstructionEncoder::encode(const Instruction* instru
     return variant;
 }
 
-void InstructionEncoder::Variant::add_constraint(std::shared_ptr<Expression>& constraints, const std::shared_ptr<Expression>& sub_constraint) {
-    constraints = BinaryExpression::create(constraints, BinaryExpression::LOGICAL_AND, sub_constraint);
+void InstructionEncoder::Variant::add_constraint(Expression& constraints, const Expression& sub_constraint) {
+    constraints = Expression(constraints, Expression::BinaryOperation::LOGICAL_AND, sub_constraint);
 }
 
 InstructionEncoder::Variant::operator bool() const {
-    auto value = argument_constraints->value() && encoding_constraints->value();
+    auto value = argument_constraints.value() && encoding_constraints.value();
     return value.has_value() && value->boolean_value();
 }
 

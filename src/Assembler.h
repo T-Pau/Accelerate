@@ -57,9 +57,9 @@ private:
 
     std::shared_ptr<Node> parse_instruction_argument(const Token& token);
 
-    void add_constant(Object::Visibility visibility, const Token& name, std::shared_ptr<Expression> value);
+    void add_constant(Object::Visibility visibility, const Token& name, Expression value);
     [[nodiscard]] std::shared_ptr<LabelBodyElement> create_anonymous_label() const;
-    [[nodiscard]] std::shared_ptr<Expression> get_pc(const std::shared_ptr<LabelBodyElement>& label) const;
+    [[nodiscard]] Expression get_pc(const std::shared_ptr<LabelBodyElement>& label) const;
     [[nodiscard]] std::shared_ptr<LabelBodyElement> get_trailing_label() const;
 
     static Object::Visibility visibility_value(const Token& token);

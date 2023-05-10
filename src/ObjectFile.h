@@ -44,20 +44,20 @@ public:
     class Constant {
     public:
         Constant() = default;
-        Constant(Symbol name, Object::Visibility visibility, std::shared_ptr<Expression> value): name(name), visibility(visibility), value(std::move(value)) {}
+        Constant(Symbol name, Object::Visibility visibility, Expression value): name(name), visibility(visibility), value(std::move(value)) {}
 
         void serialize(std::ostream& stream) const;
 
         Symbol name;
         Object::Visibility visibility = Object::OBJECT;
-        std::shared_ptr<Expression> value;
+        Expression value;
     };
 
     ObjectFile() noexcept;
 
     Object* create_object(Symbol section_name, Object::Visibility visibility, Token name);
 
-    void add_constant(Symbol name, Object::Visibility visibility, std::shared_ptr<Expression> value);
+    void add_constant(Symbol name, Object::Visibility visibility, Expression value);
     void add_object(const Object* object);
     void add_object_file(const ObjectFile& file);
 
@@ -82,7 +82,7 @@ private:
     Object* insert_object(Object object);
     void add_to_environment(const Constant& constant) { add_to_environment(constant.name, constant.visibility, constant.value);}
     void add_to_environment(Object* object);
-    void add_to_environment(Symbol name, Object::Visibility visibility, std::shared_ptr<Expression> value);
+    void add_to_environment(Symbol name, Object::Visibility visibility, Expression value);
 
     std::unordered_map<Symbol, Object> objects;
     std::unordered_map<Symbol, Constant> constants;

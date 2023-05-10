@@ -22,6 +22,7 @@ add_library(xlr8-library STATIC
         Environment.cc
         Exception.cc
         Expression.cc
+        BaseExpression.cc
         ExpressionNode.cc
         ExpressionParser.cc
         FileParser.cc
@@ -65,6 +66,7 @@ add_library(xlr8-library STATIC
         Value.cc
         ValueExpression.cc
         VariableExpression.cc
+        VoidExpression.cc
         ${COMPATIBILITY}
 )
 

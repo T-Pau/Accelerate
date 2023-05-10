@@ -5,13 +5,12 @@
 #ifndef LABEL_EXPRESSION_H
 #define LABEL_EXPRESSION_H
 
-#include "Expression.h"
+#include "BaseExpression.h"
 #include "LabelBodyElement.h"
 
-class LabelExpression: public Expression {
+class LabelExpression: public BaseExpression {
 public:
     explicit LabelExpression(std::shared_ptr<LabelBodyElement> label): label(std::move(label)) {}
-    static std::shared_ptr<Expression> create(const std::shared_ptr<LabelBodyElement>& label);
 
     [[nodiscard]] Type type() const override {return LABEL;}
     [[nodiscard]] std::optional<Value> minimum_value() const override {return label->minimum_value();}
@@ -21,7 +20,8 @@ public:
     void collect_variables(std::vector<Symbol>& variables) const override {}
 
 protected:
-    [[nodiscard]] std::shared_ptr<Expression> evaluate(const Environment &environment) const override;
+    static Expression create(const std::shared_ptr<LabelBodyElement>& label);
+    [[nodiscard]] std::optional<Expression> evaluated(const Environment &environment) const override;
     void serialize_sub(std::ostream& stream) const override;
 
 

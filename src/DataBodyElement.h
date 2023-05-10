@@ -42,20 +42,20 @@ class DataBodyElement: public BodyElement {
 public:
     class Datum {
     public:
-        Datum(std::shared_ptr<Expression> expression, std::optional<Encoding> encoding): expression(std::move(expression)), encoding(encoding) {}
+        Datum(Expression expression, std::optional<Encoding> encoding): expression(std::move(expression)), encoding(encoding) {}
 
         [[nodiscard]] std::optional<uint64_t> size() const;
         [[nodiscard]] uint64_t maximum_size() const {return size().value_or(8);}
         [[nodiscard]] uint64_t minimum_size() const {return size().value_or(1);}
 
-        std::shared_ptr<Expression> expression;
+        Expression expression;
         std::optional<Encoding> encoding;
     };
 
     DataBodyElement() = default;
     explicit DataBodyElement(std::vector<Datum> data): data(std::move(data)) {}
 
-    void append(const std::shared_ptr<Expression>& expression, std::optional<Encoding> encoding = {}) {data.emplace_back(expression, encoding);}
+    void append(Expression expression, std::optional<Encoding> encoding = {}) {data.emplace_back(std::move(expression), encoding);}
     [[nodiscard]] std::shared_ptr<BodyElement> clone() const override {return std::make_shared<DataBodyElement>(data);}
     [[nodiscard]] bool empty() const override {return data.empty();}
     void encode(std::string &bytes) const override;
