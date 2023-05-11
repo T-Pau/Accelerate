@@ -131,7 +131,7 @@ std::shared_ptr<BodyElement> DataBodyElement::append_sub(std::shared_ptr<BodyEle
     return new_data_body;
 }
 
-void DataBodyElement::encode(std::string &bytes) const {
+void DataBodyElement::encode(std::string &bytes, const Memory* memory) const {
     for (auto& datum: data) {
         auto value = datum.expression.value();
         if (!value.has_value()) {

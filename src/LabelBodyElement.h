@@ -14,7 +14,7 @@ class LabelBodyElement: public BodyElement {
 public:
     LabelBodyElement(Symbol name, SizeRange offset): name(name), offset(offset) {}
 
-    void encode(std::string &bytes) const override {}
+    void encode(std::string &bytes, const Memory* memory) const override {}
     [[nodiscard]] bool empty() const override {return offset.minimum == offset.maximum;}
     [[nodiscard]] std::shared_ptr<BodyElement> clone() const override {throw Exception("can't clone label");}
     [[nodiscard]] EvaluationResult evaluate(const Environment &environment, uint64_t minimum_offset, uint64_t maximum_offset) const override;

@@ -34,7 +34,9 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <optional>
 #include <utility>
+
 #include "Environment.h"
+#include "Memory.h"
 
 class CPU;
 
@@ -63,7 +65,7 @@ public:
     static std::shared_ptr<BodyElement> evaluate(std::shared_ptr<BodyElement> element, const Environment& environment);
     static std::shared_ptr<BodyElement> make_unique(std::shared_ptr<BodyElement> element);
 
-    virtual void encode(std::string& bytes) const = 0;
+    virtual void encode(std::string& bytes, const Memory* memory) const = 0;
     [[nodiscard]] virtual std::shared_ptr<BodyElement> clone() const = 0;
     [[nodiscard]] virtual bool empty() const = 0;
     [[nodiscard]] virtual EvaluationResult evaluate(const Environment &environment, uint64_t minimum_offset, uint64_t maximum_offset) const = 0;

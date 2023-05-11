@@ -141,8 +141,8 @@ std::shared_ptr<BodyElement> BodyBlock::append_sub(std::shared_ptr<BodyElement> 
     return new_block;
 }
 
-void BodyBlock::encode(std::string &bytes) const {
+void BodyBlock::encode(std::string &bytes, const Memory* memory) const {
     for (auto& element: elements) {
-        element->encode(bytes);
+        element->encode(bytes, memory);
     }
 }

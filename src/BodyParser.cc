@@ -221,10 +221,20 @@ void BodyParser::parse_label(Object::Visibility visibility, const Token& name) {
 
 void BodyParser::parse_memory() {
     auto expression_parser = ExpressionParser(tokenizer);
+    auto bank = Expression(uint64_t(0));
     auto start_address = expression_parser.parse();
     tokenizer.expect(Token::comma);
     auto end_address = expression_parser.parse();
-    current_body->append(std::make_shared<MemoryBodyElement>(start_address, end_address));
+    auto token = tokenizer.next();
+    if (token == Token::comma) {
+        bank = start_address;
+        start_address = end_address;
+        end_address = expression_parser.parse();
+    }
+    else {
+        tokenizer.unget(token);
+    }
+    current_body->append(std::make_shared<MemoryBodyElement>(bank, start_address, end_address));
 }
 
 void BodyParser::parse_assignment(Object::Visibility visibility, const Token &name) {

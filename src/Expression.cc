@@ -25,8 +25,13 @@ Expression::Expression(Symbol name): expression(std::make_shared<VariableExpress
 Expression::Expression(Value value): expression(std::make_shared<ValueExpression>(value)) {}
 Expression::Expression(Symbol name, const std::vector<Expression>& arguments): expression(FunctionExpression::create(name, arguments).expression) {}
 Expression::Expression(Object* object): expression(ObjectExpression::create(object).expression) {}
+
 const BinaryExpression *Expression::as_binary() const {
     return std::dynamic_pointer_cast<BinaryExpression>(expression).get();
+}
+
+const ObjectExpression *Expression::as_object() const {
+    return std::dynamic_pointer_cast<ObjectExpression>(expression).get();
 }
 
 const VariableExpression *Expression::as_variable() const {

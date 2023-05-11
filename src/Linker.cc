@@ -62,8 +62,8 @@ void Linker::link() {
         for (auto object: current_objects) {
             for (const auto &expression: object->data) {
                 for (auto sub_expression: *expression) {
-                    if (sub_expression->type() == BaseExpression::OBJECT) {
-                        auto sub_object = dynamic_cast<ObjectExpression *>(sub_expression)->object;
+                    if (sub_expression.is_object()) {
+                        auto sub_object = sub_expression.as_object();
                         if (add_object(sub_object)) {
                             new_objects.insert(sub_object);
                         }
@@ -135,33 +135,16 @@ void Linker::output(const std::string &file_name) {
     environment.add(TargetParser::token_data_size.as_symbol(), Expression(data_range.size));
     environment.add(TargetParser::token_data_start.as_symbol(), Expression(data_range.start));
 
+    auto body = target.output;
+    body.evaluate(environment);
+
+    auto bytes = std::string();
+    bytes.reserve(body.minimum_size());
+
+    body.encode(bytes, &memory);
+
     auto stream = std::ofstream(file_name);
-
-#if 0
-    for (const auto& element: target.output_elements) {
-        auto arguments = element.arguments;
-        arguments.evaluate(environment);
-        switch (element.type) {
-            case OutputElement::DATA:
-                stream << arguments.bytes(target.cpu->byte_order);
-                break;
-
-            case OutputElement::MEMORY: {
-                uint64_t bank = 0;
-                size_t index = 0;
-                if (arguments.expressions.size() == 3) {
-                    bank = arguments.expressions[0]->value().unsigned_value();
-                    index += 1;
-                }
-                uint64_t start = arguments.expressions[index]->value().unsigned_value();
-                uint64_t end = arguments.expressions[index + 1]->value().unsigned_value();
-
-                stream << memory[bank].data(Range(start, end - start));
-                break;
-            }
-        }
-    }
-#endif
+    stream << bytes;
 }
 
 bool Linker::add_object(Object *object) {

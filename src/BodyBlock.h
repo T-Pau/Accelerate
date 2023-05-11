@@ -45,7 +45,7 @@ public:
     [[nodiscard]] std::shared_ptr<BodyElement> append_sub(std::shared_ptr<BodyElement> body, std::shared_ptr<BodyElement> element) override;
     [[nodiscard]] std::shared_ptr<BodyElement> clone() const override {return std::make_shared<BodyBlock>(elements);}
     [[nodiscard]] bool empty() const override {return elements.empty();}
-    void encode(std::string &bytes) const override;
+    void encode(std::string &bytes, const Memory* memory) const override;
     [[nodiscard]] EvaluationResult
     evaluate(const Environment &environment, uint64_t minimum_offset, uint64_t maximum_offset) const override;
     [[nodiscard]] uint64_t maximum_size() const override;

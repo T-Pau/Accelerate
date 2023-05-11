@@ -78,6 +78,7 @@ public:
     explicit Memory(const std::vector<Range>& bank_ranges);
 
     Bank& operator[](uint64_t bank) {return banks[bank];}
+    const Bank& operator[](uint64_t bank) const {return banks[bank];}
 
 private:
     std::vector<Bank> banks;

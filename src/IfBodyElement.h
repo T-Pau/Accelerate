@@ -54,7 +54,7 @@ public:
     void append(const Expression& condition, Body body) {clauses.emplace_back(condition, std::move(body));}
     [[nodiscard]] std::shared_ptr<BodyElement> clone() const override {return std::make_shared<IfBodyElement>(clauses);} // TODO: this doesn't copy clauses
     [[nodiscard]] bool empty() const override {return clauses.empty();}
-    void encode(std::string &bytes) const override {throw Exception("unresolved if");}
+    void encode(std::string &bytes, const Memory* memory) const override {throw Exception("unresolved if");}
     [[nodiscard]] EvaluationResult evaluate(const Environment &environment, uint64_t minimum_offset, uint64_t maximum_offset) const override;
     [[nodiscard]] uint64_t maximum_size() const override;
     [[nodiscard]] uint64_t minimum_size() const override;

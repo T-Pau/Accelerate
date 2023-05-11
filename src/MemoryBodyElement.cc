@@ -26,10 +26,11 @@ uint64_t MemoryBodyElement::minimum_size() const {
 
 BodyElement::EvaluationResult MemoryBodyElement::evaluate(const Environment &environment, uint64_t minimum_offset, uint64_t maximum_offset) const {
     auto result = EvaluationResult(minimum_offset, maximum_offset);
+    auto new_bank = bank.evaluated(environment);
     auto new_start_address = start_address.evaluated(environment);
     auto new_end_address = end_address.evaluated(environment);
-    if (new_start_address || new_end_address) {
-        result.element = std::make_shared<MemoryBodyElement>(new_start_address.value_or(start_address), new_end_address.value_or(end_address));
+    if (new_bank || new_start_address || new_end_address) {
+        result.element = std::make_shared<MemoryBodyElement>(new_bank.value_or(bank), new_start_address.value_or(start_address), new_end_address.value_or(end_address));
     }
     result.minimum_offset += minimum_size();
     result.maximum_offset += maximum_size();
@@ -48,4 +49,19 @@ std::optional<uint64_t> MemoryBodyElement::size() const {
     else {
         return {};
     }
+}
+
+void MemoryBodyElement::encode(std::string &bytes, const Memory *memory) const {
+    if (memory == nullptr) {
+        throw Exception("can't encode .memory without memory");
+    }
+    if (!bank.has_value() || !start_address.has_value() || !end_address.has_value()) {
+        throw Exception("unresolved address"); // TODO: more details
+    }
+
+    auto bank_value = bank.value()->unsigned_value();
+    auto start_value = start_address.value()->unsigned_value();
+    auto end_value = end_address.value()->unsigned_value();
+
+    bytes += (*memory)[bank_value].data(Range(start_value, end_value - start_value));
 }
