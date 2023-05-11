@@ -50,19 +50,3 @@ std::ostream& operator<< (std::ostream& stream, const BaseExpression& node) {
 void BaseExpression::serialize(std::ostream &stream) const {
     serialize_sub(stream);
 }
-
-
-BaseExpression::Iterator &BaseExpression::Iterator::operator++() {
-    while (!layers.empty()) {
-        auto last = layers.back();
-        last.current_child = last.node->iterate(last.current_child);
-        if (last.current_child != nullptr) {
-            layers.emplace_back(last.current_child);
-            break;
-        }
-        else {
-            layers.pop_back();
-        }
-    }
-    return *this;
-}

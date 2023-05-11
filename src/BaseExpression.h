@@ -55,39 +55,6 @@ public:
         VOID
     };
 
-    class Iterator {
-    public:
-        using iterator_category = std::forward_iterator_tag;
-        using value_type = BaseExpression*;
-        using pointer = BaseExpression**;
-        using reference = BaseExpression*&;
-
-        Iterator() = default;
-        explicit Iterator(BaseExpression*expression){ layers.emplace_back(expression);}
-
-        reference operator*() { return layers.back().node;}
-        pointer operator->() { return &layers.back().node;}
-
-        Iterator& operator++();
-        Iterator operator++(int) {auto tmp = *this; ++(*this); return tmp;}
-
-        bool operator==(const Iterator& other) const {return layers == other.layers;}
-        bool operator!=(const Iterator& other) const { return !(*this == other);}
-
-    private:
-        class Layer {
-        public:
-            explicit Layer(BaseExpression* node): node(node) {}
-            bool operator==(const Layer& other) const {return node == other.node && current_child == other.current_child;}
-            BaseExpression* node;
-            BaseExpression* current_child = nullptr;
-        };
-        std::vector<Layer> layers;
-    };
-
-    Iterator begin() {return Iterator(this);}
-    Iterator end() {return {};}
-
     [[nodiscard]] virtual Type type() const = 0;
     [[nodiscard]] virtual bool has_value() const {return value().has_value();}
     [[nodiscard]] virtual std::optional<Value> value() const {return {};}
@@ -102,7 +69,6 @@ public:
     Location location;
 
 protected:
-    virtual BaseExpression* iterate(BaseExpression* last) const {return nullptr;}
     virtual void serialize_sub(std::ostream& stream) const = 0;
 };
 
