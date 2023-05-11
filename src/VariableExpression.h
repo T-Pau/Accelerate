@@ -39,8 +39,6 @@ class VariableExpression: public BaseExpression {
 public:
     explicit VariableExpression(Symbol symbol): symbol(symbol) {}
 
-    [[nodiscard]] Type type() const override {return VARIABLE;}
-
     [[nodiscard]] Symbol variable() const {return symbol;}
 
 protected:

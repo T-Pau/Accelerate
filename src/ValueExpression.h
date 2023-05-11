@@ -41,8 +41,6 @@ public:
     explicit ValueExpression(Value value): value_(value) {}
     explicit ValueExpression(uint64_t value): ValueExpression(Value(value)) {}
 
-    [[nodiscard]] Type type() const override {return VALUE;}
-
     [[nodiscard]] bool has_value() const override {return true;}
     [[nodiscard]] std::optional<Value> value() const override {return value_;}
     [[nodiscard]] std::optional<Value> minimum_value() const override {return value_;}

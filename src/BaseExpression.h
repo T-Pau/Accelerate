@@ -44,18 +44,6 @@ class Environment;
 
 class BaseExpression {
 public:
-    enum Type {
-        BINARY,
-        FUNCTION,
-        LABEL,
-        OBJECT,
-        UNARY,
-        VALUE,
-        VARIABLE,
-        VOID
-    };
-
-    [[nodiscard]] virtual Type type() const = 0;
     [[nodiscard]] virtual bool has_value() const {return value().has_value();}
     [[nodiscard]] virtual std::optional<Value> value() const {return {};}
     [[nodiscard]] virtual std::optional<Value> minimum_value() const {return value();}

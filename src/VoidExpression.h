@@ -10,7 +10,6 @@
 class VoidExpression: public BaseExpression {
     [[nodiscard]] std::optional<Expression> evaluated(const Environment &environment) const override;
     void serialize_sub(std::ostream &stream) const override {}
-    [[nodiscard]] Type type() const override {return BaseExpression::VOID;}
 };
 
 

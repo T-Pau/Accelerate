@@ -12,7 +12,6 @@ class LabelExpression: public BaseExpression {
 public:
     explicit LabelExpression(std::shared_ptr<LabelBodyElement> label): label(std::move(label)) {}
 
-    [[nodiscard]] Type type() const override {return LABEL;}
     [[nodiscard]] std::optional<Value> minimum_value() const override {return label->minimum_value();}
     [[nodiscard]] std::optional<Value> maximum_value() const override {return label->maximum_value();}
     [[nodiscard]] std::optional<Value> value() const override {return label->value();}

@@ -11,8 +11,6 @@ class FunctionExpression: public BaseExpression {
 public:
     FunctionExpression(Symbol name, std::vector<Expression> arguments): name(name), arguments(std::move(arguments)) {}
 
-    [[nodiscard]] Type type() const override {return FUNCTION;}
-
     void collect_objects(std::unordered_set<Object*>& objects) const override;
 
 protected:

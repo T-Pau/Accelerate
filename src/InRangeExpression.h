@@ -42,7 +42,6 @@ public:
     InRangeExpression(Expression lower_bound, Expression upper_bound, Expression argument): lower_bound(std::move(lower_bound)), upper_bound(std::move(upper_bound)), argument(std::move(argument)) {}
     [[nodiscard]] Expression static create(const Expression& lower_bound, const Expression& upper_bound, const Expression& argument);
 
-    [[nodiscard]] Type type() const override {return FUNCTION;}
     [[nodiscard]] std::optional<Value> minimum_value() const override {return {};}
     [[nodiscard]] std::optional<Value> maximum_value() const override {return {};}
 

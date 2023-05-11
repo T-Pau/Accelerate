@@ -39,8 +39,6 @@ class UnaryExpression: public BaseExpression {
 public:
     UnaryExpression(Expression::UnaryOperation operation, Expression operand) : operation(operation), operand(std::move(operand)) {}
 
-    [[nodiscard]] Type type() const override {return UNARY;}
-
     void collect_objects(std::unordered_set<Object*>& objects) const override { operand.collect_objects(objects);}
 
 protected:

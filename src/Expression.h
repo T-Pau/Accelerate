@@ -64,9 +64,9 @@ public:
     bool evaluate(const Environment& environment);
     [[nodiscard]] std::shared_ptr<BaseExpression> get_expression() const {return expression;}
     [[nodiscard]] bool has_value() const {return value().has_value();}
-    [[nodiscard]] bool is_binary() const {return expression->type() == BaseExpression::BINARY;}
-    [[nodiscard]] bool is_object() const {return expression->type() == BaseExpression::OBJECT;}
-    [[nodiscard]] bool is_variable() const {return expression->type() == BaseExpression::VARIABLE;}
+    [[nodiscard]] bool is_binary() const {return as_binary() != nullptr;}
+    [[nodiscard]] bool is_object() const {return as_object() != nullptr;}
+    [[nodiscard]] bool is_variable() const {return as_variable() != nullptr;}
     [[nodiscard]] const Location& location() const {return expression->location;}
     [[nodiscard]] std::optional<Value> maximum_value() const {return expression->maximum_value();}
     [[nodiscard]] std::optional<Value> minimum_value() const {return expression->minimum_value();}

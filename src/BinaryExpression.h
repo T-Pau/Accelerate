@@ -39,7 +39,6 @@ class BinaryExpression: public BaseExpression {
 public:
     BinaryExpression(Expression left, Expression::BinaryOperation operation, Expression right): left(std::move(left)), operation(operation), right(std::move(right)) {}
 
-    [[nodiscard]] Type type() const override {return BINARY;}
     [[nodiscard]] std::optional<Value> minimum_value() const override;
     [[nodiscard]] std::optional<Value> maximum_value() const override;
 
