@@ -41,7 +41,7 @@ public:
 
     [[nodiscard]] Type type() const override {return UNARY;}
 
-    void collect_variables(std::vector<Symbol>& variables) const override { operand.collect_variables(variables);}
+    void collect_objects(std::unordered_set<Object*>& objects) const override { operand.collect_objects(objects);}
 
 protected:
     [[nodiscard]] static Expression create(Expression::UnaryOperation operation, Expression operand);

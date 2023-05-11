@@ -19,9 +19,9 @@ void FunctionExpression::serialize_sub(std::ostream &stream) const {
     stream << ")";
 }
 
-void FunctionExpression::collect_variables(std::vector<Symbol> &variables) const {
+void FunctionExpression::collect_objects(std::unordered_set<Object*> &objects) const {
     for (auto& argument: arguments) {
-        argument.collect_variables(variables);
+        argument.collect_objects(objects);
     }
 }
 

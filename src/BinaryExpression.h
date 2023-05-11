@@ -43,7 +43,9 @@ public:
     [[nodiscard]] std::optional<Value> minimum_value() const override;
     [[nodiscard]] std::optional<Value> maximum_value() const override;
 
-    void collect_variables(std::vector<Symbol>& variables) const override {left.collect_variables(variables); right.collect_variables(variables);}
+    void collect_objects(std::unordered_set<Object*>& objects) const override {
+        left.collect_objects(objects);
+        right.collect_objects(objects);}
 
 protected:
     [[nodiscard]] Expression static create(const Expression& left, Expression::BinaryOperation operation, const Expression& right);

@@ -60,7 +60,7 @@ public:
     [[nodiscard]] const BinaryExpression* as_binary() const;
     [[nodiscard]] const ObjectExpression* as_object() const;
     [[nodiscard]] const VariableExpression* as_variable() const;
-    void collect_variables(std::vector<Symbol>& variables) const {expression->collect_variables(variables);}
+    void collect_objects(std::unordered_set<Object*>& variables) const {expression->collect_objects(variables);}
     bool evaluate(const Environment& environment);
     [[nodiscard]] std::shared_ptr<BaseExpression> get_expression() const {return expression;}
     [[nodiscard]] bool has_value() const {return value().has_value();}

@@ -147,6 +147,12 @@ void DataBodyElement::encode(std::string &bytes, const Memory* memory) const {
     }
 }
 
+void DataBodyElement::collect_objects(std::unordered_set<Object *> &objects) const {
+    for (auto& datum: data) {
+        datum.expression.collect_objects(objects);
+    }
+}
+
 std::optional<uint64_t> DataBodyElement::Datum::size() const {
     if (encoding.has_value()) {
         return encoding->byte_size();

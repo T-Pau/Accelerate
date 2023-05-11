@@ -44,7 +44,7 @@ public:
 
     [[nodiscard]] bool has_value() const override {return object->has_address();}
     [[nodiscard]] std::optional<Value> value() const override;
-    void collect_variables(std::vector<Symbol>& variables) const override {}
+    void collect_objects(std::unordered_set<Object*>& objects) const override {objects.insert(object);}
 
     Object* object;
 

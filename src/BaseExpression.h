@@ -38,6 +38,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "FileTokenizer.h"
 #include "Int.h"
 
+class Object;
 class Expression;
 class Environment;
 
@@ -96,7 +97,7 @@ public:
     void serialize(std::ostream& stream) const;
 
     [[nodiscard]] virtual std::optional<Expression> evaluated(const Environment& environment) const = 0;
-    virtual void collect_variables(std::vector<Symbol>& variables) const = 0;
+    virtual void collect_objects(std::unordered_set<Object*>& objects) const {}
 
     Location location;
 

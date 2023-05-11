@@ -55,24 +55,19 @@ void Linker::link() {
     }
 
     // Collect all referenced objects.
-#if 0
     while (!new_objects.empty()) {
         auto current_objects = new_objects;
         new_objects.clear();
         for (auto object: current_objects) {
-            for (const auto &expression: object->data) {
-                for (auto sub_expression: *expression) {
-                    if (sub_expression.is_object()) {
-                        auto sub_object = sub_expression.as_object();
-                        if (add_object(sub_object)) {
-                            new_objects.insert(sub_object);
-                        }
-                    }
+            auto used_objects = std::unordered_set<Object*>();
+            object->body.collect_objects(used_objects);
+            for (const auto& used_object: used_objects) {
+                if (add_object(used_object)) {
+                    new_objects.insert(used_object);
                 }
             }
         }
     }
-#endif
 
     for (auto object: objects) {
         if (!object->bank.has_value() || object->address.has_value()) {

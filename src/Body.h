@@ -15,6 +15,7 @@ public:
 
     void append(const std::shared_ptr<BodyElement>& element);
     [[nodiscard]] std::shared_ptr<BodyElement> back() const;
+    void collect_objects(std::unordered_set<Object*>& objects) const;
     [[nodiscard]] bool empty() const {return !elements || elements->empty();}
     void encode(std::string& bytes, const Memory* memory = nullptr) const {if (elements) {elements->encode(bytes, memory);}}
     bool evaluate(const Environment& environment);

@@ -43,8 +43,6 @@ public:
 
     [[nodiscard]] Symbol variable() const {return symbol;}
 
-    void collect_variables(std::vector<Symbol>& variables) const override {variables.emplace_back(symbol);}
-
 protected:
     [[nodiscard]] std::optional<Expression> evaluated(const Environment &environment) const override;
 

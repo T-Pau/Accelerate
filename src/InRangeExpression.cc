@@ -61,8 +61,8 @@ void InRangeExpression::serialize_sub(std::ostream &stream) const {
     stream << ".in_range(" << lower_bound << ", " << upper_bound << ", " << argument << ")";
 }
 
-void InRangeExpression::collect_variables(std::vector<Symbol> &variables) const {
-    lower_bound.collect_variables(variables);
-    upper_bound.collect_variables(variables);
-    argument.collect_variables(variables);
+void InRangeExpression::collect_objects(std::unordered_set<Object *> &objects) const {
+    lower_bound.collect_objects(objects);
+    upper_bound.collect_objects(objects);
+    argument.collect_objects(objects);
 }

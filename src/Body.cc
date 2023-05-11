@@ -23,6 +23,13 @@ void Body::append(const std::shared_ptr<BodyElement> &element) {
     }
 }
 
+
+void Body::collect_objects(std::unordered_set<Object*> &objects) const {
+    if (elements) {
+        elements->collect_objects(objects);
+    }
+}
+
 bool Body::evaluate(const Environment &environment) {
     auto result = elements->evaluate(environment, 0, 0);
     if (result.element) {

@@ -46,7 +46,7 @@ public:
     [[nodiscard]] std::optional<Value> minimum_value() const override {return {};}
     [[nodiscard]] std::optional<Value> maximum_value() const override {return {};}
 
-    void collect_variables(std::vector<Symbol>& variables) const override;
+    void collect_objects(std::unordered_set<Object*>& objects) const override;
 
 protected:
     [[nodiscard]] std::optional<Expression> evaluated(const Environment &environment) const override;

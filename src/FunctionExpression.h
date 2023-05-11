@@ -13,7 +13,7 @@ public:
 
     [[nodiscard]] Type type() const override {return FUNCTION;}
 
-    void collect_variables(std::vector<Symbol>& variables) const override;
+    void collect_objects(std::unordered_set<Object*>& objects) const override;
 
 protected:
     static Expression create(Symbol name, const std::vector<Expression>& arguments);

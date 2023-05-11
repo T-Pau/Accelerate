@@ -47,7 +47,6 @@ add_library(xlr8-library STATIC
         ObjectExpression.cc
         ObjectFile.cc
         ObjectFileParser.cc
-        OutputElement.cc
         ParseException.cc
         ParsedValue.cc
         Path.cc

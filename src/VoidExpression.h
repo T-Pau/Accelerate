@@ -8,7 +8,6 @@
 #include "BaseExpression.h"
 
 class VoidExpression: public BaseExpression {
-    void collect_variables(std::vector<Symbol> &variables) const override {}
     [[nodiscard]] std::optional<Expression> evaluated(const Environment &environment) const override;
     void serialize_sub(std::ostream &stream) const override {}
     [[nodiscard]] Type type() const override {return BaseExpression::VOID;}

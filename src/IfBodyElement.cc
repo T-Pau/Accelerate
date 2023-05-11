@@ -204,3 +204,10 @@ uint64_t IfBodyElement::minimum_size() const {
     return common_size;
 }
 
+void IfBodyElement::collect_objects(std::unordered_set<Object*> &objects) const {
+    for (auto& clause: clauses) {
+        clause.condition.collect_objects(objects);
+        clause.body.collect_objects(objects);
+    }
+}
+

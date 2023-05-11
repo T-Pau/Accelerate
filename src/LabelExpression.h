@@ -17,8 +17,6 @@ public:
     [[nodiscard]] std::optional<Value> maximum_value() const override {return label->maximum_value();}
     [[nodiscard]] std::optional<Value> value() const override {return label->value();}
 
-    void collect_variables(std::vector<Symbol>& variables) const override {}
-
 protected:
     static Expression create(const std::shared_ptr<LabelBodyElement>& label);
     [[nodiscard]] std::optional<Expression> evaluated(const Environment &environment) const override;
