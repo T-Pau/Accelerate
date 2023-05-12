@@ -19,7 +19,7 @@ void LabelBody::serialize(std::ostream &stream, const std::string& prefix) const
     stream << label->name << ":" << std::endl;
 }
 
-std::optional<Body> LabelBody::evaluated(const Environment &environment, const SizeRange& new_offset) const {
+std::optional<Body> LabelBody::evaluated(const Environment &environment, bool top_level, const SizeRange& new_offset) const {
     label->offset = new_offset;
 
     if (label->offset.size().has_value()) {

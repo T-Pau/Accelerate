@@ -24,6 +24,7 @@ add_library(xlr8-library STATIC
         Exception.cc
         Expression.cc
         BaseExpression.cc
+        ErrorBody.cc
         ExpressionNode.cc
         ExpressionParser.cc
         FileParser.cc

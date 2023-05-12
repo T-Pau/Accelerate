@@ -1,5 +1,5 @@
 /*
-BlockBody.h --
+ErrorBody.cc -- 
 
 Copyright (C) Dieter Baron
 
@@ -29,32 +29,17 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef BLOCK_BODY_H
-#define BLOCK_BODY_H
+#include "ErrorBody.h"
 
-#include <vector>
+std::optional<Body> ErrorBody::evaluated(const Environment &environment, bool top_level, const SizeRange &offset) const {
+    if (top_level) {
+        throw ParseException(location, message);
+    }
+    else {
+        return {};
+    }
+}
 
-#include "Body.h"
-
-class BlockBody: public BodyElement {
-public:
-    BlockBody() = default;
-    explicit BlockBody(std::vector<Body> elements);
-    static Body create(const std::vector<Body>& elements);
-
-    [[nodiscard]] std::optional<Body> append_sub(Body body, Body element) override;
-    [[nodiscard]] std::shared_ptr<BodyElement> clone() const override {return std::make_shared<BlockBody>(elements);}
-    [[nodiscard]] bool empty() const override {return elements.empty();}
-    void encode(std::string &bytes, const Memory* memory) const override;
-    [[nodiscard]] std::optional<Body> evaluated(const Environment &environment, bool top_level, const SizeRange& offset) const override;
-    [[nodiscard]] std::optional<Body> back() const {if (elements.empty()) {return {};} else {return elements.back();}}
-
-    void serialize(std::ostream& stream, const std::string& prefix) const override;
-
-private:
-    std::vector<Body> elements;
-
-    void append_element(const Body& element);
-};
-
-#endif // BLOCK_BODY_H
+void ErrorBody::serialize(std::ostream &stream, const std::string &prefix) const {
+    stream << prefix << ".error \"" << message << "\" (\"" << location.to_string() << "\")" << std::endl;
+}

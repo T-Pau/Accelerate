@@ -7,6 +7,7 @@
 
 #include "BodyElement.h"
 #include "Label.h"
+#include "Location.h"
 #include "SizeRange.h"
 
 class BlockBody;
@@ -24,6 +25,8 @@ public:
     explicit Body(const std::vector<Body>& elements);
     // Data
     explicit Body(std::vector<DataBodyElement> elements);
+    // Error
+    Body(Location location, std::string message);
     // If
     explicit Body(const std::vector<IfBodyClause>& clauses);
     // Label
@@ -41,8 +44,9 @@ public:
     [[nodiscard]] bool empty() const {return element->empty();}
     [[nodiscard]] Body make_unique() const;
     void encode(std::string& bytes, const Memory* memory = nullptr) const {element->encode(bytes, memory);}
-    bool evaluate(const Environment& environment, const SizeRange& offset = SizeRange(0));
-    [[nodiscard]] std::optional<Body> evaluated (const Environment& environment, const SizeRange& offset) const;
+    bool evaluate(const Environment& environment) {return evaluate(environment, true, SizeRange(0));}
+    bool evaluate(const Environment& environment, bool top_level, const SizeRange& offset);
+    [[nodiscard]] std::optional<Body> evaluated (const Environment& environment, bool top_level, const SizeRange& offset) const;
     [[nodiscard]] bool is_block() const {return as_block() != nullptr;}
     [[nodiscard]] bool is_data() const {return as_data() != nullptr;}
     [[nodiscard]] bool is_label() const {return as_label() != nullptr;}
@@ -53,6 +57,8 @@ public:
 
 private:
     std::shared_ptr<BodyElement> element;
+
+
 };
 
 #endif // BODY_H

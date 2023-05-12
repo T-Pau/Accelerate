@@ -9,6 +9,7 @@
 #include "BlockBody.h"
 #include "DataBody.h"
 #include "EmptyBody.h"
+#include "ErrorBody.h"
 #include "IfBody.h"
 #include "LabelBody.h"
 #include "MemoryBody.h"
@@ -30,6 +31,7 @@ Body::Body(const std::vector<Body>& elements) {
 
 Body::Body(std::vector<DataBodyElement> elements): element(std::make_shared<DataBody>(std::move(elements))) {}
 
+Body::Body(Location location, std::string message): element(std::make_shared<ErrorBody>(location, std::move(message))) {}
 Body::Body(const std::vector<IfBodyClause>& clauses) {
     *this = IfBody::create(clauses);
 }
@@ -56,8 +58,8 @@ void Body::append(const Body& new_element) {
     }
 }
 
-bool Body::evaluate(const Environment &environment, const SizeRange& offset) {
-    auto new_elements = element->evaluated(environment, offset);
+bool Body::evaluate(const Environment &environment, bool top_level, const SizeRange& offset) {
+    auto new_elements = element->evaluated(environment, top_level, offset);
     if (new_elements) {
         element = new_elements->element;
         return true;
@@ -81,8 +83,8 @@ std::optional<Body> Body::back() const {
     }
 }
 
-std::optional<Body> Body::evaluated(const Environment &environment, const SizeRange& offset) const {
-    return element->evaluated(environment, offset);
+std::optional<Body> Body::evaluated(const Environment &environment, bool top_level, const SizeRange& offset) const {
+    return element->evaluated(environment, top_level, offset);
 }
 
 BlockBody *Body::as_block() const {

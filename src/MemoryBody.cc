@@ -18,7 +18,7 @@ MemoryBody::MemoryBody(Expression bank_, Expression start_address_, Expression e
     }
 }
 
-std::optional<Body> MemoryBody::evaluated(const Environment &environment, const SizeRange& offset) const {
+std::optional<Body> MemoryBody::evaluated(const Environment &environment, bool top_level, const SizeRange& offset) const {
     auto new_bank = bank.evaluated(environment);
     auto new_start_address = start_address.evaluated(environment);
     auto new_end_address = end_address.evaluated(environment);

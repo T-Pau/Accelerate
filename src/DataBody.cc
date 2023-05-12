@@ -40,7 +40,7 @@ DataBody::DataBody(std::vector<DataBodyElement> data_): data(std::move(data_)) {
 }
 
 
-std::optional<Body> DataBody::evaluated(const Environment &environment, const SizeRange& offset) const {
+std::optional<Body> DataBody::evaluated(const Environment &environment, bool top_level, const SizeRange& offset) const {
     auto new_data = std::vector<DataBodyElement>();
     auto changed = false;
 

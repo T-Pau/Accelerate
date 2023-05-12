@@ -41,7 +41,7 @@ IfBody::IfBody(std::vector<IfBodyClause> clauses_): clauses(std::move(clauses_))
     }
 }
 
-std::optional<Body> IfBody::evaluated(const Environment &environment, const SizeRange& offset) const {
+std::optional<Body> IfBody::evaluated(const Environment &environment, bool top_level, const SizeRange& offset) const {
     auto new_clauses = std::vector<IfBodyClause>();
     auto changed = false;
 
@@ -49,7 +49,11 @@ std::optional<Body> IfBody::evaluated(const Environment &environment, const Size
         auto new_expression = clause.condition;
         auto new_body = clause.body;
         changed = new_expression.evaluate(environment) || changed;
-        changed = new_body.evaluate(environment, offset) || changed;
+        if (new_clauses.empty() && new_expression.has_value() && new_expression.value()) {
+            new_body.evaluate(environment, top_level, offset);
+            return new_body;
+        }
+        changed = new_body.evaluate(environment, false, offset) || changed;
 
         new_clauses.emplace_back(new_expression, new_body);
     }

@@ -106,7 +106,7 @@ Body InstructionEncoder::encode(const Token& name, const std::vector<std::shared
         clauses.emplace_back(constraints, variant.data);
     }
 
-    // TODO: add error clause
+    clauses.emplace_back(Expression(Value(true)), Body(name.location, "arguments out of range"));
 
     return Body(clauses);
 }
@@ -186,7 +186,7 @@ InstructionEncoder::Variant InstructionEncoder::encode(const Instruction* instru
     environment.add(Assembler::symbol_opcode, Expression(instruction->opcode(match.addressing_mode)));
 
     variant.data = addressing_mode->encoding;
-    variant.data.evaluate(environment, offset);
+    variant.data.evaluate(environment, false, offset);
 
     auto data = variant.data.as_data();
     for (const auto& datum: data->data) {
