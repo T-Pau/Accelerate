@@ -65,7 +65,7 @@ std::optional<Value> ObjectExpression::maximum_value() const {
         return value();
     }
     else {
-        return Value(object->section->maximum_address() - object->body.size_range().minimum);
+        return Value(object->section->maximum_address() - object->size_range().minimum);
     }
 }
 

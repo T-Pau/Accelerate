@@ -222,7 +222,7 @@ void Assembler::parse_symbol(Object::Visibility visibility, const Token &name) {
                 if (!value.has_value() || !value->is_unsigned()) {
                     throw ParseException(expression.location(), "reservation must be constant expression");
                 }
-                object->size = value->unsigned_value();
+                object->reservation = value->unsigned_value();
             }
         }
         else {

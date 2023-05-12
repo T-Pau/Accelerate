@@ -136,7 +136,7 @@ void ObjectFileParser::parse_object() {
         if (!reserve.is_unsigned()) {
             throw ParseException(reserve, "unsigned integer expected");
         }
-        object->size = reserve.as_unsigned();
+        object->reservation = reserve.as_unsigned();
     }
 
     auto data_value = parameters->get_optional(token_data);

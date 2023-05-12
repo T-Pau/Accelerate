@@ -52,9 +52,10 @@ public:
     Object(const ObjectFile* owner, const Object* object);
 
     void evaluate(const Environment& environment);
-    [[nodiscard]] bool is_reservation() const {return body.empty();}
-    [[nodiscard]] bool empty() const {return is_reservation() && size == 0;}
+    [[nodiscard]] bool is_reservation() const {return reservation > 0;}
+    [[nodiscard]] bool empty() const {return !is_reservation() && body.empty();}
     [[nodiscard]] bool has_address() const {return address.has_value();}
+    [[nodiscard]] SizeRange size_range() const;
 
     void serialize(std::ostream& stream) const;
 
@@ -63,7 +64,7 @@ public:
     Visibility visibility;
     Token name;
     uint64_t alignment = 0;
-    uint64_t size = 0;
+    uint64_t reservation = 0;
     std::optional<uint64_t> bank;
     std::optional<uint64_t> address;
 

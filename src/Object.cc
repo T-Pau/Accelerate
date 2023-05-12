@@ -71,13 +71,13 @@ void Object::serialize(std::ostream &stream) const {
         stream << "    >" << std::endl;
     }
     else {
-        stream << "    reserve: " << size << std::endl;
+        stream << "    reserve: " << reservation << std::endl;
     }
 
     stream << "}" << std::endl;
 }
 
-Object::Object(const ObjectFile *owner, const Object *object): owner(owner), section(object->section), visibility(object->visibility), name(object->name), size(object->size) {
+Object::Object(const ObjectFile *owner, const Object *object): owner(owner), section(object->section), visibility(object->visibility), name(object->name), reservation(object->reservation) {
     // TODO: copy constructor would need cloning data. move constructor instead?
     if (!object->is_reservation()) {
         // append(object->data);
@@ -86,4 +86,13 @@ Object::Object(const ObjectFile *owner, const Object *object): owner(owner), sec
 
 void Object::evaluate(const Environment &environment) {
     body.evaluate(environment);
+}
+
+SizeRange Object::size_range() const {
+    if (is_reservation()) {
+        return SizeRange(reservation);
+    }
+    else {
+        return body.size_range();
+    }
 }

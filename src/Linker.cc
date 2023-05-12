@@ -78,12 +78,12 @@ void Linker::link() {
 
     // TODO: sort objects
     for (auto object: objects) {
-        if (object->size == 0) {
+        if (!object->size_range().size().has_value()) {
             FileReader::global.error({}, "object '%s' has unknown size", object->name.as_string().c_str());
             continue;
         }
         for (const auto& block: object->section->blocks) {
-            auto address = memory[block.bank].allocate(block.range, object->is_reservation() ? Memory::RESERVED : Memory::DATA, object->alignment, object->size);
+            auto address = memory[block.bank].allocate(block.range, object->is_reservation() ? Memory::RESERVED : Memory::DATA, object->alignment, *object->size_range().size());
             if (address.has_value()) {
                 object->bank = block.bank;
                 object->address = address.value();
