@@ -35,8 +35,10 @@ IfBody::IfBody(std::vector<IfBodyClause> clauses_): clauses(std::move(clauses_))
     if (!clauses.empty()) {
         size_range_ = SizeRange(std::numeric_limits<uint64_t>::max(), 0);
         for (const auto& clause: clauses) {
-            size_range_.minimum = std::min(size_range_.minimum, clause.body.size_range().minimum);
-            size_range_.maximum = std::max(size_range_.maximum, clause.body.size_range().maximum);
+            if (!clause.body.is_error()) {
+                size_range_.minimum = std::min(size_range_.minimum, clause.body.size_range().minimum);
+                size_range_.maximum = std::max(size_range_.maximum, clause.body.size_range().maximum);
+            }
         }
     }
 }

@@ -5,6 +5,7 @@
 #include "BodyParser.h"
 
 #include <utility>
+
 #include "ParseException.h"
 #include "FileReader.h"
 #include "ExpressionParser.h"
@@ -214,7 +215,7 @@ std::shared_ptr<Node> BodyParser::parse_instruction_argument(const Token& token)
 
 
 void BodyParser::parse_label(Object::Visibility visibility, const Token& name) {
-    auto label = std::make_shared<Label>(name.as_symbol(), SizeRange(current_body->size_range().minimum));
+    auto label = std::make_shared<Label>(name.as_symbol(), SizeRange(current_body->size_range()));
     current_body->append(Body(label));
     add_constant(visibility, name, get_pc(label));
     environment->add(Symbol(".label_offset(" + name.as_string() + ")"), Expression(std::make_shared<LabelExpression>(label)));

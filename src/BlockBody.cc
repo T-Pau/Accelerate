@@ -138,4 +138,5 @@ void BlockBody::append_element(const Body &element) {
     else {
         elements.emplace_back(element);
     }
+    size_range_ += element.size_range();
 }

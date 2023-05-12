@@ -95,6 +95,10 @@ DataBody *Body::as_data() const {
     return std::dynamic_pointer_cast<DataBody>(element).get();
 }
 
+ErrorBody *Body::as_error() const {
+    return std::dynamic_pointer_cast<ErrorBody>(element).get();
+}
+
 LabelBody *Body::as_label() const {
     return std::dynamic_pointer_cast<LabelBody>(element).get();
 }

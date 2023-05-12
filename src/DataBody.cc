@@ -127,17 +127,20 @@ Body DataBody::appending(const std::vector<DataBodyElement> &elements) {
     return Body(new_data);
 }
 
-std::optional<uint64_t> DataBodyElement::size() const {
+SizeRange DataBodyElement::size_range() const {
     if (encoding.has_value()) {
-        return encoding->byte_size();
+        return SizeRange(encoding->byte_size());
     }
-    else {
-        const auto& value = expression.value();
-        if (value.has_value()) {
-            return value->default_size();
-        }
-        else {
-            return {};
-        }
+    auto value = expression.value();
+    if (value) {
+        return SizeRange(value->default_size());
     }
+    auto minimum_value = expression.minimum_value();
+    auto maximum_value = expression.maximum_value();
+    if (minimum_value && maximum_value) {
+        auto minimum_size = minimum_value->default_size();
+        auto maximum_size = maximum_value->default_size();
+        return {std::min(minimum_size, maximum_size), std::max(minimum_size, maximum_size)};
+    }
+    return {1, 8};
 }

@@ -43,8 +43,8 @@ class DataBodyElement {
 public:
     DataBodyElement(Expression expression, std::optional<Encoding> encoding): expression(std::move(expression)), encoding(encoding) {}
 
-    [[nodiscard]] std::optional<uint64_t> size() const;
-    [[nodiscard]] SizeRange size_range() const {return SizeRange(size().value_or(1), size().value_or(8));}
+    [[nodiscard]] std::optional<uint64_t> size() const {return size_range().size();}
+    [[nodiscard]] SizeRange size_range() const;
 
     Expression expression;
     std::optional<Encoding> encoding;

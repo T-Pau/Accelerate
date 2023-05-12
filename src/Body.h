@@ -13,6 +13,7 @@
 class BlockBody;
 class DataBody;
 class DataBodyElement;
+class ErrorBody;
 class IfBodyClause;
 class LabelBody;
 
@@ -36,6 +37,7 @@ public:
 
     [[nodiscard]] BlockBody* as_block() const;
     [[nodiscard]] DataBody* as_data() const;
+    [[nodiscard]] ErrorBody* as_error() const;
     [[nodiscard]] LabelBody* as_label() const;
     void append(const Body& element);
     std::optional<Body> append_sub(Body element);
@@ -49,6 +51,7 @@ public:
     [[nodiscard]] std::optional<Body> evaluated (const Environment& environment, bool top_level, const SizeRange& offset) const;
     [[nodiscard]] bool is_block() const {return as_block() != nullptr;}
     [[nodiscard]] bool is_data() const {return as_data() != nullptr;}
+    [[nodiscard]] bool is_error() const {return as_error() != nullptr;}
     [[nodiscard]] bool is_label() const {return as_label() != nullptr;}
     void serialize(std::ostream& stream, const std::string& prefix = "") const {element->serialize(stream, prefix);}
     [[nodiscard]] std::optional<uint64_t> size() const {return element->size();}

@@ -51,7 +51,7 @@
     arguments {
         value: byte
     }
-    encoding: .opcode, value
+    encoding: .opcode, value:1
 }
 
 .addressing_mode zero_page {
@@ -59,7 +59,7 @@
     arguments {
         address: byte
     }
-    encoding: .opcode, address
+    encoding: .opcode, address:1
 }
 
 .addressing_mode absolute {
@@ -91,7 +91,7 @@
     arguments {
         address: byte
     }
-    encoding: .opcode, address
+    encoding: .opcode, address:1
 }
 
 .addressing_mode zero_page_y_indexed {
@@ -99,7 +99,7 @@
     arguments {
         address: byte
     }
-    encoding: .opcode, address
+    encoding: .opcode, address:1
 }
 
 .addressing_mode absolute_x_indexed {
@@ -123,7 +123,7 @@
     arguments {
         address: byte
     }
-    encoding: .opcode, address
+    encoding: .opcode, address:1
 }
 
 .addressing_mode indirect_y_indexed {
@@ -131,7 +131,7 @@
     arguments {
         address: byte
     }
-    encoding: .opcode, address
+    encoding: .opcode, address:1
 }
 
 
