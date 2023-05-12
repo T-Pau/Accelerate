@@ -31,7 +31,8 @@
 
 .syntax punctuation: "#" "," "(" ")"
 
-.argument_type byte range: 0, $ff
+;.argument_type byte range: 0, $ff
+.argument_type byte any
 
 .argument_type word any
 
