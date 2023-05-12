@@ -1,5 +1,5 @@
 /*
-DataBodyElement.h --
+DataBody.h --
 
 Copyright (C) Dieter Baron
 
@@ -29,8 +29,8 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef DATA_BODY_ELEMENT_H
-#define DATA_BODY_ELEMENT_H
+#ifndef DATA_BODY_H
+#define DATA_BODY_H
 
 
 #include <utility>
@@ -39,24 +39,27 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Encoding.h"
 #include "Expression.h"
 
-class DataBodyElement: public BodyElement {
+class DataBodyElement {
 public:
-    class Datum {
-    public:
-        Datum(Expression expression, std::optional<Encoding> encoding): expression(std::move(expression)), encoding(encoding) {}
+    DataBodyElement(Expression expression, std::optional<Encoding> encoding): expression(std::move(expression)), encoding(encoding) {}
 
-        [[nodiscard]] std::optional<uint64_t> size() const;
-        [[nodiscard]] SizeRange size_range() const {return SizeRange(size().value_or(1), size().value_or(8));}
+    [[nodiscard]] std::optional<uint64_t> size() const;
+    [[nodiscard]] SizeRange size_range() const {return SizeRange(size().value_or(1), size().value_or(8));}
 
-        Expression expression;
-        std::optional<Encoding> encoding;
-    };
+    Expression expression;
+    std::optional<Encoding> encoding;
+};
 
-    DataBodyElement() = default;
-    explicit DataBodyElement(std::vector<Datum> data);
+class DataBody: public BodyElement {
+public:
 
-    void append(Expression expression, std::optional<Encoding> encoding = {}) {data.emplace_back(std::move(expression), encoding);}
-    [[nodiscard]] std::shared_ptr<BodyElement> clone() const override {return std::make_shared<DataBodyElement>(data);}
+    DataBody() = default;
+    explicit DataBody(std::vector<DataBodyElement> data);
+
+    Body appending(const DataBody* body) {return appending(body->data);}
+    Body appending(const std::vector<DataBodyElement>& elements);
+//    void append(Expression expression, std::optional<Encoding> encoding = {}) {data.emplace_back(std::move(expression), encoding);}
+    [[nodiscard]] std::shared_ptr<BodyElement> clone() const override {return std::make_shared<DataBody>(data);}
     void collect_objects(std::unordered_set<Object*> &objects) const override;
     [[nodiscard]] bool empty() const override {return data.empty();}
     void encode(std::string &bytes, const Memory* memory) const override;
@@ -64,11 +67,11 @@ public:
 
     void serialize(std::ostream &stream, const std::string& prefix) const override;
 
-    std::vector<Datum> data;
+    std::vector<DataBodyElement> data;
 
 protected:
     [[nodiscard]] std::optional<Body> append_sub(Body body, Body element) override;
 };
 
 
-#endif // DATA_BODY_ELEMENT_H
+#endif // DATA_BODY_H

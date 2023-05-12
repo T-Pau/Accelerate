@@ -33,7 +33,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define ADDRESSING_MODE_H
 
 #include "ArgumentType.h"
-#include "DataBodyElement.h"
+#include "DataBody.h"
 #include "BaseExpression.h"
 #include "ParsedValue.h"
 #include "Symbol.h"

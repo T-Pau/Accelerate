@@ -34,11 +34,11 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 #include "Target.h"
-#include "IfBodyElement.h"
-#include "DataBodyElement.h"
+#include "IfBody.h"
+#include "DataBody.h"
 #include "InRangeExpression.h"
 #include "ValueExpression.h"
-#include "LabelBodyElement.h"
+#include "LabelBody.h"
 
 
 class InstructionEncoder {

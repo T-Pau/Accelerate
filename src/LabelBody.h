@@ -2,8 +2,8 @@
 // Created by Dieter Baron on 03.05.23.
 //
 
-#ifndef LABEL_BODY_ELEMENT_H
-#define LABEL_BODY_ELEMENT_H
+#ifndef LABEL_BODY_H
+#define LABEL_BODY_H
 
 #include "Body.h"
 #include "Label.h"
@@ -11,9 +11,9 @@
 #include "Exception.h"
 #include "SizeRange.h"
 
-class LabelBodyElement: public BodyElement {
+class LabelBody: public BodyElement {
 public:
-    explicit LabelBodyElement(std::shared_ptr<Label> label): label(std::move(label)) {}
+    explicit LabelBody(std::shared_ptr<Label> label): label(std::move(label)) {}
 
     void encode(std::string &bytes, const Memory* memory) const override {}
     [[nodiscard]] bool empty() const override {return label->offset.minimum == label->offset.maximum;}
@@ -26,4 +26,4 @@ public:
 };
 
 
-#endif // LABEL_BODY_ELEMENT_H
+#endif // LABEL_BODY_H

@@ -9,7 +9,7 @@ add_library(xlr8-library STATIC
         Assembler.cc
         BinaryExpression.cc
         Body.cc
-        BodyBlock.cc
+        BlockBody.cc
         BodyElement.cc
         BodyParser.cc
         CPU.cc
@@ -17,8 +17,8 @@ add_library(xlr8-library STATIC
         CPUParser.cc
         Command.cc
         Commandline.cc
-        DataBodyElement.cc
-        EmptyBodyElement.cc
+        DataBody.cc
+        EmptyBody.cc
         Encoding.cc
         Environment.cc
         Exception.cc
@@ -30,19 +30,19 @@ add_library(xlr8-library STATIC
         FileReader.cc
         FileTokenizer.cc
         FunctionExpression.cc
-        IfBodyElement.cc
+        IfBody.cc
         InRangeExpression.cc
         Instruction.cc
         InstructionEncoder.cc
         Int.cc
         Label.cc
-        LabelBodyElement.cc
+        LabelBody.cc
         LabelExpression.cc
         LibraryGetter.cc
         Linker.cc
         Location.cc
         Memory.cc
-        MemoryBodyElement.cc
+        MemoryBody.cc
         MemoryMap.cc
         Node.cc
         Object.cc

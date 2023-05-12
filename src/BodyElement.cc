@@ -32,7 +32,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "BodyElement.h"
 
 #include "Body.h"
-#include "BodyBlock.h"
+#include "BlockBody.h"
 
 std::ostream& operator<<(std::ostream& stream, const BodyElement& element) {
     element.serialize(stream, "");

@@ -39,7 +39,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Tokenizer.h"
 #include "UnaryExpression.h"
 #include "Encoding.h"
-#include "DataBodyElement.h"
+#include "DataBody.h"
 #include "VariableExpression.h"
 
 class ExpressionParser {

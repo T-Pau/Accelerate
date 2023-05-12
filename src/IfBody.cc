@@ -1,5 +1,5 @@
 /*
-IfBodyElement.cc --
+IfBody.cc --
 
 Copyright (C) Dieter Baron
 
@@ -29,9 +29,9 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "IfBodyElement.h"
+#include "IfBody.h"
 
-IfBodyElement::IfBodyElement(std::vector<Clause> clauses_): clauses(std::move(clauses_)) {
+IfBody::IfBody(std::vector<IfBodyClause> clauses_): clauses(std::move(clauses_)) {
     if (!clauses.empty()) {
         size_range_ = SizeRange(std::numeric_limits<uint64_t>::max(), 0);
         for (const auto& clause: clauses) {
@@ -41,72 +41,39 @@ IfBodyElement::IfBodyElement(std::vector<Clause> clauses_): clauses(std::move(cl
     }
 }
 
-std::optional<Body> IfBodyElement::evaluated(const Environment &environment, const SizeRange& offset) const {
-    auto new_clauses = std::vector<Clause>();
+std::optional<Body> IfBody::evaluated(const Environment &environment, const SizeRange& offset) const {
+    auto new_clauses = std::vector<IfBodyClause>();
     auto changed = false;
-    auto first = true;
-    auto ignore = false;
 
     for (auto& clause: clauses) {
-        if (ignore) {
-            changed = true;
-            break;
-        }
         auto new_expression = clause.condition;
+        auto new_body = clause.body;
         changed = new_expression.evaluate(environment) || changed;
-        auto new_body = clause.body.evaluated(environment, offset);
-        if (new_body) {
-            changed = true;
-        }
-        else {
-            new_body = clause.body;
-        }
+        changed = new_body.evaluate(environment, offset) || changed;
 
-        if (new_body->empty()) {
-            changed = true;
-            continue;
-        }
-
-        if (new_expression.has_value()) {
-            if (!*new_expression.value()) {
-                continue;
-            }
-            else if (first) {
-                return *new_body;
-            }
-        }
-        new_clauses.emplace_back(new_expression, *new_body);
-
-        if (new_expression.has_value() && *new_expression.value()) {
-            ignore = true;
-        }
-
-        first = false;
+        new_clauses.emplace_back(new_expression, new_body);
     }
 
-    if (new_clauses.empty()) {
-        return Body();
-    }
-    else if (changed) {
-        return Body(std::make_shared<IfBodyElement>(new_clauses));
+    if (changed) {
+        return Body(std::make_shared<IfBody>(new_clauses));
     }
     else {
         return {};
     }
 }
 
-void IfBodyElement::serialize(std::ostream &stream, const std::string& prefix) const {
+void IfBody::serialize(std::ostream &stream, const std::string& prefix) const {
     if (empty()) {
         return;
     }
-    if (clauses.front()) {
+    if (clauses.front().is_true()) {
         clauses.front().body.serialize(stream, prefix);
         return;
     }
 
     auto first = true;
     for (auto& clause: clauses) {
-        if (clause) {
+        if (clause.is_true()) {
             stream << prefix << ".else" << std::endl;
         }
         else {
@@ -114,7 +81,7 @@ void IfBodyElement::serialize(std::ostream &stream, const std::string& prefix) c
                 stream << prefix << ".if ";
             }
             else {
-                stream << prefix << ".else if ";
+                stream << prefix << ".else_if ";
             }
             stream << clause.condition << std::endl;
         }
@@ -127,10 +94,37 @@ void IfBodyElement::serialize(std::ostream &stream, const std::string& prefix) c
     stream << prefix << ".end" << std::endl;
 }
 
-void IfBodyElement::collect_objects(std::unordered_set<Object*> &objects) const {
+void IfBody::collect_objects(std::unordered_set<Object*> &objects) const {
     for (auto& clause: clauses) {
         clause.condition.collect_objects(objects);
         clause.body.collect_objects(objects);
     }
+}
+
+Body IfBody::create(const std::vector<IfBodyClause> &clauses) {
+    auto filtered_clauses = std::vector<IfBodyClause>();
+
+    for (auto& clause: clauses) {
+        if (clause.is_false()) {
+            continue;
+        }
+
+        filtered_clauses.emplace_back(clause);
+
+        if (clause.is_true()) {
+            if (filtered_clauses.size() == 1) {
+                return clause.body;
+            }
+            else {
+                break;
+            }
+        }
+    }
+
+    if (filtered_clauses.empty()) {
+        return {};
+    }
+
+    return Body(std::make_shared<IfBody>(filtered_clauses));
 }
 

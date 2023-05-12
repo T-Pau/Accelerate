@@ -36,7 +36,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Target.h"
 #include "FileTokenizer.h"
 #include "Object.h"
-#include "LabelBodyElement.h"
+#include "LabelBody.h"
 
 class Assembler {
 public:
@@ -58,9 +58,9 @@ private:
     std::shared_ptr<Node> parse_instruction_argument(const Token& token);
 
     void add_constant(Object::Visibility visibility, const Token& name, Expression value);
-    [[nodiscard]] std::shared_ptr<LabelBodyElement> create_anonymous_label() const;
-    [[nodiscard]] Expression get_pc(const std::shared_ptr<LabelBodyElement>& label) const;
-    [[nodiscard]] std::shared_ptr<LabelBodyElement> get_trailing_label() const;
+    [[nodiscard]] std::shared_ptr<LabelBody> create_anonymous_label() const;
+    [[nodiscard]] Expression get_pc(const std::shared_ptr<LabelBody>& label) const;
+    [[nodiscard]] std::shared_ptr<LabelBody> get_trailing_label() const;
 
     static Object::Visibility visibility_value(const Token& token);
 

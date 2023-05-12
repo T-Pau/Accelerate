@@ -6,40 +6,53 @@
 #define BODY_H
 
 #include "BodyElement.h"
+#include "Label.h"
 #include "SizeRange.h"
 
-class BodyBlock;
+class BlockBody;
+class DataBody;
 class DataBodyElement;
-class LabelBodyElement;
+class IfBodyClause;
+class LabelBody;
 
 class Body {
 public:
 
     Body();
     explicit Body(const std::shared_ptr<BodyElement>& element);
-    explicit Body(const std::shared_ptr<BodyElement>& element, SizeRange size_range);
+    // Block
+    explicit Body(const std::vector<Body>& elements);
+    // Data
+    explicit Body(std::vector<DataBodyElement> elements);
+    // If
+    explicit Body(const std::vector<IfBodyClause>& clauses);
+    // Label
+    explicit Body(std::shared_ptr<Label> label);
+    // Memory
+    Body(Expression bank, Expression start_address, Expression end_address);
 
-    BodyBlock* as_block() const;
-    DataBodyElement* as_data() const;
-    LabelBodyElement* as_label() const;
+    [[nodiscard]] BlockBody* as_block() const;
+    [[nodiscard]] DataBody* as_data() const;
+    [[nodiscard]] LabelBody* as_label() const;
     void append(const Body& element);
     std::optional<Body> append_sub(Body element);
     [[nodiscard]] std::optional<Body> back() const;
-    void collect_objects(std::unordered_set<Object*>& objects) const {elements->collect_objects(objects);}
-    [[nodiscard]] bool empty() const {return elements->empty();}
-    Body make_unique() const;
-    void encode(std::string& bytes, const Memory* memory = nullptr) const {elements->encode(bytes, memory);}
+    void collect_objects(std::unordered_set<Object*>& objects) const {element->collect_objects(objects);}
+    [[nodiscard]] bool empty() const {return element->empty();}
+    [[nodiscard]] Body make_unique() const;
+    void encode(std::string& bytes, const Memory* memory = nullptr) const {element->encode(bytes, memory);}
     bool evaluate(const Environment& environment, const SizeRange& offset = SizeRange(0));
     [[nodiscard]] std::optional<Body> evaluated (const Environment& environment, const SizeRange& offset) const;
     [[nodiscard]] bool is_block() const {return as_block() != nullptr;}
+    [[nodiscard]] bool is_data() const {return as_data() != nullptr;}
     [[nodiscard]] bool is_label() const {return as_label() != nullptr;}
-    void serialize(std::ostream& stream, const std::string& prefix = "") const {elements->serialize(stream, prefix);}
-    [[nodiscard]] std::optional<uint64_t> size() const {return elements->size();}
-    [[nodiscard]] SizeRange size_range() const {return elements->size_range();}
-    [[nodiscard]] long use_count() const {return elements.use_count();}
+    void serialize(std::ostream& stream, const std::string& prefix = "") const {element->serialize(stream, prefix);}
+    [[nodiscard]] std::optional<uint64_t> size() const {return element->size();}
+    [[nodiscard]] SizeRange size_range() const {return element->size_range();}
+    [[nodiscard]] long use_count() const {return element.use_count();}
 
 private:
-    std::shared_ptr<BodyElement> elements;
+    std::shared_ptr<BodyElement> element;
 };
 
 #endif // BODY_H

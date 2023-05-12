@@ -13,7 +13,7 @@
 #include "InstructionEncoder.h"
 #include "LabelExpression.h"
 #include "TokenNode.h"
-#include "MemoryBodyElement.h"
+#include "MemoryBody.h"
 
 const Symbol BodyParser::symbol_pc = Symbol(".pc");
 const Token BodyParser::token_data = Token(Token::DIRECTIVE, "data");
@@ -177,7 +177,7 @@ void BodyParser::parse_end() {
         throw Exception(".end outside .if");
     }
     pop_body();
-    current_body->append(Body(std::make_shared<IfBodyElement>(ifs.back())));
+    current_body->append(Body(ifs.back()));
     ifs.pop_back();
 }
 
@@ -213,7 +213,7 @@ std::shared_ptr<Node> BodyParser::parse_instruction_argument(const Token& token)
 
 void BodyParser::parse_label(Object::Visibility visibility, const Token& name) {
     auto label = std::make_shared<Label>(name.as_symbol(), SizeRange(current_body->size_range().minimum));
-    current_body->append(Body(std::make_shared<LabelBodyElement>(label)));
+    current_body->append(Body(label));
     add_constant(visibility, name, get_pc(label));
     environment->add(Symbol(".label_offset(" + name.as_string() + ")"), Expression(std::make_shared<LabelExpression>(label)));
 }
@@ -234,7 +234,7 @@ void BodyParser::parse_memory() {
     else {
         tokenizer.unget(token);
     }
-    current_body->append(Body(std::make_shared<MemoryBodyElement>(bank, start_address, end_address)));
+    current_body->append(Body(bank, start_address, end_address));
 }
 
 void BodyParser::parse_assignment(Object::Visibility visibility, const Token &name) {
@@ -313,7 +313,7 @@ void BodyParser::parse_instruction(const Token &name) {
     }
     if (is_anonymous_label) {
         if (label.use_count() > 1) {
-            current_body->append(Body(std::make_shared<LabelBodyElement>(label)));
+            current_body->append(Body(label));
         }
         else {
             next_label -= 1;
@@ -339,12 +339,12 @@ void BodyParser::pop_body() {
 }
 
 void BodyParser::push_clause(Expression condition) {
-    ifs.back().emplace_back(IfBodyElement::Clause(std::move(condition), {}));
+    ifs.back().emplace_back(IfBodyClause(std::move(condition), {}));
     push_body(&ifs.back().back().body);
 }
 
 SizeRange BodyParser::current_size() const {
-    auto size = SizeRange();
+    auto size = SizeRange(0);
 
     for (auto& b: bodies) {
         size += b->size_range();

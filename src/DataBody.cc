@@ -1,5 +1,5 @@
 /*
-DataBodyElement.cc --
+DataBody.cc --
 
 Copyright (C) Dieter Baron
 
@@ -29,19 +29,19 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "DataBodyElement.h"
+#include "DataBody.h"
 
 #include "Exception.h"
 
-DataBodyElement::DataBodyElement(std::vector<Datum> data_): data(std::move(data_)) {
+DataBody::DataBody(std::vector<DataBodyElement> data_): data(std::move(data_)) {
     for (const auto& datum: data) {
         size_range_ += datum.size_range();
     }
 }
 
 
-std::optional<Body> DataBodyElement::evaluated(const Environment &environment, const SizeRange& offset) const {
-    auto new_data = std::vector<Datum>();
+std::optional<Body> DataBody::evaluated(const Environment &environment, const SizeRange& offset) const {
+    auto new_data = std::vector<DataBodyElement>();
     auto changed = false;
 
     for (auto& datum: data) {
@@ -56,13 +56,13 @@ std::optional<Body> DataBodyElement::evaluated(const Environment &environment, c
     }
 
     if (changed) {
-        return Body(std::make_shared<DataBodyElement>(new_data));
+        return Body(std::make_shared<DataBody>(new_data));
     }
 
     return {};
 }
 
-void DataBodyElement::serialize(std::ostream &stream, const std::string& prefix) const {
+void DataBody::serialize(std::ostream &stream, const std::string& prefix) const {
     stream << prefix << ".data ";
     auto first = true;
     for (auto& datum: data) {
@@ -84,7 +84,7 @@ void DataBodyElement::serialize(std::ostream &stream, const std::string& prefix)
     stream << std::endl;
 }
 
-std::optional<Body> DataBodyElement::append_sub(Body body, Body element) {
+std::optional<Body> DataBody::append_sub(Body body, Body element) {
     auto data_element = element.as_data();
 
     if (!data_element) {
@@ -99,7 +99,7 @@ std::optional<Body> DataBodyElement::append_sub(Body body, Body element) {
     return new_body;
 }
 
-void DataBodyElement::encode(std::string &bytes, const Memory* memory) const {
+void DataBody::encode(std::string &bytes, const Memory* memory) const {
     for (auto& datum: data) {
         auto value = datum.expression.value();
         if (!value.has_value()) {
@@ -115,13 +115,19 @@ void DataBodyElement::encode(std::string &bytes, const Memory* memory) const {
     }
 }
 
-void DataBodyElement::collect_objects(std::unordered_set<Object *> &objects) const {
+void DataBody::collect_objects(std::unordered_set<Object *> &objects) const {
     for (auto& datum: data) {
         datum.expression.collect_objects(objects);
     }
 }
 
-std::optional<uint64_t> DataBodyElement::Datum::size() const {
+Body DataBody::appending(const std::vector<DataBodyElement> &elements) {
+    auto new_data = data;
+    new_data.insert(new_data.end(), elements.begin(), elements.end());
+    return Body(new_data);
+}
+
+std::optional<uint64_t> DataBodyElement::size() const {
     if (encoding.has_value()) {
         return encoding->byte_size();
     }

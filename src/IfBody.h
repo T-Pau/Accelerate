@@ -1,5 +1,5 @@
 /*
-IfBodyElement.h --
+IfBody.h --
 
 Copyright (C) Dieter Baron
 
@@ -29,29 +29,32 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef IF_BODY_ELEMENT_H
-#define IF_BODY_ELEMENT_H
+#ifndef IF_BODY_H
+#define IF_BODY_H
 
 #include "BodyElement.h"
 #include "Body.h"
 #include "BaseExpression.h"
 #include "Exception.h"
 
-class IfBodyElement: public BodyElement {
+class IfBodyClause {
 public:
-    class Clause {
-    public:
-        Clause(Expression condition, Body body): condition(std::move(condition)), body(std::move(body)) {}
+    IfBodyClause(Expression condition, Body body): condition(std::move(condition)), body(std::move(body)) {}
 
-        explicit operator bool() const {return condition.has_value() && *condition.value();}
-        Expression condition;
-        Body body;
-    };
+    [[nodiscard]] bool is_true() const {return condition.has_value() && *condition.value();}
+    [[nodiscard]] bool is_false() const {return condition.has_value() && !*condition.value();}
 
-    IfBodyElement() = default;
-    explicit IfBodyElement(std::vector<Clause> clauses);
+    Expression condition;
+    Body body;
+};
 
-    [[nodiscard]] std::shared_ptr<BodyElement> clone() const override {return std::make_shared<IfBodyElement>(clauses);} // TODO: this doesn't copy clauses
+
+class IfBody: public BodyElement {
+public:
+    explicit IfBody(std::vector<IfBodyClause> clauses);
+    static Body create(const std::vector<IfBodyClause>& clasues);
+
+    [[nodiscard]] std::shared_ptr<BodyElement> clone() const override {return std::make_shared<IfBody>(clauses);} // TODO: this doesn't copy clauses
     void collect_objects(std::unordered_set<Object*> &objects) const override;
     [[nodiscard]] bool empty() const override {return clauses.empty();}
     void encode(std::string &bytes, const Memory* memory) const override {throw Exception("unresolved if");}
@@ -60,8 +63,8 @@ public:
     void serialize(std::ostream &stream, const std::string& prefix) const override;
 
 private:
-    std::vector<Clause> clauses;
+    std::vector<IfBodyClause> clauses;
 };
 
 
-#endif // IF_BODY_ELEMENT_H
+#endif // IF_BODY_H

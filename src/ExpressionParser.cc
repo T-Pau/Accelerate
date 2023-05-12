@@ -358,7 +358,7 @@ void ExpressionParser::shift(ExpressionParser::Element next) {
 
 
 Body ExpressionParser::parse_list() {
-    auto list = std::vector<DataBodyElement::Datum>();
+    auto list = std::vector<DataBodyElement>();
 
     while (true) {
         auto expression = parse();
@@ -381,7 +381,7 @@ Body ExpressionParser::parse_list() {
         }
     }
 
-    return Body(std::make_shared<DataBodyElement>(list));
+    return Body(list);
 }
 
 Encoding ExpressionParser::parse_encoding() {

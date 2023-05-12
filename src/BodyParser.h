@@ -10,8 +10,8 @@
 #include "CPU.h"
 #include "ObjectFile.h"
 #include "Body.h"
-#include "IfBodyElement.h"
-#include "LabelBodyElement.h"
+#include "IfBody.h"
+#include "LabelBody.h"
 #include "SizeRange.h"
 
 class BodyParser {
@@ -35,7 +35,7 @@ private:
 
     uint64_t next_label = 0;
     Body body;
-    std::vector<std::vector<IfBodyElement::Clause>> ifs;
+    std::vector<std::vector<IfBodyClause>> ifs;
     std::vector<Body*> bodies;
     Body *current_body = nullptr;
 

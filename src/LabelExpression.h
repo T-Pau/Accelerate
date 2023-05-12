@@ -6,7 +6,7 @@
 #define LABEL_EXPRESSION_H
 
 #include "BaseExpression.h"
-#include "LabelBodyElement.h"
+#include "LabelBody.h"
 
 class LabelExpression: public BaseExpression {
 public:

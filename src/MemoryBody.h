@@ -2,17 +2,17 @@
 // Created by Dieter Baron on 10.05.23.
 //
 
-#ifndef MEMORY_BODY_ELEMENT_H
-#define MEMORY_BODY_ELEMENT_H
+#ifndef MEMORY_BODY_H
+#define MEMORY_BODY_H
 
 #include "Body.h"
 #include "Exception.h"
 
-class MemoryBodyElement: public BodyElement {
+class MemoryBody: public BodyElement {
 public:
-    MemoryBodyElement(Expression bank, Expression start_address, Expression end_address);
+    MemoryBody(Expression bank, Expression start_address, Expression end_address);
 
-    [[nodiscard]] std::shared_ptr<BodyElement> clone() const override {return std::make_shared<MemoryBodyElement>(bank, start_address, end_address);}
+    [[nodiscard]] std::shared_ptr<BodyElement> clone() const override {return std::make_shared<MemoryBody>(bank, start_address, end_address);}
     [[nodiscard]] bool empty() const override {return size().value_or(1) == 0;}
     void encode(std::string &bytes, const Memory* memory) const override;
     [[nodiscard]] std::optional<Body> evaluated(const Environment &environment, const SizeRange& offset) const override;
@@ -24,4 +24,4 @@ public:
 };
 
 
-#endif // MEMORY_BODY_ELEMENT_H
+#endif // MEMORY_BODY_H

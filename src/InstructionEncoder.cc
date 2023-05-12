@@ -96,7 +96,7 @@ Body InstructionEncoder::encode(const Token& name, const std::vector<std::shared
         }
     }
 
-    auto clauses = std::vector<IfBodyElement::Clause>();
+    auto clauses = std::vector<IfBodyClause>();
 
     for (const auto &variant: variants) {
         auto constraints = variant.argument_constraints;
@@ -108,7 +108,7 @@ Body InstructionEncoder::encode(const Token& name, const std::vector<std::shared
 
     // TODO: add error clause
 
-    return Body(std::make_shared<IfBodyElement>(clauses));
+    return Body(clauses);
 }
 
 InstructionEncoder::Variant InstructionEncoder::encode(const Instruction* instruction, const AddressingModeMatcherResult& match, const std::vector<std::shared_ptr<Node>>& arguments, std::shared_ptr<Environment> outer_environment, const SizeRange& offset) const {

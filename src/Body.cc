@@ -6,55 +6,60 @@
 
 #include <utility>
 
-#include "BodyBlock.h"
-#include "DataBodyElement.h"
-#include "EmptyBodyElement.h"
-#include "LabelBodyElement.h"
+#include "BlockBody.h"
+#include "DataBody.h"
+#include "EmptyBody.h"
+#include "IfBody.h"
+#include "LabelBody.h"
+#include "MemoryBody.h"
 
-Body::Body(): elements(std::make_shared<EmptyBodyElement>()) {}
+Body::Body(): element(std::make_shared<EmptyBody>()) {}
 
-Body::Body(const std::shared_ptr<BodyElement> &element) {
-    if (element) {
-        elements = element;
+Body::Body(const std::shared_ptr<BodyElement> &new_element) {
+    if (new_element) {
+        element = new_element;
     }
     else {
-        elements = std::make_shared<EmptyBodyElement>();
+        element = std::make_shared<EmptyBody>();
     }
 }
 
-Body::Body(const std::shared_ptr<BodyElement> &element, SizeRange size_range) {
-    if (element) {
-        elements = element;
-        elements->size_range_ = size_range;
-    }
-    else {
-        elements = std::make_shared<EmptyBodyElement>();
-    }
+Body::Body(const std::vector<Body>& elements) {
+    *this = BlockBody::create(elements);
 }
 
+Body::Body(std::vector<DataBodyElement> elements): element(std::make_shared<DataBody>(std::move(elements))) {}
 
-void Body::append(const Body& element) {
-    if (element.empty()) {
+Body::Body(const std::vector<IfBodyClause>& clauses) {
+    *this = IfBody::create(clauses);
+}
+
+Body::Body(std::shared_ptr<Label> label): element(std::make_shared<LabelBody>(std::move(label))) {}
+
+Body::Body(Expression bank, Expression start_address, Expression end_address): element(std::make_shared<MemoryBody>(std::move(bank), std::move(start_address), std::move(end_address))) {}
+
+void Body::append(const Body& new_element) {
+    if (new_element.empty()) {
         return;
     }
-    if (!elements) {
-        elements = element.elements;
+    if (element->empty()) {
+        element = new_element.element;
     }
     else {
-        auto new_body = append_sub(element);
+        auto new_body = append_sub(new_element);
         if (new_body) {
-            elements = new_body->elements;
+            element = new_body->element;
         }
         else {
-            elements = std::make_shared<BodyBlock>(std::vector<Body>({*this, element}));
+            element = std::make_shared<BlockBody>(std::vector<Body>({*this, new_element}));
         }
     }
 }
 
 bool Body::evaluate(const Environment &environment, const SizeRange& offset) {
-    auto new_elements = elements->evaluated(environment, offset);
+    auto new_elements = element->evaluated(environment, offset);
     if (new_elements) {
-        elements = new_elements->elements;
+        element = new_elements->element;
         return true;
     }
     else {
@@ -77,30 +82,30 @@ std::optional<Body> Body::back() const {
 }
 
 std::optional<Body> Body::evaluated(const Environment &environment, const SizeRange& offset) const {
-    return elements->evaluated(environment, offset);
+    return element->evaluated(environment, offset);
 }
 
-BodyBlock *Body::as_block() const {
-    return std::dynamic_pointer_cast<BodyBlock>(elements).get();
+BlockBody *Body::as_block() const {
+    return std::dynamic_pointer_cast<BlockBody>(element).get();
 }
 
-DataBodyElement *Body::as_data() const {
-    return std::dynamic_pointer_cast<DataBodyElement>(elements).get();
+DataBody *Body::as_data() const {
+    return std::dynamic_pointer_cast<DataBody>(element).get();
 }
 
-LabelBodyElement *Body::as_label() const {
-    return std::dynamic_pointer_cast<LabelBodyElement>(elements).get();
+LabelBody *Body::as_label() const {
+    return std::dynamic_pointer_cast<LabelBody>(element).get();
 }
 
-std::optional<Body> Body::append_sub(Body element) {
-    return elements->append_sub(*this, std::move(element));
+std::optional<Body> Body::append_sub(Body new_element) {
+    return element->append_sub(*this, std::move(new_element));
 }
 
 Body Body::make_unique() const {
-    if (elements.use_count() == 1) {
+    if (element.use_count() == 1) {
         return *this;
     }
     else {
-        return Body(elements->clone());
+        return Body(element->clone());
     }
 }

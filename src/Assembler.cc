@@ -39,7 +39,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "TokenNode.h"
 #include "ExpressionParser.h"
 #include "VariableExpression.h"
-#include "LabelBodyElement.h"
+#include "LabelBody.h"
 
 bool Assembler::initialized = false;
 Symbol Assembler::symbol_opcode;
