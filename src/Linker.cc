@@ -38,17 +38,17 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "TargetParser.h"
 
 void Linker::link() {
-    program.evaluate(*program.local_environment);
+    program->evaluate(*program->local_environment);
 
     for (auto& library: libraries) {
-        library.evaluate(*library.local_environment);
-        program.evaluate(*library.global_environment);
+        library->evaluate(*library->local_environment);
+        program->evaluate(*library->global_environment);
     }
 
     std::unordered_set<Object*> new_objects;
 
     // Collect all objects from main program.
-    for (auto object : program.all_objects()) {
+    for (auto object : program->all_objects()) {
         if (add_object(object)) {
             new_objects.insert(object);
         }

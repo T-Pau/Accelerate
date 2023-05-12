@@ -42,13 +42,13 @@ class ObjectFileParser: public FileParser {
 public:
     ObjectFileParser();
 
-    ObjectFile parse(Symbol filename);
+    std::shared_ptr<ObjectFile> parse(Symbol filename);
 
 protected:
     void parse_directive(const Token& directive) override;
 
 private:
-    ObjectFile file;
+    std::shared_ptr<ObjectFile> file;
 
     void parse_constant();
     void parse_format_version();

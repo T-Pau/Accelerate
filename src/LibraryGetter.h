@@ -36,13 +36,13 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ObjectFile.h"
 #include "ObjectFileParser.h"
 
-class LibraryGetter: public Getter<ObjectFile> {
+class LibraryGetter: public Getter<std::shared_ptr<ObjectFile>> {
 public:
     static LibraryGetter global;
 
 protected:
     std::string filename_extension() const override {return ".lib";}
-    ObjectFile parse(Symbol name, Symbol filename) override {return ObjectFileParser().parse(filename);}
+    std::shared_ptr<ObjectFile> parse(Symbol name, Symbol filename) override {return ObjectFileParser().parse(filename);}
 };
 
 #endif // LIBRARY_GETTER_H

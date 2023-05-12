@@ -56,9 +56,9 @@ protected:
 private:
     class File {
     public:
-        File(std::string name, ObjectFile file): name(std::move(name)), file(std::move(file)) {}
+        File(std::string name, std::shared_ptr<ObjectFile> file): name(std::move(name)), file(std::move(file)) {}
         std::string name;
-        ObjectFile file;
+        std::shared_ptr<ObjectFile> file;
     };
 
     static std::vector<Commandline::Option> options;

@@ -59,7 +59,7 @@ public:
 
     void add_constant(Symbol name, Object::Visibility visibility, Expression value);
     void add_object(const Object* object);
-    void add_object_file(const ObjectFile& file);
+    void add_object_file(const std::shared_ptr<ObjectFile>& file);
 
     [[nodiscard]] const Object* object(Symbol name) const;
     [[nodiscard]] std::vector<Object*> all_objects();
@@ -89,5 +89,6 @@ private:
 };
 
 std::ostream& operator<<(std::ostream& stream, const ObjectFile& list);
+std::ostream& operator<<(std::ostream& stream, const std::shared_ptr<ObjectFile>& list);
 
 #endif // OBJECT_FILE_H

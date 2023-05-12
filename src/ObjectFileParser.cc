@@ -79,8 +79,8 @@ ObjectFileParser::ObjectFileParser() {
     initialize();
 }
 
-ObjectFile ObjectFileParser::parse(Symbol filename) {
-    file = ObjectFile();
+std::shared_ptr<ObjectFile> ObjectFileParser::parse(Symbol filename) {
+    file = std::make_shared<ObjectFile>();
 
     if (!parse_file(filename)) {
         throw Exception("can't parse object file '%s'", filename.c_str());
@@ -104,7 +104,7 @@ void ObjectFileParser::parse_constant() {
     auto value = (*parameters)[token_value]->as_scalar();
     auto visibility = visibility_from_name((*parameters)[token_visibility]->as_singular_scalar()->token());
     auto value_tokenizer = SequenceTokenizer(value->tokens);
-    file.add_constant(name.as_symbol(), visibility, ExpressionParser(value_tokenizer).parse());
+    file->add_constant(name.as_symbol(), visibility, ExpressionParser(value_tokenizer).parse());
 }
 
 
@@ -119,7 +119,7 @@ void ObjectFileParser::parse_object() {
     }
     auto visibility = visibility_from_name((*parameters)[token_visibility]->as_singular_scalar()->token());
 
-    auto object = file.create_object(section.as_symbol(), visibility, name);
+    auto object = file->create_object(section.as_symbol(), visibility, name);
 
     auto alignment_value = parameters->get_optional(token_alignment);
     if (alignment_value) {
@@ -165,5 +165,5 @@ void ObjectFileParser::parse_format_version() {
 void ObjectFileParser::parse_target() {
     auto name = tokenizer.expect(Token::STRING, TokenGroup::newline);
 
-    file.target = &Target::get(name.as_symbol());
+    file->target = &Target::get(name.as_symbol());
 }

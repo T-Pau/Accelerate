@@ -777,7 +777,7 @@ file 4510.o {} <inline>
     section: code
     visibility: global
     body <
-        .data $63, (($1234-(test_bsr+$00))-$02):-2
+        .data $63, (($1234-test_bsr)-$02):-2
     >
 }
 .object test_bvc {

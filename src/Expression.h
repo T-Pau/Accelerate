@@ -72,6 +72,7 @@ public:
     [[nodiscard]] std::optional<Value> minimum_value() const {return expression->minimum_value();}
     void serialize(std::ostream& stream) const;
     [[nodiscard]] std::optional<Value> value() const {return expression->value();}
+    [[nodiscard]] Symbol variable_name() const;
 
     [[nodiscard]] std::optional<Expression> evaluated(const Environment& environment) const {return expression->evaluated(environment);}
 

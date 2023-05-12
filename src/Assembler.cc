@@ -63,7 +63,7 @@ void Assembler::initialize() {
     }
 }
 
-ObjectFile Assembler::parse(Symbol file_name) {
+std::shared_ptr<ObjectFile> Assembler::parse(Symbol file_name) {
     initialize();
     target.cpu->setup(tokenizer);
     ExpressionParser::setup(tokenizer);
@@ -77,9 +77,10 @@ ObjectFile Assembler::parse(Symbol file_name) {
     tokenizer.add_literal(token_section);
     tokenizer.push(file_name);
 
-    object_file.target = &target;
+    object_file = std::make_shared<ObjectFile>();
+    object_file->target = &target;
 
-    file_environment = std::make_shared<Environment>();
+    file_environment = std::make_shared<Environment>(object_file->local_environment);
 
     while (!tokenizer.ended()) {
         try {
@@ -147,7 +148,7 @@ ObjectFile Assembler::parse(Symbol file_name) {
         }
     }
 
-    object_file.evaluate(*file_environment);
+    object_file->evaluate(*file_environment);
 
     return object_file;
 }
@@ -156,13 +157,13 @@ void Assembler::add_constant(Object::Visibility visibility, const Token& name, E
     value.evaluate(*file_environment);
     switch (visibility) {
         case Object::OBJECT:
+            file_environment->add(name.as_symbol(), value);
             break;
         case Object::LOCAL:
         case Object::GLOBAL:
-            object_file.add_constant(name.as_symbol(), visibility, value);
+            object_file->add_constant(name.as_symbol(), visibility, value);
             break;
     }
-    file_environment->add(name.as_symbol(), value);
 }
 
 void Assembler::parse_assignment(Object::Visibility visibility, const Token &name) {
@@ -191,7 +192,7 @@ Object::Visibility Assembler::visibility_value(const Token& token) {
 }
 
 void Assembler::parse_symbol(Object::Visibility visibility, const Token &name) {
-    auto object = object_file.create_object(current_section, visibility, name);
+    auto object = object_file->create_object(current_section, visibility, name);
 
     while (true) {
         auto token = tokenizer.next();
@@ -201,7 +202,7 @@ void Assembler::parse_symbol(Object::Visibility visibility, const Token &name) {
         }
         else if (token == Token::curly_open) {
             // TODO: error if .reserved
-            object->body = BodyParser(tokenizer, object->name.as_symbol(), target.cpu, &object_file, file_environment).parse();
+            object->body = BodyParser(tokenizer, object->name.as_symbol(), target.cpu, object_file.get(), file_environment).parse();
             break;
         }
         // TODO: parameters

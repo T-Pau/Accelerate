@@ -1,5 +1,10 @@
 .include "c64.inc"
 
+.section zero_page
+
+.local ptr .reserve 2
+
+
 .section code
 
 .global start {
@@ -23,7 +28,3 @@ end:
 .local message {
     .data $41, $53, $53, $45, $4d, $42, $4c, $45, $44, $20, $42, $59, $20, $41, $43, $43, $45, $4c, $45, $52, $41, $54, $45, $21, $00
 }
-
-.section zero_page
-
-.local ptr .reserve 2

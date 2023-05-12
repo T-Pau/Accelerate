@@ -161,51 +161,98 @@ Expression BinaryExpression::create(const Expression& left, Expression::BinaryOp
     }
     else {
         switch (operation) {
+            case Expression::BinaryOperation::ADD: {
+                if (right.has_value() && right.value() == Value(uint64_t(0))) {
+                    // N + 0 -> N
+                    return left;
+                }
+                if (left.has_value() && left.value() == Value(uint64_t(0))) {
+                    // 0 + N -> N
+                    return right;
+                }
+                break;
+            }
+
+            case Expression::BinaryOperation::MULTIPLY: {
+                if (left.has_value() && left.value() == Value(uint64_t(1))) {
+                    // 0 * N -> 0
+                    return left;
+                }
+                if (left.has_value() && left.value() == Value(uint64_t(1))) {
+                    // 1 * N -> N
+                    return right;
+                }
+                if (right.has_value() && right.value() == Value(uint64_t(1))) {
+                    // N * 0 -> 0
+                    return right;
+                }
+                if (right.has_value() && right.value() == Value(uint64_t(1))) {
+                    // N * 1 -> N
+                    return left;
+                }
+                break;
+            }
+
+            case Expression::BinaryOperation::DIVIDE: {
+                if (right.has_value() && right.value() == Value(uint64_t(1))) {
+                    // N / 1 -> N
+                    return left;
+                }
+                break;
+            }
+
             case Expression::BinaryOperation::SUBTRACT: {
+                if (right.has_value() && right.value() == Value(uint64_t(0))) {
+                    // N - 0 -> N
+                    return left;
+                }
+                if (left.has_value() && left.value() == Value(uint64_t(0))) {
+                    // 0 - N -> -N
+                    return {Expression::UnaryOperation::MINUS, right};
+                }
                 // This special case is for resolving relative addressing within an object.
                 if (left.is_binary() && right.is_binary()) {
                     // (object_name + N) - (object_name + M) -> N - M
                     auto left_binary = left.as_binary();
                     auto right_binary = right.as_binary();
 
-                    if (left_binary->operation == Expression::BinaryOperation::ADD && right_binary->operation == Expression::BinaryOperation::ADD &&
-                        left_binary->left.is_variable() && right_binary->left.is_variable()) {
-                        auto left_left = left_binary->left.as_variable();
-                        auto right_left = right_binary->left.as_variable();
-                        if (left_left->variable() == right_left->variable()) {
+                    if (left_binary->operation == Expression::BinaryOperation::ADD && right_binary->operation == Expression::BinaryOperation::ADD) {
+                        auto left_variable = left_binary->left.variable_name();
+                        auto right_variable = right_binary->left.variable_name();
+                        if (!left_variable.empty() && left_variable == right_variable) {
                             return {left_binary->right, operation, right_binary->right};
                         }
                     }
                 }
-                else if (left.is_variable() && right.is_binary()) {
+                else if (right.is_binary()) {
                     // object_name - (object_name + M) -> -M
-                    auto left_variable = left.as_variable();
+                    auto left_variable = left.variable_name();
                     auto right_binary = right.as_binary();
 
-                    if (right_binary->operation == Expression::BinaryOperation::ADD && right_binary->left.is_variable()) {
-                        auto right_left = right_binary->left.as_variable();
-                        if (left_variable->variable() == right_left->variable()) {
+                    if (!left_variable.empty() && right_binary->operation == Expression::BinaryOperation::ADD) {
+                        auto right_variabel = right_binary->left.variable_name();
+                        if (left_variable == right_variabel) {
                             return {Expression::UnaryOperation::MINUS, right_binary->right};
                         }
                     }
                 }
-                else if (left.is_binary() && right.is_variable()) {
+                else if (left.is_binary()) {
                     // (object_name + N) - object_name -> N
                     auto left_binary = left.as_binary();
-                    auto right_variable = right.as_variable();
+                    auto right_variable = right.variable_name();
 
-                    if (left_binary->operation == Expression::BinaryOperation::ADD && left_binary->left.is_variable()) {
-                        auto left_left = left_binary->left.as_variable();
-                        if (left_left->variable() == right_variable->variable()) {
+                    if (!right_variable.empty() && left_binary->operation == Expression::BinaryOperation::ADD) {
+                        auto left_variable = left_binary->left.variable_name();
+                        if (left_variable == right_variable) {
                             return left_binary->right;
                         }
                     }
                 }
-                else if (left.is_variable() && right.is_variable()) {
+                else {
                     // object_name - object_name -> 0
-                    auto left_variable = left.as_variable();
-                    auto right_variable = right.as_variable();
-                    if (left_variable->variable() == right_variable->variable()) {
+                    auto left_variable = left.variable_name();
+                    auto right_variable = right.variable_name();
+                    if (!left_variable.empty() && left_variable == right_variable) {
                         return Expression(uint64_t(0));
                     }
                 }
@@ -230,7 +277,6 @@ Expression BinaryExpression::create(const Expression& left, Expression::BinaryOp
                 }
                 break;
 
-            // TODO: optimization for + or - 0, * or / 1
             default:
                 break;
         }

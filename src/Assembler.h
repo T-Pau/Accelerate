@@ -42,7 +42,7 @@ class Assembler {
 public:
     explicit Assembler(const Target& target): target(target) {}
 
-    ObjectFile parse(Symbol file_name);
+    std::shared_ptr<ObjectFile> parse(Symbol file_name);
 
     static Symbol symbol_opcode;
 
@@ -70,7 +70,7 @@ private:
     std::shared_ptr<Environment> file_environment;
 
     FileTokenizer tokenizer;
-    ObjectFile object_file;
+    std::shared_ptr<ObjectFile> object_file;
 
     static void initialize();
     static bool initialized;

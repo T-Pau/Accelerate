@@ -43,6 +43,11 @@ std::ostream& operator<<(std::ostream& stream, const ObjectFile& file) {
     return stream;
 }
 
+std::ostream& operator<<(std::ostream& stream, const std::shared_ptr<ObjectFile>& file) {
+    file->serialize(stream);
+    return stream;
+}
+
 std::ostream& operator<<(std::ostream& stream, const ObjectFile::Constant& file) {
     file.serialize(stream);
     return stream;
@@ -85,11 +90,11 @@ void ObjectFile::add_constant(Symbol name, Object::Visibility visibility, Expres
     add_to_environment(pair.first->second);
 }
 
-void ObjectFile::add_object_file(const ObjectFile &file) {
-    for (const auto& pair: file.constants) {
+void ObjectFile::add_object_file(const std::shared_ptr<ObjectFile> &file) {
+    for (const auto& pair: file->constants) {
         add_constant(pair.second.name, pair.second.visibility, pair.second.value);
     }
-    for (const auto& pair: file.objects) {
+    for (const auto& pair: file->objects) {
         auto own_object = insert_object({this, &pair.second});
         //add_object(own_object);
     }

@@ -43,8 +43,8 @@ public:
     Linker(): target(Target::empty) {}
     explicit Linker(const Target& target): target(target), memory(target.map.initialize_memory()) {}
 
-    void add_file(const ObjectFile& file) {program.add_object_file(file);}
-    void add_library(ObjectFile library) {libraries.emplace_back(std::move(library));}
+    void add_file(const std::shared_ptr<ObjectFile>& file) {program->add_object_file(file);}
+    void add_library(std::shared_ptr<ObjectFile> library) {libraries.emplace_back(std::move(library));}
 
     void link();
     void output(const std::string& file_name);
@@ -53,8 +53,8 @@ public:
 
 private:
 
-    ObjectFile program;
-    std::vector<ObjectFile> libraries;
+    std::shared_ptr<ObjectFile> program;
+    std::vector<std::shared_ptr<ObjectFile>> libraries;
 
     bool add_object(Object* object);
 

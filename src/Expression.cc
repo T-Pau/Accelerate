@@ -52,6 +52,18 @@ void Expression::serialize(std::ostream &stream) const {
     }
 }
 
+Symbol Expression::variable_name() const {
+    auto variable = as_variable();
+    if (variable) {
+        return variable->symbol;
+    }
+    auto object = as_object();
+    if (object) {
+        return object->object->name.as_symbol();
+    }
+    return {};
+}
+
 
 std::ostream& operator<<(std::ostream& stream, const Expression& expression) {
     expression.serialize(stream);
