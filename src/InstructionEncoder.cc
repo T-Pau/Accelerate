@@ -41,8 +41,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "BinaryExpression.h"
 #include "Util.h"
 
-std::shared_ptr<BodyElement>
-InstructionEncoder::encode(const Token& name, const std::vector<std::shared_ptr<Node>>& arguments, const std::shared_ptr<Environment>& environment) {
+Body InstructionEncoder::encode(const Token& name, const std::vector<std::shared_ptr<Node>>& arguments, const std::shared_ptr<Environment>& environment, const SizeRange& offset) {
     const auto instruction = cpu->instruction(name.as_symbol());
     if (instruction == nullptr) {
         throw ParseException(name, "unknown instruction '%s'", name.as_string().c_str());
@@ -60,7 +59,7 @@ InstructionEncoder::encode(const Token& name, const std::vector<std::shared_ptr<
     for (const auto &match: matches) {
         if (instruction->has_addressing_mode(match.addressing_mode)) {
             supported = true;
-            auto variant = encode(instruction, match, arguments, environment);
+            auto variant = encode(instruction, match, arguments, environment, offset);
             auto constraint =  variant.argument_constraints.value() && variant.encoding_constraints.value();
 
             if (constraint.has_value() && !*constraint) {
@@ -97,22 +96,22 @@ InstructionEncoder::encode(const Token& name, const std::vector<std::shared_ptr<
         }
     }
 
-    auto body = std::make_shared<IfBodyElement>();
+    auto clauses = std::vector<IfBodyElement::Clause>();
 
     for (const auto &variant: variants) {
         auto constraints = variant.argument_constraints;
         if (&variant != &variants.back()) {
             constraints = Expression(constraints, Expression::BinaryOperation::LOGICAL_AND, variant.encoding_constraints);
         }
-        body->append(constraints, Body(variant.data));
+        clauses.emplace_back(constraints, variant.data);
     }
 
     // TODO: add error clause
 
-    return body;
+    return Body(std::make_shared<IfBodyElement>(clauses));
 }
 
-InstructionEncoder::Variant InstructionEncoder::encode(const Instruction* instruction, const AddressingModeMatcherResult& match, const std::vector<std::shared_ptr<Node>>& arguments, std::shared_ptr<Environment> outer_environment) const {
+InstructionEncoder::Variant InstructionEncoder::encode(const Instruction* instruction, const AddressingModeMatcherResult& match, const std::vector<std::shared_ptr<Node>>& arguments, std::shared_ptr<Environment> outer_environment, const SizeRange& offset) const {
     auto environment = Environment(std::move(outer_environment));
 
     const auto addressing_mode = cpu->addressing_mode(match.addressing_mode);
@@ -186,9 +185,10 @@ InstructionEncoder::Variant InstructionEncoder::encode(const Instruction* instru
 
     environment.add(Assembler::symbol_opcode, Expression(instruction->opcode(match.addressing_mode)));
 
-    variant.data = BodyElement::evaluate(addressing_mode->encoding, environment);
+    variant.data = addressing_mode->encoding;
+    variant.data.evaluate(environment, offset);
 
-    auto data = std::dynamic_pointer_cast<DataBodyElement>(variant.data);
+    auto data = variant.data.as_data();
     for (const auto& datum: data->data) {
         if (datum.encoding.has_value()) {
             auto lower = datum.encoding->minimum_value();

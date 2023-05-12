@@ -91,7 +91,7 @@ void ObjectFile::add_object_file(const ObjectFile &file) {
     }
     for (const auto& pair: file.objects) {
         auto own_object = insert_object({this, &pair.second});
-        add_object(own_object);
+        //add_object(own_object);
     }
 }
 
@@ -180,7 +180,7 @@ Object* ObjectFile::insert_object(Object object) {
     auto name = object.name;
     auto pair = objects.insert({object.name.as_symbol(), std::move(object)});
     if (!pair.second) {
-        throw ParseException(name, "redefinition of object");
+        throw ParseException(name, "redefinition of object %s", name.as_string().c_str());
     }
     auto own_object = &pair.first->second;
     add_to_environment(own_object);

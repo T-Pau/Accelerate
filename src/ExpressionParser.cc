@@ -357,8 +357,8 @@ void ExpressionParser::shift(ExpressionParser::Element next) {
 }
 
 
-std::unique_ptr<DataBodyElement> ExpressionParser::parse_list() {
-    auto list = std::make_unique<DataBodyElement>();
+Body ExpressionParser::parse_list() {
+    auto list = std::vector<DataBodyElement::Datum>();
 
     while (true) {
         auto expression = parse();
@@ -371,7 +371,7 @@ std::unique_ptr<DataBodyElement> ExpressionParser::parse_list() {
             token = tokenizer.next();
         }
 
-        list->append(expression, encoding);
+        list.emplace_back(expression, encoding);
 
         if (!token || token.is_newline()) {
             break;
@@ -381,7 +381,7 @@ std::unique_ptr<DataBodyElement> ExpressionParser::parse_list() {
         }
     }
 
-    return list;
+    return Body(std::make_shared<DataBodyElement>(list));
 }
 
 Encoding ExpressionParser::parse_encoding() {

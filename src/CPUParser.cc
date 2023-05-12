@@ -175,9 +175,8 @@ void CPUParser::parse_addressing_mode() {
 
     auto encoding_definition = definition->get_optional(token_encoding);
     if (encoding_definition == nullptr) {
-        auto encoding = std::make_unique<DataBodyElement>();
-        encoding->append(Expression(token_opcode));
-        addressing_mode.encoding = std::move(encoding);
+        auto data = std::vector<DataBodyElement::Datum>({DataBodyElement::Datum(Expression(token_opcode), {})});
+        addressing_mode.encoding = Body(std::make_shared<DataBodyElement>(data));
     }
     else if (encoding_definition->is_scalar()) {
         auto encoding_tokens = std::vector<Token>();

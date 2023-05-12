@@ -134,7 +134,7 @@ void Linker::output(const std::string &file_name) {
     body.evaluate(environment);
 
     auto bytes = std::string();
-    bytes.reserve(body.minimum_size());
+    bytes.reserve(body.size_range().minimum);
 
     body.encode(bytes, &memory);
 

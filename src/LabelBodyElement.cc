@@ -4,14 +4,10 @@
 
 #include "LabelBodyElement.h"
 
-std::optional<Value> LabelBodyElement::value() const {
-    if (offset.minimum == offset.maximum) {
-        return Value(offset.minimum);
-    }
-    else {
-        return {};
-    }
-}
+#include <iostream>
+
+#include "Body.h"
+
 
 void LabelBodyElement::serialize(std::ostream &stream, const std::string& prefix) const {
     if (prefix.ends_with("  ")) {
@@ -20,19 +16,14 @@ void LabelBodyElement::serialize(std::ostream &stream, const std::string& prefix
     else {
         stream << prefix;
     }
-    stream << name << ":" << std::endl;
+    stream << label->name << ":" << std::endl;
 }
 
-BodyElement::EvaluationResult LabelBodyElement::evaluate(const Environment &environment, uint64_t new_minimum_offset, uint64_t new_maximum_offset) const {
-    offset.minimum = new_minimum_offset;
-    offset.maximum = new_maximum_offset;
+std::optional<Body> LabelBodyElement::evaluated(const Environment &environment, const SizeRange& new_offset) const {
+    label->offset = new_offset;
 
-    return {{}, new_minimum_offset, new_maximum_offset};
-}
-
-std::optional<Value> LabelBodyElement::maximum_value() const {
-    if (offset.maximum) {
-        return Value(*offset.maximum);
+    if (label->offset.size().has_value()) {
+        return Body();
     }
     else {
         return {};

@@ -4,52 +4,36 @@
 
 #include "MemoryBodyElement.h"
 
-uint64_t MemoryBodyElement::maximum_size() const {
-    auto s = start_address.minimum_value();
-    auto minimum_start = s ? s->unsigned_value() : 0;
-    auto e = end_address.maximum_value();
-    if (!e) {
-        return std::numeric_limits<uint64_t>::max();
+MemoryBodyElement::MemoryBodyElement(Expression bank_, Expression start_address_, Expression end_address_): bank(std::move(bank_)), start_address(std::move(start_address_)), end_address(std::move(end_address_)) {
+    auto minimum_start = start_address.minimum_value().value_or(Value(uint64_t(0)));
+    auto maximum_end = end_address.maximum_value();
+    if (!maximum_end) {
+        size_range_.maximum = maximum_end->unsigned_value() - minimum_start.unsigned_value();
     }
 
-    return e->unsigned_value() - minimum_start;
-}
-
-uint64_t MemoryBodyElement::minimum_size() const {
-    auto s = start_address.maximum_value();
-    auto e = end_address.minimum_value();
-    if (!s || !e) {
-        return 0;
+    auto maximum_start = start_address.maximum_value();
+    auto minimum_end = end_address.minimum_value();
+    if (maximum_start && minimum_end) {
+        size_range_.minimum = maximum_start->unsigned_value() - minimum_end->unsigned_value();
     }
-    return e->unsigned_value() - s->unsigned_value();
 }
 
-BodyElement::EvaluationResult MemoryBodyElement::evaluate(const Environment &environment, uint64_t minimum_offset, uint64_t maximum_offset) const {
-    auto result = EvaluationResult(minimum_offset, maximum_offset);
+std::optional<Body> MemoryBodyElement::evaluated(const Environment &environment, const SizeRange& offset) const {
     auto new_bank = bank.evaluated(environment);
     auto new_start_address = start_address.evaluated(environment);
     auto new_end_address = end_address.evaluated(environment);
     if (new_bank || new_start_address || new_end_address) {
-        result.element = std::make_shared<MemoryBodyElement>(new_bank.value_or(bank), new_start_address.value_or(start_address), new_end_address.value_or(end_address));
+        return Body(std::make_shared<MemoryBodyElement>(new_bank.value_or(bank), new_start_address.value_or(start_address), new_end_address.value_or(end_address)));
     }
-    result.minimum_offset += minimum_size();
-    result.maximum_offset += maximum_size();
-
-    return result;
+    else {
+        return {};
+    }
 }
 
 void MemoryBodyElement::serialize(std::ostream &stream, const std::string &prefix) const {
     stream << prefix << ".memory " << start_address << ", " << end_address << std::endl;
 }
 
-std::optional<uint64_t> MemoryBodyElement::size() const {
-    if (start_address.has_value() && end_address.has_value()) {
-        return end_address.value()->unsigned_value() - start_address.value()->unsigned_value();
-    }
-    else {
-        return {};
-    }
-}
 
 void MemoryBodyElement::encode(std::string &bytes, const Memory *memory) const {
     if (memory == nullptr) {

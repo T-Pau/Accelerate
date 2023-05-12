@@ -5,33 +5,24 @@
 #ifndef LABEL_BODY_ELEMENT_H
 #define LABEL_BODY_ELEMENT_H
 
-#include "BodyElement.h"
+#include "Body.h"
+#include "Label.h"
 #include "Value.h"
 #include "Exception.h"
 #include "SizeRange.h"
 
 class LabelBodyElement: public BodyElement {
 public:
-    LabelBodyElement(Symbol name, SizeRange offset): name(name), offset(offset) {}
+    explicit LabelBodyElement(std::shared_ptr<Label> label): label(std::move(label)) {}
 
     void encode(std::string &bytes, const Memory* memory) const override {}
-    [[nodiscard]] bool empty() const override {return offset.minimum == offset.maximum;}
+    [[nodiscard]] bool empty() const override {return label->offset.minimum == label->offset.maximum;}
     [[nodiscard]] std::shared_ptr<BodyElement> clone() const override {throw Exception("can't clone label");}
-    [[nodiscard]] EvaluationResult evaluate(const Environment &environment, uint64_t minimum_offset, uint64_t maximum_offset) const override;
-    [[nodiscard]] uint64_t minimum_size() const override {return 0;}
-    [[nodiscard]] uint64_t maximum_size() const override {return 0;}
-    [[nodiscard]] std::optional<uint64_t> size() const override {return 0;}
-
-    [[nodiscard]] Value minimum_value() const {return Value(offset.minimum);}
-    [[nodiscard]] std::optional<Value> maximum_value() const;
-    [[nodiscard]] std::optional<Value> value() const;
+    [[nodiscard]] std::optional<Body> evaluated(const Environment &environment, const SizeRange& offset) const override;
 
     void serialize(std::ostream &stream, const std::string& prefix) const override;
 
-    const Symbol name;
-
-private:
-    mutable SizeRange offset;
+    std::shared_ptr<Label> label;
 };
 
 

@@ -50,7 +50,7 @@ public:
 
     Expression parse() { top = Element({}, START); return do_parse();}
     Expression parse(Expression& left) { top = Element(left, 0); return do_parse();}
-    std::unique_ptr<DataBodyElement> parse_list();
+    Body parse_list();
 
 private:
     class BinaryOperator {

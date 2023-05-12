@@ -5,21 +5,18 @@
 #ifndef MEMORY_BODY_ELEMENT_H
 #define MEMORY_BODY_ELEMENT_H
 
-#include "BodyElement.h"
+#include "Body.h"
 #include "Exception.h"
 
 class MemoryBodyElement: public BodyElement {
 public:
-    MemoryBodyElement(Expression bank, Expression start_address, Expression end_address): bank(std::move(bank)), start_address(std::move(start_address)), end_address(std::move(end_address)) {}
+    MemoryBodyElement(Expression bank, Expression start_address, Expression end_address);
 
     [[nodiscard]] std::shared_ptr<BodyElement> clone() const override {return std::make_shared<MemoryBodyElement>(bank, start_address, end_address);}
     [[nodiscard]] bool empty() const override {return size().value_or(1) == 0;}
     void encode(std::string &bytes, const Memory* memory) const override;
-    [[nodiscard]] EvaluationResult evaluate(const Environment &environment, uint64_t minimum_offset, uint64_t maximum_offset) const override;
-    [[nodiscard]] uint64_t maximum_size() const override;
-    [[nodiscard]] uint64_t minimum_size() const override;
+    [[nodiscard]] std::optional<Body> evaluated(const Environment &environment, const SizeRange& offset) const override;
     void serialize(std::ostream &stream, const std::string &prefix) const override;
-    [[nodiscard]] std::optional<uint64_t> size() const override;
 
     Expression bank;
     Expression start_address;

@@ -67,9 +67,7 @@ private:
     const Target& target;
 
     Symbol current_section;
-    Object* current_object = nullptr;
     std::shared_ptr<Environment> file_environment;
-    std::shared_ptr<Environment> current_environment;
 
     FileTokenizer tokenizer;
     ObjectFile object_file;

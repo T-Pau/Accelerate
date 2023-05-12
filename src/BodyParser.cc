@@ -127,21 +127,21 @@ void BodyParser::add_constant(Object::Visibility visibility, Token name, const E
 }
 
 
-std::shared_ptr<LabelBodyElement> BodyParser::get_label(bool& is_anonymous) {
-    auto trailing_label = std::dynamic_pointer_cast<LabelBodyElement>(current_body->back());
-    if (trailing_label) {
+std::shared_ptr<Label> BodyParser::get_label(bool& is_anonymous) {
+    auto trailing_label = current_body->back();
+    if (trailing_label.has_value() && trailing_label->is_label()) {
         is_anonymous = false;
-        return trailing_label;
+        return trailing_label->as_label()->label;
     }
     next_label += 1;
     auto name = Symbol(".label_" + std::to_string(next_label));
     is_anonymous = true;
-    return std::make_shared<LabelBodyElement>(name, current_size());
+    return std::make_shared<Label>(name, current_size());
 }
 
 
-Expression BodyParser::get_pc(const std::shared_ptr<LabelBodyElement>& label) const {
-    return {Expression(object_name), Expression::BinaryOperation::ADD, Expression(std::make_shared<LabelExpression>(label))};
+Expression BodyParser::get_pc(std::shared_ptr<Label> label) const {
+    return {Expression(object_name), Expression::BinaryOperation::ADD, Expression(std::make_shared<LabelExpression>(std::move(label)))};
 }
 
 
@@ -177,7 +177,7 @@ void BodyParser::parse_end() {
         throw Exception(".end outside .if");
     }
     pop_body();
-    current_body->append(std::make_shared<IfBodyElement>(ifs.back()));
+    current_body->append(Body(std::make_shared<IfBodyElement>(ifs.back())));
     ifs.pop_back();
 }
 
@@ -212,8 +212,8 @@ std::shared_ptr<Node> BodyParser::parse_instruction_argument(const Token& token)
 
 
 void BodyParser::parse_label(Object::Visibility visibility, const Token& name) {
-    auto label = std::make_shared<LabelBodyElement>(name.as_symbol(), SizeRange(current_body->minimum_size()));
-    current_body->append(label);
+    auto label = std::make_shared<Label>(name.as_symbol(), SizeRange(current_body->size_range().minimum));
+    current_body->append(Body(std::make_shared<LabelBodyElement>(label)));
     add_constant(visibility, name, get_pc(label));
     environment->add(Symbol(".label_offset(" + name.as_string() + ")"), Expression(std::make_shared<LabelExpression>(label)));
 }
@@ -234,7 +234,7 @@ void BodyParser::parse_memory() {
     else {
         tokenizer.unget(token);
     }
-    current_body->append(std::make_shared<MemoryBodyElement>(bank, start_address, end_address));
+    current_body->append(Body(std::make_shared<MemoryBodyElement>(bank, start_address, end_address)));
 }
 
 void BodyParser::parse_assignment(Object::Visibility visibility, const Token &name) {
@@ -304,16 +304,16 @@ void BodyParser::parse_instruction(const Token &name) {
 
     auto is_anonymous_label = false;
     auto label = get_label(is_anonymous_label);
-    auto instruction = std::shared_ptr<BodyElement>();
+    auto instruction = Body();
     {
         auto instruction_environment = std::make_shared<Environment>(environment);
         instruction_environment->add(symbol_pc, get_pc(label));
         instruction_environment->add(Symbol(".label_offset(" + label->name.str() + ")"), Expression(std::make_shared<LabelExpression>(label)));
-        instruction = encoder.encode(name, arguments, instruction_environment);
+        instruction = encoder.encode(name, arguments, instruction_environment, current_size());
     }
     if (is_anonymous_label) {
         if (label.use_count() > 1) {
-            current_body->append(label);
+            current_body->append(Body(std::make_shared<LabelBodyElement>(label)));
         }
         else {
             next_label -= 1;
@@ -347,7 +347,7 @@ SizeRange BodyParser::current_size() const {
     auto size = SizeRange();
 
     for (auto& b: bodies) {
-        size += SizeRange(b->minimum_size(), b->maximum_size());
+        size += b->size_range();
     }
 
     return size;

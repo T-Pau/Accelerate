@@ -67,7 +67,7 @@ public:
     bool uses_pc = false;
     std::vector<Notation> notations;
     std::unordered_map<Symbol, const ArgumentType*> arguments;
-    std::shared_ptr<DataBodyElement> encoding;
+    Body encoding;
 
     void add_notation(Notation notation) {notations.emplace_back(std::move(notation));}
 };

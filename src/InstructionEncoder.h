@@ -45,14 +45,14 @@ class InstructionEncoder {
 public:
     explicit InstructionEncoder(const CPU* cpu): cpu(cpu) {}
 
-    [[nodiscard]] std::shared_ptr<BodyElement> encode(const Token& name, const std::vector<std::shared_ptr<Node>>& arguments, const std::shared_ptr<Environment>& environment);
+    [[nodiscard]] Body encode(const Token& name, const std::vector<std::shared_ptr<Node>>& arguments, const std::shared_ptr<Environment>& environment, const SizeRange& offset);
 
 private:
     class Variant {
     public:
         Expression argument_constraints = Expression(Value(true));
         Expression encoding_constraints = Expression(Value(true));
-        std::shared_ptr<BodyElement> data;
+        Body data;
 
         void add_argument_constraint(const Expression& sub_constraint) {return add_constraint(argument_constraints, sub_constraint);}
         void add_encoding_constraint(const Expression& sub_constraint) {return add_constraint(encoding_constraints, sub_constraint);}
@@ -63,7 +63,7 @@ private:
         static void add_constraint(Expression& constraint, const Expression& sub_constraint);
     };
 
-    Variant encode(const Instruction* instruction, const AddressingModeMatcherResult& match, const std::vector<std::shared_ptr<Node>>& arguments, std::shared_ptr<Environment> outer_environment) const;
+    Variant encode(const Instruction* instruction, const AddressingModeMatcherResult& match, const std::vector<std::shared_ptr<Node>>& arguments, std::shared_ptr<Environment> outer_environment, const SizeRange& offset) const;
 
     const CPU* cpu;
 };

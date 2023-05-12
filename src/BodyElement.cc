@@ -30,6 +30,8 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include "BodyElement.h"
+
+#include "Body.h"
 #include "BodyBlock.h"
 
 std::ostream& operator<<(std::ostream& stream, const BodyElement& element) {
@@ -37,43 +39,12 @@ std::ostream& operator<<(std::ostream& stream, const BodyElement& element) {
     return stream;
 }
 
-std::shared_ptr<BodyElement> BodyElement::evaluate(std::shared_ptr<BodyElement> element, const Environment &environment) {
-    auto result = element->evaluate(environment, 0, 0);
-    if (result.element) {
-        return result.element;
-    }
-    else {
-        return element;
-    }
-}
-
-std::shared_ptr<BodyElement> BodyElement::append(const std::shared_ptr<BodyElement>& body, const std::shared_ptr<BodyElement>& element) {
-    if (element->empty()) {
-        return body;
-    }
-    if (!body) {
-        return element;
-    }
-
-    auto new_body = body->append_sub(body, element);
-    if (new_body) {
-        return new_body;
-    }
-    else {
-        return std::make_shared<BodyBlock>(std::vector<std::shared_ptr<BodyElement>>({body, element}));
-    }
-}
-
-std::shared_ptr<BodyElement> BodyElement::make_unique(std::shared_ptr<BodyElement> element) {
-    if (element.use_count() < 2) {
-        return element;
-    }
-    else {
-        return element->clone();
-    }
-}
 
 std::ostream& operator<<(std::ostream& stream, const std::shared_ptr<BodyElement>& element) {
     stream << *element;
     return stream;
+}
+
+std::optional<Body> BodyElement::append_sub(Body body, Body element) {
+    return {};
 }

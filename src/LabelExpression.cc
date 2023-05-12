@@ -6,8 +6,8 @@
 
 #include "Expression.h"
 
-Expression LabelExpression::create(const std::shared_ptr<LabelBodyElement>& label) {
-    auto value = label->value();
+Expression LabelExpression::create(const std::shared_ptr<Label>& label) {
+    auto value = label->offset.size();
     if (value.has_value()) {
         return Expression(*value);
     }
@@ -18,7 +18,7 @@ Expression LabelExpression::create(const std::shared_ptr<LabelBodyElement>& labe
 
 
 std::optional<Expression> LabelExpression::evaluated(const Environment &environment) const {
-    auto v = label->value();
+    auto v = label->offset.size();
     if (v.has_value()) {
         return Expression(*v);
     }
@@ -29,4 +29,27 @@ std::optional<Expression> LabelExpression::evaluated(const Environment &environm
 
 void LabelExpression::serialize_sub(std::ostream &stream) const {
     stream << ".label_offset(" << label->name << ")";
+}
+
+
+std::optional<Value> LabelExpression::maximum_value() const {
+    auto v = label->offset.maximum;
+
+    if (v) {
+        return Value(*v);
+    }
+    else {
+        return {};
+    }
+}
+
+std::optional<Value> LabelExpression::value() const {
+    auto offset = label->offset.size();
+
+    if (offset) {
+        return Value(*offset);
+    }
+    else {
+        return {};
+    }
 }

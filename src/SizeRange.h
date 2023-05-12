@@ -7,6 +7,7 @@
 
 #include <cstdint>
 #include <optional>
+#include <ostream>
 
 class SizeRange {
 public:
@@ -14,8 +15,9 @@ public:
     explicit SizeRange(uint64_t size): minimum(size), maximum(size) {}
     SizeRange(uint64_t minimum, std::optional<uint64_t> maximum): minimum(minimum), maximum(maximum) {}
 
-    [[nodiscard]] std::optional<uint64_t> size() {return minimum == maximum ? minimum : std::optional<uint64_t>();}
+    [[nodiscard]] std::optional<uint64_t> size() const;
 
+    SizeRange operator-(const SizeRange& other) const;
     SizeRange operator+(const SizeRange& other) const;
     SizeRange operator+=(const SizeRange& other) {*this = *this + other; return *this;}
 
@@ -23,5 +25,6 @@ public:
     std::optional<uint64_t> maximum;
 };
 
+std::ostream& operator<<(std::ostream& stream, const SizeRange& size_range);
 
 #endif // SIZE_RANGE_H

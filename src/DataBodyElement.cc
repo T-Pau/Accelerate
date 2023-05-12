@@ -30,45 +30,17 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include "DataBodyElement.h"
+
 #include "Exception.h"
 
-std::optional<uint64_t> DataBodyElement::size() const {
-    size_t size = 0;
-
+DataBodyElement::DataBodyElement(std::vector<Datum> data_): data(std::move(data_)) {
     for (const auto& datum: data) {
-        auto datum_size = datum.size();
-        if (!datum_size.has_value()) {
-            return {};
-        }
-        size += *datum_size;
+        size_range_ += datum.size_range();
     }
-
-    return size;
 }
 
-uint64_t DataBodyElement::maximum_size() const {
-    size_t size = 0;
 
-    for (const auto& datum: data) {
-        size += datum.maximum_size();
-    }
-
-    return size;
-}
-
-uint64_t DataBodyElement::minimum_size() const {
-    size_t size = 0;
-
-    for (const auto& datum: data) {
-        size += datum.minimum_size();
-    }
-
-    return size;
-}
-
-BodyElement::EvaluationResult DataBodyElement::evaluate(const Environment &environment, uint64_t minimum_offset, uint64_t maximum_offset) const {
-    auto result = EvaluationResult(minimum_offset, maximum_offset);
-
+std::optional<Body> DataBodyElement::evaluated(const Environment &environment, const SizeRange& offset) const {
     auto new_data = std::vector<Datum>();
     auto changed = false;
 
@@ -81,18 +53,13 @@ BodyElement::EvaluationResult DataBodyElement::evaluate(const Environment &envir
         else {
             new_data.emplace_back(datum);
         }
-        result.minimum_offset += new_data.back().minimum_size();
-        result.maximum_offset += new_data.back().maximum_size();
     }
 
     if (changed) {
-        result.element = std::make_shared<DataBodyElement>(new_data);
+        return Body(std::make_shared<DataBodyElement>(new_data));
     }
 
-    // minimum_size = result.minimum_offset - minimum_offset;
-    // maximum_size = result.maximum_offset - maximum_offset;
-
-    return result;
+    return {};
 }
 
 void DataBodyElement::serialize(std::ostream &stream, const std::string& prefix) const {
@@ -117,18 +84,19 @@ void DataBodyElement::serialize(std::ostream &stream, const std::string& prefix)
     stream << std::endl;
 }
 
-std::shared_ptr<BodyElement> DataBodyElement::append_sub(std::shared_ptr<BodyElement> body, std::shared_ptr<BodyElement> element) {
-    auto data_element = std::dynamic_pointer_cast<DataBodyElement>(element);
+std::optional<Body> DataBodyElement::append_sub(Body body, Body element) {
+    auto data_element = element.as_data();
 
     if (!data_element) {
         return {};
     }
 
-    auto new_data_body = std::dynamic_pointer_cast<DataBodyElement>(BodyElement::make_unique(body));
+    auto new_body = body.make_unique();
+    auto new_data_body = new_body.as_data();
 
     new_data_body->data.insert(new_data_body->data.end(), data_element->data.begin(), data_element->data.end());
-
-    return new_data_body;
+    new_data_body->size_range_ += element.size_range();
+    return new_body;
 }
 
 void DataBodyElement::encode(std::string &bytes, const Memory* memory) const {

@@ -49,8 +49,8 @@ private:
 
     void add_constant(Object::Visibility visibility, Token name, const Expression& value);
     [[nodiscard]] SizeRange current_size() const;
-    [[nodiscard]] Expression get_pc(const std::shared_ptr<LabelBodyElement>& label) const;
-    [[nodiscard]] std::shared_ptr<LabelBodyElement> get_label(bool& is_anonymous);
+    [[nodiscard]] Expression get_pc(std::shared_ptr<Label> label) const;
+    [[nodiscard]] std::shared_ptr<Label> get_label(bool& is_anonymous);
     void push_clause(Expression condition);
     void push_body(Body* new_body);
     void pop_body();

@@ -18,6 +18,7 @@ add_library(xlr8-library STATIC
         Command.cc
         Commandline.cc
         DataBodyElement.cc
+        EmptyBodyElement.cc
         Encoding.cc
         Environment.cc
         Exception.cc
@@ -34,6 +35,7 @@ add_library(xlr8-library STATIC
         Instruction.cc
         InstructionEncoder.cc
         Int.cc
+        Label.cc
         LabelBodyElement.cc
         LabelExpression.cc
         LibraryGetter.cc

@@ -38,7 +38,6 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "FileReader.h"
 #include "TokenNode.h"
 #include "ExpressionParser.h"
-#include "ExpressionNode.h"
 #include "VariableExpression.h"
 #include "LabelBodyElement.h"
 
@@ -81,7 +80,6 @@ ObjectFile Assembler::parse(Symbol file_name) {
     object_file.target = &target;
 
     file_environment = std::make_shared<Environment>();
-    current_environment = file_environment;
 
     while (!tokenizer.ended()) {
         try {
@@ -154,13 +152,8 @@ ObjectFile Assembler::parse(Symbol file_name) {
     return object_file;
 }
 
-void Assembler::parse_symbol_body() {
-    current_object->body = BodyParser(tokenizer, current_object->name.as_symbol(), target.cpu, &object_file, current_environment).parse();;
-}
-
-
 void Assembler::add_constant(Object::Visibility visibility, const Token& name, Expression value) {
-    value.evaluate(*current_environment);
+    value.evaluate(*file_environment);
     switch (visibility) {
         case Object::OBJECT:
             break;
@@ -169,7 +162,7 @@ void Assembler::add_constant(Object::Visibility visibility, const Token& name, E
             object_file.add_constant(name.as_symbol(), visibility, value);
             break;
     }
-    current_environment->add(name.as_symbol(), value);
+    file_environment->add(name.as_symbol(), value);
 }
 
 void Assembler::parse_assignment(Object::Visibility visibility, const Token &name) {
@@ -198,7 +191,7 @@ Object::Visibility Assembler::visibility_value(const Token& token) {
 }
 
 void Assembler::parse_symbol(Object::Visibility visibility, const Token &name) {
-    current_object = object_file.create_object(current_section, visibility, name);
+    auto object = object_file.create_object(current_section, visibility, name);
 
     while (true) {
         auto token = tokenizer.next();
@@ -208,10 +201,7 @@ void Assembler::parse_symbol(Object::Visibility visibility, const Token &name) {
         }
         else if (token == Token::curly_open) {
             // TODO: error if .reserved
-            current_environment = std::make_shared<Environment>(file_environment);
-            parse_symbol_body();
-            current_object->evaluate(*current_environment);
-            current_environment = file_environment;
+            object->body = BodyParser(tokenizer, object->name.as_symbol(), target.cpu, &object_file, file_environment).parse();
             break;
         }
         // TODO: parameters
@@ -225,13 +215,13 @@ void Assembler::parse_symbol(Object::Visibility visibility, const Token &name) {
                 if (!value.has_value() || !value->is_unsigned()) {
                     throw ParseException(expression.location(), "alignment must be constant unsigned integer");
                 }
-                current_object->alignment = value->unsigned_value();
+                object->alignment = value->unsigned_value();
             }
             else {
                 if (!value.has_value() || !value->is_unsigned()) {
                     throw ParseException(expression.location(), "reservation must be constant expression");
                 }
-                current_object->size = value->unsigned_value();
+                object->size = value->unsigned_value();
             }
         }
         else {
@@ -242,7 +232,7 @@ void Assembler::parse_symbol(Object::Visibility visibility, const Token &name) {
     if (current_section.empty()) {
         throw ParseException(name, "symbol outside section");
     }
-    if (current_object->empty()) {
+    if (object->empty()) {
         throw ParseException(name, "empty symbol");
     }
 

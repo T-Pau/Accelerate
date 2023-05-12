@@ -30,119 +30,86 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include "BodyBlock.h"
-#include "DataBodyElement.h"
+
+BodyBlock::BodyBlock(std::vector<Body> elements_): elements(std::move(elements_)) {
+    for (const auto&element: elements) {
+        size_range_ += element.size_range();
+    }
+}
+
 
 std::ostream& operator<<(std::ostream& stream, const BodyBlock& block) {
     block.serialize(stream, "");
     return stream;
 }
 
-BodyElement::EvaluationResult BodyBlock::evaluate(const Environment &environment, uint64_t minimum_offset, uint64_t maximum_offset) const {
-    auto result = EvaluationResult(minimum_offset, maximum_offset);
-
-    auto new_elements = std::vector<std::shared_ptr<BodyElement>>();
+std::optional<Body> BodyBlock::evaluated(const Environment &environment, const SizeRange& offset) const {
+    auto new_elements = std::vector<Body>();
     auto changed = false;
+    auto current_offset = offset;
 
     for (auto& element: elements) {
-        auto sub_result = element->evaluate(environment, result.minimum_offset, result.maximum_offset);
-        if (sub_result.element) {
+        auto new_element = element.evaluated(environment, current_offset);
+        if (new_element) {
             changed = true;
         }
         else {
-            sub_result.element = element;
+            new_element = element;
         }
 
-        if (sub_result.element->empty()) {
+        if (new_element->empty()) {
             changed = true;
             continue;
         }
 
         if (!new_elements.empty()) {
-            auto combined = new_elements.back()->append_sub(new_elements.back(), sub_result.element);
+            auto combined = new_elements.back().append_sub(*new_element);
             if (combined) {
                 changed = true;
                 new_elements.pop_back();
-                sub_result.element = combined;
+                new_element = combined;
             }
         }
 
-        result.minimum_offset += element->minimum_size();
-        result.maximum_offset += element->maximum_size();
-        new_elements.emplace_back(sub_result.element);
+        current_offset += new_element->size_range();
+        new_elements.emplace_back(*new_element);
     }
 
     if (changed) {
-        result.element = std::make_shared<BodyBlock>(new_elements);
+        return Body(std::make_shared<BodyBlock>(new_elements));
     }
-
-    // minimum_size = result.minimum_offset - minimum_offset;
-    // maximum_size = result.maximum_offset - maximum_offset;
-
-    return result;
+    else {
+        return {};
+    }
 }
 
 void BodyBlock::serialize(std::ostream &stream, const std::string& prefix) const {
     for (auto& element: elements) {
-        element->serialize(stream, prefix);
+        element.serialize(stream, prefix);
     }
 }
 
-std::optional<uint64_t> BodyBlock::size() const {
-    auto total_size = uint64_t(0);
 
-    for (auto& element: elements) {
-        auto current_size = element->size();
+std::optional<Body> BodyBlock::append_sub(Body body, Body element) {
+    auto block_element = element.as_block();
 
-        if (current_size.has_value()) {
-            total_size += *current_size;
-        }
-        else {
-            return {};
-        }
-    }
-
-    return total_size;
-}
-
-
-uint64_t BodyBlock::maximum_size() const {
-    auto total_size = uint64_t(0);
-
-    for (auto& element: elements) {
-        total_size += element->maximum_size();
-    }
-
-    return total_size;
-}
-
-
-uint64_t BodyBlock::minimum_size() const {
-    auto total_size = uint64_t(0);
-
-    for (auto& element: elements) {
-        total_size += element->minimum_size();
-    }
-
-    return total_size;
-}
-
-std::shared_ptr<BodyElement> BodyBlock::append_sub(std::shared_ptr<BodyElement> body, std::shared_ptr<BodyElement> element) {
-    auto block_element = std::dynamic_pointer_cast<BodyBlock>(element);
-
-    auto new_block = std::dynamic_pointer_cast<BodyBlock>(BodyElement::make_unique(body));
+    auto new_body = body.make_unique();
+    auto new_block = new_body.as_block();
 
     if (block_element) {
         new_block->elements.insert(elements.end(), block_element->elements.begin(), block_element->elements.end());
     }
     else {
         new_block->elements.emplace_back(element);
-    }
 
-    return new_block;
+    }
+    new_block->size_range_ += element.size_range();
+
+    return new_body;
 }
 
 void BodyBlock::encode(std::string &bytes, const Memory* memory) const {
     for (auto& element: elements) {
-        element->encode(bytes, memory);
+        element.encode(bytes, memory);
     }
 }

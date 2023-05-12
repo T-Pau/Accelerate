@@ -32,33 +32,26 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef BODY_BLOCK_H
 #define BODY_BLOCK_H
 
-#include "BodyElement.h"
-#include "Environment.h"
-
 #include <vector>
+
+#include "Body.h"
 
 class BodyBlock: public BodyElement {
 public:
     BodyBlock() = default;
-    explicit BodyBlock(std::vector<std::shared_ptr<BodyElement>> elements): elements(std::move(elements)) {}
+    explicit BodyBlock(std::vector<Body> elements);
 
-    [[nodiscard]] std::shared_ptr<BodyElement> append_sub(std::shared_ptr<BodyElement> body, std::shared_ptr<BodyElement> element) override;
+    [[nodiscard]] std::optional<Body> append_sub(Body body, Body element) override;
     [[nodiscard]] std::shared_ptr<BodyElement> clone() const override {return std::make_shared<BodyBlock>(elements);}
     [[nodiscard]] bool empty() const override {return elements.empty();}
     void encode(std::string &bytes, const Memory* memory) const override;
-    [[nodiscard]] EvaluationResult
-    evaluate(const Environment &environment, uint64_t minimum_offset, uint64_t maximum_offset) const override;
-    [[nodiscard]] uint64_t maximum_size() const override;
-    [[nodiscard]] uint64_t minimum_size() const override;
-    [[nodiscard]] std::optional<uint64_t> size() const override;
-    [[nodiscard]] std::shared_ptr<BodyElement> back() const {return elements.empty() ? nullptr : elements.back();}
+    [[nodiscard]] std::optional<Body> evaluated(const Environment &environment, const SizeRange& offset) const override;
+    [[nodiscard]] std::optional<Body> back() const {if (elements.empty()) {return {};} else {return elements.back();}}
 
     void serialize(std::ostream& stream, const std::string& prefix) const override;
 
 private:
-    std::vector<std::shared_ptr<BodyElement>> elements;
+    std::vector<Body> elements;
 };
-
-std::ostream& operator<<(std::ostream& stream, const BodyBlock& block);
 
 #endif // BODY_BLOCK_H

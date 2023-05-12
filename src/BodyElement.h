@@ -37,48 +37,29 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "Environment.h"
 #include "Memory.h"
-
-class CPU;
+#include "SizeRange.h"
 
 class Body;
+class CPU;
 
 class BodyElement {
 public:
-    enum Type {
-        DATA,
-        IF
-    };
-
-    class EvaluationResult {
-    public:
-        EvaluationResult() = default;
-        EvaluationResult(std::shared_ptr<BodyElement> element, uint64_t offset): element(std::move(element)), minimum_offset(offset), maximum_offset(offset) {}
-        EvaluationResult(std::shared_ptr<BodyElement> element, uint64_t minimum_offset, uint64_t maximum_offset): element(std::move(element)), minimum_offset(minimum_offset), maximum_offset(maximum_offset) {}
-        EvaluationResult(uint64_t minimum_offset, uint64_t maximum_offset): minimum_offset(minimum_offset), maximum_offset(maximum_offset) {}
-
-        std::shared_ptr<BodyElement> element;
-        uint64_t minimum_offset = 0;
-        uint64_t maximum_offset = 0;
-    };
-
-    static std::shared_ptr<BodyElement> append(const std::shared_ptr<BodyElement>& body, const std::shared_ptr<BodyElement>& element);
-    static std::shared_ptr<BodyElement> evaluate(std::shared_ptr<BodyElement> element, const Environment& environment);
-    static std::shared_ptr<BodyElement> make_unique(std::shared_ptr<BodyElement> element);
+    [[nodiscard]] SizeRange size_range() const {return size_range_;}
+    [[nodiscard]] std::optional<uint64_t> size() const {return size_range().size();}
 
     virtual void collect_objects(std::unordered_set<Object*>& objects) const {}
-    virtual void encode(std::string& bytes, const Memory* memory) const = 0;
     [[nodiscard]] virtual std::shared_ptr<BodyElement> clone() const = 0;
     [[nodiscard]] virtual bool empty() const = 0;
-    [[nodiscard]] virtual EvaluationResult evaluate(const Environment &environment, uint64_t minimum_offset, uint64_t maximum_offset) const = 0;
-    [[nodiscard]] virtual uint64_t maximum_size() const = 0;
-    [[nodiscard]] virtual uint64_t minimum_size() const = 0;
-    [[nodiscard]] virtual std::optional<uint64_t> size() const = 0;
-
+    virtual void encode(std::string& bytes, const Memory* memory) const = 0;
+    [[nodiscard]] virtual std::optional<Body> evaluated(const Environment &environment, const SizeRange& offset) const = 0;
     virtual void serialize(std::ostream& stream, const std::string& prefix) const = 0;
 
-    [[nodiscard]] virtual std::shared_ptr<BodyElement> append_sub(std::shared_ptr<BodyElement> body, std::shared_ptr<BodyElement> element) {return {};}
+    [[nodiscard]] virtual std::optional<Body> append_sub(Body body, Body element);
 
     friend class Body;
+
+protected:
+    SizeRange size_range_ = SizeRange(0);
 };
 
 std::ostream& operator<<(std::ostream& stream, const BodyElement& element);

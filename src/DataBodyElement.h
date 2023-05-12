@@ -32,9 +32,10 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef DATA_BODY_ELEMENT_H
 #define DATA_BODY_ELEMENT_H
 
-#include "BodyElement.h"
 
 #include <utility>
+
+#include "Body.h"
 #include "Encoding.h"
 #include "Expression.h"
 
@@ -45,33 +46,28 @@ public:
         Datum(Expression expression, std::optional<Encoding> encoding): expression(std::move(expression)), encoding(encoding) {}
 
         [[nodiscard]] std::optional<uint64_t> size() const;
-        [[nodiscard]] uint64_t maximum_size() const {return size().value_or(8);}
-        [[nodiscard]] uint64_t minimum_size() const {return size().value_or(1);}
+        [[nodiscard]] SizeRange size_range() const {return SizeRange(size().value_or(1), size().value_or(8));}
 
         Expression expression;
         std::optional<Encoding> encoding;
     };
 
     DataBodyElement() = default;
-    explicit DataBodyElement(std::vector<Datum> data): data(std::move(data)) {}
+    explicit DataBodyElement(std::vector<Datum> data);
 
     void append(Expression expression, std::optional<Encoding> encoding = {}) {data.emplace_back(std::move(expression), encoding);}
     [[nodiscard]] std::shared_ptr<BodyElement> clone() const override {return std::make_shared<DataBodyElement>(data);}
     void collect_objects(std::unordered_set<Object*> &objects) const override;
     [[nodiscard]] bool empty() const override {return data.empty();}
     void encode(std::string &bytes, const Memory* memory) const override;
-    [[nodiscard]] EvaluationResult evaluate(const Environment &environment, uint64_t minimum_offset, uint64_t maximum_offset) const override;
-    [[nodiscard]] uint64_t maximum_size() const override;
-    [[nodiscard]] uint64_t minimum_size() const override;
-    [[nodiscard]] std::optional<uint64_t> size() const override;
+    [[nodiscard]] std::optional<Body> evaluated(const Environment &environment, const SizeRange& offset) const override;
 
     void serialize(std::ostream &stream, const std::string& prefix) const override;
 
     std::vector<Datum> data;
 
 protected:
-    [[nodiscard]] std::shared_ptr<BodyElement> append_sub(std::shared_ptr<BodyElement> body, std::shared_ptr<BodyElement> element) override;
-
+    [[nodiscard]] std::optional<Body> append_sub(Body body, Body element) override;
 };
 
 

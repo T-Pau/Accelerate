@@ -31,9 +31,17 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "IfBodyElement.h"
 
-BodyElement::EvaluationResult IfBodyElement::evaluate(const Environment &environment, uint64_t minimum_offset, uint64_t maximum_offset) const {
-    auto result = EvaluationResult(std::numeric_limits<uint64_t>::max(), 0);
+IfBodyElement::IfBodyElement(std::vector<Clause> clauses_): clauses(std::move(clauses_)) {
+    if (!clauses.empty()) {
+        size_range_ = SizeRange(std::numeric_limits<uint64_t>::max(), 0);
+        for (const auto& clause: clauses) {
+            size_range_.minimum = std::min(size_range_.minimum, clause.body.size_range().minimum);
+            size_range_.maximum = std::max(size_range_.maximum, clause.body.size_range().maximum);
+        }
+    }
+}
 
+std::optional<Body> IfBodyElement::evaluated(const Environment &environment, const SizeRange& offset) const {
     auto new_clauses = std::vector<Clause>();
     auto changed = false;
     auto first = true;
@@ -46,15 +54,15 @@ BodyElement::EvaluationResult IfBodyElement::evaluate(const Environment &environ
         }
         auto new_expression = clause.condition;
         changed = new_expression.evaluate(environment) || changed;
-        auto sub_result = clause.body.elements->evaluate(environment, minimum_offset, maximum_offset);
-        if (sub_result.element) {
+        auto new_body = clause.body.evaluated(environment, offset);
+        if (new_body) {
             changed = true;
         }
         else {
-            sub_result.element = clause.body.elements;
+            new_body = clause.body;
         }
 
-        if (sub_result.element->empty()) {
+        if (new_body->empty()) {
             changed = true;
             continue;
         }
@@ -64,13 +72,10 @@ BodyElement::EvaluationResult IfBodyElement::evaluate(const Environment &environ
                 continue;
             }
             else if (first) {
-                return sub_result;
+                return *new_body;
             }
         }
-        new_clauses.emplace_back(new_expression, Body(sub_result.element));
-
-        result.minimum_offset = std::min(result.minimum_offset, sub_result.minimum_offset);
-        result.maximum_offset = std::max(result.maximum_offset, sub_result.maximum_offset);
+        new_clauses.emplace_back(new_expression, *new_body);
 
         if (new_expression.has_value() && *new_expression.value()) {
             ignore = true;
@@ -80,15 +85,14 @@ BodyElement::EvaluationResult IfBodyElement::evaluate(const Environment &environ
     }
 
     if (new_clauses.empty()) {
-        result.minimum_offset = minimum_offset;
-        result.maximum_offset = maximum_offset;
+        return Body();
     }
-
-    if (changed) {
-        result.element = std::make_shared<IfBodyElement>(new_clauses);
+    else if (changed) {
+        return Body(std::make_shared<IfBodyElement>(new_clauses));
     }
-
-    return result;
+    else {
+        return {};
+    }
 }
 
 void IfBodyElement::serialize(std::ostream &stream, const std::string& prefix) const {
@@ -121,87 +125,6 @@ void IfBodyElement::serialize(std::ostream &stream, const std::string& prefix) c
     }
 
     stream << prefix << ".end" << std::endl;
-}
-
-std::optional<uint64_t> IfBodyElement::size() const {
-    if (empty()) {
-        return 0;
-    }
-
-    auto common_size = std::optional<uint64_t>();
-
-    auto first = true;
-    for (auto &clause: clauses) {
-        auto current_size = clause.body.size();
-        if (first) {
-            common_size = current_size;
-        }
-        else {
-            if (current_size != common_size) {
-                return {};
-            }
-        }
-        if (clause) {
-            break;
-        }
-
-        first = false;
-    }
-
-    return common_size;
-}
-
-
-uint64_t IfBodyElement::maximum_size() const {
-    if (empty()) {
-        return 0;
-    }
-
-    auto common_size = uint64_t();
-
-    auto first = true;
-    for (auto &clause: clauses) {
-        auto current_size = clause.body.minimum_size();
-        if (first) {
-            common_size = current_size;
-        }
-        else {
-            common_size = std::max(common_size, current_size);
-        }
-        if (clause) {
-            break;
-        }
-
-        first = false;
-    }
-
-    return common_size;
-}
-
-uint64_t IfBodyElement::minimum_size() const {
-    if (empty()) {
-        return 0;
-    }
-
-    auto common_size = uint64_t();
-
-    auto first = true;
-    for (auto &clause: clauses) {
-        auto current_size = clause.body.minimum_size();
-        if (first) {
-            common_size = current_size;
-        }
-        else {
-            common_size = std::min(common_size, current_size);
-        }
-        if (clause) {
-            break;
-        }
-
-        first = false;
-    }
-
-    return common_size;
 }
 
 void IfBodyElement::collect_objects(std::unordered_set<Object*> &objects) const {

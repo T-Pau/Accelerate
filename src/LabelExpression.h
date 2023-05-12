@@ -10,20 +10,20 @@
 
 class LabelExpression: public BaseExpression {
 public:
-    explicit LabelExpression(std::shared_ptr<LabelBodyElement> label): label(std::move(label)) {}
+    explicit LabelExpression(std::shared_ptr<Label> label): label(std::move(label)) {}
 
-    [[nodiscard]] std::optional<Value> minimum_value() const override {return label->minimum_value();}
-    [[nodiscard]] std::optional<Value> maximum_value() const override {return label->maximum_value();}
-    [[nodiscard]] std::optional<Value> value() const override {return label->value();}
+    [[nodiscard]] std::optional<Value> minimum_value() const override {return Value(label->offset.minimum);}
+    [[nodiscard]] std::optional<Value> maximum_value() const override;
+    [[nodiscard]] std::optional<Value> value() const override;
 
 protected:
-    static Expression create(const std::shared_ptr<LabelBodyElement>& label);
+    static Expression create(const std::shared_ptr<Label>& label);
     [[nodiscard]] std::optional<Expression> evaluated(const Environment &environment) const override;
     void serialize_sub(std::ostream& stream) const override;
 
 
 private:
-    std::shared_ptr<LabelBodyElement> label;
+    std::shared_ptr<Label> label;
 };
 
 
