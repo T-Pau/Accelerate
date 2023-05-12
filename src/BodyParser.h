@@ -56,6 +56,7 @@ private:
     void pop_body();
 
     void parse_data();
+    void parse_error();
     void parse_else();
     void parse_else_if();
     void parse_end();
@@ -64,9 +65,10 @@ private:
 
     static const Symbol symbol_pc;
     static const Token token_data;
-    static const Token token_end;
     static const Token token_else;
     static const Token token_else_if;
+    static const Token token_end;
+    static const Token token_error;
     static const Token token_if;
     static const Token token_memory;
 

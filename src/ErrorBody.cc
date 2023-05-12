@@ -41,5 +41,15 @@ std::optional<Body> ErrorBody::evaluated(const Environment &environment, bool to
 }
 
 void ErrorBody::serialize(std::ostream &stream, const std::string &prefix) const {
-    stream << prefix << ".error \"" << message << "\" (\"" << location.to_string() << "\")" << std::endl;
+    stream << prefix << ".error \"" << message << "\" (\"" << location.file.str() << "\"";
+    if (location.start_line_number > 0) {
+        stream << ", " << location.start_line_number;
+        if (location.start_column > 0 || location.end_column > 0) {
+            stream << ", " << location.start_column;
+            if (location.start_column != location.end_column) {
+                stream << ", " << location.end_column;
+            }
+        }
+    }
+    stream << ")" << std::endl;
 }

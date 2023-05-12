@@ -17,19 +17,21 @@
 
 const Symbol BodyParser::symbol_pc = Symbol(".pc");
 const Token BodyParser::token_data = Token(Token::DIRECTIVE, "data");
-const Token BodyParser::token_end = Token(Token::DIRECTIVE, "end");
 const Token BodyParser::token_else = Token(Token::DIRECTIVE, "else");
 const Token BodyParser::token_else_if = Token(Token::DIRECTIVE, "else_if");
+const Token BodyParser::token_end = Token(Token::DIRECTIVE, "end");
+const Token BodyParser::token_error = Token(Token::DIRECTIVE, "error");
 const Token BodyParser::token_if = Token(Token::DIRECTIVE, "if");
 const Token BodyParser::token_memory = Token(Token::DIRECTIVE, "memory");
 
 const std::unordered_map<Symbol, void (BodyParser::*)()> BodyParser::directive_parser_methods = {
-        { token_data.as_symbol(), &BodyParser::parse_data },
-        { token_end.as_symbol(), &BodyParser::parse_end },
-        { token_else.as_symbol(), &BodyParser::parse_else },
-        { token_else_if.as_symbol(), &BodyParser::parse_else_if },
-        { token_if.as_symbol(), &BodyParser::parse_if },
-        { token_memory.as_symbol(), &BodyParser::parse_memory }
+        {token_data.as_symbol(), &BodyParser::parse_data},
+        {token_else.as_symbol(), &BodyParser::parse_else},
+        {token_else_if.as_symbol(), &BodyParser::parse_else_if},
+        {token_end.as_symbol(), &BodyParser::parse_end},
+        {token_error.as_symbol(), &BodyParser::parse_error},
+        {token_if.as_symbol(), &BodyParser::parse_if},
+        {token_memory.as_symbol(), &BodyParser::parse_memory}
 };
 
 void BodyParser::setup(FileTokenizer &tokenizer) {
@@ -351,4 +353,32 @@ SizeRange BodyParser::current_size() const {
     }
 
     return size;
+}
+
+void BodyParser::parse_error() {
+    auto message = tokenizer.expect(Token::STRING, TokenGroup::newline);
+    auto token = tokenizer.next();
+    Location location = message.location;
+    if (token == Token::paren_open) {
+        location = Location(tokenizer.expect(Token::STRING, TokenGroup::newline).as_string());
+        token = tokenizer.next();
+        if (token == Token::comma) {
+            location.start_line_number = tokenizer.expect(Token::VALUE, TokenGroup::newline).as_unsigned();
+            token = tokenizer.next();
+            if (token == Token::comma) {
+                location.start_column = tokenizer.expect(Token::VALUE, TokenGroup::newline).as_unsigned();
+                token = tokenizer.next();
+                if (token == Token::comma) {
+                    location.end_column = tokenizer.expect(Token::VALUE, TokenGroup::newline).as_unsigned();
+                    token = tokenizer.next();
+                }
+            }
+        }
+        if (token != Token::paren_close) {
+            throw ParseException(token, "expected ')'");
+        }
+    }
+    else {
+        tokenizer.unget(token);
+    }
 }
