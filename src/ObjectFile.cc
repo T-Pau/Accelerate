@@ -76,7 +76,7 @@ void ObjectFile::serialize(std::ostream &stream) const {
     std::sort(names.begin(), names.end());
 
     for (auto name: names) {
-        stream << objects.find(name)->second;
+        stream << *(objects.find(name)->second);
     }
 }
 
@@ -90,13 +90,12 @@ void ObjectFile::add_constant(Symbol name, Object::Visibility visibility, Expres
     add_to_environment(pair.first->second);
 }
 
-void ObjectFile::add_object_file(const std::shared_ptr<ObjectFile> &file) {
+void ObjectFile::add_object_file(const std::shared_ptr<ObjectFile>& file) {
     for (const auto& pair: file->constants) {
         add_constant(pair.second.name, pair.second.visibility, pair.second.value);
     }
-    for (const auto& pair: file->objects) {
-        auto own_object = insert_object({this, &pair.second});
-        //add_object(own_object);
+    for (auto& pair: file->objects) {
+        add_object(std::move(pair.second));
     }
 }
 
@@ -105,14 +104,7 @@ void ObjectFile::evaluate(const Environment &environment) {
         pair.second.value.evaluate(environment);
     }
     for (auto& pair: objects) {
-        pair.second.body.evaluate(environment);
-    }
-}
-
-
-void ObjectFile::export_constants(Environment &environment) const {
-    for (auto& pair: constants) {
-        environment.add(pair.second.name, pair.second.value);
+        pair.second->body.evaluate(environment);
     }
 }
 
@@ -132,7 +124,7 @@ const Object* ObjectFile::object(Symbol name) const {
     auto it = objects.find(name);
 
     if (it != objects.end()) {
-        return &it-> second;
+        return it-> second.get();
     }
     else {
         return nullptr;
@@ -145,7 +137,7 @@ Object *ObjectFile::create_object(Symbol section_name, Object::Visibility visibi
     if (section == nullptr) {
         throw ParseException(name, "unknown section '%s'", section_name.c_str());
     }
-    return insert_object({this, section, visibility, name});
+    return insert_object(std::make_unique<Object>(this, section, visibility, name));
 }
 
 ObjectFile::ObjectFile() noexcept {
@@ -171,23 +163,20 @@ std::vector<Object *> ObjectFile::all_objects() {
 
     v.reserve(objects.size());
     for (auto& pair: objects) {
-        v.emplace_back(&pair.second);
+        v.emplace_back(pair.second.get());
     }
 
     return v;
 }
 
-void ObjectFile::add_object(const Object *object) {
-    insert_object(Object(this, object));
-}
-
-Object* ObjectFile::insert_object(Object object) {
-    auto name = object.name;
-    auto pair = objects.insert({object.name.as_symbol(), std::move(object)});
+Object* ObjectFile::insert_object(std::unique_ptr<Object> object) {
+    auto name = object->name;
+    object->owner = this;
+    auto pair = objects.insert({name.as_symbol(), std::move(object)});
     if (!pair.second) {
         throw ParseException(name, "redefinition of object %s", name.as_string().c_str());
     }
-    auto own_object = &pair.first->second;
+    auto own_object = pair.first->second.get();
     add_to_environment(own_object);
     return own_object;
 

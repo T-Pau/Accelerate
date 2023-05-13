@@ -42,7 +42,7 @@ std::ostream& operator<<(std::ostream& stream, const Encoding& encoding) {
 }
 
 bool Encoding::operator==(const Encoding &other) const {
-    return type == other.type && size == other.size && byte_order == other.byte_order;
+    return type == other.type && size == other.size && explicit_byte_order == other.explicit_byte_order;
 }
 
 void Encoding::encode(std::string &bytes, const Value &value) const {
@@ -51,11 +51,15 @@ void Encoding::encode(std::string &bytes, const Value &value) const {
     }
 
     switch (type) {
-        case SIGNED:
-            Int::encode(bytes, static_cast<uint64_t>(value.signed_value()), size, byte_order);
+        case SIGNED: {
+            int64_t signed_value = value.signed_value();
+            Int::encode(bytes, *(reinterpret_cast<uint64_t*>(&signed_value)), size, byte_order());
             break;
 
+        }
+
         case UNSIGNED:
+            Int::encode(bytes, value.unsigned_value(), size, byte_order());
             break;
     }
 }
@@ -71,10 +75,10 @@ bool Encoding::fits(const Value &value) const {
 bool Encoding::is_natural_encoding(const Value &value) const {
     switch (type) {
         case SIGNED:
-            return value.is_signed() && value.default_size() == size && byte_order == default_byte_order;
+            return value.is_signed() && value.default_size() == size && byte_order() == default_byte_order;
 
         case UNSIGNED:
-            return value.is_unsigned() && value.default_size() == size && byte_order == default_byte_order;
+            return value.is_unsigned() && value.default_size() == size && byte_order() == default_byte_order;
     }
 }
 
@@ -100,16 +104,13 @@ Encoding::Encoding(const Value value) {
 
         case Value::SIGNED:
             type = SIGNED;
-            size = Int::minimum_byte_size(value.signed_value());
-            byte_order = default_byte_order;
             break;
 
         case Value::UNSIGNED:
             type = UNSIGNED;
-            size = Int::minimum_byte_size(value.unsigned_value());
-            byte_order = default_byte_order;
             break;
     }
+    size = value.default_size();
 }
 
 std::optional<Value> Encoding::minimum_value() const {

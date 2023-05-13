@@ -58,7 +58,7 @@ public:
     Object* create_object(Symbol section_name, Object::Visibility visibility, Token name);
 
     void add_constant(Symbol name, Object::Visibility visibility, Expression value);
-    void add_object(const Object* object);
+    void add_object(std::unique_ptr<Object> object) {(void)insert_object(std::move(object));}
     void add_object_file(const std::shared_ptr<ObjectFile>& file);
 
     [[nodiscard]] const Object* object(Symbol name) const;
@@ -68,7 +68,6 @@ public:
     std::shared_ptr<Environment> local_environment;
 
     void evaluate(const Environment& environment);
-    void export_constants(Environment& environment) const;
     void remove_local_constants();
 
     void serialize(std::ostream& stream) const;
@@ -79,12 +78,12 @@ public:
     static const unsigned int format_version_minor;
 
 private:
-    Object* insert_object(Object object);
+    Object* insert_object(std::unique_ptr<Object> object);
     void add_to_environment(const Constant& constant) { add_to_environment(constant.name, constant.visibility, constant.value);}
     void add_to_environment(Object* object);
     void add_to_environment(Symbol name, Object::Visibility visibility, Expression value);
 
-    std::unordered_map<Symbol, Object> objects;
+    std::unordered_map<Symbol, std::unique_ptr<Object>> objects;
     std::unordered_map<Symbol, Constant> constants;
 };
 

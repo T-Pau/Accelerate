@@ -7,14 +7,17 @@
 MemoryBody::MemoryBody(Expression bank_, Expression start_address_, Expression end_address_): bank(std::move(bank_)), start_address(std::move(start_address_)), end_address(std::move(end_address_)) {
     auto minimum_start = start_address.minimum_value().value_or(Value(uint64_t(0)));
     auto maximum_end = end_address.maximum_value();
-    if (!maximum_end) {
+    if (maximum_end) {
         size_range_.maximum = maximum_end->unsigned_value() - minimum_start.unsigned_value();
     }
 
     auto maximum_start = start_address.maximum_value();
     auto minimum_end = end_address.minimum_value();
     if (maximum_start && minimum_end) {
-        size_range_.minimum = maximum_start->unsigned_value() - minimum_end->unsigned_value();
+        size_range_.minimum = minimum_end->unsigned_value() - maximum_start->unsigned_value();
+    }
+    else {
+        size_range_.maximum = {};
     }
 }
 

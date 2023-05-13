@@ -44,8 +44,8 @@ public:
         UNSIGNED
     };
 
-    Encoding(Type type, size_t size, uint64_t byte_order = default_byte_order): type(type), size(size), byte_order(byte_order) {}
-    Encoding(const Value value);
+    Encoding(Type type, size_t size, std::optional<uint64_t> byte_order = {}): type(type), size(size), explicit_byte_order(byte_order) {}
+    Encoding(const Value);
 
     [[nodiscard]] size_t byte_size() const {return size;}
     void encode(std::string& bytes, const Value& value) const;
@@ -64,7 +64,9 @@ public:
 private:
     Type type;
     size_t size;
-    uint64_t byte_order;
+    std::optional<uint64_t> explicit_byte_order;
+
+    [[nodiscard]] uint64_t byte_order() const {return explicit_byte_order.value_or(default_byte_order);}
 };
 
 std::ostream& operator<<(std::ostream& stream, const Encoding& encoding);
