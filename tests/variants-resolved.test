@@ -1,0 +1,28 @@
+description Test instruction with 2 variants, known which will be used
+arguments -c --target 6502 file.s
+file file.s <inline>
+.section zero_page
+.global ptr .reserve 2
+.section code
+.global test {
+    sta ptr
+}
+end-of-inline-data
+file file.o {} <inline>
+.format_version 1.0
+
+.target "6502"
+
+.object ptr {
+    section: zero_page
+    visibility: global
+    reserve: 2
+}
+.object test {
+    section: code
+    visibility: global
+    body <
+        .data $85, ptr:1
+    >
+}
+end-of-inline-data
