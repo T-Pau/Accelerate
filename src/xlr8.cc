@@ -198,14 +198,6 @@ void xlr8::process() {
         }
         linker->link();
     }
-    else {
-#if 0
-        // TODO: this segfaulsts since expressions contain objects without owner/section (how?!)
-        for (auto& file: files) {
-            file.file.evaluate(*file.file.local_environment);
-        }
-#endif
-    }
 }
 
 void xlr8::create_output() {
