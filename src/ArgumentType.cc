@@ -56,29 +56,15 @@ Value ArgumentTypeMap::entry(Value value) const {
     }
 }
 
-std::optional<bool> ArgumentTypeMap::fits(const std::shared_ptr<BaseExpression> &expression) const {
-    if (expression->has_value()) {
-        return has_entry(*expression->value());
-    }
-    else {
-        return {};
-    }
+const ArgumentTypeEncoding *ArgumentType::as_encoding() const {
+    return dynamic_cast<const ArgumentTypeEncoding*>(this);
 }
 
-std::optional<bool> ArgumentTypeRange::fits(const std::shared_ptr<BaseExpression> &expression) const {
-    auto minimum_value = expression->minimum_value();
-    auto maximum_value = expression->maximum_value();
+std::unique_ptr<ArgumentType> ArgumentTypeEncoding::range_type(Symbol range_name) const {
+    auto range = std::make_unique<ArgumentTypeRange>(range_name);
+    // TODO: handle encodings with unknown minimum/maximum value.
+    range->lower_bound = *encoding.minimum_value();
+    range->upper_bound = *encoding.minimum_value();
 
-    if (!minimum_value.has_value() || !maximum_value.has_value()) {
-        return {};
-    }
-    else if (*maximum_value < lower_bound || *minimum_value > upper_bound) {
-        return false;
-    }
-    else if (*minimum_value >= lower_bound && *maximum_value <= upper_bound) {
-        return true;
-    }
-    else {
-        return {};
-    }
+    return range;
 }

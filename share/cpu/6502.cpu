@@ -31,10 +31,9 @@
 
 .syntax punctuation: "#" "," "(" ")"
 
-;.argument_type byte range: 0, $ff
-.argument_type byte any
-
-.argument_type word any
+.argument_type byte fits :1
+.argument_type word fits :2
+.argument_type any any
 
 .addressing_mode accumulator {
     notation [
@@ -52,7 +51,7 @@
     arguments {
         value: byte
     }
-    encoding: .opcode, value:1
+    encoding: .opcode, value
 }
 
 .addressing_mode zero_page {
@@ -60,7 +59,7 @@
     arguments {
         address: byte
     }
-    encoding: .opcode, address:1
+    encoding: .opcode, address
 }
 
 .addressing_mode absolute {
@@ -68,13 +67,13 @@
     arguments {
         address: word
     }
-    encoding: .opcode, address:2
+    encoding: .opcode, address
 }
 
 .addressing_mode relative {
     notation: address
     arguments {
-        address: word
+        address: any
     }
     encoding: .opcode, address - .pc - 2 :-1
 }
@@ -84,7 +83,7 @@
     arguments {
         address: word
     }
-    encoding: .opcode, address:2
+    encoding: .opcode, address
 }
 
 .addressing_mode zero_page_x_indexed {
@@ -92,7 +91,7 @@
     arguments {
         address: byte
     }
-    encoding: .opcode, address:1
+    encoding: .opcode, address
 }
 
 .addressing_mode zero_page_y_indexed {
@@ -100,7 +99,7 @@
     arguments {
         address: byte
     }
-    encoding: .opcode, address:1
+    encoding: .opcode, address
 }
 
 .addressing_mode absolute_x_indexed {
@@ -108,7 +107,7 @@
     arguments {
         address: word
     }
-    encoding: .opcode, address:2
+    encoding: .opcode, address
 }
 
 .addressing_mode absolute_y_indexed {
@@ -116,7 +115,7 @@
     arguments {
         address: word
     }
-    encoding: .opcode, address:2
+    encoding: .opcode, address
 }
 
 .addressing_mode x_indexed_indirect {
@@ -124,7 +123,7 @@
     arguments {
         address: byte
     }
-    encoding: .opcode, address:1
+    encoding: .opcode, address
 }
 
 .addressing_mode indirect_y_indexed {
@@ -132,7 +131,7 @@
     arguments {
         address: byte
     }
-    encoding: .opcode, address:1
+    encoding: .opcode, address
 }
 
 

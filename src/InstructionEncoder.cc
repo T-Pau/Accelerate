@@ -125,7 +125,8 @@ InstructionEncoder::Variant InstructionEncoder::encode(const Instruction* instru
         if (it_notation->is_argument()) {
             auto argument_type = addressing_mode->argument(it_notation->symbol);
             switch (argument_type->type()) {
-                case ArgumentType::ANY: {
+                case ArgumentType::ANY:
+                case ArgumentType::ENCODING: {
                     if ((*it_arguments)->type() != Node::EXPRESSION) {
                         throw ParseException((*it_arguments)->get_location(), "any argument is not an expression");
                     }

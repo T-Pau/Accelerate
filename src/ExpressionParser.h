@@ -50,6 +50,7 @@ public:
 
     Expression parse() { top = Element({}, START); return do_parse();}
     Expression parse(Expression& left) { top = Element(left, 0); return do_parse();}
+    Encoding parse_encoding();
     Body parse_list();
 
 private:
@@ -103,7 +104,6 @@ private:
 
     Expression do_parse();
     Element next_element();
-    Encoding parse_encoding();
     void reduce_argument_list();
     void reduce_binary(int up_to_level);
     void reduce_function_call();

@@ -76,6 +76,7 @@ void CPUParser::initialize() {
         parser_methods[Symbol("syntax")] = &CPUParser::parse_syntax;
 
         argument_type_parser_methods[Symbol("enum")] = &CPUParser::parse_argument_type_enum;
+        argument_type_parser_methods[Symbol("fits")] = &CPUParser::parse_argument_type_encoding;
         argument_type_parser_methods[Symbol("map")] = &CPUParser::parse_argument_type_map;
         argument_type_parser_methods[Symbol("range")] = &CPUParser::parse_argument_type_range;
 
@@ -126,6 +127,9 @@ void CPUParser::parse_addressing_mode() {
         throw ParseException(name, "addressing mode definition is not a dictionary");
     }
 
+    auto unencoded_encoding_arguments = std::unordered_set<Symbol>();
+    auto unused_arguments = std::unordered_set<Symbol>();
+
     auto addressing_mode = AddressingMode();
 
     auto definition = parameters->as_dictionary();
@@ -151,6 +155,12 @@ void CPUParser::parse_addressing_mode() {
                 throw ParseException(argument_type_name, "unknown argument type '%s'", argument_type_name.as_string().c_str());
             }
             addressing_mode.arguments[argument_symbol(pair.first.as_symbol())] = argument_type;
+            auto encoding_argument_type = argument_type->as_encoding();
+            if (encoding_argument_type) {
+                auto argument_variable_name = argument_symbol(pair.first.as_symbol());
+                unencoded_encoding_arguments.insert(argument_variable_name);
+            }
+            unused_arguments.insert(pair.first.as_symbol());
         }
     }
 
@@ -189,6 +199,7 @@ void CPUParser::parse_addressing_mode() {
                 if (!addressing_mode.has_argument(argument_name)) {
                     throw ParseException(token, "unknown argument in encoding");
                 }
+                unused_arguments.erase(token.as_symbol());
                 encoding_tokens.emplace_back(Token::NAME, token.location, argument_name);
             }
             else {
@@ -198,9 +209,29 @@ void CPUParser::parse_addressing_mode() {
 
         auto encoding_tokenizer = SequenceTokenizer(encoding_tokens);
         addressing_mode.encoding = ExpressionParser(encoding_tokenizer).parse_list();
+        for (auto& datum: addressing_mode.encoding.as_data()->data) {
+            if (datum.expression.is_variable()) {
+                auto variable_name = datum.expression.as_variable()->variable();
+                auto encoding_type = addressing_mode.argument(variable_name)->as_encoding();
+                if (encoding_type && (!datum.encoding || *datum.encoding == encoding_type->encoding)) {
+                    datum.encoding = encoding_type->encoding;
+                    unencoded_encoding_arguments.erase(variable_name);
+                }
+            }
+        }
     }
     else {
         throw ParseException(name, "invalid encoding for addressing mode '%s'", name.as_string().c_str());
+    }
+
+    // TODO: warn unused arguments
+
+    for (const auto& argument: unencoded_encoding_arguments) {
+        auto encoding_type = addressing_mode.argument(argument);
+        if (!encoding_type) {
+            throw Exception("internal error: expected encoding argument type for '%s'", argument.c_str());
+        }
+        addressing_mode.arguments[argument] = cpu.argument_type(Symbol(".range(" + encoding_type->name.str() + ")"));
     }
 
     cpu.add_addressing_mode(name.as_symbol(), std::move(addressing_mode));
@@ -233,8 +264,14 @@ void CPUParser::parse_argument_type() {
             throw ParseException(type, "unknown argument type '%s'", type.as_string().c_str());
         }
         argument_type = (this->*it->second)(name, parameters.get());
+        auto encoding_type = argument_type->as_encoding();
+        if (encoding_type) {
+            auto range_name = Symbol(".range(" + name.as_string() + ")");
+            cpu.add_argument_type(range_name, encoding_type->range_type(range_name));
+        }
     }
 
+    // TODO: add .range(name) for encoding type
     cpu.add_argument_type(name.as_symbol(), std::move(argument_type));
 }
 
@@ -309,6 +346,15 @@ void CPUParser::parse_syntax() {
             tokenizer.add_literal(Token::PUNCTUATION, value.as_string());
         }
     }
+}
+
+
+std::unique_ptr<ArgumentType> CPUParser::parse_argument_type_encoding(const Token& name, const ParsedValue *parameters) {
+    if (!parameters->is_scalar()) {
+        throw ParseException(parameters->location, "definition of range argument type '%s' must be scalar", name.as_string().c_str());
+    }
+    auto tokenizer = SequenceTokenizer(parameters->as_scalar()->tokens);
+    return std::make_unique<ArgumentTypeEncoding>(name.as_symbol(), ExpressionParser(tokenizer).parse_encoding());
 }
 
 

@@ -58,6 +58,7 @@ private:
 
     AddressingMode::Notation parse_addressing_mode_notation(const AddressingMode& addressing_mode, const ParsedScalar* parameters);
 
+    std::unique_ptr<ArgumentType> parse_argument_type_encoding(const Token& name, const ParsedValue* parameters);
     std::unique_ptr<ArgumentType> parse_argument_type_enum(const Token& name, const ParsedValue* parameters);
     std::unique_ptr<ArgumentType> parse_argument_type_map(const Token& name, const ParsedValue* parameters);
     std::unique_ptr<ArgumentType> parse_argument_type_range(const Token& name, const ParsedValue* parameters);
