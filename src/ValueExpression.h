@@ -47,7 +47,7 @@ public:
     [[nodiscard]] std::optional<Value> maximum_value() const override {return value_;}
 
 protected:
-    [[nodiscard]] std::optional<Expression> evaluated(const Environment &environment) const override {return {};}
+    [[nodiscard]] std::optional<Expression> evaluated(const EvaluationContext& context) const override {return {};}
 
     void serialize_sub(std::ostream& stream) const override;
 

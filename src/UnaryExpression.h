@@ -43,7 +43,7 @@ public:
 
 protected:
     [[nodiscard]] static Expression create(Expression::UnaryOperation operation, Expression operand);
-    [[nodiscard]] std::optional<Expression> evaluated(const Environment &environment) const override;
+    [[nodiscard]] std::optional<Expression> evaluated(const EvaluationContext& context) const override;
     [[nodiscard]] std::optional<Value> minimum_value() const override;
     [[nodiscard]] std::optional<Value> maximum_value() const override;
 

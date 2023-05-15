@@ -46,7 +46,7 @@ public:
     [[nodiscard]] std::shared_ptr<BodyElement> clone() const override {return std::make_shared<BlockBody>(elements);}
     [[nodiscard]] bool empty() const override {return elements.empty();}
     void encode(std::string &bytes, const Memory* memory) const override;
-    [[nodiscard]] std::optional<Body> evaluated(const Environment &environment, bool top_level, const SizeRange& offset) const override;
+    [[nodiscard]] std::optional<Body> evaluated(const EvaluationContext& context) const override;
     [[nodiscard]] std::optional<Body> back() const {if (elements.empty()) {return {};} else {return elements.back();}}
 
     void serialize(std::ostream& stream, const std::string& prefix) const override;

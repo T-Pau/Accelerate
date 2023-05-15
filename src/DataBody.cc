@@ -40,12 +40,12 @@ DataBody::DataBody(std::vector<DataBodyElement> data_): data(std::move(data_)) {
 }
 
 
-std::optional<Body> DataBody::evaluated(const Environment &environment, bool top_level, const SizeRange& offset) const {
+std::optional<Body> DataBody::evaluated(const EvaluationContext& context) const {
     auto new_data = std::vector<DataBodyElement>();
     auto changed = false;
 
     for (auto& datum: data) {
-        auto new_expression = datum.expression.evaluated(environment);
+        auto new_expression = datum.expression.evaluated(context);
         if (new_expression) {
             changed = true;
             new_data.emplace_back(*new_expression, datum.encoding);

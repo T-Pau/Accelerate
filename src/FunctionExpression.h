@@ -15,7 +15,7 @@ public:
 
 protected:
     static Expression create(Symbol name, const std::vector<Expression>& arguments);
-    [[nodiscard]] std::optional<Expression> evaluated(const Environment &environment) const override;
+    [[nodiscard]] std::optional<Expression> evaluated(const EvaluationContext& context) const override;
 
     void serialize_sub(std::ostream& stream) const override;
 

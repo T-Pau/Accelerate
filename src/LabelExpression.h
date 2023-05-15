@@ -18,7 +18,7 @@ public:
 
 protected:
     static Expression create(const std::shared_ptr<Label>& label);
-    [[nodiscard]] std::optional<Expression> evaluated(const Environment &environment) const override;
+    [[nodiscard]] std::optional<Expression> evaluated(const EvaluationContext& context) const override;
     void serialize_sub(std::ostream& stream) const override;
 
 

@@ -38,6 +38,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Environment.h"
 #include "Memory.h"
 #include "SizeRange.h"
+#include "EvaluationContext.h"
 
 class Body;
 class CPU;
@@ -51,7 +52,7 @@ public:
     [[nodiscard]] virtual std::shared_ptr<BodyElement> clone() const = 0;
     [[nodiscard]] virtual bool empty() const = 0;
     virtual void encode(std::string& bytes, const Memory* memory) const = 0;
-    [[nodiscard]] virtual std::optional<Body> evaluated(const Environment &environment, bool top_level, const SizeRange& offset) const = 0;
+    [[nodiscard]] virtual std::optional<Body> evaluated(const EvaluationContext& context) const = 0;
     virtual void serialize(std::ostream& stream, const std::string& prefix) const = 0;
 
     [[nodiscard]] virtual std::optional<Body> append_sub(Body body, Body element);

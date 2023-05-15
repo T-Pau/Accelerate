@@ -33,9 +33,9 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "VariableExpression.h"
 
-std::optional<Expression> BinaryExpression::evaluated(const Environment &environment) const {
-    auto new_left = left.evaluated(environment);
-    auto new_right= right.evaluated(environment);
+std::optional<Expression> BinaryExpression::evaluated(const EvaluationContext& context) const {
+    auto new_left = left.evaluated(context);
+    auto new_right= right.evaluated(context);
 
     if (!new_left && !new_right) {
         return {};

@@ -38,8 +38,8 @@ const VariableExpression *Expression::as_variable() const {
     return std::dynamic_pointer_cast<VariableExpression>(expression).get();
 }
 
-bool Expression::evaluate(const Environment &environment) {
-    auto new_expression = expression->evaluated(environment);
+bool Expression::evaluate(const EvaluationContext& context) {
+    auto new_expression = expression->evaluated(context);
     if (new_expression.has_value()) {
         *this = *new_expression;
     }
@@ -62,6 +62,10 @@ Symbol Expression::variable_name() const {
         return object->object->name.as_symbol();
     }
     return {};
+}
+
+bool Expression::evaluate(const Environment &environment) {
+    return evaluate(EvaluationContext(environment));
 }
 
 

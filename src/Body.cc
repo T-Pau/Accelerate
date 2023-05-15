@@ -58,8 +58,8 @@ void Body::append(const Body& new_element) {
     }
 }
 
-bool Body::evaluate(const Environment &environment, bool top_level, const SizeRange& offset) {
-    auto new_elements = element->evaluated(environment, top_level, offset);
+bool Body::evaluate(const EvaluationContext& context) {
+    auto new_elements = element->evaluated(context);
     if (new_elements) {
         element = new_elements->element;
         return true;
@@ -83,8 +83,8 @@ std::optional<Body> Body::back() const {
     }
 }
 
-std::optional<Body> Body::evaluated(const Environment &environment, bool top_level, const SizeRange& offset) const {
-    return element->evaluated(environment, top_level, offset);
+std::optional<Body> Body::evaluated(const EvaluationContext& context) const {
+    return element->evaluated(context);
 }
 
 BlockBody *Body::as_block() const {

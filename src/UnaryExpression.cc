@@ -74,8 +74,8 @@ Expression UnaryExpression::create(Expression::UnaryOperation operation, Express
 }
 
 
-std::optional<Expression> UnaryExpression::evaluated(const Environment &environment) const {
-    auto new_operand = operand.evaluated(environment);
+std::optional<Expression> UnaryExpression::evaluated(const EvaluationContext& context) const {
+    auto new_operand = operand.evaluated(context);
 
     if (!new_operand) {
         return {};

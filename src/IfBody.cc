@@ -43,19 +43,19 @@ IfBody::IfBody(std::vector<IfBodyClause> clauses_): clauses(std::move(clauses_))
     }
 }
 
-std::optional<Body> IfBody::evaluated(const Environment &environment, bool top_level, const SizeRange& offset) const {
+std::optional<Body> IfBody::evaluated(const EvaluationContext& context) const {
     auto new_clauses = std::vector<IfBodyClause>();
     auto changed = false;
 
     for (auto& clause: clauses) {
         auto new_expression = clause.condition;
         auto new_body = clause.body;
-        changed = new_expression.evaluate(environment) || changed;
+        changed = new_expression.evaluate(context) || changed;
         if (new_clauses.empty() && new_expression.has_value() && new_expression.value()) {
-            new_body.evaluate(environment, top_level, offset);
+            new_body.evaluate(context);
             return new_body;
         }
-        changed = new_body.evaluate(environment, false, offset) || changed;
+        changed = new_body.evaluate(EvaluationContext(context, false)) || changed;
 
         new_clauses.emplace_back(new_expression, new_body);
     }

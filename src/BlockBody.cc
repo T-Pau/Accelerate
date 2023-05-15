@@ -65,13 +65,13 @@ std::ostream& operator<<(std::ostream& stream, const BlockBody& block) {
     return stream;
 }
 
-std::optional<Body> BlockBody::evaluated(const Environment &environment, bool top_level, const SizeRange& offset) const {
+std::optional<Body> BlockBody::evaluated(const EvaluationContext& context) const {
     auto new_elements = std::vector<Body>();
     auto changed = false;
-    auto current_offset = offset;
+    auto current_offset = context.offset;
 
     for (auto& element: elements) {
-        auto new_element = element.evaluated(environment, top_level, current_offset);
+        auto new_element = element.evaluated(EvaluationContext(context, current_offset));
         if (new_element) {
             changed = true;
             new_elements.emplace_back(*new_element);

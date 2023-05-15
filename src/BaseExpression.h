@@ -40,6 +40,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 class Object;
 class Expression;
+class EvaluationContext;
 class Environment;
 
 class BaseExpression {
@@ -51,7 +52,7 @@ public:
 
     void serialize(std::ostream& stream) const;
 
-    [[nodiscard]] virtual std::optional<Expression> evaluated(const Environment& environment) const = 0;
+    [[nodiscard]] virtual std::optional<Expression> evaluated(const EvaluationContext& context) const = 0;
     virtual void collect_objects(std::unordered_set<Object*>& objects) const {}
 
     Location location;

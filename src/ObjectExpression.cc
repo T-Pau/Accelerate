@@ -33,7 +33,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "ValueExpression.h"
 
-std::optional<Expression> ObjectExpression::evaluated(const Environment &environment) const {
+std::optional<Expression> ObjectExpression::evaluated(const EvaluationContext& context) const {
     if (object->has_address()) {
         return Expression(object->address.value());
     }

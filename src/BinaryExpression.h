@@ -48,7 +48,7 @@ public:
 
 protected:
     [[nodiscard]] Expression static create(const Expression& left, Expression::BinaryOperation operation, const Expression& right);
-    [[nodiscard]] std::optional<Expression> evaluated(const Environment &environment) const override;
+    [[nodiscard]] std::optional<Expression> evaluated(const EvaluationContext& context) const override;
 
     void serialize_sub(std::ostream& stream) const override;
 

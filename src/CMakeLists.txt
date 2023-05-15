@@ -20,6 +20,7 @@ add_library(xlr8-library STATIC
         DataBody.cc
         EmptyBody.cc
         Encoding.cc
+        EvaluationContext.cc
         Environment.cc
         Exception.cc
         Expression.cc

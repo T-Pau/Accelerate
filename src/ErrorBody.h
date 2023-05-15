@@ -44,7 +44,7 @@ public:
     [[nodiscard]] std::shared_ptr<BodyElement> clone() const override {return std::make_shared<ErrorBody>(location, message);}
     [[nodiscard]] bool empty() const override {return false;}
     void encode(std::string &bytes, const Memory *memory) const override {throw ParseException(location, message);}
-    [[nodiscard]] std::optional<Body> evaluated(const Environment &environment, bool top_level, const SizeRange &offset) const override;
+    [[nodiscard]] std::optional<Body> evaluated(const EvaluationContext& context) const override;
     void serialize(std::ostream &stream, const std::string &prefix) const override;
 
     Location location;

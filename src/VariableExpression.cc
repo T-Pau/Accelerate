@@ -32,15 +32,22 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "VariableExpression.h"
 
 #include "Environment.h"
+#include "EvaluationContext.h"
 #include "ParseException.h"
 
 
-std::optional<Expression> VariableExpression::evaluated(const Environment &environment) const {
-    auto value = environment[symbol];
+std::optional<Expression> VariableExpression::evaluated(const EvaluationContext& context) const {
+    if (context.evaluating(symbol)) {
+        throw Exception("circular definition of %s", symbol.c_str());
+    }
+
+    auto value = context.environment[symbol];
 
     if (value) {
         auto new_value = *value;
-        new_value.evaluate(environment);
+        if (!context.shallow) {
+            new_value.evaluate(EvaluationContext(context, symbol));
+        }
         return new_value;
     }
     else {

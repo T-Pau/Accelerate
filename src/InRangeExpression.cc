@@ -44,10 +44,10 @@ Expression InRangeExpression::create(const Expression& lower_bound, const Expres
     }
 }
 
-std::optional<Expression> InRangeExpression::evaluated(const Environment &environment) const {
-    auto new_lower = lower_bound.evaluated(environment);
-    auto new_upper = upper_bound.evaluated(environment);
-    auto new_argument = argument.evaluated(environment);
+std::optional<Expression> InRangeExpression::evaluated(const EvaluationContext& context) const {
+    auto new_lower = lower_bound.evaluated(context);
+    auto new_upper = upper_bound.evaluated(context);
+    auto new_argument = argument.evaluated(context);
 
     if (new_lower || new_upper || new_argument) {
         return create(new_lower.value_or(lower_bound), new_upper.value_or(upper_bound), new_argument.value_or(argument));

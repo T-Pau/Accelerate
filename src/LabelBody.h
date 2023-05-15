@@ -18,7 +18,7 @@ public:
     void encode(std::string &bytes, const Memory* memory) const override {}
     [[nodiscard]] bool empty() const override {return label->offset.minimum == label->offset.maximum;}
     [[nodiscard]] std::shared_ptr<BodyElement> clone() const override {throw Exception("can't clone label");}
-    [[nodiscard]] std::optional<Body> evaluated(const Environment &environment, bool top_level, const SizeRange& offset) const override;
+    [[nodiscard]] std::optional<Body> evaluated(const EvaluationContext& context) const override;
 
     void serialize(std::ostream &stream, const std::string& prefix) const override;
 

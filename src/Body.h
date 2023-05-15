@@ -9,6 +9,7 @@
 #include "Label.h"
 #include "Location.h"
 #include "SizeRange.h"
+#include "EvaluationContext.h"
 
 class BlockBody;
 class DataBody;
@@ -46,9 +47,9 @@ public:
     [[nodiscard]] bool empty() const {return element->empty();}
     [[nodiscard]] Body make_unique() const;
     void encode(std::string& bytes, const Memory* memory = nullptr) const {element->encode(bytes, memory);}
-    bool evaluate(const Environment& environment) {return evaluate(environment, true, SizeRange(0));}
-    bool evaluate(const Environment& environment, bool top_level, const SizeRange& offset);
-    [[nodiscard]] std::optional<Body> evaluated (const Environment& environment, bool top_level, const SizeRange& offset) const;
+    bool evaluate(const Environment& environment, bool top_level = true, SizeRange offset = SizeRange(0)) {return evaluate(EvaluationContext(environment, top_level, offset));}
+    bool evaluate(const EvaluationContext& context);
+    [[nodiscard]] std::optional<Body> evaluated (const EvaluationContext& context) const;
     [[nodiscard]] bool is_block() const {return as_block() != nullptr;}
     [[nodiscard]] bool is_data() const {return as_data() != nullptr;}
     [[nodiscard]] bool is_error() const {return as_error() != nullptr;}

@@ -29,8 +29,8 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef FITS_EXPRESSION_H
-#define FITS_EXPRESSION_H
+#ifndef IN_RANGE_EXPRESSION_H
+#define IN_RANGE_EXPRESSION_H
 
 #include "ArgumentType.h"
 #include "Expression.h"
@@ -39,7 +39,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 class InRangeExpression: public BaseExpression {
 public:
-    InRangeExpression(Expression lower_bound, Expression upper_bound, Expression argument): lower_bound(std::move(lower_bound)), upper_bound(std::move(upper_bound)), argument(std::move(argument)) {}
+    InRangeExpression(const Expression& lower_bound, const Expression& upper_bound, const Expression& argument): lower_bound(std::move(lower_bound)), upper_bound(std::move(upper_bound)), argument(std::move(argument)) {}
     [[nodiscard]] Expression static create(const Expression& lower_bound, const Expression& upper_bound, const Expression& argument);
 
     [[nodiscard]] std::optional<Value> minimum_value() const override {return {};}
@@ -48,7 +48,7 @@ public:
     void collect_objects(std::unordered_set<Object*>& objects) const override;
 
 protected:
-    [[nodiscard]] std::optional<Expression> evaluated(const Environment &environment) const override;
+    [[nodiscard]] std::optional<Expression> evaluated(const EvaluationContext& context) const override;
     void serialize_sub(std::ostream& stream) const override;
 
 private:
@@ -58,4 +58,4 @@ private:
 };
 
 
-#endif // FITS_EXPRESSION_H
+#endif // IN_RANGE_EXPRESSION_H

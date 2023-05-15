@@ -9,6 +9,7 @@
 #include "VoidExpression.h"
 
 class BinaryExpression;
+class EvaluationContext;
 class Object;
 class ObjectExpression;
 class VariableExpression;
@@ -62,6 +63,7 @@ public:
     [[nodiscard]] const VariableExpression* as_variable() const;
     void collect_objects(std::unordered_set<Object*>& variables) const {expression->collect_objects(variables);}
     bool evaluate(const Environment& environment);
+    bool evaluate(const EvaluationContext& context);
     [[nodiscard]] std::shared_ptr<BaseExpression> get_expression() const {return expression;}
     [[nodiscard]] bool has_value() const {return value().has_value();}
     [[nodiscard]] bool is_binary() const {return as_binary() != nullptr;}
@@ -74,7 +76,7 @@ public:
     [[nodiscard]] std::optional<Value> value() const {return expression->value();}
     [[nodiscard]] Symbol variable_name() const;
 
-    [[nodiscard]] std::optional<Expression> evaluated(const Environment& environment) const {return expression->evaluated(environment);}
+    [[nodiscard]] std::optional<Expression> evaluated(const EvaluationContext& context) const {return expression->evaluated(context);}
 
 private:
     std::shared_ptr<BaseExpression> expression = std::make_shared<VoidExpression>();

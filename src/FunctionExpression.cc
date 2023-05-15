@@ -30,7 +30,7 @@ Expression FunctionExpression::create(Symbol name, const std::vector<Expression>
     return Expression(std::make_shared<FunctionExpression>(name, arguments));
 }
 
-std::optional<Expression> FunctionExpression::evaluated(const Environment &environment) const {
+std::optional<Expression> FunctionExpression::evaluated(const EvaluationContext& context) const {
     // TODO: implement
     return {};
 }

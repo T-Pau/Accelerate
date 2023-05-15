@@ -31,8 +31,8 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "ErrorBody.h"
 
-std::optional<Body> ErrorBody::evaluated(const Environment &environment, bool top_level, const SizeRange &offset) const {
-    if (top_level) {
+std::optional<Body> ErrorBody::evaluated(const EvaluationContext& context) const {
+    if (context.top_level) {
         throw ParseException(location, message);
     }
     else {

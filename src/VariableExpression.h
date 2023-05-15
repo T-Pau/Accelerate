@@ -42,7 +42,7 @@ public:
     [[nodiscard]] Symbol variable() const {return symbol;}
 
 protected:
-    [[nodiscard]] std::optional<Expression> evaluated(const Environment &environment) const override;
+    [[nodiscard]] std::optional<Expression> evaluated(const EvaluationContext& context) const override;
 
     void serialize_sub(std::ostream& stream) const override {stream << symbol.str();}
 

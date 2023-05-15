@@ -6,6 +6,6 @@
 
 #include "Expression.h"
 
-std::optional<Expression> VoidExpression::evaluated(const Environment &environment) const {
+std::optional<Expression> VoidExpression::evaluated(const EvaluationContext &context) const {
     return {};
 }

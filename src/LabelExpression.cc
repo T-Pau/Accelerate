@@ -17,7 +17,7 @@ Expression LabelExpression::create(const std::shared_ptr<Label>& label) {
 }
 
 
-std::optional<Expression> LabelExpression::evaluated(const Environment &environment) const {
+std::optional<Expression> LabelExpression::evaluated(const EvaluationContext& context) const {
     auto v = label->offset.size();
     if (v.has_value()) {
         return Expression(*v);
