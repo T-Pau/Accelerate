@@ -110,7 +110,7 @@ end:
     .data $30, $31, $32, $33, $34, $35, $36, $37, $38, $39, $41, $42, $43, $44, $45, $46
 }
 
-.section bss
+.section reserved
 
 .local tmp .reserve 1
 .local should .reserve 1

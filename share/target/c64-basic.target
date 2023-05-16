@@ -22,7 +22,7 @@
     segment: program
 }
 
-.section bss {
+.section reserved {
     type: reserve_only
     segment: program
 }

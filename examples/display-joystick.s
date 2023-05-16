@@ -31,7 +31,7 @@
 
 .global ptr2 .reserve 2
 
-.section bss
+.section reserved
 
 .global port_digital .reserve 1
 

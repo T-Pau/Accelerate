@@ -38,6 +38,6 @@ loop:
 
 .include "a2.s"
 
-.section bss
+.section reserved
 
 .local tmp .reserve 2
