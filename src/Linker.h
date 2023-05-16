@@ -51,9 +51,10 @@ public:
 
     const Target& target;
 
+    std::shared_ptr<ObjectFile> program = std::make_shared<ObjectFile>();
+
 private:
 
-    std::shared_ptr<ObjectFile> program = std::make_shared<ObjectFile>();
     std::vector<std::shared_ptr<ObjectFile>> libraries;
 
     bool add_object(Object* object);

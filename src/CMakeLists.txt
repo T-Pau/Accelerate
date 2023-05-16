@@ -76,7 +76,7 @@ add_library(xlr8-library STATIC
 
 target_include_directories(xlr8-library PRIVATE ${PROJECT_BINARY_DIR})
 
-foreach(PROGRAM xlr8 xlr8-ar)
+foreach(PROGRAM xlr8)
     ADD_EXECUTABLE(${PROGRAM} ${PROGRAM}.cc)
     target_include_directories(${PROGRAM} PRIVATE ${PROJECT_BINARY_DIR})
     target_link_libraries(${PROGRAM} xlr8-library)

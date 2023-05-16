@@ -54,6 +54,11 @@ protected:
     size_t minimum_arguments() override {return 1;}
 
 private:
+    enum Mode {
+        COMPILE,
+        CREATE_LIBRARY,
+        LINK
+    };
     class File {
     public:
         File(std::string name, std::shared_ptr<ObjectFile> file): name(std::move(name)), file(std::move(file)) {}
@@ -63,7 +68,7 @@ private:
 
     static std::vector<Commandline::Option> options;
 
-    bool do_link = true;
+    Mode mode = LINK;
 
     std::unique_ptr<Linker> linker;
     Path library_path;
@@ -75,6 +80,7 @@ private:
 
 std::vector<Commandline::Option> xlr8::options = {
         Commandline::Option("compile", 'c', "compile only, don't link"),
+        Commandline::Option("create-library", 'a', "create library"),
         Commandline::Option("include-directory", 'I', "directory", "search for sources in DIRECTORY"),
         Commandline::Option("library-directory", 'L', "directory", "search for libraries in DIRECTORY"),
         Commandline::Option("system-directory", "directory", "search for system files in DIRECTORY"),
@@ -96,7 +102,10 @@ void xlr8::process() {
     for (const auto& option: arguments.options) {
         try {
             if (option.name == "compile") {
-                do_link = false;
+                mode = COMPILE;
+            }
+            else if (option.name == "create-library") {
+                mode = CREATE_LIBRARY;
             }
             else if (option.name == "include-directory") {
                 include_path.append_directory(option.argument);
@@ -117,8 +126,8 @@ void xlr8::process() {
         }
     }
 
-    if (!do_link && !library_path.empty()) {
-        FileReader::global.warning({}, "not linking, --library-path not used");
+    if (mode == COMPILE && !library_path.empty()) {
+        FileReader::global.warning({}, "compiling only, --library-path not used");
     }
 
     system_path.append_path(include_path);
@@ -144,14 +153,14 @@ void xlr8::process() {
                 files.emplace_back(file_name, Assembler(linker->target).parse(Symbol(file_name)));
             }
             else if (extension == ".o") {
-                if (!do_link) {
-                    throw Exception("not linking, object file not used");
+                if (mode == COMPILE) {
+                    throw Exception("only compiling, object file not used");
                 }
                 files.emplace_back(file_name, ObjectFileParser().parse(Symbol(file_name)));
             }
             else if (extension == ".lib") {
-                if (!do_link) {
-                    throw Exception("not linking, library not used");
+                if (mode == COMPILE) {
+                    throw Exception("only compiling, library not used");
                 }
                 linker->add_library(LibraryGetter::global.get(file_name));
             }
@@ -173,13 +182,26 @@ void xlr8::process() {
             throw Exception("no sources given");
 
         case 1:
-            if (do_link && !output_file.has_value()) {
-                set_output_file(files[0].name, linker->target.extension);
+            if (!output_file) {
+                switch (mode) {
+                    case COMPILE:
+                        break;
+
+                    case CREATE_LIBRARY:
+                        set_output_file(files[0].name, "lib");
+                        break;
+
+                    case LINK:
+                        set_output_file(files[0].name, linker->target.extension);
+                        break;
+                }
+            }
+            if (mode == LINK && !output_file.has_value()) {
             }
             break;
 
         default:
-            if (do_link) {
+            if (mode != COMPILE) {
                 if (!output_file.has_value()) {
                     throw Exception("option --output required with multiple source files");
                 }
@@ -192,23 +214,38 @@ void xlr8::process() {
             break;
     }
 
-    if (do_link) {
+    if (mode != COMPILE) {
         for (const auto& file: files) {
             linker->add_file(file.file);
         }
-        linker->link();
+        if (mode == LINK) {
+            linker->link();
+        }
+        else {
+            // TODO: resolve constants in program
+            linker->program->remove_local_constants();
+        }
     }
 }
 
 void xlr8::create_output() {
-    if (do_link) {
-        linker->output(output_file.value());
-    }
-    else {
-        for (const auto& file: files) {
-            auto file_name = output_file.has_value() ? output_file.value() : default_output_filename(file.name, "o");
-            auto stream = std::ofstream(file_name);
-            stream << file.file;
+    switch (mode) {
+        case COMPILE:
+            for (const auto& file: files) {
+                auto file_name = output_file.has_value() ? output_file.value() : default_output_filename(file.name, "o");
+                auto stream = std::ofstream(file_name);
+                stream << file.file;
+            }
+            break;
+
+        case CREATE_LIBRARY: {
+            auto stream = std::ofstream(output_file.value());
+            stream << *(linker->program);
+
         }
+
+        case LINK:
+            linker->output(output_file.value());
+            break;
     }
 }
