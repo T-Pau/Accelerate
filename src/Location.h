@@ -45,7 +45,7 @@ public:
 
     void extend(const Location& end);
 
-    [[nodiscard]] std::string to_string() const {return file.str() + ":" + std::to_string(start_line_number) + "." + std::to_string(start_column);}
+    [[nodiscard]] std::string to_string() const;
 
     Symbol file;
     size_t start_line_number = 0;

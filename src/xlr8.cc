@@ -43,6 +43,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Util.h"
 #include "config.h"
 #include "CPUGetter.h"
+#include "ParseException.h"
 
 class xlr8: public Command {
 public:
@@ -168,8 +169,13 @@ void xlr8::process() {
                 throw Exception("unrecognized file type '%s'", extension.c_str());
             }
         }
+        catch (ParseException& ex) {
+            FileReader::global.error(ex.location, "%s", ex.what());
+            ok = false;
+        }
         catch (Exception& ex) {
             FileReader::global.error(Location(file_name), "%s", ex.what());
+            ok = false;
         }
     }
 

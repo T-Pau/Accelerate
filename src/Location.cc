@@ -38,3 +38,11 @@ void Location::extend(const Location &end) {
 
     end_column = end.end_column;
 }
+
+std::string Location::to_string() const {
+    auto s = file.str();
+    if (start_line_number > 0) {
+        s += ":" + std::to_string(start_line_number) + "." + std::to_string(start_column);
+    }
+    return s;
+}

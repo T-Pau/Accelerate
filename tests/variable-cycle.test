@@ -1,0 +1,9 @@
+description Test detection of cycle in variable definition.
+arguments -c --target 6502 file.s
+return 1
+file file.s <inline>
+.global cycle = cycle + 1
+end-of-inline-data
+stderr
+file.s: error: circular definition of cycle
+end-of-inline-data
