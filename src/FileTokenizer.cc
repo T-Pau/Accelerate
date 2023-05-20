@@ -97,6 +97,7 @@ Token FileTokenizer::next_raw() {
         auto c = current_source->next();
 
         if (c == EOF) {
+            eof_location = current_location();
             current_source = nullptr;
             sources.pop_back();
             if (sources.empty()) {
@@ -273,7 +274,7 @@ Token FileTokenizer::parse_string(Location location) {
 
 Location FileTokenizer::current_location() const{
     if (current_source == nullptr) {
-        return {};
+        return eof_location;
     }
     else {
         return current_source->location();

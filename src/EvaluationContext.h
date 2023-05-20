@@ -27,7 +27,7 @@ public:
     const Environment& environment;
     bool shallow = false; // Don't evaluate values of variables (used in macros and functions for parameters).
 
-    SizeRange offset = SizeRange(0);
+    SizeRange offset;
     bool top_level = false;
     std::unordered_set<Symbol> evaluating_variables; // Variables currently being evaluated (used for loop detection).
 

@@ -347,7 +347,7 @@ void BodyParser::push_clause(Expression condition) {
 }
 
 SizeRange BodyParser::current_size() const {
-    auto size = SizeRange(0);
+    auto size = SizeRange();
 
     for (auto& b: bodies) {
         size += b->size_range();

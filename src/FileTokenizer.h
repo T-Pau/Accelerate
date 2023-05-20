@@ -113,6 +113,7 @@ private:
 
     std::vector<Source> sources;
     Source* current_source = nullptr;
+    Location eof_location;
 
     bool last_was_newline = true;
 };

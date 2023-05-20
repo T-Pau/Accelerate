@@ -22,7 +22,7 @@ public:
     SizeRange operator+=(const SizeRange& other) {*this = *this + other; return *this;}
 
     uint64_t minimum = 0;
-    std::optional<uint64_t> maximum;
+    std::optional<uint64_t> maximum = 0;
 };
 
 std::ostream& operator<<(std::ostream& stream, const SizeRange& size_range);

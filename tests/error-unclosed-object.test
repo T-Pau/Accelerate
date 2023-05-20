@@ -1,0 +1,11 @@
+description Test detection of cycle in variable definition.
+arguments -c --target 6502 file.s
+return 1
+file file.s <inline>
+.section code
+.global test {
+    lda #$0
+end-of-inline-data
+stderr
+file.s:4: unclosed body
+end-of-inline-data
