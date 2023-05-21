@@ -187,7 +187,7 @@ InstructionEncoder::Variant InstructionEncoder::encode(const Instruction* instru
     environment->add(Assembler::symbol_opcode, Expression(instruction->opcode(match.addressing_mode)));
 
     variant.data = addressing_mode->encoding;
-    variant.data.evaluate(environment, false, offset);
+    variant.data.evaluate(Symbol(), environment, true, offset);
 
     auto data = variant.data.as_data();
     for (const auto& datum: data->data) {

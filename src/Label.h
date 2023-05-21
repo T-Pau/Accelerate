@@ -10,12 +10,14 @@
 
 class Label {
 public:
-    Label(Symbol name): name(name) {}
+    explicit Label(Symbol name): name(name) {}
     Label(Symbol name, SizeRange offset): name(name), offset(offset) {}
+    explicit Label(SizeRange offset): offset(offset) {}
+
+    [[nodiscard]] bool is_named() const {return !name.empty();}
 
     const Symbol name;
-    mutable SizeRange offset;
+    mutable SizeRange offset = SizeRange(0, {});
 };
-
 
 #endif // LABEL_H

@@ -131,7 +131,7 @@ void Linker::output(const std::string &file_name) {
     environment->add(TargetParser::token_data_start.as_symbol(), Expression(data_range.start));
 
     auto body = target.output;
-    body.evaluate(environment);
+    body.evaluate(Symbol(), environment);
 
     auto bytes = std::string();
     bytes.reserve(body.size_range().minimum);

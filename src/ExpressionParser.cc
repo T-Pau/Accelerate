@@ -34,7 +34,6 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ValueExpression.h"
 #include "ParseException.h"
 
-
 std::unordered_map<Token, ExpressionParser::BinaryOperator> ExpressionParser::binary_operators;
 
 std::unordered_map<Token, Expression::UnaryOperation> ExpressionParser::unary_operators;
@@ -72,6 +71,9 @@ ExpressionParser::Element ExpressionParser::next_element() {
     }
     else if (token.is_name()) {
         return Element(token);
+    }
+    else if (token == Token::colon_minus || token == Token::colon_plus) {
+        return {Expression(token), 0};
     }
     else if (token == Token::comma) {
         return Element(token.location, COMMA);

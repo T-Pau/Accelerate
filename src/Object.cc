@@ -89,7 +89,7 @@ Object::Object(const ObjectFile *owner, const Object *object): owner(owner), sec
 }
 
 void Object::evaluate(std::shared_ptr<Environment> environment) {
-    body.evaluate(environment);
+    body.evaluate(name.as_symbol(), environment);
 }
 
 SizeRange Object::size_range() const {
@@ -100,4 +100,3 @@ SizeRange Object::size_range() const {
         return body.size_range();
     }
 }
-

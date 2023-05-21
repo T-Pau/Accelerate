@@ -16,7 +16,7 @@ public:
     explicit LabelBody(std::shared_ptr<Label> label): label(std::move(label)) {}
 
     void encode(std::string &bytes, const Memory* memory) const override {}
-    [[nodiscard]] bool empty() const override {return label->offset.minimum == label->offset.maximum;}
+    [[nodiscard]] bool empty() const override {return label->is_named() && label->offset.minimum == label->offset.maximum;}
     [[nodiscard]] std::shared_ptr<BodyElement> clone() const override {throw Exception("can't clone label");}
     [[nodiscard]] std::optional<Body> evaluated(const EvaluationContext& context) const override;
 

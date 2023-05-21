@@ -45,6 +45,8 @@ class Environment;
 
 class BaseExpression {
 public:
+    BaseExpression() = default;
+    BaseExpression(Location location): location(location) {}
     [[nodiscard]] virtual bool has_value() const {return value().has_value();}
     [[nodiscard]] virtual std::optional<Value> value() const {return {};}
     [[nodiscard]] virtual std::optional<Value> minimum_value() const {return value();}

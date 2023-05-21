@@ -220,7 +220,14 @@ void xlr8::process() {
             break;
     }
 
-    if (mode != COMPILE) {
+    if (mode == COMPILE) {
+        for (const auto& file: files) {
+            for (auto object: file.file->all_objects()) {
+                object->evaluate(file.file->local_environment);
+            }
+        }
+    }
+    else {
         for (const auto& file: files) {
             linker->add_file(file.file);
         }

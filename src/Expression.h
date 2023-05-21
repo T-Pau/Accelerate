@@ -7,6 +7,13 @@
 
 #include "BaseExpression.h"
 #include "VoidExpression.h"
+#include "Label.h"
+
+enum LabelExpressionType {
+    NAMED,
+    NEXT_UNNAMED,
+    PREVIOUS_UNNAMED
+};
 
 class BinaryExpression;
 class EvaluationContext;
@@ -46,6 +53,9 @@ public:
     Expression(const Expression& left, BinaryOperation operation, const Expression& right);
     // Function
     Expression(Symbol name, const std::vector<Expression>& arguments);
+    // Label
+    Expression(Location location, std::shared_ptr<Label> label);
+    Expression(Location location, LabelExpressionType type);
     // Object
     explicit Expression(Object* object);
     // Unary

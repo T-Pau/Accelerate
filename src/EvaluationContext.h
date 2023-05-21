@@ -15,9 +15,9 @@
 
 class EvaluationContext {
 public:
-    EvaluationContext(): environment(std::make_shared<Environment>()), scope(std::make_shared<EvaluationScope>()) {}
+    EvaluationContext(): environment(std::make_shared<Environment>()) {}
     explicit EvaluationContext(std::shared_ptr<Environment> environment, bool shallow = false): environment(std::move(environment)), shallow(shallow) {}
-    explicit EvaluationContext(std::shared_ptr<Environment> environment, bool conditional, SizeRange offset): environment(std::move(environment)), conditional(conditional), conditional_in_scope(conditional), offset(offset) {}
+    explicit EvaluationContext(Symbol object_name, std::shared_ptr<Environment> environment, bool conditional, SizeRange offset): environment(std::move(environment)), object_name(object_name), conditional(conditional), conditional_in_scope(conditional), offset(offset) {}
     EvaluationContext(const EvaluationContext& context) = default;
 
     [[nodiscard]] EvaluationContext evaluating_variable(Symbol variable) const;
@@ -29,12 +29,13 @@ public:
 
     std::shared_ptr<Environment> environment;
     bool shallow = false; // Don't evaluate values of variables (used in macros and functions for parameters).
+    Symbol object_name;
 
     SizeRange offset;
     bool conditional = false;
     bool conditional_in_scope = false;
     std::unordered_set<Symbol> evaluating_variables; // Variables currently being evaluated (used for loop detection).
-    std::shared_ptr<EvaluationScope> scope;
+    std::shared_ptr<EvaluationScope> scope = std::make_shared<EvaluationScope>();
 };
 
 #endif // EVALUATION_CONTEXT_H

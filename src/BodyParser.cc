@@ -87,7 +87,7 @@ Body BodyParser::parse() {
                 case Token::PUNCTUATION:
                     if (token == end_token) {
                         // TODO: check that ifs is empty
-                        body.evaluate(environment);
+                        body.evaluate(object_name, environment);
                         return body;
                     }
                     else if (token == Token::colon) {
@@ -148,7 +148,8 @@ std::shared_ptr<Label> BodyParser::get_label(bool& is_anonymous) {
 
 
 Expression BodyParser::get_pc(std::shared_ptr<Label> label) const {
-    return {Expression(object_name), Expression::BinaryOperation::ADD, Expression(std::make_shared<LabelExpression>(std::move(label)))};
+    // TODO: include correct location
+    return {Expression(object_name), Expression::BinaryOperation::ADD, Expression(Location(), std::move(label))};
 }
 
 
@@ -222,7 +223,7 @@ void BodyParser::parse_label(Object::Visibility visibility, const Token& name) {
     auto label = std::make_shared<Label>(name.as_symbol(), SizeRange(current_body->size_range()));
     current_body->append(Body(label));
     add_constant(visibility, name, get_pc(label));
-    environment->add(Symbol(".label_offset(" + name.as_string() + ")"), Expression(std::make_shared<LabelExpression>(label)));
+    environment->add(Symbol(".label_offset(" + name.as_string() + ")"), Expression(std::make_shared<LabelExpression>(name.location, label)));
 }
 
 
@@ -315,7 +316,7 @@ void BodyParser::parse_instruction(const Token &name) {
     {
         auto instruction_environment = std::make_shared<Environment>(environment);
         instruction_environment->add(symbol_pc, get_pc(label));
-        instruction_environment->add(Symbol(".label_offset(" + label->name.str() + ")"), Expression(std::make_shared<LabelExpression>(label)));
+        instruction_environment->add(Symbol(".label_offset(" + label->name.str() + ")"), Expression(std::make_shared<LabelExpression>(Location(), label)));
         instruction = encoder.encode(name, arguments, instruction_environment, current_size());
     }
     if (is_anonymous_label) {
@@ -389,5 +390,5 @@ void BodyParser::parse_error() {
 }
 
 void BodyParser::parse_unnamed_label() {
-    // TODO: implement
+    current_body->append(Body(std::make_shared<Label>(current_size())));
 }

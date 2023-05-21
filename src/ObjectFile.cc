@@ -105,7 +105,7 @@ void ObjectFile::evaluate(const std::shared_ptr<Environment>& environment) {
         pair.second.value.evaluate(environment);
     }
     for (auto& pair: objects) {
-        pair.second->body.evaluate(environment);
+        pair.second->body.evaluate(pair.second->name.as_symbol(), environment);
     }
 }
 
