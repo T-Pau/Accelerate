@@ -46,6 +46,7 @@ private:
     void parse_instruction(const Token& name);
     std::shared_ptr<Node> parse_instruction_argument(const Token& token);
     void parse_label(Object::Visibility visibility, const Token& name);
+    void parse_unnamed_label();
 
     void add_constant(Object::Visibility visibility, Token name, const Expression& value);
     [[nodiscard]] SizeRange current_size() const;

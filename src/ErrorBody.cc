@@ -32,11 +32,11 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ErrorBody.h"
 
 std::optional<Body> ErrorBody::evaluated(const EvaluationContext& context) const {
-    if (context.top_level) {
-        throw ParseException(location, message);
+    if (context.conditional) {
+        return {};
     }
     else {
-        return {};
+        throw ParseException(location, message);
     }
 }
 

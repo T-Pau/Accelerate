@@ -38,11 +38,11 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "TargetParser.h"
 
 void Linker::link() {
-    program->evaluate(*program->local_environment);
+    program->evaluate(program->local_environment);
 
     for (auto& library: libraries) {
-        library->evaluate(*library->local_environment);
-        program->evaluate(*library->global_environment);
+        library->evaluate(library->local_environment);
+        program->evaluate(library->global_environment);
     }
 
     std::unordered_set<Object*> new_objects;
@@ -100,7 +100,7 @@ void Linker::link() {
         return;
     }
 
-    auto empty_environment = Environment();
+    auto empty_environment = std::make_shared<Environment>();
     for (auto object: objects) {
         try {
             object->evaluate(empty_environment);
@@ -115,20 +115,20 @@ void Linker::link() {
 }
 
 void Linker::output(const std::string &file_name) {
-    auto environment = Environment();
+    auto environment = std::make_shared<Environment>();
 
     for (const auto& object: objects) {
         if (object->has_address()) {
-            environment.add(object->name.as_symbol(), Expression(object->address.value()));
+            environment->add(object->name.as_symbol(), Expression(object->address.value()));
         }
     }
 
     // TODO: support for multiple banks
     auto data_range = memory[0].data_range();
 
-    environment.add(TargetParser::token_data_end.as_symbol(), Expression(data_range.end()));
-    environment.add(TargetParser::token_data_size.as_symbol(), Expression(data_range.size));
-    environment.add(TargetParser::token_data_start.as_symbol(), Expression(data_range.start));
+    environment->add(TargetParser::token_data_end.as_symbol(), Expression(data_range.end()));
+    environment->add(TargetParser::token_data_size.as_symbol(), Expression(data_range.size));
+    environment->add(TargetParser::token_data_start.as_symbol(), Expression(data_range.start));
 
     auto body = target.output;
     body.evaluate(environment);

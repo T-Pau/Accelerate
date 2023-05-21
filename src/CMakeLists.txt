@@ -21,6 +21,7 @@ add_library(xlr8-library STATIC
         EmptyBody.cc
         Encoding.cc
         EvaluationContext.cc
+        EvaluationScope.cc
         Environment.cc
         Exception.cc
         Expression.cc

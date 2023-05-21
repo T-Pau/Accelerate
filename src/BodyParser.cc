@@ -36,7 +36,8 @@ const std::unordered_map<Symbol, void (BodyParser::*)()> BodyParser::directive_p
 };
 
 void BodyParser::setup(FileTokenizer &tokenizer) {
-    // TODO: implement
+    tokenizer.add_literal(Token::colon_minus);
+    tokenizer.add_literal(Token::colon_plus);
 }
 
 Body BodyParser::parse() {
@@ -86,8 +87,11 @@ Body BodyParser::parse() {
                 case Token::PUNCTUATION:
                     if (token == end_token) {
                         // TODO: check that ifs is empty
-                        body.evaluate(*environment);
+                        body.evaluate(environment);
                         return body;
+                    }
+                    else if (token == Token::colon) {
+                        parse_unnamed_label();
                     }
                     else {
                         if (allow_instructions() && cpu->uses_empty_mnemonic()) {
@@ -382,4 +386,8 @@ void BodyParser::parse_error() {
     else {
         tokenizer.unget(token);
     }
+}
+
+void BodyParser::parse_unnamed_label() {
+    // TODO: implement
 }

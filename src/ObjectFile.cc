@@ -95,11 +95,12 @@ void ObjectFile::add_object_file(const std::shared_ptr<ObjectFile>& file) {
         add_constant(pair.second.name, pair.second.visibility, pair.second.value);
     }
     for (auto& pair: file->objects) {
+        pair.second->environment->replace(pair.second->owner->local_environment, local_environment);
         add_object(std::move(pair.second));
     }
 }
 
-void ObjectFile::evaluate(const Environment &environment) {
+void ObjectFile::evaluate(const std::shared_ptr<Environment>& environment) {
     for (auto& pair: constants) {
         pair.second.value.evaluate(environment);
     }
@@ -149,7 +150,7 @@ void ObjectFile::add_to_environment(Object *object) {
     add_to_environment(object->name.as_symbol(), object->visibility, Expression(object));
 }
 
-void ObjectFile::add_to_environment(Symbol name, Object::Visibility visibility, Expression value) {
+void ObjectFile::add_to_environment(Symbol name, Object::Visibility visibility, Expression value) const {
     if (visibility == Object::GLOBAL) {
         global_environment->add(name, std::move(value));
     }

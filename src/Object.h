@@ -48,10 +48,10 @@ public:
         GLOBAL
     };
 
-    Object(const ObjectFile* owner, const MemoryMap::Section* section, Visibility visibility, Token name): owner(owner), section(section), visibility(visibility), name(name) {}
+    Object(const ObjectFile* owner, const MemoryMap::Section* section, Visibility visibility, Token name);
     Object(const ObjectFile* owner, const Object* object);
 
-    void evaluate(const Environment& environment);
+    void evaluate(std::shared_ptr<Environment> environment);
     [[nodiscard]] bool is_reservation() const {return reservation > 0;}
     [[nodiscard]] bool empty() const {return !is_reservation() && body.empty();}
     [[nodiscard]] bool has_address() const {return address.has_value();}
@@ -69,6 +69,7 @@ public:
     std::optional<uint64_t> address;
 
     Body body;
+    std::shared_ptr<Environment> environment;
 };
 
 std::ostream& operator<<(std::ostream& stream, const std::shared_ptr<Object>& node);

@@ -34,71 +34,35 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ValueExpression.h"
 #include "ParseException.h"
 
-bool ExpressionParser::initialized;
-Token ExpressionParser::token_ampersand;
-Token ExpressionParser::token_caret;
-Token ExpressionParser::token_comma;
-Token ExpressionParser::token_colon;
-Token ExpressionParser::token_double_greater;
-Token ExpressionParser::token_double_less;
-Token ExpressionParser::token_greater;
-Token ExpressionParser::token_less;
-Token ExpressionParser::token_minus;
-Token ExpressionParser::token_paren_close;
-Token ExpressionParser::token_paren_open;
-Token ExpressionParser::token_pipe;
-Token ExpressionParser::token_plus;
-Token ExpressionParser::token_slash;
-Token ExpressionParser::token_star;
-Token ExpressionParser::token_tilde;
 
 std::unordered_map<Token, ExpressionParser::BinaryOperator> ExpressionParser::binary_operators;
+
 std::unordered_map<Token, Expression::UnaryOperation> ExpressionParser::unary_operators;
 
 void ExpressionParser::initialize() {
-    if (initialized) {
-        return;
-    }
+    binary_operators = {
+            {Token::plus,           BinaryOperator(Expression::BinaryOperation::ADD, 1)},
+            {Token::minus,          BinaryOperator(Expression::BinaryOperation::SUBTRACT, 1)},
+            {Token::pipe,           BinaryOperator(Expression::BinaryOperation::BITWISE_OR, 1)},
 
-    token_ampersand = Token(Token::PUNCTUATION, "&");
-    token_caret = Token(Token::PUNCTUATION, "^");
-    token_comma = Token(Token::PUNCTUATION, ",");
-    token_colon = Token(Token::PUNCTUATION, ":");
-    token_double_greater = Token(Token::PUNCTUATION, ">>");
-    token_double_less = Token(Token::PUNCTUATION, "<<");
-    token_greater = Token(Token::PUNCTUATION, ">");
-    token_less = Token(Token::PUNCTUATION, "<");
-    token_minus = Token(Token::PUNCTUATION, "-");
-    token_paren_close = Token(Token::PUNCTUATION, ")");
-    token_paren_open = Token(Token::PUNCTUATION, "(");
-    token_pipe = Token(Token::PUNCTUATION, "|");
-    token_plus = Token(Token::PUNCTUATION, "+");
-    token_slash = Token(Token::PUNCTUATION, "/");
-    token_star = Token(Token::PUNCTUATION, "*");
-    token_tilde = Token(Token::PUNCTUATION, "~");
+            {Token::star,           BinaryOperator(Expression::BinaryOperation::MULTIPLY, 2)},
+            {Token::slash,          BinaryOperator(Expression::BinaryOperation::DIVIDE, 2)},
+            {Token::ampersand,      BinaryOperator(Expression::BinaryOperation::BITWISE_AND, 2)},
+            {Token::caret,          BinaryOperator(Expression::BinaryOperation::BITWISE_XOR, 2)},
+            {Token::double_less,    BinaryOperator(Expression::BinaryOperation::SHIFT_LEFT, 2)},
+            {Token::double_greater, BinaryOperator(Expression::BinaryOperation::SHIFT_RIGHT, 2)}
+    };
 
     unary_operators = {
-            {token_plus,    Expression::UnaryOperation::PLUS},
-            {token_minus,   Expression::UnaryOperation::MINUS},
-            {token_caret,   Expression::UnaryOperation::BANK_BYTE},
-            {token_less,    Expression::UnaryOperation::LOW_BYTE},
-            {token_greater, Expression::UnaryOperation::HIGH_BYTE},
-            {token_tilde,   Expression::UnaryOperation::BITWISE_NOT}
-    };
-
-    binary_operators = {
-            {token_plus, BinaryOperator(Expression::BinaryOperation::ADD, 1)},
-            {token_minus, BinaryOperator(Expression::BinaryOperation::SUBTRACT, 1)},
-            {token_pipe, BinaryOperator(Expression::BinaryOperation::BITWISE_OR, 1)},
-
-            {token_star, BinaryOperator(Expression::BinaryOperation::MULTIPLY, 2)},
-            {token_slash, BinaryOperator(Expression::BinaryOperation::DIVIDE, 2)},
-            {token_ampersand, BinaryOperator(Expression::BinaryOperation::BITWISE_AND, 2)},
-            {token_caret, BinaryOperator(Expression::BinaryOperation::BITWISE_XOR, 2)},
-            {token_double_less, BinaryOperator(Expression::BinaryOperation::SHIFT_LEFT, 2)},
-            {token_double_greater, BinaryOperator(Expression::BinaryOperation::SHIFT_RIGHT, 2)}
+            {Token::plus,    Expression::UnaryOperation::PLUS},
+            {Token::minus,   Expression::UnaryOperation::MINUS},
+            {Token::caret,   Expression::UnaryOperation::BANK_BYTE},
+            {Token::less,    Expression::UnaryOperation::LOW_BYTE},
+            {Token::greater, Expression::UnaryOperation::HIGH_BYTE},
+            {Token::tilde,   Expression::UnaryOperation::BITWISE_NOT}
     };
 }
+
 
 ExpressionParser::Element ExpressionParser::next_element() {
     auto token = tokenizer.next();
@@ -109,13 +73,13 @@ ExpressionParser::Element ExpressionParser::next_element() {
     else if (token.is_name()) {
         return Element(token);
     }
-    else if (token == token_comma) {
+    else if (token == Token::comma) {
         return Element(token.location, COMMA);
     }
-    else if (token == token_paren_close) {
+    else if (token == Token::paren_close) {
         return Element(token.location, PARENTHESIS_CLOSED);
     }
-    else if (token == token_paren_open) {
+    else if (token == Token::paren_open) {
         return Element(token.location, PARENTHESIS_OPEN);
     }
     else {
@@ -248,7 +212,7 @@ Expression ExpressionParser::do_parse() {
                             }
                             throw ParseException(stack.back().location, "unmatched '('");
                         }
-                        auto token = token_comma;
+                        auto token = Token::comma;
                         token.location = next.location;
                         tokenizer.unget(token);
                         return top.node;
@@ -264,7 +228,7 @@ Expression ExpressionParser::do_parse() {
                     case PARENTHESIS_CLOSED:
                         reduce_binary(0);
                         if (stack.empty()) {
-                            auto token = token_paren_close;
+                            auto token = Token::paren_close;
                             token.location = next.location;
                             tokenizer.unget(token);
                             return top.node;
@@ -366,8 +330,8 @@ Body ExpressionParser::parse_list() {
 
         auto token = tokenizer.next();
 
-        if (token == token_colon) {
-            encoding = parse_encoding();
+        if (token == Token::colon || token == Token::colon_minus || token == Token::colon_plus) {
+            encoding = parse_encoding(token);
             token = tokenizer.next();
         }
 
@@ -376,7 +340,7 @@ Body ExpressionParser::parse_list() {
         if (!token || token.is_newline()) {
             break;
         }
-        else if (token != token_comma) {
+        else if (token != Token::comma) {
             throw ParseException(token, "expected ':', ',', or newline");
         }
     }
@@ -384,15 +348,30 @@ Body ExpressionParser::parse_list() {
     return Body(list);
 }
 
-Encoding ExpressionParser::parse_encoding() {
-    auto token = tokenizer.next();
+Encoding ExpressionParser::parse_encoding(Token token) {
+    Encoding::Type type;
 
-    auto type = Encoding::UNSIGNED;
-
-    if (token == token_minus) {
-        type = Encoding::SIGNED;
+    if (token == Token::colon) {
         token = tokenizer.next();
+        if (token == Token::minus) {
+            type = Encoding::SIGNED;
+        }
+        else if (token == Token::plus) {
+            type = Encoding::UNSIGNED;
+        }
+        else {
+            type = Encoding::UNSIGNED;
+            tokenizer.unget(token);
+        }
     }
+    else if (token == Token::colon_minus) {
+        type = Encoding::SIGNED;
+    }
+    else if (token == Token::colon_plus) {
+        type = Encoding::UNSIGNED;
+    }
+
+    token = tokenizer.next();
 
     if (token.is_unsigned()) {
         return {type, token.as_unsigned()};

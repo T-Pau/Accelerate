@@ -112,7 +112,7 @@ Body InstructionEncoder::encode(const Token& name, const std::vector<std::shared
 }
 
 InstructionEncoder::Variant InstructionEncoder::encode(const Instruction* instruction, const AddressingModeMatcherResult& match, const std::vector<std::shared_ptr<Node>>& arguments, std::shared_ptr<Environment> outer_environment, const SizeRange& offset) const {
-    auto environment = Environment(std::move(outer_environment));
+    auto environment = std::make_shared<Environment>(std::move(outer_environment));
 
     const auto addressing_mode = cpu->addressing_mode(match.addressing_mode);
     const auto& notation = addressing_mode->notations[match.notation_index];
@@ -132,7 +132,7 @@ InstructionEncoder::Variant InstructionEncoder::encode(const Instruction* instru
                     }
                     auto expression = std::dynamic_pointer_cast<ExpressionNode>(*it_arguments)->expression;
 
-                    environment.add(it_notation->symbol, expression);
+                    environment->add(it_notation->symbol, expression);
                     break;
                 }
 
@@ -145,7 +145,7 @@ InstructionEncoder::Variant InstructionEncoder::encode(const Instruction* instru
                     if (!enum_type->has_entry(value_name)) {
                         throw ParseException((*it_arguments)->get_location(), "invalid enum argument");
                     }
-                    environment.add(it_notation->symbol, Expression(enum_type->entry(value_name)));
+                    environment->add(it_notation->symbol, Expression(enum_type->entry(value_name)));
                     break;
                 }
 
@@ -162,7 +162,7 @@ InstructionEncoder::Variant InstructionEncoder::encode(const Instruction* instru
                     if (!map_type->has_entry(value)) {
                         throw ParseException((*it_arguments)->get_location(), "invalid map argument");
                     }
-                    environment.add(it_notation->symbol, Expression(map_type->entry(value)));
+                    environment->add(it_notation->symbol, Expression(map_type->entry(value)));
                     break;
                 }
 
@@ -175,7 +175,7 @@ InstructionEncoder::Variant InstructionEncoder::encode(const Instruction* instru
                     auto expression = std::dynamic_pointer_cast<ExpressionNode>(*it_arguments)->expression;
 
                     variant.add_argument_constraint(InRangeExpression::create(Expression(range_type->lower_bound), Expression(range_type->upper_bound), expression));
-                    environment.add(it_notation->symbol, expression);
+                    environment->add(it_notation->symbol, expression);
                     break;
             }
         }
@@ -184,7 +184,7 @@ InstructionEncoder::Variant InstructionEncoder::encode(const Instruction* instru
         it_arguments++;
     }
 
-    environment.add(Assembler::symbol_opcode, Expression(instruction->opcode(match.addressing_mode)));
+    environment->add(Assembler::symbol_opcode, Expression(instruction->opcode(match.addressing_mode)));
 
     variant.data = addressing_mode->encoding;
     variant.data.evaluate(environment, false, offset);

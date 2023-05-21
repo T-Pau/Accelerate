@@ -55,7 +55,7 @@ std::optional<Body> IfBody::evaluated(const EvaluationContext& context) const {
             new_body.evaluate(context);
             return new_body;
         }
-        changed = new_body.evaluate(EvaluationContext(context, false)) || changed;
+        changed = new_body.evaluate(context.making_conditional()) || changed;
 
         new_clauses.emplace_back(new_expression, new_body);
     }

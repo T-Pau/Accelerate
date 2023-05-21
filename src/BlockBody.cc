@@ -71,7 +71,7 @@ std::optional<Body> BlockBody::evaluated(const EvaluationContext& context) const
     auto current_offset = context.offset;
 
     for (auto& element: elements) {
-        auto new_element = element.evaluated(EvaluationContext(context, current_offset));
+        auto new_element = element.evaluated(context.setting_offset(current_offset));
         if (new_element) {
             changed = true;
             new_elements.emplace_back(*new_element);

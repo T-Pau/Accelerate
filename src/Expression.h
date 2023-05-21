@@ -62,7 +62,7 @@ public:
     [[nodiscard]] const ObjectExpression* as_object() const;
     [[nodiscard]] const VariableExpression* as_variable() const;
     void collect_objects(std::unordered_set<Object*>& variables) const {expression->collect_objects(variables);}
-    bool evaluate(const Environment& environment);
+    bool evaluate(std::shared_ptr<Environment> environment);
     bool evaluate(const EvaluationContext& context);
     [[nodiscard]] std::shared_ptr<BaseExpression> get_expression() const {return expression;}
     [[nodiscard]] bool has_value() const {return value().has_value();}

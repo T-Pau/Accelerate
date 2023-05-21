@@ -36,34 +36,21 @@ std::optional<Expression> Environment::operator[](Symbol name) const {
     if (it != variables.end()) {
         return it->second;
     }
-    else if (next) {
-        return (*next)[name];
+    for (auto& environment: next) {
+        auto value = (*environment)[name];
+        if (value) {
+            return value;
+        }
     }
-    else {
-        return {};
-    }
+
+    return {};
 }
 
-void Environment::set(Symbol name, const Expression& value) {
-    if (!update(name, value)) {
-        add(name, value);
+void Environment::replace(const std::shared_ptr<Environment>& old_next, const std::shared_ptr<Environment>& new_next) {
+    for (auto environment: next) {
+        if (environment == old_next) {
+            environment = new_next;
+            return;
+        }
     }
-}
-
-bool Environment::update(Symbol name, const Expression& value) {
-    auto it = variables.find(name);
-    if (it != variables.end()) {
-        it->second = value;
-        return true;
-    }
-    else if (next) {
-        return next->update(name, value);
-    }
-    else {
-        return false;
-    }
-}
-
-void Environment::remove(Symbol name) {
-    variables.erase(name);
 }

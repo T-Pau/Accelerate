@@ -33,15 +33,27 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 const std::string Token::empty_string;
 
+const Token Token::ampersand = Token(Token::PUNCTUATION, "&");
+const Token Token::caret = Token(Token::PUNCTUATION, "^");
 const Token Token::colon = Token(PUNCTUATION, ":");
+const Token Token::colon_minus = Token(PUNCTUATION, ":-");
+const Token Token::colon_plus = Token(PUNCTUATION, ":+");
 const Token Token::comma = Token(PUNCTUATION, ",");
 const Token Token::curly_close = Token(PUNCTUATION, "}");
 const Token Token::curly_open = Token(PUNCTUATION, "{");
+const Token Token::double_greater = Token(Token::PUNCTUATION, ">>");
+const Token Token::double_less = Token(Token::PUNCTUATION, "<<");
 const Token Token::equals = Token(PUNCTUATION, "=");
 const Token Token::greater = Token(PUNCTUATION, ">");
 const Token Token::less = Token(PUNCTUATION, "<");
+const Token Token::minus = Token(PUNCTUATION, "-");
 const Token Token::paren_close = Token(PUNCTUATION, ")");
 const Token Token::paren_open = Token(PUNCTUATION, "(");
+const Token Token::pipe = Token(Token::PUNCTUATION, "|");
+const Token Token::plus = Token(Token::PUNCTUATION, "+");
+const Token Token::slash = Token(Token::PUNCTUATION, "/");
+const Token Token::star = Token(Token::PUNCTUATION, "*");
+const Token Token::tilde = Token(Token::PUNCTUATION, "~");
 
 const char* Token::type_name(Type type) {
     switch (type) {

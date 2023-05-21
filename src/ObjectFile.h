@@ -67,7 +67,7 @@ public:
     std::shared_ptr<Environment> global_environment;
     std::shared_ptr<Environment> local_environment;
 
-    void evaluate(const Environment& environment);
+    void evaluate(const std::shared_ptr<Environment>& environment);
     void remove_local_constants();
 
     void serialize(std::ostream& stream) const;
@@ -81,7 +81,7 @@ private:
     Object* insert_object(std::unique_ptr<Object> object);
     void add_to_environment(const Constant& constant) { add_to_environment(constant.name, constant.visibility, constant.value);}
     void add_to_environment(Object* object);
-    void add_to_environment(Symbol name, Object::Visibility visibility, Expression value);
+    void add_to_environment(Symbol name, Object::Visibility visibility, Expression value) const;
 
     std::unordered_map<Symbol, std::unique_ptr<Object>> objects;
     std::unordered_map<Symbol, Constant> constants;

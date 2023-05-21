@@ -30,7 +30,11 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include "Object.h"
+
 #include "BodyElement.h"
+#include "ObjectFile.h"
+
+Object::Object(const ObjectFile *owner, const MemoryMap::Section *section, Object::Visibility visibility, Token name): owner(owner), section(section), visibility(visibility), name(name), environment(std::make_shared<Environment>(owner->local_environment)) {}
 
 std::ostream& operator<<(std::ostream& stream, const std::shared_ptr<Object>& object) {
     object->serialize(stream);
@@ -84,7 +88,7 @@ Object::Object(const ObjectFile *owner, const Object *object): owner(owner), sec
     }
 }
 
-void Object::evaluate(const Environment &environment) {
+void Object::evaluate(std::shared_ptr<Environment> environment) {
     body.evaluate(environment);
 }
 
@@ -96,3 +100,4 @@ SizeRange Object::size_range() const {
         return body.size_range();
     }
 }
+

@@ -4,14 +4,35 @@
 
 #include "EvaluationContext.h"
 
-EvaluationContext::EvaluationContext(const EvaluationContext &context, Symbol variable): EvaluationContext(context) {
-    evaluating_variables.insert(variable);
+#include <utility>
+
+EvaluationContext EvaluationContext::evaluating_variable(Symbol variable) const {
+    auto new_context = *this;
+    new_context.evaluating_variables.insert(variable);
+    return new_context;
 }
 
-EvaluationContext::EvaluationContext(const EvaluationContext &context, SizeRange new_offset): EvaluationContext(context) {
-    offset = new_offset;
+EvaluationContext EvaluationContext::adding_offset(SizeRange size) const {
+    auto new_context = *this;
+    new_context.offset += size;
+    return new_context;
 }
 
-EvaluationContext::EvaluationContext(const EvaluationContext &context, bool new_top_level): EvaluationContext(context) {
-    top_level = new_top_level;
+EvaluationContext EvaluationContext::adding_scope(std::shared_ptr<Environment> new_environment) const {
+    auto new_context = *this;
+    new_context.environment = std::move(new_environment);
+    new_context.scope = std::make_shared<EvaluationScope>(new_context.scope);
+    return new_context;
+}
+
+EvaluationContext EvaluationContext::setting_offset(SizeRange new_offset) const {
+    auto new_context = *this;
+    new_context.offset = new_offset;
+    return new_context;
+}
+
+EvaluationContext EvaluationContext::making_conditional() const {
+    auto new_context = *this;
+    new_context.conditional = true;
+    return new_context;
 }

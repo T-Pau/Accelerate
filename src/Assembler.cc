@@ -148,13 +148,13 @@ std::shared_ptr<ObjectFile> Assembler::parse(Symbol file_name) {
         }
     }
 
-    object_file->evaluate(*file_environment);
+    object_file->evaluate(file_environment);
 
     return object_file;
 }
 
 void Assembler::add_constant(Object::Visibility visibility, const Token& name, Expression value) {
-    value.evaluate(*file_environment);
+    value.evaluate(file_environment);
     switch (visibility) {
         case Object::OBJECT:
             file_environment->add(name.as_symbol(), value);
@@ -209,7 +209,7 @@ void Assembler::parse_symbol(Object::Visibility visibility, const Token &name) {
         else if (token == token_align || token == token_reserve) {
             auto expression = ExpressionParser(tokenizer).parse();
 
-            expression.evaluate(*file_environment);
+            expression.evaluate(file_environment);
             auto value = expression.value();
 
             if (token == token_align) {

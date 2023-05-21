@@ -88,15 +88,27 @@ public:
 
     Location location;
 
+    static const Token ampersand;
+    static const Token caret;
     static const Token colon;
+    static const Token colon_minus;
+    static const Token colon_plus;
     static const Token comma;
     static const Token curly_close;
     static const Token curly_open;
+    static const Token double_greater;
+    static const Token double_less;
     static const Token equals;
     static const Token greater;
     static const Token less;
+    static const Token minus;
     static const Token paren_close;
     static const Token paren_open;
+    static const Token pipe;
+    static const Token plus;
+    static const Token slash;
+    static const Token star;
+    static const Token tilde;
 
 private:
     Type type;

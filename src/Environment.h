@@ -36,23 +36,24 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <utility>
 
 #include "Expression.h"
+#include "Label.h"
 #include "Symbol.h"
 
 class Environment {
 public:
     Environment() = default;
-    explicit Environment(std::shared_ptr<Environment> next): next(std::move(next)) {}
+    explicit Environment(std::shared_ptr<Environment> next): next({std::move(next)}) {}
 
     void add(Symbol name, Expression value) { variables[name] = std::move(value);}
-    void remove(Symbol name);
-    void set(Symbol name, const Expression& value);
+    void remove(Symbol name) {variables.erase(name);}
     std::optional<Expression> operator[](Symbol name) const;
 
-private:
-    bool update(Symbol name, const Expression& value);
+    void replace(const std::shared_ptr<Environment>& old_next, const std::shared_ptr<Environment>& new_next);
 
+private:
     std::unordered_map<Symbol, Expression> variables;
-    std::shared_ptr<Environment> next;
+    std::unordered_map<Symbol, std::shared_ptr<Label>> labels;
+    std::vector<std::shared_ptr<Environment>> next;
 };
 
 

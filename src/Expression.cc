@@ -64,7 +64,7 @@ Symbol Expression::variable_name() const {
     return {};
 }
 
-bool Expression::evaluate(const Environment &environment) {
+bool Expression::evaluate(std::shared_ptr<Environment> environment) {
     return evaluate(EvaluationContext(environment));
 }
 

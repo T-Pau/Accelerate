@@ -50,7 +50,7 @@ public:
 
     Expression parse() { top = Element({}, START); return do_parse();}
     Expression parse(Expression& left) { top = Element(left, 0); return do_parse();}
-    Encoding parse_encoding();
+    Encoding parse_encoding(Token token);
     Body parse_list();
 
 private:
@@ -114,24 +114,6 @@ private:
 
     Element top = Element({}, START);
     std::vector<Element> stack;
-
-    static bool initialized;
-    static Token token_ampersand;
-    static Token token_caret;
-    static Token token_colon;
-    static Token token_comma;
-    static Token token_double_greater;
-    static Token token_double_less;
-    static Token token_greater;
-    static Token token_less;
-    static Token token_minus;
-    static Token token_paren_close;
-    static Token token_paren_open;
-    static Token token_pipe;
-    static Token token_plus;
-    static Token token_slash;
-    static Token token_star;
-    static Token token_tilde;
 
     static std::unordered_map<Token, BinaryOperator> binary_operators;
     static std::unordered_map<Token, Expression::UnaryOperation> unary_operators;

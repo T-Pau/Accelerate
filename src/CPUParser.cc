@@ -354,7 +354,7 @@ std::unique_ptr<ArgumentType> CPUParser::parse_argument_type_encoding(const Toke
         throw ParseException(parameters->location, "definition of range argument type '%s' must be scalar", name.as_string().c_str());
     }
     auto tokenizer = SequenceTokenizer(parameters->as_scalar()->tokens);
-    return std::make_unique<ArgumentTypeEncoding>(name.as_symbol(), ExpressionParser(tokenizer).parse_encoding());
+    return std::make_unique<ArgumentTypeEncoding>(name.as_symbol(), ExpressionParser(tokenizer).parse_encoding(Token::colon));
 }
 
 

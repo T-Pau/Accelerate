@@ -41,12 +41,12 @@ std::optional<Expression> VariableExpression::evaluated(const EvaluationContext&
         throw Exception("circular definition of %s", symbol.c_str());
     }
 
-    auto value = context.environment[symbol];
+    auto value = (*context.environment)[symbol];
 
     if (value) {
         auto new_value = *value;
         if (!context.shallow) {
-            new_value.evaluate(EvaluationContext(context, symbol));
+            new_value.evaluate(context.evaluating_variable(symbol));
         }
         return new_value;
     }
