@@ -55,12 +55,13 @@ private:
     void parse_object();
     void parse_target();
 
-    static Object::Visibility visibility_from_name(const Token& name);
+    static Visibility visibility_from_name(const Token& name);
 
     static void initialize();
 
     static bool initialized;
     static std::unordered_map<Symbol, void (ObjectFileParser::*)()> parser_methods;
+    static Token token_address;
     static Token token_alignment;
     static Token token_constant;
     static Token token_data;

@@ -31,10 +31,12 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "Object.h"
 
+#include <utility>
+
 #include "BodyElement.h"
 #include "ObjectFile.h"
 
-Object::Object(const ObjectFile *owner, const MemoryMap::Section *section, Object::Visibility visibility, Token name): owner(owner), section(section), visibility(visibility), name(name), environment(std::make_shared<Environment>(owner->local_environment)) {}
+Object::Object(ObjectFile *owner, const MemoryMap::Section *section, Visibility visibility, Token name): owner(owner), section(section), visibility(visibility), name(name), environment(std::make_shared<Environment>(owner->local_environment)) {}
 
 std::ostream& operator<<(std::ostream& stream, const std::shared_ptr<Object>& object) {
     object->serialize(stream);
@@ -47,24 +49,13 @@ std::ostream& operator<< (std::ostream& stream, const Object& object) {
     return stream;
 }
 
-std::ostream& operator<< (std::ostream& stream, Object::Visibility visibility) {
-    switch  (visibility) {
-        case Object::OBJECT:
-            stream << "none";
-            break;
-        case Object::LOCAL:
-            stream << "local";
-            break;
-        case Object::GLOBAL:
-            stream << "global";
-            break;
-    }
-    return stream;
-}
 
 void Object::serialize(std::ostream &stream) const {
     stream << ".object " << name.as_string() << " {" << std::endl;
-    if (alignment > 0) {
+    if (address) {
+        stream << "    address: " << *address;
+    }
+    else if (alignment > 0) {
         stream << "    alignment: " << alignment << std::endl;
     }
     stream << "    section: " << section->name << std::endl;
@@ -81,15 +72,9 @@ void Object::serialize(std::ostream &stream) const {
     stream << "}" << std::endl;
 }
 
-Object::Object(const ObjectFile *owner, const Object *object): owner(owner), section(object->section), visibility(object->visibility), name(object->name), reservation(object->reservation) {
-    // TODO: copy constructor would need cloning data. move constructor instead?
-    if (!object->is_reservation()) {
-        // append(object->data);
-    }
-}
 
 void Object::evaluate(std::shared_ptr<Environment> environment) {
-    body.evaluate(name.as_symbol(), environment);
+    body.evaluate(name.as_symbol(), owner, std::move(environment));
 }
 
 SizeRange Object::size_range() const {

@@ -45,6 +45,7 @@ public:
     explicit Environment(std::shared_ptr<Environment> next): next({std::move(next)}) {}
 
     void add(Symbol name, Expression value) { variables[name] = std::move(value);}
+    void add_next(std::shared_ptr<Environment> new_next) {next.emplace_back(std::move(new_next));}
     void remove(Symbol name) {variables.erase(name);}
     std::optional<Expression> operator[](Symbol name) const;
 

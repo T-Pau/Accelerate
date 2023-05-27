@@ -47,22 +47,22 @@ public:
     static Symbol symbol_opcode;
 
 private:
-    void parse_assignment(Object::Visibility visibility, const Token& name);
+    void parse_assignment(Visibility visibility, const Token& name);
     void parse_directive(const Token& directive);
     void parse_instruction(const Token& name);
-    void parse_label(Object::Visibility visibility, const Token& name);
+    void parse_label(Visibility visibility, const Token& name);
     void parse_section();
-    void parse_symbol(Object::Visibility visibility, const Token& name);
+    void parse_symbol(Visibility visibility, const Token& name);
     void parse_symbol_body();
 
     std::shared_ptr<Node> parse_instruction_argument(const Token& token);
 
-    void add_constant(Object::Visibility visibility, const Token& name, Expression value);
+    void add_constant(Visibility visibility, const Token& name, Expression value);
     [[nodiscard]] std::shared_ptr<LabelBody> create_anonymous_label() const;
     [[nodiscard]] Expression get_pc(const std::shared_ptr<LabelBody>& label) const;
     [[nodiscard]] std::shared_ptr<LabelBody> get_trailing_label() const;
 
-    static Object::Visibility visibility_value(const Token& token);
+    static Visibility visibility_value(const Token& token);
 
     const Target& target;
 

@@ -70,7 +70,7 @@ void Linker::link() {
     }
 
     for (auto object: objects) {
-        if (!object->bank.has_value() || object->address.has_value()) {
+        if (!object->address.has_value()) {
             // TODO: unresolved symbol
             continue;
         }
@@ -85,8 +85,7 @@ void Linker::link() {
         for (const auto& block: object->section->blocks) {
             auto address = memory[block.bank].allocate(block.range, object->is_reservation() ? Memory::RESERVED : Memory::DATA, object->alignment, *object->size_range().size());
             if (address.has_value()) {
-                object->bank = block.bank;
-                object->address = address.value();
+                object->address = {block.bank, *address};
                 break;
             }
         }
@@ -106,7 +105,7 @@ void Linker::link() {
             object->evaluate(empty_environment);
             std::string bytes;
             object->body.encode(bytes);
-            memory[object->bank.value()].copy(object->address.value(), bytes);
+            memory[object->address->bank].copy(object->address->address, bytes);
         }
         catch (Exception& ex) {
             FileReader::global.error(Location(), "can't evaluated '%s': %s", object->name.as_string().c_str(), ex.what());
@@ -119,7 +118,7 @@ void Linker::output(const std::string &file_name) {
 
     for (const auto& object: objects) {
         if (object->has_address()) {
-            environment->add(object->name.as_symbol(), Expression(object->address.value()));
+            environment->add(object->name.as_symbol(), Expression(object->address->address));
         }
     }
 
@@ -131,7 +130,7 @@ void Linker::output(const std::string &file_name) {
     environment->add(TargetParser::token_data_start.as_symbol(), Expression(data_range.start));
 
     auto body = target.output;
-    body.evaluate(Symbol(), environment);
+    body.evaluate(Symbol(), nullptr, environment);
 
     auto bytes = std::string();
     bytes.reserve(body.size_range().minimum);

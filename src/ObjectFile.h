@@ -44,20 +44,21 @@ public:
     class Constant {
     public:
         Constant() = default;
-        Constant(Symbol name, Object::Visibility visibility, Expression value): name(name), visibility(visibility), value(std::move(value)) {}
+        Constant(Symbol name, Visibility visibility, Expression value): name(name), visibility(visibility), value(std::move(value)) {}
 
         void serialize(std::ostream& stream) const;
 
         Symbol name;
-        Object::Visibility visibility = Object::OBJECT;
+        Visibility visibility = Visibility::LOCAL;
         Expression value;
+        std::unordered_set<Object*> referenced_objects;
     };
 
     ObjectFile() noexcept;
 
-    Object* create_object(Symbol section_name, Object::Visibility visibility, Token name);
+    Object* create_object(Symbol section_name, Visibility visibility, Token name);
 
-    void add_constant(Symbol name, Object::Visibility visibility, Expression value);
+    void add_constant(Symbol name, Visibility visibility, Expression value);
     void add_object(std::unique_ptr<Object> object) {(void)insert_object(std::move(object));}
     void add_object_file(const std::shared_ptr<ObjectFile>& file);
 
@@ -67,7 +68,9 @@ public:
     std::shared_ptr<Environment> global_environment;
     std::shared_ptr<Environment> local_environment;
 
-    void evaluate(const std::shared_ptr<Environment>& environment);
+    void evaluate(const std::shared_ptr<Environment>& environment); // DEPRECATED
+    void evaluate();
+    void import(ObjectFile* library);
     void remove_local_constants();
 
     void serialize(std::ostream& stream) const;
@@ -81,10 +84,12 @@ private:
     Object* insert_object(std::unique_ptr<Object> object);
     void add_to_environment(const Constant& constant) { add_to_environment(constant.name, constant.visibility, constant.value);}
     void add_to_environment(Object* object);
-    void add_to_environment(Symbol name, Object::Visibility visibility, Expression value) const;
+    void add_to_environment(Symbol name, Visibility visibility, Expression value) const;
 
     std::unordered_map<Symbol, std::unique_ptr<Object>> objects;
     std::unordered_map<Symbol, Constant> constants;
+
+    std::unordered_set<ObjectFile*> imported_libraries;
 };
 
 std::ostream& operator<<(std::ostream& stream, const ObjectFile& list);

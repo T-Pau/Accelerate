@@ -35,7 +35,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 std::optional<Expression> ObjectExpression::evaluated(const EvaluationContext& context) const {
     if (object->has_address()) {
-        return Expression(object->address.value());
+        return Expression(object->address->address);
     }
     else {
         return {};
@@ -44,7 +44,7 @@ std::optional<Expression> ObjectExpression::evaluated(const EvaluationContext& c
 
 std::optional<Value> ObjectExpression::value() const {
     if (has_value()) {
-        return Value(object->address.value());
+        return Value(object->address->address);
     }
     else {
         return {};
@@ -53,7 +53,7 @@ std::optional<Value> ObjectExpression::value() const {
 
 Expression ObjectExpression::create(Object *object) {
     if (object->has_address()) {
-        return Expression(object->address.value());
+        return Expression(object->address->address);
     }
     else {
         return Expression(std::make_shared<ObjectExpression>(object));

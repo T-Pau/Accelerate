@@ -3,10 +3,12 @@ if(NOT HAVE_GETOPT_LONG)
 endif()
 
 add_library(xlr8-library STATIC
+        Address.cc
         AddressingMode.cc
         AddressingModeMatcher.cc
         ArgumentType.cc
         Assembler.cc
+        AssignmentBody.cc
         BinaryExpression.cc
         Body.cc
         BlockBody.cc
@@ -71,6 +73,7 @@ add_library(xlr8-library STATIC
         Value.cc
         ValueExpression.cc
         VariableExpression.cc
+        Visibility.cc
         VoidExpression.cc
         ${COMPATIBILITY}
 )

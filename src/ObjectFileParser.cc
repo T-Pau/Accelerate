@@ -38,6 +38,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 bool ObjectFileParser::initialized = false;
 std::unordered_map<Symbol, void (ObjectFileParser::*)()> ObjectFileParser::parser_methods;
+Token ObjectFileParser::token_address;
 Token ObjectFileParser::token_alignment;
 Token ObjectFileParser::token_constant;
 Token ObjectFileParser::token_data;
@@ -53,6 +54,7 @@ Token ObjectFileParser::token_visibility;
 
 void ObjectFileParser::initialize() {
     if (!initialized) {
+        token_address = Token(Token::NAME, "address");
         token_alignment = Token(Token::NAME, "alignment");
         token_constant = Token(Token::DIRECTIVE, "constant");
         token_data = Token(Token::NAME, "data");
@@ -61,7 +63,7 @@ void ObjectFileParser::initialize() {
         token_local = Token(Token::NAME, "local");
         token_object = Token(Token::DIRECTIVE, "object");
         token_section = Token(Token::NAME, "section");
-        token_reserve = Token(Token::NAME, "size");
+        token_reserve = Token(Token::NAME, "reserve");
         token_target = Token(Token::DIRECTIVE, "target");
         token_value = Token(Token::NAME, "value");
         token_visibility = Token(Token::NAME, "visibility");
@@ -121,6 +123,34 @@ void ObjectFileParser::parse_object() {
 
     auto object = file->create_object(section.as_symbol(), visibility, name);
 
+    auto address_value = parameters->get_optional(token_address);
+    if (address_value) {
+        const auto& tokens = address_value->as_scalar()->tokens;
+        switch (tokens.size()) {
+            case 1:
+                if (!tokens[0].is_unsigned()) {
+                    throw ParseException(tokens[0], "expected unsigned");
+                }
+                object->address = Address(tokens[0].as_unsigned());
+                break;
+
+            case 3:
+                if (tokens[1] != Token::colon) {
+                    throw ParseException(tokens[1], "expected ':'");
+                }
+                if (!tokens[0].is_unsigned()) {
+                    throw ParseException(tokens[0], "expected unsigned");
+                }
+                if (!tokens[2].is_unsigned()) {
+                    throw ParseException(tokens[2], "expected unsigned");
+                }
+                object->address = {tokens[0].as_unsigned(), tokens[0].as_unsigned()};
+                break;
+
+            default:
+                throw ParseException(address_value->location, "invalid address");
+        }
+    }
     auto alignment_value = parameters->get_optional(token_alignment);
     if (alignment_value) {
         auto alignment = alignment_value->as_singular_scalar()->token();
@@ -146,12 +176,12 @@ void ObjectFileParser::parse_object() {
     }
 }
 
-Object::Visibility ObjectFileParser::visibility_from_name(const Token& name) {
+Visibility ObjectFileParser::visibility_from_name(const Token& name) {
     if (name == token_global) {
-        return Object::GLOBAL;
+        return Visibility::GLOBAL;
     }
     else if (name == token_local) {
-        return Object::LOCAL;
+        return Visibility::LOCAL;
     }
     else {
         throw ParseException(name, "illegal visibility");

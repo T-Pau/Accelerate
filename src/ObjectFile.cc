@@ -80,7 +80,7 @@ void ObjectFile::serialize(std::ostream &stream) const {
     }
 }
 
-void ObjectFile::add_constant(Symbol name, Object::Visibility visibility, Expression value) {
+void ObjectFile::add_constant(Symbol name, Visibility visibility, Expression value) {
     auto pair = constants.insert({name, Constant(name, visibility, std::move(value))});
 
     if (!pair.second) {
@@ -100,19 +100,30 @@ void ObjectFile::add_object_file(const std::shared_ptr<ObjectFile>& file) {
     }
 }
 
+
+void ObjectFile::evaluate() {
+    for (auto& pair: constants) {
+        pair.second.value.evaluate(local_environment);
+    }
+    for (auto& pair: objects) {
+        pair.second->evaluate();
+    }
+}
+
+
 void ObjectFile::evaluate(const std::shared_ptr<Environment>& environment) {
     for (auto& pair: constants) {
         pair.second.value.evaluate(environment);
     }
     for (auto& pair: objects) {
-        pair.second->body.evaluate(pair.second->name.as_symbol(), environment);
+        pair.second->body.evaluate(pair.second->name.as_symbol(), this, environment);
     }
 }
 
 
 void ObjectFile::remove_local_constants() {
     std::erase_if(constants, [this](const auto& item) {
-        if (item.second.visibility == Object::LOCAL) {
+        if (item.second.visibility == Visibility::LOCAL) {
             local_environment->remove(item.first);
             return true;
         }
@@ -133,7 +144,7 @@ const Object* ObjectFile::object(Symbol name) const {
 }
 
 
-Object *ObjectFile::create_object(Symbol section_name, Object::Visibility visibility, Token name) {
+Object *ObjectFile::create_object(Symbol section_name, Visibility visibility, Token name) {
     auto section = target->map.section(section_name);
     if (section == nullptr) {
         throw ParseException(name, "unknown section '%s'", section_name.c_str());
@@ -150,8 +161,8 @@ void ObjectFile::add_to_environment(Object *object) {
     add_to_environment(object->name.as_symbol(), object->visibility, Expression(object));
 }
 
-void ObjectFile::add_to_environment(Symbol name, Object::Visibility visibility, Expression value) const {
-    if (visibility == Object::GLOBAL) {
+void ObjectFile::add_to_environment(Symbol name, Visibility visibility, Expression value) const {
+    if (visibility == Visibility::GLOBAL) {
         global_environment->add(name, std::move(value));
     }
     else {
@@ -189,4 +200,14 @@ void ObjectFile::Constant::serialize(std::ostream &stream) const {
     stream << "    visibility: " << visibility << std::endl;
     stream << "    value: " << value << std::endl;
     stream << "}" << std::endl;
+}
+
+
+void ObjectFile::import(ObjectFile *library) {
+    if (imported_libraries.contains(library)) {
+        return;
+    }
+    // TODO: detect loops
+    imported_libraries.insert(library);
+    global_environment->add_next(library->global_environment);
 }

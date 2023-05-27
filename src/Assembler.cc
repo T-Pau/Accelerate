@@ -92,7 +92,7 @@ std::shared_ptr<ObjectFile> Assembler::parse(Symbol file_name) {
 
                 case Token::DIRECTIVE: {
                     auto visibility = visibility_value(token);
-                    if (visibility != Object::OBJECT) {
+                    if (visibility != Visibility::SCOPE) {
                         auto name = tokenizer.next();
                         if (name.get_type() != Token::NAME) {
                             throw ParseException(name, "name expected");
@@ -119,7 +119,7 @@ std::shared_ptr<ObjectFile> Assembler::parse(Symbol file_name) {
                 case Token::NAME: {
                     auto token2 = tokenizer.next();
                     if (token2 == Token::equals) {
-                        parse_assignment(Object::OBJECT, token);
+                        parse_assignment(Visibility::SCOPE, token);
                         break;
                     }
                     else {
@@ -153,20 +153,20 @@ std::shared_ptr<ObjectFile> Assembler::parse(Symbol file_name) {
     return object_file;
 }
 
-void Assembler::add_constant(Object::Visibility visibility, const Token& name, Expression value) {
+void Assembler::add_constant(Visibility visibility, const Token& name, Expression value) {
     value.evaluate(file_environment);
     switch (visibility) {
-        case Object::OBJECT:
+        case Visibility::SCOPE:
             file_environment->add(name.as_symbol(), value);
             break;
-        case Object::LOCAL:
-        case Object::GLOBAL:
+        case Visibility::LOCAL:
+        case Visibility::GLOBAL:
             object_file->add_constant(name.as_symbol(), visibility, value);
             break;
     }
 }
 
-void Assembler::parse_assignment(Object::Visibility visibility, const Token &name) {
+void Assembler::parse_assignment(Visibility visibility, const Token &name) {
     add_constant(visibility, name, ExpressionParser(tokenizer).parse());
 }
 
@@ -179,19 +179,19 @@ void Assembler::parse_section() {
     current_section = token.as_symbol();
 }
 
-Object::Visibility Assembler::visibility_value(const Token& token) {
+Visibility Assembler::visibility_value(const Token& token) {
     if (token == token_local) {
-        return Object::LOCAL;
+        return Visibility::LOCAL;
     }
     else if (token == token_global) {
-        return Object::GLOBAL;
+        return Visibility::GLOBAL;
     }
     else {
-        return Object::OBJECT;
+        return Visibility::SCOPE;
     }
 }
 
-void Assembler::parse_symbol(Object::Visibility visibility, const Token &name) {
+void Assembler::parse_symbol(Visibility visibility, const Token &name) {
     auto object = object_file->create_object(current_section, visibility, name);
 
     while (true) {

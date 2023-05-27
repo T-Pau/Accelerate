@@ -1,0 +1,14 @@
+BasedOnStyle: LLVM
+IndentWidth: 4
+IndentCaseLabels: true
+ColumnLimit: 2000
+KeepEmptyLinesAtTheStartOfBlocks: false
+MaxEmptyLinesToKeep: 2
+BreakBeforeBraces: Custom
+BraceWrapping:
+  BeforeElse: true
+AlignEscapedNewlines: Left
+UseTab: Never
+SeparateDefinitionBlocks : Always
+AlwaysBreakAfterReturnType: None
+#PPDirectiveIndentStyle: AfterHash

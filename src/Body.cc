@@ -6,6 +6,7 @@
 
 #include <utility>
 
+#include "AssignmentBody.h"
 #include "BlockBody.h"
 #include "DataBody.h"
 #include "EmptyBody.h"
@@ -24,6 +25,12 @@ Body::Body(const std::shared_ptr<BodyElement> &new_element) {
         element = std::make_shared<EmptyBody>();
     }
 }
+
+
+Body::Body(Visibility visibility, Symbol name, Expression value) {
+    element = std::make_shared<AssignmentBody>(visibility, name, std::move(value));
+}
+
 
 Body::Body(const std::vector<Body>& elements) {
     *this = BlockBody::create(elements);

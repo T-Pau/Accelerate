@@ -59,10 +59,10 @@ Body BodyParser::parse() {
                 case Token::NAME: {
                     auto token2 = tokenizer.next();
                     if (token2 == Token::colon) {
-                        parse_label(Object::OBJECT, token);
+                        parse_label(Visibility::SCOPE, token);
                     }
                     else if (token2 == Token::equals) {
-                        parse_assignment(Object::OBJECT, token);
+                        parse_assignment(Visibility::SCOPE, token);
                     }
                     else {
                         tokenizer.unget(token2);
@@ -87,7 +87,7 @@ Body BodyParser::parse() {
                 case Token::PUNCTUATION:
                     if (token == end_token) {
                         // TODO: check that ifs is empty
-                        body.evaluate(object_name, environment);
+                        body.evaluate(object_name, object_file, environment);
                         return body;
                     }
                     else if (token == Token::colon) {
@@ -123,8 +123,8 @@ Body BodyParser::parse() {
     throw ParseException(Location(), "unclosed body"); // TODO: location
 }
 
-void BodyParser::add_constant(Object::Visibility visibility, Token name, const Expression& value) {
-    if (visibility != Object::OBJECT) {
+void BodyParser::add_constant(Visibility visibility, Token name, const Expression& value) {
+    if (visibility != Visibility::SCOPE) {
         if (!object_file) {
             throw ParseException(name, "unsupported visibility");
         }
@@ -219,7 +219,7 @@ std::shared_ptr<Node> BodyParser::parse_instruction_argument(const Token& token)
 }
 
 
-void BodyParser::parse_label(Object::Visibility visibility, const Token& name) {
+void BodyParser::parse_label(Visibility visibility, const Token& name) {
     auto label = std::make_shared<Label>(name.as_symbol(), SizeRange(current_body->size_range()));
     current_body->append(Body(label));
     add_constant(visibility, name, get_pc(label));
@@ -245,8 +245,8 @@ void BodyParser::parse_memory() {
     current_body->append(Body(bank, start_address, end_address));
 }
 
-void BodyParser::parse_assignment(Object::Visibility visibility, const Token &name) {
-    // TODO: implement
+void BodyParser::parse_assignment(Visibility visibility, const Token &name) {
+    current_body->append(Body(visibility, name.as_symbol(), ExpressionParser(tokenizer).parse()));
 }
 
 void BodyParser::parse_instruction(const Token &name) {

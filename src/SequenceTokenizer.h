@@ -50,5 +50,4 @@ private:
 
 };
 
-
 #endif // SEQUENCE_TOKENIZER_H

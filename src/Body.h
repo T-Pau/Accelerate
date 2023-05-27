@@ -6,10 +6,11 @@
 #define BODY_H
 
 #include "BodyElement.h"
+#include "EvaluationContext.h"
 #include "Label.h"
 #include "Location.h"
 #include "SizeRange.h"
-#include "EvaluationContext.h"
+#include "Visibility.h"
 
 class BlockBody;
 class DataBody;
@@ -23,6 +24,8 @@ public:
 
     Body();
     explicit Body(const std::shared_ptr<BodyElement>& element);
+    // Assignment
+    Body(Visibility visibility, Symbol name, Expression value);
     // Block
     explicit Body(const std::vector<Body>& elements);
     // Data
@@ -47,7 +50,7 @@ public:
     [[nodiscard]] bool empty() const {return element->empty();}
     [[nodiscard]] Body make_unique() const;
     void encode(std::string& bytes, const Memory* memory = nullptr) const {element->encode(bytes, memory);}
-    bool evaluate(Symbol object_name, std::shared_ptr<Environment> environment, bool conditional = false, SizeRange offset = SizeRange()) {return evaluate(EvaluationContext(object_name, environment, conditional, offset));}
+    bool evaluate(Symbol object_name, ObjectFile* object_file, std::shared_ptr<Environment> environment, bool conditional = false, SizeRange offset = SizeRange()) {return evaluate(EvaluationContext(object_name, object_file, environment, conditional, offset));}
     bool evaluate(const EvaluationContext& context);
     [[nodiscard]] std::optional<Body> evaluated (const EvaluationContext& context) const;
     [[nodiscard]] bool is_block() const {return as_block() != nullptr;}

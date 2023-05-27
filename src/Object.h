@@ -34,47 +34,41 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <vector>
 
+#include "Address.h"
 #include "Body.h"
 #include "MemoryMap.h"
 #include "Token.h"
+#include "Visibility.h"
 
 class ObjectFile;
 
 class Object {
 public:
-    enum Visibility {
-        OBJECT,
-        LOCAL,
-        GLOBAL
-    };
-
-    Object(const ObjectFile* owner, const MemoryMap::Section* section, Visibility visibility, Token name);
-    Object(const ObjectFile* owner, const Object* object);
+    Object(ObjectFile* owner, const MemoryMap::Section* section, Visibility visibility, Token name);
 
     void evaluate(std::shared_ptr<Environment> environment);
     [[nodiscard]] bool is_reservation() const {return reservation > 0;}
     [[nodiscard]] bool empty() const {return !is_reservation() && body.empty();}
+    void evaluate() {body.evaluate(name.as_symbol(), owner, environment, false);}
     [[nodiscard]] bool has_address() const {return address.has_value();}
     [[nodiscard]] SizeRange size_range() const;
 
     void serialize(std::ostream& stream) const;
 
-    const ObjectFile* owner;
+    ObjectFile* owner;
     const MemoryMap::Section* section;
     Visibility visibility;
     Token name;
     uint64_t alignment = 0;
     uint64_t reservation = 0;
-    std::optional<uint64_t> bank;
-    std::optional<uint64_t> address;
+    std::optional<Address> address;
 
     Body body;
     std::shared_ptr<Environment> environment;
+    std::unordered_set<Object*> referenced_objects;
 };
 
 std::ostream& operator<<(std::ostream& stream, const std::shared_ptr<Object>& node);
 std::ostream& operator<<(std::ostream& stream, const Object& node);
-std::ostream& operator<<(std::ostream& stream, Object::Visibility visibility);
-
 
 #endif // OBJECT_H

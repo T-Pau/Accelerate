@@ -41,14 +41,14 @@ private:
 
     [[nodiscard]] bool allow_instructions() const {return cpu != nullptr;}
     [[nodiscard]] bool allow_labels() const {return !object_name.empty();}
-    void parse_assignment(Object::Visibility visibility, const Token& name);
+    void parse_assignment(Visibility visibility, const Token& name);
     void parse_directive(const Token& directive);
     void parse_instruction(const Token& name);
     std::shared_ptr<Node> parse_instruction_argument(const Token& token);
-    void parse_label(Object::Visibility visibility, const Token& name);
+    void parse_label(Visibility visibility, const Token& name);
     void parse_unnamed_label();
 
-    void add_constant(Object::Visibility visibility, Token name, const Expression& value);
+    void add_constant(Visibility visibility, Token name, const Expression& value);
     [[nodiscard]] SizeRange current_size() const;
     [[nodiscard]] Expression get_pc(std::shared_ptr<Label> label) const;
     [[nodiscard]] std::shared_ptr<Label> get_label(bool& is_anonymous);
