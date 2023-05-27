@@ -43,6 +43,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 bool Assembler::initialized = false;
 Symbol Assembler::symbol_opcode;
+Token Assembler::token_address;
 Token Assembler::token_align;
 Token Assembler::token_global;
 Token Assembler::token_local;
@@ -53,6 +54,7 @@ Token Assembler::token_section;
 void Assembler::initialize() {
     if (!initialized) {
         symbol_opcode = ".opcode";
+        token_address = Token(Token::DIRECTIVE, ".address");
         token_align = Token(Token::DIRECTIVE, ".align");
         token_global = Token(Token::DIRECTIVE, ".global");
         token_local = Token(Token::DIRECTIVE, ".local");
@@ -69,6 +71,7 @@ std::shared_ptr<ObjectFile> Assembler::parse(Symbol file_name) {
     ExpressionParser::setup(tokenizer);
     BodyParser::setup(tokenizer);
     tokenizer.add_punctuations({"{", "}", "=", ":"});
+    tokenizer.add_literal(token_address);
     tokenizer.add_literal(token_align);
 //    tokenizer.add_literal(token_data);
     tokenizer.add_literal(token_global);
@@ -206,6 +209,9 @@ void Assembler::parse_symbol(Visibility visibility, const Token &name) {
             break;
         }
         // TODO: parameters
+        else if (token == token_address) {
+            object->address = Address(tokenizer, file_environment);
+        }
         else if (token == token_align || token == token_reserve) {
             auto expression = ExpressionParser(tokenizer).parse();
 

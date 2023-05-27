@@ -47,7 +47,7 @@ public:
     explicit FileTokenizer(std::shared_ptr<const Path> path = std::make_shared<const Path>(), bool use_preprocessor = true);
     void push(Symbol filename);
 
-    [[nodiscard]] Location current_location() const;
+    [[nodiscard]] Location current_location() const override;
     [[nodiscard]] Symbol current_file() const {return current_source ? current_source->file() : Symbol();}
     Symbol find_file(Symbol file_name);
 

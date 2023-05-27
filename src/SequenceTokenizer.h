@@ -38,16 +38,21 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 class SequenceTokenizer: public Tokenizer {
 public:
-    explicit SequenceTokenizer(std::vector<Token> tokens): tokens(std::move(tokens)) { current_position = this->tokens.begin();}
+    SequenceTokenizer(Location location, std::vector<Token> tokens): location(location), tokens(std::move(tokens)) { current_position = this->tokens.begin();}
+    explicit SequenceTokenizer(std::vector<Token> tokens);
+
+    [[nodiscard]] Location current_location() const override {return location;}
 
 protected:
     [[nodiscard]] bool sub_ended() const override {return current_position == tokens.end();}
     Token sub_next() override;
 
 private:
+    Location location;
     std::vector<Token> tokens;
     std::vector<Token>::iterator current_position;
 
+    void set_location(Token token);
 };
 
 #endif // SEQUENCE_TOKENIZER_H

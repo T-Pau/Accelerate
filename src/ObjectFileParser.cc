@@ -125,32 +125,12 @@ void ObjectFileParser::parse_object() {
 
     auto address_value = parameters->get_optional(token_address);
     if (address_value) {
-        const auto& tokens = address_value->as_scalar()->tokens;
-        switch (tokens.size()) {
-            case 1:
-                if (!tokens[0].is_unsigned()) {
-                    throw ParseException(tokens[0], "expected unsigned");
-                }
-                object->address = Address(tokens[0].as_unsigned());
-                break;
-
-            case 3:
-                if (tokens[1] != Token::colon) {
-                    throw ParseException(tokens[1], "expected ':'");
-                }
-                if (!tokens[0].is_unsigned()) {
-                    throw ParseException(tokens[0], "expected unsigned");
-                }
-                if (!tokens[2].is_unsigned()) {
-                    throw ParseException(tokens[2], "expected unsigned");
-                }
-                object->address = {tokens[0].as_unsigned(), tokens[0].as_unsigned()};
-                break;
-
-            default:
-                throw ParseException(address_value->location, "invalid address");
+        auto tokenizer = SequenceTokenizer(address_value->location, address_value->as_scalar()->tokens);
+        object->address = Address(tokenizer);
+        if (!tokenizer.ended()) {
+            throw ParseException(tokenizer.current_location(), "expected newline");
         }
-    }
+   }
     auto alignment_value = parameters->get_optional(token_alignment);
     if (alignment_value) {
         auto alignment = alignment_value->as_singular_scalar()->token();

@@ -53,6 +53,7 @@ public:
     void skip(const TokenGroup& types);
     void skip(Token::Type type);
 
+    [[nodiscard]] virtual Location current_location() const = 0;
     [[nodiscard]] bool ended() const {return !ungot_token.has_value() && sub_ended();}
 
 protected:

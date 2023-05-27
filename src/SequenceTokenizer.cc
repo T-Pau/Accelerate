@@ -31,11 +31,27 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "SequenceTokenizer.h"
 
+SequenceTokenizer::SequenceTokenizer(std::vector<Token> tokens_): tokens(std::move(tokens_)) {
+    current_position = tokens.begin();
+    if (!tokens.empty()) {
+        set_location(tokens.front());
+    }
+}
+
+
 Token SequenceTokenizer::sub_next() {
     if (current_position == tokens.end()) {
         return {};
     }
     else {
-        return *current_position++;
+        auto token = *current_position++;
+        set_location(token);
+        return token;
     }
+}
+
+
+void SequenceTokenizer::set_location(Token token) {
+    location = token.location;
+    location.end_column = location.start_column;
 }

@@ -117,6 +117,7 @@ Body BodyParser::parse() {
         }
         catch (ParseException& ex) {
             FileReader::global.error(ex.location, "%s", ex.what());
+            tokenizer.skip_until(TokenGroup::newline);
         }
     }
 

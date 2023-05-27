@@ -75,6 +75,7 @@ private:
     static void initialize();
     static bool initialized;
 
+    static Token token_address;
     static Token token_align;
     static Token token_data;
     static Token token_global;

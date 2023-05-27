@@ -1,14 +1,23 @@
 BasedOnStyle: LLVM
-IndentWidth: 4
-IndentCaseLabels: true
-ColumnLimit: 2000
-KeepEmptyLinesAtTheStartOfBlocks: false
-MaxEmptyLinesToKeep: 2
-BreakBeforeBraces: Custom
+
+AlignEscapedNewlines: Left
+AlwaysBreakAfterReturnType: None
 BraceWrapping:
   BeforeElse: true
-AlignEscapedNewlines: Left
-UseTab: Never
+BreakBeforeBraces: Custom
+ColumnLimit: 2000
+IncludeCategories:
+  - Regex: '<[[:alnum:].]+>'
+    Priority: 1
+  - Regex: ''
+    Priority: 2
+IndentCaseLabels: true
+IndentWidth: 4
+InsertNewlineAtEOF: true
+KeepEmptyLinesAtTheStartOfBlocks: false
+MaxEmptyLinesToKeep: 2
+PointerAlignment: Left
+ReferenceAlignment: Left
 SeparateDefinitionBlocks : Always
-AlwaysBreakAfterReturnType: None
+UseTab: Never
 #PPDirectiveIndentStyle: AfterHash
