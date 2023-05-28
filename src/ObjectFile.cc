@@ -98,6 +98,9 @@ void ObjectFile::add_object_file(const std::shared_ptr<ObjectFile>& file) {
         pair.second->environment->replace(pair.second->owner->local_environment, local_environment);
         add_object(std::move(pair.second));
     }
+    for (auto& library: file->imported_libraries) {
+        import(library);
+    }
 }
 
 

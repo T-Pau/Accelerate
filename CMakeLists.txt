@@ -56,12 +56,12 @@ enable_testing()
 
 # Targets
 add_subdirectory(src)
+add_subdirectory(share)
 add_subdirectory(tests)
 
 # write out config file
 CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/config.h.in ${CMAKE_CURRENT_BINARY_DIR}/config.h)
 
-install(DIRECTORY share/ DESTINATION share/xlr8)
 
 # for tests
 

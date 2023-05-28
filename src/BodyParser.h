@@ -56,6 +56,7 @@ private:
     void push_body(Body* new_body);
     void pop_body();
 
+    void handle_name(Visibility visibility, Token name);
     void parse_data();
     void parse_error();
     void parse_else();

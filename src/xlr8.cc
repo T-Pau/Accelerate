@@ -136,6 +136,7 @@ void xlr8::process() {
     system_path.append_directory(system_directory ? system_directory : SYSTEM_DIRECTORY);
 
     LibraryGetter::global.path->append_path(library_path);
+    LibraryGetter::global.path->append_path(system_path, "lib");
     TargetGetter::global.path->append_path(system_path, "target");
     CPUGetter::global.path->append_path(system_path, "cpu");
 

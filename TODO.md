@@ -1,9 +1,11 @@
 ## Bugs
 
+- Created `cbm.lib` is empty.
 - Record object reference while evaluating, otherwise reference is lost for fixed address objects.
 
 ## Missing Features
 
+- Allow target to be specified in source file.
 - Allow pinning object to fixed address in map file. (`.pin name address`)
 - Evaluate program/library constants in output elements.
 - Add optional priorities to sections.

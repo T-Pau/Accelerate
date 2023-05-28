@@ -36,6 +36,7 @@ const std::unordered_map<Symbol, void (BodyParser::*)()> BodyParser::directive_p
 };
 
 void BodyParser::setup(FileTokenizer &tokenizer) {
+    VisibilityHelper::setup(tokenizer);
     tokenizer.add_literal(Token::colon_minus);
     tokenizer.add_literal(Token::colon_plus);
 }
@@ -52,22 +53,18 @@ Body BodyParser::parse() {
                 case Token::END:
                     throw ParseException(token, "unclosed symbol body");
 
-                case Token::DIRECTIVE:
+                case Token::DIRECTIVE: {
+                    auto visibility = VisibilityHelper::from_token(token);
+                    if (visibility) {
+                        handle_name(*visibility, tokenizer.expect(Token::NAME, TokenGroup::newline));
+                        break;
+                    }
                     parse_directive(token);
                     break;
+                }
 
                 case Token::NAME: {
-                    auto token2 = tokenizer.next();
-                    if (token2 == Token::colon) {
-                        parse_label(Visibility::SCOPE, token);
-                    }
-                    else if (token2 == Token::equals) {
-                        parse_assignment(Visibility::SCOPE, token);
-                    }
-                    else {
-                        tokenizer.unget(token2);
-                        throw ParseException(token, "unexpected name");
-                    }
+                    handle_name(Visibility::SCOPE, token);
                     break;
                 }
 
@@ -392,4 +389,19 @@ void BodyParser::parse_error() {
 
 void BodyParser::parse_unnamed_label() {
     current_body->append(Body(std::make_shared<Label>(current_size())));
+}
+
+void BodyParser::handle_name(Visibility visibility, Token name) {
+    auto token = tokenizer.next();
+    if (token == Token::colon) {
+        parse_label(visibility, token);
+    }
+    else if (token == Token::equals) {
+        parse_assignment(visibility, token);
+    }
+    else {
+        // TODO: if visibility == SCOPE, handle macro call
+        tokenizer.unget(token);
+        throw ParseException(name, "unexpected name");
+    }
 }
