@@ -43,7 +43,7 @@ std::ostream& operator<<(std::ostream& stream, Address address) {
 
 void Address::serialize(std::ostream &stream) const {
     if (bank > 0) {
-        stream << bank << ":";
+        stream << "$" << std::hex << bank << ":";
     }
-    stream << address;
+    stream << "$" << std::hex << address;
 }

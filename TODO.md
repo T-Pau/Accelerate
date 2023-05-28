@@ -1,6 +1,5 @@
 ## Bugs
 
-- Created `cbm.lib` is empty.
 - Record object reference while evaluating, otherwise reference is lost for fixed address objects.
 
 ## Missing Features

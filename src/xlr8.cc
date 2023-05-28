@@ -255,7 +255,7 @@ void xlr8::create_output() {
         case CREATE_LIBRARY: {
             auto stream = std::ofstream(output_file.value());
             stream << *(linker->program);
-
+            break;
         }
 
         case LINK:

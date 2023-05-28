@@ -2,13 +2,18 @@ file(GLOB SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/*.s)
 
 set(XLR8 ${CMAKE_BINARY_DIR}/src/xlr8)
 
+cmake_policy(SET CMP0116 NEW)
+
 foreach(SOURCE IN LISTS SOURCES)
     get_filename_component(NAME ${SOURCE} NAME_WLE)
-    set(LIB ${CMAKE_CURRENT_BINARY_DIR}}/${NAME}.lib)
+    set(LIB ${CMAKE_CURRENT_BINARY_DIR}/${NAME}.lib)
+    set(depfile ${CMAKE_CURRENT_BINARY_DIR}/${NAME}.d)
     add_custom_command(
             OUTPUT ${LIB}
             MAIN_DEPENDENCY ${SOURCE}
-            COMMAND ${XLR8}  --system-directory ${CMAKE_SOURCE_DIR}/share --target 6502 --create-library -o ${LIB} ${SOURCE}
+            DEPENDS ${XLR8}
+            DEPFILE ${depfile}
+            COMMAND ${XLR8} --system-directory ${CMAKE_SOURCE_DIR}/share --target 6502 --depfile ${depfile} --create-library -o ${LIB} ${SOURCE}
     )
     list(APPEND LIBS ${LIB})
 endforeach()

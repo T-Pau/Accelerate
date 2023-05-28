@@ -53,7 +53,7 @@ std::ostream& operator<< (std::ostream& stream, const Object& object) {
 void Object::serialize(std::ostream &stream) const {
     stream << ".object " << name.as_string() << " {" << std::endl;
     if (address) {
-        stream << "    address: " << *address;
+        stream << "    address: " << *address << std::endl;
     }
     else if (alignment > 0) {
         stream << "    alignment: " << alignment << std::endl;
