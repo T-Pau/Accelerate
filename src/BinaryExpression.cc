@@ -260,19 +260,46 @@ Expression BinaryExpression::create(const Expression& left, Expression::BinaryOp
             }
 
             case Expression::BinaryOperation::LOGICAL_AND:
+                // true && X -> X
                 if (left.has_value() && *left.value()) {
                     return right;
                 }
+                // X && true -> X
                 if (right.has_value() && *right.value()) {
                     return left;
                 }
                 break;
 
             case Expression::BinaryOperation::LOGICAL_OR:
+                // false || X -> X
                 if (left.has_value() && !*left.value()) {
                     return right;
                 }
+                // X || false -> X
                 if (right.has_value() && !*right.value()) {
+                    return left;
+                }
+                break;
+
+            case Expression::BinaryOperation::BITWISE_AND:
+                // 0 & X -> 0
+                if (left.has_value() && left.value()->unsigned_value() == 0) {
+                    return left;
+                }
+                // X & 0 -> 0
+                if (right.has_value() && right.value()->unsigned_value() == 0) {
+                    return right;
+                }
+                break;
+
+            case Expression::BinaryOperation::BITWISE_OR:
+            case Expression::BinaryOperation::BITWISE_XOR:
+                // 0 | X -> X
+                if (left.has_value() && left.value()->unsigned_value() == 0) {
+                    return right;
+                }
+                // X | 0 -> X
+                if (right.has_value() && right.value()->unsigned_value() == 0) {
                     return left;
                 }
                 break;
