@@ -299,7 +299,14 @@ void ExpressionParser::reduce_unary(const ExpressionParser::Element& next) {
 }
 
 void ExpressionParser::reduce_binary(int up_to_level) {
-    while (top.is_operand() && stack.size() >= 2) {
+    while (top.is_operand() && !stack.empty()) {
+        if (stack.back().is_unary_operator()) {
+            top = Element(Expression(stack.back().operation.unary, top.node), 0);
+            stack.pop_back();
+        }
+        if (top.is_operand() && stack.size() < 2) {
+            break;
+        }
         const auto& operation = stack[stack.size() - 1];
         const auto& left = stack[stack.size() - 2];
 
