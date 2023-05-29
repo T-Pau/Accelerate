@@ -54,9 +54,9 @@ std::ostream& operator<<(std::ostream& stream, const ObjectFile::Constant& file)
 }
 
 void ObjectFile::serialize(std::ostream &stream) const {
-    stream << ".format_version " << format_version_major << "." << format_version_minor << std::endl << std::endl;
-    if (!target->name.empty()) {
-        stream << ".target \"" << target->name.str() << "\"" << std::endl << std::endl;
+    stream << ".format_version " << format_version_major << "." << format_version_minor << std::endl;
+    if (target && !target->name.empty()) {
+        stream << ".target \"" << target->name.str() << "\"" << std::endl;
     }
 
     auto names = std::vector<Symbol>();
@@ -91,6 +91,12 @@ void ObjectFile::add_constant(Symbol name, Visibility visibility, Expression val
 }
 
 void ObjectFile::add_object_file(const std::shared_ptr<ObjectFile>& file) {
+    if (file->target) {
+        if (target && !target->name.empty() && target != file->target) {
+            throw Exception("can't combine files for different targets");
+        }
+        target = file->target;
+    }
     for (const auto& pair: file->constants) {
         add_constant(pair.second.name, pair.second.visibility, pair.second.value);
     }

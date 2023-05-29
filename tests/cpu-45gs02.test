@@ -627,9 +627,7 @@ file 45gs02.s <inline>
 end-of-inline-data
 file 45gs02.o {} <inline>
 .format_version 1.0
-
 .target "45gs02"
-
 .object test_adc {
     section: code
     visibility: global

@@ -13,7 +13,7 @@ foreach(SOURCE IN LISTS SOURCES)
             MAIN_DEPENDENCY ${SOURCE}
             DEPENDS ${XLR8}
             DEPFILE ${depfile}
-            COMMAND ${XLR8} --system-directory ${CMAKE_SOURCE_DIR}/share --target 6502 --depfile ${depfile} --create-library -o ${LIB} ${SOURCE}
+            COMMAND ${XLR8} --system-directory ${CMAKE_SOURCE_DIR}/share --depfile ${depfile} --create-library -o ${LIB} ${SOURCE}
     )
     list(APPEND LIBS ${LIB})
 endforeach()

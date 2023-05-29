@@ -50,6 +50,7 @@ public:
     void expect(Token token);
     void expect_litearls(const std::vector<Token::Type>& types, const TokenGroup& synchronize);
     void skip_until(const TokenGroup& types, bool including_terminator = false);
+    void skip_until(const Token& token, bool including_terminator = false);
     void skip(const TokenGroup& types);
     void skip(Token::Type type);
 

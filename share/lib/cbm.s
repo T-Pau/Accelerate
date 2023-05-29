@@ -1,5 +1,7 @@
 ; CBM Kernal Routines
 
+.target "6502"
+
 .global ACPTR = $ffa5
 .global CHKIN = $ffc6
 .global CHKOUT = $ffc9

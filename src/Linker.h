@@ -40,16 +40,17 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 class Linker {
 public:
-    Linker(): target(Target::empty) {}
-    explicit Linker(const Target& target): target(target), memory(target.map.initialize_memory()) {Encoding::default_byte_order = target.cpu->byte_order;}
+    Linker() = default;
+    explicit Linker(const Target* target_) {set_target(target_);}
 
     void add_file(const std::shared_ptr<ObjectFile>& file) {program->add_object_file(file);}
     void add_library(std::shared_ptr<ObjectFile> library) {libraries.emplace_back(std::move(library));}
+    void set_target(const Target* new_target);
 
     void link();
     void output(const std::string& file_name);
 
-    const Target& target;
+    const Target* target = nullptr;
 
     std::shared_ptr<ObjectFile> program = std::make_shared<ObjectFile>();
 

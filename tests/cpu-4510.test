@@ -513,9 +513,7 @@ file 4510.s <inline>
 end-of-inline-data
 file 4510.o {} <inline>
 .format_version 1.0
-
 .target "4510"
-
 .object test_adc {
     section: code
     visibility: global

@@ -90,6 +90,19 @@ void Tokenizer::skip_until(const TokenGroup &types, bool including_terminator) {
     }
 }
 
+
+void Tokenizer::skip_until(const Token& token, bool including_terminator) {
+    Token next_token;
+    while ((next_token = next())) {
+        if (next_token == token) {
+            if (!including_terminator) {
+                unget(next_token);
+            }
+            return;
+        }
+    }
+}
+
 void Tokenizer::expect_litearls(const std::vector<Token::Type>& types, const TokenGroup &synchronize) {
     for (auto type : types) {
         expect(type, synchronize);

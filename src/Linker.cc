@@ -129,7 +129,7 @@ void Linker::output(const std::string &file_name) {
     environment->add(TargetParser::token_data_size.as_symbol(), Expression(data_range.size));
     environment->add(TargetParser::token_data_start.as_symbol(), Expression(data_range.start));
 
-    auto body = target.output;
+    auto body = target->output;
     body.evaluate(Symbol(), nullptr, environment);
 
     auto bytes = std::string();
@@ -143,4 +143,19 @@ void Linker::output(const std::string &file_name) {
 
 bool Linker::add_object(Object *object) {
     return objects.insert(object).second;
+}
+
+void Linker::set_target(const Target* new_target) {
+    if (!new_target) {
+        return;
+    }
+    if (target) {
+        if (new_target != target) {
+            throw Exception("can't link files for different targets");
+        }
+        return;
+    }
+    target = new_target;
+    memory = target->map.initialize_memory();
+    Encoding::default_byte_order = target->cpu->byte_order;
 }

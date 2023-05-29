@@ -272,9 +272,7 @@ file 6502.s <inline>
 end-of-inline-data
 file 6502.o {} <inline>
 .format_version 1.0
-
 .target "6502"
-
 .object test_adc {
     section: code
     visibility: global

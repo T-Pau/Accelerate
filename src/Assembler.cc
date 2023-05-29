@@ -49,6 +49,7 @@ Token Assembler::token_global;
 Token Assembler::token_local;
 Token Assembler::token_reserve;
 Token Assembler::token_section;
+Token Assembler::token_target;
 
 
 void Assembler::initialize() {
@@ -60,6 +61,7 @@ void Assembler::initialize() {
         token_local = Token(Token::DIRECTIVE, ".local");
         token_reserve = Token(Token::DIRECTIVE, ".reserve");
         token_section = Token(Token::DIRECTIVE, ".section");
+        token_target = Token(Token::DIRECTIVE, ".target");
 
         initialized = true;
     }
@@ -67,21 +69,23 @@ void Assembler::initialize() {
 
 std::shared_ptr<ObjectFile> Assembler::parse(Symbol file_name) {
     initialize();
-    target.cpu->setup(tokenizer);
+    if (target) {
+        target->cpu->setup(tokenizer);
+    }
     ExpressionParser::setup(tokenizer);
     BodyParser::setup(tokenizer);
     tokenizer.add_punctuations({"{", "}", "=", ":"});
     tokenizer.add_literal(token_address);
     tokenizer.add_literal(token_align);
-//    tokenizer.add_literal(token_data);
     tokenizer.add_literal(token_global);
     tokenizer.add_literal(token_local);
     tokenizer.add_literal(token_reserve);
     tokenizer.add_literal(token_section);
+    tokenizer.add_literal(token_target);
     tokenizer.push(file_name);
 
     object_file = std::make_shared<ObjectFile>();
-    object_file->target = &target;
+    object_file->target = target;
 
     file_environment = std::make_shared<Environment>(object_file->local_environment);
 
@@ -94,28 +98,7 @@ std::shared_ptr<ObjectFile> Assembler::parse(Symbol file_name) {
                     break;
 
                 case Token::DIRECTIVE: {
-                    auto visibility = visibility_value(token);
-                    if (visibility != Visibility::SCOPE) {
-                        auto name = tokenizer.next();
-                        if (name.get_type() != Token::NAME) {
-                            throw ParseException(name, "name expected");
-                        }
-                        auto token2 = tokenizer.next();
-                        if (token2 == Token::equals) {
-                            parse_assignment(visibility, name);
-                        }
-                        else {
-                            tokenizer.unget(token2);
-                            parse_symbol(visibility, name);
-                        }
-                    }
-                    else if (token == token_section) {
-                        parse_section();
-                    }
-                    else {
-                        throw ParseException(token, "unknown directive");
-                    }
-                    tokenizer.expect(Token::NEWLINE, TokenGroup::newline);
+                    parse_directive(token);
                     break;
                 }
 
@@ -176,7 +159,10 @@ void Assembler::parse_assignment(Visibility visibility, const Token &name) {
 void Assembler::parse_section() {
     auto token = tokenizer.expect(Token::NAME, TokenGroup::newline);
 
-    if (!target.map.has_section(token.as_symbol())) {
+    if (!target) {
+        throw ParseException(token, "no target specified");
+    }
+    if (!target->map.has_section(token.as_symbol())) {
         throw ParseException(token, "unknown section");
     }
     current_section = token.as_symbol();
@@ -195,6 +181,10 @@ Visibility Assembler::visibility_value(const Token& token) {
 }
 
 void Assembler::parse_symbol(Visibility visibility, const Token &name) {
+    if (!target) {
+        tokenizer.skip_until(Token::curly_close, true);
+        throw ParseException(name, "no target specified");
+    }
     auto object = object_file->create_object(current_section, visibility, name);
 
     while (true) {
@@ -205,7 +195,7 @@ void Assembler::parse_symbol(Visibility visibility, const Token &name) {
         }
         else if (token == Token::curly_open) {
             // TODO: error if .reserved
-            object->body = BodyParser(tokenizer, object->name.as_symbol(), target.cpu, object_file.get(), file_environment).parse();
+            object->body = BodyParser(tokenizer, object->name.as_symbol(), target->cpu, object_file.get(), file_environment).parse();
             break;
         }
         // TODO: parameters
@@ -245,4 +235,46 @@ void Assembler::parse_symbol(Visibility visibility, const Token &name) {
 
     // TODO: warn if reserved in saved section
     // TODO: error if data in unsaved section
+}
+
+void Assembler::parse_directive(const Token& directive) {
+    auto visibility = visibility_value(directive);
+    if (visibility != Visibility::SCOPE) {
+        auto name = tokenizer.next();
+        if (name.get_type() != Token::NAME) {
+            throw ParseException(name, "name expected");
+        }
+        auto token = tokenizer.next();
+        if (token == Token::equals) {
+            parse_assignment(visibility, name);
+        }
+        else {
+            tokenizer.unget(token);
+            parse_symbol(visibility, name);
+        }
+    }
+    else if (directive == token_section) {
+        parse_section();
+    }
+    else if (directive == token_target) {
+        parse_target();
+    }
+    else {
+        throw ParseException(directive, "unknown directive");
+    }
+    tokenizer.expect(Token::NEWLINE, TokenGroup::newline);
+
+}
+
+void Assembler::parse_target() {
+    auto name = tokenizer.expect(Token::STRING, TokenGroup::newline);
+    // TODO: check that target comes first
+    auto& new_target = Target::get(name.as_symbol());
+    if (target) {
+        // TODO: check that targets are compatible
+    }
+    else {
+        target = &new_target;
+        object_file->target = target;
+    }
 }

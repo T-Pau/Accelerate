@@ -8,9 +8,7 @@ file file.s <inline>
 end-of-inline-data
 file file.o {} <inline>
 .format_version 1.0
-
 .target "6502"
-
 .object test {
     section: code
     visibility: global

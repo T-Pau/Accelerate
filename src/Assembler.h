@@ -40,31 +40,23 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 class Assembler {
 public:
-    explicit Assembler(const Target& target): target(target) {}
+    explicit Assembler(const Target* target): target(target) {}
 
     std::shared_ptr<ObjectFile> parse(Symbol file_name);
 
     static Symbol symbol_opcode;
 
 private:
-    void parse_assignment(Visibility visibility, const Token& name);
-    void parse_directive(const Token& directive);
-    void parse_instruction(const Token& name);
-    void parse_label(Visibility visibility, const Token& name);
-    void parse_section();
-    void parse_symbol(Visibility visibility, const Token& name);
-    void parse_symbol_body();
-
-    std::shared_ptr<Node> parse_instruction_argument(const Token& token);
-
-    void add_constant(Visibility visibility, const Token& name, Expression value);
-    [[nodiscard]] std::shared_ptr<LabelBody> create_anonymous_label() const;
-    [[nodiscard]] Expression get_pc(const std::shared_ptr<LabelBody>& label) const;
-    [[nodiscard]] std::shared_ptr<LabelBody> get_trailing_label() const;
-
     static Visibility visibility_value(const Token& token);
 
-    const Target& target;
+    void add_constant(Visibility visibility, const Token& name, Expression value);
+    void parse_assignment(Visibility visibility, const Token& name);
+    void parse_directive(const Token& directive);
+    void parse_section();
+    void parse_symbol(Visibility visibility, const Token& name);
+    void parse_target();
+
+    const Target* target;
 
     Symbol current_section;
     std::shared_ptr<Environment> file_environment;
@@ -82,6 +74,7 @@ private:
     static Token token_local;
     static Token token_reserve;
     static Token token_section;
+    static Token token_target;
 };
 
 #endif // ASSEMBLER_H

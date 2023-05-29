@@ -97,7 +97,7 @@ int main(int argc, char *argv[]) {
 
 
 void xlr8::process() {
-    std::optional<std::string> target;
+    std::optional<std::string> target_name;
     auto ok = true;
 
     for (const auto& option: arguments.options) {
@@ -118,7 +118,7 @@ void xlr8::process() {
                 system_path.append_directory(option.argument);
             }
             else if (option.name == "target") {
-                target = option.argument;
+                target_name = option.argument;
             }
         }
         catch (Exception& ex) {
@@ -140,12 +140,11 @@ void xlr8::process() {
     TargetGetter::global.path->append_path(system_path, "target");
     CPUGetter::global.path->append_path(system_path, "cpu");
 
-    if (!target.has_value()) {
-        FileReader::global.error({}, "missing --target option");
-        ok = false;
+    const Target* target = nullptr;
+    if (target_name) {
+        target = &Target::get(*target_name);
     }
-
-    linker = std::make_unique<Linker>(Target::get(target.value()));
+    linker = std::make_unique<Linker>(target);
 
     for (const auto &file_name: arguments.arguments) {
         try {
@@ -184,6 +183,14 @@ void xlr8::process() {
         throw Exception();
     }
 
+    for (const auto& file: files) {
+        linker->set_target(file.file->target);
+    }
+
+    if (!linker->target) {
+        throw Exception("no target specified");
+    }
+
     switch (files.size()) {
         case 0:
             throw Exception("no sources given");
@@ -199,7 +206,7 @@ void xlr8::process() {
                         break;
 
                     case LINK:
-                        set_output_file(files[0].name, linker->target.extension);
+                        set_output_file(files[0].name, linker->target->extension);
                         break;
                 }
             }
