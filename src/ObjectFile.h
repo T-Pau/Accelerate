@@ -35,8 +35,10 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <map>
 #include <utility>
 
-#include "Symbol.h"
+#include "Function.h"
+#include "Macro.h"
 #include "Object.h"
+#include "Symbol.h"
 #include "Target.h"
 
 class ObjectFile {
@@ -71,6 +73,7 @@ public:
     std::shared_ptr<Environment> global_environment;
     std::shared_ptr<Environment> local_environment;
 
+    Symbol name;
     const Target* target = &Target::empty;
 
     static const unsigned int format_version_major;
@@ -82,8 +85,10 @@ private:
     void add_to_environment(Object* object);
     void add_to_environment(Symbol name, Visibility visibility, Expression value) const;
 
-    std::unordered_map<Symbol, std::unique_ptr<Object>> objects;
     std::unordered_map<Symbol, Constant> constants;
+    std::unordered_map<Symbol, std::unique_ptr<Function>> functions;
+    std::unordered_map<Symbol, std::unique_ptr<Macro>> macros;
+    std::unordered_map<Symbol, std::unique_ptr<Object>> objects;
 
     std::unordered_set<ObjectFile*> imported_libraries;
 };

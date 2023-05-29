@@ -55,18 +55,56 @@ std::ostream& operator<<(std::ostream& stream, const ObjectFile::Constant& file)
 
 void ObjectFile::serialize(std::ostream &stream) const {
     stream << ".format_version " << format_version_major << "." << format_version_minor << std::endl;
+
     if (target && !target->name.empty()) {
         stream << ".target \"" << target->name.str() << "\"" << std::endl;
     }
 
     auto names = std::vector<Symbol>();
+    if (!imported_libraries.empty()) {
+        for (auto& library: imported_libraries) {
+            names.emplace_back(library->name);
+        }
+        std::sort(names.begin(), names.end());
+        stream << ".import ";
+        auto first = false;
+        for (auto name: names) {
+            if (first) {
+                first = false;
+            }
+            else {
+                stream << ", ";
+            }
+            stream << "\"" << name << "\"";
+        }
+        stream << std::endl;
+    }
+
+    names = std::vector<Symbol>();
     for (const auto& pair: constants) {
         names.emplace_back(pair.first);
     }
     std::sort(names.begin(), names.end());
-
     for (auto name: names) {
         stream << constants.find(name)->second;
+    }
+
+    names.clear();
+    for (const auto& pair: functions) {
+        names.emplace_back(pair.first);
+    }
+    std::sort(names.begin(), names.end());
+    for (auto name: names) {
+        stream << functions.find(name)->second;
+    }
+
+    names.clear();
+    for (const auto& pair: macros) {
+        names.emplace_back(pair.first);
+    }
+    std::sort(names.begin(), names.end());
+    for (auto name: names) {
+        stream << macros.find(name)->second;
     }
 
     names.clear();
@@ -74,7 +112,6 @@ void ObjectFile::serialize(std::ostream &stream) const {
         names.emplace_back(pair.first);
     }
     std::sort(names.begin(), names.end());
-
     for (auto name: names) {
         stream << *(objects.find(name)->second);
     }

@@ -14,6 +14,7 @@ add_library(xlr8-library STATIC
         BlockBody.cc
         BodyElement.cc
         BodyParser.cc
+        Callable.cc
         CPU.cc
         CPUGetter.cc
         CPUParser.cc
@@ -34,6 +35,7 @@ add_library(xlr8-library STATIC
         FileParser.cc
         FileReader.cc
         FileTokenizer.cc
+        Function.cc
         FunctionExpression.cc
         IfBody.cc
         InRangeExpression.cc
@@ -46,6 +48,7 @@ add_library(xlr8-library STATIC
         LibraryGetter.cc
         Linker.cc
         Location.cc
+        Macro.cc
         Memory.cc
         MemoryBody.cc
         MemoryMap.cc

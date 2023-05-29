@@ -83,6 +83,7 @@ ObjectFileParser::ObjectFileParser() {
 
 std::shared_ptr<ObjectFile> ObjectFileParser::parse(Symbol filename) {
     file = std::make_shared<ObjectFile>();
+    file->name = filename;
 
     if (!parse_file(filename)) {
         throw Exception("can't parse object file '%s'", filename.c_str());
