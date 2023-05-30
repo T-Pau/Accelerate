@@ -67,15 +67,15 @@ void ObjectFile::serialize(std::ostream &stream) const {
         }
         std::sort(names.begin(), names.end());
         stream << ".import ";
-        auto first = false;
-        for (auto name: names) {
+        auto first = true;
+        for (auto name_: names) {
             if (first) {
                 first = false;
             }
             else {
                 stream << ", ";
             }
-            stream << "\"" << name << "\"";
+            stream << "\"" << name_ << "\"";
         }
         stream << std::endl;
     }
@@ -85,8 +85,8 @@ void ObjectFile::serialize(std::ostream &stream) const {
         names.emplace_back(pair.first);
     }
     std::sort(names.begin(), names.end());
-    for (auto name: names) {
-        stream << constants.find(name)->second;
+    for (auto name_ : names) {
+        stream << constants.find(name_)->second;
     }
 
     names.clear();
@@ -94,8 +94,8 @@ void ObjectFile::serialize(std::ostream &stream) const {
         names.emplace_back(pair.first);
     }
     std::sort(names.begin(), names.end());
-    for (auto name: names) {
-        stream << functions.find(name)->second;
+    for (auto name_: names) {
+        stream << functions.find(name_)->second;
     }
 
     names.clear();
@@ -103,8 +103,8 @@ void ObjectFile::serialize(std::ostream &stream) const {
         names.emplace_back(pair.first);
     }
     std::sort(names.begin(), names.end());
-    for (auto name: names) {
-        stream << macros.find(name)->second;
+    for (auto name_: names) {
+        stream << macros.find(name_)->second;
     }
 
     names.clear();
@@ -112,16 +112,16 @@ void ObjectFile::serialize(std::ostream &stream) const {
         names.emplace_back(pair.first);
     }
     std::sort(names.begin(), names.end());
-    for (auto name: names) {
-        stream << *(objects.find(name)->second);
+    for (auto name_: names) {
+        stream << *(objects.find(name_)->second);
     }
 }
 
-void ObjectFile::add_constant(Symbol name, Visibility visibility, Expression value) {
-    auto pair = constants.insert({name, Constant(name, visibility, std::move(value))});
+void ObjectFile::add_constant(Symbol symbol_name, Visibility visibility, Expression value) {
+    auto pair = constants.insert({symbol_name, Constant(symbol_name, visibility, std::move(value))});
 
     if (!pair.second) {
-        throw ParseException(Location(), "duplicate symbol '%s'", name.c_str());
+        throw ParseException(Location(), "duplicate symbol '%s'", symbol_name.c_str());
     }
 
     add_to_environment(pair.first->second);
@@ -134,13 +134,27 @@ void ObjectFile::add_object_file(const std::shared_ptr<ObjectFile>& file) {
         }
         target = file->target;
     }
+
     for (const auto& pair: file->constants) {
         add_constant(pair.second.name, pair.second.visibility, pair.second.value);
     }
+
+    for (auto& pair: file->macros) {
+        add_macro(std::move(pair.second));
+    }
+    file->functions.clear();
+
+    for (auto& pair: file->functions) {
+        add_function(std::move(pair.second));
+    }
+    file->functions.clear();
+
     for (auto& pair: file->objects) {
         pair.second->environment->replace(pair.second->owner->local_environment, local_environment);
         add_object(std::move(pair.second));
     }
+    file->objects.clear();
+
     for (auto& library: file->imported_libraries) {
         import(library);
     }
@@ -178,8 +192,8 @@ void ObjectFile::remove_local_constants() {
 }
 
 
-const Object* ObjectFile::object(Symbol name) const {
-    auto it = objects.find(name);
+const Object* ObjectFile::object(Symbol object_name) const {
+    auto it = objects.find(object_name);
 
     if (it != objects.end()) {
         return it-> second.get();
@@ -190,12 +204,12 @@ const Object* ObjectFile::object(Symbol name) const {
 }
 
 
-Object *ObjectFile::create_object(Symbol section_name, Visibility visibility, Token name) {
+Object *ObjectFile::create_object(Symbol section_name, Visibility visibility, Token object_name) {
     auto section = target->map.section(section_name);
     if (section == nullptr) {
-        throw ParseException(name, "unknown section '%s'", section_name.c_str());
+        throw ParseException(object_name, "unknown section '%s'", section_name.c_str());
     }
-    return insert_object(std::make_unique<Object>(this, section, visibility, name));
+    return insert_object(std::make_unique<Object>(this, section, visibility, object_name));
 }
 
 ObjectFile::ObjectFile() noexcept {
@@ -207,12 +221,12 @@ void ObjectFile::add_to_environment(Object *object) {
     add_to_environment(object->name.as_symbol(), object->visibility, Expression(object));
 }
 
-void ObjectFile::add_to_environment(Symbol name, Visibility visibility, Expression value) const {
+void ObjectFile::add_to_environment(Symbol symbol_name, Visibility visibility, Expression value) const {
     if (visibility == Visibility::GLOBAL) {
-        global_environment->add(name, std::move(value));
+        global_environment->add(symbol_name, std::move(value));
     }
     else {
-        local_environment->add(name, std::move(value));
+        local_environment->add(symbol_name, std::move(value));
     }
 }
 
@@ -228,11 +242,11 @@ std::vector<Object *> ObjectFile::all_objects() {
 }
 
 Object* ObjectFile::insert_object(std::unique_ptr<Object> object) {
-    auto name = object->name;
+    auto object_name = object->name;
     object->owner = this;
-    auto pair = objects.insert({name.as_symbol(), std::move(object)});
+    auto pair = objects.insert({object_name.as_symbol(), std::move(object)});
     if (!pair.second) {
-        throw ParseException(name, "redefinition of object %s", name.as_string().c_str());
+        throw ParseException(object_name, "redefinition of object %s", object_name.as_string().c_str());
     }
     auto own_object = pair.first->second.get();
     add_to_environment(own_object);
@@ -240,6 +254,15 @@ Object* ObjectFile::insert_object(std::unique_ptr<Object> object) {
 
 }
 
+void ObjectFile::insert_function(std::unique_ptr<Function> function) {
+    functions[function->name.as_symbol()] = std::move(function);
+    // TODO: add to environment
+}
+
+void ObjectFile::insert_macro(std::unique_ptr<Macro> macro) {
+    macros[macro->name.as_symbol()] = std::move(macro);
+    // TODO: add to environment
+}
 
 void ObjectFile::Constant::serialize(std::ostream &stream) const {
     stream << ".constant " << name << " {" << std::endl;

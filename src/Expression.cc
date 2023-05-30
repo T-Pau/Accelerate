@@ -7,13 +7,18 @@
 #include <utility>
 
 #include "BinaryExpression.h"
+#include "ExpressionParser.h"
 #include "FunctionExpression.h"
 #include "LabelExpression.h"
+#include "ObjectExpression.h"
+#include "ParseException.h"
 #include "UnaryExpression.h"
 #include "ValueExpression.h"
 #include "VariableExpression.h"
-#include "ObjectExpression.h"
-#include "ParseException.h"
+
+Expression::Expression(Tokenizer& tokenizer) {
+    *this = ExpressionParser(tokenizer).parse();
+}
 
 Expression::Expression(const Expression &left, Expression::BinaryOperation operation, const Expression &right): expression(BinaryExpression::create(left, operation, right).expression) {}
 Expression::Expression(Expression::UnaryOperation operation, const Expression &operand): expression(UnaryExpression::create(operation, operand).expression) {}
@@ -78,7 +83,6 @@ Symbol Expression::variable_name() const {
 bool Expression::evaluate(std::shared_ptr<Environment> environment) {
     return evaluate(EvaluationContext(std::move(environment)));
 }
-
 
 std::ostream& operator<<(std::ostream& stream, const Expression& expression) {
     expression.serialize(stream);

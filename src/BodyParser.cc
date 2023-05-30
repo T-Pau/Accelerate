@@ -36,7 +36,7 @@ const std::unordered_map<Symbol, void (BodyParser::*)()> BodyParser::directive_p
 };
 
 void BodyParser::setup(FileTokenizer &tokenizer) {
-    VisibilityHelper::setup(tokenizer);
+    VisibilityHelper::setup(tokenizer, true);
     tokenizer.add_literal(Token::colon_minus);
     tokenizer.add_literal(Token::colon_plus);
 }

@@ -19,10 +19,13 @@ enum class Visibility {
 class VisibilityHelper {
   public:
     static std::optional<Visibility> from_token(Token token);
-    static Token token_local;
-    static Token token_global;
+    static Token token_global_directive;
+    static Token token_global_name;
+    static Token token_local_directive;
+    static Token token_local_name;
 
-    static void setup(FileTokenizer& tokenizer);
+    static void initialize();
+    static void setup(FileTokenizer& tokenizer, bool use_directives);
 
   private:
     static bool initialized;

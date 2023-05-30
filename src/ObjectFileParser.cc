@@ -38,13 +38,16 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 bool ObjectFileParser::initialized = false;
 std::unordered_map<Symbol, void (ObjectFileParser::*)()> ObjectFileParser::parser_methods;
+std::unordered_map<Symbol, void (ObjectFileParser::*)(Token name, const std::shared_ptr<ParsedValue>& definition)> ObjectFileParser::symbol_parser_methods;
 Token ObjectFileParser::token_address;
 Token ObjectFileParser::token_alignment;
 Token ObjectFileParser::token_constant;
 Token ObjectFileParser::token_data;
 Token ObjectFileParser::token_format_version;
+Token ObjectFileParser::token_function;
 Token ObjectFileParser::token_global;
 Token ObjectFileParser::token_local;
+Token ObjectFileParser::token_macro;
 Token ObjectFileParser::token_object;
 Token ObjectFileParser::token_reserve;
 Token ObjectFileParser::token_section;
@@ -59,8 +62,10 @@ void ObjectFileParser::initialize() {
         token_constant = Token(Token::DIRECTIVE, "constant");
         token_data = Token(Token::NAME, "data");
         token_format_version = Token(Token::DIRECTIVE, "format_version");
+        token_function = Token(Token::DIRECTIVE, "function");
         token_global = Token(Token::NAME, "global");
         token_local = Token(Token::NAME, "local");
+        token_macro = Token(Token::DIRECTIVE, "macro");
         token_object = Token(Token::DIRECTIVE, "object");
         token_section = Token(Token::NAME, "section");
         token_reserve = Token(Token::NAME, "reserve");
@@ -69,9 +74,11 @@ void ObjectFileParser::initialize() {
         token_visibility = Token(Token::NAME, "visibility");
 
         parser_methods[token_format_version.as_symbol()] = &ObjectFileParser::parse_format_version;
-        parser_methods[token_constant.as_symbol()] = &ObjectFileParser::parse_constant;
-        parser_methods[token_object.as_symbol()] = &ObjectFileParser::parse_object;
         parser_methods[token_target.as_symbol()] = &ObjectFileParser::parse_target;
+        symbol_parser_methods[token_constant.as_symbol()] = &ObjectFileParser::parse_constant;
+        symbol_parser_methods[token_function.as_symbol()] = &ObjectFileParser::parse_function;
+        symbol_parser_methods[token_object.as_symbol()] = &ObjectFileParser::parse_object;
+        symbol_parser_methods[token_macro.as_symbol()] = &ObjectFileParser::parse_macro;
 
         initialized = true;
     }
@@ -93,16 +100,22 @@ std::shared_ptr<ObjectFile> ObjectFileParser::parse(Symbol filename) {
 
 void ObjectFileParser::parse_directive(const Token &directive) {
     auto it = parser_methods.find(directive.as_symbol());
-    if (it == parser_methods.end()) {
-        throw ParseException(directive, "unknown directive");
+    if (it != parser_methods.end()) {
+        (this->*it->second)();
     }
-    (this->*it->second)();
+    else {
+        auto it_symbol = symbol_parser_methods.find(directive.as_symbol());
+        if (it_symbol != symbol_parser_methods.end()) {
+            (this->*it_symbol->second)(tokenizer.expect(Token::NAME, TokenGroup::newline), ParsedValue::parse(tokenizer));
+        }
+        else {
+            throw ParseException(directive, "unknown directive");
+        }
+    }
 }
 
-void ObjectFileParser::parse_constant() {
-    auto name = tokenizer.expect(Token::NAME, TokenGroup::newline);
-    auto parse_value = ParsedValue::parse(tokenizer);
-    auto parameters = parse_value->as_dictionary();
+void ObjectFileParser::parse_constant(Token name, const std::shared_ptr<ParsedValue>& definition) {
+    auto parameters = definition->as_dictionary();
 
     auto value = (*parameters)[token_value]->as_scalar();
     auto visibility = visibility_from_name((*parameters)[token_visibility]->as_singular_scalar()->token());
@@ -111,10 +124,8 @@ void ObjectFileParser::parse_constant() {
 }
 
 
-void ObjectFileParser::parse_object() {
-    auto name = tokenizer.expect(Token::NAME, TokenGroup::newline);
-    auto parse_value = ParsedValue::parse(tokenizer);
-    auto parameters = parse_value->as_dictionary();
+void ObjectFileParser::parse_object(Token name, const std::shared_ptr<ParsedValue>& definition) {
+    auto parameters = definition->as_dictionary();
 
     auto section = (*parameters)[token_section]->as_singular_scalar()->token();
     if (!section.is_name()) {
@@ -173,8 +184,17 @@ void ObjectFileParser::parse_format_version() {
     // TODO: implement
 }
 
+void ObjectFileParser::parse_function(Token name, const std::shared_ptr<ParsedValue>& definition) {
+   file->add_function(std::make_unique<Function>(name, definition));
+}
+
 void ObjectFileParser::parse_target() {
     auto name = tokenizer.expect(Token::STRING, TokenGroup::newline);
 
     file->target = &Target::get(name.as_symbol());
+}
+
+void ObjectFileParser::parse_macro(Token name, const std::shared_ptr<ParsedValue>& definition) {
+    //file->add_macro(std::make_unique<Macro>(name, definition));
+    // TODO: implement
 }

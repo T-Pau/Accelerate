@@ -4,9 +4,11 @@
 
 #include "Visibility.h"
 
-Token VisibilityHelper::token_local;
-Token VisibilityHelper::token_global;
 bool VisibilityHelper::initialized = false;
+Token VisibilityHelper::token_local_directive;
+Token VisibilityHelper::token_local_name;
+Token VisibilityHelper::token_global_directive;
+Token VisibilityHelper::token_global_name;
 
 std::ostream& operator<<(std::ostream& stream, Visibility visibility) {
     switch  (visibility) {
@@ -23,21 +25,27 @@ std::ostream& operator<<(std::ostream& stream, Visibility visibility) {
     return stream;
 }
 
-void VisibilityHelper::setup(FileTokenizer& tokenizer) {
+void VisibilityHelper::initialize() {
     if (!initialized) {
-        token_local = Token(Token::DIRECTIVE, ".local");
-        token_global = Token(Token::DIRECTIVE, ".global");
+        token_global_directive = Token(Token::DIRECTIVE, ".global");
+        token_global_name = Token(Token::NAME, "global");
+        token_local_directive = Token(Token::DIRECTIVE, ".local");
+        token_local_name = Token(Token::NAME, "local");
         initialized = true;
     }
-    tokenizer.add_literal(token_local);
-    tokenizer.add_literal(token_global);
+}
+
+void VisibilityHelper::setup(FileTokenizer& tokenizer, bool use_directives) {
+    initialize();
+    tokenizer.add_literal(token_local_directive);
+    tokenizer.add_literal(token_global_directive);
 }
 
 std::optional<Visibility> VisibilityHelper::from_token(Token token) {
-    if (token == token_local) {
+    if (token == token_local_directive) {
         return Visibility::LOCAL;
     }
-    else if (token == token_global) {
+    else if (token == token_global_directive) {
         return Visibility::GLOBAL;
     }
     else {

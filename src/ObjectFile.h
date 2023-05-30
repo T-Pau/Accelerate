@@ -58,15 +58,17 @@ public:
 
     ObjectFile() noexcept;
 
-    void add_constant(Symbol name, Visibility visibility, Expression value);
+    void add_constant(Symbol symbol_name, Visibility visibility, Expression value);
+    void add_function(std::unique_ptr<Function> function) {insert_function(std::move(function));}
+    void add_macro(std::unique_ptr<Macro> macro) {insert_macro(std::move(macro));}
     void add_object(std::unique_ptr<Object> object) {(void)insert_object(std::move(object));}
     void add_object_file(const std::shared_ptr<ObjectFile>& file);
     [[nodiscard]] std::vector<Object*> all_objects();
-    Object* create_object(Symbol section_name, Visibility visibility, Token name);
+    Object* create_object(Symbol section_name, Visibility visibility, Token object_name);
     void evaluate(const std::shared_ptr<Environment>& environment); // DEPRECATED
     void evaluate();
     void import(ObjectFile* library);
-    [[nodiscard]] const Object* object(Symbol name) const;
+    [[nodiscard]] const Object* object(Symbol object_name) const;
     void remove_local_constants();
     void serialize(std::ostream& stream) const;
 
@@ -80,10 +82,12 @@ public:
     static const unsigned int format_version_minor;
 
 private:
+    void insert_function(std::unique_ptr<Function> function);
+    void insert_macro(std::unique_ptr<Macro> macro);
     Object* insert_object(std::unique_ptr<Object> object);
     void add_to_environment(const Constant& constant) { add_to_environment(constant.name, constant.visibility, constant.value);}
     void add_to_environment(Object* object);
-    void add_to_environment(Symbol name, Visibility visibility, Expression value) const;
+    void add_to_environment(Symbol symbol_name, Visibility visibility, Expression value) const;
 
     std::unordered_map<Symbol, Constant> constants;
     std::unordered_map<Symbol, std::unique_ptr<Function>> functions;

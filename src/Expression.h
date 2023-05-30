@@ -6,8 +6,9 @@
 #define EXPRESSION_H
 
 #include "BaseExpression.h"
-#include "VoidExpression.h"
 #include "Label.h"
+#include "Tokenizer.h"
+#include "VoidExpression.h"
 
 enum LabelExpressionType {
     NAMED,
@@ -48,6 +49,7 @@ public:
 
     Expression() = default;
     explicit Expression(const std::shared_ptr<BaseExpression>& expression_) {if (expression_) {expression = expression_;}}
+    explicit Expression(Tokenizer& tokenizer);
 
     // Binary
     Expression(const Expression& left, BinaryOperation operation, const Expression& right);
