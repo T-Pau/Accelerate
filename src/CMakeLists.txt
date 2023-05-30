@@ -9,27 +9,28 @@ add_library(xlr8-library STATIC
         ArgumentType.cc
         Assembler.cc
         AssignmentBody.cc
+        BaseExpression.cc
         BinaryExpression.cc
-        Body.cc
         BlockBody.cc
+        Body.cc
         BodyElement.cc
         BodyParser.cc
-        Callable.cc
         CPU.cc
         CPUGetter.cc
         CPUParser.cc
+        Callable.cc
         Command.cc
         Commandline.cc
         DataBody.cc
         EmptyBody.cc
         Encoding.cc
+        Entity.cc
+        Environment.cc
+        ErrorBody.cc
         EvaluationContext.cc
         EvaluationScope.cc
-        Environment.cc
         Exception.cc
         Expression.cc
-        BaseExpression.cc
-        ErrorBody.cc
         ExpressionNode.cc
         ExpressionParser.cc
         FileParser.cc

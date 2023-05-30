@@ -16,7 +16,7 @@ AssignmentBody::evaluated(const EvaluationContext &context) const {
     }
     else {
         // TODO: this can't be written out if label is not resolved yet.
-        context.object_file->add_constant(name, visibility, value);
+        context.object_file->add_constant(std::make_unique<ObjectFile::Constant>(Token(Token::NAME, {}, name), visibility, value));
     }
 
     return Body();

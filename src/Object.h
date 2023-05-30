@@ -36,14 +36,17 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "Address.h"
 #include "Body.h"
+#include "Entity.h"
 #include "MemoryMap.h"
+#include "ParsedValue.h"
 #include "Token.h"
 #include "Visibility.h"
 
 class ObjectFile;
 
-class Object {
+class Object: public Entity {
 public:
+    Object(ObjectFile* owner, Token name, const std::shared_ptr<ParsedValue>& definition);
     Object(ObjectFile* owner, const MemoryMap::Section* section, Visibility visibility, Token name);
 
     void evaluate(std::shared_ptr<Environment> environment);
@@ -57,8 +60,6 @@ public:
 
     ObjectFile* owner;
     const MemoryMap::Section* section;
-    Visibility visibility;
-    Token name;
     uint64_t alignment = 0;
     uint64_t reservation = 0;
     std::optional<Address> address;
@@ -66,9 +67,19 @@ public:
     Body body;
     std::shared_ptr<Environment> environment;
     std::unordered_set<Object*> referenced_objects;
+
+  private:
+    static void initialize();
+
+    static bool initialized;
+    static Token token_address;
+    static Token token_alignment;
+    static Token token_body;
+    static Token token_reserve;
+    static Token token_section;
+
 };
 
-std::ostream& operator<<(std::ostream& stream, const std::shared_ptr<Object>& node);
 std::ostream& operator<<(std::ostream& stream, const Object& node);
 
 #endif // OBJECT_H

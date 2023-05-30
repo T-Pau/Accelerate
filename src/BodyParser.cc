@@ -126,7 +126,7 @@ void BodyParser::add_constant(Visibility visibility, Token name, const Expressio
         if (!object_file) {
             throw ParseException(name, "unsupported visibility");
         }
-        object_file->add_constant(name.as_symbol(), visibility, value);
+        object_file->add_constant(std::make_unique<ObjectFile::Constant>(name, visibility, value));
     }
     environment->add(name.as_symbol(), value);
 }

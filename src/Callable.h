@@ -5,12 +5,11 @@
 #ifndef CALLABLE_H
 #define CALLABLE_H
 
+#include "Entity.h"
 #include "EvaluationContext.h"
 #include "Expression.h"
-#include "ParsedValue.h"
-#include "Visibility.h"
 
-class Callable {
+class Callable: public Entity {
   public:
     Callable(Token name, const std::shared_ptr<ParsedValue>& definition);
     [[nodiscard]] Symbol argument_name(size_t index) const {return argument_names[index];}
@@ -20,8 +19,6 @@ class Callable {
 
     void parse_arguments(Tokenizer& tokenizer, bool comma_separated);
 
-    Token name;
-    Visibility visibility;
   protected:
     std::vector<Symbol> argument_names;
     std::vector<Expression> default_arguments;
@@ -34,7 +31,6 @@ class Callable {
 
     static bool initialized;
     static Token token_arguments;
-    static Token token_visibility;
 };
 
 

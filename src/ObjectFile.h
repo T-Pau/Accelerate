@@ -43,22 +43,26 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 class ObjectFile {
 public:
-    class Constant {
+    class Constant: public Entity {
     public:
-        Constant() = default;
-        Constant(Symbol name, Visibility visibility, Expression value): name(name), visibility(visibility), value(std::move(value)) {}
+        Constant(Token name, Visibility visibility, Expression value): Entity(name, visibility), value(std::move(value)) {}
+        Constant(Token name, const std::shared_ptr<ParsedValue>& definition);
 
         void serialize(std::ostream& stream) const;
 
-        Symbol name;
-        Visibility visibility = Visibility::LOCAL;
         Expression value;
         std::unordered_set<Object*> referenced_objects;
+
+      private:
+        static void initialize();
+
+        static bool initialized;
+        static Token token_value;
     };
 
     ObjectFile() noexcept;
 
-    void add_constant(Symbol symbol_name, Visibility visibility, Expression value);
+    void add_constant(std::unique_ptr<Constant> constant) {insert_constant(std::move(constant));}
     void add_function(std::unique_ptr<Function> function) {insert_function(std::move(function));}
     void add_macro(std::unique_ptr<Macro> macro) {insert_macro(std::move(macro));}
     void add_object(std::unique_ptr<Object> object) {(void)insert_object(std::move(object));}
@@ -82,14 +86,15 @@ public:
     static const unsigned int format_version_minor;
 
 private:
+    void insert_constant(std::unique_ptr<Constant> constant);
     void insert_function(std::unique_ptr<Function> function);
     void insert_macro(std::unique_ptr<Macro> macro);
     Object* insert_object(std::unique_ptr<Object> object);
-    void add_to_environment(const Constant& constant) { add_to_environment(constant.name, constant.visibility, constant.value);}
+    void add_to_environment(const Constant& constant) { add_to_environment(constant.name.as_symbol(), constant.visibility, constant.value);}
     void add_to_environment(Object* object);
     void add_to_environment(Symbol symbol_name, Visibility visibility, Expression value) const;
 
-    std::unordered_map<Symbol, Constant> constants;
+    std::unordered_map<Symbol, std::unique_ptr<Constant>> constants;
     std::unordered_map<Symbol, std::unique_ptr<Function>> functions;
     std::unordered_map<Symbol, std::unique_ptr<Macro>> macros;
     std::unordered_map<Symbol, std::unique_ptr<Object>> objects;

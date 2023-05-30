@@ -32,8 +32,19 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ObjectFile.h"
 #include "ParseException.h"
 #include "ObjectExpression.h"
+#include "SequenceTokenizer.h"
 
 #include <utility>
+
+bool ObjectFile::Constant::initialized = false;
+Token ObjectFile::Constant::token_value;
+
+void ObjectFile::Constant::initialize() {
+    if (!initialized) {
+        initialized = true;
+        token_value = Token(Token::NAME, "value");
+    }
+}
 
 const unsigned int ObjectFile::format_version_major = 1;
 const unsigned int ObjectFile::format_version_minor = 0;
@@ -117,15 +128,18 @@ void ObjectFile::serialize(std::ostream &stream) const {
     }
 }
 
-void ObjectFile::add_constant(Symbol symbol_name, Visibility visibility, Expression value) {
-    auto pair = constants.insert({symbol_name, Constant(symbol_name, visibility, std::move(value))});
+void ObjectFile::insert_constant(std::unique_ptr<Constant> constant) {
+    auto constant_name = constant->name;
+
+    auto pair = constants.insert({constant_name.as_symbol(), std::move(constant)});
 
     if (!pair.second) {
-        throw ParseException(Location(), "duplicate symbol '%s'", symbol_name.c_str());
+        throw ParseException(Location(), "duplicate symbol '%s'", constant_name.as_string().c_str());
     }
 
-    add_to_environment(pair.first->second);
+    add_to_environment(pair.first->second->name.as_symbol(), pair.first->second->visibility, pair.first->second->value);
 }
+
 
 void ObjectFile::add_object_file(const std::shared_ptr<ObjectFile>& file) {
     if (file->target) {
@@ -135,9 +149,10 @@ void ObjectFile::add_object_file(const std::shared_ptr<ObjectFile>& file) {
         target = file->target;
     }
 
-    for (const auto& pair: file->constants) {
-        add_constant(pair.second.name, pair.second.visibility, pair.second.value);
+    for (auto& pair: file->constants) {
+        add_constant(std::move(pair.second));
     }
+    file->constants.clear();
 
     for (auto& pair: file->macros) {
         add_macro(std::move(pair.second));
@@ -163,7 +178,7 @@ void ObjectFile::add_object_file(const std::shared_ptr<ObjectFile>& file) {
 
 void ObjectFile::evaluate() {
     for (auto& pair: constants) {
-        pair.second.value.evaluate(local_environment);
+        pair.second->value.evaluate(local_environment);
     }
     for (auto& pair: objects) {
         pair.second->evaluate();
@@ -173,7 +188,7 @@ void ObjectFile::evaluate() {
 
 void ObjectFile::evaluate(const std::shared_ptr<Environment>& environment) {
     for (auto& pair: constants) {
-        pair.second.value.evaluate(environment);
+        pair.second->value.evaluate(environment);
     }
     for (auto& pair: objects) {
         pair.second->body.evaluate(pair.second->name.as_symbol(), this, environment);
@@ -183,7 +198,7 @@ void ObjectFile::evaluate(const std::shared_ptr<Environment>& environment) {
 
 void ObjectFile::remove_local_constants() {
     std::erase_if(constants, [this](const auto& item) {
-        if (item.second.visibility == Visibility::LOCAL) {
+        if (item.second->visibility == Visibility::LOCAL) {
             local_environment->remove(item.first);
             return true;
         }
@@ -265,12 +280,23 @@ void ObjectFile::insert_macro(std::unique_ptr<Macro> macro) {
 }
 
 void ObjectFile::Constant::serialize(std::ostream &stream) const {
-    stream << ".constant " << name << " {" << std::endl;
-    stream << "    visibility: " << visibility << std::endl;
+    stream << ".constant " << name.as_symbol() << " {" << std::endl;
+    serialize_entity(stream);
     stream << "    value: " << value << std::endl;
     stream << "}" << std::endl;
 }
 
+ObjectFile::Constant::Constant(Token name, const std::shared_ptr<ParsedValue>& definition): Entity(name, definition) {
+    initialize();
+
+    auto parameters = definition->as_dictionary();
+
+    auto tokenizer = SequenceTokenizer((*parameters)[token_value]->as_scalar()->tokens);
+    value = Expression(tokenizer);
+    if (!tokenizer.ended()) {
+        throw ParseException(tokenizer.current_location(), "invalid value for constant");
+    }
+}
 
 void ObjectFile::import(ObjectFile *library) {
     if (imported_libraries.contains(library)) {

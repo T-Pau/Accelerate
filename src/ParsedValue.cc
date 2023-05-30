@@ -102,6 +102,15 @@ const ParsedArray *ParsedValue::as_array() const {
 }
 
 
+const ParsedBody *ParsedValue::as_body() const {
+    if (!is_body()) {
+        throw ParseException(location, "body expected");
+    }
+
+    return reinterpret_cast<const ParsedBody*>(this);
+}
+
+
 const ParsedDictionary *ParsedValue::as_dictionary() const {
     if (!is_dictionary()) {
         throw ParseException(location, "dictionary expected");

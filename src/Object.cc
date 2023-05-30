@@ -35,13 +35,70 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "BodyElement.h"
 #include "ObjectFile.h"
+#include "ParseException.h"
+#include "SequenceTokenizer.h"
 
-Object::Object(ObjectFile *owner, const MemoryMap::Section *section, Visibility visibility, Token name): owner(owner), section(section), visibility(visibility), name(name), environment(std::make_shared<Environment>(owner->local_environment)) {}
+#define ADDRESS "address"
+#define ALIGNMENT "alignment"
+#define BODY "body"
+#define RESERVE "reserve"
+#define SECTION "section"
 
-std::ostream& operator<<(std::ostream& stream, const std::shared_ptr<Object>& object) {
-    object->serialize(stream);
-    return stream;
+bool Object::initialized;
+Token Object::token_address;
+Token Object::token_alignment;
+Token Object::token_body;
+Token Object::token_reserve;
+Token Object::token_section;
+
+void Object::initialize() {
+    if (!initialized) {
+        initialized = true;
+        token_address = Token(Token::NAME, ADDRESS);
+        token_alignment = Token(Token::NAME, ALIGNMENT);
+        token_body = Token(Token::NAME, BODY);
+        token_reserve = Token(Token::NAME, RESERVE);
+        token_section = Token(Token::NAME, SECTION);
+    }
 }
+
+Object::Object(ObjectFile* owner, Token name_, const std::shared_ptr<ParsedValue>& definition): Entity(name_, definition), owner(owner), environment(std::make_shared<Environment>(owner->local_environment)) {
+    auto parameters = definition->as_dictionary();
+
+    auto address_value = parameters->get_optional(token_address);
+    if (address_value) {
+        auto tokenizer = SequenceTokenizer(address_value->location, address_value->as_scalar()->tokens);
+        address = Address(tokenizer);
+        if (!tokenizer.ended()) {
+            throw ParseException(tokenizer.current_location(), "expected newline");
+        }
+    }
+
+    auto alignment_value = parameters->get_optional(token_alignment);
+    if (alignment_value) {
+        auto alignment_token = alignment_value->as_singular_scalar()->token();
+        if (!alignment_token.is_unsigned()) {
+            throw ParseException(alignment_token, "unsigned integer expected");
+        }
+        alignment = alignment_token.as_unsigned();
+    }
+
+    auto reserve_value = parameters->get_optional(token_reserve);
+    if (reserve_value) {
+        auto reserve = reserve_value->as_singular_scalar()->token();
+        if (!reserve.is_unsigned()) {
+            throw ParseException(reserve, "unsigned integer expected");
+        }
+        reservation = reserve.as_unsigned();
+    }
+
+    section = owner->target->map.section((*parameters)[token_section]->as_singular_scalar()->token().as_symbol());
+
+    body = (*parameters)[token_body]->as_body()->body;
+}
+
+
+Object::Object(ObjectFile *owner, const MemoryMap::Section *section, Visibility visibility, Token name): Entity(name, visibility), owner(owner), section(section), environment(std::make_shared<Environment>(owner->local_environment)) {}
 
 
 std::ostream& operator<< (std::ostream& stream, const Object& object) {
@@ -51,24 +108,25 @@ std::ostream& operator<< (std::ostream& stream, const Object& object) {
 
 
 void Object::serialize(std::ostream &stream) const {
+    initialize();
+
     stream << ".object " << name.as_string() << " {" << std::endl;
+    serialize_entity(stream);
     if (address) {
-        stream << "    address: " << *address << std::endl;
+        stream << "    " ADDRESS ": " << *address << std::endl;
     }
     else if (alignment > 0) {
-        stream << "    alignment: " << alignment << std::endl;
+        stream << "    " ALIGNMENT ": " << alignment << std::endl;
     }
-    stream << "    section: " << section->name << std::endl;
-    stream << "    visibility: " << visibility << std::endl;
+    stream << "    " SECTION ": " << section->name << std::endl;
     if (!body.empty()) {
-        stream << "    body <" << std::endl;
+        stream << "    " BODY " <" << std::endl;
         body.serialize(stream, "        ");
         stream << "    >" << std::endl;
     }
     else {
-        stream << "    reserve: " << reservation << std::endl;
+        stream << "    " RESERVE ": " << reservation << std::endl;
     }
-
     stream << "}" << std::endl;
 }
 

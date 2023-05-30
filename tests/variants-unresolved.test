@@ -10,8 +10,8 @@ file file.o {} <inline>
 .format_version 1.0
 .target "6502"
 .object test {
-    section: code
     visibility: global
+    section: code
     body <
         .if .in_range($00, $ff, ptr)
           .data $85, ptr:1

@@ -11,29 +11,17 @@
 
 bool Callable::initialized = false;
 Token Callable::token_arguments;
-Token Callable::token_visibility;
 
 void Callable::initialize() {
     if (!initialized) {
         initialized = true;
         token_arguments = Token(Token::NAME, "arguments");
-        token_visibility = Token(Token::NAME, "visibility");
-        VisibilityHelper::initialize();
     }
 }
 
-Callable::Callable(Token name_, const std::shared_ptr<ParsedValue>& definition) {
+Callable::Callable(Token name_, const std::shared_ptr<ParsedValue>& definition): Entity(name_, definition) {
     initialize();
     auto parameters = definition->as_dictionary();
-
-    name = name_;
-
-    auto visibility_value = (*parameters)[token_visibility]->as_singular_scalar()->token();
-    auto visibility_ = VisibilityHelper::from_token(visibility_value);
-    if (!visibility_) {
-        throw ParseException(visibility_value, "invalid visibility");
-    }
-    visibility = *visibility_;
 
     auto arguments_value = parameters->get_optional(token_arguments);
     if (arguments_value) {
@@ -48,6 +36,7 @@ Callable::Callable(Token name_, const std::shared_ptr<ParsedValue>& definition) 
     }
 }
 
+
 std::optional<Expression> Callable::default_argument(size_t index) const {
     if (index >= minimum_arguments()) {
         return default_arguments[index - minimum_arguments()];
@@ -57,8 +46,9 @@ std::optional<Expression> Callable::default_argument(size_t index) const {
     }
 }
 
+
 void Callable::serialize_callable(std::ostream& stream) const {
-    stream << "    visibility: " << visibility << std::endl;
+    serialize_entity(stream);
     if (!argument_names.empty()) {
         stream << "    arguments: ";
         for (size_t index = 0; index < argument_names.size(); index++) {

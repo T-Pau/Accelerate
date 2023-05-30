@@ -42,6 +42,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Body.h"
 
 class ParsedArray;
+class ParsedBody;
 class ParsedDictionary;
 class ParsedScalar;
 
@@ -61,6 +62,7 @@ public:
     static std::shared_ptr<ParsedValue> parse(Tokenizer& tokenizer);
 
     [[nodiscard]] const ParsedArray* as_array() const;
+    [[nodiscard]] const ParsedBody* as_body() const;
     [[nodiscard]] const ParsedDictionary* as_dictionary() const;
     [[nodiscard]] const ParsedScalar* as_scalar() const;
     [[nodiscard]] const ParsedScalar* as_singular_scalar() const;

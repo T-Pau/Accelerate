@@ -147,7 +147,7 @@ void Assembler::add_constant(Visibility visibility, const Token& name, Expressio
             break;
         case Visibility::LOCAL:
         case Visibility::GLOBAL:
-            object_file->add_constant(name.as_symbol(), visibility, value);
+            object_file->add_constant(std::make_unique<ObjectFile::Constant>(name, visibility, value));
             break;
     }
 }

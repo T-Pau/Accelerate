@@ -64,21 +64,12 @@ private:
     static bool initialized;
     static std::unordered_map<Symbol, void (ObjectFileParser::*)()> parser_methods;
     static std::unordered_map<Symbol, void (ObjectFileParser::*)(Token name, const std::shared_ptr<ParsedValue>& definition)> symbol_parser_methods;
-    static Token token_address;
-    static Token token_alignment;
     static Token token_constant;
-    static Token token_data;
     static Token token_format_version;
     static Token token_function;
-    static Token token_global;
-    static Token token_local;
     static Token token_macro;
     static Token token_object;
-    static Token token_reserve;
-    static Token token_section;
     static Token token_target;
-    static Token token_value;
-    static Token token_visibility;
 };
 
 
