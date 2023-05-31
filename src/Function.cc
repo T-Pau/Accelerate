@@ -6,23 +6,25 @@
 #include "ParseException.h"
 #include "SequenceTokenizer.h"
 
+#define DEFINITION "definition"
+
 bool Function::initialized = false;
-Token Function::token_value;
+Token Function::token_definition;
 
 void Function::initialize() {
     if (!initialized) {
         initialized = true;
-        token_value = Token(Token::NAME, "value");
+        token_definition = Token(Token::NAME, DEFINITION);
     }
 }
 
-Function::Function(Token name, const std::shared_ptr<ParsedValue>& definition) : Callable(name, definition) {
-    auto parameters = definition->as_dictionary();
+Function::Function(Token name, const std::shared_ptr<ParsedValue>& definition_) : Callable(name, definition_) {
+    auto parameters = definition_->as_dictionary();
 
-    auto tokenizer = SequenceTokenizer((*parameters)[token_value]->as_scalar()->tokens);
-    value = Expression(tokenizer);
+    auto tokenizer = SequenceTokenizer((*parameters)[token_definition]->as_scalar()->tokens);
+    definition = Expression(tokenizer);
     if (!tokenizer.ended()) {
-        throw ParseException(tokenizer.current_location(), "invalid value");
+        throw ParseException(tokenizer.current_location(), "invalid definition");
     }
 }
 
@@ -34,13 +36,13 @@ std::ostream& operator<<(std::ostream& stream, const Function& function) {
 
 
 Expression Function::call(const std::vector<Expression>& arguments) {
-    return value.evaluated(bind(arguments)).value_or(value);
+    return definition.evaluated(bind(arguments)).value_or(definition);
 }
 
 
 void Function::serialize(std::ostream& stream) const {
-    stream << ".function " << name.as_string() << "{" << std::endl;
+    stream << ".function " << name.as_string() << " {" << std::endl;
     serialize_callable(stream);
-    stream << "    value: " << value << std::endl;
+    stream << "    " DEFINITION ": " << definition << std::endl;
     stream << "}" << std::endl;
 }

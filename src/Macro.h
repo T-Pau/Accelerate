@@ -12,8 +12,9 @@
 class Macro: public Callable {
   public:
     Macro(Token name, const std::shared_ptr<ParsedValue>& definition);
+    Macro(Token name, Visibility visibility, Callable::Arguments arguments, Body body): Callable(name, visibility, std::move(arguments)), body(body) {}
 
-    Body expand(const std::vector<Expression>& arguments) const;
+    [[nodiscard]] Body expand(const std::vector<Expression>& arguments) const;
     void serialize(std::ostream& stream) const;
 
     Body body;

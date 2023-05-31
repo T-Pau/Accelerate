@@ -45,6 +45,7 @@ public:
 
     std::vector<Token> collect_until(Token::Type type);
     std::vector<Token> collect_until(const TokenGroup& types);
+    Token expect(Token::Type type);
     Token expect(Token::Type type, const TokenGroup& synchronize);
     Token expect(const TokenGroup& types, const TokenGroup& synchronize);
     void expect(Token token);

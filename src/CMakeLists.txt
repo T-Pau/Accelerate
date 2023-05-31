@@ -50,6 +50,7 @@ add_library(xlr8-library STATIC
         Linker.cc
         Location.cc
         Macro.cc
+        MacroBody.cc
         Memory.cc
         MemoryBody.cc
         MemoryMap.cc

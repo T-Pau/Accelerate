@@ -97,21 +97,13 @@ std::shared_ptr<ObjectFile> Assembler::parse(Symbol file_name) {
                 case Token::END:
                     break;
 
-                case Token::DIRECTIVE: {
+                case Token::DIRECTIVE:
                     parse_directive(token);
                     break;
-                }
 
-                case Token::NAME: {
-                    auto token2 = tokenizer.next();
-                    if (token2 == Token::equals) {
-                        parse_assignment(Visibility::SCOPE, token);
-                        break;
-                    }
-                    else {
-                        throw ParseException(token2, "unexpected");
-                    }
-                }
+                case Token::NAME:
+                    parse_name(Visibility::LOCAL, token);
+                    break;
 
                 case Token::NEWLINE:
                     // ignore
@@ -139,21 +131,10 @@ std::shared_ptr<ObjectFile> Assembler::parse(Symbol file_name) {
     return object_file;
 }
 
-void Assembler::add_constant(Visibility visibility, const Token& name, Expression value) {
-    value.evaluate(file_environment);
-    switch (visibility) {
-        case Visibility::SCOPE:
-            file_environment->add(name.as_symbol(), value);
-            break;
-        case Visibility::LOCAL:
-        case Visibility::GLOBAL:
-            object_file->add_constant(std::make_unique<ObjectFile::Constant>(name, visibility, value));
-            break;
-    }
-}
 
 void Assembler::parse_assignment(Visibility visibility, const Token &name) {
-    add_constant(visibility, name, ExpressionParser(tokenizer).parse());
+    auto value = ExpressionParser(tokenizer).parse();
+    object_file->add_constant(std::make_unique<ObjectFile::Constant>(name, visibility, value));
 }
 
 void Assembler::parse_section() {
@@ -244,14 +225,7 @@ void Assembler::parse_directive(const Token& directive) {
         if (name.get_type() != Token::NAME) {
             throw ParseException(name, "name expected");
         }
-        auto token = tokenizer.next();
-        if (token == Token::equals) {
-            parse_assignment(visibility, name);
-        }
-        else {
-            tokenizer.unget(token);
-            parse_symbol(visibility, name);
-        }
+        parse_name(visibility, name);
     }
     else if (directive == token_section) {
         parse_section();
@@ -276,5 +250,33 @@ void Assembler::parse_target() {
     else {
         target = &new_target;
         object_file->target = target;
+    }
+}
+
+
+void Assembler::parse_name(Visibility visibility, const Token& name) {
+    auto token = tokenizer.next();
+    if (token == Token::equals) {
+        parse_assignment(visibility, name);
+        return;
+    }
+    else if (token.is_name()) {
+        tokenizer.unget(token);
+        auto arguments = Callable::Arguments(tokenizer);
+        tokenizer.expect(Token::curly_open);
+        auto body = BodyParser(tokenizer, object_file->target->cpu).parse(); // TODO: proper mode for macros
+        object_file->add_macro(std::make_unique<Macro>(name, visibility, arguments, body));
+    }
+    else if (token == Token::paren_open) {
+        auto arguments = Callable::Arguments(tokenizer);
+        tokenizer.expect(Token::paren_close);
+        tokenizer.expect(Token::equals);
+
+        auto definition = ExpressionParser(tokenizer).parse();
+        object_file->add_function(std::make_unique<Function>(name, visibility, arguments, definition));
+    }
+    else {
+        tokenizer.unget(token);
+        parse_symbol(visibility, name);
     }
 }

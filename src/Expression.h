@@ -30,10 +30,16 @@ public:
         BITWISE_OR,
         BITWISE_XOR,
         DIVIDE,
+        EQUAL,
+        GREATER,
+        GREATER_EQUAL,
+        LESS,
+        LESS_EQUAL,
         LOGICAL_AND,
         LOGICAL_OR,
         MODULO,
         MULTIPLY,
+        NOT_EQUAL,
         SHIFT_LEFT,
         SHIFT_RIGHT,
         SUBTRACT
@@ -44,6 +50,7 @@ public:
         HIGH_BYTE,
         LOW_BYTE,
         MINUS,
+        NOT,
         PLUS
     };
 

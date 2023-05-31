@@ -96,11 +96,17 @@ public:
     static const Token comma;
     static const Token curly_close;
     static const Token curly_open;
+    static const Token double_ampersand;
     static const Token double_greater;
     static const Token double_less;
+    static const Token double_pipe;
     static const Token equals;
+    static const Token exclaim;
+    static const Token exclaim_equals;
     static const Token greater;
+    static const Token greater_equals;
     static const Token less;
+    static const Token less_equals;
     static const Token minus;
     static const Token paren_close;
     static const Token paren_open;

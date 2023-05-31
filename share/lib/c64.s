@@ -19,21 +19,21 @@
 
 .global VIC = $d000
 .global VIC_SPRITE_0_X = VIC + $00
-.global VIC_SPRITE_0_X = VIC + $01
+.global VIC_SPRITE_0_Y = VIC + $01
 .global VIC_SPRITE_1_X = VIC + $02
-.global VIC_SPRITE_1_X = VIC + $03
+.global VIC_SPRITE_1_Y = VIC + $03
 .global VIC_SPRITE_2_X = VIC + $04
-.global VIC_SPRITE_2_X = VIC + $05
+.global VIC_SPRITE_2_Y = VIC + $05
 .global VIC_SPRITE_3_X = VIC + $06
-.global VIC_SPRITE_3_X = VIC + $07
+.global VIC_SPRITE_3_Y = VIC + $07
 .global VIC_SPRITE_4_X = VIC + $08
-.global VIC_SPRITE_4_X = VIC + $09
+.global VIC_SPRITE_4_Y = VIC + $09
 .global VIC_SPRITE_5_X = VIC + $0a
-.global VIC_SPRITE_5_X = VIC + $0b
+.global VIC_SPRITE_5_Y = VIC + $0b
 .global VIC_SPRITE_6_X = VIC + $0c
-.global VIC_SPRITE_6_X = VIC + $0d
+.global VIC_SPRITE_6_Y = VIC + $0d
 .global VIC_SPRITE_7_X = VIC + $0e
-.global VIC_SPRITE_7_X = VIC + $0f
+.global VIC_SPRITE_7_Y = VIC + $0f
 .global VIC_SPRITE_X_MSB = VIC + $10
 ;
 .global VIC_RASTER = VIC + $12
@@ -51,10 +51,10 @@
 .global VIC_SPRITE_SPRITE_COLLISION = VIC + $1e
 .global VIC_SPRITE_BACKGROUND_COLLISION = VIC + $1f
 .global VIC_BORDER_COLOR = VIC + $20
-.glboal VIC_BACKGROUND_COLOR = VIC + $21
-.glboal VIC_BACKGROUND_COLOR_1 = VIC + $22
-.glboal VIC_BACKGROUND_COLOR_2 = VIC + $23
-.glboal VIC_BACKGROUND_COLOR_3 = VIC + $24
+.global VIC_BACKGROUND_COLOR = VIC + $21
+.global VIC_BACKGROUND_COLOR_1 = VIC + $22
+.global VIC_BACKGROUND_COLOR_2 = VIC + $23
+.global VIC_BACKGROUND_COLOR_3 = VIC + $24
 .global VIC_SPRITE_MULTICOLOR_0 = VIC + $25
 .global VIC_SPRITE_MULTICOLOR_1 = VIC + $26
 .global VIC_SPRITE_0_COLOR = VIC + $27

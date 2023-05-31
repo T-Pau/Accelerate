@@ -6,39 +6,53 @@ statements:
     statements statement NEWLINE
 
 statement:
-    assignment
-    symbol
+    constant
+    function-definition
+    macro-definition
+    object
     section
 
-assignment:
+constant:
     visibility? NAME = expression NEWLINE
 
-symbol:
-    visibility NAME symbol-parameter*
-    visibility NAME symbol-parameter* { NEWLINE symbol-body }
+function-definition:
+    visibility? NAME ( argument-list ) = expression
+
+macro-definition:
+    visibility? NAME ( argument-list) { NEWLINE macro-body }
+
+object:
+    visibility? NAME object-parameter*
+    visibility? NAME object-parameter* { NEWLINE object-body }
+
 
 section:
     .SECTION NAME
 
-symbol-body:
+object-body:
     <empty>
-    symbol-body symbol-body-line NEWLINE
+    object-body object-body-line NEWLINE
 
 visibility:
     .GLOBAL
     .LOCAL
 
-symbol-body-line:
+object-body-line:
     assignment
     label? instruction
+    label? macro-call
     label
 
 label:
     visibility? NAME :
+    :
 
 instruction:
     NAME instruction_arguments? NEWLINE
     instruction_arguments NEWLINE
+
+macro-call:
+    NAME ( macro-arguments ) NEWLINE
 
 instruction_arguments:
     instruction_argument

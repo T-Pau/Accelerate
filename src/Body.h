@@ -36,6 +36,8 @@ public:
     explicit Body(const std::vector<IfBodyClause>& clauses);
     // Label
     explicit Body(std::shared_ptr<Label> label);
+    // Macro
+    Body(Token name, std::vector<Expression> arguments);
     // Memory
     Body(Expression bank, Expression start_address, Expression end_address);
 

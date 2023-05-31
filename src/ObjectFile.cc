@@ -97,7 +97,7 @@ void ObjectFile::serialize(std::ostream &stream) const {
     }
     std::sort(names.begin(), names.end());
     for (auto name_ : names) {
-        stream << constants.find(name_)->second;
+        stream << (*constants.find(name_)->second);
     }
 
     names.clear();
@@ -106,7 +106,7 @@ void ObjectFile::serialize(std::ostream &stream) const {
     }
     std::sort(names.begin(), names.end());
     for (auto name_: names) {
-        stream << functions.find(name_)->second;
+        stream << *(functions.find(name_)->second);
     }
 
     names.clear();
@@ -115,7 +115,7 @@ void ObjectFile::serialize(std::ostream &stream) const {
     }
     std::sort(names.begin(), names.end());
     for (auto name_: names) {
-        stream << macros.find(name_)->second;
+        stream << (*macros.find(name_)->second);
     }
 
     names.clear();
@@ -305,4 +305,9 @@ void ObjectFile::import(ObjectFile *library) {
     // TODO: detect loops
     imported_libraries.insert(library);
     global_environment->add_next(library->global_environment);
+}
+
+void ObjectFile::set_target(const Target* new_target) {
+    // TODO: check compatibility
+    target = new_target;
 }

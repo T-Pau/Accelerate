@@ -55,6 +55,16 @@ void Tokenizer::unget(Token token) {
     ungot_token = token;
 }
 
+Token Tokenizer::expect(Token::Type type) {
+    auto token = next();
+    if (token.get_type() == type) {
+        return token;
+    }
+    else {
+        throw ParseException(token.location, "expected %s, got %s", Token::type_name(type), token.type_name());
+    }
+}
+
 Token Tokenizer::expect(Token::Type type, const TokenGroup& synchronize) {
     auto token = next();
     if (token.get_type() == type) {

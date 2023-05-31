@@ -68,6 +68,26 @@ void BinaryExpression::serialize_sub(std::ostream &stream) const {
             stream << '/';
             break;
 
+        case Expression::BinaryOperation::EQUAL:
+            stream << "=";
+            break;
+
+        case Expression::BinaryOperation::GREATER:
+            stream << ">";
+            break;
+
+        case Expression::BinaryOperation::GREATER_EQUAL:
+            stream << ">=";
+            break;
+
+        case Expression::BinaryOperation::LESS:
+            stream << "<";
+            break;
+
+        case Expression::BinaryOperation::LESS_EQUAL:
+            stream << "<=";
+            break;
+
         case Expression::BinaryOperation::LOGICAL_AND:
             stream << "&&";
             break;
@@ -82,6 +102,10 @@ void BinaryExpression::serialize_sub(std::ostream &stream) const {
 
         case Expression::BinaryOperation::MULTIPLY:
             stream << '*';
+            break;
+
+        case Expression::BinaryOperation::NOT_EQUAL:
+            stream << "!=";
             break;
 
         case Expression::BinaryOperation::SHIFT_LEFT:
@@ -155,6 +179,29 @@ Expression BinaryExpression::create(const Expression& left, Expression::BinaryOp
             case Expression::BinaryOperation::MODULO:
                 value = left_value % right_value;
                 break;
+            case Expression::EQUAL:
+                value = Value(left_value == right_value);
+                break;
+
+            case Expression::GREATER:
+                value = Value(left_value > right_value);
+                break;
+
+            case Expression::GREATER_EQUAL:
+                value = Value(left_value >= right_value);
+                break;
+
+            case Expression::LESS:
+                value = Value(left_value < right_value);
+                break;
+
+            case Expression::LESS_EQUAL:
+                value = Value(left_value <= right_value);
+                break;
+
+            case Expression::NOT_EQUAL:
+                value = Value(left_value != right_value);
+                break;
         }
 
         return Expression(value);
@@ -172,6 +219,48 @@ Expression BinaryExpression::create(const Expression& left, Expression::BinaryOp
                 }
                 break;
             }
+
+            case Expression::BinaryOperation::EQUAL:
+                if (left.minimum_value() > right.maximum_value() || left.maximum_value() < right.minimum_value()) {
+                    return Expression(false);
+                }
+                break;
+
+            case Expression::BinaryOperation::GREATER:
+                if (left.minimum_value() > right.maximum_value()) {
+                    return Expression(true);
+                }
+                else if (left.maximum_value() <= right.minimum_value()) {
+                    return Expression(false);
+                }
+                break;
+
+            case Expression::BinaryOperation::GREATER_EQUAL:
+                if (left.minimum_value() >= right.maximum_value()) {
+                    return Expression(true);
+                }
+                else if (left.maximum_value() < right.minimum_value()) {
+                    return Expression(false);
+                }
+                break;
+
+            case Expression::BinaryOperation::LESS:
+                if (left.minimum_value() >= right.maximum_value()) {
+                    return Expression(false);
+                }
+                else if (left.maximum_value() < right.minimum_value()) {
+                    return Expression(true);
+                }
+                break;
+
+            case Expression::BinaryOperation::LESS_EQUAL:
+                if (left.minimum_value() > right.maximum_value()) {
+                    return Expression(false);
+                }
+                else if (left.maximum_value() <= right.minimum_value()) {
+                    return Expression(true);
+                }
+                break;
 
             case Expression::BinaryOperation::MULTIPLY: {
                 if (left.has_value() && left.value() == Value(uint64_t(1))) {
@@ -192,6 +281,12 @@ Expression BinaryExpression::create(const Expression& left, Expression::BinaryOp
                 }
                 break;
             }
+
+            case Expression::BinaryOperation::NOT_EQUAL:
+                if (left.minimum_value() > right.maximum_value() || left.maximum_value() < right.minimum_value()) {
+                    return Expression(true);
+                }
+                break;
 
             case Expression::BinaryOperation::DIVIDE: {
                 if (right.has_value() && right.value() == Value(uint64_t(1))) {
@@ -321,12 +416,18 @@ std::optional<Value> BinaryExpression::minimum_value() const {
         case Expression::BinaryOperation::BITWISE_OR:
         case Expression::BinaryOperation::BITWISE_XOR:
         case Expression::BinaryOperation::DIVIDE:
+        case Expression::BinaryOperation::LOGICAL_AND:
+        case Expression::BinaryOperation::LOGICAL_OR:
         case Expression::BinaryOperation::MODULO:
         case Expression::BinaryOperation::MULTIPLY:
         case Expression::BinaryOperation::SHIFT_LEFT:
         case Expression::BinaryOperation::SHIFT_RIGHT:
-        case Expression::BinaryOperation::LOGICAL_AND:
-        case Expression::BinaryOperation::LOGICAL_OR:
+        case Expression::EQUAL:
+        case Expression::GREATER:
+        case Expression::GREATER_EQUAL:
+        case Expression::LESS:
+        case Expression::LESS_EQUAL:
+        case Expression::NOT_EQUAL:
             return {};
 
         case Expression::BinaryOperation::SUBTRACT:
@@ -344,12 +445,18 @@ std::optional<Value> BinaryExpression::maximum_value() const {
         case Expression::BinaryOperation::BITWISE_OR:
         case Expression::BinaryOperation::BITWISE_XOR:
         case Expression::BinaryOperation::DIVIDE:
+        case Expression::BinaryOperation::LOGICAL_AND:
+        case Expression::BinaryOperation::LOGICAL_OR:
         case Expression::BinaryOperation::MODULO:
         case Expression::BinaryOperation::MULTIPLY:
         case Expression::BinaryOperation::SHIFT_LEFT:
         case Expression::BinaryOperation::SHIFT_RIGHT:
-        case Expression::BinaryOperation::LOGICAL_AND:
-        case Expression::BinaryOperation::LOGICAL_OR:
+        case Expression::EQUAL:
+        case Expression::GREATER:
+        case Expression::GREATER_EQUAL:
+        case Expression::LESS:
+        case Expression::LESS_EQUAL:
+        case Expression::NOT_EQUAL:
             return {};
 
         case Expression::BinaryOperation::SUBTRACT:

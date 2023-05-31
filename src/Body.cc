@@ -13,6 +13,7 @@
 #include "ErrorBody.h"
 #include "IfBody.h"
 #include "LabelBody.h"
+#include "MacroBody.h"
 #include "MemoryBody.h"
 
 Body::Body(): element(std::make_shared<EmptyBody>()) {}
@@ -44,6 +45,8 @@ Body::Body(const std::vector<IfBodyClause>& clauses) {
 }
 
 Body::Body(std::shared_ptr<Label> label): element(std::make_shared<LabelBody>(std::move(label))) {}
+
+Body::Body(Token name, std::vector<Expression> arguments): element(std::make_shared<MacroBody>(name, std::move(arguments))) {}
 
 Body::Body(Expression bank, Expression start_address, Expression end_address): element(std::make_shared<MemoryBody>(std::move(bank), std::move(start_address), std::move(end_address))) {}
 

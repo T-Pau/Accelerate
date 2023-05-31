@@ -49,7 +49,7 @@ public:
 private:
     static Visibility visibility_value(const Token& token);
 
-    void add_constant(Visibility visibility, const Token& name, Expression value);
+    void parse_name(Visibility visibility, const Token& name);
     void parse_assignment(Visibility visibility, const Token& name);
     void parse_directive(const Token& directive);
     void parse_section();

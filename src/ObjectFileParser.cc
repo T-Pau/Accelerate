@@ -118,10 +118,9 @@ void ObjectFileParser::parse_function(Token name, const std::shared_ptr<ParsedVa
 void ObjectFileParser::parse_target() {
     auto name = tokenizer.expect(Token::STRING, TokenGroup::newline);
 
-    file->target = &Target::get(name.as_symbol());
+    file->set_target(&Target::get(name.as_symbol()));
 }
 
 void ObjectFileParser::parse_macro(Token name, const std::shared_ptr<ParsedValue>& definition) {
-    //file->add_macro(std::make_unique<Macro>(name, definition));
-    // TODO: implement
+    file->add_macro(std::make_unique<Macro>(name, definition));
 }

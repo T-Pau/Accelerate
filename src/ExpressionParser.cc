@@ -40,25 +40,38 @@ std::unordered_map<Token, Expression::UnaryOperation> ExpressionParser::unary_op
 
 void ExpressionParser::initialize() {
     binary_operators = {
-            {Token::plus,           BinaryOperator(Expression::BinaryOperation::ADD, 1)},
-            {Token::minus,          BinaryOperator(Expression::BinaryOperation::SUBTRACT, 1)},
-            {Token::pipe,           BinaryOperator(Expression::BinaryOperation::BITWISE_OR, 1)},
+        {Token::double_pipe, BinaryOperator(Expression::BinaryOperation::LOGICAL_OR, 1)},
 
-            {Token::star,           BinaryOperator(Expression::BinaryOperation::MULTIPLY, 2)},
-            {Token::slash,          BinaryOperator(Expression::BinaryOperation::DIVIDE, 2)},
-            {Token::ampersand,      BinaryOperator(Expression::BinaryOperation::BITWISE_AND, 2)},
-            {Token::caret,          BinaryOperator(Expression::BinaryOperation::BITWISE_XOR, 2)},
-            {Token::double_less,    BinaryOperator(Expression::BinaryOperation::SHIFT_LEFT, 2)},
-            {Token::double_greater, BinaryOperator(Expression::BinaryOperation::SHIFT_RIGHT, 2)}
+        {Token::double_ampersand, BinaryOperator(Expression::BinaryOperation::LOGICAL_AND, 2)},
+
+        {Token::equals, BinaryOperator(Expression::BinaryOperation::EQUAL, 3)},
+        {Token::greater, BinaryOperator(Expression::BinaryOperation::GREATER, 3)},
+        {Token::greater_equals, BinaryOperator(Expression::BinaryOperation::GREATER_EQUAL, 3)},
+        {Token::less, BinaryOperator(Expression::BinaryOperation::LESS, 3)},
+        {Token::less_equals, BinaryOperator(Expression::BinaryOperation::LESS_EQUAL, 3)},
+        {Token::exclaim_equals, BinaryOperator(Expression::BinaryOperation::NOT_EQUAL, 3)},
+
+        {Token::plus, BinaryOperator(Expression::BinaryOperation::ADD, 4)},
+        {Token::minus, BinaryOperator(Expression::BinaryOperation::SUBTRACT, 4)},
+        {Token::pipe, BinaryOperator(Expression::BinaryOperation::BITWISE_OR, 4)},
+        {Token::caret, BinaryOperator(Expression::BinaryOperation::BITWISE_XOR, 4)},
+
+        {Token::star, BinaryOperator(Expression::BinaryOperation::MULTIPLY, 5)},
+        {Token::slash, BinaryOperator(Expression::BinaryOperation::DIVIDE, 5)},
+        {Token::ampersand, BinaryOperator(Expression::BinaryOperation::BITWISE_AND, 5)},
+
+        {Token::double_less, BinaryOperator(Expression::BinaryOperation::SHIFT_LEFT, 6)},
+        {Token::double_greater, BinaryOperator(Expression::BinaryOperation::SHIFT_RIGHT, 6)}
     };
 
     unary_operators = {
-            {Token::plus,    Expression::UnaryOperation::PLUS},
-            {Token::minus,   Expression::UnaryOperation::MINUS},
-            {Token::caret,   Expression::UnaryOperation::BANK_BYTE},
-            {Token::less,    Expression::UnaryOperation::LOW_BYTE},
-            {Token::greater, Expression::UnaryOperation::HIGH_BYTE},
-            {Token::tilde,   Expression::UnaryOperation::BITWISE_NOT}
+        {Token::exclaim, Expression::UnaryOperation::NOT},
+        {Token::plus, Expression::UnaryOperation::PLUS},
+        {Token::minus, Expression::UnaryOperation::MINUS},
+        {Token::caret, Expression::UnaryOperation::BANK_BYTE},
+        {Token::less, Expression::UnaryOperation::LOW_BYTE},
+        {Token::greater, Expression::UnaryOperation::HIGH_BYTE},
+        {Token::tilde, Expression::UnaryOperation::BITWISE_NOT}
     };
 }
 

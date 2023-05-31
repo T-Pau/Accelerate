@@ -400,8 +400,26 @@ void BodyParser::handle_name(Visibility visibility, Token name) {
         parse_assignment(visibility, token);
     }
     else {
-        // TODO: if visibility == SCOPE, handle macro call
         tokenizer.unget(token);
-        throw ParseException(name, "unexpected name");
+        if (visibility != Visibility::SCOPE) {
+            throw ParseException(name, "macro call can't have visibility");
+        }
+
+        std::vector<Expression> arguments;
+
+        while (true) {
+            token = tokenizer.next();
+            if (!token || token.is_newline()) {
+                break;
+            }
+            if (arguments.empty()) {
+                tokenizer.unget(token);
+            }
+            else if (token != Token::comma) {
+                throw ParseException(token, "expected ','");
+            }
+            arguments.emplace_back(tokenizer);
+        }
+        current_body->append(Body(name, arguments));
     }
 }
