@@ -43,7 +43,7 @@ void BodyParser::setup(FileTokenizer &tokenizer) {
 
 Body BodyParser::parse() {
     body = Body();
-    push_body(&body);
+    current_body = &body;
 
     while (!tokenizer.ended()) {
         try {
@@ -330,30 +330,35 @@ void BodyParser::parse_instruction(const Token &name) {
 }
 
 
-void BodyParser::push_body(Body *new_body) {
-    bodies.emplace_back(new_body);
-    current_body = new_body;
+void BodyParser::push_body(const BodyParser::BodyIndex& body_index) {
+    body_indices.emplace_back(body_index);
+    current_body = get_body(body_index);
 }
 
 void BodyParser::pop_body() {
-    bodies.pop_back();
-    if (bodies.empty()) {
-        push_body(&body);
+    if (body_indices.empty()) {
         throw Exception("internal error: closing outermost body");
     }
-    current_body = bodies.back();
+    body_indices.pop_back();
+    if (body_indices.empty()) {
+        current_body = &body;
+    }
+    else {
+        current_body = get_body(body_indices.back());
+    }
 }
 
 void BodyParser::push_clause(Expression condition) {
     ifs.back().emplace_back(IfBodyClause(std::move(condition), {}));
-    push_body(&ifs.back().back().body);
+    push_body(BodyIndex(ifs.size() - 1, ifs.back().size() - 1));
 }
 
-SizeRange BodyParser::current_size() const {
-    auto size = SizeRange();
 
-    for (auto& b: bodies) {
-        size += b->size_range();
+SizeRange BodyParser::current_size() {
+    auto size = body.size_range();
+
+    for (auto& body_index: body_indices) {
+        size += get_body(body_index)->size_range();
     }
 
     return size;

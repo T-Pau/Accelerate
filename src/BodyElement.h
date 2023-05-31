@@ -45,6 +45,8 @@ class CPU;
 
 class BodyElement {
 public:
+  BodyElement() = default;
+  BodyElement(SizeRange size_range): size_range_(size_range) {}
     [[nodiscard]] SizeRange size_range() const {return size_range_;}
     [[nodiscard]] std::optional<uint64_t> size() const {return size_range().size();}
 

@@ -11,7 +11,7 @@
 
 class MacroBody: public BodyElement {
   public:
-    MacroBody(Token name, std::vector<Expression> arguments): name(name), arguments(std::move(arguments)) {}
+    MacroBody(Token name, std::vector<Expression> arguments): BodyElement(SizeRange(0,{})), name(name), arguments(std::move(arguments)) {}
 
     [[nodiscard]] std::shared_ptr<BodyElement> clone() const override {throw Exception("can't clone MacroBody");}
     [[nodiscard]] bool empty() const override {return false;}

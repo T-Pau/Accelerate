@@ -25,6 +25,14 @@ public:
     Body parse();
 
 private:
+    class BodyIndex {
+      public:
+        BodyIndex(size_t if_index, size_t clause_index): if_index(if_index), clause_index(clause_index) {}
+
+        size_t if_index;
+        size_t clause_index;
+    };
+
     bool allow_memory = false;
     const CPU* cpu = nullptr;
     std::shared_ptr<Environment> environment = std::make_shared<Environment>();
@@ -36,8 +44,8 @@ private:
     uint64_t next_label = 0;
     Body body;
     std::vector<std::vector<IfBodyClause>> ifs;
-    std::vector<Body*> bodies;
-    Body *current_body = nullptr;
+    std::vector<BodyIndex> body_indices;
+    Body *current_body = &body;
 
     [[nodiscard]] bool allow_instructions() const {return cpu != nullptr;}
     [[nodiscard]] bool allow_labels() const {return !object_name.empty();}
@@ -49,11 +57,12 @@ private:
     void parse_unnamed_label();
 
     void add_constant(Visibility visibility, Token name, const Expression& value);
-    [[nodiscard]] SizeRange current_size() const;
+    [[nodiscard]] SizeRange current_size();
+    Body* get_body(const BodyIndex& body_index) {return &ifs[body_index.if_index][body_index.clause_index].body;}
     [[nodiscard]] Expression get_pc(std::shared_ptr<Label> label) const;
     [[nodiscard]] std::shared_ptr<Label> get_label(bool& is_anonymous);
     void push_clause(Expression condition);
-    void push_body(Body* new_body);
+    void push_body(const BodyIndex& body_index);
     void pop_body();
 
     void handle_name(Visibility visibility, Token name);
