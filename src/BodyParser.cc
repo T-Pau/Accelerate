@@ -168,6 +168,7 @@ void BodyParser::parse_else() {
     if (ifs.empty()) {
         throw Exception(".else outside .if");
     }
+    pop_body();
     push_clause(Expression(Value(true)));
 }
 
@@ -175,6 +176,7 @@ void BodyParser::parse_else_if() {
     if (ifs.empty()) {
         throw Exception(".else_if outside .if");
     }
+    pop_body();
     push_clause(ExpressionParser(tokenizer).parse());
 }
 
