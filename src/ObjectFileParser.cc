@@ -108,6 +108,7 @@ void ObjectFileParser::parse_object(Token name, const std::shared_ptr<ParsedValu
 
 
 void ObjectFileParser::parse_format_version() {
+    auto token = tokenizer.expect(Token::VALUE);
     // TODO: implement
 }
 

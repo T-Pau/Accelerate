@@ -55,7 +55,7 @@ Entity::Entity(Token name_, const std::shared_ptr<ParsedValue>& definition) {
     auto visibility_value = (*parameters)[token_visibility]->as_singular_scalar()->token();
     auto visibility_ = VisibilityHelper::from_token(visibility_value);
     if (!visibility_) {
-        throw ParseException(visibility_value, "invalid visibility");
+        throw ParseException(visibility_value, "invalid visibility '%s'", visibility_value.as_string().c_str());
     }
     visibility = *visibility_;
 }

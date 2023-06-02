@@ -229,10 +229,8 @@ void xlr8::process() {
     }
 
     if (mode == COMPILE) {
-        for (const auto& file: files) {
-            for (auto object: file.file->all_objects()) {
-                object->evaluate(file.file->local_environment);
-            }
+        for (auto& file: files) {
+            file.file->evaluate();
         }
     }
     else {
@@ -243,8 +241,8 @@ void xlr8::process() {
             linker->link();
         }
         else {
-            // TODO: resolve constants in program
-            linker->program->remove_local_constants();
+            linker->program->evaluate();
+            //linker->program->remove_local_constants();
         }
     }
 }

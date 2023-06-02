@@ -162,14 +162,31 @@ Token FileTokenizer::parse_number(unsigned int base, Location location) {
     uint64_t size = 0;
     auto leading_zero = false;
     uint64_t integer = 0;
+    double floating = 0;
+    auto in_fraction = false;
 
     while (true) {
         current_source->expand_location(location);
         auto c = current_source->next();
+        if (c == '.') {
+            if (in_fraction) {
+                current_source->unget();
+                return {Token::VALUE, location, floating};
+            }
+            else {
+                in_fraction = true;
+                floating = double(integer);
+                size = 0;
+            }
+            continue;
+        }
         int digit = convert_digit(c);
         // TODO: real numbers
         if (digit < 0 || digit >= base) {
             current_source->unget();
+            if (in_fraction) {
+                return {Token::VALUE, location, floating};
+            }
             if (size == 0) {
                 throw ParseException(location, "empty integer");
             }
@@ -183,8 +200,14 @@ Token FileTokenizer::parse_number(unsigned int base, Location location) {
         if (size == 0 && digit == 0 && (base == 2 || base == 16)) {
             leading_zero = true;
         }
-        size += 1;
-        integer = integer * base + digit;
+        if (in_fraction) {
+            size += 10;
+            floating += double(digit) / double(size);
+        }
+        else {
+         size += 1;
+            integer = integer * base + digit;
+        }
     }
 }
 

@@ -42,10 +42,10 @@ void VisibilityHelper::setup(FileTokenizer& tokenizer, bool use_directives) {
 }
 
 std::optional<Visibility> VisibilityHelper::from_token(Token token) {
-    if (token == token_local_directive) {
+    if (token == token_local_directive || token == token_local_name) {
         return Visibility::LOCAL;
     }
-    else if (token == token_global_directive) {
+    else if (token == token_global_directive || token == token_global_name) {
         return Visibility::GLOBAL;
     }
     else {
