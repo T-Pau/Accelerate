@@ -76,6 +76,7 @@ public:
     void remove_local_constants();
     void serialize(std::ostream& stream) const;
     void set_target(const Target* new_target);
+    std::shared_ptr<Environment> environment(Visibility visibility);
 
     std::shared_ptr<Environment> global_environment;
     std::shared_ptr<Environment> local_environment;

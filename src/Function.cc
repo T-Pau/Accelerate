@@ -35,7 +35,7 @@ std::ostream& operator<<(std::ostream& stream, const Function& function) {
 }
 
 
-Expression Function::call(const std::vector<Expression>& arguments) {
+Expression Function::call(const std::vector<Expression>& arguments) const {
     return definition.evaluated(bind(arguments)).value_or(definition);
 }
 

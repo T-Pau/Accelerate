@@ -270,6 +270,14 @@ Object* ObjectFile::insert_object(std::unique_ptr<Object> object) {
 }
 
 void ObjectFile::insert_function(std::unique_ptr<Function> function) {
+    if (function->visibility == Visibility::SCOPE) {
+        return;
+    }
+    auto fuck = environment(function->visibility);
+    auto fuck2 = function.get();
+    auto fuck3 = function->name.as_symbol();
+    fuck->add(fuck3, fuck2);
+    environment(function->visibility)->add(function->name.as_symbol(), function.get());
     functions[function->name.as_symbol()] = std::move(function);
     // TODO: add to environment
 }
@@ -310,4 +318,15 @@ void ObjectFile::import(ObjectFile *library) {
 void ObjectFile::set_target(const Target* new_target) {
     // TODO: check compatibility
     target = new_target;
+}
+
+std::shared_ptr<Environment> ObjectFile::environment(Visibility visibility) {
+    switch (visibility) {
+        case Visibility::SCOPE:
+            return {}; // TODO: throw?
+        case Visibility::LOCAL:
+            return local_environment;
+        case Visibility::GLOBAL:
+            return global_environment;
+    }
 }

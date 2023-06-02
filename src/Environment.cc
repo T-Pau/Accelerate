@@ -54,3 +54,34 @@ void Environment::replace(const std::shared_ptr<Environment>& old_next, const st
         }
     }
 }
+
+const Function* Environment::get_function(Symbol name) const {
+    auto it = functions.find(name);
+
+    if (it != functions.end()) {
+        return it->second;
+    }
+    for (auto& environment: next) {
+        auto function = environment->get_function(name);
+        if (function) {
+            return function;
+        }
+    }
+    return nullptr;
+}
+
+const Macro* Environment::get_macro(Symbol name) const {
+    auto it = macros.find(name);
+
+    if (it != macros.end()) {
+        return it->second;
+    }
+    for (auto& environment: next) {
+        auto macro = environment->get_macro(name);
+        if (macro) {
+            return macro;
+        }
+    }
+    return nullptr;
+}
+

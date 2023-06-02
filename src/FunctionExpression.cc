@@ -4,7 +4,9 @@
 
 #include "FunctionExpression.h"
 
+#include "EvaluationContext.h"
 #include "Expression.h"
+#include "Function.h"
 
 void FunctionExpression::serialize_sub(std::ostream &stream) const {
     stream << name << "(";
@@ -31,6 +33,28 @@ Expression FunctionExpression::create(Symbol name, const std::vector<Expression>
 }
 
 std::optional<Expression> FunctionExpression::evaluated(const EvaluationContext& context) const {
-    // TODO: implement
-    return {};
+    std::vector<Expression> new_arguments;
+    auto changed = false;
+    for (auto& argument: arguments) {
+        auto new_argument = argument.evaluated(context);
+        if (new_argument) {
+            new_arguments.emplace_back(*new_argument);
+            changed = true;
+        }
+        else {
+            new_arguments.emplace_back(argument);
+        }
+    }
+
+    auto function = context.environment->get_function(name);
+    if (!function) {
+        if (changed) {
+            return Expression(name, new_arguments);
+        }
+        else {
+            return {};
+        }
+    }
+
+    return function->call(new_arguments);
 }
