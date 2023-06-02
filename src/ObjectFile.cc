@@ -257,13 +257,12 @@ std::vector<Object *> ObjectFile::all_objects() {
 }
 
 Object* ObjectFile::insert_object(std::unique_ptr<Object> object) {
-    auto object_name = object->name;
-    object->owner = this;
-    auto pair = objects.insert({object_name.as_symbol(), std::move(object)});
+    auto own_object = object.get();
+    auto pair = objects.insert({own_object->name.as_symbol(), std::move(object)});
     if (!pair.second) {
-        throw ParseException(object_name, "redefinition of object %s", object_name.as_string().c_str());
+        throw ParseException(own_object->name, "redefinition of object %s", own_object->name.as_string().c_str());
     }
-    auto own_object = pair.first->second.get();
+    own_object->set_owner(this);
     add_to_environment(own_object);
     return own_object;
 

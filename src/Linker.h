@@ -40,17 +40,24 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 class Linker {
 public:
+    enum Mode {
+        COMPILE,
+        CREATE_LIBRARY,
+        LINK
+    };
+
     Linker() = default;
     explicit Linker(const Target* target_) {set_target(target_);}
 
     void add_file(const std::shared_ptr<ObjectFile>& file) {program->add_object_file(file);}
-    void add_library(std::shared_ptr<ObjectFile> library) {libraries.emplace_back(std::move(library));}
+    void add_library(std::shared_ptr<ObjectFile> library);
     void set_target(const Target* new_target);
 
     void link();
     void output(const std::string& file_name);
 
     const Target* target = nullptr;
+    Mode mode = LINK;
 
     std::shared_ptr<ObjectFile> program = std::make_shared<ObjectFile>();
 

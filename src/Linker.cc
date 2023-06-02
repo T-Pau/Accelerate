@@ -159,3 +159,10 @@ void Linker::set_target(const Target* new_target) {
     memory = target->map.initialize_memory();
     Encoding::default_byte_order = target->cpu->byte_order;
 }
+
+void Linker::add_library(std::shared_ptr<ObjectFile> library) {
+    if (mode != COMPILE) {
+        program->import(library.get());
+    }
+    libraries.emplace_back(std::move(library));
+}

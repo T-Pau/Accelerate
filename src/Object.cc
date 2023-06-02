@@ -143,3 +143,13 @@ SizeRange Object::size_range() const {
         return body.size_range();
     }
 }
+
+void Object::set_owner(ObjectFile* new_owner) {
+    if (new_owner == owner) {
+        return;
+    }
+    if (owner) {
+        environment->replace(owner->local_environment, new_owner->local_environment);
+    }
+    owner = new_owner;
+}

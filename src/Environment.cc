@@ -47,7 +47,7 @@ std::optional<Expression> Environment::operator[](Symbol name) const {
 }
 
 void Environment::replace(const std::shared_ptr<Environment>& old_next, const std::shared_ptr<Environment>& new_next) {
-    for (auto environment: next) {
+    for (auto& environment: next) {
         if (environment == old_next) {
             environment = new_next;
             return;

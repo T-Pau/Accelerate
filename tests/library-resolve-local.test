@@ -1,0 +1,48 @@
+description Test instruction with 2 variants, known which will be used
+arguments --create-library --target 6502 -o a.lib a.s b.s c64.lib
+file a.s <inline>
+.section zero_page
+.global ptr .reserve 2
+address = ptr + 1
+end-of-inline-data
+file b.s <inline>
+.section code
+value = COLOR_BLACK
+.global init {
+    lda #value
+    sta address
+}
+end-of-inline-data
+file c64.lib <inline>
+.format_version 1.0
+.target "6502"
+.constant COLOR_BLACK {
+    visibility: global
+    value: $00
+}
+end-of-inline-data
+file a.lib {} <inline>
+.format_version 1.0
+.target "6502"
+.import "c64.lib"
+.constant address {
+    visibility: local
+    value: (ptr+$01)
+}
+.constant value {
+    visibility: local
+    value: $00
+}
+.object init {
+    visibility: global
+    section: code
+    body <
+        .data $a9, $00, $85, (ptr+$01):1
+    >
+}
+.object ptr {
+    visibility: global
+    section: zero_page
+    reserve: 2
+}
+end-of-inline-data
