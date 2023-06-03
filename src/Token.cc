@@ -59,6 +59,8 @@ const Token Token::pipe = Token(Token::PUNCTUATION, "|");
 const Token Token::plus = Token(Token::PUNCTUATION, "+");
 const Token Token::slash = Token(Token::PUNCTUATION, "/");
 const Token Token::star = Token(Token::PUNCTUATION, "*");
+const Token Token::square_close(Token::PUNCTUATION, "]");
+const Token Token::square_open(Token::PUNCTUATION, "[");
 const Token Token::tilde = Token(Token::PUNCTUATION, "~");
 
 const char* Token::type_name(Type type) {

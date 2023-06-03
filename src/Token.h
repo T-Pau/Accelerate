@@ -113,6 +113,8 @@ public:
     static const Token pipe;
     static const Token plus;
     static const Token slash;
+    static const Token square_close;
+    static const Token square_open;
     static const Token star;
     static const Token tilde;
 

@@ -35,25 +35,11 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 bool ParsedValue::initialized = false;
 TokenGroup ParsedValue::start_group;
-Token ParsedValue::token_angle_close;
-Token ParsedValue::token_angle_open;
-Token ParsedValue::token_colon;
-Token ParsedValue::token_curly_close;
-Token ParsedValue::token_curly_open;
-Token ParsedValue::token_square_close;
-Token ParsedValue::token_square_open;
 
 void ParsedValue::initialize() {
     if (!initialized) {
-        token_angle_close = Token(Token::PUNCTUATION, ">");
-        token_angle_open = Token(Token::PUNCTUATION, "<");
-        token_colon = Token(Token::PUNCTUATION, ":");
-        token_curly_close = Token(Token::PUNCTUATION, "}");
-        token_curly_open = Token(Token::PUNCTUATION, "{");
-        token_square_close = Token(Token::PUNCTUATION, "]");
-        token_square_open = Token(Token::PUNCTUATION, "[");
 
-        start_group = TokenGroup({}, {token_angle_open, token_colon, token_curly_open, token_square_open}, "object start");
+        start_group = TokenGroup({}, {Token::less, Token::colon, Token::curly_open, Token::square_open}, "object start");
 
         initialized = true;
     }
@@ -67,16 +53,16 @@ std::shared_ptr<ParsedValue> ParsedValue::parse(Tokenizer &tokenizer) {
 
     std::shared_ptr<ParsedValue> object;
 
-    if (token == token_angle_open) {
+    if (token == Token::less) {
         object = std::make_shared<ParsedBody>(tokenizer);
     }
-    else if (token == token_colon) {
+    else if (token == Token::colon) {
         object = std::make_shared<ParsedScalar>(tokenizer);
     }
-    else if (token == token_curly_open) {
+    else if (token == Token::curly_open) {
         object = std::make_shared<ParsedDictionary>(tokenizer);
     }
-    else if (token == token_square_open) {
+    else if (token == Token::square_open) {
         object = std::make_shared<ParsedArray>(tokenizer);
     }
     else {
@@ -143,7 +129,7 @@ ParsedArray::ParsedArray(Tokenizer &tokenizer) {
     while (true) {
         auto token = tokenizer.next();
 
-        if (token == token_square_close) {
+        if (token == Token::square_close) {
             break;
         }
 
@@ -158,7 +144,7 @@ ParsedDictionary::ParsedDictionary(Tokenizer &tokenizer) {
     tokenizer.skip(Token::NEWLINE);
     while (true) {
         auto token = tokenizer.next();
-        if (token == token_curly_close) {
+        if (token == Token::curly_close) {
             break;
         }
 
@@ -198,4 +184,5 @@ ParsedBody::ParsedBody(Tokenizer &tokenizer) {
     auto parser = BodyParser(tokenizer);
 
     body = parser.parse();
+    tokenizer.skip(Token::NEWLINE);
 }

@@ -17,6 +17,8 @@ void Macro::initialize() {
 
 
 Macro::Macro(Token name, const std::shared_ptr<ParsedValue>& definition) : Callable(name, definition) {
+    initialize();
+
     auto parameters = definition->as_dictionary();
 
     body = (*parameters)[token_body]->as_body()->body;

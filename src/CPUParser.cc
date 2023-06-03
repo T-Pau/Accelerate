@@ -286,7 +286,7 @@ void CPUParser::parse_byte_order() {
 void CPUParser::parse_instruction() {
     Token name = tokenizer.next();
 
-    if (name == ParsedValue::token_curly_open) {
+    if (name == Token::curly_open) {
         tokenizer.unget(name);
         name = Token(Token::NAME, name.location, Symbol());
     }

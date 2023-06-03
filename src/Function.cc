@@ -20,7 +20,7 @@ void Function::initialize() {
 
 Function::Function(Token name, const std::shared_ptr<ParsedValue>& definition_) : Callable(name, definition_) {
     auto parameters = definition_->as_dictionary();
-
+    initialize();
     auto tokenizer = SequenceTokenizer((*parameters)[token_definition]->as_scalar()->tokens);
     definition = Expression(tokenizer);
     if (!tokenizer.ended()) {

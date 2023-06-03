@@ -128,7 +128,7 @@ void ObjectFile::serialize(std::ostream &stream) const {
     }
 }
 
-void ObjectFile::insert_constant(std::unique_ptr<Constant> constant) {
+void ObjectFile::add_constant(std::unique_ptr<Constant> constant) {
     auto constant_name = constant->name;
 
     auto pair = constants.insert({constant_name.as_symbol(), std::move(constant)});
@@ -157,7 +157,7 @@ void ObjectFile::add_object_file(const std::shared_ptr<ObjectFile>& file) {
     for (auto& pair: file->macros) {
         add_macro(std::move(pair.second));
     }
-    file->functions.clear();
+    file->macros.clear();
 
     for (auto& pair: file->functions) {
         add_function(std::move(pair.second));
@@ -165,7 +165,6 @@ void ObjectFile::add_object_file(const std::shared_ptr<ObjectFile>& file) {
     file->functions.clear();
 
     for (auto& pair: file->objects) {
-        pair.second->environment->replace(pair.second->owner->local_environment, local_environment);
         add_object(std::move(pair.second));
     }
     file->objects.clear();
@@ -268,22 +267,22 @@ Object* ObjectFile::insert_object(std::unique_ptr<Object> object) {
 
 }
 
-void ObjectFile::insert_function(std::unique_ptr<Function> function) {
+void ObjectFile::add_function(std::unique_ptr<Function> function) {
     if (function->visibility == Visibility::SCOPE) {
+        // TODO: error
         return;
     }
-    auto fuck = environment(function->visibility);
-    auto fuck2 = function.get();
-    auto fuck3 = function->name.as_symbol();
-    fuck->add(fuck3, fuck2);
     environment(function->visibility)->add(function->name.as_symbol(), function.get());
     functions[function->name.as_symbol()] = std::move(function);
-    // TODO: add to environment
 }
 
-void ObjectFile::insert_macro(std::unique_ptr<Macro> macro) {
+void ObjectFile::add_macro(std::unique_ptr<Macro> macro) {
+    if (macro->visibility == Visibility::SCOPE) {
+        // TODO: error
+        return;
+    }
+    environment(macro->visibility)->add(macro->name.as_symbol(), macro.get());
     macros[macro->name.as_symbol()] = std::move(macro);
-    // TODO: add to environment
 }
 
 void ObjectFile::Constant::serialize(std::ostream &stream) const {
@@ -319,7 +318,7 @@ void ObjectFile::set_target(const Target* new_target) {
     target = new_target;
 }
 
-std::shared_ptr<Environment> ObjectFile::environment(Visibility visibility) {
+std::shared_ptr<Environment> ObjectFile::environment(Visibility visibility) const {
     switch (visibility) {
         case Visibility::SCOPE:
             return {}; // TODO: throw?

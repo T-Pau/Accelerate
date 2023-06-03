@@ -74,18 +74,10 @@ public:
 
     Location location;
 
-    static Token token_curly_open;
-    static Token token_curly_close;
-
 protected:
     static void initialize();
     static bool initialized;
     static TokenGroup start_group;
-    static Token token_angle_close;
-    static Token token_angle_open;
-    static Token token_colon;
-    static Token token_square_close;
-    static Token token_square_open;
 };
 
 

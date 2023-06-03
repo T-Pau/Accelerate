@@ -62,9 +62,9 @@ public:
 
     ObjectFile() noexcept;
 
-    void add_constant(std::unique_ptr<Constant> constant) {insert_constant(std::move(constant));}
-    void add_function(std::unique_ptr<Function> function) {insert_function(std::move(function));}
-    void add_macro(std::unique_ptr<Macro> macro) {insert_macro(std::move(macro));}
+    void add_constant(std::unique_ptr<Constant> constant);
+    void add_function(std::unique_ptr<Function> function);
+    void add_macro(std::unique_ptr<Macro> macro);
     void add_object(std::unique_ptr<Object> object) {(void)insert_object(std::move(object));}
     void add_object_file(const std::shared_ptr<ObjectFile>& file);
     [[nodiscard]] std::vector<Object*> all_objects();
@@ -76,7 +76,7 @@ public:
     void remove_local_constants();
     void serialize(std::ostream& stream) const;
     void set_target(const Target* new_target);
-    std::shared_ptr<Environment> environment(Visibility visibility);
+    std::shared_ptr<Environment> environment(Visibility visibility) const;
 
     std::shared_ptr<Environment> global_environment;
     std::shared_ptr<Environment> local_environment;
@@ -88,9 +88,6 @@ public:
     static const unsigned int format_version_minor;
 
 private:
-    void insert_constant(std::unique_ptr<Constant> constant);
-    void insert_function(std::unique_ptr<Function> function);
-    void insert_macro(std::unique_ptr<Macro> macro);
     Object* insert_object(std::unique_ptr<Object> object);
     void add_to_environment(const Constant& constant) { add_to_environment(constant.name.as_symbol(), constant.visibility, constant.value);}
     void add_to_environment(Object* object);

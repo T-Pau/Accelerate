@@ -31,8 +31,6 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "UnaryExpression.h"
 
-#include "ValueExpression.h"
-
 Expression UnaryExpression::create(Expression::UnaryOperation operation, Expression operand) {
     std::shared_ptr<BaseExpression> node;
 
@@ -63,6 +61,10 @@ Expression UnaryExpression::create(Expression::UnaryOperation operation, Express
 
             case Expression::UnaryOperation::BANK_BYTE:
                 value = (value >> 16) & 0xff;
+                break;
+
+            case Expression::NOT:
+                value = Value(!value);
                 break;
         }
 
@@ -109,6 +111,10 @@ void UnaryExpression::serialize_sub(std::ostream &stream) const {
             stream << '-';
             break;
 
+        case Expression::UnaryOperation::NOT:
+            stream << '!';
+            break;
+
         case Expression::UnaryOperation::PLUS:
             break;
     }
@@ -125,6 +131,7 @@ std::optional<Value> UnaryExpression::minimum_value() const {
             return Value(static_cast<uint64_t>(0));
 
         case Expression::UnaryOperation::BITWISE_NOT:
+        case Expression::UnaryOperation::NOT:
             return {};
 
         case Expression::UnaryOperation::MINUS: {
@@ -151,6 +158,7 @@ std::optional<Value> UnaryExpression::maximum_value() const {
             return Value(static_cast<uint64_t>(0xff));
 
         case Expression::UnaryOperation::BITWISE_NOT:
+        case Expression::UnaryOperation::NOT:
             return {};
 
         case Expression::UnaryOperation::MINUS: {
