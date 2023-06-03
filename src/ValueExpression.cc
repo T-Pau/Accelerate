@@ -42,14 +42,32 @@ ValueExpression::ValueExpression(const Token &token) {
 
 
 void ValueExpression::serialize_sub(std::ostream &stream) const {
-    auto width = static_cast<int>(value()->default_size()) * 2;
-    uint64_t v;
-    if (value()->is_signed()) {
-        stream << "-";
-        v = -value()->signed_value();
+    switch (value()->type()) {
+        case Value::BOOLEAN:
+            stream << (value()->boolean_value() ? "true" : "false");
+            break;
+
+        case Value::FLOAT:
+            stream << value()->float_value();
+            break;
+
+        case Value::SIGNED:
+        case Value::UNSIGNED: {
+            auto width = static_cast<int>(value()->default_size()) * 2;
+            uint64_t v;
+            if (value()->is_signed()) {
+                stream << "-";
+                v = -value()->signed_value();
+            }
+            else {
+                v = value()->unsigned_value();
+            }
+            stream << "$" << std::setfill('0') << std::setw(width) << std::hex << v << std::dec;
+            break;
+        }
+
+        case Value::VOID:
+            stream << "void";
+            break;
     }
-    else {
-        v = value()->unsigned_value();
-    }
-    stream << "$" << std::setfill('0') << std::setw(width) << std::hex << v << std::dec;
 }

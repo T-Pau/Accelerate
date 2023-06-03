@@ -1,0 +1,91 @@
+description Test instruction with 2 variants, known which will be used
+arguments --create-library --target 6502 -o a.lib a.s b.s c.lib
+file a.s <inline>
+other_address = $2002
+other_file address {
+    lda #0
+    sta address
+}
+end-of-inline-data
+file b.s <inline>
+same_address = $1001
+same_file address {
+    ldx #1
+    stx address
+}
+.section code
+.global init {
+    same_file same_address
+    other_file other_address
+    library library_address
+    same_file unknown_address
+    unknown same_address
+    unknown unknown_address
+}
+end-of-inline-data
+file c.lib <inline>
+.format_version 1.0
+.target "6502"
+.constant library_address {
+    visibility: global
+    value: $3003
+}
+.macro library {
+    visibility: global
+    arguments: address
+    body <
+        .data $a0, $02, $8c, address:2
+    >
+}
+end-of-inline-data
+file a.lib {} <inline>
+.format_version 1.0
+.target "6502"
+.import "c.lib"
+.constant other_address {
+    visibility: local
+    value: $2002
+}
+.constant same_address {
+    visibility: local
+    value: $1001
+}
+.macro other_file {
+    visibility: local
+    arguments: address
+    body <
+        .data $a9, $00
+        .if .in_range($00, $ff, address)
+          .data $85, address:1
+        .else
+          .data $8d, address:2
+        .end
+    >
+}
+.macro same_file {
+    visibility: local
+    arguments: address
+    body <
+        .data $a2, $01
+        .if .in_range($00, $ff, address)
+          .data $86, address:1
+        .else
+          .data $8e, address:2
+        .end
+    >
+}
+.object init {
+    visibility: global
+    section: code
+    body <
+        .data $a2, $01, $8e, $1001, $a9, $00, $8d, $2002, $a0, $02, $8c, $3003, $a2, $01
+        .if .in_range($00, $ff, unknown_address)
+          .data $86, unknown_address:1
+        .else
+          .data $8e, unknown_address:2
+        .end
+        unknown $1001
+        unknown unknown_address
+    >
+}
+end-of-inline-data

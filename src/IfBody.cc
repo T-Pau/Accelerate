@@ -51,7 +51,7 @@ std::optional<Body> IfBody::evaluated(const EvaluationContext& context) const {
         auto new_expression = clause.condition;
         auto new_body = clause.body;
         changed = new_expression.evaluate(context) || changed;
-        if (new_clauses.empty() && new_expression.has_value() && new_expression.value()) {
+        if (new_clauses.empty() && new_expression.has_value() && *new_expression.value()) {
             new_body.evaluate(context);
             return new_body;
         }
@@ -61,7 +61,7 @@ std::optional<Body> IfBody::evaluated(const EvaluationContext& context) const {
     }
 
     if (changed) {
-        return Body(std::make_shared<IfBody>(new_clauses));
+        return Body(new_clauses);
     }
     else {
         return {};
