@@ -39,20 +39,20 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 class BlockBody: public BodyElement {
 public:
     BlockBody() = default;
-    explicit BlockBody(std::vector<Body> elements);
+    explicit BlockBody(std::vector<Body> block);
     static Body create(const std::vector<Body>& elements);
 
     [[nodiscard]] std::optional<Body> append_sub(Body body, Body element) override;
-    [[nodiscard]] std::shared_ptr<BodyElement> clone() const override {return std::make_shared<BlockBody>(elements);}
-    [[nodiscard]] bool empty() const override {return elements.empty();}
+    [[nodiscard]] std::shared_ptr<BodyElement> clone() const override {return std::make_shared<BlockBody>(block);}
+    [[nodiscard]] bool empty() const override {return block.empty();}
     void encode(std::string &bytes, const Memory* memory) const override;
     [[nodiscard]] std::optional<Body> evaluated(const EvaluationContext& context) const override;
-    [[nodiscard]] std::optional<Body> back() const {if (elements.empty()) {return {};} else {return elements.back();}}
+    [[nodiscard]] std::optional<Body> back() const {if (block.empty()) {return {};} else {return block.back();}}
 
     void serialize(std::ostream& stream, const std::string& prefix) const override;
 
 private:
-    std::vector<Body> elements;
+    std::vector<Body> block;
 
     void append_element(const Body& element);
 };

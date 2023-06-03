@@ -33,8 +33,8 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "DataBody.h"
 
-BlockBody::BlockBody(std::vector<Body> elements_): elements(std::move(elements_)) {
-    for (const auto& element: elements) {
+BlockBody::BlockBody(std::vector<Body> block_): block(std::move(block_)) {
+    for (const auto& element: block) {
         size_range_ += element.size_range();
     }
 }
@@ -47,12 +47,12 @@ Body BlockBody::create(const std::vector<Body>& elements) {
         block->append_element(element);
     }
 
-    switch (block->elements.size()) {
+    switch (block->block.size()) {
         case 0:
             return {};
 
         case 1:
-            return block->elements.front();
+            return block->block.front();
 
         default:
             return Body(block);
@@ -70,7 +70,7 @@ std::optional<Body> BlockBody::evaluated(const EvaluationContext& context) const
     auto changed = false;
     auto current_offset = context.offset;
 
-    for (auto& element: elements) {
+    for (auto& element: block) {
         auto new_element = element.evaluated(context.setting_offset(current_offset));
         if (new_element) {
             changed = true;
@@ -92,7 +92,7 @@ std::optional<Body> BlockBody::evaluated(const EvaluationContext& context) const
 }
 
 void BlockBody::serialize(std::ostream &stream, const std::string& prefix) const {
-    for (auto& element: elements) {
+    for (auto& element: block) {
         element.serialize(stream, prefix);
     }
 }
@@ -107,7 +107,7 @@ std::optional<Body> BlockBody::append_sub(Body body, Body element) {
 }
 
 void BlockBody::encode(std::string &bytes, const Memory* memory) const {
-    for (auto& element: elements) {
+    for (auto& element: block) {
         element.encode(bytes, memory);
     }
 }
@@ -117,26 +117,27 @@ void BlockBody::append_element(const Body &element) {
         return;
     }
     if (element.is_block()) {
-        auto block = element.as_block();
-        if (!elements.empty() && elements.back().is_data() && block->elements.front().is_data()) {
-            auto last_data = elements.back().as_data();
-            auto first_data = block->elements.front().as_data();
-            elements.pop_back();
-            elements.emplace_back(last_data->appending(first_data));
-            elements.insert(elements.end(), block->elements.begin() + 1, block->elements.end());
+        auto new_block = element.as_block();
+        if (!block.empty() && block.back().is_data() && new_block->block.front().is_data()) {
+            auto last_data = block.back().as_data();
+            auto first_data = new_block->block.front().as_data();
+            block.pop_back();
+            block.emplace_back(last_data->appending(first_data));
+            block.insert(block.end(), new_block->block.begin() + 1, new_block->block.end());
         }
         else {
-            elements.insert(elements.end(), block->elements.begin(), block->elements.end());
+            block.insert(block.end(), new_block->block.begin(), new_block->block.end());
         }
     }
-    else if (element.is_data() && !elements.empty() && elements.back().is_data()) {
-        auto last_data = elements.back().as_data();
+    else if (element.is_data() && !block.empty() && block.back().is_data()) {
+        auto last = block.back(); // needed to keep alive after we pop it off block.
+        auto last_data = block.back().as_data();
         auto new_data = element.as_data();
-        elements.pop_back();
-        elements.emplace_back(last_data->appending(new_data));
+        block.pop_back();
+        block.emplace_back(last_data->appending(new_data));
     }
     else {
-        elements.emplace_back(element);
+        block.emplace_back(element);
     }
     size_range_ += element.size_range();
 }
