@@ -1,0 +1,58 @@
+description Test function expansion
+arguments --create-library --target 6502 -o a.lib a.s b.s c.lib
+file a.s <inline>
+other_function(argument) = $2000 + argument
+other_value = 2
+end-of-inline-data
+file b.s <inline>
+same_function(argument) = $1000 + argument
+same_value = 1
+.section code
+.global init {
+    .data same_function(same_value), other_function(other_value), library_function(library_value)
+    .data same_function(unknown_value), unknown_function(same_value), unknown_function(unknown_value)
+}
+end-of-inline-data
+file c.lib <inline>
+.format_version 1.0
+.target "6502"
+.constant library_value {
+    visibility: global
+    value: $03
+}
+.function library_function {
+    visibility: global
+    arguments: offset
+    definition: ($3000+offset)
+}
+end-of-inline-data
+file a.lib {} <inline>
+.format_version 1.0
+.target "6502"
+.import "c.lib"
+.constant other_value {
+    visibility: local
+    value: $02
+}
+.constant same_value {
+    visibility: local
+    value: $01
+}
+.function other_function {
+    visibility: local
+    arguments: argument
+    definition: ($2000+argument)
+}
+.function same_function {
+    visibility: local
+    arguments: argument
+    definition: ($1000+argument)
+}
+.object init {
+    visibility: global
+    section: code
+    body <
+        .data $1001, $2002, $3003, ($1000+unknown_value), unknown_function($01), unknown_function(unknown_value)
+    >
+}
+end-of-inline-data

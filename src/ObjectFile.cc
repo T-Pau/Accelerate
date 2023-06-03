@@ -310,7 +310,7 @@ void ObjectFile::import(ObjectFile *library) {
     }
     // TODO: detect loops
     imported_libraries.insert(library);
-    global_environment->add_next(library->global_environment);
+    local_environment->add_next(library->global_environment);
 }
 
 void ObjectFile::set_target(const Target* new_target) {

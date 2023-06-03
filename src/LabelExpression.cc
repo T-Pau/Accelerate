@@ -97,7 +97,7 @@ std::optional<Value> LabelExpression::value() const {
 
 std::optional<Value> LabelExpression::minimum_value() const {
     if (!label) {
-        return {};
+        return Value(uint64_t(0));
     }
     return Value(label->offset.minimum);
 }
