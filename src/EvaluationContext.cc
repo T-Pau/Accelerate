@@ -34,5 +34,6 @@ EvaluationContext EvaluationContext::setting_offset(SizeRange new_offset) const 
 EvaluationContext EvaluationContext::making_conditional() const {
     auto new_context = *this;
     new_context.conditional = true;
+    new_context.conditional_in_scope = true;
     return new_context;
 }

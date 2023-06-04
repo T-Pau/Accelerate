@@ -401,10 +401,10 @@ void BodyParser::parse_unnamed_label() {
 void BodyParser::handle_name(Visibility visibility, Token name) {
     auto token = tokenizer.next();
     if (token == Token::colon) {
-        parse_label(visibility, token);
+        parse_label(visibility, name);
     }
     else if (token == Token::equals) {
-        parse_assignment(visibility, token);
+        parse_assignment(visibility, name);
     }
     else {
         tokenizer.unget(token);

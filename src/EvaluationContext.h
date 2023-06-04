@@ -19,7 +19,7 @@ class EvaluationContext {
 public:
     EvaluationContext(): environment(std::make_shared<Environment>()) {}
     explicit EvaluationContext(std::shared_ptr<Environment> environment, bool shallow = false): environment(std::move(environment)), shallow(shallow) {}
-    explicit EvaluationContext(Symbol object_name, ObjectFile* object_file, std::shared_ptr<Environment> environment, bool conditional, SizeRange offset): environment(std::move(environment)), object_name(object_name), conditional(conditional), conditional_in_scope(conditional), offset(offset) {}
+    explicit EvaluationContext(Symbol object_name, ObjectFile* object_file, std::shared_ptr<Environment> environment, bool conditional, SizeRange offset): environment(std::move(environment)), object_name(object_name), object_file(object_file), conditional(conditional), conditional_in_scope(conditional), offset(offset) {}
     EvaluationContext(const EvaluationContext& context) = default;
 
     [[nodiscard]] EvaluationContext evaluating_variable(Symbol variable) const;

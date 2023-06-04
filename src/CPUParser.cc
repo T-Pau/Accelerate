@@ -465,9 +465,13 @@ AddressingMode::Notation CPUParser::parse_addressing_mode_notation(const Address
 
 
 Symbol CPUParser::argument_symbol(Symbol symbol) {
+#if 0
+    return symbol;
+#else
     auto name = symbol.str();
     if (name.front() == '.') {
         return symbol;
     }
     return Symbol("$" + name);
+#endif
 }

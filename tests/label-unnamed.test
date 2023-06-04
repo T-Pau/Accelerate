@@ -1,0 +1,26 @@
+description Test function expansion
+arguments -c --target 6502 a.s
+file a.s <inline>
+.section code
+test {
+    nop
+    bne :+
+    nop
+:   nop
+    bne :-
+    nop
+}
+end-of-inline-data
+file a.o {} <inline>
+.format_version 1.0
+.target "6502"
+.object test {
+    visibility: local
+    section: code
+    body <
+        .data $ea, $d0, $01:-1, $ea
+      :
+        .data $ea, $d0, -$03, $ea
+    >
+}
+end-of-inline-data

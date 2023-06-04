@@ -28,5 +28,5 @@ AssignmentBody::serialize(std::ostream &stream, const std::string &prefix) const
     if (visibility != Visibility::SCOPE) {
         stream << "." << visibility << " ";
     }
-    stream << name << " = " << value;
+    stream << name << " = " << value << std::endl;
 }

@@ -125,7 +125,7 @@
 }
 
 .instruction and {
-        quad_zero_page_z_indexed: $32
+    quad_zero_page_z_indexed: $32
 }
 
 .instruction andq {
