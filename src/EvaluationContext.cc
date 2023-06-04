@@ -6,6 +6,9 @@
 
 #include <utility>
 
+#include "Exception.h"
+#include "Object.h"
+
 EvaluationContext EvaluationContext::evaluating_variable(Symbol variable) const {
     auto new_context = *this;
     new_context.evaluating_variables.insert(variable);
@@ -36,4 +39,15 @@ EvaluationContext EvaluationContext::making_conditional() const {
     new_context.conditional = true;
     new_context.conditional_in_scope = true;
     return new_context;
+}
+
+EvaluationContext::EvaluationContext(Object* object, std::shared_ptr<Environment> environment_, SizeRange offset, bool conditional, bool shallow): environment(std::move(environment_)), object(object), shallow(shallow), offset(offset), conditional(conditional), conditional_in_scope(conditional) {
+    if (!environment) {
+        if (object) {
+            environment = object->environment;
+        }
+        else {
+            environment = std::make_shared<Environment>();
+        }
+    }
 }

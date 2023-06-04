@@ -32,14 +32,15 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "VariableExpression.h"
 
 #include "EvaluationContext.h"
+#include "Object.h"
 #include "ParseException.h"
 
 std::optional<Expression> VariableExpression::evaluated(const EvaluationContext& context) const {
     if (symbol == Token::colon_minus.as_symbol() || symbol == Token::colon_plus.as_symbol()) {
-        if (context.object_name.empty()) {
+        if (!context.object) {
             return {};
         }
-        return Expression(Expression(context.object_name), Expression::BinaryOperation::ADD, Expression(location, symbol == Token::colon_minus.as_symbol() ? LabelExpressionType::PREVIOUS_UNNAMED : LabelExpressionType::NEXT_UNNAMED));
+        return Expression(Expression(context.object->name), Expression::BinaryOperation::ADD, Expression(location, symbol == Token::colon_minus.as_symbol() ? LabelExpressionType::PREVIOUS_UNNAMED : LabelExpressionType::NEXT_UNNAMED));
     }
     if (context.evaluating(symbol)) {
         throw Exception("circular definition of %s", symbol.c_str());

@@ -176,7 +176,7 @@ void Assembler::parse_symbol(Visibility visibility, const Token &name) {
         }
         else if (token == Token::curly_open) {
             // TODO: error if .reserved
-            object->body = BodyParser(tokenizer, object->name.as_symbol(), target->cpu, object_file.get(), file_environment).parse();
+            object->body = BodyParser(tokenizer, object, target->cpu, file_environment).parse();
             break;
         }
         // TODO: parameters

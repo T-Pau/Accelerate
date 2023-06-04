@@ -15,6 +15,7 @@
 #include "LabelExpression.h"
 #include "TokenNode.h"
 #include "MemoryBody.h"
+#include "ObjectNameExpression.h"
 
 const Symbol BodyParser::symbol_pc = Symbol(".pc");
 const Token BodyParser::token_data = Token(Token::DIRECTIVE, "data");
@@ -84,7 +85,7 @@ Body BodyParser::parse() {
                 case Token::PUNCTUATION:
                     if (token == end_token) {
                         // TODO: check that ifs is empty
-                        body.evaluate(object_name, object_file, environment);
+                        body.evaluate(object, environment);
                         return body;
                     }
                     else if (token == Token::colon) {
@@ -123,10 +124,10 @@ Body BodyParser::parse() {
 
 void BodyParser::add_constant(Visibility visibility, Token name, const Expression& value) {
     if (visibility != Visibility::SCOPE) {
-        if (!object_file) {
+        if (!object) {
             throw ParseException(name, "unsupported visibility");
         }
-        object_file->add_constant(std::make_unique<ObjectFile::Constant>(name, visibility, value));
+        object->owner->add_constant(std::make_unique<ObjectFile::Constant>(name, visibility, value));
     }
     environment->add(name.as_symbol(), value);
 }
@@ -146,8 +147,7 @@ std::shared_ptr<Label> BodyParser::get_label(bool& is_anonymous) {
 
 
 Expression BodyParser::get_pc(std::shared_ptr<Label> label) const {
-    // TODO: include correct location
-    return {Expression(object_name), Expression::BinaryOperation::ADD, Expression(Location(), std::move(label))};
+    return {ObjectNameExpression::create(object), Expression::BinaryOperation::ADD, Expression(Location(), std::move(label))};
 }
 
 

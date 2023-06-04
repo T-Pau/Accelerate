@@ -52,7 +52,7 @@ public:
     void evaluate(std::shared_ptr<Environment> environment);
     [[nodiscard]] bool is_reservation() const {return reservation > 0;}
     [[nodiscard]] bool empty() const {return !is_reservation() && body.empty();}
-    void evaluate() {body.evaluate(name.as_symbol(), owner, environment, false);}
+    void evaluate() {body.evaluate(this);}
     [[nodiscard]] bool has_address() const {return address.has_value();}
     void set_owner(ObjectFile* new_owner);
     [[nodiscard]] SizeRange size_range() const;

@@ -8,7 +8,7 @@
 
 std::optional<Body>
 AssignmentBody::evaluated(const EvaluationContext &context) const {
-    if (context.conditional_in_scope || !context.object_file) {
+    if (context.conditional_in_scope || !context.object) {
         return {};
     }
     if (visibility == Visibility::SCOPE) {
@@ -16,7 +16,7 @@ AssignmentBody::evaluated(const EvaluationContext &context) const {
     }
     else {
         // TODO: this can't be written out if label is not resolved yet.
-        context.object_file->add_constant(std::make_unique<ObjectFile::Constant>(Token(Token::NAME, {}, name), visibility, value));
+        context.object->owner->add_constant(std::make_unique<ObjectFile::Constant>(Token(Token::NAME, {}, name), visibility, value));
     }
 
     return Body();

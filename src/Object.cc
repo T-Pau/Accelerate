@@ -132,7 +132,7 @@ void Object::serialize(std::ostream &stream) const {
 
 
 void Object::evaluate(std::shared_ptr<Environment> environment) {
-    body.evaluate(name.as_symbol(), owner, std::move(environment));
+    body.evaluate(this, std::move(environment));
 }
 
 SizeRange Object::size_range() const {
