@@ -10,7 +10,7 @@
 
 std::optional<Expression> ObjectNameExpression::evaluated(const EvaluationContext& context) const {
     if (context.object) {
-        return Expression(context.object->name);
+        return Expression(context.object);
     }
     else {
         return {};
@@ -18,12 +18,12 @@ std::optional<Expression> ObjectNameExpression::evaluated(const EvaluationContex
 }
 
 void ObjectNameExpression::serialize_sub(std::ostream& stream) const {
-    stream << ".object_name";
+    stream << ".current_object";
 }
 
-Expression ObjectNameExpression::create(const Object* object) {
+Expression ObjectNameExpression::create(Object* object) {
     if (object) {
-        return Expression(object->name);
+        return Expression(object);
     }
     else {
         return Expression(std::make_shared<ObjectNameExpression>());

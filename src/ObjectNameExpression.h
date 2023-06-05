@@ -9,7 +9,10 @@
 
 class ObjectNameExpression: public BaseExpression {
   public:
-    static Expression create(const Object* object);
+    ObjectNameExpression() = default;
+    ObjectNameExpression(Location location): BaseExpression(location) {}
+
+    static Expression create(Object* object);
 
     [[nodiscard]] std::optional<Expression> evaluated(const EvaluationContext &context) const override;
     void serialize_sub(std::ostream &stream) const override;

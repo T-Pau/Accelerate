@@ -147,7 +147,7 @@ std::shared_ptr<Label> BodyParser::get_label(bool& is_anonymous) {
 
 
 Expression BodyParser::get_pc(std::shared_ptr<Label> label) const {
-    return {ObjectNameExpression::create(object), Expression::BinaryOperation::ADD, Expression(Location(), std::move(label))};
+    return {ObjectNameExpression::create(object), Expression::BinaryOperation::ADD, Expression(Location(), object_name(), std::move(label))};
 }
 
 
@@ -223,7 +223,6 @@ void BodyParser::parse_label(Visibility visibility, const Token& name) {
     auto label = std::make_shared<Label>(name.as_symbol(), SizeRange(current_body->size_range()));
     current_body->append(Body(label));
     add_constant(visibility, name, get_pc(label));
-    environment->add(Symbol(".label_offset(" + name.as_string() + ")"), Expression(std::make_shared<LabelExpression>(name.location, label)));
 }
 
 
@@ -246,6 +245,9 @@ void BodyParser::parse_memory() {
 }
 
 void BodyParser::parse_assignment(Visibility visibility, const Token &name) {
+    if (!object) {
+        throw ParseException(name, "assignment only allowed in objects");
+    }
     current_body->append(Body(visibility, name.as_symbol(), ExpressionParser(tokenizer).parse()));
 }
 
@@ -314,19 +316,23 @@ void BodyParser::parse_instruction(const Token &name) {
     auto label = get_label(is_anonymous_label);
     auto instruction = Body();
     {
-        auto instruction_environment = std::make_shared<Environment>(environment);
+        auto instruction_environment = std::make_shared<Environment>();
         instruction_environment->add(symbol_pc, get_pc(label));
-        instruction_environment->add(Symbol(".label_offset(" + label->name.str() + ")"), Expression(std::make_shared<LabelExpression>(Location(), label)));
+        instruction_environment->add(Symbol(".label_offset(" + label->name.str() + ")"), Expression(Location(), object_name(), label));
         instruction = encoder.encode(name, arguments, instruction_environment, current_size());
     }
     if (is_anonymous_label) {
         if (label.use_count() > 1) {
-            current_body->append(Body(label));
+            auto combined_body = Body(label);
+            combined_body.append(instruction);
+            instruction = combined_body;
         }
         else {
             next_label -= 1;
         }
     }
+
+    instruction.evaluate(object, environment, current_size(), ifs.empty());
 
     current_body->append(instruction);
 }

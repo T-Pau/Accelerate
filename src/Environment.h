@@ -52,6 +52,7 @@ public:
     void add(Symbol name, const Macro* macro) {macros[name] = macro;} // TODO: check for duplicates
     void add_next(std::shared_ptr<Environment> new_next) {next.emplace_back(std::move(new_next));}
     [[nodiscard]] const Function* get_function(Symbol name) const;
+    [[nodiscard]] std::shared_ptr<Label> get_label(Symbol name) const;
     [[nodiscard]] const Macro* get_macro(Symbol name) const;
     [[nodiscard]] std::optional<Expression> get_variable(Symbol name) const {return (*this)[name];}
 
@@ -61,7 +62,7 @@ public:
     void replace(const std::shared_ptr<Environment>& old_next, const std::shared_ptr<Environment>& new_next);
 
 private:
-  std::unordered_map<Symbol, const Function*> functions;
+    std::unordered_map<Symbol, const Function*> functions;
     std::unordered_map<Symbol, std::shared_ptr<Label>> labels;
     std::unordered_map<Symbol, const Macro*> macros;
     std::vector<std::shared_ptr<Environment>> next;

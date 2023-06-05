@@ -63,7 +63,10 @@ public:
     // Function
     Expression(Symbol name, const std::vector<Expression>& arguments);
     // Label
-    Expression(Location location, std::shared_ptr<Label> label);
+    Expression(Location location, Symbol object_name, Symbol label_name);
+    Expression(Location location, Symbol object_name, std::shared_ptr<Label> label);
+    Expression(Location location, const Object* object, Symbol label_name);
+    Expression(Location location, const Object* object, std::shared_ptr<Label> label);
     Expression(Location location, LabelExpressionType type);
     // Object
     explicit Expression(Object* object);

@@ -44,6 +44,8 @@ public:
 
     std::shared_ptr<ObjectFile> parse(Symbol filename);
 
+    static Token token_object_name;
+
 protected:
     void parse_directive(const Token& directive) override;
 

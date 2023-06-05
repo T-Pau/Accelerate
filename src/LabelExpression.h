@@ -10,9 +10,13 @@
 
 class LabelExpression: public BaseExpression {
 public:
-
-    explicit LabelExpression(Location location, std::shared_ptr<Label> label): BaseExpression(location), type(LabelExpressionType::NAMED), label(std::move(label)) {}
-    explicit LabelExpression(Location location, LabelExpressionType type): BaseExpression(location), type(type) {}
+    static Expression create(Location location, const Object* object, std::shared_ptr<Label> label);
+    static Expression create(Location location, const Object* object, Symbol label_name);
+    LabelExpression(Location location, Symbol object_name, Symbol label_name): BaseExpression(location), type(LabelExpressionType::NAMED), unresolved_object_name(object_name), unresolved_label_name(label_name) {}
+    LabelExpression(Location location, Symbol object_name, std::shared_ptr<Label> label): BaseExpression(location), type(LabelExpressionType::NAMED), unresolved_object_name(object_name), label(std::move(label)) {}
+    LabelExpression(Location location, const Object* object, Symbol label_name): BaseExpression(location), type(LabelExpressionType::NAMED), object(object), unresolved_label_name(label_name) {}
+    LabelExpression(Location location, const Object* object, std::shared_ptr<Label> label): BaseExpression(location), type(LabelExpressionType::NAMED), object(std::move(object)), label(std::move(label)) {}
+    LabelExpression(Location location, LabelExpressionType type): BaseExpression(location), type(type) {}
 
     [[nodiscard]] std::optional<Value> minimum_value() const override;
     [[nodiscard]] std::optional<Value> maximum_value() const override;
@@ -21,12 +25,16 @@ public:
     void set_label(std::shared_ptr<Label> new_label) const {label = std::move(new_label);}
 
 protected:
-    static Expression create(const std::shared_ptr<Label>& label);
     [[nodiscard]] std::optional<Expression> evaluated(const EvaluationContext& context) const override;
     void serialize_sub(std::ostream& stream) const override;
 
 private:
+    Symbol object_name() const;
+    Symbol label_name() const {return label ? label->name : unresolved_label_name;}
     mutable LabelExpressionType type;
+    Symbol unresolved_object_name;
+    Symbol unresolved_label_name;
+    const Object* object = nullptr;
     mutable std::shared_ptr<Label> label;
 };
 

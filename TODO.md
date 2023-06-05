@@ -27,7 +27,7 @@
 
 ## Cleanup
 
-- Don't rename CPU notation arguments, evaluate notation shallowly in clean environment.
+- Don't rename CPU notation arguments. (Currently fails for 45gs02 CPU.)
 
 
 ## Older Items

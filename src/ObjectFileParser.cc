@@ -44,6 +44,7 @@ Token ObjectFileParser::token_format_version;
 Token ObjectFileParser::token_function;
 Token ObjectFileParser::token_macro;
 Token ObjectFileParser::token_object;
+Token ObjectFileParser::token_object_name;
 Token ObjectFileParser::token_target;
 
 void ObjectFileParser::initialize() {
@@ -53,6 +54,7 @@ void ObjectFileParser::initialize() {
         token_function = Token(Token::DIRECTIVE, "function");
         token_macro = Token(Token::DIRECTIVE, "macro");
         token_object = Token(Token::DIRECTIVE, "object");
+        token_object = Token(Token::NAME, ".current_object");
         token_target = Token(Token::DIRECTIVE, "target");
 
         parser_methods[token_format_version.as_symbol()] = &ObjectFileParser::parse_format_version;

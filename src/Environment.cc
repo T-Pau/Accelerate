@@ -70,6 +70,22 @@ const Function* Environment::get_function(Symbol name) const {
     return nullptr;
 }
 
+std::shared_ptr<Label> Environment::get_label(Symbol name) const {
+    auto it = labels.find(name);
+
+    if (it != labels.end()) {
+        return it->second;
+    }
+    for (auto& environment: next) {
+        auto label = environment->get_label(name);
+        if (label) {
+            return label;
+        }
+    }
+    return nullptr;
+}
+
+
 const Macro* Environment::get_macro(Symbol name) const {
     auto it = macros.find(name);
 

@@ -59,6 +59,7 @@ private:
     Body* get_body(const BodyIndex& body_index) {return &ifs[body_index.if_index][body_index.clause_index].body;}
     [[nodiscard]] Expression get_pc(std::shared_ptr<Label> label) const;
     [[nodiscard]] std::shared_ptr<Label> get_label(bool& is_anonymous);
+    [[nodiscard]] Symbol object_name() const {return object ? object->name.as_symbol() : Symbol();};
     void push_clause(Expression condition);
     void push_body(const BodyIndex& body_index);
     void pop_body();
