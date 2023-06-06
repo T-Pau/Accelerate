@@ -40,6 +40,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 class InRangeExpression: public BaseExpression {
 public:
     InRangeExpression(const Expression& lower_bound, const Expression& upper_bound, const Expression& argument): lower_bound(std::move(lower_bound)), upper_bound(std::move(upper_bound)), argument(std::move(argument)) {}
+    [[nodiscard]] Expression static create(const std::vector<Expression>& arguments);
     [[nodiscard]] Expression static create(const Expression& lower_bound, const Expression& upper_bound, const Expression& argument);
 
     [[nodiscard]] std::optional<Value> minimum_value() const override {return {};}

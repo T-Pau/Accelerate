@@ -63,6 +63,7 @@ void Object::initialize() {
 }
 
 Object::Object(ObjectFile* owner, Token name_, const std::shared_ptr<ParsedValue>& definition): Entity(name_, definition), owner(owner), environment(std::make_shared<Environment>(owner->local_environment)) {
+    initialize();
     auto parameters = definition->as_dictionary();
 
     auto address_value = parameters->get_optional(token_address);
@@ -83,7 +84,11 @@ Object::Object(ObjectFile* owner, Token name_, const std::shared_ptr<ParsedValue
         alignment = alignment_token.as_unsigned();
     }
 
+    auto body_value = parameters->get_optional(token_body);
     auto reserve_value = parameters->get_optional(token_reserve);
+    if ((body_value && reserve_value) || (!body_value && !reserve_value)) {
+        throw ParseException(parameters->location, "object must contain exactly one of reserve and body");
+    }
     if (reserve_value) {
         auto reserve = reserve_value->as_singular_scalar()->token();
         if (!reserve.is_unsigned()) {
@@ -91,10 +96,11 @@ Object::Object(ObjectFile* owner, Token name_, const std::shared_ptr<ParsedValue
         }
         reservation = reserve.as_unsigned();
     }
+    else {
+        body = body_value->as_body()->body;
+    }
 
     section = owner->target->map.section((*parameters)[token_section]->as_singular_scalar()->token().as_symbol());
-
-    body = (*parameters)[token_body]->as_body()->body;
 }
 
 

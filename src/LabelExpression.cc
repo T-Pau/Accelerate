@@ -8,6 +8,19 @@
 #include "Object.h"
 #include "ObjectFile.h"
 #include "ParseException.h"
+#include "VariableExpression.h"
+
+Expression LabelExpression::create(const std::vector<Expression>& arguments) {
+    if (arguments.size() != 2) {
+        throw ParseException(Location(), "invalid number of arguments for .label_offset()"); // TODO: location
+    }
+    auto object_name = arguments[0].as_variable();
+    auto label_name = arguments[1].as_variable();
+    if (!object_name || !label_name) {
+        throw ParseException(Location(), "invalid arguments for .label_offset()");
+    }
+    return Expression(std::make_shared<LabelExpression>(object_name->location, object_name->variable(), label_name->variable()));
+}
 
 Expression LabelExpression::create(Location location, const Object* object, std::shared_ptr<Label> label) {
     auto offset = label->offset.size();
@@ -49,9 +62,9 @@ std::optional<Expression> LabelExpression::evaluated(const EvaluationContext& co
                 }
             }
 
-            if (!label) {
+            if (new_object && !label) {
                 // TODO: handle scope
-                new_label = object->environment->get_label(unresolved_label_name);
+                new_label = new_object->environment->get_label(unresolved_label_name);
                 if (new_label) {
                     changed = true;
                 }

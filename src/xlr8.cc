@@ -134,7 +134,6 @@ void xlr8::process() {
     TargetGetter::global.path->append_path(system_path, "target");
     CPUGetter::global.path->append_path(system_path, "cpu");
 
-    const Target* target = nullptr;
     if (target_name) {
         linker->set_target(&Target::get(*target_name));
     }
@@ -235,6 +234,7 @@ void xlr8::process() {
         }
         else {
             linker->program->evaluate();
+            linker->program->evaluate(); // TODO: shouldn't be necessary
             //linker->program->remove_local_constants();
         }
     }

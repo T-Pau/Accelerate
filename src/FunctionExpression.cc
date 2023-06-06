@@ -4,9 +4,12 @@
 
 #include "FunctionExpression.h"
 
+#include "ObjectFileParser.h"
 #include "EvaluationContext.h"
 #include "Expression.h"
 #include "Function.h"
+#include "InRangeExpression.h"
+#include "LabelExpression.h"
 
 void FunctionExpression::serialize_sub(std::ostream &stream) const {
     stream << name << "(";
@@ -28,6 +31,12 @@ void FunctionExpression::collect_objects(std::unordered_set<Object*> &objects) c
 }
 
 Expression FunctionExpression::create(Symbol name, const std::vector<Expression> &arguments) {
+    if (name == ObjectFileParser::token_in_range.as_symbol()) {
+        return InRangeExpression::create(arguments);
+    }
+    else if (name == ObjectFileParser::token_label_offset.as_symbol()) {
+        return LabelExpression::create(arguments);
+    }
     // TODO: built in functions
     return Expression(std::make_shared<FunctionExpression>(name, arguments));
 }

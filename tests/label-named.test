@@ -22,7 +22,7 @@ file a.o {} <inline>
 }
 .constant next {
     visibility: local
-    value: ((test+$04)+$01)
+    value: (test+$05)
 }
 .object test {
     visibility: local

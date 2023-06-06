@@ -44,6 +44,8 @@ public:
 
     std::shared_ptr<ObjectFile> parse(Symbol filename);
 
+    static Token token_in_range;
+    static Token token_label_offset;
     static Token token_object_name;
 
 protected:
@@ -58,8 +60,6 @@ private:
     void parse_macro(Token name, const std::shared_ptr<ParsedValue>& definition);
     void parse_object(Token name, const std::shared_ptr<ParsedValue>& definition);
     void parse_target();
-
-    static Visibility visibility_from_name(const Token& name);
 
     static void initialize();
 

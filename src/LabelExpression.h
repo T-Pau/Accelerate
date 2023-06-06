@@ -12,6 +12,7 @@ class LabelExpression: public BaseExpression {
 public:
     static Expression create(Location location, const Object* object, std::shared_ptr<Label> label);
     static Expression create(Location location, const Object* object, Symbol label_name);
+    static Expression create(const std::vector<Expression>& arguments);
     LabelExpression(Location location, Symbol object_name, Symbol label_name): BaseExpression(location), type(LabelExpressionType::NAMED), unresolved_object_name(object_name), unresolved_label_name(label_name) {}
     LabelExpression(Location location, Symbol object_name, std::shared_ptr<Label> label): BaseExpression(location), type(LabelExpressionType::NAMED), unresolved_object_name(object_name), label(std::move(label)) {}
     LabelExpression(Location location, const Object* object, Symbol label_name): BaseExpression(location), type(LabelExpressionType::NAMED), object(object), unresolved_label_name(label_name) {}

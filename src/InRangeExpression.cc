@@ -30,7 +30,16 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include "InRangeExpression.h"
+#include "ParseException.h"
 #include "ValueExpression.h"
+
+Expression InRangeExpression::create(const std::vector<Expression>& arguments) {
+    if (arguments.size() != 3) {
+        throw ParseException(Location(), "invalid number of arguments for .in_range()"); // TODO: location
+    }
+    return create(arguments[0], arguments[1], arguments[2]);
+}
+
 
 Expression InRangeExpression::create(const Expression& lower_bound, const Expression& upper_bound, const Expression& argument) {
     if (lower_bound.maximum_value() <= argument.minimum_value() && upper_bound.minimum_value() >= argument.maximum_value()) {

@@ -42,6 +42,8 @@ std::unordered_map<Symbol, void (ObjectFileParser::*)(Token name, const std::sha
 Token ObjectFileParser::token_constant;
 Token ObjectFileParser::token_format_version;
 Token ObjectFileParser::token_function;
+Token ObjectFileParser::token_in_range;
+Token ObjectFileParser::token_label_offset;
 Token ObjectFileParser::token_macro;
 Token ObjectFileParser::token_object;
 Token ObjectFileParser::token_object_name;
@@ -52,9 +54,11 @@ void ObjectFileParser::initialize() {
         token_constant = Token(Token::DIRECTIVE, "constant");
         token_format_version = Token(Token::DIRECTIVE, "format_version");
         token_function = Token(Token::DIRECTIVE, "function");
+        token_in_range = Token(Token::NAME, ".in_range");
+        token_label_offset = Token(Token::NAME, ".label_offset");
         token_macro = Token(Token::DIRECTIVE, "macro");
         token_object = Token(Token::DIRECTIVE, "object");
-        token_object = Token(Token::NAME, ".current_object");
+        token_object_name = Token(Token::NAME, ".current_object");
         token_target = Token(Token::DIRECTIVE, "target");
 
         parser_methods[token_format_version.as_symbol()] = &ObjectFileParser::parse_format_version;
@@ -70,6 +74,10 @@ void ObjectFileParser::initialize() {
 
 ObjectFileParser::ObjectFileParser() {
     initialize();
+    tokenizer.add_literal(token_in_range);
+    tokenizer.add_literal(token_label_offset);
+    tokenizer.add_literal(token_object);
+    tokenizer.add_literal(token_object_name);
 }
 
 std::shared_ptr<ObjectFile> ObjectFileParser::parse(Symbol filename) {
