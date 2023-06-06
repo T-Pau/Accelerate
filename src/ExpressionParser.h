@@ -72,13 +72,14 @@ private:
         PARENTHESIS_CLOSED,
         PARENTHESIS_OPEN,
         START,
-        UNARY_OPERATOR
+        UNARY_OPERATOR,
+        UNNAMED_LABEL
     };
 
     class Element {
     public:
         explicit Element(const Token& token): type(NAME), node(std::make_shared<VariableExpression>(token.as_symbol())), level(0), location(token.location) {}
-        Element(const Expression& node, int level): type(OPERAND), node(node), level(level), location(node.location()) {}
+        Element(const Expression& node, int level, ElementType type = OPERAND): type(type), node(node), level(level), location(node.location()) {}
         Element(Location location, BinaryOperator binary);
         Element(Location location, Expression::UnaryOperation unary);
         explicit Element(Location location, ElementType type): type(type), location(location) {}

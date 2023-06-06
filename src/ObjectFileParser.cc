@@ -78,6 +78,9 @@ ObjectFileParser::ObjectFileParser() {
     tokenizer.add_literal(token_label_offset);
     tokenizer.add_literal(token_object);
     tokenizer.add_literal(token_object_name);
+    tokenizer.add_literal(Token::NAME, ".label_", "0123456789");
+    tokenizer.add_literal(Token::colon_minus);
+    tokenizer.add_literal(Token::colon_plus);
 }
 
 std::shared_ptr<ObjectFile> ObjectFileParser::parse(Symbol filename) {

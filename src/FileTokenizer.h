@@ -53,7 +53,7 @@ public:
 
     void add_punctuations(const std::unordered_set<std::string>& names);
     void add_literal(const Token& token) { add_literal(token.get_type(), token.as_string());}
-    void add_literal(Token::Type match, const std::string& name) {matcher.add(name.c_str(), match);}
+    void add_literal(Token::Type match, const std::string& name, const std::string& suffix_characters = "");
 
 protected:
     Token sub_next() override;
@@ -85,9 +85,13 @@ private:
         std::optional<Token::Type> match_type;
         bool match_in_word = false;
         std::unordered_map<char,MatcherNode> next;
+        std::unordered_set<char> suffix_characters;
 
-        void add(const char* string, Token::Type type, bool match_in_word = false);
+        void add(const char* string, Token::Type type, const std::unordered_set<char>& suffix_characters = {}, bool match_in_word = false);
         std::optional<Token::Type> match(Source& source, std::string& name);
+
+      private:
+        bool conflicts(const std::unordered_set<char>& new_suffix) const;
     };
 
     Token next_raw();

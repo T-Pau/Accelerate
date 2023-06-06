@@ -420,6 +420,14 @@ std::optional<Token::Type> FileTokenizer::MatcherNode::match(FileTokenizer::Sour
     auto it = next.find(static_cast<char>(c));
 
     if (it == next.end()) {
+        while (suffix_characters.contains(static_cast<char>(c))) {
+            name += c;
+            c = source.next();
+            if (c == EOF) {
+                break;
+            }
+        }
+
         bool matched;
 
         if (name.empty() || !match_type.has_value()) {
@@ -449,17 +457,40 @@ std::optional<Token::Type> FileTokenizer::MatcherNode::match(FileTokenizer::Sour
 }
 
 
-void FileTokenizer::MatcherNode::add(const char *string, Token::Type type, bool match_in_word_) {
+void FileTokenizer::MatcherNode::add(const char *string, Token::Type type, const std::unordered_set<char>& new_suffix, bool match_in_word_) {
     if (string[0] == '\0') {
         if (match_type.has_value() && (match_type.value() != type || match_in_word != match_in_word_)) {
             throw Exception("literal already defined with different type"); // TODO: include more detail
         }
-        else {
-            match_in_word = match_in_word_;
-            match_type = type;
+        if (conflicts(new_suffix)) {
+            throw Exception("suffix_characters conflicts with already defined literal"); // TODO: include more detail
         }
+        if (match_type && suffix_characters != new_suffix) {
+            throw Exception("literal already defined with different suffix characters"); // TODO: include more detail
+        }
+
+        match_in_word = match_in_word_;
+        match_type = type;
+        suffix_characters = new_suffix;
     }
     else {
-        next[string[0]].add(string + 1, type, match_in_word_);
+        if (suffix_characters.contains(string[0])) {
+            throw Exception("literal conflicts with already defined suffix characters"); // TODO include more detail
+        }
+        next[string[0]].add(string + 1, type, new_suffix, match_in_word_);
     }
+}
+
+bool FileTokenizer::MatcherNode::conflicts(const std::unordered_set<char>& new_suffix) const {
+    return std::any_of(new_suffix.begin(), new_suffix.end(), [this](char c) {
+      return next.find(c) != next.end();
+    });
+}
+
+void FileTokenizer::add_literal(Token::Type match, const std::string& name, const std::string& suffix_characters) {
+    auto suffix_set = std::unordered_set<char>();
+    for (auto c: suffix_characters) {
+        suffix_set.insert(c);
+    }
+    matcher.add(name.c_str(), match, suffix_set);
 }

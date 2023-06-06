@@ -11,6 +11,22 @@
 #include "VariableExpression.h"
 
 Expression LabelExpression::create(const std::vector<Expression>& arguments) {
+    if (arguments.size() == 1) {
+        auto label_name = arguments[0].as_variable();
+        if (!label_name) {
+            throw ParseException(Location(), "invalid arguments for .label_offset()"); // TODO: location
+        }
+        else if (label_name->variable() == Token::colon_minus.as_symbol()) {
+            return Expression(std::make_shared<LabelExpression>(label_name->location, PREVIOUS_UNNAMED));
+
+        }
+        else if (label_name->variable() == Token::colon_plus.as_symbol()) {
+            return Expression(std::make_shared<LabelExpression>(label_name->location, NEXT_UNNAMED));
+        }
+        else {
+            throw ParseException(Location(), "invalid arguments for .label_offset()"); // TODO: location
+        }
+    }
     if (arguments.size() != 2) {
         throw ParseException(Location(), "invalid number of arguments for .label_offset()"); // TODO: location
     }

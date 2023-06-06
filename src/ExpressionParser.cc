@@ -86,7 +86,7 @@ ExpressionParser::Element ExpressionParser::next_element() {
         return Element(token);
     }
     else if (token == Token::colon_minus || token == Token::colon_plus) {
-        return {Expression(token), 0};
+        return {Expression(token), 0, UNNAMED_LABEL};
     }
     else if (token == Token::comma) {
         return Element(token.location, COMMA);
@@ -112,6 +112,7 @@ ExpressionParser::Element ExpressionParser::next_element() {
 
             case NAME:
             case OPERAND:
+            case UNNAMED_LABEL:
             case PARENTHESIS_CLOSED: {
                 auto it = binary_operators.find(token);
                 if (it != binary_operators.end()) {
@@ -154,6 +155,7 @@ Expression ExpressionParser::do_parse() {
 
                     case NAME:
                     case OPERAND:
+                    case UNNAMED_LABEL:
                     case PARENTHESIS_OPEN:
                     case UNARY_OPERATOR:
                         shift(next);
@@ -184,6 +186,7 @@ Expression ExpressionParser::do_parse() {
 
                     case NAME:
                     case OPERAND:
+                    case UNNAMED_LABEL:
                         reduce_unary(next);
                         break;
 
@@ -205,7 +208,8 @@ Expression ExpressionParser::do_parse() {
                     break;
                 }
                 // fallthrough
-            case OPERAND: {
+            case OPERAND:
+            case UNNAMED_LABEL: {
                 switch (next.type) {
                     case NAME:
                     case OPERAND:
@@ -233,6 +237,9 @@ Expression ExpressionParser::do_parse() {
                         return top.node;
                     }
 
+                    case UNNAMED_LABEL:
+                        tokenizer.unget(Token(Token::PUNCTUATION, next.location, next.node.as_variable()->variable()));
+                        // fallthrough
                     case END:
                         reduce_binary(0);
                         if (!stack.empty()) {
@@ -290,6 +297,7 @@ Expression ExpressionParser::do_parse() {
                     case OPERAND:
                     case PARENTHESIS_OPEN:
                     case UNARY_OPERATOR:
+                    case UNNAMED_LABEL:
                         shift(next);
                         break;
 
@@ -448,6 +456,10 @@ const char *ExpressionParser::Element::description() const {
 
         case START:
             return "beginning of expression";
+
+        case UNNAMED_LABEL:
+            return "unnamed label";
+
     }
 }
 
