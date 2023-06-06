@@ -1,5 +1,6 @@
 ## Bugs
 
+- `-function()` not parsed correctly (`-function` reduced before `(` is seen)
 - Don't use full file name for .import in object file. 
 - Record object reference while evaluating, otherwise reference is lost for fixed address objects.
 - Isolate expanded macro body.

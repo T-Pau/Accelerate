@@ -14,7 +14,7 @@ Expression LabelExpression::create(const std::vector<Expression>& arguments) {
     if (arguments.size() == 1) {
         auto label_name = arguments[0].as_variable();
         if (!label_name) {
-            throw ParseException(Location(), "invalid arguments for .label_offset()"); // TODO: location
+            throw ParseException(arguments[0].location(), "invalid arguments for .label_offset()");
         }
         else if (label_name->variable() == Token::colon_minus.as_symbol()) {
             return Expression(std::make_shared<LabelExpression>(label_name->location, PREVIOUS_UNNAMED));
@@ -24,16 +24,16 @@ Expression LabelExpression::create(const std::vector<Expression>& arguments) {
             return Expression(std::make_shared<LabelExpression>(label_name->location, NEXT_UNNAMED));
         }
         else {
-            throw ParseException(Location(), "invalid arguments for .label_offset()"); // TODO: location
+            throw ParseException(arguments[0].location(), "invalid arguments for .label_offset()");
         }
     }
     if (arguments.size() != 2) {
-        throw ParseException(Location(), "invalid number of arguments for .label_offset()"); // TODO: location
+        throw ParseException(arguments.empty() ? Location() : arguments.front().location(), "invalid number of arguments for .label_offset()");
     }
     auto object_name = arguments[0].as_variable();
     auto label_name = arguments[1].as_variable();
     if (!object_name || !label_name) {
-        throw ParseException(Location(), "invalid arguments for .label_offset()");
+        throw ParseException(arguments[0].location(), "invalid arguments for .label_offset()");
     }
     return Expression(std::make_shared<LabelExpression>(object_name->location, object_name->variable(), label_name->variable()));
 }
