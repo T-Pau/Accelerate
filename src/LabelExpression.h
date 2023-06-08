@@ -32,7 +32,7 @@ protected:
 private:
     Symbol object_name() const;
     Symbol label_name() const {return label ? label->name : unresolved_label_name;}
-    mutable LabelExpressionType type;
+    LabelExpressionType type;
     Symbol unresolved_object_name;
     Symbol unresolved_label_name;
     const Object* object = nullptr;

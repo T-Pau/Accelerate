@@ -107,17 +107,20 @@ std::optional<Expression> LabelExpression::evaluated(const EvaluationContext& co
         }
 
         case NEXT_UNNAMED:
-            context.scope->add_forward_unnamed_label_use(this);
+            if (!label) {
+                context.scope->add_forward_unnamed_label_use(this);
+            }
             break;
 
         case PREVIOUS_UNNAMED:
-            try {
-                label = context.scope->get_previous_unnamed_label();
-                type = NAMED;
-            }
-            catch (Exception &ex) {
-                if (!context.conditional_in_scope) {
-                    throw ex;
+            if (!label) {
+                try {
+                    label = context.scope->get_previous_unnamed_label();
+                }
+                catch (Exception& ex) {
+                    if (!context.conditional_in_scope) {
+                        throw ex;
+                    }
                 }
             }
             break;
