@@ -35,14 +35,14 @@
 .global VIC_SPRITE_7_X = VIC + $0e
 .global VIC_SPRITE_7_Y = VIC + $0f
 .global VIC_SPRITE_X_MSB = VIC + $10
-;
+.global VIC_CONTROL_1 = VIC + $11
 .global VIC_RASTER = VIC + $12
 .global VIC_LIGHTPEN_X = VIC + $13
 .global VIC_LIGHTPEN_Y = VIC + $14
 .global VIC_SPRITE_ENABLE = VIC + $15
-;
+.global VIC_CONTROL_2 = VIC + $16
 .global VIC_SPRITE_EXPAND_Y = VIC + $17
-;
+.global VIC_VIDEO_ADDRESS = VIC + $18
 .global VIC_INTERRUPT_REQUEST = VIC + $19
 .global VIC_INTERRUPT_MASK = VIC + $1a
 .global VIC_SPRITE_PRIORITY = VIC + $1b
@@ -78,6 +78,8 @@
 .global CIA1_TOD_MINUTES = CIA1 + $09
 .global CIA1_TOD_HOURS = CIA1 + $0a
 ; ...
+.global CIA1_TIMER_A_CONTROL = CIA1 + $0e
+; ...
 
 .global CIA2 = $dd00
 .global CIA2_PRA = CIA2 + $00
@@ -92,3 +94,4 @@
 .global CIA2_TOD_HOURS = CIA2 + $0a
 
 
+.global CINV = $3014 ; IRQ vector

@@ -78,7 +78,7 @@ void Linker::link() {
 
     // TODO: sort objects
     for (auto object: objects) {
-        if (!object->size_range().size().has_value()) {
+        if (!object->size_range().size()) {
             FileReader::global.error({}, "object '%s' has unknown size", object->name.as_string().c_str());
             continue;
         }
@@ -108,7 +108,7 @@ void Linker::link() {
             memory[object->address->bank].copy(object->address->address, bytes);
         }
         catch (Exception& ex) {
-            FileReader::global.error(Location(), "can't evaluated '%s': %s", object->name.as_string().c_str(), ex.what());
+            FileReader::global.error(Location(), "can't evaluate '%s': %s", object->name.as_string().c_str(), ex.what());
         }
     }
 }

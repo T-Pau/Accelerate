@@ -85,7 +85,7 @@ private:
 
         [[nodiscard]] const char* description() const;
         [[nodiscard]] bool is_binary_operator() const {return type == BINARY_OPERATOR;}
-        [[nodiscard]] bool is_operand() const {return type == OPERAND;}
+        [[nodiscard]] bool is_operand() const {return type == OPERAND || type == UNNAMED_LABEL;}
         [[nodiscard]] bool is_unary_operator() const {return type == UNARY_OPERATOR;}
 
         ElementType type;

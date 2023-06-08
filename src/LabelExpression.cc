@@ -136,26 +136,31 @@ std::optional<Expression> LabelExpression::evaluated(const EvaluationContext& co
 }
 
 void LabelExpression::serialize_sub(std::ostream &stream) const {
-    stream << ".label_offset(";
-    switch (type) {
-        case NAMED:
-            if (object_name().empty()) {
-                stream << ".current_object";
-            }
-            else {
-                stream << object_name();
-            }
-            stream << ", " << label_name();
-            break;
-
-        case NEXT_UNNAMED:
-            stream << ":+";
-            break;
-
-        case PREVIOUS_UNNAMED:
-            stream << ":-";
+    if (label && label->offset.size()) {
+        stream << *label->offset.size();
     }
-    stream << ")";
+    else {
+        stream << ".label_offset(";
+        switch (type) {
+            case NAMED:
+                if (object_name().empty()) {
+                    stream << ".current_object";
+                }
+                else {
+                    stream << object_name();
+                }
+                stream << ", " << label_name();
+                break;
+
+            case NEXT_UNNAMED:
+                stream << ":+";
+                break;
+
+            case PREVIOUS_UNNAMED:
+                stream << ":-";
+        }
+        stream << ")";
+    }
 }
 
 
@@ -195,5 +200,5 @@ std::optional<Value> LabelExpression::minimum_value() const {
 }
 
 Symbol LabelExpression::object_name() const {
-    return object ? object->name.as_symbol() : unresolved_label_name;
+    return object ? object->name.as_symbol() : unresolved_object_name;
 }

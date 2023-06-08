@@ -147,7 +147,7 @@ std::shared_ptr<Label> BodyParser::get_label(bool& is_anonymous) {
 
 
 Expression BodyParser::get_pc(std::shared_ptr<Label> label) const {
-    return {ObjectNameExpression::create(object), Expression::BinaryOperation::ADD, Expression(Location(), object_name(), std::move(label))};
+    return {ObjectNameExpression::create(object), Expression::BinaryOperation::ADD, Expression(Location(), object, std::move(label))};
 }
 
 

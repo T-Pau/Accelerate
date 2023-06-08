@@ -31,6 +31,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "ObjectFileParser.h"
 #include "Exception.h"
+#include "LibraryGetter.h"
 #include "ParsedValue.h"
 #include "ParseException.h"
 #include "ExpressionParser.h"
@@ -42,6 +43,7 @@ std::unordered_map<Symbol, void (ObjectFileParser::*)(Token name, const std::sha
 Token ObjectFileParser::token_constant;
 Token ObjectFileParser::token_format_version;
 Token ObjectFileParser::token_function;
+Token ObjectFileParser::token_import;
 Token ObjectFileParser::token_in_range;
 Token ObjectFileParser::token_label_offset;
 Token ObjectFileParser::token_macro;
@@ -54,6 +56,7 @@ void ObjectFileParser::initialize() {
         token_constant = Token(Token::DIRECTIVE, "constant");
         token_format_version = Token(Token::DIRECTIVE, "format_version");
         token_function = Token(Token::DIRECTIVE, "function");
+        token_import = Token(Token::DIRECTIVE, "import");
         token_in_range = Token(Token::NAME, ".in_range");
         token_label_offset = Token(Token::NAME, ".label_offset");
         token_macro = Token(Token::DIRECTIVE, "macro");
@@ -63,6 +66,7 @@ void ObjectFileParser::initialize() {
 
         parser_methods[token_format_version.as_symbol()] = &ObjectFileParser::parse_format_version;
         parser_methods[token_target.as_symbol()] = &ObjectFileParser::parse_target;
+        parser_methods[token_import.as_symbol()] = &ObjectFileParser::parse_import;
         symbol_parser_methods[token_constant.as_symbol()] = &ObjectFileParser::parse_constant;
         symbol_parser_methods[token_function.as_symbol()] = &ObjectFileParser::parse_function;
         symbol_parser_methods[token_object.as_symbol()] = &ObjectFileParser::parse_object;
@@ -137,4 +141,28 @@ void ObjectFileParser::parse_target() {
 
 void ObjectFileParser::parse_macro(Token name, const std::shared_ptr<ParsedValue>& definition) {
     file->add_macro(std::make_unique<Macro>(name, definition));
+}
+
+void ObjectFileParser::parse_import() {
+    auto first = true;
+
+    while (true) {
+        auto token = tokenizer.next();
+        if (!token || token.is_newline()) {
+            break;
+        }
+        if (first) {
+            first = false;
+        }
+        else {
+            if (token != Token::comma) {
+                throw ParseException(token, "expected ','");
+            }
+            token = tokenizer.next();
+        }
+        if (!token.is_string()) {
+            throw ParseException(token, "expected string");
+        }
+        file->import(LibraryGetter::global.get(token.as_symbol(), file->name).get());
+    }
 }

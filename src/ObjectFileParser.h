@@ -57,6 +57,7 @@ private:
     void parse_constant(Token name, const std::shared_ptr<ParsedValue>& definition);
     void parse_format_version();
     void parse_function(Token name, const std::shared_ptr<ParsedValue>& definition);
+    void parse_import();
     void parse_macro(Token name, const std::shared_ptr<ParsedValue>& definition);
     void parse_object(Token name, const std::shared_ptr<ParsedValue>& definition);
     void parse_target();
@@ -69,6 +70,7 @@ private:
     static Token token_constant;
     static Token token_format_version;
     static Token token_function;
+    static Token token_import;
     static Token token_macro;
     static Token token_object;
     static Token token_target;
