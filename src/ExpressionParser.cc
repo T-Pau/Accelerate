@@ -83,7 +83,14 @@ ExpressionParser::Element ExpressionParser::next_element() {
         return {Expression(token), 0};
     }
     else if (token.is_name()) {
-        return Element(token);
+        auto next_token = tokenizer.next();
+        if (next_token == Token::paren_open) {
+            return Element(token, FUNCTION_CALL);
+        }
+        else {
+            tokenizer.unget(next_token);
+            return Element(token);
+        }
     }
     else if (token == Token::colon_minus || token == Token::colon_plus) {
         return {Expression(token), 0, UNNAMED_LABEL};
@@ -99,7 +106,7 @@ ExpressionParser::Element ExpressionParser::next_element() {
     }
     else {
         switch (top.type) {
-            case ARGUMENT_LIST:
+            case FUNCTION_CALL:
             case BINARY_OPERATOR:
             case PARENTHESIS_OPEN:
             case START: {
@@ -110,7 +117,6 @@ ExpressionParser::Element ExpressionParser::next_element() {
                 break;
             }
 
-            case NAME:
             case OPERAND:
             case UNNAMED_LABEL:
             case PARENTHESIS_CLOSED: {
@@ -153,7 +159,7 @@ Expression ExpressionParser::do_parse() {
                     case PARENTHESIS_CLOSED:
                         throw ParseException(next.location, "unexpected %s", next.description());
 
-                    case NAME:
+                    case FUNCTION_CALL:
                     case OPERAND:
                     case UNNAMED_LABEL:
                     case PARENTHESIS_OPEN:
@@ -161,7 +167,6 @@ Expression ExpressionParser::do_parse() {
                         shift(next);
                         break;
 
-                    case ARGUMENT_LIST:
                     case START:
                         // can't happen: next can never be argument_list or start
                         break;
@@ -184,17 +189,16 @@ Expression ExpressionParser::do_parse() {
                     case UNARY_OPERATOR:
                         throw ParseException(next.location, "unexpected %s", next.description());
 
-                    case NAME:
                     case OPERAND:
                     case UNNAMED_LABEL:
                         reduce_unary(next);
                         break;
 
+                    case FUNCTION_CALL:
                     case PARENTHESIS_OPEN:
                         shift(next);
                         break;
 
-                    case ARGUMENT_LIST:
                     case START:
                         // can't happen: next can never be argument_list or start
                         break;
@@ -202,16 +206,10 @@ Expression ExpressionParser::do_parse() {
                 break;
             }
 
-            case NAME:
-                if (next.type == PARENTHESIS_OPEN) {
-                    shift(Element(next.location, ARGUMENT_LIST));
-                    break;
-                }
-                // fallthrough
             case OPERAND:
             case UNNAMED_LABEL: {
                 switch (next.type) {
-                    case NAME:
+                    case FUNCTION_CALL:
                     case OPERAND:
                     case PARENTHESIS_OPEN:
                     case UNARY_OPERATOR:
@@ -225,7 +223,7 @@ Expression ExpressionParser::do_parse() {
                     case COMMA: {
                         reduce_binary(0);
                         if (!stack.empty()) {
-                            if (stack.back().type == ARGUMENT_LIST) {
+                            if (stack.back().type == FUNCTION_CALL) {
                                 reduce_argument_list();
                                 break;
                             }
@@ -258,7 +256,7 @@ Expression ExpressionParser::do_parse() {
                         else if (stack.back().type == PARENTHESIS_OPEN) {
                             stack.pop_back();
                         }
-                        else if (stack.back().type == ARGUMENT_LIST) {
+                        else if (stack.back().type == FUNCTION_CALL) {
                             reduce_argument_list();
                             reduce_function_call();
                         }
@@ -267,7 +265,6 @@ Expression ExpressionParser::do_parse() {
                         }
                         break;
 
-                    case ARGUMENT_LIST:
                     case START:
                         // can't happen: next can never be argument_list or start
                         break;
@@ -275,12 +272,12 @@ Expression ExpressionParser::do_parse() {
                 break;
             }
 
-            case ARGUMENT_LIST:
+            case FUNCTION_CALL:
             case PARENTHESIS_OPEN:
             case START: {
                 switch (next.type) {
                     case PARENTHESIS_CLOSED:
-                        if (top.type == ARGUMENT_LIST) {
+                        if (top.type == FUNCTION_CALL) {
                             reduce_function_call();
                             break;
                         }
@@ -293,7 +290,7 @@ Expression ExpressionParser::do_parse() {
                         }
                         throw ParseException(next.location, "unexpected %s", next.description());
 
-                    case NAME:
+                    case FUNCTION_CALL:
                     case OPERAND:
                     case PARENTHESIS_OPEN:
                     case UNARY_OPERATOR:
@@ -301,7 +298,6 @@ Expression ExpressionParser::do_parse() {
                         shift(next);
                         break;
 
-                    case ARGUMENT_LIST:
                     case START:
                         // can't happen: next can never be argument_list or start
                         break;
@@ -418,18 +414,13 @@ void ExpressionParser::reduce_argument_list() {
 }
 
 void ExpressionParser::reduce_function_call() {
-    auto previous = stack.back();
-    auto name = previous.node.as_variable();
+    auto name = top.node.as_variable();
     top = Element(Expression(name->variable(), top.arguments), 0);
-    stack.pop_back();
 }
 
 
 const char *ExpressionParser::Element::description() const {
     switch (type) {
-        case ARGUMENT_LIST:
-            return "argument list";
-
         case BINARY_OPERATOR:
             return "binary operator";
 
@@ -439,8 +430,8 @@ const char *ExpressionParser::Element::description() const {
         case END:
             return "end of expression";
 
-        case NAME:
-            return "name";
+        case FUNCTION_CALL:
+            return "function call";
 
         case UNARY_OPERATOR:
             return "unary operator";

@@ -48,7 +48,7 @@ public:
 
     static void setup(FileTokenizer& tokenizer);
 
-    Expression parse() { top = Element({}, START); return do_parse();}
+    Expression parse() { top = Element(Location(), START); return do_parse();}
     Expression parse(Expression& left) { top = Element(left, 0); return do_parse();}
     Encoding parse_encoding(Token token);
     Body parse_list();
@@ -63,11 +63,10 @@ private:
     };
 
     enum ElementType {
-        ARGUMENT_LIST,
         BINARY_OPERATOR,
         COMMA,
         END,
-        NAME,
+        FUNCTION_CALL,
         OPERAND,
         PARENTHESIS_CLOSED,
         PARENTHESIS_OPEN,
@@ -78,7 +77,7 @@ private:
 
     class Element {
     public:
-        explicit Element(const Token& token): type(NAME), node(std::make_shared<VariableExpression>(token.as_symbol())), level(0), location(token.location) {}
+        explicit Element(const Token& token, ElementType type = OPERAND): type(type), node(std::make_shared<VariableExpression>(token.as_symbol())), level(0), location(token.location) {}
         Element(const Expression& node, int level, ElementType type = OPERAND): type(type), node(node), level(level), location(node.location()) {}
         Element(Location location, BinaryOperator binary);
         Element(Location location, Expression::UnaryOperation unary);
@@ -86,7 +85,7 @@ private:
 
         [[nodiscard]] const char* description() const;
         [[nodiscard]] bool is_binary_operator() const {return type == BINARY_OPERATOR;}
-        [[nodiscard]] bool is_operand() const {return type == OPERAND || type == NAME;}
+        [[nodiscard]] bool is_operand() const {return type == OPERAND;}
         [[nodiscard]] bool is_unary_operator() const {return type == UNARY_OPERATOR;}
 
         ElementType type;
@@ -115,7 +114,7 @@ private:
 
     Tokenizer& tokenizer;
 
-    Element top = Element({}, START);
+    Element top = Element(Location(), START);
     std::vector<Element> stack;
 
     static std::unordered_map<Token, BinaryOperator> binary_operators;
