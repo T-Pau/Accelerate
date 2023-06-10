@@ -47,18 +47,18 @@ public:
     static Symbol symbol_opcode;
 
 private:
-    static Visibility visibility_value(const Token& token);
-
     void parse_name(Visibility visibility, const Token& name);
     void parse_assignment(Visibility visibility, const Token& name);
     void parse_directive(const Token& directive);
     void parse_section();
     void parse_symbol(Visibility visibility, const Token& name);
     void parse_target();
+    void parse_visibility();
 
     const Target* target;
 
     Symbol current_section;
+    Visibility current_visibility = Visibility::LOCAL;
     std::shared_ptr<Environment> file_environment;
 
     FileTokenizer tokenizer;
@@ -70,11 +70,10 @@ private:
     static Token token_address;
     static Token token_align;
     static Token token_data;
-    static Token token_global;
-    static Token token_local;
     static Token token_reserve;
     static Token token_section;
     static Token token_target;
+    static Token token_visibility;
 };
 
 #endif // ASSEMBLER_H

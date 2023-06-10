@@ -45,23 +45,21 @@ bool Assembler::initialized = false;
 Symbol Assembler::symbol_opcode;
 Token Assembler::token_address;
 Token Assembler::token_align;
-Token Assembler::token_global;
-Token Assembler::token_local;
 Token Assembler::token_reserve;
 Token Assembler::token_section;
 Token Assembler::token_target;
+Token Assembler::token_visibility;
 
 
 void Assembler::initialize() {
     if (!initialized) {
         symbol_opcode = ".opcode";
-        token_address = Token(Token::DIRECTIVE, ".address");
-        token_align = Token(Token::DIRECTIVE, ".align");
-        token_global = Token(Token::DIRECTIVE, ".global");
-        token_local = Token(Token::DIRECTIVE, ".local");
-        token_reserve = Token(Token::DIRECTIVE, ".reserve");
-        token_section = Token(Token::DIRECTIVE, ".section");
-        token_target = Token(Token::DIRECTIVE, ".target");
+        token_address = Token(Token::DIRECTIVE, "address");
+        token_align = Token(Token::DIRECTIVE, "align");
+        token_reserve = Token(Token::DIRECTIVE, "reserve");
+        token_section = Token(Token::DIRECTIVE, "section");
+        token_target = Token(Token::DIRECTIVE, "target");
+        token_visibility = Token(Token::DIRECTIVE, "visibility");
 
         initialized = true;
     }
@@ -75,20 +73,13 @@ std::shared_ptr<ObjectFile> Assembler::parse(Symbol file_name) {
     ExpressionParser::setup(tokenizer);
     BodyParser::setup(tokenizer);
     tokenizer.add_punctuations({"{", "}", "=", ":"});
-    tokenizer.add_literal(token_address);
-    tokenizer.add_literal(token_align);
-    tokenizer.add_literal(token_global);
-    tokenizer.add_literal(token_local);
-    tokenizer.add_literal(token_reserve);
-    tokenizer.add_literal(token_section);
-    tokenizer.add_literal(token_target);
     tokenizer.push(file_name);
 
     object_file = std::make_shared<ObjectFile>();
     object_file->target = target;
 
     file_environment = std::make_shared<Environment>(object_file->local_environment);
-
+    
     while (!tokenizer.ended()) {
         try {
             auto token = tokenizer.next();
@@ -102,7 +93,7 @@ std::shared_ptr<ObjectFile> Assembler::parse(Symbol file_name) {
                     break;
 
                 case Token::NAME:
-                    parse_name(Visibility::LOCAL, token);
+                    parse_name(current_visibility, token);
                     break;
 
                 case Token::NEWLINE:
@@ -147,18 +138,6 @@ void Assembler::parse_section() {
         throw ParseException(token, "unknown section");
     }
     current_section = token.as_symbol();
-}
-
-Visibility Assembler::visibility_value(const Token& token) {
-    if (token == token_local) {
-        return Visibility::LOCAL;
-    }
-    else if (token == token_global) {
-        return Visibility::GLOBAL;
-    }
-    else {
-        return Visibility::SCOPE;
-    }
 }
 
 void Assembler::parse_symbol(Visibility visibility, const Token &name) {
@@ -219,19 +198,27 @@ void Assembler::parse_symbol(Visibility visibility, const Token &name) {
 }
 
 void Assembler::parse_directive(const Token& directive) {
-    auto visibility = visibility_value(directive);
-    if (visibility != Visibility::SCOPE) {
+    auto visibility = VisibilityHelper::from_token(directive);
+    if (visibility) {
         auto name = tokenizer.next();
         if (name.get_type() != Token::NAME) {
             throw ParseException(name, "name expected");
         }
-        parse_name(visibility, name);
+        parse_name(*visibility, name);
     }
     else if (directive == token_section) {
         parse_section();
     }
     else if (directive == token_target) {
         parse_target();
+    }
+    else if (directive == token_visibility) {
+        auto name = tokenizer.expect(Token::NAME);
+        visibility = VisibilityHelper::from_token(name);
+        if (!visibility) {
+            throw ParseException(name, "unknown visibility");
+        }
+        current_visibility = *visibility;
     }
     else {
         throw ParseException(directive, "unknown directive");
