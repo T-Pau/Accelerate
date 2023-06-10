@@ -6,6 +6,7 @@
 
 #include "Expression.h"
 #include "Object.h"
+#include "ObjectExpression.h"
 #include "ObjectFile.h"
 #include "ParseException.h"
 #include "VariableExpression.h"
@@ -65,12 +66,20 @@ std::optional<Expression> LabelExpression::evaluated(const EvaluationContext& co
             const Object* new_object = object;
             auto new_label = label;
 
-            if (!object && context.object) {
-                if (unresolved_object_name.empty() || unresolved_object_name == context.object->name.as_symbol()) {
-                    new_object = context.object;
+            if (!object) {
+                if (context.object) {
+                    if (unresolved_object_name.empty() || unresolved_object_name == context.object->name.as_symbol()) {
+                        new_object = context.object;
+                    }
+                    else {
+                        new_object = context.object->owner->object(unresolved_object_name); // TODO: search in included libraries too
+                    }
                 }
                 else {
-                    new_object = context.object->owner->object(unresolved_object_name); // TODO: search in included libraries too
+                    auto value = context.environment->get_variable(unresolved_object_name);
+                    if (value && value->is_object()) {
+                        new_object = value->as_object()->object;
+                    }
                 }
 
                 if (new_object) {
