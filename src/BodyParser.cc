@@ -161,7 +161,9 @@ void BodyParser::parse_directive(const Token& directive) {
 
 
 void BodyParser::parse_data() {
-    current_body->append(ExpressionParser(tokenizer).parse_list());
+    auto data = ExpressionParser(tokenizer).parse_list();
+    data.evaluate(object, environment, current_size(), ifs.empty());
+    current_body->append(data);
 }
 
 void BodyParser::parse_else() {

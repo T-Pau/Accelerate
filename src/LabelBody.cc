@@ -7,7 +7,7 @@
 #include <iostream>
 
 #include "Body.h"
-
+#include "Object.h"
 
 void LabelBody::serialize(std::ostream &stream, const std::string& prefix) const {
     if (prefix.ends_with("  ")) {
@@ -22,7 +22,15 @@ void LabelBody::serialize(std::ostream &stream, const std::string& prefix) const
 std::optional<Body> LabelBody::evaluated(const EvaluationContext& context) const {
     label->offset = context.offset;
 
-    if (!label->is_named()) {
+    if (label->is_named()) {
+        if (!context.conditional && context.object) {
+            context.object->environment->add(label->name, label);
+            if (label->offset.size()) {
+                return Body();
+            }
+        }
+    }
+    else {
         if (context.conditional_in_scope) {
             context.scope->invalidate_unnamed_label();
         }
@@ -31,10 +39,5 @@ std::optional<Body> LabelBody::evaluated(const EvaluationContext& context) const
         }
     }
 
-    if (label->is_named() && label->offset.size().has_value()) {
-        return Body();
-    }
-    else {
-        return {};
-    }
+    return {};
 }

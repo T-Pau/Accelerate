@@ -1,0 +1,47 @@
+arguments --create-library -o l.lib a.o b.o
+file a.o <inline>
+.format_version 1.0
+.target "6502"
+.object color_line {
+    visibility: local
+    section: code
+    body <
+        .if .in_range($00, $ff, tmp1)
+          .data $85, tmp1:1
+        .else
+          .data $8d, tmp1:2
+        .end
+      :
+        .data $91, ptr1:1, $88
+      .label_1:
+        .data $10, ((.label_offset(:-)-.label_offset(color_line, .label_1))-$02):-1, $60
+    >
+}
+end-of-inline-data
+file b.o <inline>
+.format_version 1.0
+.target "6502"
+.object tmp1 {
+    visibility: local
+    section: zero_page
+    reserve: 1
+}
+end-of-inline-data
+file l.lib {} <inline>
+.format_version 1.0
+.target "6502"
+.object color_line {
+    visibility: local
+    section: code
+    body <
+        .data $85, tmp1:1
+      :
+        .data $91, ptr1:1, $88, $10, -$05, $60
+    >
+}
+.object tmp1 {
+    visibility: local
+    section: zero_page
+    reserve: 1
+}
+end-of-inline-data

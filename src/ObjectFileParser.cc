@@ -80,7 +80,6 @@ ObjectFileParser::ObjectFileParser() {
     initialize();
     tokenizer.add_literal(token_in_range);
     tokenizer.add_literal(token_label_offset);
-    tokenizer.add_literal(token_object);
     tokenizer.add_literal(token_object_name);
     tokenizer.add_literal(Token::NAME, ".label_", "0123456789");
     tokenizer.add_literal(Token::colon_minus);

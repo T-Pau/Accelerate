@@ -49,6 +49,7 @@ public:
 
     void add(Symbol name, Expression value) {variables[name] = std::move(value);} // TODO: check for duplicates
     void add(Symbol name, const Function* function) {functions[name] = function;} // TODO: check for duplicates
+    void add(Symbol name, std::shared_ptr<Label> label) {labels[name] = std::move(label);} // TODO: check for duplicates
     void add(Symbol name, const Macro* macro) {macros[name] = macro;} // TODO: check for duplicates
     void add_next(std::shared_ptr<Environment> new_next) {next.emplace_back(std::move(new_next));}
     [[nodiscard]] const Function* get_function(Symbol name) const;

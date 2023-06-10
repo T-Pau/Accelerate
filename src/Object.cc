@@ -98,6 +98,7 @@ Object::Object(ObjectFile* owner, Token name_, const std::shared_ptr<ParsedValue
     }
     else {
         body = body_value->as_body()->body;
+        evaluate();
     }
 
     section = owner->target->map.section((*parameters)[token_section]->as_singular_scalar()->token().as_symbol());
