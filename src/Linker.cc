@@ -39,6 +39,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 void Linker::link() {
     program->evaluate(program->private_environment);
+    program->evaluate(program->private_environment);
 
     for (auto& library: libraries) {
         library->evaluate(library->private_environment);

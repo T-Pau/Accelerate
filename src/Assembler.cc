@@ -45,6 +45,7 @@ bool Assembler::initialized = false;
 Symbol Assembler::symbol_opcode;
 Token Assembler::token_address;
 Token Assembler::token_align;
+Token Assembler::token_macro;
 Token Assembler::token_reserve;
 Token Assembler::token_section;
 Token Assembler::token_target;
@@ -56,6 +57,7 @@ void Assembler::initialize() {
         symbol_opcode = ".opcode";
         token_address = Token(Token::DIRECTIVE, "address");
         token_align = Token(Token::DIRECTIVE, "align");
+        token_macro = Token(Token::DIRECTIVE, "macro");
         token_reserve = Token(Token::DIRECTIVE, "reserve");
         token_section = Token(Token::DIRECTIVE, "section");
         token_target = Token(Token::DIRECTIVE, "target");
@@ -201,10 +203,16 @@ void Assembler::parse_directive(const Token& directive) {
     auto visibility = VisibilityHelper::from_token(directive);
     if (visibility) {
         auto name = tokenizer.next();
-        if (name.get_type() != Token::NAME) {
+        if (name == token_macro) {
+            parse_macro(*visibility);
+        }
+        else if (name.get_type() != Token::NAME) {
             throw ParseException(name, "name expected");
         }
         parse_name(*visibility, name);
+    }
+    else if (directive == token_macro) {
+        parse_macro(current_visibility);
     }
     else if (directive == token_section) {
         parse_section();
@@ -247,13 +255,6 @@ void Assembler::parse_name(Visibility visibility, const Token& name) {
         parse_assignment(visibility, name);
         return;
     }
-    else if (token.is_name()) {
-        tokenizer.unget(token);
-        auto arguments = Callable::Arguments(tokenizer);
-        tokenizer.expect(Token::curly_open);
-        auto body = BodyParser(tokenizer, object_file->target->cpu).parse(); // TODO: proper mode for macros
-        object_file->add_macro(std::make_unique<Macro>(name, visibility, arguments, body));
-    }
     else if (token == Token::paren_open) {
         auto arguments = Callable::Arguments(tokenizer);
         tokenizer.expect(Token::paren_close);
@@ -266,4 +267,12 @@ void Assembler::parse_name(Visibility visibility, const Token& name) {
         tokenizer.unget(token);
         parse_symbol(visibility, name);
     }
+}
+
+void Assembler::parse_macro(Visibility visibility) {
+    auto name = tokenizer.expect(Token::NAME);
+    auto arguments = Callable::Arguments(tokenizer);
+    tokenizer.expect(Token::curly_open);
+    auto body = BodyParser(tokenizer, object_file->target->cpu).parse(); // TODO: proper mode for macros
+    object_file->add_macro(std::make_unique<Macro>(name, visibility, arguments, body));
 }

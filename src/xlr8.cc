@@ -235,7 +235,7 @@ void xlr8::process() {
         else {
             linker->program->evaluate();
             linker->program->evaluate(); // TODO: shouldn't be necessary
-            //linker->program->remove_local_constants();
+            //linker->program->remove_private_constants();
         }
     }
 }

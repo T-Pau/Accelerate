@@ -50,10 +50,10 @@ private:
     void parse_name(Visibility visibility, const Token& name);
     void parse_assignment(Visibility visibility, const Token& name);
     void parse_directive(const Token& directive);
+    void parse_macro(Visibility visibility);
     void parse_section();
     void parse_symbol(Visibility visibility, const Token& name);
     void parse_target();
-    void parse_visibility();
 
     const Target* target;
 
@@ -70,6 +70,7 @@ private:
     static Token token_address;
     static Token token_align;
     static Token token_data;
+    static Token token_macro;
     static Token token_reserve;
     static Token token_section;
     static Token token_target;

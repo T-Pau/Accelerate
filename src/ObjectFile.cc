@@ -195,7 +195,7 @@ void ObjectFile::evaluate(const std::shared_ptr<Environment>& environment) {
 }
 
 
-void ObjectFile::remove_local_constants() {
+void ObjectFile::remove_private_constants() {
     std::erase_if(constants, [this](const auto& item) {
         if (item.second->visibility == Visibility::PRIVATE) {
             private_environment->remove(item.first);

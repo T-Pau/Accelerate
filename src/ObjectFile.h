@@ -73,7 +73,7 @@ public:
     void evaluate();
     void import(ObjectFile* library);
     [[nodiscard]] const Object* object(Symbol object_name) const;
-    void remove_local_constants();
+    void remove_private_constants();
     void serialize(std::ostream& stream) const;
     void set_target(const Target* new_target);
     std::shared_ptr<Environment> environment(Visibility visibility) const;

@@ -2,14 +2,14 @@ description Test instruction with 2 variants, known which will be used
 arguments --create-library --target 6502 -o a.lib a.s b.s c.lib
 file a.s <inline>
 other_address = $2002
-other_file address {
+.macro other_file address {
     lda #0
     sta address
 }
 end-of-inline-data
 file b.s <inline>
 same_address = $1001
-same_file address {
+.macro same_file address {
     ldx #1
     stx address
 }
