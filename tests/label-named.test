@@ -6,8 +6,8 @@ test {
     nop
     bne label
     nop
-.local label:
-.local next = label + 1
+.private label:
+.private next = label + 1
     nop
     bne label
     nop
@@ -17,15 +17,15 @@ file a.o {} <inline>
 .format_version 1.0
 .target "6502"
 .constant label {
-    visibility: local
+    visibility: private
     value: (test+$04)
 }
 .constant next {
-    visibility: local
+    visibility: private
     value: (test+$05)
 }
 .object test {
-    visibility: local
+    visibility: private
     section: code
     body <
         .data $ea, $d0, $01:-1, $ea, $ea, $d0, -$03, $ea

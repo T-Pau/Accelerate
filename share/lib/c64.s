@@ -1,6 +1,6 @@
 .target "6502"
 
-.visibility global
+.visibility public
 
 COLOR_BLACK = 0
 COLOR_WHITE = 1

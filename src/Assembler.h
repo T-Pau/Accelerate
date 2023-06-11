@@ -58,7 +58,7 @@ private:
     const Target* target;
 
     Symbol current_section;
-    Visibility current_visibility = Visibility::LOCAL;
+    Visibility current_visibility = Visibility::PRIVATE;
     std::shared_ptr<Environment> file_environment;
 
     FileTokenizer tokenizer;

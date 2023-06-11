@@ -5,7 +5,7 @@ file a.s <inline>
 test {
     lda foo
 label:
-.local next = label + 1
+.private next = label + 1
     nop
 }
 end-of-inline-data
@@ -13,11 +13,11 @@ file a.o {} <inline>
 .format_version 1.0
 .target "6502"
 .constant next {
-    visibility: local
+    visibility: private
     value: ((test+.label_offset(test, label))+$01)
 }
 .object test {
-    visibility: local
+    visibility: private
     section: code
     body <
         .if .in_range($00, $ff, foo)

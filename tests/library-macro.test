@@ -14,7 +14,7 @@ same_file address {
     stx address
 }
 .section code
-.global init {
+.public init {
     same_file same_address
     other_file other_address
     library library_address
@@ -27,11 +27,11 @@ file c.lib <inline>
 .format_version 1.0
 .target "6502"
 .constant library_address {
-    visibility: global
+    visibility: public
     value: $3003
 }
 .macro library {
-    visibility: global
+    visibility: public
     arguments: address
     body <
         .data $a0, $02, $8c, address:2
@@ -43,15 +43,15 @@ file a.lib {} <inline>
 .target "6502"
 .import "c.lib"
 .constant other_address {
-    visibility: local
+    visibility: private
     value: $2002
 }
 .constant same_address {
-    visibility: local
+    visibility: private
     value: $1001
 }
 .macro other_file {
-    visibility: local
+    visibility: private
     arguments: address
     body <
         .data $a9, $00
@@ -63,7 +63,7 @@ file a.lib {} <inline>
     >
 }
 .macro same_file {
-    visibility: local
+    visibility: private
     arguments: address
     body <
         .data $a2, $01
@@ -75,7 +75,7 @@ file a.lib {} <inline>
     >
 }
 .object init {
-    visibility: global
+    visibility: public
     section: code
     body <
         .data $a2, $01, $8e, $1001, $a9, $00, $8d, $2002, $a0, $02, $8c, $3003, $a2, $01

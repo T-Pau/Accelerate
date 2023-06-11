@@ -2,7 +2,7 @@ description Test 4510 CPU definition
 arguments -c --target 4510 4510.s
 file 4510.s <inline>
 .section code
-.global test_adc {
+test_adc {
     adc #$12
     adc $12
     adc $12,x
@@ -13,7 +13,7 @@ file 4510.s <inline>
     adc ($12),y
     adc ($12),z
 }
-.global test_and {
+test_and {
     and #$12
     and $12
     and $12,x
@@ -24,7 +24,7 @@ file 4510.s <inline>
     and ($12),y
     and ($12),z
 }
-.global test_asl {
+test_asl {
     asl
     asl a
     asl $12
@@ -32,132 +32,132 @@ file 4510.s <inline>
     asl $1234
     asl $1234,x
 }
-.global test_asr {
+test_asr {
     asr
     asr a
     asr $12
     asr $12,x
 }
-.global test_asw {
+test_asw {
     asw $1234
 }
-.global test_bbr0 {
+test_bbr0 {
     bbr0 test_bbr0
 }
-.global test_bbr1 {
+test_bbr1 {
     bbr1 test_bbr1
 }
-.global test_bbr2 {
+test_bbr2 {
     bbr2 test_bbr2
 }
-.global test_bbr3 {
+test_bbr3 {
     bbr3 test_bbr3
 }
-.global test_bbr4 {
+test_bbr4 {
     bbr4 test_bbr4
 }
-.global test_bbr5 {
+test_bbr5 {
     bbr5 test_bbr5
 }
-.global test_bbr6 {
+test_bbr6 {
     bbr6 test_bbr6
 }
-.global test_bbr7 {
+test_bbr7 {
     bbr7 test_bbr7
 }
-.global test_bbs0 {
+test_bbs0 {
     bbs0 test_bbs0
 }
-.global test_bbs1 {
+test_bbs1 {
     bbs1 test_bbs1
 }
-.global test_bbs2 {
+test_bbs2 {
     bbs2 test_bbs2
 }
-.global test_bbs3 {
+test_bbs3 {
     bbs3 test_bbs3
 }
-.global test_bbs4 {
+test_bbs4 {
     bbs4 test_bbs4
 }
-.global test_bbs5 {
+test_bbs5 {
     bbs5 test_bbs5
 }
-.global test_bbs6 {
+test_bbs6 {
     bbs6 test_bbs6
 }
-.global test_bbs7 {
+test_bbs7 {
     bbs7 test_bbs7
 }
-.global test_bcc {
+test_bcc {
     bcc test_bcc
     bcc $1234
 }
-.global test_bcs {
+test_bcs {
     bcs test_bcs
     bcs $1234
 }
-.global test_beq {
+test_beq {
     beq test_beq
     beq $1234
 }
-.global test_bit {
+test_bit {
     bit #$12
     bit $12
     bit $12,x
     bit $1234
     bit $1234,x
 }
-.global test_bmi {
+test_bmi {
     bmi test_bmi
     bmi $1234
 }
-.global test_bne {
+test_bne {
     bne test_bne
     bne $1234
 }
-.global test_bpl {
+test_bpl {
     bpl test_bpl
     bpl $1234
 }
-.global test_bra {
+test_bra {
     bra test_bra
     bra $1234
 }
-.global test_brk {
+test_brk {
     brk
 }
-.global test_bru {
+test_bru {
     bru test_bru
     bru $1234
 }
-.global test_bsr {
+test_bsr {
     bsr $1234
 }
-.global test_bvc {
+test_bvc {
     bvc test_bvc
     bvc $1234
 }
-.global test_bvs {
+test_bvs {
     bvs test_bvs
     bvs $1234
 }
-.global test_clc {
+test_clc {
     clc
 }
-.global test_cld {
+test_cld {
     cld
 }
-.global test_cle {
+test_cle {
     cle
 }
-.global test_cli {
+test_cli {
     cli
 }
-.global test_clv {
+test_clv {
     clv
 }
-.global test_cmp {
+test_cmp {
     cmp #$12
     cmp $12
     cmp $12,x
@@ -168,22 +168,22 @@ file 4510.s <inline>
     cmp ($12),y
     cmp ($12),z
 }
-.global test_cpx {
+test_cpx {
     cpx #$12
     cpx $12
     cpx $1234
 }
-.global test_cpy {
+test_cpy {
     cpy #$12
     cpy $12
     cpy $1234
 }
-.global test_cpz {
+test_cpz {
     cpz #$12
     cpz $12
     cpz $1234
 }
-.global test_dec {
+test_dec {
     dec
     dec a
     dec $12
@@ -191,19 +191,19 @@ file 4510.s <inline>
     dec $1234
     dec $1234,x
 }
-.global test_dew {
+test_dew {
     dew $12
 }
-.global test_dex {
+test_dex {
     dex
 }
-.global test_dey {
+test_dey {
     dey
 }
-.global test_dez {
+test_dez {
     dez
 }
-.global test_eor {
+test_eor {
     eor #$12
     eor $12
     eor $12,x
@@ -214,7 +214,7 @@ file 4510.s <inline>
     eor ($12),y
     eor ($12),z
 }
-.global test_inc {
+test_inc {
     inc
     inc a
     inc $12
@@ -222,29 +222,29 @@ file 4510.s <inline>
     inc $1234
     inc $1234,x
 }
-.global test_inw {
+test_inw {
     inw $12
 }
-.global test_inx {
+test_inx {
     inx
 }
-.global test_iny {
+test_iny {
     iny
 }
-.global test_inz {
+test_inz {
     inz
 }
-.global test_jmp {
+test_jmp {
     jmp $1234
     jmp ($1234)
     jmp ($1234,x)
 }
-.global test_jsr {
+test_jsr {
     jsr $1234
     jsr ($1234)
     jsr ($1234,x)
 }
-.global test_lda {
+test_lda {
     lda #$12
     lda $12
     lda $12,x
@@ -256,26 +256,26 @@ file 4510.s <inline>
     lda ($12),z
     lda ($12,sp),y
 }
-.global test_ldx {
+test_ldx {
     ldx #$12
     ldx $12
     ldx $12,y
     ldx $1234
     ldx $1234,y
 }
-.global test_ldy {
+test_ldy {
     ldy #$12
     ldy $12
     ldy $12,x
     ldy $1234
     ldy $1234,x
 }
-.global test_ldz {
+test_ldz {
     ldz #$12
     ldz $1234
     ldz $1234,x
 }
-.global test_lsr {
+test_lsr {
     lsr
     lsr a
     lsr $12
@@ -283,17 +283,17 @@ file 4510.s <inline>
     lsr $1234
     lsr $1234,x
 }
-.global test_map {
+test_map {
     map
 }
-.global test_neg {
+test_neg {
     neg
     neg a
 }
-.global test_nop {
+test_nop {
     nop
 }
-.global test_ora {
+test_ora {
     ora #$12
     ora $12
     ora $12,x
@@ -304,65 +304,65 @@ file 4510.s <inline>
     ora ($12),y
     ora ($12),z
 }
-.global test_pha {
+test_pha {
     pha
 }
-.global test_php {
+test_php {
     php
 }
-.global test_phw {
+test_phw {
     phw #$1234
     phw $1234
 }
-.global test_phx {
+test_phx {
     phx
 }
-.global test_phy {
+test_phy {
     phy
 }
-.global test_phz {
+test_phz {
     phz
 }
-.global test_pla {
+test_pla {
     pla
 }
-.global test_plp {
+test_plp {
     plp
 }
-.global test_plx {
+test_plx {
     plx
 }
-.global test_ply {
+test_ply {
     ply
 }
-.global test_plz {
+test_plz {
     plz
 }
-.global test_rmb0 {
+test_rmb0 {
     rmb0 $12
 }
-.global test_rmb1 {
+test_rmb1 {
     rmb1 $12
 }
-.global test_rmb2 {
+test_rmb2 {
     rmb2 $12
 }
-.global test_rmb3 {
+test_rmb3 {
     rmb3 $12
 }
-.global test_rmb4 {
+test_rmb4 {
     rmb4 $12
 }
-.global test_rmb5 {
+test_rmb5 {
     rmb5 $12
 }
-.global test_rmb6 {
+test_rmb6 {
     rmb6 $12
 }
-.global test_rmb7 {
+test_rmb7 {
     rmb7 $12
 }
-.global test_rol {
+test_rol {
     rol
     rol a
     rol $12
@@ -370,7 +370,7 @@ file 4510.s <inline>
     rol $1234
     rol $1234,x
 }
-.global test_ror {
+test_ror {
     ror
     ror a
     ror $12
@@ -378,19 +378,19 @@ file 4510.s <inline>
     ror $1234
     ror $1234,x
 }
-.global test_row {
+test_row {
     row $1234
 }
-.global test_rti {
+test_rti {
     rti
 }
-.global test_rtn {
+test_rtn {
     rtn #$12
 }
-.global test_rts {
+test_rts {
     rts
 }
-.global test_sbc {
+test_sbc {
     sbc #$12
     sbc $12
     sbc $12,x
@@ -401,43 +401,43 @@ file 4510.s <inline>
     sbc ($12),y
     sbc ($12),z
 }
-.global test_sec {
+test_sec {
     sec
 }
-.global test_sed {
+test_sed {
     sed
 }
-.global test_see {
+test_see {
     see
 }
-.global test_sei {
+test_sei {
     sei
 }
-.global test_smb0 {
+test_smb0 {
     smb0 $12
 }
-.global test_smb1 {
+test_smb1 {
     smb1 $12
 }
-.global test_smb2 {
+test_smb2 {
     smb2 $12
 }
-.global test_smb3 {
+test_smb3 {
     smb3 $12
 }
-.global test_smb4 {
+test_smb4 {
     smb4 $12
 }
-.global test_smb5 {
+test_smb5 {
     smb5 $12
 }
-.global test_smb6 {
+test_smb6 {
     smb6 $12
 }
-.global test_smb7 {
+test_smb7 {
     smb7 $12
 }
-.global test_sta {
+test_sta {
     sta $12
     sta $12,x
     sta $1234
@@ -448,66 +448,66 @@ file 4510.s <inline>
     sta ($12),z
     sta ($12,sp),y
 }
-.global test_stx {
+test_stx {
     stx $12
     stx $12,y
     stx $1234
     stx $1234,y
 }
-.global test_sty {
+test_sty {
     sty $12
     sty $12,x
     sty $1234
     sty $1234,x
 }
-.global test_stz {
+test_stz {
     stz $12
     stz $12,x
     stz $1234
     stz $1234,x
 }
-.global test_tab {
+test_tab {
     tab
 }
-.global test_tax {
+test_tax {
     tax
 }
-.global test_tay {
+test_tay {
     tay
 }
-.global test_taz {
+test_taz {
     taz
 }
-.global test_tba {
+test_tba {
     tba
 }
-.global test_trb {
+test_trb {
     trb $12
     trb $1234
 }
-.global test_tsb {
+test_tsb {
     tsb $12
     tsb $1234
 }
-.global test_tsx {
+test_tsx {
     tsx
 }
-.global test_tsy {
+test_tsy {
     tsy
 }
-.global test_txa {
+test_txa {
     txa
 }
-.global test_txs {
+test_txs {
     txs
 }
-.global test_tya {
+test_tya {
     tya
 }
-.global test_tys {
+test_tys {
     tys
 }
-.global test_tza {
+test_tza {
     tza
 }
 end-of-inline-data
@@ -515,154 +515,154 @@ file 4510.o {} <inline>
 .format_version 1.0
 .target "4510"
 .object test_adc {
-    visibility: global
+    visibility: private
     section: code
     body <
         .data $69, $12, $65, $12, $75, $12, $6d, $1234, $7d, $1234, $79, $1234, $61, $12, $71, $12, $72, $12
     >
 }
 .object test_and {
-    visibility: global
+    visibility: private
     section: code
     body <
         .data $29, $12, $25, $12, $35, $12, $2d, $1234, $3d, $1234, $39, $1234, $21, $12, $31, $12, $32, $12
     >
 }
 .object test_asl {
-    visibility: global
+    visibility: private
     section: code
     body <
         .data $0a, $0a, $06, $12, $16, $12, $0e, $1234, $1e, $1234
     >
 }
 .object test_asr {
-    visibility: global
+    visibility: private
     section: code
     body <
         .data $43, $43, $44, $12, $54, $12
     >
 }
 .object test_asw {
-    visibility: global
+    visibility: private
     section: code
     body <
         .data $cb, $1234
     >
 }
 .object test_bbr0 {
-    visibility: global
+    visibility: private
     section: code
     body <
         .data $0f, -$02
     >
 }
 .object test_bbr1 {
-    visibility: global
+    visibility: private
     section: code
     body <
         .data $1f, -$02
     >
 }
 .object test_bbr2 {
-    visibility: global
+    visibility: private
     section: code
     body <
         .data $2f, -$02
     >
 }
 .object test_bbr3 {
-    visibility: global
+    visibility: private
     section: code
     body <
         .data $3f, -$02
     >
 }
 .object test_bbr4 {
-    visibility: global
+    visibility: private
     section: code
     body <
         .data $4f, -$02
     >
 }
 .object test_bbr5 {
-    visibility: global
+    visibility: private
     section: code
     body <
         .data $5f, -$02
     >
 }
 .object test_bbr6 {
-    visibility: global
+    visibility: private
     section: code
     body <
         .data $6f, -$02
     >
 }
 .object test_bbr7 {
-    visibility: global
+    visibility: private
     section: code
     body <
         .data $7f, -$02
     >
 }
 .object test_bbs0 {
-    visibility: global
+    visibility: private
     section: code
     body <
         .data $8f, -$02
     >
 }
 .object test_bbs1 {
-    visibility: global
+    visibility: private
     section: code
     body <
         .data $9f, -$02
     >
 }
 .object test_bbs2 {
-    visibility: global
+    visibility: private
     section: code
     body <
         .data $af, -$02
     >
 }
 .object test_bbs3 {
-    visibility: global
+    visibility: private
     section: code
     body <
         .data $bf, -$02
     >
 }
 .object test_bbs4 {
-    visibility: global
+    visibility: private
     section: code
     body <
         .data $cf, -$02
     >
 }
 .object test_bbs5 {
-    visibility: global
+    visibility: private
     section: code
     body <
         .data $df, -$02
     >
 }
 .object test_bbs6 {
-    visibility: global
+    visibility: private
     section: code
     body <
         .data $ef, -$02
     >
 }
 .object test_bbs7 {
-    visibility: global
+    visibility: private
     section: code
     body <
         .data $ff, -$02
     >
 }
 .object test_bcc {
-    visibility: global
+    visibility: private
     section: code
     body <
         .data $90, -$02
@@ -674,7 +674,7 @@ file 4510.o {} <inline>
     >
 }
 .object test_bcs {
-    visibility: global
+    visibility: private
     section: code
     body <
         .data $b0, -$02
@@ -686,7 +686,7 @@ file 4510.o {} <inline>
     >
 }
 .object test_beq {
-    visibility: global
+    visibility: private
     section: code
     body <
         .data $f0, -$02
@@ -698,14 +698,14 @@ file 4510.o {} <inline>
     >
 }
 .object test_bit {
-    visibility: global
+    visibility: private
     section: code
     body <
         .data $89, $12, $24, $12, $34, $12, $2c, $1234, $3c, $1234
     >
 }
 .object test_bmi {
-    visibility: global
+    visibility: private
     section: code
     body <
         .data $30, -$02
@@ -717,7 +717,7 @@ file 4510.o {} <inline>
     >
 }
 .object test_bne {
-    visibility: global
+    visibility: private
     section: code
     body <
         .data $d0, -$02
@@ -729,7 +729,7 @@ file 4510.o {} <inline>
     >
 }
 .object test_bpl {
-    visibility: global
+    visibility: private
     section: code
     body <
         .data $10, -$02
@@ -741,7 +741,7 @@ file 4510.o {} <inline>
     >
 }
 .object test_bra {
-    visibility: global
+    visibility: private
     section: code
     body <
         .data $80, -$02
@@ -753,14 +753,14 @@ file 4510.o {} <inline>
     >
 }
 .object test_brk {
-    visibility: global
+    visibility: private
     section: code
     body <
         .data $00
     >
 }
 .object test_bru {
-    visibility: global
+    visibility: private
     section: code
     body <
         .data $80, -$02
@@ -772,14 +772,14 @@ file 4510.o {} <inline>
     >
 }
 .object test_bsr {
-    visibility: global
+    visibility: private
     section: code
     body <
         .data $63, (($1234-test_bsr)-$02):-2
     >
 }
 .object test_bvc {
-    visibility: global
+    visibility: private
     section: code
     body <
         .data $50, -$02
@@ -791,7 +791,7 @@ file 4510.o {} <inline>
     >
 }
 .object test_bvs {
-    visibility: global
+    visibility: private
     section: code
     body <
         .data $70, -$02
@@ -803,609 +803,609 @@ file 4510.o {} <inline>
     >
 }
 .object test_clc {
-    visibility: global
+    visibility: private
     section: code
     body <
         .data $18
     >
 }
 .object test_cld {
-    visibility: global
+    visibility: private
     section: code
     body <
         .data $d8
     >
 }
 .object test_cle {
-    visibility: global
+    visibility: private
     section: code
     body <
         .data $02
     >
 }
 .object test_cli {
-    visibility: global
+    visibility: private
     section: code
     body <
         .data $58
     >
 }
 .object test_clv {
-    visibility: global
+    visibility: private
     section: code
     body <
         .data $b8
     >
 }
 .object test_cmp {
-    visibility: global
+    visibility: private
     section: code
     body <
         .data $c9, $12, $c5, $12, $d5, $12, $cd, $1234, $dd, $1234, $d9, $1234, $c1, $12, $d1, $12, $d2, $12
     >
 }
 .object test_cpx {
-    visibility: global
+    visibility: private
     section: code
     body <
         .data $e0, $12, $e4, $12, $ec, $1234
     >
 }
 .object test_cpy {
-    visibility: global
+    visibility: private
     section: code
     body <
         .data $c0, $12, $c4, $12, $cc, $1234
     >
 }
 .object test_cpz {
-    visibility: global
+    visibility: private
     section: code
     body <
         .data $c2, $12, $d4, $12, $dc, $1234
     >
 }
 .object test_dec {
-    visibility: global
+    visibility: private
     section: code
     body <
         .data $3a, $3a, $c6, $12, $d6, $12, $ce, $1234, $de, $1234
     >
 }
 .object test_dew {
-    visibility: global
+    visibility: private
     section: code
     body <
         .data $c3, $12
     >
 }
 .object test_dex {
-    visibility: global
+    visibility: private
     section: code
     body <
         .data $ca
     >
 }
 .object test_dey {
-    visibility: global
+    visibility: private
     section: code
     body <
         .data $88
     >
 }
 .object test_dez {
-    visibility: global
+    visibility: private
     section: code
     body <
         .data $3b
     >
 }
 .object test_eor {
-    visibility: global
+    visibility: private
     section: code
     body <
         .data $49, $12, $45, $12, $55, $12, $4d, $1234, $5d, $1234, $59, $1234, $41, $12, $51, $12, $52, $12
     >
 }
 .object test_inc {
-    visibility: global
+    visibility: private
     section: code
     body <
         .data $1a, $1a, $e6, $12, $f6, $12, $ee, $1234, $fe, $1234
     >
 }
 .object test_inw {
-    visibility: global
+    visibility: private
     section: code
     body <
         .data $e3, $12
     >
 }
 .object test_inx {
-    visibility: global
+    visibility: private
     section: code
     body <
         .data $e8
     >
 }
 .object test_iny {
-    visibility: global
+    visibility: private
     section: code
     body <
         .data $c8
     >
 }
 .object test_inz {
-    visibility: global
+    visibility: private
     section: code
     body <
         .data $1b
     >
 }
 .object test_jmp {
-    visibility: global
+    visibility: private
     section: code
     body <
         .data $4c, $1234, $6c, $1234, $7c, $1234
     >
 }
 .object test_jsr {
-    visibility: global
+    visibility: private
     section: code
     body <
         .data $20, $1234, $22, $1234, $23, $1234
     >
 }
 .object test_lda {
-    visibility: global
+    visibility: private
     section: code
     body <
         .data $a9, $12, $a5, $12, $b5, $12, $ad, $1234, $bd, $1234, $b9, $1234, $a1, $12, $b1, $12, $b2, $12, $e2, $12
     >
 }
 .object test_ldx {
-    visibility: global
+    visibility: private
     section: code
     body <
         .data $a2, $12, $a6, $12, $b6, $12, $ae, $1234, $be, $1234
     >
 }
 .object test_ldy {
-    visibility: global
+    visibility: private
     section: code
     body <
         .data $a0, $12, $a4, $12, $b4, $12, $ac, $1234, $bc, $1234
     >
 }
 .object test_ldz {
-    visibility: global
+    visibility: private
     section: code
     body <
         .data $a3, $12, $ab, $1234, $bb, $1234
     >
 }
 .object test_lsr {
-    visibility: global
+    visibility: private
     section: code
     body <
         .data $4a, $4a, $46, $12, $56, $12, $4e, $1234, $5e, $1234
     >
 }
 .object test_map {
-    visibility: global
+    visibility: private
     section: code
     body <
         .data $5c
     >
 }
 .object test_neg {
-    visibility: global
+    visibility: private
     section: code
     body <
         .data $42, $42
     >
 }
 .object test_nop {
-    visibility: global
+    visibility: private
     section: code
     body <
         .data $ea
     >
 }
 .object test_ora {
-    visibility: global
+    visibility: private
     section: code
     body <
         .data $09, $12, $05, $12, $15, $12, $0d, $1234, $1d, $1234, $19, $1234, $01, $12, $11, $12, $12, $12
     >
 }
 .object test_pha {
-    visibility: global
+    visibility: private
     section: code
     body <
         .data $48
     >
 }
 .object test_php {
-    visibility: global
+    visibility: private
     section: code
     body <
         .data $08
     >
 }
 .object test_phw {
-    visibility: global
+    visibility: private
     section: code
     body <
         .data $f4, $1234, $fc, $1234
     >
 }
 .object test_phx {
-    visibility: global
+    visibility: private
     section: code
     body <
         .data $da
     >
 }
 .object test_phy {
-    visibility: global
+    visibility: private
     section: code
     body <
         .data $5a
     >
 }
 .object test_phz {
-    visibility: global
+    visibility: private
     section: code
     body <
         .data $db
     >
 }
 .object test_pla {
-    visibility: global
+    visibility: private
     section: code
     body <
         .data $68
     >
 }
 .object test_plp {
-    visibility: global
+    visibility: private
     section: code
     body <
         .data $28
     >
 }
 .object test_plx {
-    visibility: global
+    visibility: private
     section: code
     body <
         .data $fa
     >
 }
 .object test_ply {
-    visibility: global
+    visibility: private
     section: code
     body <
         .data $7a
     >
 }
 .object test_plz {
-    visibility: global
+    visibility: private
     section: code
     body <
         .data $fb
     >
 }
 .object test_rmb0 {
-    visibility: global
+    visibility: private
     section: code
     body <
         .data $07, $12
     >
 }
 .object test_rmb1 {
-    visibility: global
+    visibility: private
     section: code
     body <
         .data $17, $12
     >
 }
 .object test_rmb2 {
-    visibility: global
+    visibility: private
     section: code
     body <
         .data $27, $12
     >
 }
 .object test_rmb3 {
-    visibility: global
+    visibility: private
     section: code
     body <
         .data $37, $12
     >
 }
 .object test_rmb4 {
-    visibility: global
+    visibility: private
     section: code
     body <
         .data $47, $12
     >
 }
 .object test_rmb5 {
-    visibility: global
+    visibility: private
     section: code
     body <
         .data $57, $12
     >
 }
 .object test_rmb6 {
-    visibility: global
+    visibility: private
     section: code
     body <
         .data $67, $12
     >
 }
 .object test_rmb7 {
-    visibility: global
+    visibility: private
     section: code
     body <
         .data $77, $12
     >
 }
 .object test_rol {
-    visibility: global
+    visibility: private
     section: code
     body <
         .data $2a, $2a, $26, $12, $36, $12, $2e, $1234, $3e, $1234
     >
 }
 .object test_ror {
-    visibility: global
+    visibility: private
     section: code
     body <
         .data $6a, $6a, $66, $12, $76, $12, $6e, $1234, $7e, $1234
     >
 }
 .object test_row {
-    visibility: global
+    visibility: private
     section: code
     body <
         .data $eb, $1234
     >
 }
 .object test_rti {
-    visibility: global
+    visibility: private
     section: code
     body <
         .data $40
     >
 }
 .object test_rtn {
-    visibility: global
+    visibility: private
     section: code
     body <
         .data $62, $12
     >
 }
 .object test_rts {
-    visibility: global
+    visibility: private
     section: code
     body <
         .data $60
     >
 }
 .object test_sbc {
-    visibility: global
+    visibility: private
     section: code
     body <
         .data $e9, $12, $e5, $12, $f5, $12, $ed, $1234, $fd, $1234, $f9, $1234, $e1, $12, $f1, $12, $f2, $12
     >
 }
 .object test_sec {
-    visibility: global
+    visibility: private
     section: code
     body <
         .data $38
     >
 }
 .object test_sed {
-    visibility: global
+    visibility: private
     section: code
     body <
         .data $f8
     >
 }
 .object test_see {
-    visibility: global
+    visibility: private
     section: code
     body <
         .data $03
     >
 }
 .object test_sei {
-    visibility: global
+    visibility: private
     section: code
     body <
         .data $78
     >
 }
 .object test_smb0 {
-    visibility: global
+    visibility: private
     section: code
     body <
         .data $87, $12
     >
 }
 .object test_smb1 {
-    visibility: global
+    visibility: private
     section: code
     body <
         .data $97, $12
     >
 }
 .object test_smb2 {
-    visibility: global
+    visibility: private
     section: code
     body <
         .data $a7, $12
     >
 }
 .object test_smb3 {
-    visibility: global
+    visibility: private
     section: code
     body <
         .data $b7, $12
     >
 }
 .object test_smb4 {
-    visibility: global
+    visibility: private
     section: code
     body <
         .data $c7, $12
     >
 }
 .object test_smb5 {
-    visibility: global
+    visibility: private
     section: code
     body <
         .data $d7, $12
     >
 }
 .object test_smb6 {
-    visibility: global
+    visibility: private
     section: code
     body <
         .data $e7, $12
     >
 }
 .object test_smb7 {
-    visibility: global
+    visibility: private
     section: code
     body <
         .data $f7, $12
     >
 }
 .object test_sta {
-    visibility: global
+    visibility: private
     section: code
     body <
         .data $85, $12, $95, $12, $8d, $1234, $9d, $1234, $99, $1234, $81, $12, $91, $12, $92, $12, $82, $12
     >
 }
 .object test_stx {
-    visibility: global
+    visibility: private
     section: code
     body <
         .data $86, $12, $96, $12, $8e, $1234, $9b, $1234
     >
 }
 .object test_sty {
-    visibility: global
+    visibility: private
     section: code
     body <
         .data $84, $12, $94, $12, $8c, $1234, $8b, $1234
     >
 }
 .object test_stz {
-    visibility: global
+    visibility: private
     section: code
     body <
         .data $64, $12, $74, $12, $9c, $1234, $9e, $1234
     >
 }
 .object test_tab {
-    visibility: global
+    visibility: private
     section: code
     body <
         .data $5b
     >
 }
 .object test_tax {
-    visibility: global
+    visibility: private
     section: code
     body <
         .data $aa
     >
 }
 .object test_tay {
-    visibility: global
+    visibility: private
     section: code
     body <
         .data $a8
     >
 }
 .object test_taz {
-    visibility: global
+    visibility: private
     section: code
     body <
         .data $4b
     >
 }
 .object test_tba {
-    visibility: global
+    visibility: private
     section: code
     body <
         .data $7b
     >
 }
 .object test_trb {
-    visibility: global
+    visibility: private
     section: code
     body <
         .data $14, $12, $1c, $1234
     >
 }
 .object test_tsb {
-    visibility: global
+    visibility: private
     section: code
     body <
         .data $04, $12, $0c, $1234
     >
 }
 .object test_tsx {
-    visibility: global
+    visibility: private
     section: code
     body <
         .data $ba
     >
 }
 .object test_tsy {
-    visibility: global
+    visibility: private
     section: code
     body <
         .data $0b
     >
 }
 .object test_txa {
-    visibility: global
+    visibility: private
     section: code
     body <
         .data $8a
     >
 }
 .object test_txs {
-    visibility: global
+    visibility: private
     section: code
     body <
         .data $9a
     >
 }
 .object test_tya {
-    visibility: global
+    visibility: private
     section: code
     body <
         .data $98
     >
 }
 .object test_tys {
-    visibility: global
+    visibility: private
     section: code
     body <
         .data $2b
     >
 }
 .object test_tza {
-    visibility: global
+    visibility: private
     section: code
     body <
         .data $6b

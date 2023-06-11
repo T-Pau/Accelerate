@@ -38,11 +38,11 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "TargetParser.h"
 
 void Linker::link() {
-    program->evaluate(program->local_environment);
+    program->evaluate(program->private_environment);
 
     for (auto& library: libraries) {
-        library->evaluate(library->local_environment);
-        program->evaluate(library->global_environment);
+        library->evaluate(library->private_environment);
+        program->evaluate(library->public_environment);
     }
 
     std::unordered_set<Object*> new_objects;

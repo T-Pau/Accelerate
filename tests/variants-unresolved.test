@@ -2,7 +2,7 @@ description Test instruction with 2 variants, unknown which will be used
 arguments -c --target 6502 file.s
 file file.s <inline>
 .section code
-.global test {
+.public test {
     sta ptr
 }
 end-of-inline-data
@@ -10,7 +10,7 @@ file file.o {} <inline>
 .format_version 1.0
 .target "6502"
 .object test {
-    visibility: global
+    visibility: public
     section: code
     body <
         .if .in_range($00, $ff, ptr)

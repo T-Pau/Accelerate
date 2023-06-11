@@ -62,7 +62,7 @@ void Object::initialize() {
     }
 }
 
-Object::Object(ObjectFile* owner, Token name_, const std::shared_ptr<ParsedValue>& definition): Entity(name_, definition), owner(owner), environment(std::make_shared<Environment>(owner->local_environment)) {
+Object::Object(ObjectFile* owner, Token name_, const std::shared_ptr<ParsedValue>& definition): Entity(name_, definition), owner(owner), environment(std::make_shared<Environment>(owner->private_environment)) {
     initialize();
     auto parameters = definition->as_dictionary();
 
@@ -105,7 +105,7 @@ Object::Object(ObjectFile* owner, Token name_, const std::shared_ptr<ParsedValue
 }
 
 
-Object::Object(ObjectFile *owner, const MemoryMap::Section *section, Visibility visibility, Token name): Entity(name, visibility), owner(owner), section(section), environment(std::make_shared<Environment>(owner->local_environment)) {}
+Object::Object(ObjectFile *owner, const MemoryMap::Section *section, Visibility visibility, Token name): Entity(name, visibility), owner(owner), section(section), environment(std::make_shared<Environment>(owner->private_environment)) {}
 
 
 std::ostream& operator<< (std::ostream& stream, const Object& object) {
@@ -156,7 +156,7 @@ void Object::set_owner(ObjectFile* new_owner) {
         return;
     }
     if (owner) {
-        environment->replace(owner->local_environment, new_owner->local_environment);
+        environment->replace(owner->private_environment, new_owner->private_environment);
     }
     owner = new_owner;
 }

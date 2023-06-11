@@ -3,11 +3,11 @@ file a.o <inline>
 .format_version 1.0
 .target "6502"
 .constant exported_label {
-    visibility: local
+    visibility: private
     value: (test+.label_offset(test, label))
 }
 .object test {
-    visibility: local
+    visibility: private
     section: code
     body <
         .if .in_range($00, $ff, tmp1)
@@ -24,7 +24,7 @@ file b.o <inline>
 .format_version 1.0
 .target "6502"
 .object tmp1 {
-    visibility: local
+    visibility: private
     section: zero_page
     reserve: 1
 }
@@ -33,18 +33,18 @@ file l.lib {} <inline>
 .format_version 1.0
 .target "6502"
 .constant exported_label {
-    visibility: local
+    visibility: private
     value: (test+$02)
 }
 .object test {
-    visibility: local
+    visibility: private
     section: code
     body <
         .data $85, tmp1:1, $91, ptr1:1, $60
     >
 }
 .object tmp1 {
-    visibility: local
+    visibility: private
     section: zero_page
     reserve: 1
 }

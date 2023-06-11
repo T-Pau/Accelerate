@@ -15,7 +15,7 @@ file a.o {} <inline>
 .format_version 1.0
 .target "6502"
 .object test {
-    visibility: local
+    visibility: private
     section: code
     body <
         .data $ea, $d0, $01:-1, $ea

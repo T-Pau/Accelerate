@@ -3,7 +3,7 @@ arguments -c --target 6502 file.s
 return 1
 file file.s <inline>
 .section code
-.global test {
+test {
     lda #$0
 end-of-inline-data
 stderr

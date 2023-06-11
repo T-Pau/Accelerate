@@ -2,7 +2,7 @@
 
 .target "6502"
 
-.visibility global
+.visibility public
 
 ACPTR = $ffa5
 CHKIN = $ffc6

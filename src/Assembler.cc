@@ -78,7 +78,7 @@ std::shared_ptr<ObjectFile> Assembler::parse(Symbol file_name) {
     object_file = std::make_shared<ObjectFile>();
     object_file->target = target;
 
-    file_environment = std::make_shared<Environment>(object_file->local_environment);
+    file_environment = std::make_shared<Environment>(object_file->private_environment);
     
     while (!tokenizer.ended()) {
         try {

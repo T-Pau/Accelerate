@@ -4,22 +4,25 @@
 
 #include "Visibility.h"
 
+#define PRIVATE_LITERAL "private"
+#define PUBLIC_LITERAL "public"
+
 bool VisibilityHelper::initialized = false;
-Token VisibilityHelper::token_local_directive;
-Token VisibilityHelper::token_local_name;
-Token VisibilityHelper::token_global_directive;
-Token VisibilityHelper::token_global_name;
+Token VisibilityHelper::token_private_directive;
+Token VisibilityHelper::token_private_name;
+Token VisibilityHelper::token_public_directive;
+Token VisibilityHelper::token_public_name;
 
 std::ostream& operator<<(std::ostream& stream, Visibility visibility) {
     switch  (visibility) {
         case Visibility::SCOPE:
             stream << "none";
             break;
-        case Visibility::LOCAL:
-            stream << "local";
+        case Visibility::PUBLIC:
+            stream << PUBLIC_LITERAL;
             break;
-        case Visibility::GLOBAL:
-            stream << "global";
+        case Visibility::PRIVATE:
+            stream << PRIVATE_LITERAL;
             break;
     }
     return stream;
@@ -27,26 +30,24 @@ std::ostream& operator<<(std::ostream& stream, Visibility visibility) {
 
 void VisibilityHelper::initialize() {
     if (!initialized) {
-        token_global_directive = Token(Token::DIRECTIVE, ".global");
-        token_global_name = Token(Token::NAME, "global");
-        token_local_directive = Token(Token::DIRECTIVE, ".local");
-        token_local_name = Token(Token::NAME, "local");
+        token_public_directive = Token(Token::DIRECTIVE, PUBLIC_LITERAL);
+        token_public_name = Token(Token::NAME, PUBLIC_LITERAL);
+        token_private_directive = Token(Token::DIRECTIVE, PRIVATE_LITERAL);
+        token_private_name = Token(Token::NAME, PRIVATE_LITERAL);
         initialized = true;
     }
 }
 
 void VisibilityHelper::setup(FileTokenizer& tokenizer, bool use_directives) {
     initialize();
-    tokenizer.add_literal(token_local_directive);
-    tokenizer.add_literal(token_global_directive);
 }
 
 std::optional<Visibility> VisibilityHelper::from_token(Token token) {
-    if (token == token_local_directive || token == token_local_name) {
-        return Visibility::LOCAL;
+    if (token == token_private_directive || token == token_private_name) {
+        return Visibility::PRIVATE;
     }
-    else if (token == token_global_directive || token == token_global_name) {
-        return Visibility::GLOBAL;
+    else if (token == token_public_directive || token == token_public_name) {
+        return Visibility::PUBLIC;
     }
     else {
         return {};

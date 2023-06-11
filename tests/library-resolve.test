@@ -2,13 +2,13 @@ description Test instruction with 2 variants, known which will be used
 arguments --create-library --target 6502 -o a.lib a.s b.s c64.lib
 file a.s <inline>
 .section zero_page
-.global ptr .reserve 2
+.public ptr .reserve 2
 address = ptr + 1
 end-of-inline-data
 file b.s <inline>
 .section code
 value = COLOR_BLACK
-.global init {
+.public init {
     lda #value
     sta address
 }
@@ -17,7 +17,7 @@ file c64.lib <inline>
 .format_version 1.0
 .target "6502"
 .constant COLOR_BLACK {
-    visibility: global
+    visibility: public
     value: $00
 }
 end-of-inline-data
@@ -26,22 +26,22 @@ file a.lib {} <inline>
 .target "6502"
 .import "c64.lib"
 .constant address {
-    visibility: local
+    visibility: private
     value: (ptr+$01)
 }
 .constant value {
-    visibility: local
+    visibility: private
     value: $00
 }
 .object init {
-    visibility: global
+    visibility: public
     section: code
     body <
         .data $a9, $00, $85, (ptr+$01):1
     >
 }
 .object ptr {
-    visibility: global
+    visibility: public
     section: zero_page
     reserve: 2
 }

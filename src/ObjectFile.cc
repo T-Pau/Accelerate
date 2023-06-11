@@ -177,7 +177,7 @@ void ObjectFile::add_object_file(const std::shared_ptr<ObjectFile>& file) {
 
 void ObjectFile::evaluate() {
     for (auto& pair: constants) {
-        pair.second->value.evaluate(local_environment);
+        pair.second->value.evaluate(private_environment);
     }
     for (auto& pair: objects) {
         pair.second->evaluate();
@@ -197,8 +197,8 @@ void ObjectFile::evaluate(const std::shared_ptr<Environment>& environment) {
 
 void ObjectFile::remove_local_constants() {
     std::erase_if(constants, [this](const auto& item) {
-        if (item.second->visibility == Visibility::LOCAL) {
-            local_environment->remove(item.first);
+        if (item.second->visibility == Visibility::PRIVATE) {
+            private_environment->remove(item.first);
             return true;
         }
         return false;
@@ -227,8 +227,8 @@ Object *ObjectFile::create_object(Symbol section_name, Visibility visibility, To
 }
 
 ObjectFile::ObjectFile() noexcept {
-    global_environment = std::make_shared<Environment>();
-    local_environment = std::make_shared<Environment>(global_environment);
+    public_environment = std::make_shared<Environment>();
+    private_environment = std::make_shared<Environment>(public_environment);
 }
 
 void ObjectFile::add_to_environment(Object *object) {
@@ -236,11 +236,11 @@ void ObjectFile::add_to_environment(Object *object) {
 }
 
 void ObjectFile::add_to_environment(Symbol symbol_name, Visibility visibility, Expression value) const {
-    if (visibility == Visibility::GLOBAL) {
-        global_environment->add(symbol_name, std::move(value));
+    if (visibility == Visibility::PUBLIC) {
+        public_environment->add(symbol_name, std::move(value));
     }
     else {
-        local_environment->add(symbol_name, std::move(value));
+        private_environment->add(symbol_name, std::move(value));
     }
 }
 
@@ -310,7 +310,7 @@ void ObjectFile::import(ObjectFile *library) {
     }
     // TODO: detect loops
     imported_libraries.insert(library);
-    local_environment->add_next(library->global_environment);
+    private_environment->add_next(library->public_environment);
 }
 
 void ObjectFile::set_target(const Target* new_target) {
@@ -322,9 +322,9 @@ std::shared_ptr<Environment> ObjectFile::environment(Visibility visibility) cons
     switch (visibility) {
         case Visibility::SCOPE:
             return {}; // TODO: throw?
-        case Visibility::LOCAL:
-            return local_environment;
-        case Visibility::GLOBAL:
-            return global_environment;
+        case Visibility::PRIVATE:
+            return private_environment;
+        case Visibility::PUBLIC:
+            return public_environment;
     }
 }
