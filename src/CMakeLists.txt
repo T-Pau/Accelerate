@@ -64,6 +64,7 @@ add_library(xlr8-library STATIC
         ParsedValue.cc
         Path.cc
         Range.cc
+        ScopeBody.cc
         SequenceTokenizer.cc
         SizeRange.cc
         Symbol.cc
@@ -81,8 +82,7 @@ add_library(xlr8-library STATIC
         VariableExpression.cc
         Visibility.cc
         VoidExpression.cc
-        ${COMPATIBILITY}
-)
+        ${COMPATIBILITY})
 
 target_include_directories(xlr8-library PRIVATE ${PROJECT_BINARY_DIR})
 

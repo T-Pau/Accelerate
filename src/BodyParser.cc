@@ -52,6 +52,7 @@ const Token BodyParser::token_end = Token(Token::DIRECTIVE, "end");
 const Token BodyParser::token_error = Token(Token::DIRECTIVE, "error");
 const Token BodyParser::token_if = Token(Token::DIRECTIVE, "if");
 const Token BodyParser::token_memory = Token(Token::DIRECTIVE, "memory");
+const Token BodyParser::token_scope = Token(Token::DIRECTIVE, "scope");
 
 const std::unordered_map<Symbol, void (BodyParser::*)()> BodyParser::directive_parser_methods = {
         {token_data.as_symbol(), &BodyParser::parse_data},
@@ -60,7 +61,8 @@ const std::unordered_map<Symbol, void (BodyParser::*)()> BodyParser::directive_p
         {token_end.as_symbol(), &BodyParser::parse_end},
         {token_error.as_symbol(), &BodyParser::parse_error},
         {token_if.as_symbol(), &BodyParser::parse_if},
-        {token_memory.as_symbol(), &BodyParser::parse_memory}
+        {token_memory.as_symbol(), &BodyParser::parse_memory},
+        {token_scope.as_symbol(), &BodyParser::parse_scope}
 };
 
 void BodyParser::setup(FileTokenizer &tokenizer) {
@@ -189,12 +191,12 @@ void BodyParser::parse_directive(const Token& directive) {
 
 void BodyParser::parse_data() {
     auto data = ExpressionParser(tokenizer).parse_list();
-    data.evaluate(object, environment, current_size(), ifs.empty());
+    data.evaluate(object, environment, current_size(), nesting.empty());
     current_body->append(data);
 }
 
 void BodyParser::parse_else() {
-    if (ifs.empty()) {
+    if (nesting.empty()) {
         throw Exception(".else outside .if");
     }
     pop_body();
@@ -202,7 +204,7 @@ void BodyParser::parse_else() {
 }
 
 void BodyParser::parse_else_if() {
-    if (ifs.empty()) {
+    if (nesting.empty()) {
         throw Exception(".else_if outside .if");
     }
     pop_body();
@@ -210,16 +212,16 @@ void BodyParser::parse_else_if() {
 }
 
 void BodyParser::parse_end() {
-    if (ifs.empty()) {
-        throw Exception(".end outside .if");
+    if (nesting.empty()) {
+        throw Exception(".end outside .if or .scope");
     }
     pop_body();
-    current_body->append(Body(ifs.back()));
-    ifs.pop_back();
+    current_body->append(nesting.back()->body());
+    nesting.pop_back();
 }
 
 void BodyParser::parse_if() {
-    ifs.emplace_back();
+    nesting.emplace_back(std::make_unique<IfNesting>());
     push_clause(ExpressionParser(tokenizer).parse());
 }
 
@@ -361,40 +363,50 @@ void BodyParser::parse_instruction(const Token &name) {
         }
     }
 
-    instruction.evaluate(object, environment, current_size(), ifs.empty());
+    instruction.evaluate(object, environment, current_size(), nesting.empty());
 
     current_body->append(instruction);
 }
 
 
-void BodyParser::push_body(const BodyParser::BodyIndex& body_index) {
-    body_indices.emplace_back(body_index);
+void BodyParser::parse_scope() {
+    nesting.emplace_back(std::make_unique<ScopeNesting>());
+    push_body(NestingIndex(nesting.size() - 1, 0));
+}
+
+
+void BodyParser::push_body(const BodyParser::NestingIndex& body_index) {
+    nesting_indices.emplace_back(body_index);
     current_body = get_body(body_index);
 }
 
 void BodyParser::pop_body() {
-    if (body_indices.empty()) {
+    if (nesting_indices.empty()) {
         throw Exception("internal error: closing outermost body");
     }
-    body_indices.pop_back();
-    if (body_indices.empty()) {
+    nesting_indices.pop_back();
+    if (nesting_indices.empty()) {
         current_body = &body;
     }
     else {
-        current_body = get_body(body_indices.back());
+        current_body = get_body(nesting_indices.back());
     }
 }
 
 void BodyParser::push_clause(Expression condition) {
-    ifs.back().emplace_back(IfBodyClause(std::move(condition), {}));
-    push_body(BodyIndex(ifs.size() - 1, ifs.back().size() - 1));
+    auto if_nesting = nesting.back()->as_if();
+    if (!if_nesting) {
+        throw Exception("not inside .if");
+    }
+    if_nesting->add_clause(std::move(condition));
+    push_body(NestingIndex(nesting.size() - 1, if_nesting->size() - 1));
 }
 
 
 SizeRange BodyParser::current_size() {
     auto size = body.size_range();
 
-    for (auto& body_index: body_indices) {
+    for (auto& body_index: nesting_indices) {
         size += get_body(body_index)->size_range();
     }
 

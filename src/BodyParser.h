@@ -52,12 +52,52 @@ public:
     Body parse();
 
 private:
-    class BodyIndex {
-      public:
-        BodyIndex(size_t if_index, size_t clause_index): if_index(if_index), clause_index(clause_index) {}
+    class IfNesting;
+    class ScopeNesting;
 
-        size_t if_index;
-        size_t clause_index;
+    class Nesting {
+      public:
+        virtual ~Nesting() = default;
+
+        virtual Body* operator[](size_t index) = 0;
+        virtual Body body() = 0;
+
+        IfNesting* as_if() {return dynamic_cast<IfNesting*>(this);}
+        ScopeNesting* as_scope() {return dynamic_cast<ScopeNesting*>(this);}
+        bool is_if() {return as_if();}
+        bool is_scope() {return as_scope();}
+    };
+
+    class IfNesting: public Nesting {
+      public:
+        virtual ~IfNesting() = default;
+
+        Body* operator[](size_t index) override {return &clauses[index].body;}
+        Body body() override {return Body(clauses);}
+
+        void add_clause(Expression condition) {clauses.emplace_back(IfBodyClause(std::move(condition), {}));}
+        [[nodiscard]] size_t size() const {return clauses.size();}
+
+      private:
+        std::vector<IfBodyClause> clauses;
+    };
+
+    class ScopeNesting: public Nesting {
+      public:
+        virtual ~ScopeNesting() = default;
+
+        Body* operator[](size_t index) override {return &inner_body;}
+        Body body() override {return inner_body.scoped();}
+
+        Body inner_body;
+    };
+
+    class NestingIndex {
+      public:
+        NestingIndex(size_t nesting_index, size_t sub_index): nesting_index(nesting_index), sub_index(sub_index) {}
+
+        size_t nesting_index;
+        size_t sub_index;
     };
 
     bool allow_memory = false;
@@ -69,8 +109,8 @@ private:
 
     uint64_t next_label = 0;
     Body body;
-    std::vector<std::vector<IfBodyClause>> ifs;
-    std::vector<BodyIndex> body_indices;
+    std::vector<std::unique_ptr<Nesting>> nesting;
+    std::vector<NestingIndex> nesting_indices;
     Body *current_body = &body;
 
     [[nodiscard]] bool allow_instructions() const {return cpu != nullptr;}
@@ -83,12 +123,12 @@ private:
 
     void add_constant(Visibility visibility, Token name, const Expression& value);
     [[nodiscard]] SizeRange current_size();
-    Body* get_body(const BodyIndex& body_index) {return &ifs[body_index.if_index][body_index.clause_index].body;}
+    Body* get_body(const NestingIndex& nesting_index) {return (*nesting[nesting_index.nesting_index])[nesting_index.sub_index];}
     [[nodiscard]] Expression get_pc(std::shared_ptr<Label> label) const;
     [[nodiscard]] std::shared_ptr<Label> get_label(bool& is_anonymous);
     [[nodiscard]] Symbol object_name() const {return object ? object->name.as_symbol() : Symbol();};
     void push_clause(Expression condition);
-    void push_body(const BodyIndex& body_index);
+    void push_body(const NestingIndex& body_index);
     void pop_body();
 
     void handle_name(Visibility visibility, Token name);
@@ -99,6 +139,7 @@ private:
     void parse_end();
     void parse_if();
     void parse_memory();
+    void parse_scope();
 
     static const Symbol symbol_pc;
     static const Token token_data;
@@ -108,6 +149,7 @@ private:
     static const Token token_error;
     static const Token token_if;
     static const Token token_memory;
+    static const Token token_scope;
 
     static const std::unordered_map<Symbol, void (BodyParser::*)()> directive_parser_methods;
 };

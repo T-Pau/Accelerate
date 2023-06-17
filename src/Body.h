@@ -86,6 +86,7 @@ public:
     [[nodiscard]] bool is_data() const {return as_data() != nullptr;}
     [[nodiscard]] bool is_error() const {return as_error() != nullptr;}
     [[nodiscard]] bool is_label() const {return as_label() != nullptr;}
+    [[nodiscard]] Body scoped() const;
     void serialize(std::ostream& stream, const std::string& prefix = "") const {element->serialize(stream, prefix);}
     [[nodiscard]] std::optional<uint64_t> size() const {return element->size();}
     [[nodiscard]] SizeRange size_range() const {return element->size_range();}

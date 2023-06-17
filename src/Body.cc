@@ -42,6 +42,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "LabelBody.h"
 #include "MacroBody.h"
 #include "MemoryBody.h"
+#include "ScopeBody.h"
 
 Body::Body(): element(std::make_shared<EmptyBody>()) {}
 
@@ -151,4 +152,8 @@ Body Body::make_unique() const {
     else {
         return Body(element->clone());
     }
+}
+
+Body Body::scoped() const {
+    return ScopeBody::create(*this);
 }

@@ -110,7 +110,7 @@ EvaluationContext Callable::bind(const std::vector<Expression>& actual_arguments
         }
     }
 
-    return EvaluationContext(environment, true);
+    return EvaluationContext(environment, true, true);
 }
 
 Callable::Arguments::Arguments(Tokenizer& tokenizer) {

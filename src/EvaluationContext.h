@@ -45,7 +45,7 @@ class ObjectFile;
 class EvaluationContext {
 public:
     EvaluationContext(): environment(std::make_shared<Environment>()) {}
-    explicit EvaluationContext(std::shared_ptr<Environment> environment, bool shallow = false): environment(std::move(environment)), shallow(shallow) {}
+    explicit EvaluationContext(std::shared_ptr<Environment> environment, bool shallow = false, bool expanding_macro = false): environment(std::move(environment)), shallow(shallow), expanding_macro(expanding_macro) {}
     explicit EvaluationContext(Object* object, std::shared_ptr<Environment> environment, SizeRange offset, bool conditional = false, bool shallow = false);
     EvaluationContext(const EvaluationContext& context) = default;
 
