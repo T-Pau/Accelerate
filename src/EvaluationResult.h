@@ -1,5 +1,5 @@
 /*
-Function.h --
+EvaluationResult.cc --
 
 Copyright (C) Dieter Baron
 
@@ -29,27 +29,30 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef FUNCTION_H
-#define FUNCTION_H
+#ifndef EVALUATION_RESULT_H
+#define EVALUATION_RESULT_H
 
-#include "Callable.h"
+#include <unordered_set>
 
-class Function: public Callable {
-  public:
-    Function(Token name, const std::shared_ptr<ParsedValue>& definition);
-    Function(Token name, Visibility visibility, Arguments arguments, Expression definition): Callable(name, visibility, std::move(arguments)), definition(definition) {}
-    Expression call(const std::vector<Expression>& arguments) const;
-    void serialize(std::ostream& stream) const;
+#include "Label.h"
 
-    Expression definition;
+class LabelExpression;
 
-  private:
-    static void initialize();
+class EvaluationResult {
+public:
+  EvaluationResult() = default;
+    explicit EvaluationResult(std::shared_ptr<EvaluationResult> next): next(std::move(next)) {}
 
-    static bool initialized;
-    static Token token_definition;
+    void invalidate_unnamed_label();
+    void set_unnamed_label(const std::shared_ptr<Label>& label);
+    [[nodiscard]] std::shared_ptr<Label> get_previous_unnamed_label() const;
+    void add_forward_unnamed_label_use(const LabelExpression*expression) {forward_unnamed_label_uses.insert(expression);}
+
+    std::shared_ptr<Label> previous_unnamed_label;
+    bool previous_unnamed_label_valid = true;
+    std::unordered_set<const LabelExpression*> forward_unnamed_label_uses;
+
+    std::shared_ptr<EvaluationResult> next;
 };
 
-std::ostream& operator<<(std::ostream& stream, const Function& function);
-
-#endif // FUNCTION_H
+#endif // EVALUATION_RESULT_H

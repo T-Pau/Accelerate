@@ -1,5 +1,5 @@
 /*
-Function.h --
+EvaluationResult.cc --
 
 Copyright (C) Dieter Baron
 
@@ -29,27 +29,35 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef FUNCTION_H
-#define FUNCTION_H
+#include "EvaluationResult.h"
 
-#include "Callable.h"
+#include "LabelExpression.h"
 
-class Function: public Callable {
-  public:
-    Function(Token name, const std::shared_ptr<ParsedValue>& definition);
-    Function(Token name, Visibility visibility, Arguments arguments, Expression definition): Callable(name, visibility, std::move(arguments)), definition(definition) {}
-    Expression call(const std::vector<Expression>& arguments) const;
-    void serialize(std::ostream& stream) const;
+void EvaluationResult::set_unnamed_label(const std::shared_ptr<Label>& label) {
+    previous_unnamed_label = label;
+    previous_unnamed_label_valid = true;
+    for (auto expression: forward_unnamed_label_uses) {
+        expression->set_label(label);
+    }
+    forward_unnamed_label_uses.clear();
+}
 
-    Expression definition;
+void EvaluationResult::invalidate_unnamed_label() {
+    previous_unnamed_label.reset();
+    previous_unnamed_label_valid = false;
+    forward_unnamed_label_uses.clear();
+}
 
-  private:
-    static void initialize();
-
-    static bool initialized;
-    static Token token_definition;
-};
-
-std::ostream& operator<<(std::ostream& stream, const Function& function);
-
-#endif // FUNCTION_H
+std::shared_ptr<Label> EvaluationResult::get_previous_unnamed_label() const {
+    if (previous_unnamed_label_valid) {
+        if (previous_unnamed_label) {
+            return previous_unnamed_label;
+        }
+        else {
+            throw Exception("no previous unnamed label");
+        }
+    }
+    else {
+        return {};
+    }
+}

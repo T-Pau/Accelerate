@@ -28,7 +28,7 @@ add_library(xlr8-library STATIC
         Environment.cc
         ErrorBody.cc
         EvaluationContext.cc
-        EvaluationScope.cc
+        EvaluationResult.cc
         Exception.cc
         Expression.cc
         ExpressionNode.cc
