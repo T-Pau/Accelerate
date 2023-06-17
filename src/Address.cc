@@ -33,10 +33,10 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ExpressionParser.h"
 #include "ParseException.h"
 
-Address::Address(Tokenizer& tokenizer, const std::shared_ptr<Environment>& environment) {
+Address::Address(Tokenizer& tokenizer, EvaluationResult& result, const std::shared_ptr<Environment>& environment) {
     auto expression = ExpressionParser(tokenizer).parse();
     if (environment) {
-        expression.evaluate(environment);
+        expression.evaluate(result, environment);
     }
     auto value = expression.value();
     if (!value.has_value() || !value->is_unsigned()) {
@@ -49,7 +49,7 @@ Address::Address(Tokenizer& tokenizer, const std::shared_ptr<Environment>& envir
         bank = value->unsigned_value();
         expression = ExpressionParser(tokenizer).parse();
         if (environment) {
-            expression.evaluate(environment);
+            expression.evaluate(result, environment);
         }
         value = expression.value();
         if (!value.has_value() || !value->is_unsigned()) {

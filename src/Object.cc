@@ -69,7 +69,8 @@ Object::Object(ObjectFile* owner, Token name_, const std::shared_ptr<ParsedValue
     auto address_value = parameters->get_optional(token_address);
     if (address_value) {
         auto tokenizer = SequenceTokenizer(address_value->location, address_value->as_scalar()->tokens);
-        address = Address(tokenizer);
+        EvaluationResult result;
+        address = Address(tokenizer, result);
         if (!tokenizer.ended()) {
             throw ParseException(tokenizer.current_location(), "expected newline");
         }
@@ -138,10 +139,6 @@ void Object::serialize(std::ostream &stream) const {
 }
 
 
-void Object::evaluate(std::shared_ptr<Environment> environment) {
-    body.evaluate(this, std::move(environment));
-}
-
 SizeRange Object::size_range() const {
     if (is_reservation()) {
         return SizeRange(reservation);
@@ -159,4 +156,10 @@ void Object::set_owner(ObjectFile* new_owner) {
         environment->replace(owner->private_environment, new_owner->private_environment);
     }
     owner = new_owner;
+}
+
+void Object::evaluate() {
+    EvaluationResult result;
+    body.evaluate(result, this);
+    // TODO: process result
 }

@@ -69,7 +69,6 @@ public:
     void add_object_file(const std::shared_ptr<ObjectFile>& file);
     [[nodiscard]] std::vector<Object*> all_objects();
     Object* create_object(Symbol section_name, Visibility visibility, Token object_name);
-    void evaluate(const std::shared_ptr<Environment>& environment); // DEPRECATED
     void evaluate();
     void import(ObjectFile* library);
     [[nodiscard]] const Object* object(Symbol object_name) const;

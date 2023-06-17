@@ -114,7 +114,9 @@ Body BodyParser::parse() {
                 case Token::PUNCTUATION:
                     if (token == end_token) {
                         // TODO: check that ifs is empty
-                        body.evaluate(object, environment);
+                        EvaluationResult result;
+                        body.evaluate(result, object, environment);
+                        // TODO: process result
                         return body;
                     }
                     else if (token == Token::colon) {
@@ -190,9 +192,11 @@ void BodyParser::parse_directive(const Token& directive) {
 
 
 void BodyParser::parse_data() {
+    EvaluationResult result;
     auto data = ExpressionParser(tokenizer).parse_list();
-    data.evaluate(object, environment, current_size(), nesting.empty());
+    data.evaluate(result, object, environment, current_size(), nesting.empty());
     current_body->append(data);
+    // TODO: process result
 }
 
 void BodyParser::parse_else() {
@@ -363,7 +367,9 @@ void BodyParser::parse_instruction(const Token &name) {
         }
     }
 
-    instruction.evaluate(object, environment, current_size(), nesting.empty());
+    EvaluationResult result;
+    instruction.evaluate(result, object, environment, current_size(), nesting.empty());
+    // TODO: process result
 
     current_body->append(instruction);
 }

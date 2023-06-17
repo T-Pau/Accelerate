@@ -33,6 +33,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define EXPRESSION_H
 
 #include "BaseExpression.h"
+#include "EvaluationResult.h"
 #include "Label.h"
 #include "Tokenizer.h"
 #include "VoidExpression.h"
@@ -111,7 +112,7 @@ public:
     [[nodiscard]] const ObjectExpression* as_object() const;
     [[nodiscard]] const VariableExpression* as_variable() const;
     void collect_objects(std::unordered_set<Object*>& variables) const {expression->collect_objects(variables);}
-    bool evaluate(std::shared_ptr<Environment> environment);
+    bool evaluate(EvaluationResult& result, std::shared_ptr<Environment> environment);
     bool evaluate(const EvaluationContext& context);
     [[nodiscard]] std::shared_ptr<BaseExpression> get_expression() const {return expression;}
     [[nodiscard]] bool has_value() const {return value().has_value();}

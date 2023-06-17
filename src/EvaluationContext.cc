@@ -51,7 +51,7 @@ EvaluationContext EvaluationContext::adding_offset(SizeRange size) const {
 EvaluationContext EvaluationContext::adding_scope(std::shared_ptr<Environment> new_environment) const {
     auto new_context = *this;
     new_context.environment = std::move(new_environment);
-    new_context.scope = std::make_shared<EvaluationResult>(new_context.scope);
+    //new_context.scope = std::make_shared<EvaluationResult>(new_context.scope);
     return new_context;
 }
 
@@ -68,7 +68,7 @@ EvaluationContext EvaluationContext::making_conditional() const {
     return new_context;
 }
 
-EvaluationContext::EvaluationContext(Object* object, std::shared_ptr<Environment> environment_, SizeRange offset, bool conditional, bool shallow): environment(std::move(environment_)), object(object), shallow(shallow), offset(offset), conditional(conditional), conditional_in_scope(conditional) {
+EvaluationContext::EvaluationContext(EvaluationResult& result, Object* object, std::shared_ptr<Environment> environment_, SizeRange offset, bool conditional, bool shallow): environment(std::move(environment_)), object(object), shallow(shallow), offset(offset), conditional(conditional), conditional_in_scope(conditional), result(result) {
     if (!environment) {
         if (object) {
             environment = object->environment;

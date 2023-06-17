@@ -119,7 +119,7 @@ std::shared_ptr<ObjectFile> Assembler::parse(Symbol file_name) {
         }
     }
 
-    object_file->evaluate(file_environment);
+    object_file->evaluate();
 
     return object_file;
 }
@@ -162,12 +162,16 @@ void Assembler::parse_symbol(Visibility visibility, const Token &name) {
         }
         // TODO: parameters
         else if (token == token_address) {
-            object->address = Address(tokenizer, file_environment);
+            EvaluationResult result;
+            object->address = Address(tokenizer, result, file_environment);
+            // TODO: process result
         }
         else if (token == token_align || token == token_reserve) {
             auto expression = ExpressionParser(tokenizer).parse();
 
-            expression.evaluate(file_environment);
+            EvaluationResult result;
+            expression.evaluate(result, file_environment);
+            // TODO: process result
             auto value = expression.value();
 
             if (token == token_align) {

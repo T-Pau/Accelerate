@@ -59,10 +59,10 @@ std::optional<Body> LabelBody::evaluated(const EvaluationContext& context) const
     }
     else {
         if (context.conditional_in_scope) {
-            context.scope->invalidate_unnamed_label();
+            context.result.invalidate_unnamed_label();
         }
         else if (context.object) {
-            context.scope->set_unnamed_label(label);
+            context.result.set_unnamed_label(label);
         }
     }
 

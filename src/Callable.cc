@@ -96,7 +96,7 @@ void Callable::Arguments::serialize(std::ostream& stream) const {
     }
 }
 
-EvaluationContext Callable::bind(const std::vector<Expression>& actual_arguments) const {
+EvaluationContext Callable::bind(EvaluationResult& result, const std::vector<Expression>& actual_arguments) const {
     if (actual_arguments.size() < arguments.minimum_arguments() || actual_arguments.size() > arguments.maximum_arguments()) {
         throw Exception("invalid number of actual_arguments");
     }
@@ -110,7 +110,7 @@ EvaluationContext Callable::bind(const std::vector<Expression>& actual_arguments
         }
     }
 
-    return EvaluationContext(environment, true, true);
+    return EvaluationContext(result, environment, true, true);
 }
 
 Callable::Arguments::Arguments(Tokenizer& tokenizer) {

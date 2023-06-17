@@ -59,8 +59,9 @@ std::ostream& operator<<(std::ostream& stream, const Macro& macro) {
 
 
 Body Macro::expand(const std::vector<Expression>& arguments) const {
-    // TODO: enclose in scope
-    return body.evaluated(bind(arguments)).value_or(body);
+    EvaluationResult result;
+    return body.evaluated(bind(result, arguments)).value_or(body);
+    // TODO: process result
 }
 
 

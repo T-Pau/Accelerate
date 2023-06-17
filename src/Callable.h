@@ -63,7 +63,7 @@ class Callable: public Entity {
   protected:
     Arguments arguments;
 
-    [[nodiscard]] EvaluationContext bind(const std::vector<Expression>& actual_arguments) const;
+    [[nodiscard]] EvaluationContext bind(EvaluationResult& result, const std::vector<Expression>& actual_arguments) const;
     void serialize_callable(std::ostream& stream) const;
 
   private:

@@ -38,13 +38,13 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "TargetParser.h"
 
 void Linker::link() {
-    program->evaluate(program->private_environment);
-    program->evaluate(program->private_environment);
-
     for (auto& library: libraries) {
-        library->evaluate(library->private_environment);
-        program->evaluate(library->public_environment);
+        library->evaluate();
+        program->import(library.get());
     }
+
+    program->evaluate();
+    program->evaluate();
 
     std::unordered_set<Object*> new_objects;
 
@@ -100,10 +100,9 @@ void Linker::link() {
         return;
     }
 
-    auto empty_environment = std::make_shared<Environment>();
     for (auto object: objects) {
         try {
-            object->evaluate(empty_environment);
+            object->evaluate();
             std::string bytes;
             object->body.encode(bytes);
             memory[object->address->bank].copy(object->address->address, bytes);
@@ -131,7 +130,9 @@ void Linker::output(const std::string &file_name) {
     environment->add(TargetParser::token_data_start.as_symbol(), Expression(data_range.start));
 
     auto body = target->output;
-    body.evaluate(nullptr, environment);
+    EvaluationResult result;
+    body.evaluate(result, nullptr, environment);
+    // TODO: process result
 
     auto bytes = std::string();
     bytes.reserve(body.size_range().minimum);

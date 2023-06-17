@@ -49,10 +49,9 @@ public:
     Object(ObjectFile* owner, Token name, const std::shared_ptr<ParsedValue>& definition);
     Object(ObjectFile* owner, const MemoryMap::Section* section, Visibility visibility, Token name);
 
-    void evaluate(std::shared_ptr<Environment> environment);
     [[nodiscard]] bool is_reservation() const {return reservation > 0;}
     [[nodiscard]] bool empty() const {return !is_reservation() && body.empty();}
-    void evaluate() {body.evaluate(this);}
+    void evaluate();
     [[nodiscard]] bool has_address() const {return address.has_value();}
     void set_owner(ObjectFile* new_owner);
     [[nodiscard]] SizeRange size_range() const;

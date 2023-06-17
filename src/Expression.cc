@@ -119,8 +119,8 @@ Symbol Expression::variable_name() const {
     return {};
 }
 
-bool Expression::evaluate(std::shared_ptr<Environment> environment) {
-    return evaluate(EvaluationContext(std::move(environment)));
+bool Expression::evaluate(EvaluationResult& result, std::shared_ptr<Environment> environment) {
+    return evaluate(EvaluationContext(result, std::move(environment)));
 }
 
 std::ostream& operator<<(std::ostream& stream, const Expression& expression) {

@@ -44,9 +44,9 @@ class ObjectFile;
 
 class EvaluationContext {
 public:
-    EvaluationContext(): environment(std::make_shared<Environment>()) {}
-    explicit EvaluationContext(std::shared_ptr<Environment> environment, bool shallow = false, bool expanding_macro = false): environment(std::move(environment)), shallow(shallow), expanding_macro(expanding_macro) {}
-    explicit EvaluationContext(Object* object, std::shared_ptr<Environment> environment, SizeRange offset, bool conditional = false, bool shallow = false);
+    explicit EvaluationContext(EvaluationResult& result): environment(std::make_shared<Environment>()), result(result) {}
+    EvaluationContext(EvaluationResult& result, std::shared_ptr<Environment> environment, bool shallow = false, bool expanding_macro = false): environment(std::move(environment)), shallow(shallow), expanding_macro(expanding_macro), result(result) {}
+    EvaluationContext(EvaluationResult& result, Object* object, std::shared_ptr<Environment> environment, SizeRange offset, bool conditional = false, bool shallow = false);
     EvaluationContext(const EvaluationContext& context) = default;
 
     [[nodiscard]] EvaluationContext evaluating_variable(Symbol variable) const;
@@ -65,7 +65,7 @@ public:
     bool conditional = false;
     bool conditional_in_scope = false;
     std::unordered_set<Symbol> evaluating_variables; // Variables currently being evaluated (used for loop detection).
-    std::shared_ptr<EvaluationResult> scope = std::make_shared<EvaluationResult>();
+    EvaluationResult& result;
 };
 
 #endif // EVALUATION_CONTEXT_H

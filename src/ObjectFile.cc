@@ -177,20 +177,12 @@ void ObjectFile::add_object_file(const std::shared_ptr<ObjectFile>& file) {
 
 void ObjectFile::evaluate() {
     for (auto& pair: constants) {
-        pair.second->value.evaluate(private_environment);
+        EvaluationResult result;
+        pair.second->value.evaluate(result, private_environment);
+        // TODO: process result
     }
     for (auto& pair: objects) {
         pair.second->evaluate();
-    }
-}
-
-
-void ObjectFile::evaluate(const std::shared_ptr<Environment>& environment) {
-    for (auto& pair: constants) {
-        pair.second->value.evaluate(environment);
-    }
-    for (auto& pair: objects) {
-        pair.second->body.evaluate(pair.second.get(), environment);
     }
 }
 
