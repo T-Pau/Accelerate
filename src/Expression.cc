@@ -127,3 +127,12 @@ std::ostream& operator<<(std::ostream& stream, const Expression& expression) {
     expression.serialize(stream);
     return stream;
 }
+
+std::optional<Expression> Expression::evaluated(const EvaluationContext& context) const {
+    auto actual_expression = expression;
+    auto it = context.remap_expressions.find(expression.get());
+    if (it != context.remap_expressions.end()) {
+        actual_expression = it->second.expression;
+    }
+    return actual_expression->evaluated(context);
+}

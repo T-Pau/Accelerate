@@ -163,8 +163,18 @@ std::optional<Expression> LabelExpression::evaluated(const EvaluationContext& co
     }
 
     if (label) {
+        auto it = context.remap_labels.find(label.get());
+        if (it != context.remap_labels.end()) {
+            auto offset = it->second->offset.size();
+            if (offset) {
+                return Expression(*offset);
+            }
+            else {
+                return Expression(location, object, it->second);
+            }
+        }
         auto offset = label->offset.size();
-        if (offset.has_value()) {
+        if (offset) {
             return Expression(*offset);
         }
     }

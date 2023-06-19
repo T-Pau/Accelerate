@@ -51,7 +51,6 @@ public:
         void serialize(std::ostream& stream) const;
 
         Expression value;
-        std::unordered_set<Object*> referenced_objects;
 
       private:
         static void initialize();

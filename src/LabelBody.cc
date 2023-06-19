@@ -47,12 +47,17 @@ void LabelBody::serialize(std::ostream &stream, const std::string& prefix) const
 }
 
 std::optional<Body> LabelBody::evaluated(const EvaluationContext& context) const {
-    label->offset = context.offset;
+    auto actual_label = label;
+    auto it = context.remap_labels.find(label.get());
+    if (it != context.remap_labels.end()) {
+        actual_label = it->second;
+    }
+    actual_label->offset = context.offset;
 
-    if (label->is_named()) {
+    if (actual_label->is_named()) {
         if (!context.conditional && context.object) {
-            context.object->environment->add(label->name, label);
-            if (label->offset.size()) {
+            context.object->environment->add(actual_label->name, actual_label);
+            if (actual_label->offset.size()) {
                 return Body();
             }
         }
@@ -66,5 +71,8 @@ std::optional<Body> LabelBody::evaluated(const EvaluationContext& context) const
         }
     }
 
+    if (actual_label != label) {
+        return Body(actual_label);
+    }
     return {};
 }

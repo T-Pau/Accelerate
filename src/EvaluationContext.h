@@ -51,7 +51,7 @@ public:
 
     [[nodiscard]] EvaluationContext evaluating_variable(Symbol variable) const;
     [[nodiscard]] EvaluationContext adding_offset(SizeRange size) const;
-    [[nodiscard]] EvaluationContext adding_scope(std::shared_ptr<Environment> environment) const;
+    [[nodiscard]] EvaluationContext adding_scope(std::shared_ptr<Environment> environment, std::unordered_map<Label*, std::shared_ptr<Label>> remap_labels = {}, std::unordered_map<BaseExpression*, Expression> remap_expressions = {}) const;
     [[nodiscard]] EvaluationContext setting_offset(SizeRange offset) const;
     [[nodiscard]] EvaluationContext making_conditional() const;
     [[nodiscard]] bool evaluating(Symbol variable) const {return evaluating_variables.contains(variable);}
@@ -60,6 +60,8 @@ public:
     Object* object = nullptr;
     bool shallow = false; // Don't evaluate values of variables (used in macros and functions for parameters).
     bool expanding_macro = false;
+    std::unordered_map<BaseExpression*, Expression> remap_expressions;
+    std::unordered_map<Label*, std::shared_ptr<Label>> remap_labels;
 
     SizeRange offset;
     bool conditional = false;

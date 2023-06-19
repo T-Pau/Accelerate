@@ -48,9 +48,11 @@ EvaluationContext EvaluationContext::adding_offset(SizeRange size) const {
     return new_context;
 }
 
-EvaluationContext EvaluationContext::adding_scope(std::shared_ptr<Environment> new_environment) const {
+EvaluationContext EvaluationContext::adding_scope(std::shared_ptr<Environment> new_environment, std::unordered_map<Label*, std::shared_ptr<Label>> new_remap_labels, std::unordered_map<BaseExpression*, Expression> new_remap_expressions) const {
     auto new_context = *this;
     new_context.environment = std::move(new_environment);
+    new_context.remap_expressions = std::move(new_remap_expressions);
+    new_context.remap_labels = std::move(new_remap_labels);
     //new_context.scope = std::make_shared<EvaluationResult>(new_context.scope);
     return new_context;
 }

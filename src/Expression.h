@@ -126,7 +126,7 @@ public:
     [[nodiscard]] std::optional<Value> value() const {return expression->value();}
     [[nodiscard]] Symbol variable_name() const;
 
-    [[nodiscard]] std::optional<Expression> evaluated(const EvaluationContext& context) const {return expression->evaluated(context);}
+    [[nodiscard]] std::optional<Expression> evaluated(const EvaluationContext& context) const;
 
 private:
     std::shared_ptr<BaseExpression> expression = std::make_shared<VoidExpression>();

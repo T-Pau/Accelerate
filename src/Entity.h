@@ -41,6 +41,8 @@ class Entity {
 
     Token name;
     Visibility visibility;
+    // TODO: move owner here
+    std::unordered_set<Object*> referenced_objects;
 
   protected:
     void serialize_entity(std::ostream& stream) const;

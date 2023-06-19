@@ -52,6 +52,10 @@ public:
     void add(Symbol name, std::shared_ptr<Label> label) {labels[name] = std::move(label);} // TODO: check for duplicates
     void add(Symbol name, const Macro* macro) {macros[name] = macro;} // TODO: check for duplicates
     void add_next(std::shared_ptr<Environment> new_next) {next.emplace_back(std::move(new_next));}
+    [[nodiscard]] const std::unordered_map<Symbol, const Function*>& all_functions() const {return functions;}
+    [[nodiscard]] const std::unordered_map<Symbol, std::shared_ptr<Label>>& all_labels() const {return labels;}
+    [[nodiscard]] const std::unordered_map<Symbol, const Macro*>& all_macros() const {return macros;}
+    [[nodiscard]] const std::unordered_map<Symbol, Expression>& all_variables() const {return variables;}
     [[nodiscard]] const Function* get_function(Symbol name) const;
     [[nodiscard]] std::shared_ptr<Label> get_label(Symbol name) const;
     [[nodiscard]] const Macro* get_macro(Symbol name) const;

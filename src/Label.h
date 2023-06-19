@@ -41,6 +41,7 @@ public:
     Label(Symbol name, SizeRange offset): name(name), offset(offset) {}
     explicit Label(SizeRange offset): offset(offset) {}
 
+    [[nodiscard]] std::shared_ptr<Label> clone() const {return std::make_shared<Label>(*this);}
     [[nodiscard]] bool is_named() const {return !name.empty();}
 
     const Symbol name;

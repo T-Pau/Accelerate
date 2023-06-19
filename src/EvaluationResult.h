@@ -37,11 +37,11 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Label.h"
 
 class LabelExpression;
+class Object;
 
 class EvaluationResult {
 public:
-  EvaluationResult() = default;
-    explicit EvaluationResult(std::shared_ptr<EvaluationResult> next): next(std::move(next)) {}
+    EvaluationResult() = default;
 
     void invalidate_unnamed_label();
     void set_unnamed_label(const std::shared_ptr<Label>& label);
@@ -52,7 +52,10 @@ public:
     bool previous_unnamed_label_valid = true;
     std::unordered_set<const LabelExpression*> forward_unnamed_label_uses;
 
-    std::shared_ptr<EvaluationResult> next;
+    std::unordered_set<Symbol> unresolved_variables;
+    std::unordered_set<Object*> used_objects;
+
+    //std::shared_ptr<EvaluationResult> next;
 };
 
 #endif // EVALUATION_RESULT_H

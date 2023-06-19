@@ -56,6 +56,7 @@ std::optional<Expression> VariableExpression::evaluated(const EvaluationContext&
         return new_value;
     }
     else {
+        context.result.unresolved_variables.insert(symbol);
         return {};
     }
 }
