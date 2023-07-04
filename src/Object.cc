@@ -151,6 +151,6 @@ SizeRange Object::size_range() const {
 void Object::evaluate() {
     EvaluationResult result;
     body.evaluate(EvaluationContext(result, this));
-    // TODO: process result
+    process_result(result);
 }
 

@@ -1,0 +1,48 @@
+arguments -c --target 6502 a.s
+file a.s <inline>
+.macro inc16 address {
+    inc address
+    bne :+
+    inc address + 1
+:
+}
+.section code
+test {
+    inc16 $1234
+    rts
+}
+end-of-inline-data
+file a.o {} <inline>
+.format_version 1.0
+.target "6502"
+.macro inc16 {
+    visibility: private
+    arguments: address
+    body <
+        .if .in_range($00, $ff, address)
+          .data $e6, address:1
+        .else
+          .data $ee, address:2
+        .end
+      .label_1:
+        .data $d0, ((:+-(.current_object+.label_offset(.current_object, .label_1)))-$02):-1
+        .if .in_range($00, $ff, (address+$01))
+          .data $e6, (address+$01):1
+        .else
+          .data $ee, (address+$01):2
+        .end
+      :
+    >
+}
+.object test {
+    visibility: private
+    section: code
+    body <
+        .scope
+          .data $ee, $1234, $d0, ((8-$03)-$02):-1, $ee, $1235
+        :
+        .end
+        .data $60
+    >
+}
+end-of-inline-data

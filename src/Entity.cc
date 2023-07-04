@@ -85,3 +85,9 @@ Macro* Entity::as_macro() {
 Object* Entity::as_object() {
     return dynamic_cast<Object*>(this);
 }
+
+void Entity::process_result(EvaluationResult& result) {
+    referenced_objects.insert(result.used_objects.begin(), result.used_objects.end());
+    unresolved_macros = std::move(result.unresolved_macros);
+    unresolved_variables = std::move(result.unresolved_variables);
+}

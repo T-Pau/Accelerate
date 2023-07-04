@@ -53,9 +53,12 @@ class Entity {
     Visibility visibility;
     ObjectFile* owner = nullptr;
     std::unordered_set<Object*> referenced_objects;
+    std::unordered_set<Symbol> unresolved_macros;
+    std::unordered_set<Symbol> unresolved_variables;
     std::shared_ptr<Environment> environment;
 
   protected:
+    void process_result(EvaluationResult& result);
     void serialize_entity(std::ostream& stream) const;
 
   private:

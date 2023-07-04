@@ -1,6 +1,7 @@
 
 set(XFAIL_TESTS
         error-unclosed-object.test
+        macro-unnamed-label.test
 )
 
 file(GLOB TESTS ${CMAKE_CURRENT_SOURCE_DIR}/*.test)
