@@ -1,5 +1,6 @@
 description Test instruction with 2 variants, known which will be used
 arguments --create-library --target 6502 -o a.lib a.s b.s c.lib
+
 file a.s <inline>
 other_address = $2002
 .macro other_file address {
@@ -7,6 +8,7 @@ other_address = $2002
     sta address
 }
 end-of-inline-data
+
 file b.s <inline>
 same_address = $1001
 .macro same_file address {
@@ -18,11 +20,9 @@ same_address = $1001
     same_file same_address
     other_file other_address
     library library_address
-    same_file unknown_address
-    unknown same_address
-    unknown unknown_address
 }
 end-of-inline-data
+
 file c.lib <inline>
 .format_version 1.0
 .target "6502"
@@ -38,6 +38,8 @@ file c.lib <inline>
     >
 }
 end-of-inline-data
+
+
 file a.lib {} <inline>
 .format_version 1.0
 .target "6502"
@@ -87,16 +89,6 @@ file a.lib {} <inline>
         .scope
           .data $a0, $02, $8c, $3003
         .end
-        .scope
-          .data $a2, $01
-          .if .in_range($00, $ff, unknown_address)
-            .data $86, unknown_address:1
-          .else
-            .data $8e, unknown_address:2
-          .end
-        .end
-        unknown $1001
-        unknown unknown_address
     >
 }
 end-of-inline-data

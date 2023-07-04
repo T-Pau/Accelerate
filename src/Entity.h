@@ -45,6 +45,7 @@ class Entity {
 
     [[nodiscard]] Macro* as_macro();
     [[nodiscard]] Object* as_object();
+    [[nodiscard]] bool check_unresolved() const;
     [[nodiscard]] bool is_macro() {return as_macro();}
     [[nodiscard]] bool is_object() {return as_object();}
     void set_owner(ObjectFile* new_owner);
@@ -53,6 +54,7 @@ class Entity {
     Visibility visibility;
     ObjectFile* owner = nullptr;
     std::unordered_set<Object*> referenced_objects;
+    std::unordered_set<Symbol> unresolved_functions;
     std::unordered_set<Symbol> unresolved_macros;
     std::unordered_set<Symbol> unresolved_variables;
     std::shared_ptr<Environment> environment;
@@ -63,6 +65,8 @@ class Entity {
 
   private:
     static void initialize();
+
+    bool check_unresolved(const std::string& singular, const std::string& plural, const std::unordered_set<Symbol>& unresolved) const;
 
     static bool initialized;
     static Token token_visibility;

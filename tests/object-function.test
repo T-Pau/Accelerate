@@ -1,0 +1,34 @@
+description Test function expansion
+arguments -c --target 6502 a.s
+
+file a.s <inline>
+same_function(argument) = $1000 + argument
+same_value = 1
+.section code
+.public init {
+    .data same_function(same_value)
+    .data same_function(unknown_value), unknown_function(same_value), unknown_function(unknown_value)
+}
+end-of-inline-data
+
+
+file a.o {} <inline>
+.format_version 1.0
+.target "6502"
+.constant same_value {
+    visibility: private
+    value: $01
+}
+.function same_function {
+    visibility: private
+    arguments: argument
+    definition: ($1000+argument)
+}
+.object init {
+    visibility: public
+    section: code
+    body <
+        .data $1001, ($1000+unknown_value), unknown_function($01), unknown_function(unknown_value)
+    >
+}
+end-of-inline-data

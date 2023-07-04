@@ -1,0 +1,58 @@
+description Test instruction with 2 variants, known which will be used
+arguments -c --target 6502 a.s
+
+file a.s <inline>
+same_address = $1001
+.macro same_file address {
+    ldx #1
+    stx address
+}
+.section code
+.public init {
+    same_file same_address
+    same_file unknown_address
+    unknown same_address
+    unknown unknown_address
+}
+end-of-inline-data
+
+
+file a.o {} <inline>
+.format_version 1.0
+.target "6502"
+.constant same_address {
+    visibility: private
+    value: $1001
+}
+.macro same_file {
+    visibility: private
+    arguments: address
+    body <
+        .data $a2, $01
+        .if .in_range($00, $ff, address)
+          .data $86, address:1
+        .else
+          .data $8e, address:2
+        .end
+    >
+}
+.object init {
+    visibility: public
+    section: code
+    body <
+        .scope
+          .data $a2, $01, $8e, $1001
+        .end
+        .scope
+          .data $a2, $01
+          .if .in_range($00, $ff, unknown_address)
+            .data $86, unknown_address:1
+          .else
+            .data $8e, unknown_address:2
+          .end
+        .end
+        unknown $1001
+        unknown unknown_address
+    >
+}
+end-of-inline-data

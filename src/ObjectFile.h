@@ -66,6 +66,7 @@ public:
     void add_macro(std::unique_ptr<Macro> macro);
     void add_object(std::unique_ptr<Object> object) {(void)insert_object(std::move(object));}
     void add_object_file(const std::shared_ptr<ObjectFile>& file);
+    bool check_unresolved() const;
     [[nodiscard]] std::vector<Object*> all_objects();
     Object* create_object(Symbol section_name, Visibility visibility, Token object_name);
     void evaluate();

@@ -30,8 +30,10 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include "Entity.h"
-#include "ParseException.h"
+#include "FileReader.h"
 #include "ObjectFile.h"
+#include "ParseException.h"
+#include "Util.h"
 
 #define VISIBILITY "visibility"
 
@@ -88,6 +90,28 @@ Object* Entity::as_object() {
 
 void Entity::process_result(EvaluationResult& result) {
     referenced_objects.insert(result.used_objects.begin(), result.used_objects.end());
+    unresolved_functions = std::move(result.unresolved_functions);
     unresolved_macros = std::move(result.unresolved_macros);
     unresolved_variables = std::move(result.unresolved_variables);
+}
+
+bool Entity::check_unresolved() const {
+    auto ok = check_unresolved("function", "functions", unresolved_functions);
+    ok = check_unresolved("macro", "macros", unresolved_macros) && ok;
+    return check_unresolved("variable", "variables", unresolved_variables) && ok;
+}
+
+bool Entity::check_unresolved(const std::string& singular, const std::string& plural, const std::unordered_set<Symbol>& unresolved) const {
+    if (unresolved.empty()) {
+        return true;
+    }
+
+    auto list = std::vector<Symbol>(unresolved.begin(), unresolved.end());
+    if (list.size() == 1) {
+        FileReader::global.error(name.location, "unresolved %s: %s", singular.c_str(), list[0].c_str());
+    }
+    else {
+        FileReader::global.error(name.location, "unresolved %s: %s", plural.c_str(), join(list).c_str());
+    }
+    return false;
 }
