@@ -59,7 +59,6 @@ private:
 
     Symbol current_section;
     Visibility current_visibility = Visibility::PRIVATE;
-    std::shared_ptr<Environment> file_environment;
 
     FileTokenizer tokenizer;
     std::shared_ptr<ObjectFile> object_file;

@@ -62,15 +62,14 @@ void Object::initialize() {
     }
 }
 
-Object::Object(ObjectFile* owner, Token name_, const std::shared_ptr<ParsedValue>& definition): Entity(name_, definition), owner(owner), environment(std::make_shared<Environment>(owner->private_environment)) {
+Object::Object(ObjectFile* owner, Token name_, const std::shared_ptr<ParsedValue>& definition): Entity(owner, name_, definition) {
     initialize();
     auto parameters = definition->as_dictionary();
 
     auto address_value = parameters->get_optional(token_address);
     if (address_value) {
         auto tokenizer = SequenceTokenizer(address_value->location, address_value->as_scalar()->tokens);
-        EvaluationResult result;
-        address = Address(tokenizer, result);
+        address = Address(tokenizer);
         if (!tokenizer.ended()) {
             throw ParseException(tokenizer.current_location(), "expected newline");
         }
@@ -106,7 +105,7 @@ Object::Object(ObjectFile* owner, Token name_, const std::shared_ptr<ParsedValue
 }
 
 
-Object::Object(ObjectFile *owner, const MemoryMap::Section *section, Visibility visibility, Token name): Entity(name, visibility), owner(owner), section(section), environment(std::make_shared<Environment>(owner->private_environment)) {}
+Object::Object(ObjectFile *owner, const MemoryMap::Section *section, Visibility visibility, Token name): Entity(owner, name, visibility), section(section) {}
 
 
 std::ostream& operator<< (std::ostream& stream, const Object& object) {
@@ -148,18 +147,10 @@ SizeRange Object::size_range() const {
     }
 }
 
-void Object::set_owner(ObjectFile* new_owner) {
-    if (new_owner == owner) {
-        return;
-    }
-    if (owner) {
-        environment->replace(owner->private_environment, new_owner->private_environment);
-    }
-    owner = new_owner;
-}
 
 void Object::evaluate() {
     EvaluationResult result;
-    body.evaluate(result, this);
+    body.evaluate(EvaluationContext(result, this));
     // TODO: process result
 }
+

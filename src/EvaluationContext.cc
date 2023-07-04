@@ -31,10 +31,9 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "EvaluationContext.h"
 
-#include <utility>
+#include "Entity.h"
 
-#include "Exception.h"
-#include "Object.h"
+EvaluationContext::EvaluationContext(EvaluationResult& result, Entity* entity): type(ENTITY), entity(entity), environment(entity->environment), result(result), offset(0) {}
 
 EvaluationContext EvaluationContext::evaluating_variable(Symbol variable) const {
     auto new_context = *this;
@@ -48,14 +47,6 @@ EvaluationContext EvaluationContext::adding_offset(SizeRange size) const {
     return new_context;
 }
 
-EvaluationContext EvaluationContext::adding_scope(std::shared_ptr<Environment> new_environment, std::unordered_map<Label*, std::shared_ptr<Label>> new_remap_labels, std::unordered_map<BaseExpression*, Expression> new_remap_expressions) const {
-    auto new_context = *this;
-    new_context.environment = std::move(new_environment);
-    new_context.remap_expressions = std::move(new_remap_expressions);
-    new_context.remap_labels = std::move(new_remap_labels);
-    //new_context.scope = std::make_shared<EvaluationResult>(new_context.scope);
-    return new_context;
-}
 
 EvaluationContext EvaluationContext::setting_offset(SizeRange new_offset) const {
     auto new_context = *this;
@@ -66,17 +57,17 @@ EvaluationContext EvaluationContext::setting_offset(SizeRange new_offset) const 
 EvaluationContext EvaluationContext::making_conditional() const {
     auto new_context = *this;
     new_context.conditional = true;
-    new_context.conditional_in_scope = true;
     return new_context;
 }
 
-EvaluationContext::EvaluationContext(EvaluationResult& result, Object* object, std::shared_ptr<Environment> environment_, SizeRange offset, bool conditional, bool shallow): environment(std::move(environment_)), object(object), shallow(shallow), offset(offset), conditional(conditional), conditional_in_scope(conditional), result(result) {
-    if (!environment) {
-        if (object) {
-            environment = object->environment;
-        }
-        else {
-            environment = std::make_shared<Environment>();
-        }
+bool EvaluationContext::shallow() const {
+    switch (type) {
+        case ARGUMENTS:
+        case MACRO_EXPANSION:
+            return true;
+
+        case ENTITY:
+        case STANDALONE:
+            return false;
     }
 }

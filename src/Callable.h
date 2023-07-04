@@ -55,15 +55,15 @@ class Callable: public Entity {
         std::vector<Expression> default_arguments;
     };
 
-    Callable(Token name, const std::shared_ptr<ParsedValue>& definition);
-    Callable(Token name, Visibility visibility, Arguments arguments): Entity(name, visibility), arguments(std::move(arguments)) {}
+    Callable(ObjectFile* owner, Token name, const std::shared_ptr<ParsedValue>& definition);
+    Callable(ObjectFile* owner, Token name, Visibility visibility, Arguments arguments): Entity(owner, name, visibility), arguments(std::move(arguments)) {}
     [[nodiscard]] Symbol argument_name(size_t index) const {return arguments.name(index);}
     [[nodiscard]] std::optional<Expression> default_argument(size_t index) const {return arguments.default_argument(index);}
 
   protected:
     Arguments arguments;
 
-    [[nodiscard]] EvaluationContext bind(EvaluationResult& result, const std::vector<Expression>& actual_arguments) const;
+    [[nodiscard]] std::shared_ptr<Environment> bind(const std::vector<Expression>& actual_arguments) const;
     void serialize_callable(std::ostream& stream) const;
 
   private:

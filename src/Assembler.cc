@@ -80,8 +80,6 @@ std::shared_ptr<ObjectFile> Assembler::parse(Symbol file_name) {
     object_file = std::make_shared<ObjectFile>();
     object_file->target = target;
 
-    file_environment = std::make_shared<Environment>(object_file->private_environment);
-    
     while (!tokenizer.ended()) {
         try {
             auto token = tokenizer.next();
@@ -127,7 +125,7 @@ std::shared_ptr<ObjectFile> Assembler::parse(Symbol file_name) {
 
 void Assembler::parse_assignment(Visibility visibility, const Token &name) {
     auto value = ExpressionParser(tokenizer).parse();
-    object_file->add_constant(std::make_unique<ObjectFile::Constant>(name, visibility, value));
+    object_file->add_constant(std::make_unique<ObjectFile::Constant>(object_file.get(), name, visibility, value));
 }
 
 void Assembler::parse_section() {
@@ -157,21 +155,16 @@ void Assembler::parse_symbol(Visibility visibility, const Token &name) {
         }
         else if (token == Token::curly_open) {
             // TODO: error if .reserved
-            object->body = BodyParser(tokenizer, object, target->cpu, file_environment).parse();
+            object->body = BodyParser(tokenizer, object, target->cpu).parse();
             break;
         }
         // TODO: parameters
         else if (token == token_address) {
-            EvaluationResult result;
-            object->address = Address(tokenizer, result, file_environment);
-            // TODO: process result
+            object->address = Address(tokenizer);
         }
         else if (token == token_align || token == token_reserve) {
             auto expression = ExpressionParser(tokenizer).parse();
 
-            EvaluationResult result;
-            expression.evaluate(result, file_environment);
-            // TODO: process result
             auto value = expression.value();
 
             if (token == token_align) {
@@ -265,7 +258,7 @@ void Assembler::parse_name(Visibility visibility, const Token& name) {
         tokenizer.expect(Token::equals);
 
         auto definition = ExpressionParser(tokenizer).parse();
-        object_file->add_function(std::make_unique<Function>(name, visibility, arguments, definition));
+        object_file->add_function(std::make_unique<Function>(object_file.get(), name, visibility, arguments, definition));
     }
     else {
         tokenizer.unget(token);
@@ -278,5 +271,5 @@ void Assembler::parse_macro(Visibility visibility) {
     auto arguments = Callable::Arguments(tokenizer);
     tokenizer.expect(Token::curly_open);
     auto body = BodyParser(tokenizer, object_file->target->cpu).parse(); // TODO: proper mode for macros
-    object_file->add_macro(std::make_unique<Macro>(name, visibility, arguments, body.scoped()));
+    object_file->add_macro(std::make_unique<Macro>(object_file.get(), name, visibility, arguments, body));
 }

@@ -45,6 +45,7 @@ enum LabelExpressionType {
 };
 
 class BinaryExpression;
+class Entity;
 class EvaluationContext;
 class Object;
 class ObjectExpression;
@@ -93,8 +94,8 @@ public:
     // Label
     Expression(Location location, Symbol object_name, Symbol label_name);
     Expression(Location location, Symbol object_name, std::shared_ptr<Label> label);
-    Expression(Location location, const Object* object, Symbol label_name);
-    Expression(Location location, const Object* object, std::shared_ptr<Label> label);
+    Expression(Location location, const Entity* object, Symbol label_name);
+    Expression(Location location, const Entity* object, std::shared_ptr<Label> label);
     Expression(Location location, LabelExpressionType type);
     // Object
     explicit Expression(Object* object);
@@ -112,7 +113,6 @@ public:
     [[nodiscard]] const ObjectExpression* as_object() const;
     [[nodiscard]] const VariableExpression* as_variable() const;
     void collect_objects(std::unordered_set<Object*>& variables) const {expression->collect_objects(variables);}
-    bool evaluate(EvaluationResult& result, std::shared_ptr<Environment> environment);
     bool evaluate(const EvaluationContext& context);
     [[nodiscard]] std::shared_ptr<BaseExpression> get_expression() const {return expression;}
     [[nodiscard]] bool has_value() const {return value().has_value();}

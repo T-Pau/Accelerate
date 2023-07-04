@@ -35,17 +35,25 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 std::optional<Body>
 AssignmentBody::evaluated(const EvaluationContext &context) const {
-    if (context.conditional_in_scope || !context.object) {
-        return {};
+    if (context.conditional) {
+        return Body(Location(), "assignment in unresolved conditional not supported");
     }
+
+
+    auto new_value = value.evaluated(context);
+
+    if (!context.entity) {
+        if (new_value) {
+            return Body(visibility, name, *new_value);
+        }
+    }
+
     if (visibility == Visibility::SCOPE) {
         context.environment->add(name, value);
     }
     else {
         // TODO: this can't be written out if label is not resolved yet.
-        auto new_value = value;
-        new_value.evaluate(context);
-        context.object->owner->add_constant(std::make_unique<ObjectFile::Constant>(Token(Token::NAME, {}, name), visibility, new_value));
+        context.entity->owner->add_constant(std::make_unique<ObjectFile::Constant>(context.entity->owner, Token(Token::NAME, {}, name), visibility, new_value.value_or(value)));
     }
 
     return Body();

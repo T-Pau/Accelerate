@@ -114,7 +114,7 @@ void ObjectFileParser::parse_directive(const Token &directive) {
 
 
 void ObjectFileParser::parse_constant(Token name, const std::shared_ptr<ParsedValue>& definition) {
-    file->add_constant(std::make_unique<ObjectFile::Constant>(name, definition));
+    file->add_constant(std::make_unique<ObjectFile::Constant>(file.get(), name, definition));
 }
 
 
@@ -129,7 +129,7 @@ void ObjectFileParser::parse_format_version() {
 }
 
 void ObjectFileParser::parse_function(Token name, const std::shared_ptr<ParsedValue>& definition) {
-   file->add_function(std::make_unique<Function>(name, definition));
+   file->add_function(std::make_unique<Function>(file.get(), name, definition));
 }
 
 void ObjectFileParser::parse_target() {
@@ -139,7 +139,7 @@ void ObjectFileParser::parse_target() {
 }
 
 void ObjectFileParser::parse_macro(Token name, const std::shared_ptr<ParsedValue>& definition) {
-    file->add_macro(std::make_unique<Macro>(name, definition));
+    file->add_macro(std::make_unique<Macro>(file.get(), name, definition));
 }
 
 void ObjectFileParser::parse_import() {

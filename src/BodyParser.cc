@@ -113,10 +113,15 @@ Body BodyParser::parse() {
 
                 case Token::PUNCTUATION:
                     if (token == end_token) {
-                        // TODO: check that ifs is empty
-                        EvaluationResult result;
-                        body.evaluate(result, object, environment);
-                        // TODO: process result
+                        // TODO: move this to Object or ObjectFile.
+                        if (entity) {
+                            // TODO: check that ifs is empty
+                            EvaluationResult result;
+                            // Evaluate twice to resolve forward label references.
+                            body.evaluate(EvaluationContext(result, entity));
+                            body.evaluate(EvaluationContext(result, entity));
+                            // TODO: process result
+                        }
                         return body;
                     }
                     else if (token == Token::colon) {
@@ -155,10 +160,10 @@ Body BodyParser::parse() {
 
 void BodyParser::add_constant(Visibility visibility, Token name, const Expression& value) {
     if (visibility != Visibility::SCOPE) {
-        if (!object) {
+        if (!entity) {
             throw ParseException(name, "unsupported visibility");
         }
-        object->owner->add_constant(std::make_unique<ObjectFile::Constant>(name, visibility, value));
+        entity->owner->add_constant(std::make_unique<ObjectFile::Constant>(entity->owner, name, visibility, value));
     }
     environment->add(name.as_symbol(), value);
 }
@@ -166,7 +171,7 @@ void BodyParser::add_constant(Visibility visibility, Token name, const Expressio
 
 std::shared_ptr<Label> BodyParser::get_label(bool& is_anonymous) {
     auto trailing_label = current_body->back();
-    if (trailing_label.has_value() && trailing_label->is_label()) {
+    if (trailing_label && trailing_label->is_label()) {
         is_anonymous = false;
         return trailing_label->as_label()->label;
     }
@@ -178,13 +183,13 @@ std::shared_ptr<Label> BodyParser::get_label(bool& is_anonymous) {
 
 
 Expression BodyParser::get_pc(std::shared_ptr<Label> label) const {
-    return {ObjectNameExpression::create(object), Expression::BinaryOperation::ADD, Expression(Location(), object, std::move(label))};
+    return {ObjectNameExpression::create(entity->as_object()), Expression::BinaryOperation::ADD, Expression(Location(), entity, std::move(label))};
 }
 
 
 void BodyParser::parse_directive(const Token& directive) {
     auto it = directive_parser_methods.find(directive.as_symbol());
-    if (it == directive_parser_methods.end() || (directive == token_memory && !allow_memory)) {
+    if (it == directive_parser_methods.end() || (directive == token_memory && !allow_memory())) {
         throw ParseException(directive, "unknown directive");
     }
     (this->*it->second)();
@@ -194,9 +199,7 @@ void BodyParser::parse_directive(const Token& directive) {
 void BodyParser::parse_data() {
     EvaluationResult result;
     auto data = ExpressionParser(tokenizer).parse_list();
-    data.evaluate(result, object, environment, current_size(), nesting.empty());
     current_body->append(data);
-    // TODO: process result
 }
 
 void BodyParser::parse_else() {
@@ -280,8 +283,8 @@ void BodyParser::parse_memory() {
 }
 
 void BodyParser::parse_assignment(Visibility visibility, const Token &name) {
-    if (!object) {
-        throw ParseException(name, "assignment only allowed in objects");
+    if (!entity) {
+        throw ParseException(name, "assignment only allowed in entities");
     }
     current_body->append(Body(visibility, name.as_symbol(), ExpressionParser(tokenizer).parse()));
 }
@@ -353,7 +356,7 @@ void BodyParser::parse_instruction(const Token &name) {
     {
         auto instruction_environment = std::make_shared<Environment>();
         instruction_environment->add(symbol_pc, get_pc(label));
-        instruction_environment->add(Symbol(".label_offset(" + label->name.str() + ")"), Expression(Location(), object_name(), label));
+        instruction_environment->add(Symbol(".label_offset(" + label->name.str() + ")"), Expression(Location(), entity_name(), label));
         instruction = encoder.encode(name, arguments, instruction_environment, current_size());
     }
     if (is_anonymous_label) {
@@ -367,8 +370,8 @@ void BodyParser::parse_instruction(const Token &name) {
         }
     }
 
-    EvaluationResult result;
-    instruction.evaluate(result, object, environment, current_size(), nesting.empty());
+    //EvaluationResult result;
+    //instruction.evaluate(result, entity, environment, current_size(), nesting.empty());
     // TODO: process result
 
     current_body->append(instruction);

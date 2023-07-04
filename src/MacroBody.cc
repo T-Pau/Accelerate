@@ -50,6 +50,7 @@ std::optional<Body> MacroBody::evaluated(const EvaluationContext& context) const
 
     auto macro = context.environment->get_macro(name.as_symbol());
     if (!macro) {
+        context.result.add_unresolved_macro(name.as_symbol());
         if (changed) {
             return Body(name, new_arguments);
         }

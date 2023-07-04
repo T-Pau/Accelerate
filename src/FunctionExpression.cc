@@ -84,6 +84,7 @@ std::optional<Expression> FunctionExpression::evaluated(const EvaluationContext&
 
     auto function = context.environment->get_function(name);
     if (!function) {
+        context.result.add_unresolved_function(name);
         if (changed) {
             return Expression(name, new_arguments);
         }

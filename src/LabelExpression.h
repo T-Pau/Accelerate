@@ -37,13 +37,13 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 class LabelExpression: public BaseExpression {
 public:
-    static Expression create(Location location, const Object* object, std::shared_ptr<Label> label);
-    static Expression create(Location location, const Object* object, Symbol label_name);
+    static Expression create(Location location, const Entity* object, std::shared_ptr<Label> label);
+    static Expression create(Location location, const Entity* object, Symbol label_name);
     static Expression create(const std::vector<Expression>& arguments);
     LabelExpression(Location location, Symbol object_name, Symbol label_name): BaseExpression(location), type(LabelExpressionType::NAMED), unresolved_object_name(object_name), unresolved_label_name(label_name) {}
     LabelExpression(Location location, Symbol object_name, std::shared_ptr<Label> label): BaseExpression(location), type(LabelExpressionType::NAMED), unresolved_object_name(object_name), label(std::move(label)) {}
-    LabelExpression(Location location, const Object* object, Symbol label_name): BaseExpression(location), type(LabelExpressionType::NAMED), object(object), unresolved_label_name(label_name) {}
-    LabelExpression(Location location, const Object* object, std::shared_ptr<Label> label): BaseExpression(location), type(LabelExpressionType::NAMED), object(std::move(object)), label(std::move(label)) {}
+    LabelExpression(Location location, const Entity* object, Symbol label_name): BaseExpression(location), type(LabelExpressionType::NAMED), object(object), unresolved_label_name(label_name) {}
+    LabelExpression(Location location, const Entity* object, std::shared_ptr<Label> label): BaseExpression(location), type(LabelExpressionType::NAMED), object(std::move(object)), label(std::move(label)) {}
     LabelExpression(Location location, LabelExpressionType type): BaseExpression(location), type(type) {}
 
     [[nodiscard]] std::optional<Value> minimum_value() const override;
@@ -62,7 +62,7 @@ private:
     LabelExpressionType type;
     Symbol unresolved_object_name;
     Symbol unresolved_label_name;
-    const Object* object = nullptr;
+    const Entity* object = nullptr;
     mutable std::shared_ptr<Label> label;
 };
 

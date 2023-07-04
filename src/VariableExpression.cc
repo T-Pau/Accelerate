@@ -37,10 +37,10 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 std::optional<Expression> VariableExpression::evaluated(const EvaluationContext& context) const {
     if (symbol == Token::colon_minus.as_symbol() || symbol == Token::colon_plus.as_symbol()) {
-        if (!context.object) {
+        if (!context.entity) {
             return {};
         }
-        return Expression(Expression(context.object->name), Expression::BinaryOperation::ADD, Expression(location, symbol == Token::colon_minus.as_symbol() ? LabelExpressionType::PREVIOUS_UNNAMED : LabelExpressionType::NEXT_UNNAMED));
+        return Expression(Expression(context.entity->name), Expression::BinaryOperation::ADD, Expression(location, symbol == Token::colon_minus.as_symbol() ? LabelExpressionType::PREVIOUS_UNNAMED : LabelExpressionType::NEXT_UNNAMED));
     }
     if (context.evaluating(symbol)) {
         throw Exception("circular definition of %s", symbol.c_str());
@@ -50,7 +50,7 @@ std::optional<Expression> VariableExpression::evaluated(const EvaluationContext&
 
     if (value) {
         auto new_value = *value;
-        if (!context.shallow) {
+        if (!context.shallow()) {
             new_value.evaluate(context.evaluating_variable(symbol));
         }
         return new_value;

@@ -1,5 +1,6 @@
 description Test function expansion
 arguments -c --target 6502 a.s
+
 file a.s <inline>
 .section code
 test {
@@ -9,6 +10,7 @@ label:
     nop
 }
 end-of-inline-data
+
 file a.o {} <inline>
 .format_version 1.0
 .target "6502"

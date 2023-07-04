@@ -40,32 +40,43 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Memory.h"
 #include "SizeRange.h"
 
+class Entity;
 class ObjectFile;
 
 class EvaluationContext {
-public:
-    explicit EvaluationContext(EvaluationResult& result): environment(std::make_shared<Environment>()), result(result) {}
-    EvaluationContext(EvaluationResult& result, std::shared_ptr<Environment> environment, bool shallow = false, bool expanding_macro = false): environment(std::move(environment)), shallow(shallow), expanding_macro(expanding_macro), result(result) {}
-    EvaluationContext(EvaluationResult& result, Object* object, std::shared_ptr<Environment> environment, SizeRange offset, bool conditional = false, bool shallow = false);
+  public:
+    enum EvaluationType {
+        ARGUMENTS,          // Bind arguments in function call or instruction encoding.
+        ENTITY,             // Evaluate object with completed body.
+        MACRO_EXPANSION,    // Bind arguments and duplicate labels in macro invocation.
+        STANDALONE          // TODO: What's this used for? Remove?
+    };
+
+    // ARGUMENTS
+    EvaluationContext(EvaluationResult& result, std::shared_ptr<Environment> environment, SizeRange offset = SizeRange(0, {})): type(ARGUMENTS), environment(std::move(environment)), result(result), offset(offset) {}
+    // ENTITY
+    EvaluationContext(EvaluationResult& result, Entity* entity);
+    // MACRO_EXPANSION
+    EvaluationContext(EvaluationResult& result, std::shared_ptr<Environment> environment, std::unordered_map<Label*, std::shared_ptr<Label>> remap_labels): type(MACRO_EXPANSION), environment(std::move(environment)), remap_labels(std::move(remap_labels)), result(result) {}
+    // STANDALONE
+    EvaluationContext(EvaluationResult& result, bool standalone, std::shared_ptr<Environment> environment): type(STANDALONE), environment(std::move(environment)), result(result), offset(0) {(void)standalone;}
+
     EvaluationContext(const EvaluationContext& context) = default;
+
+    [[nodiscard]] bool shallow() const;
 
     [[nodiscard]] EvaluationContext evaluating_variable(Symbol variable) const;
     [[nodiscard]] EvaluationContext adding_offset(SizeRange size) const;
-    [[nodiscard]] EvaluationContext adding_scope(std::shared_ptr<Environment> environment, std::unordered_map<Label*, std::shared_ptr<Label>> remap_labels = {}, std::unordered_map<BaseExpression*, Expression> remap_expressions = {}) const;
     [[nodiscard]] EvaluationContext setting_offset(SizeRange offset) const;
     [[nodiscard]] EvaluationContext making_conditional() const;
     [[nodiscard]] bool evaluating(Symbol variable) const {return evaluating_variables.contains(variable);}
 
+    EvaluationType type;
+    Entity* entity = nullptr;
     std::shared_ptr<Environment> environment;
-    Object* object = nullptr;
-    bool shallow = false; // Don't evaluate values of variables (used in macros and functions for parameters).
-    bool expanding_macro = false;
-    std::unordered_map<BaseExpression*, Expression> remap_expressions;
     std::unordered_map<Label*, std::shared_ptr<Label>> remap_labels;
-
-    SizeRange offset;
+    SizeRange offset = SizeRange(0, {});
     bool conditional = false;
-    bool conditional_in_scope = false;
     std::unordered_set<Symbol> evaluating_variables; // Variables currently being evaluated (used for loop detection).
     EvaluationResult& result;
 };

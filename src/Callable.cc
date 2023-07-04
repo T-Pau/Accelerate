@@ -48,7 +48,7 @@ void Callable::initialize() {
     }
 }
 
-Callable::Callable(Token name_, const std::shared_ptr<ParsedValue>& definition): Entity(name_, definition) {
+Callable::Callable(ObjectFile* owner, Token name_, const std::shared_ptr<ParsedValue>& definition): Entity(owner, name_, definition) {
     initialize();
     auto parameters = definition->as_dictionary();
 
@@ -96,7 +96,7 @@ void Callable::Arguments::serialize(std::ostream& stream) const {
     }
 }
 
-EvaluationContext Callable::bind(EvaluationResult& result, const std::vector<Expression>& actual_arguments) const {
+std::shared_ptr<Environment> Callable::bind(const std::vector<Expression>& actual_arguments) const {
     if (actual_arguments.size() < arguments.minimum_arguments() || actual_arguments.size() > arguments.maximum_arguments()) {
         throw Exception("invalid number of actual_arguments");
     }
@@ -110,7 +110,7 @@ EvaluationContext Callable::bind(EvaluationResult& result, const std::vector<Exp
         }
     }
 
-    return EvaluationContext(result, environment, true, true);
+    return environment;
 }
 
 Callable::Arguments::Arguments(Tokenizer& tokenizer) {

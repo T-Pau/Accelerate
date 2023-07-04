@@ -43,9 +43,18 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 class BodyParser {
 public:
-    explicit BodyParser(Tokenizer& tokenizer): end_token(Token::greater), tokenizer(tokenizer) {} // ParsedValue
-    BodyParser(Tokenizer& tokenizer, const CPU* cpu): allow_memory(true), cpu(cpu), tokenizer(tokenizer) {} // Target
-    BodyParser(Tokenizer& tokenizer, Object* object, const CPU* cpu, std::shared_ptr<Environment> environment): cpu(cpu), environment(std::move(environment)), object(object), tokenizer(tokenizer) {} // Assembler
+    enum ParsingType {
+        ENTITY,         // Parsing a macro or object from source.
+        OUTPUT,         // Parsing output section from target.
+        PARSED_VALUE    // Parsing body in parsed value from object file.
+    };
+
+    // PARSED_VALUE
+    explicit BodyParser(Tokenizer& tokenizer): parsing_type(PARSED_VALUE), end_token(Token::greater), tokenizer(tokenizer) {}
+    // OUTPUT
+    BodyParser(Tokenizer& tokenizer, const CPU* cpu): parsing_type(OUTPUT), cpu(cpu), tokenizer(tokenizer) {}
+    // ENTITY
+    BodyParser(Tokenizer& tokenizer, Entity* entity, const CPU* cpu): parsing_type(ENTITY), cpu(cpu), entity(entity), tokenizer(tokenizer) {}
 
     static void setup(FileTokenizer& tokenizer);
 
@@ -70,7 +79,7 @@ private:
 
     class IfNesting: public Nesting {
       public:
-        virtual ~IfNesting() = default;
+        ~IfNesting() override = default;
 
         Body* operator[](size_t index) override {return &clauses[index].body;}
         Body body() override {return Body(clauses);}
@@ -84,7 +93,7 @@ private:
 
     class ScopeNesting: public Nesting {
       public:
-        virtual ~ScopeNesting() = default;
+        ~ScopeNesting() override = default;
 
         Body* operator[](size_t index) override {return &inner_body;}
         Body body() override {return inner_body.scoped();}
@@ -100,11 +109,11 @@ private:
         size_t sub_index;
     };
 
-    bool allow_memory = false;
+    ParsingType parsing_type;
     const CPU* cpu = nullptr;
     std::shared_ptr<Environment> environment = std::make_shared<Environment>();
     Token end_token = Token::curly_close;
-    Object* object = nullptr;
+    Entity* entity = nullptr;
     Tokenizer& tokenizer;
 
     uint64_t next_label = 0;
@@ -113,6 +122,7 @@ private:
     std::vector<NestingIndex> nesting_indices;
     Body *current_body = &body;
 
+    [[nodiscard]] bool allow_memory() const {return parsing_type == OUTPUT;}
     [[nodiscard]] bool allow_instructions() const {return cpu != nullptr;}
     void parse_assignment(Visibility visibility, const Token& name);
     void parse_directive(const Token& directive);
@@ -126,7 +136,7 @@ private:
     Body* get_body(const NestingIndex& nesting_index) {return (*nesting[nesting_index.nesting_index])[nesting_index.sub_index];}
     [[nodiscard]] Expression get_pc(std::shared_ptr<Label> label) const;
     [[nodiscard]] std::shared_ptr<Label> get_label(bool& is_anonymous);
-    [[nodiscard]] Symbol object_name() const {return object ? object->name.as_symbol() : Symbol();};
+    [[nodiscard]] Symbol entity_name() const {return entity ? entity->name.as_symbol() : Symbol();};
     void push_clause(Expression condition);
     void push_body(const NestingIndex& body_index);
     void pop_body();

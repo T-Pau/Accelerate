@@ -130,6 +130,7 @@ void ObjectFile::serialize(std::ostream &stream) const {
 
 void ObjectFile::add_constant(std::unique_ptr<Constant> constant) {
     auto constant_name = constant->name;
+    constant->set_owner(this);
 
     auto pair = constants.insert({constant_name.as_symbol(), std::move(constant)});
 
@@ -178,7 +179,7 @@ void ObjectFile::add_object_file(const std::shared_ptr<ObjectFile>& file) {
 void ObjectFile::evaluate() {
     for (auto& pair: constants) {
         EvaluationResult result;
-        pair.second->value.evaluate(result, private_environment);
+        pair.second->value.evaluate(EvaluationContext(result, pair.second.get()));
         // TODO: process result
     }
     for (auto& pair: objects) {
@@ -264,6 +265,7 @@ void ObjectFile::add_function(std::unique_ptr<Function> function) {
         // TODO: error
         return;
     }
+    function->set_owner(this);
     environment(function->visibility)->add(function->name.as_symbol(), function.get());
     functions[function->name.as_symbol()] = std::move(function);
 }
@@ -273,6 +275,7 @@ void ObjectFile::add_macro(std::unique_ptr<Macro> macro) {
         // TODO: error
         return;
     }
+    macro->set_owner(this);
     environment(macro->visibility)->add(macro->name.as_symbol(), macro.get());
     macros[macro->name.as_symbol()] = std::move(macro);
 }
@@ -284,7 +287,7 @@ void ObjectFile::Constant::serialize(std::ostream &stream) const {
     stream << "}" << std::endl;
 }
 
-ObjectFile::Constant::Constant(Token name, const std::shared_ptr<ParsedValue>& definition): Entity(name, definition) {
+ObjectFile::Constant::Constant(ObjectFile* owner, Token name, const std::shared_ptr<ParsedValue>& definition): Entity(owner, name, definition) {
     initialize();
 
     auto parameters = definition->as_dictionary();

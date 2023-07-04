@@ -56,6 +56,7 @@ public:
     [[nodiscard]] const std::unordered_map<Symbol, std::shared_ptr<Label>>& all_labels() const {return labels;}
     [[nodiscard]] const std::unordered_map<Symbol, const Macro*>& all_macros() const {return macros;}
     [[nodiscard]] const std::unordered_map<Symbol, Expression>& all_variables() const {return variables;}
+    [[nodiscard]] bool empty() const {return functions.empty() && labels.empty() && macros.empty() && variables.empty();}
     [[nodiscard]] const Function* get_function(Symbol name) const;
     [[nodiscard]] std::shared_ptr<Label> get_label(Symbol name) const;
     [[nodiscard]] const Macro* get_macro(Symbol name) const;

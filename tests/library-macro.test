@@ -34,9 +34,7 @@ file c.lib <inline>
     visibility: public
     arguments: address
     body <
-        .scope
-          .data $a0, $02, $8c, address:2
-        .end
+      .data $a0, $02, $8c, address:2
     >
 }
 end-of-inline-data
@@ -56,13 +54,11 @@ file a.lib {} <inline>
     visibility: private
     arguments: address
     body <
-        .scope
-          .data $a9, $00
-          .if .in_range($00, $ff, address)
-            .data $85, address:1
-          .else
-            .data $8d, address:2
-          .end
+        .data $a9, $00
+        .if .in_range($00, $ff, address)
+          .data $85, address:1
+        .else
+          .data $8d, address:2
         .end
     >
 }
@@ -70,13 +66,11 @@ file a.lib {} <inline>
     visibility: private
     arguments: address
     body <
-        .scope
-          .data $a2, $01
-          .if .in_range($00, $ff, address)
-            .data $86, address:1
-          .else
-            .data $8e, address:2
-          .end
+        .data $a2, $01
+        .if .in_range($00, $ff, address)
+          .data $86, address:1
+        .else
+          .data $8e, address:2
         .end
     >
 }
@@ -84,11 +78,22 @@ file a.lib {} <inline>
     visibility: public
     section: code
     body <
-        .data $a2, $01, $8e, $1001, $a9, $00, $8d, $2002, $a0, $02, $8c, $3003, $a2, $01
-        .if .in_range($00, $ff, unknown_address)
-          .data $86, unknown_address:1
-        .else
-          .data $8e, unknown_address:2
+        .scope
+          .data $a2, $01, $8e, $1001
+        .end
+        .scope
+          .data $a9, $00, $8d, $2002
+        .end
+        .scope
+          .data $a0, $02, $8c, $3003
+        .end
+        .scope
+          .data $a2, $01
+          .if .in_range($00, $ff, unknown_address)
+            .data $86, unknown_address:1
+          .else
+            .data $8e, unknown_address:2
+          .end
         .end
         unknown $1001
         unknown unknown_address

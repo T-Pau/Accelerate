@@ -36,8 +36,8 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Object.h"
 
 std::optional<Expression> ObjectNameExpression::evaluated(const EvaluationContext& context) const {
-    if (context.object) {
-        return Expression(context.object);
+    if (context.entity && context.entity->is_object()) {
+        return Expression(context.entity->as_object());
     }
     else {
         return {};

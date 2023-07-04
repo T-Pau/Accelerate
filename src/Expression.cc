@@ -64,10 +64,10 @@ Expression::Expression(const Token& token) {
 }
 Expression::Expression(Location location, Symbol object_name, Symbol label_name): expression(std::make_shared<LabelExpression>(location, object_name, label_name)) {}
 Expression::Expression(Location location, Symbol object_name, std::shared_ptr<Label> label): expression(std::make_shared<LabelExpression>(location, object_name, std::move(label))) {}
-Expression::Expression(Location location, const Object* object, Symbol label_name) {
+Expression::Expression(Location location, const Entity* object, Symbol label_name) {
     *this = LabelExpression::create(location, object, label_name);
 }
-Expression::Expression(Location location, const Object* object, std::shared_ptr<Label> label) {
+Expression::Expression(Location location, const Entity* object, std::shared_ptr<Label> label) {
     *this = LabelExpression::create(location, object, std::move(label));
 }
 Expression::Expression(Location location, LabelExpressionType type): expression(std::make_shared<LabelExpression>(location, type)) {}
@@ -119,20 +119,11 @@ Symbol Expression::variable_name() const {
     return {};
 }
 
-bool Expression::evaluate(EvaluationResult& result, std::shared_ptr<Environment> environment) {
-    return evaluate(EvaluationContext(result, std::move(environment)));
-}
-
 std::ostream& operator<<(std::ostream& stream, const Expression& expression) {
     expression.serialize(stream);
     return stream;
 }
 
 std::optional<Expression> Expression::evaluated(const EvaluationContext& context) const {
-    auto actual_expression = expression;
-    auto it = context.remap_expressions.find(expression.get());
-    if (it != context.remap_expressions.end()) {
-        actual_expression = it->second.expression;
-    }
-    return actual_expression->evaluated(context);
+    return expression->evaluated(context);
 }

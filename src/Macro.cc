@@ -30,6 +30,8 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include "Macro.h"
+
+#include <utility>
 #include "Exception.h"
 
 bool Macro::initialized = false;
@@ -43,12 +45,19 @@ void Macro::initialize() {
 }
 
 
-Macro::Macro(Token name, const std::shared_ptr<ParsedValue>& definition) : Callable(name, definition) {
+Macro::Macro(ObjectFile* owner, Token name, const std::shared_ptr<ParsedValue>& definition) : Callable(owner, name, definition) {
     initialize();
 
     auto parameters = definition->as_dictionary();
 
     body = (*parameters)[token_body]->as_body()->body;
+}
+
+Macro::Macro(ObjectFile* owner, Token name, Visibility visibility, Callable::Arguments arguments, Body body_): Callable(owner, name, visibility, std::move(arguments)), body(std::move(body_)) {
+    EvaluationResult result;
+    // No outside references can be resolved before arguments are bound.
+    body.evaluate(EvaluationContext(result, this));
+    body.evaluate(EvaluationContext(result, this));
 }
 
 
@@ -59,8 +68,14 @@ std::ostream& operator<<(std::ostream& stream, const Macro& macro) {
 
 
 Body Macro::expand(const std::vector<Expression>& arguments) const {
+    std::unordered_map<Label*, std::shared_ptr<Label>> remap_labels;
+
+    for (auto& pair : environment->all_labels()) {
+        remap_labels[pair.second.get()] = pair.second->clone();
+    }
+
     EvaluationResult result;
-    return body.evaluated(bind(result, arguments)).value_or(body);
+    return body.evaluated(EvaluationContext(result, bind(arguments), std::move(remap_labels))).value_or(body).scoped();
     // TODO: process result
 }
 

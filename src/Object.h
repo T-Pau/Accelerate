@@ -53,20 +53,16 @@ public:
     [[nodiscard]] bool empty() const {return !is_reservation() && body.empty();}
     void evaluate();
     [[nodiscard]] bool has_address() const {return address.has_value();}
-    void set_owner(ObjectFile* new_owner);
     [[nodiscard]] SizeRange size_range() const;
 
     void serialize(std::ostream& stream) const;
 
-    ObjectFile* owner;
     const MemoryMap::Section* section;
     uint64_t alignment = 0;
     uint64_t reservation = 0;
     std::optional<Address> address;
 
     Body body;
-    std::shared_ptr<Environment> environment;
-    std::unordered_set<Object*> referenced_objects;
 
   private:
     static void initialize();

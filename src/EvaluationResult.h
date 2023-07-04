@@ -43,6 +43,10 @@ class EvaluationResult {
 public:
     EvaluationResult() = default;
 
+    void add_unresolved_function(Symbol name) {unresolved_functions.insert(name);}
+    void add_unresolved_macro(Symbol name) {unresolved_macros.insert(name);}
+    void add_unresolved_variable(Symbol name) {unresolved_variables.insert(name);}
+
     void invalidate_unnamed_label();
     void set_unnamed_label(const std::shared_ptr<Label>& label);
     [[nodiscard]] std::shared_ptr<Label> get_previous_unnamed_label() const;
@@ -52,10 +56,10 @@ public:
     bool previous_unnamed_label_valid = true;
     std::unordered_set<const LabelExpression*> forward_unnamed_label_uses;
 
+    std::unordered_set<Symbol> unresolved_functions;
+    std::unordered_set<Symbol> unresolved_macros;
     std::unordered_set<Symbol> unresolved_variables;
     std::unordered_set<Object*> used_objects;
-
-    //std::shared_ptr<EvaluationResult> next;
 };
 
 #endif // EVALUATION_RESULT_H

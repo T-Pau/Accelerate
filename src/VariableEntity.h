@@ -1,5 +1,8 @@
+#ifndef VARIABLE_ENTITY_H
+#define VARIABLE_ENTITY_H
+
 /*
-Address.h --
+VariableEntity.h --
 
 Copyright (C) Dieter Baron
 
@@ -29,25 +32,12 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef ADDRESS_H
-#define ADDRESS_H
+#include "Entity.h"
 
-#include "Environment.h"
-#include "Tokenizer.h"
-#include <iostream>
-
-class Address {
+class VariableEntity: public Entity {
   public:
-    Address(uint64_t bank, uint64_t address): bank(bank), address(address) {}
-    explicit Address(uint64_t address): address(address) {}
-    explicit Address(Tokenizer& tokenizer);
 
-    void serialize(std::ostream& stream) const;
-
-    uint64_t bank = 0;
-    uint64_t address = 0;
 };
 
-std::ostream& operator<<(std::ostream& stream, Address address);
 
-#endif // ADDRESS_H
+#endif // VARIABLE_ENTITY_H

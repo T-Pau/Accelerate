@@ -31,6 +31,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "LabelExpression.h"
 
+#include "Entity.h"
 #include "Expression.h"
 #include "Object.h"
 #include "ObjectExpression.h"
@@ -66,7 +67,7 @@ Expression LabelExpression::create(const std::vector<Expression>& arguments) {
     return Expression(std::make_shared<LabelExpression>(object_name->location, object_name->variable(), label_name->variable()));
 }
 
-Expression LabelExpression::create(Location location, const Object* object, std::shared_ptr<Label> label) {
+Expression LabelExpression::create(Location location, const Entity* object, std::shared_ptr<Label> label) {
     auto offset = label->offset.size();
     if (offset.has_value()) {
         return Expression(*offset);
@@ -76,7 +77,7 @@ Expression LabelExpression::create(Location location, const Object* object, std:
     }
 }
 
-Expression LabelExpression::create(Location location, const Object* object, Symbol label_name) {
+Expression LabelExpression::create(Location location, const Entity* object, Symbol label_name) {
     auto label = object->environment->get_label(label_name);
     if (label) {
         return create(location, object, label);
@@ -90,16 +91,16 @@ std::optional<Expression> LabelExpression::evaluated(const EvaluationContext& co
     switch (type) {
         case NAMED: {
             auto changed = false;
-            const Object* new_object = object;
+            const Entity* new_object = object;
             auto new_label = label;
 
             if (!object) {
-                if (context.object) {
-                    if (unresolved_object_name.empty() || unresolved_object_name == context.object->name.as_symbol()) {
-                        new_object = context.object;
+                if (context.entity) {
+                    if (unresolved_object_name.empty() || unresolved_object_name == context.entity->name.as_symbol()) {
+                        new_object = context.entity;
                     }
                     else {
-                        new_object = context.object->owner->object(unresolved_object_name); // TODO: search in included libraries too
+                        new_object = context.entity->owner->object(unresolved_object_name); // TODO: search in included libraries too
                     }
                 }
                 else {
@@ -143,18 +144,18 @@ std::optional<Expression> LabelExpression::evaluated(const EvaluationContext& co
         }
 
         case NEXT_UNNAMED:
-            if (!label && context.object) {
+            if (!label && context.entity) {
                 context.result.add_forward_unnamed_label_use(this);
             }
             break;
 
         case PREVIOUS_UNNAMED:
-            if (!label && context.object) {
+            if (!label && context.entity) {
                 try {
                     label = context.result.get_previous_unnamed_label();
                 }
                 catch (Exception& ex) {
-                    if (!context.conditional_in_scope) {
+                    if (!context.conditional) {
                         throw ex;
                     }
                 }

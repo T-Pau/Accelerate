@@ -34,15 +34,26 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "ParsedValue.h"
 
+class Macro;
+class Object;
+
 class Entity {
   public:
-    Entity(Token name, const std::shared_ptr<ParsedValue>& definition);
-    Entity(Token name, Visibility visibility): name(name), visibility(visibility) {}
+    Entity(ObjectFile* owner, Token name, const std::shared_ptr<ParsedValue>& definition);
+    Entity(ObjectFile* owner, Token name, Visibility visibility);
+    virtual ~Entity() = default;
+
+    [[nodiscard]] Macro* as_macro();
+    [[nodiscard]] Object* as_object();
+    [[nodiscard]] bool is_macro() {return as_macro();}
+    [[nodiscard]] bool is_object() {return as_object();}
+    void set_owner(ObjectFile* new_owner);
 
     Token name;
     Visibility visibility;
-    // TODO: move owner here
+    ObjectFile* owner = nullptr;
     std::unordered_set<Object*> referenced_objects;
+    std::shared_ptr<Environment> environment;
 
   protected:
     void serialize_entity(std::ostream& stream) const;

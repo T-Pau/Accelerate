@@ -55,18 +55,19 @@ std::optional<Body> LabelBody::evaluated(const EvaluationContext& context) const
     actual_label->offset = context.offset;
 
     if (actual_label->is_named()) {
-        if (!context.conditional && context.object) {
-            context.object->environment->add(actual_label->name, actual_label);
+        if (!context.conditional && context.entity) {
+            context.entity->environment->add(actual_label->name, Expression(Expression(context.entity->name), Expression::BinaryOperation::ADD, Expression(Location(), context.entity, actual_label)));
+            context.entity->environment->add(actual_label->name, actual_label);
             if (actual_label->offset.size()) {
                 return Body();
             }
         }
     }
     else {
-        if (context.conditional_in_scope) {
+        if (context.conditional) {
             context.result.invalidate_unnamed_label();
         }
-        else if (context.object) {
+        else if (context.entity) {
             context.result.set_unnamed_label(label);
         }
     }

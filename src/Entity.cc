@@ -31,6 +31,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "Entity.h"
 #include "ParseException.h"
+#include "ObjectFile.h"
 
 #define VISIBILITY "visibility"
 
@@ -46,7 +47,7 @@ void Entity::initialize() {
 }
 
 
-Entity::Entity(Token name_, const std::shared_ptr<ParsedValue>& definition) {
+Entity::Entity(ObjectFile* owner, Token name_, const std::shared_ptr<ParsedValue>& definition): environment(std::make_shared<Environment>(owner->private_environment)), owner(owner) {
     initialize();
     auto parameters = definition->as_dictionary();
 
@@ -60,7 +61,27 @@ Entity::Entity(Token name_, const std::shared_ptr<ParsedValue>& definition) {
     visibility = *visibility_;
 }
 
+Entity::Entity(ObjectFile* owner, Token name, Visibility visibility): name(name), visibility(visibility), owner(owner), environment(std::make_shared<Environment>(owner->private_environment)) {}
+
 
 void Entity::serialize_entity(std::ostream& stream) const {
     stream << "    " VISIBILITY ": " << visibility << std::endl;
+}
+
+void Entity::set_owner(ObjectFile* new_owner) {
+    if (new_owner == owner) {
+        return;
+    }
+    if (owner) {
+        environment->replace(owner->private_environment, new_owner->private_environment);
+    }
+    owner = new_owner;
+}
+
+Macro* Entity::as_macro() {
+    return dynamic_cast<Macro*>(this);
+}
+
+Object* Entity::as_object() {
+    return dynamic_cast<Object*>(this);
 }

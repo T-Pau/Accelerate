@@ -45,7 +45,7 @@ void Function::initialize() {
     }
 }
 
-Function::Function(Token name, const std::shared_ptr<ParsedValue>& definition_) : Callable(name, definition_) {
+Function::Function(ObjectFile* owner, Token name, const std::shared_ptr<ParsedValue>& definition_) : Callable(owner, name, definition_) {
     auto parameters = definition_->as_dictionary();
     initialize();
     auto tokenizer = SequenceTokenizer((*parameters)[token_definition]->as_scalar()->tokens);
@@ -64,7 +64,7 @@ std::ostream& operator<<(std::ostream& stream, const Function& function) {
 
 Expression Function::call(const std::vector<Expression>& arguments) const {
     EvaluationResult result;
-    return definition.evaluated(bind(result, arguments)).value_or(definition);
+    return definition.evaluated(EvaluationContext(result, bind(arguments))).value_or(definition);
     // TODO: process result
 }
 

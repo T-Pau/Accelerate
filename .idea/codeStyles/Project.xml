@@ -1,5 +1,8 @@
 <component name="ProjectCodeStyleConfiguration">
   <code_scheme name="Project" version="173">
+    <Objective-C>
+      <option name="HEADER_GUARD_STYLE_PATTERN" value="${FILE_NAME}_${EXT}" />
+    </Objective-C>
     <Objective-C-extensions>
       <rules>
         <rule entity="NAMESPACE" visibility="ANY" specifier="ANY" prefix="" style="SNAKE_CASE" suffix="" />

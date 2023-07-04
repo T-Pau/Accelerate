@@ -79,7 +79,6 @@ public:
     [[nodiscard]] bool empty() const {return element->empty();}
     [[nodiscard]] Body make_unique() const;
     void encode(std::string& bytes, const Memory* memory = nullptr) const {element->encode(bytes, memory);}
-    bool evaluate(EvaluationResult& result, Object* object, std::shared_ptr<Environment> environment = {}, SizeRange offset = SizeRange(), bool conditional = false, bool shallow = false) {return evaluate(EvaluationContext(result, object, environment, offset, conditional, shallow));}
     bool evaluate(const EvaluationContext& context);
     [[nodiscard]] std::optional<Body> evaluated (const EvaluationContext& context) const;
     [[nodiscard]] bool is_block() const {return as_block() != nullptr;}
