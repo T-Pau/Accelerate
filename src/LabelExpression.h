@@ -37,33 +37,30 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 class LabelExpression: public BaseExpression {
 public:
-    static Expression create(Location location, const Entity* object, std::shared_ptr<Label> label);
-    static Expression create(Location location, const Entity* object, Symbol label_name);
+    static Expression create(Location location, const Entity* object, Symbol label_name, SizeRange offset);
     static Expression create(const std::vector<Expression>& arguments);
-    LabelExpression(Location location, Symbol object_name, Symbol label_name): BaseExpression(location), type(LabelExpressionType::NAMED), unresolved_object_name(object_name), unresolved_label_name(label_name) {}
-    LabelExpression(Location location, Symbol object_name, std::shared_ptr<Label> label): BaseExpression(location), type(LabelExpressionType::NAMED), unresolved_object_name(object_name), label(std::move(label)) {}
-    LabelExpression(Location location, const Entity* object, Symbol label_name): BaseExpression(location), type(LabelExpressionType::NAMED), object(object), unresolved_label_name(label_name) {}
-    LabelExpression(Location location, const Entity* object, std::shared_ptr<Label> label): BaseExpression(location), type(LabelExpressionType::NAMED), object(std::move(object)), label(std::move(label)) {}
-    LabelExpression(Location location, LabelExpressionType type): BaseExpression(location), type(type) {}
+    LabelExpression(Location location, Symbol object_name, Symbol label_name): BaseExpression(location), type(LabelExpressionType::NAMED), object_name(object_name), label_name(label_name) {}
+    LabelExpression(Location location, Symbol object_name, Symbol label_name, SizeRange offset): BaseExpression(location), type(LabelExpressionType::NAMED), object_name(object_name), label_name(label_name), offset(offset) {}
+    LabelExpression(Location location, const Entity* object, Symbol label_name, SizeRange offset);
+    LabelExpression(Location location, LabelExpressionType type, size_t unnamed_index = std::numeric_limits<size_t>::max(), SizeRange offset = SizeRange(0, {})): BaseExpression(location), type(type), offset(offset), unnamed_index(unnamed_index) {}
 
-    [[nodiscard]] std::optional<Value> minimum_value() const override;
-    [[nodiscard]] std::optional<Value> maximum_value() const override;
-    [[nodiscard]] std::optional<Value> value() const override;
-
-    void set_label(std::shared_ptr<Label> new_label) const {label = std::move(new_label);}
+    [[nodiscard]] std::optional<Value> minimum_value() const override {return offset.minimum_value();}
+    [[nodiscard]] std::optional<Value> maximum_value() const override {return offset.maximum_value();}
+    [[nodiscard]] std::optional<Value> value() const override {return offset.value();}
 
 protected:
     [[nodiscard]] std::optional<Expression> evaluated(const EvaluationContext& context) const override;
     void serialize_sub(std::ostream& stream) const override;
 
 private:
-    Symbol object_name() const;
-    Symbol label_name() const {return label ? label->name : unresolved_label_name;}
+    [[nodiscard]] bool added_to_environment() const {return unnamed_index != std::numeric_limits<size_t>::max();}
+
     LabelExpressionType type;
-    Symbol unresolved_object_name;
-    Symbol unresolved_label_name;
+    Symbol object_name;
+    Symbol label_name;
     const Entity* object = nullptr;
-    mutable std::shared_ptr<Label> label;
+    SizeRange offset = SizeRange(0, {});
+    size_t unnamed_index = std::numeric_limits<size_t>::max();
 };
 
 #endif // LABEL_EXPRESSION_H

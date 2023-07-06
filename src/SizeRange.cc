@@ -58,6 +58,16 @@ std::optional<uint64_t> SizeRange::size() const {
     }
 }
 
+std::optional<Value> SizeRange::value() const {
+    auto s = size();
+    if (s) {
+        return Value(*s);
+    }
+    else {
+        return {};
+    }
+}
+
 std::ostream& operator<<(std::ostream& stream, const SizeRange& size_range) {
     stream << "(" << size_range.minimum << ",";
     if (size_range.maximum.has_value()) {

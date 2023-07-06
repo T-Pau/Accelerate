@@ -43,37 +43,37 @@ void LabelBody::serialize(std::ostream &stream, const std::string& prefix) const
     else {
         stream << prefix;
     }
-    stream << label->name << ":" << std::endl;
+    stream << name << ":" << std::endl;
 }
 
 std::optional<Body> LabelBody::evaluated(const EvaluationContext& context) const {
-    auto actual_label = label;
-    auto it = context.remap_labels.find(label.get());
-    if (it != context.remap_labels.end()) {
-        actual_label = it->second;
-    }
-    actual_label->offset = context.offset;
+    auto new_added_to_environment = added_to_environment;
+    auto new_unnamed_index = unnamed_index;
 
-    if (actual_label->is_named()) {
-        if (!context.conditional && context.entity) {
-            context.entity->environment->add(actual_label->name, Expression(Expression(context.entity->name), Expression::BinaryOperation::ADD, Expression(Location(), context.entity, actual_label)));
-            context.entity->environment->add(actual_label->name, actual_label);
-            if (actual_label->offset.size()) {
-                return Body();
+    if (context.entity) {
+        if (!added_to_environment) {
+            if (name.empty()) {
+                new_unnamed_index = context.environment->unnamed_labels.add_label(context.offset);
+            }
+            else {
+                context.environment->add(name, context.offset);
+            }
+            new_added_to_environment = true;
+        }
+        else if (offset != context.offset) {
+            if (name.empty()) {
+                context.environment->unnamed_labels.update_label(unnamed_index, context.offset);
+            }
+            else {
+                context.environment->update(name, context.offset);
             }
         }
     }
-    else {
-        if (context.conditional) {
-            context.result.invalidate_unnamed_label();
-        }
-        else if (context.entity) {
-            context.result.set_unnamed_label(label);
-        }
-    }
 
-    if (actual_label != label) {
-        return Body(actual_label);
+    if (new_added_to_environment != added_to_environment || context.offset != offset) {
+        return Body(name, context.offset, new_added_to_environment, new_unnamed_index);
     }
-    return {};
+    else {
+        return {};
+    }
 }

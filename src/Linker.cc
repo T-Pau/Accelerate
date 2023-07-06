@@ -131,7 +131,7 @@ void Linker::output(const std::string &file_name) {
 
     auto body = target->output;
     EvaluationResult result;
-    body.evaluate(EvaluationContext(result, true, environment));
+    body.evaluate(EvaluationContext(result, EvaluationContext::STANDALONE, environment, SizeRange()));
     // TODO: process result
 
     auto bytes = std::string();

@@ -72,7 +72,8 @@ Body::Body(const std::vector<IfBodyClause>& clauses) {
     *this = IfBody::create(clauses);
 }
 
-Body::Body(std::shared_ptr<Label> label): element(std::make_shared<LabelBody>(std::move(label))) {}
+Body::Body(Symbol name): element(std::make_shared<LabelBody>(name)) {}
+Body::Body(Symbol name, SizeRange offset, bool added_to_environment, size_t unnamed_index): element(std::make_shared<LabelBody>(name, offset, added_to_environment, unnamed_index)) {}
 
 Body::Body(Token name, std::vector<Expression> arguments): element(std::make_shared<MacroBody>(name, std::move(arguments))) {}
 

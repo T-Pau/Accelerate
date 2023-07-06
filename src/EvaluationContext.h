@@ -52,14 +52,10 @@ class EvaluationContext {
         STANDALONE          // TODO: What's this used for? Remove?
     };
 
-    // ARGUMENTS
-    EvaluationContext(EvaluationResult& result, std::shared_ptr<Environment> environment, SizeRange offset = SizeRange(0, {})): type(ARGUMENTS), environment(std::move(environment)), result(result), offset(offset) {}
+    // ARGUMENTS, MACRO_EXPANSION, STANDALONE
+    EvaluationContext(EvaluationResult& result, EvaluationType type, std::shared_ptr<Environment> environment, SizeRange offset = SizeRange(0, {})): type(type), environment(std::move(environment)), result(result), offset(offset) {}
     // ENTITY
     EvaluationContext(EvaluationResult& result, Entity* entity);
-    // MACRO_EXPANSION
-    EvaluationContext(EvaluationResult& result, std::shared_ptr<Environment> environment, std::unordered_map<Label*, std::shared_ptr<Label>> remap_labels): type(MACRO_EXPANSION), environment(std::move(environment)), remap_labels(std::move(remap_labels)), result(result) {}
-    // STANDALONE
-    EvaluationContext(EvaluationResult& result, bool standalone, std::shared_ptr<Environment> environment): type(STANDALONE), environment(std::move(environment)), result(result), offset(0) {(void)standalone;}
 
     EvaluationContext(const EvaluationContext& context) = default;
 
@@ -74,7 +70,6 @@ class EvaluationContext {
     EvaluationType type;
     Entity* entity = nullptr;
     std::shared_ptr<Environment> environment;
-    std::unordered_map<Label*, std::shared_ptr<Label>> remap_labels;
     SizeRange offset = SizeRange(0, {});
     bool conditional = false;
     std::unordered_set<Symbol> evaluating_variables; // Variables currently being evaluated (used for loop detection).

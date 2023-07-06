@@ -34,7 +34,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "BaseExpression.h"
 #include "EvaluationResult.h"
-#include "Label.h"
+#include "SizeRange.h"
 #include "Tokenizer.h"
 #include "VoidExpression.h"
 
@@ -92,11 +92,9 @@ public:
     // Function
     Expression(Symbol name, const std::vector<Expression>& arguments);
     // Label
-    Expression(Location location, Symbol object_name, Symbol label_name);
-    Expression(Location location, Symbol object_name, std::shared_ptr<Label> label);
-    Expression(Location location, const Entity* object, Symbol label_name);
-    Expression(Location location, const Entity* object, std::shared_ptr<Label> label);
-    Expression(Location location, LabelExpressionType type);
+    Expression(Location location, Symbol object_name, Symbol label_name, SizeRange offset = SizeRange(0, {}));
+    Expression(Location location, const Entity* object, Symbol label_name, SizeRange offset = SizeRange(0, {}));
+    Expression(Location location, LabelExpressionType type, size_t unnamed_index = std::numeric_limits<size_t>::max(), SizeRange offset = SizeRange(0, {}));
     // Object
     explicit Expression(Object* object);
     // Unary
@@ -118,6 +116,7 @@ public:
     [[nodiscard]] bool has_value() const {return value().has_value();}
     [[nodiscard]] bool is_binary() const {return as_binary() != nullptr;}
     [[nodiscard]] bool is_object() const {return as_object() != nullptr;}
+    [[nodiscard]] bool is_unique() const {return expression.use_count() <= 1;}
     [[nodiscard]] bool is_variable() const {return as_variable() != nullptr;}
     [[nodiscard]] const Location& location() const {return expression->location;}
     [[nodiscard]] std::optional<Value> maximum_value() const {return expression->maximum_value();}

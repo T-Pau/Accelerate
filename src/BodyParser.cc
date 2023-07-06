@@ -39,7 +39,6 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ValueExpression.h"
 #include "ExpressionNode.h"
 #include "InstructionEncoder.h"
-#include "LabelExpression.h"
 #include "TokenNode.h"
 #include "MemoryBody.h"
 #include "ObjectNameExpression.h"
@@ -169,21 +168,20 @@ void BodyParser::add_constant(Visibility visibility, Token name, const Expressio
 }
 
 
-std::shared_ptr<Label> BodyParser::get_label(bool& is_anonymous) {
+Symbol BodyParser::get_label(bool& is_anonymous) {
     auto trailing_label = current_body->back();
     if (trailing_label && trailing_label->is_label()) {
         is_anonymous = false;
-        return trailing_label->as_label()->label;
+        return trailing_label->as_label()->name;
     }
     next_label += 1;
-    auto name = Symbol(".label_" + std::to_string(next_label));
     is_anonymous = true;
-    return std::make_shared<Label>(name, current_size());
+    return Symbol(".label_" + std::to_string(next_label));
 }
 
 
-Expression BodyParser::get_pc(std::shared_ptr<Label> label) const {
-    return {ObjectNameExpression::create(entity->as_object()), Expression::BinaryOperation::ADD, Expression(Location(), entity, std::move(label))};
+Expression BodyParser::get_pc(Symbol label) const {
+    return {ObjectNameExpression::create(entity->as_object()), Expression::BinaryOperation::ADD, Expression(Location(), entity, label)};
 }
 
 
@@ -258,9 +256,8 @@ std::shared_ptr<Node> BodyParser::parse_instruction_argument(const Token& token)
 
 
 void BodyParser::parse_label(Visibility visibility, const Token& name) {
-    auto label = std::make_shared<Label>(name.as_symbol(), SizeRange(current_body->size_range()));
-    current_body->append(Body(label));
-    add_constant(visibility, name, get_pc(label));
+    current_body->append(Body(name.as_symbol(), SizeRange(current_body->size_range())));
+    add_constant(visibility, name, get_pc(name.as_symbol()));
 }
 
 
@@ -352,15 +349,17 @@ void BodyParser::parse_instruction(const Token &name) {
 
     auto is_anonymous_label = false;
     auto label = get_label(is_anonymous_label);
+    auto label_expression = get_pc(label);
     auto instruction = Body();
+    auto uses_pc = false;
     {
         auto instruction_environment = std::make_shared<Environment>();
-        instruction_environment->add(symbol_pc, get_pc(label));
-        instruction_environment->add(Symbol(".label_offset(" + label->name.str() + ")"), Expression(Location(), entity_name(), label));
-        instruction = encoder.encode(name, arguments, instruction_environment, current_size());
+        instruction_environment->add(symbol_pc, label_expression);
+        //instruction_environment->add(Symbol(".label_offset(" + label->name.str() + ")"), Expression(Location(), entity_name(), label));
+        instruction = encoder.encode(name, arguments, instruction_environment, current_size(), uses_pc);
     }
     if (is_anonymous_label) {
-        if (label.use_count() > 1) {
+        if (uses_pc) {
             auto combined_body = Body(label);
             combined_body.append(instruction);
             instruction = combined_body;
@@ -451,7 +450,7 @@ void BodyParser::parse_error() {
 }
 
 void BodyParser::parse_unnamed_label() {
-    current_body->append(Body(std::make_shared<Label>(current_size())));
+    current_body->append(Body(Symbol(), current_size()));
 }
 
 void BodyParser::handle_name(Visibility visibility, Token name) {

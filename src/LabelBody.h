@@ -33,23 +33,26 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define LABEL_BODY_H
 
 #include "Body.h"
-#include "Label.h"
 #include "Value.h"
 #include "Exception.h"
 #include "SizeRange.h"
 
 class LabelBody: public BodyElement {
 public:
-    explicit LabelBody(std::shared_ptr<Label> label): label(std::move(label)) {}
+    explicit LabelBody(Symbol name): name(name) {}
+    LabelBody(Symbol name, SizeRange offset, bool added_to_environment, size_t unnamed_index): name(name), offset(offset), added_to_environment(added_to_environment), unnamed_index(unnamed_index) {}
 
     void encode(std::string &bytes, const Memory* memory) const override {}
-    [[nodiscard]] bool empty() const override {return label->is_named() && label->offset.minimum == label->offset.maximum;}
+    [[nodiscard]] bool empty() const override {return added_to_environment && offset.size();}
     [[nodiscard]] std::shared_ptr<BodyElement> clone() const override {throw Exception("can't clone label");}
     [[nodiscard]] std::optional<Body> evaluated(const EvaluationContext& context) const override;
 
     void serialize(std::ostream &stream, const std::string& prefix) const override;
 
-    std::shared_ptr<Label> label;
+    Symbol name;
+    SizeRange offset = SizeRange(0, {});
+    size_t unnamed_index = std::numeric_limits<size_t>::max();
+    bool added_to_environment = false;
 };
 
 

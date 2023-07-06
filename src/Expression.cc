@@ -31,8 +31,6 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "Expression.h"
 
-#include <utility>
-
 #include "BinaryExpression.h"
 #include "ExpressionParser.h"
 #include "FunctionExpression.h"
@@ -62,15 +60,12 @@ Expression::Expression(const Token& token) {
         expression = std::make_shared<ValueExpression>(token);
     }
 }
-Expression::Expression(Location location, Symbol object_name, Symbol label_name): expression(std::make_shared<LabelExpression>(location, object_name, label_name)) {}
-Expression::Expression(Location location, Symbol object_name, std::shared_ptr<Label> label): expression(std::make_shared<LabelExpression>(location, object_name, std::move(label))) {}
-Expression::Expression(Location location, const Entity* object, Symbol label_name) {
-    *this = LabelExpression::create(location, object, label_name);
+
+Expression::Expression(Location location, Symbol object_name, Symbol label_name, SizeRange offset): expression(std::make_shared<LabelExpression>(location, object_name, label_name, offset)) {}
+Expression::Expression(Location location, const Entity* object, Symbol label_name, SizeRange offset) {
+    *this = LabelExpression::create(location, object, label_name, offset);
 }
-Expression::Expression(Location location, const Entity* object, std::shared_ptr<Label> label) {
-    *this = LabelExpression::create(location, object, std::move(label));
-}
-Expression::Expression(Location location, LabelExpressionType type): expression(std::make_shared<LabelExpression>(location, type)) {}
+Expression::Expression(Location location, LabelExpressionType type, size_t unnamed_index, SizeRange offset): expression(std::make_shared<LabelExpression>(location, type, unnamed_index, offset)) {}
 Expression::Expression(Symbol name): expression(std::make_shared<VariableExpression>(name)) {}
 Expression::Expression(Value value): expression(std::make_shared<ValueExpression>(value)) {}
 Expression::Expression(Symbol name, const std::vector<Expression>& arguments): expression(FunctionExpression::create(name, arguments).expression) {}

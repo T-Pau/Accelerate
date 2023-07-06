@@ -36,14 +36,21 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <optional>
 #include <ostream>
 
+#include "Value.h"
+
 class SizeRange {
 public:
     SizeRange() = default;
     explicit SizeRange(uint64_t size): minimum(size), maximum(size) {}
     SizeRange(uint64_t minimum, std::optional<uint64_t> maximum): minimum(minimum), maximum(maximum) {}
 
+    [[nodiscard]] std::optional<Value> maximum_value() const {return maximum ? Value(*maximum) : std::optional<Value>();}
+    [[nodiscard]] Value minimum_value() const {return Value(minimum);}
+    [[nodiscard]] std::optional<Value> value() const;
     [[nodiscard]] std::optional<uint64_t> size() const;
 
+    bool operator==(const SizeRange&other) const {return minimum == other.minimum && maximum == other.maximum;}
+    bool operator!=(const SizeRange&other) const {return !(*this == other);}
     SizeRange operator-(const SizeRange& other) const;
     SizeRange operator+(const SizeRange& other) const;
     SizeRange operator+=(const SizeRange& other) {*this = *this + other; return *this;}

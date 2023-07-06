@@ -70,7 +70,7 @@ const Function* Environment::get_function(Symbol name) const {
     return nullptr;
 }
 
-std::shared_ptr<Label> Environment::get_label(Symbol name) const {
+std::optional<SizeRange> Environment::get_label(Symbol name) const {
     auto it = labels.find(name);
 
     if (it != labels.end()) {
@@ -82,7 +82,7 @@ std::shared_ptr<Label> Environment::get_label(Symbol name) const {
             return label;
         }
     }
-    return nullptr;
+    return {};
 }
 
 

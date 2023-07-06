@@ -18,9 +18,7 @@ file a.o {} <inline>
     visibility: private
     section: code
     body <
-        .data $ea, $d0, $01:-1, $ea
-      :
-        .data $ea, $d0, -$03, $ea
+        .data $ea, $d0, $01:-1, $ea, $ea, $d0, -$03, $ea
     >
 }
 end-of-inline-data

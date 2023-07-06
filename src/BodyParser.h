@@ -54,7 +54,7 @@ public:
     // OUTPUT
     BodyParser(Tokenizer& tokenizer, const CPU* cpu): parsing_type(OUTPUT), cpu(cpu), tokenizer(tokenizer) {}
     // ENTITY
-    BodyParser(Tokenizer& tokenizer, Entity* entity, const CPU* cpu): parsing_type(ENTITY), cpu(cpu), entity(entity), tokenizer(tokenizer) {}
+    BodyParser(Tokenizer& tokenizer, Entity* entity, const CPU* cpu): parsing_type(ENTITY), cpu(cpu), entity(entity), environment(entity->environment), tokenizer(tokenizer) {}
 
     static void setup(FileTokenizer& tokenizer);
 
@@ -134,8 +134,8 @@ private:
     void add_constant(Visibility visibility, Token name, const Expression& value);
     [[nodiscard]] SizeRange current_size();
     Body* get_body(const NestingIndex& nesting_index) {return (*nesting[nesting_index.nesting_index])[nesting_index.sub_index];}
-    [[nodiscard]] Expression get_pc(std::shared_ptr<Label> label) const;
-    [[nodiscard]] std::shared_ptr<Label> get_label(bool& is_anonymous);
+    [[nodiscard]] Expression get_pc(Symbol label) const;
+    [[nodiscard]] Symbol get_label(bool& is_anonymous);
     [[nodiscard]] Symbol entity_name() const {return entity ? entity->name.as_symbol() : Symbol();};
     void push_clause(Expression condition);
     void push_body(const NestingIndex& body_index);

@@ -36,8 +36,8 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <utility>
 
 #include "Expression.h"
-#include "Label.h"
 #include "Symbol.h"
+#include "UnnamedLabelList.h"
 
 class Function;
 class Macro;
@@ -49,27 +49,30 @@ public:
 
     void add(Symbol name, Expression value) {variables[name] = std::move(value);} // TODO: check for duplicates
     void add(Symbol name, const Function* function) {functions[name] = function;} // TODO: check for duplicates
-    void add(Symbol name, std::shared_ptr<Label> label) {labels[name] = std::move(label);} // TODO: check for duplicates
+    void add(Symbol name, SizeRange offset) {labels[name] = offset;} // TODO: check for duplicates
     void add(Symbol name, const Macro* macro) {macros[name] = macro;} // TODO: check for duplicates
     void add_next(std::shared_ptr<Environment> new_next) {next.emplace_back(std::move(new_next));}
     [[nodiscard]] const std::unordered_map<Symbol, const Function*>& all_functions() const {return functions;}
-    [[nodiscard]] const std::unordered_map<Symbol, std::shared_ptr<Label>>& all_labels() const {return labels;}
+    [[nodiscard]] const std::unordered_map<Symbol, SizeRange>& all_labels() const {return labels;}
     [[nodiscard]] const std::unordered_map<Symbol, const Macro*>& all_macros() const {return macros;}
     [[nodiscard]] const std::unordered_map<Symbol, Expression>& all_variables() const {return variables;}
     [[nodiscard]] bool empty() const {return functions.empty() && labels.empty() && macros.empty() && variables.empty();}
     [[nodiscard]] const Function* get_function(Symbol name) const;
-    [[nodiscard]] std::shared_ptr<Label> get_label(Symbol name) const;
+    [[nodiscard]] std::optional<SizeRange> get_label(Symbol name) const;
     [[nodiscard]] const Macro* get_macro(Symbol name) const;
     [[nodiscard]] std::optional<Expression> get_variable(Symbol name) const {return (*this)[name];}
-
     void remove(Symbol name) {variables.erase(name);}
+    void update(Symbol name, SizeRange offset) {labels[name] = offset;} // TODO: check for existence
+
     std::optional<Expression> operator[](Symbol name) const;
 
     void replace(const std::shared_ptr<Environment>& old_next, const std::shared_ptr<Environment>& new_next);
 
+    UnnamedLabelList unnamed_labels;
+
 private:
     std::unordered_map<Symbol, const Function*> functions;
-    std::unordered_map<Symbol, std::shared_ptr<Label>> labels;
+    std::unordered_map<Symbol, SizeRange> labels;
     std::unordered_map<Symbol, const Macro*> macros;
     std::vector<std::shared_ptr<Environment>> next;
     std::unordered_map<Symbol, Expression> variables;

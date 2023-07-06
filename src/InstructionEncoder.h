@@ -45,21 +45,24 @@ class InstructionEncoder {
 public:
     explicit InstructionEncoder(const CPU* cpu): cpu(cpu) {}
 
-    [[nodiscard]] Body encode(const Token& name, const std::vector<std::shared_ptr<Node>>& arguments, const std::shared_ptr<Environment>& environment, const SizeRange& offset);
+    [[nodiscard]] Body encode(const Token& name, const std::vector<std::shared_ptr<Node>>& arguments, const std::shared_ptr<Environment>& environment, const SizeRange& offset, bool& uses_pc);
 
 private:
     class Variant {
-    public:
+      public:
         Expression argument_constraints = Expression(Value(true));
         Expression encoding_constraints = Expression(Value(true));
-        Body data;
+
 
         void add_argument_constraint(const Expression& sub_constraint) {return add_constraint(argument_constraints, sub_constraint);}
         void add_encoding_constraint(const Expression& sub_constraint) {return add_constraint(encoding_constraints, sub_constraint);}
 
         explicit operator bool() const;
 
-    private:
+        Body data;
+        bool uses_pc = false;
+
+      private:
         static void add_constraint(Expression& constraint, const Expression& sub_constraint);
     };
 

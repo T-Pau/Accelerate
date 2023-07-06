@@ -68,14 +68,8 @@ std::ostream& operator<<(std::ostream& stream, const Macro& macro) {
 
 
 Body Macro::expand(const std::vector<Expression>& arguments) const {
-    std::unordered_map<Label*, std::shared_ptr<Label>> remap_labels;
-
-    for (auto& pair : environment->all_labels()) {
-        remap_labels[pair.second.get()] = pair.second->clone();
-    }
-
     EvaluationResult result;
-    return body.evaluated(EvaluationContext(result, bind(arguments), std::move(remap_labels))).value_or(body).scoped();
+    return body.evaluated(EvaluationContext(result, EvaluationContext::MACRO_EXPANSION, bind(arguments))).value_or(body).scoped();
     // TODO: process result
 }
 

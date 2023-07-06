@@ -1,5 +1,5 @@
 /*
-Label.h --
+UnnamedLabelList.cc --
 
 Copyright (C) Dieter Baron
 
@@ -29,23 +29,45 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef LABEL_H
-#define LABEL_H
+#include "UnnamedLabelList.h"
+#include "Exception.h"
 
-#include "Symbol.h"
-#include "SizeRange.h"
+size_t UnnamedLabelList::add_label(SizeRange offset) {
+    entries.emplace_back(offset);
+    return current_index();
+}
 
-class Label {
-public:
-    explicit Label(Symbol name): name(name) {}
-    Label(Symbol name, SizeRange offset): name(name), offset(offset) {}
-    explicit Label(SizeRange offset): offset(offset) {}
+size_t UnnamedLabelList::add_user() {
+    entries.emplace_back();
+    return current_index();
+}
 
-    [[nodiscard]] std::shared_ptr<Label> clone() const {return std::make_shared<Label>(*this);}
-    [[nodiscard]] bool is_named() const {return !name.empty();}
+SizeRange UnnamedLabelList::get_next(size_t index) const {
+    index += 1;
+    while (index < entries.size()) {
+        if (entries[index]) {
+            return *entries[index];
+        }
+        index += 1;
+    }
 
-    const Symbol name;
-    mutable SizeRange offset = SizeRange(0, {});
-};
+    throw Exception("no next unnamed label");
+}
 
-#endif // LABEL_H
+SizeRange UnnamedLabelList::get_previous(size_t index) const {
+    while (index > 0) {
+        index -= 1;
+        if (entries[index]) {
+            return *entries[index];
+        }
+    }
+
+    throw Exception("no previous unnamed label");
+}
+
+void UnnamedLabelList::update_label(size_t index, SizeRange offset) {
+    if (!entries[index]) {
+        throw Exception("internal error: can't update unnamed label use");
+    }
+    entries[index] = offset;
+}

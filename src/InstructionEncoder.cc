@@ -41,7 +41,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "BinaryExpression.h"
 #include "Util.h"
 
-Body InstructionEncoder::encode(const Token& name, const std::vector<std::shared_ptr<Node>>& arguments, const std::shared_ptr<Environment>& environment, const SizeRange& offset) {
+Body InstructionEncoder::encode(const Token& name, const std::vector<std::shared_ptr<Node>>& arguments, const std::shared_ptr<Environment>& environment, const SizeRange& offset, bool& uses_pc) {
     const auto instruction = cpu->instruction(name.as_symbol());
     if (instruction == nullptr) {
         throw ParseException(name, "unknown instruction '%s'", name.as_string().c_str());
@@ -79,7 +79,8 @@ Body InstructionEncoder::encode(const Token& name, const std::vector<std::shared
         else {
             if (matches.size() == 1) {
                 throw ParseException(name, "instruction %s doesn't support addressing mode %s", name.as_string().c_str(), matches.begin()->addressing_mode.c_str());
-            } else {
+            }
+            else {
                 auto modes = std::vector<Symbol>();
                 for (const auto &match: matches) {
                     modes.emplace_back(match.addressing_mode);
@@ -92,17 +93,20 @@ Body InstructionEncoder::encode(const Token& name, const std::vector<std::shared
     else if (variants.size() == 1) {
         auto constraints = variants.front().argument_constraints;
         if (constraints.has_value() && constraints.value()->boolean_value()) {
+            uses_pc = variants.front().uses_pc;
             return variants.front().data;
         }
     }
 
     auto clauses = std::vector<IfBodyClause>();
 
+    uses_pc = false;
     for (const auto &variant: variants) {
         auto constraints = variant.argument_constraints;
         if (&variant != &variants.back()) {
             constraints = Expression(constraints, Expression::BinaryOperation::LOGICAL_AND, variant.encoding_constraints);
         }
+        uses_pc |= variant.uses_pc;
         clauses.emplace_back(constraints, variant.data);
     }
 
@@ -186,9 +190,10 @@ InstructionEncoder::Variant InstructionEncoder::encode(const Instruction* instru
 
     environment->add(Assembler::symbol_opcode, Expression(instruction->opcode(match.addressing_mode)));
 
+    variant.uses_pc = addressing_mode->uses_pc;
     variant.data = addressing_mode->encoding;
     EvaluationResult result;
-    variant.data.evaluate(EvaluationContext(result, environment, offset));
+    variant.data.evaluate(EvaluationContext(result, EvaluationContext::ARGUMENTS, environment, offset));
     // TODO: process result
 
     auto data = variant.data.as_data();

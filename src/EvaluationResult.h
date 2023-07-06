@@ -34,7 +34,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <unordered_set>
 
-#include "Label.h"
+#include "Symbol.h"
 
 class LabelExpression;
 class Object;
@@ -46,15 +46,6 @@ public:
     void add_unresolved_function(Symbol name) {unresolved_functions.insert(name);}
     void add_unresolved_macro(Symbol name) {unresolved_macros.insert(name);}
     void add_unresolved_variable(Symbol name) {unresolved_variables.insert(name);}
-
-    void invalidate_unnamed_label();
-    void set_unnamed_label(const std::shared_ptr<Label>& label);
-    [[nodiscard]] std::shared_ptr<Label> get_previous_unnamed_label() const;
-    void add_forward_unnamed_label_use(const LabelExpression*expression) {forward_unnamed_label_uses.insert(expression);}
-
-    std::shared_ptr<Label> previous_unnamed_label;
-    bool previous_unnamed_label_valid = true;
-    std::unordered_set<const LabelExpression*> forward_unnamed_label_uses;
 
     std::unordered_set<Symbol> unresolved_functions;
     std::unordered_set<Symbol> unresolved_macros;

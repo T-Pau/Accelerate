@@ -49,7 +49,7 @@ AssignmentBody::evaluated(const EvaluationContext &context) const {
     }
 
     if (visibility == Visibility::SCOPE) {
-        context.environment->add(name, value);
+        context.environment->add(name, new_value.value_or(value));
     }
     else {
         // TODO: this can't be written out if label is not resolved yet.

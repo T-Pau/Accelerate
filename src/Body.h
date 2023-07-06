@@ -34,7 +34,6 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "BodyElement.h"
 #include "EvaluationContext.h"
-#include "Label.h"
 #include "Location.h"
 #include "SizeRange.h"
 #include "Visibility.h"
@@ -62,7 +61,8 @@ public:
     // If
     explicit Body(const std::vector<IfBodyClause>& clauses);
     // Label
-    explicit Body(std::shared_ptr<Label> label);
+    explicit Body(Symbol name);
+    Body(Symbol name, SizeRange offset, bool added_to_environment = false, size_t unnamed_index = std::numeric_limits<size_t>::max());
     // Macro
     Body(Token name, std::vector<Expression> arguments);
     // Memory

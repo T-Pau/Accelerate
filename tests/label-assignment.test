@@ -5,8 +5,8 @@ file a.s <inline>
 .section code
 test {
     lda foo
-label:
 .private next = label + 1
+label:
     nop
 }
 end-of-inline-data
