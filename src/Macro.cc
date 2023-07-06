@@ -55,9 +55,6 @@ Macro::Macro(ObjectFile* owner, Token name, const std::shared_ptr<ParsedValue>& 
 
 Macro::Macro(ObjectFile* owner, Token name, Visibility visibility, Callable::Arguments arguments, Body body_): Callable(owner, name, visibility, std::move(arguments)), body(std::move(body_)) {
     EvaluationResult result;
-    // No outside references can be resolved before arguments are bound.
-    body.evaluate(EvaluationContext(result, this));
-    body.evaluate(EvaluationContext(result, this));
 }
 
 

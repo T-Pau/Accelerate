@@ -39,8 +39,7 @@ file a.o {} <inline>
     section: code
     body <
         .scope
-          .data $ee, $1234, $d0, ((8-$03)-$02):-1, $ee, $1235
-        :
+          .data $ee, $1234, $d0, $03:-1, $ee, $1235
         .end
         .data $60
     >
