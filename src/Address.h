@@ -44,6 +44,10 @@ class Address {
 
     void serialize(std::ostream& stream) const;
 
+    bool operator==(const Address& other) const {return bank == other.bank && address == other.address;}
+    bool operator!=(const Address& other) const {return !(*this == other);}
+    bool operator<(const Address& other) const {return bank < other.bank || (bank == other.bank && address < other.address);}
+
     uint64_t bank = 0;
     uint64_t address = 0;
 };

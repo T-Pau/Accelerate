@@ -46,6 +46,8 @@ void Linker::link() {
     program->evaluate();
     program->evaluate();
 
+    program->check_unresolved();
+
     std::unordered_set<Object*> new_objects;
 
     // Collect all objects from main program.
@@ -61,8 +63,7 @@ void Linker::link() {
         new_objects.clear();
         for (auto object: current_objects) {
             auto used_objects = std::unordered_set<Object*>();
-            object->body.collect_objects(used_objects);
-            for (const auto& used_object: used_objects) {
+            for (const auto& used_object: object->referenced_objects) {
                 if (add_object(used_object)) {
                     new_objects.insert(used_object);
                 }
@@ -70,29 +71,32 @@ void Linker::link() {
         }
     }
 
-    for (auto object: objects) {
-        if (!object->address.has_value()) {
-            // TODO: unresolved symbol
-            continue;
-        }
-    }
-
-    // TODO: sort objects
-    for (auto object: objects) {
+    auto sorted_objects = std::vector<Object*>(objects.begin(), objects.end());
+    std::sort(sorted_objects.begin(), sorted_objects.end(), Object::less_pointers);
+    for (auto object: sorted_objects) {
         if (!object->size_range().size()) {
             FileReader::global.error({}, "object '%s' has unknown size", object->name.as_string().c_str());
             continue;
         }
-        for (const auto& block: object->section->blocks) {
-            auto address = memory[block.bank].allocate(block.range, object->is_reservation() ? Memory::RESERVED : Memory::DATA, object->alignment, *object->size_range().size());
-            if (address.has_value()) {
-                object->address = {block.bank, *address};
-                break;
+        if (object->address) {
+            // TODO: validate that object->address is in object->section
+            auto range = Range(object->address->address, *object->size_range().size());
+            if (!memory[object->address->bank].allocate(range, object->is_reservation() ? Memory::RESERVED : Memory::DATA, 0, range.size)) {
+                FileReader::global.error({}, "fixed space (%llu, %llu) not free", range.start, range.end());
             }
         }
-        if (!object->address.has_value()) {
-            FileReader::global.error({}, "no space left in section '%s'", object->section->name.c_str());
-            continue;
+        else {
+            for (const auto& block : object->section->blocks) {
+                auto address = memory[block.bank].allocate(block.range, object->is_reservation() ? Memory::RESERVED : Memory::DATA, object->alignment, *object->size_range().size());
+                if (address.has_value()) {
+                    object->address = {block.bank, *address};
+                    break;
+                }
+            }
+            if (!object->address) {
+                FileReader::global.error({}, "no space left in section '%s'", object->section->name.c_str());
+                continue;
+            }
         }
     }
 

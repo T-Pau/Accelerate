@@ -49,6 +49,8 @@ public:
     Object(ObjectFile* owner, Token name, const std::shared_ptr<ParsedValue>& definition);
     Object(ObjectFile* owner, const MemoryMap::Section* section, Visibility visibility, Token name);
 
+    bool static less_pointers(const Object* a, const Object* b) {return *a < *b;}
+
     [[nodiscard]] bool is_reservation() const {return reservation > 0;}
     [[nodiscard]] bool empty() const {return !is_reservation() && body.empty();}
     void evaluate();
@@ -56,6 +58,8 @@ public:
     [[nodiscard]] SizeRange size_range() const;
 
     void serialize(std::ostream& stream) const;
+
+    bool operator<(const Object& other) const;
 
     const MemoryMap::Section* section;
     uint64_t alignment = 0;

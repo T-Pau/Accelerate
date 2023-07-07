@@ -111,6 +111,7 @@ bool Entity::check_unresolved(const std::string& singular, const std::string& pl
         FileReader::global.error(name.location, "unresolved %s: %s", singular.c_str(), list[0].c_str());
     }
     else {
+        std::sort(list.begin(), list.end());
         FileReader::global.error(name.location, "unresolved %s: %s", plural.c_str(), join(list).c_str());
     }
     return false;

@@ -154,3 +154,33 @@ void Object::evaluate() {
     process_result(result);
 }
 
+
+bool Object::operator<(const Object& other) const {
+    if (address) {
+        if (other.address) {
+            if (address != other.address) {
+                return address < other.address;
+            }
+        }
+        else {
+            return true;
+        }
+    }
+    else {
+        if (other.address) {
+            return false;
+        }
+        if (*section < *other.section) {
+            return true;
+        }
+        else if (*other.section < *section) {
+            return false;
+        }
+    }
+
+    if (size_range().size() && other.size_range().size() && size_range().size() != other.size_range().size()) {
+        return size_range().size() < other.size_range().size();
+    }
+
+    return name.as_symbol() < other.name.as_symbol();
+}
