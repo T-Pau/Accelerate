@@ -179,7 +179,7 @@ bool Object::operator<(const Object& other) const {
     }
 
     if (size_range().size() && other.size_range().size() && size_range().size() != other.size_range().size()) {
-        return size_range().size() < other.size_range().size();
+        return size_range().size() > other.size_range().size();
     }
 
     return name.as_symbol() < other.name.as_symbol();
