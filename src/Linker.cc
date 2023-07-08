@@ -172,3 +172,17 @@ void Linker::add_library(std::shared_ptr<ObjectFile> library) {
     }
     libraries.emplace_back(std::move(library));
 }
+
+void Linker::output_symbol_map(const std::string& file_name) {
+    auto sorted_objects = std::vector<Object*>(objects.begin(), objects.end());
+    std::sort(sorted_objects.begin(), sorted_objects.end(), Object::less_pointers);
+
+    auto stream = std::ofstream(file_name);
+
+    for (const auto& object: sorted_objects) {
+        stream << "object\t" << *object->address;
+        stream << "\t$" << std::setfill('0') << std::setw(4) << std::hex << *object->size_range().size() << std::dec;
+        stream << "\t" << object->name.as_symbol();
+        stream << "\t" << object->section->name << "\t" << (object->is_reservation() ? "reserve" : "data") << "\n";
+    }
+}

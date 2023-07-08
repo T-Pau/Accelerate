@@ -73,12 +73,13 @@ private:
 };
 
 std::vector<Commandline::Option> xlr8::options = {
-        Commandline::Option("compile", 'c', "compile only, don't link"),
-        Commandline::Option("create-library", 'a', "create library"),
-        Commandline::Option("include-directory", 'I', "directory", "search for sources in DIRECTORY"),
-        Commandline::Option("library-directory", 'L', "directory", "search for libraries in DIRECTORY"),
-        Commandline::Option("system-directory", "directory", "search for system files in DIRECTORY"),
-        Commandline::Option("target", "file", "read target definition from FILE"),
+    Commandline::Option("compile", 'c', "compile only, don't link"),
+    Commandline::Option("create-library", 'a', "create library"),
+    Commandline::Option("include-directory", 'I', "directory", "search for sources in DIRECTORY"),
+    Commandline::Option("library-directory", 'L', "directory", "search for libraries in DIRECTORY"),
+    Commandline::Option("symbol-map", "file", "write symbol map to FILE"),
+    Commandline::Option("system-directory", "directory", "search for system files in DIRECTORY"),
+    Commandline::Option("target", "file", "read target definition from FILE"),
 };
 
 
@@ -259,8 +260,13 @@ void xlr8::create_output() {
             break;
         }
 
-        case Linker::LINK:
+        case Linker::LINK: {
             linker->output(output_file.value());
+            auto map_file = arguments.find_last("symbol-map");
+            if (map_file) {
+                linker->output_symbol_map(*map_file);
+            }
             break;
+        }
     }
 }

@@ -31,6 +31,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "Address.h"
 #include "ExpressionParser.h"
+#include "Int.h"
 #include "ParseException.h"
 
 Address::Address(Tokenizer& tokenizer) {
@@ -64,7 +65,7 @@ std::ostream& operator<<(std::ostream& stream, Address address) {
 
 void Address::serialize(std::ostream &stream) const {
     if (bank > 0) {
-        stream << "$" << std::hex << bank << ":";
+        stream << "$" << std::setfill('0') << std::setw(std::max(static_cast<int>(Int::minimum_byte_size(bank)), 2)) << std::hex << bank << ":";
     }
-    stream << "$" << std::hex << address;
+    stream << "$" << std::setfill('0') << std::setw(std::max(static_cast<int>(Int::minimum_byte_size(address)), 2)) << std::hex << address << std::dec;
 }

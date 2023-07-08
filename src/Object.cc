@@ -158,8 +158,8 @@ void Object::evaluate() {
 bool Object::operator<(const Object& other) const {
     if (address) {
         if (other.address) {
-            if (address != other.address) {
-                return address < other.address;
+            if (*address != *other.address) {
+                return *address < *other.address;
             }
         }
         else {

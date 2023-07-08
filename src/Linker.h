@@ -55,6 +55,7 @@ public:
 
     void link();
     void output(const std::string& file_name);
+    void output_symbol_map(const std::string& file_name);
 
     const Target* target = nullptr;
     Mode mode = LINK;
