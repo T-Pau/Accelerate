@@ -1,14 +1,17 @@
 ## Bugs
 
+- Fix serializing partially resolved object files (compile mode). 
 - Don't use full file name for .import in object file. 
-- Record object reference while evaluating, otherwise reference is lost for fixed address objects.
-- Isolate expanded macro body.
 - .segment not reported as unknown directive while assembling
 - columns are off when source contains TAB.
+- Serialize which library object was resolved in (needed to refer to private objects).
+- Test/fix labels (named and unnamed) in macros.
+- Resolve macros in library they're defined in. Add placeholders for arguments in local environment.
 
 
 ## Missing Features
 
+- Clean
 - Allow pinning object to fixed address in map file. (`.pin name address`)
 - Evaluate program/library constants in output elements.
 - Add optional priorities to sections.
@@ -20,7 +23,6 @@
 
 ## Optimizations
 
-- Remove unnamed label body element when no longer needed.
 - Don't serialize signed encoding when value is known to fit.
 - Simplify X + N + M and similar.
 
