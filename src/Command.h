@@ -32,6 +32,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef COMMAND_H
 #define COMMAND_H
 
+#include <limits>
 #include <string>
 
 #include "Commandline.h"
