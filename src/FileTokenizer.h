@@ -84,7 +84,7 @@ private:
     public:
         std::optional<Token::Type> match_type;
         bool match_in_word = false;
-        std::unordered_map<char,MatcherNode> next;
+        std::unordered_map<char,std::unique_ptr<MatcherNode>> next;
         std::unordered_set<char> suffix_characters;
 
         void add(const char* string, Token::Type type, const std::unordered_set<char>& suffix_characters = {}, bool match_in_word = false);

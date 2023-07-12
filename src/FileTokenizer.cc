@@ -453,7 +453,7 @@ std::optional<Token::Type> FileTokenizer::MatcherNode::match(FileTokenizer::Sour
     }
 
     name += static_cast<char>(c);
-    return it->second.match(source,name);
+    return it->second->match(source,name);
 }
 
 
@@ -477,7 +477,10 @@ void FileTokenizer::MatcherNode::add(const char *string, Token::Type type, const
         if (suffix_characters.contains(string[0])) {
             throw Exception("literal conflicts with already defined suffix characters"); // TODO include more detail
         }
-        next[string[0]].add(string + 1, type, new_suffix, match_in_word_);
+        if (next.find(string[0]) == next.end()) {
+            next[string[0]] = std::make_unique<MatcherNode>();
+        }
+        next[string[0]]->add(string + 1, type, new_suffix, match_in_word_);
     }
 }
 

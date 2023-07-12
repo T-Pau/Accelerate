@@ -33,6 +33,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define VALUE_H
 
 #include <cstdint>
+#include <optional>
 #include <ostream>
 
 
