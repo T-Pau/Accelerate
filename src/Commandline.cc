@@ -52,6 +52,7 @@ Commandline::Commandline(std::vector<Option> options_, std::string arguments_, s
 
 
 ParsedCommandline Commandline::parse(int argc, char *const *argv) {
+    program_name = argv[0];
     std::string short_options;
     std::vector<struct option> long_options;
     std::unordered_map<int, size_t> option_indices;
@@ -180,7 +181,7 @@ void Commandline::usage(bool full, FILE *fout) {
         fprintf(fout, "%s\n\n", header.c_str());
     }
 
-    fprintf(fout, "Usage: %s", getprogname());
+    fprintf(fout, "Usage: %s", program_name.c_str());
     if (!short_options_without_argument.str().empty()) {
         fprintf(fout, " [-%s]", short_options_without_argument.str().c_str());
     }

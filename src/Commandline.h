@@ -82,6 +82,7 @@ public:
     void add_option(Option option);
 
     std::vector<Option> options;
+    std::string program_name;
     std::string arguments;
     std::string header;
     std::string footer;
