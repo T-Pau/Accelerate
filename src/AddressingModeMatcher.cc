@@ -43,7 +43,10 @@ void AddressingModeMatcher::MatcherNode::add_notation(const AddressingModeMatche
         return;
     }
     for (const auto& element: AddressingModeMatcherElement::elements_for(*current, arguments)) {
-        next[element].add_notation(result, current + 1, end, arguments);
+        if (next.find(element) == next.end()) {
+            next[element] = std::make_unique<MatcherNode>();
+        }
+        next[element]->add_notation(result, current + 1, end, arguments);
     }
 }
 
@@ -57,7 +60,7 @@ std::unordered_set<AddressingModeMatcherResult> AddressingModeMatcher::match(con
             return {};
         }
         current++;
-        node = &it->second;
+        node = it->second.get();
     }
 
     return node->results;

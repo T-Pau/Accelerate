@@ -111,7 +111,7 @@ private:
         void add_notation(const AddressingModeMatcherResult& result, std::vector<AddressingMode::Notation::Element>::const_iterator current, std::vector<AddressingMode::Notation::Element>::const_iterator end, const std::unordered_map<Symbol, const ArgumentType*>& arguments);
 
         std::unordered_set<AddressingModeMatcherResult> results;
-        std::unordered_map<AddressingModeMatcherElement, MatcherNode> next;
+        std::unordered_map<AddressingModeMatcherElement, std::unique_ptr<MatcherNode>> next;
     };
 
     MatcherNode start;
