@@ -6,13 +6,11 @@
 
 ## Source
 
-## ParsedValue
-
 ## Module
 
 # Components
 
-## Module
+## Library
 
 - exported symbols
 - exported constants
@@ -30,7 +28,7 @@ Allow re-exporting symbols/constants of used modules
 
 ## Scope
 
-Visibility of a symbol: unit, file?, module, global
+Visibility of a symbol: scope, private, public
 
 ## Constant
 
@@ -42,12 +40,14 @@ base_address = $1000
 
 ## Object
 
-A constant or unit
-
-## Unit
-
 This is the basic unit of the linker. 
 
 - containing section
 - relative range of used bytes
 - content (expressions for data of used bytes)
+
+
+## Function
+
+
+## Macro

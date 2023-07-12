@@ -7,7 +7,7 @@
 multiply(arg1, arg2 = 1) = arg1 * arg2
 
 ; macro
-copy source, destination = $0400 {
+.macro copy source, destination = $0400 {
     lda source
     sta destination
 }
@@ -31,11 +31,6 @@ init {
 }
 ```
 
-# Questions
-
-- `.global` only valid for symbol on same line or for all following symbols (like `.section`)
-- `.global` and `.local` or `.public` and `.private` (like C++)
-- Require `.macro` prefix for definition? Makes it easier to differentiate from object, and removes ambiguatity for macros without arguments. 
 
 # Documentation
 
@@ -45,7 +40,7 @@ Select section for following symbols. Remains valid until next `.section` direct
 .section code
 ```
 
-Define global constant. Visibility selector (`.global` or default `.local`) is only valid for this symbol.
+Define global constant. Visibility selector (`.public` or default `.private`) is only valid for this symbol.
 
 ```asm
 .global VIC_BACKGROUD_COLOR = $d020
@@ -79,7 +74,7 @@ screen .reserve $400 .align $400
 Define a macro:
 
 ```asm
-inc16 address {
+.macro inc16 address {
     inc address
     bne :+
     inc address + 1
