@@ -31,6 +31,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "Command.h"
 
+#include <cstring>
 #include <fstream>
 #include <iostream>
 #include <utility>

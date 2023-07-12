@@ -25,11 +25,7 @@ jobs:
           python-version: '3.11'
       - name: install dependencies (Windows)
         if: ${{ runner.os == 'Windows' }}
-        uses: lukka/run-vcpkg@v7
-        id: runvcpkg
-        with:
-          vcpkgGitCommitId: f93ba152d55e1d243160e690bc302ffe8638358e
-          vcpkgTriplet: x64-windows
+        uses: ilammy/msvc-dev-cmd@v1.4.1
       - name: prepare build directory and install nihtest
         run: |
           cmake -E make_directory ${{runner.workspace}}/build
@@ -43,7 +39,7 @@ jobs:
         if: ${{ runner.os == 'Windows' }}
         working-directory: ${{runner.workspace}}/build
         run: |
-          cmake ${{ matrix.cmake_extra }} -DCMAKE_TOOLCHAIN_FILE=${{env.VCPKG_ROOT}}/scripts/buildsystems/vcpkg.cmake ${{github.workspace}}
+          cmake ${{ matrix.cmake_extra }} ${{github.workspace}}
       - name: build
         working-directory: ${{runner.workspace}}/build
         run: |
