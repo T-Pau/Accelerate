@@ -30,6 +30,9 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include "MemoryMap.h"
+
+#include <algorithm>
+
 #include "Int.h"
 
 const std::vector<MemoryMap::Block> *MemoryMap::segment(Symbol name) const {

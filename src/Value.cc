@@ -31,6 +31,8 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "Value.h"
 
+#include <limits>
+
 #include "Int.h"
 #include "Exception.h"
 

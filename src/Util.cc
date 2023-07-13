@@ -31,6 +31,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "Util.h"
 
+#include <cstring>
 #include <filesystem>
 
 std::string string_format(const char *format, ...) {

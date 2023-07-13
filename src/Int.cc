@@ -31,6 +31,8 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "Int.h"
 
+#include <limits>
+
 size_t Int::minimum_byte_size(uint64_t value) {
     if (value > std::numeric_limits<uint32_t>::max()) {
         return 8;

@@ -30,11 +30,13 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include "ObjectFile.h"
+
+#include <algorithm>
+#include <utility>
+
 #include "ParseException.h"
 #include "ObjectExpression.h"
 #include "SequenceTokenizer.h"
-
-#include <utility>
 
 bool ObjectFile::Constant::initialized = false;
 Token ObjectFile::Constant::token_value;

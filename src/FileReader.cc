@@ -31,6 +31,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "FileReader.h"
 
+#include <algorithm>
 #include <cstring>
 
 #include "Exception.h"

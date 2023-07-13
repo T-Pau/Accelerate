@@ -31,6 +31,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "FileTokenizer.h"
 
+#include <algorithm>
 #include <utility>
 
 #include "FileReader.h"

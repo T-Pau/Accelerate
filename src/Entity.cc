@@ -30,6 +30,9 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include "Entity.h"
+
+#include <algorithm>
+
 #include "FileReader.h"
 #include "ObjectFile.h"
 #include "ParseException.h"

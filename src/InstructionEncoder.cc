@@ -31,6 +31,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "InstructionEncoder.h"
 
+#include <algorithm>
 #include <utility>
 
 #include "Assembler.h"
