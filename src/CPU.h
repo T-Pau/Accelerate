@@ -55,7 +55,7 @@ public:
     [[nodiscard]] const ArgumentType* argument_type(Symbol name) const;
     [[nodiscard]] const Instruction* instruction(Symbol name) const;
 
-    [[nodiscard]] std::unordered_set<AddressingModeMatcherResult> match_addressing_modes(const std::vector<std::shared_ptr<Node>>& arguments) const {return addressing_mode_matcher.match(arguments);}
+    [[nodiscard]] std::vector<AddressingModeMatcherResult> match_addressing_modes(const std::vector<std::shared_ptr<Node>>& arguments) const;
 
     void setup(FileTokenizer& tokenizer) const;
 

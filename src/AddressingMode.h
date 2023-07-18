@@ -64,6 +64,9 @@ public:
     [[nodiscard]] const ArgumentType* argument(Symbol name) const;
     [[nodiscard]] bool has_argument(Symbol name) const {return argument(name) != nullptr;}
 
+    bool operator<(const AddressingMode& other) const {return priority < other.priority;}
+
+    size_t priority = std::numeric_limits<size_t>::max();
     bool uses_pc = false;
     std::vector<Notation> notations;
     std::unordered_map<Symbol, const ArgumentType*> arguments;

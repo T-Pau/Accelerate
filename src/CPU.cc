@@ -31,6 +31,8 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "CPU.h"
 
+#include <algorithm>
+
 #include "CPUGetter.h"
 
 const CPU CPU::empty = CPU();
@@ -38,7 +40,9 @@ const CPU CPU::empty = CPU();
 void CPU::add_addressing_mode(Symbol name, AddressingMode mode) {
     addressing_modes[name] = std::move(mode);
 
-    const auto& addressing_mode = addressing_modes[name];
+    auto& addressing_mode = addressing_modes[name];
+
+    addressing_mode.priority = addressing_modes.size();
 
     size_t notation_index = 0;
     for (const auto& notation: addressing_mode.notations) {
@@ -116,3 +120,13 @@ bool CPU::is_compatible_with(const CPU &other) const {
     return true;
 }
 
+
+std::vector<AddressingModeMatcherResult> CPU::match_addressing_modes(const std::vector<std::shared_ptr<Node>>& arguments) const {
+    auto matches = addressing_mode_matcher.match(arguments);
+    auto v = std::vector<AddressingModeMatcherResult>(matches.begin(), matches.end());
+    sort(v.begin(), v.end(),
+         [this](const AddressingModeMatcherResult& a, const AddressingModeMatcherResult& b) -> bool {
+             return *addressing_mode(a.addressing_mode) < *addressing_mode(b.addressing_mode);
+         });
+    return v;
+}
