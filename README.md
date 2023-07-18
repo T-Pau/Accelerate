@@ -8,8 +8,8 @@ Programs are divided into small objects like a single subroutine or variables. T
 
 ## Building Accelerate
 
-Accelerate is written in C++17 and should run on any modern platform. It also comes with an extensive test suite.
+Accelerate is written in C++20 and should run on any modern platform. It also comes with an extensive test suite.
 
-To build it, you need a C++17 compiler and [cmake](https://cmake.org). To run the tests, you need [Python](https://www.python.org) and [nihtest](https://github.com/nih-at/nihtest).
+To build it, you need a C++20 compiler and [cmake](https://cmake.org). To run the tests, you need [Python](https://www.python.org) and [nihtest](https://github.com/nih-at/nihtest).
 
 [![Github Actions Build Status](https://github.com/T-Pau/Accelerate/workflows/build/badge.svg)](https://github.com/T-Pau/Accelerate/actions?query=workflow%3Abuild)

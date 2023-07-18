@@ -47,7 +47,6 @@ ENDIF(NOT TARGET dist)
 # Checks
 
 check_function_exists(getopt_long HAVE_GETOPT_LONG)
-check_function_exists(getprogname HAVE_GETPROGNAME)
 
 ADD_DEFINITIONS("-DHAVE_CONFIG_H")
 
@@ -61,17 +60,3 @@ add_subdirectory(tests)
 
 # write out config file
 CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/config.h.in ${CMAKE_CURRENT_BINARY_DIR}/config.h)
-
-
-# for tests
-
-#SET(srcdir ${CMAKE_CURRENT_SOURCE_DIR}/regress)
-#SET(abs_srcdir ${CMAKE_CURRENT_SOURCE_DIR}/regress)
-#SET(top_builddir ${CMAKE_CURRENT_BINARY_DIR}) # used to find config.h
-
-#CONFIGURE_FILE(regress/runtest.in ${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/runtest @ONLY)
-#FILE(COPY ${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/runtest
-#  DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/regress
-#  FILE_PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
-#)
-

@@ -43,7 +43,7 @@ public:
     Symbol& operator=(const std::string& name);
 
 
-    [[nodiscard]] const std::string& str() const {return names[id];}
+    [[nodiscard]] const std::string& str() const {return global->names[id];}
     [[nodiscard]] const char* c_str() const {return str().c_str();}
     [[nodiscard]] uint32_t value() const {return id;}
     [[nodiscard]] bool empty() const {return id==0;}
@@ -58,8 +58,14 @@ public:
 private:
     uint32_t id;
 
-    static std::unordered_map<std::string, uint32_t> symbols;
-    static std::vector<std::string> names;
+    class Table {
+      public:
+        std::unordered_map<std::string, uint32_t> symbols = {{"", 0}};
+        std::vector<std::string> names = {""};
+    };
+
+    static void init_global() {if (!global) {global = new Table();}}
+    static Table* global;
 };
 
 template<>

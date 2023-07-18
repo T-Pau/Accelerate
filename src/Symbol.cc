@@ -33,20 +33,15 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "Exception.h"
 
-std::unordered_map<std::string, uint32_t> Symbol::symbols = {
-        {"", 0}
-};
-std::vector<std::string> Symbol::names = {
-        ""
-};
-
+Symbol::Table* Symbol::global = nullptr;
 
 Symbol::Symbol(const std::string &name) {
-    auto it = symbols.find(name);
-    if (it == symbols.end()) {
-        id = names.size();
-        names.push_back(name);
-        symbols[name] = id;
+    init_global();
+    auto it = global->symbols.find(name);
+    if (it == global->symbols.end()) {
+        id = global->names.size();
+        global->names.push_back(name);
+        global->symbols[name] = id;
     }
     else {
         id = it->second;
