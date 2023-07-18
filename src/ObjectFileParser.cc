@@ -104,7 +104,8 @@ void ObjectFileParser::parse_directive(const Token &directive) {
     else {
         auto it_symbol = symbol_parser_methods.find(directive.as_symbol());
         if (it_symbol != symbol_parser_methods.end()) {
-            (this->*it_symbol->second)(tokenizer.expect(Token::NAME, TokenGroup::newline), ParsedValue::parse(tokenizer));
+            auto name = tokenizer.expect(Token::NAME, TokenGroup::newline);
+            (this->*it_symbol->second)(name, ParsedValue::parse(tokenizer));
         }
         else {
             throw ParseException(directive, "unknown directive");
