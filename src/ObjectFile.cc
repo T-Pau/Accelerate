@@ -38,15 +38,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ObjectExpression.h"
 #include "SequenceTokenizer.h"
 
-bool ObjectFile::Constant::initialized = false;
-Token ObjectFile::Constant::token_value;
-
-void ObjectFile::Constant::initialize() {
-    if (!initialized) {
-        initialized = true;
-        token_value = Token(Token::NAME, "value");
-    }
-}
+const Token ObjectFile::Constant::token_value{Token::NAME, "value"};
 
 const unsigned int ObjectFile::format_version_major = 1;
 const unsigned int ObjectFile::format_version_minor = 0;
@@ -290,8 +282,6 @@ void ObjectFile::Constant::serialize(std::ostream &stream) const {
 }
 
 ObjectFile::Constant::Constant(ObjectFile* owner, Token name, const std::shared_ptr<ParsedValue>& definition): Entity(owner, name, definition) {
-    initialize();
-
     auto parameters = definition->as_dictionary();
 
     auto tokenizer = SequenceTokenizer((*parameters)[token_value]->as_scalar()->tokens);

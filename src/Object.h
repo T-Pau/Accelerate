@@ -69,14 +69,11 @@ public:
     Body body;
 
   private:
-    static void initialize();
-
-    static bool initialized;
-    static Token token_address;
-    static Token token_alignment;
-    static Token token_body;
-    static Token token_reserve;
-    static Token token_section;
+    static const Token token_address;
+    static const Token token_alignment;
+    static const Token token_body;
+    static const Token token_reserve;
+    static const Token token_section;
 
 };
 

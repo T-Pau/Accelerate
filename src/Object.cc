@@ -31,8 +31,6 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "Object.h"
 
-#include <utility>
-
 #include "BodyElement.h"
 #include "ObjectFile.h"
 #include "ParseException.h"
@@ -44,26 +42,14 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define RESERVE "reserve"
 #define SECTION "section"
 
-bool Object::initialized;
-Token Object::token_address;
-Token Object::token_alignment;
-Token Object::token_body;
-Token Object::token_reserve;
-Token Object::token_section;
+const Token Object::token_address{Token::NAME, ADDRESS};
+const Token Object::token_alignment{Token::NAME, ALIGNMENT};
+const Token Object::token_body{Token::NAME, BODY};
+const Token Object::token_reserve{Token::NAME, RESERVE};
+const Token Object::token_section{Token::NAME, SECTION};
 
-void Object::initialize() {
-    if (!initialized) {
-        initialized = true;
-        token_address = Token(Token::NAME, ADDRESS);
-        token_alignment = Token(Token::NAME, ALIGNMENT);
-        token_body = Token(Token::NAME, BODY);
-        token_reserve = Token(Token::NAME, RESERVE);
-        token_section = Token(Token::NAME, SECTION);
-    }
-}
 
 Object::Object(ObjectFile* owner, Token name_, const std::shared_ptr<ParsedValue>& definition): Entity(owner, name_, definition) {
-    initialize();
     auto parameters = definition->as_dictionary();
 
     auto address_value = parameters->get_optional(token_address);
@@ -115,8 +101,6 @@ std::ostream& operator<< (std::ostream& stream, const Object& object) {
 
 
 void Object::serialize(std::ostream &stream) const {
-    initialize();
-
     stream << ".object " << name.as_string() << " {" << std::endl;
     serialize_entity(stream);
     if (address) {

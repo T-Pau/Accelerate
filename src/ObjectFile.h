@@ -53,10 +53,7 @@ public:
         Expression value;
 
       private:
-        static void initialize();
-
-        static bool initialized;
-        static Token token_value;
+        static const Token token_value;
     };
 
     ObjectFile() noexcept;
