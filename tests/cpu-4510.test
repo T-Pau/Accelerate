@@ -1,5 +1,5 @@
 description Test 4510 CPU definition
-arguments -c --target 4510 4510.s
+arguments --create-library --target 4510 4510.s
 file 4510.s <inline>
 .section code
 test_adc {
@@ -511,7 +511,7 @@ test_tza {
     tza
 }
 end-of-inline-data
-file 4510.o {} <inline>
+file 4510.lib {} <inline>
 .format_version 1.0
 .target "4510"
 .object test_adc {

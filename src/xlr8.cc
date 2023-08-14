@@ -73,7 +73,7 @@ private:
 };
 
 std::vector<Commandline::Option> xlr8::options = {
-    Commandline::Option("compile", 'c', "compile only, don't link"),
+//    Commandline::Option("compile", 'c', "compile only, don't link"),
     Commandline::Option("create-library", 'a', "create library"),
     Commandline::Option("include-directory", 'I', "directory", "search for sources in DIRECTORY"),
     Commandline::Option("library-directory", 'L', "directory", "search for libraries in DIRECTORY"),
@@ -146,12 +146,12 @@ void xlr8::process() {
             if (extension == ".s") {
                 files.emplace_back(file_name, Assembler(linker->target).parse(Symbol(file_name)));
             }
-            else if (extension == ".o") {
+/*            else if (extension == ".o") {
                 if (linker->mode == Linker::COMPILE) {
                     throw Exception("only compiling, object file not used");
                 }
                 files.emplace_back(file_name, ObjectFileParser().parse(Symbol(file_name)));
-            }
+            } */
             else if (extension == ".lib") {
                 if (linker->mode == Linker::COMPILE) {
                     throw Exception("only compiling, library not used");

@@ -1,5 +1,5 @@
 description Test function expansion
-arguments -c --target 6502 a.s
+arguments --create-library --target 6502 a.s
 file a.s <inline>
 .section code
 test {
@@ -11,7 +11,7 @@ test {
     nop
 }
 end-of-inline-data
-file a.o {} <inline>
+file a.lib {} <inline>
 .format_version 1.0
 .target "6502"
 .object test {

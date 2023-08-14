@@ -1,5 +1,5 @@
 description Test instruction with 2 variants, known which will be used
-arguments -c --target 6502 file.s
+arguments --create-library --target 6502 file.s
 file file.s <inline>
 .section zero_page
 .public ptr .reserve 2
@@ -8,7 +8,7 @@ file file.s <inline>
     sta ptr
 }
 end-of-inline-data
-file file.o {} <inline>
+file file.lib {} <inline>
 .format_version 1.0
 .target "6502"
 .object ptr {

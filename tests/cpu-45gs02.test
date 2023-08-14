@@ -1,5 +1,5 @@
 description Test 45gs02 CPU definition
-arguments -c --target 45gs02 45gs02.s
+arguments --create-library --target 45gs02 45gs02.s
 file 45gs02.s <inline>
 .section code
 test_adc {
@@ -625,7 +625,7 @@ test_tza {
     tza
 }
 end-of-inline-data
-file 45gs02.o {} <inline>
+file 45gs02.lib {} <inline>
 .format_version 1.0
 .target "45gs02"
 .object test_adc {

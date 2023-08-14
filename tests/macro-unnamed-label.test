@@ -1,4 +1,4 @@
-arguments -c --target 6502 a.s
+arguments --create-library --target 6502 a.s
 file a.s <inline>
 .macro inc16 address {
     inc address
@@ -12,7 +12,7 @@ test {
     rts
 }
 end-of-inline-data
-file a.o {} <inline>
+file a.lib {} <inline>
 .format_version 1.0
 .target "6502"
 .macro inc16 {

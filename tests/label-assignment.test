@@ -1,5 +1,5 @@
 description Test function expansion
-arguments -c --target 6502 a.s
+arguments --create-library --target 6502 a.s
 
 file a.s <inline>
 .section code
@@ -9,26 +9,27 @@ test {
 label:
     nop
 }
+.section zero_page
+foo .reserve 1
 end-of-inline-data
 
-file a.o {} <inline>
+file a.lib {} <inline>
 .format_version 1.0
 .target "6502"
 .constant next {
     visibility: private
-    value: ((test+.label_offset(test, label))+$01)
+    value: (test+$03)
+}
+.object foo {
+    visibility: private
+    section: zero_page
+    reserve: 1
 }
 .object test {
     visibility: private
     section: code
     body <
-        .if .in_range($00, $ff, foo)
-          .data $a5, foo:1
-        .else
-          .data $ad, foo:2
-        .end
-      label:
-        .data $ea
+        .data $a5, foo:1, $ea
     >
 }
 end-of-inline-data

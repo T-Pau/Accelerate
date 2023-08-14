@@ -1,5 +1,5 @@
 description Test 65c02 CPU definition
-arguments -c --target 65c02 65c02.s
+arguments --create-library --target 65c02 65c02.s
 file 65c02.s <inline>
 .section code
 test_adc {
@@ -417,7 +417,7 @@ test_wai {
     wai
 }
 end-of-inline-data
-file 65c02.o {} <inline>
+file 65c02.lib {} <inline>
 .format_version 1.0
 .target "65c02"
 .object test_adc {

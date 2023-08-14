@@ -1,5 +1,5 @@
 description Test 6502 CPU definition
-arguments -c --target 6502 6502.s
+arguments --create-library --target 6502 6502.s
 file 6502.s <inline>
 .section code
 test_adc {
@@ -270,7 +270,7 @@ test_tya {
     tya
 }
 end-of-inline-data
-file 6502.o {} <inline>
+file 6502.lib {} <inline>
 .format_version 1.0
 .target "6502"
 .object test_adc {

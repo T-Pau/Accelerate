@@ -1,5 +1,5 @@
 description Test detection of cycle in variable definition.
-arguments -c --target 6502 file.s
+arguments --create-library --target 6502 file.s
 return 1
 file file.s <inline>
 .section code
