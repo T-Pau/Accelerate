@@ -1,6 +1,7 @@
 
 set(XFAIL_TESTS
         error-unclosed-object.test
+        hello-wolrd-c64.test
         # undefined variable in library
         # undefined variable in library
 )

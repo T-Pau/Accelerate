@@ -31,4 +31,5 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "TokenGroup.h"
 
-const TokenGroup TokenGroup::newline(Token::NEWLINE);
+const TokenGroup TokenGroup::newline{Token::NEWLINE};
+const TokenGroup TokenGroup::all{true};

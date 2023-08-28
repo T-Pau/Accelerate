@@ -43,19 +43,21 @@ public:
 
     Target parse(Symbol name, Symbol file_name);
 
-    static Token token_data_end;
-    static Token token_data_start;
-    static Token token_data_size;
+    static const Token token_data_end;
+    static const Token token_data_start;
+    static const Token token_data_size;
 
 protected:
     void parse_directive(const Token& directive) override;
 
 private:
     void parse_cpu();
+    void parse_default_string_encoding();
     void parse_extension();
     void parse_output();
     void parse_section();
     void parse_segment();
+    void parse_string_encoding();
 
     static std::vector<MemoryMap::Block> parse_address(const ParsedValue* address);
     static MemoryMap::Block parse_single_address(const ParsedScalar* address);
@@ -69,21 +71,22 @@ private:
     static void initialize();
     static bool initialized;
     static std::unordered_map<Symbol, void (TargetParser::*)()> parser_methods;
-    static Token token_address;
-    static Token token_colon;
-    static Token token_cpu;
-    static Token token_data;
-    static Token token_extension;
-    static Token token_memory;
-    static Token token_minus;
-    static Token token_output;
-    static Token token_read_only;
-    static Token token_read_write;
-    static Token token_reserve_only;
-    static Token token_section;
-    static Token token_segment;
-    static Token token_segment_name;
-    static Token token_type;
+    static const Token token_address;
+    static const Token token_colon;
+    static const Token token_cpu;
+    static const Token token_data;
+    static const Token token_default_string_encoding;
+    static const Token token_extension;
+    static const Token token_memory;
+    static const Token token_output;
+    static const Token token_read_only;
+    static const Token token_read_write;
+    static const Token token_reserve_only;
+    static const Token token_section;
+    static const Token token_segment;
+    static const Token token_segment_name;
+    static const Token token_string_encoding;
+    static const Token token_type;
 };
 
 

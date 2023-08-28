@@ -1,4 +1,4 @@
-.cpu "6502"
+.include "c64.inc"
 
 .extension "prg"
 

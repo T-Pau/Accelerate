@@ -36,6 +36,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <optional>
 #include <ostream>
 
+#include "Symbol.h"
 
 class Value {
 public:
@@ -43,6 +44,7 @@ public:
         BOOLEAN,
         FLOAT,
         SIGNED,
+        STRING,
         UNSIGNED,
         VOID
     };
@@ -52,6 +54,8 @@ public:
     explicit Value(int64_t value, uint64_t default_size = 0);
     explicit Value(bool value): type_(BOOLEAN), boolean_value_(value) {}
     explicit Value(double value): type_(FLOAT), float_value_(value) {}
+    explicit Value(const std::string& value): Value(Symbol(value)) {}
+    explicit Value(Symbol value): type_(STRING), string_value_(value) {}
     Value(const Value&other) = default;
 
 //    Value& operator=(const Value& other);
@@ -61,6 +65,7 @@ public:
     [[nodiscard]] bool is_integer() const {return type() == SIGNED || type() == UNSIGNED;}
     [[nodiscard]] bool is_number() const {return is_integer() || is_float();}
     [[nodiscard]] bool is_signed() const {return type() == SIGNED;}
+    [[nodiscard]] bool is_string() const {return type() == STRING;}
     [[nodiscard]] bool is_unsigned() const {return type() == UNSIGNED;}
     [[nodiscard]] bool is_void() const {return type() == VOID;}
 
@@ -69,6 +74,8 @@ public:
     [[nodiscard]] bool boolean_value() const;
     [[nodiscard]] double float_value() const;
     [[nodiscard]] int64_t signed_value() const;
+    [[nodiscard]] std::string string_value() const;
+    [[nodiscard]] Symbol symbol_value() const;
     [[nodiscard]] uint64_t unsigned_value() const;
     [[nodiscard]] uint64_t default_size() const;
 
@@ -105,6 +112,7 @@ private:
         double float_value_;
         int64_t signed_value_;
         uint64_t unsigned_value_;
+        Symbol string_value_;
     };
     uint64_t explicit_default_size = 0;
 
@@ -127,6 +135,8 @@ struct std::hash<Value> {
                 return std::hash<double>{}(value.float_value());
             case Value::SIGNED:
                 return std::hash<::int64_t>{}(value.signed_value());
+            case Value::STRING:
+                return std::hash<Symbol>{}(value.symbol_value());
             case Value::UNSIGNED:
                 return std::hash<::uint64_t>{}(value.unsigned_value());
             case Value::VOID:

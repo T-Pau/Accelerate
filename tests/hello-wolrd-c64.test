@@ -1,0 +1,4 @@
+description Hello World on C64
+arguments --target c64-basic hello-world-c64.s cbm.lib
+file hello-world-c64.s ../examples/hello-world-c64.s
+file hello-world-c64.prg {} {}

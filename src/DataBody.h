@@ -57,8 +57,8 @@ public:
     explicit DataBody(std::vector<DataBodyElement> data);
 
     Body appending(const DataBody* body) {return appending(body->data);}
-    Body appending(const std::vector<DataBodyElement>& elements);
-//    void append(Expression expression, std::optional<Encoding> encoding = {}) {data.emplace_back(std::move(expression), encoding);}
+    Body appending(const std::vector<DataBodyElement>& elements) const;
+//    void append(Expression expression, std::optional<IntegerEncoding> encoding = {}) {data.emplace_back(std::move(expression), encoding);}
     [[nodiscard]] std::shared_ptr<BodyElement> clone() const override {return std::make_shared<DataBody>(data);}
     void collect_objects(std::unordered_set<Object*> &objects) const override;
     [[nodiscard]] bool empty() const override {return data.empty();}

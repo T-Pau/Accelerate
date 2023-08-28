@@ -34,10 +34,15 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ParseException.h"
 
 ValueExpression::ValueExpression(const Token &token) {
-    if (!token.is_value()) {
+    if (token.is_value()) {
+        value_ = token.as_value();
+    }
+    else if (token.is_string()) {
+        value_ = Value(token.as_symbol());
+    }
+    else {
         throw ParseException(token, "internal error: can't create value node from %s", token.type_name());
     }
-    value_ = token.as_value();
 }
 
 
@@ -66,8 +71,21 @@ void ValueExpression::serialize_sub(std::ostream &stream) const {
             break;
         }
 
+        case Value::STRING:
+            stream << '"' << value()->string_value() << '"';
+            break;
+
         case Value::VOID:
             stream << "void";
             break;
+    }
+}
+
+std::optional<Value> ValueExpression::maximum_value() const {
+    if (value_.is_number()) {
+        return value_;
+    }
+    else {
+        return {};
     }
 }

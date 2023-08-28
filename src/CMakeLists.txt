@@ -43,6 +43,7 @@ add_library(xlr8-library STATIC
         Instruction.cc
         InstructionEncoder.cc
         Int.cc
+        IntegerEncoding.cc
         LabelBody.cc
         LabelExpression.cc
         LibraryGetter.cc
@@ -66,6 +67,7 @@ add_library(xlr8-library STATIC
         ScopeBody.cc
         SequenceTokenizer.cc
         SizeRange.cc
+        StringEncoding.cc
         Symbol.cc
         Target.cc
         TargetGetter.cc
@@ -76,6 +78,7 @@ add_library(xlr8-library STATIC
         Tokenizer.cc
         UnaryExpression.cc
         UnnamedLabelList.cc
+        UTF8.cc
         Util.cc
         Value.cc
         ValueExpression.cc

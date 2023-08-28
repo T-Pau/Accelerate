@@ -1,9 +1,12 @@
+#ifndef UTF8_H
+#define UTF8_H
+
 /*
-ValueExpression.h --
+UTF8.h --
 
 Copyright (C) Dieter Baron
 
-The authors can be contacted at <assembler@tpau.group>
+The authors can be contacted at <accelerate@tpau.group>
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions
@@ -29,30 +32,28 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef VALUE_EXPRESSION_H
-#define VALUE_EXPRESSION_H
+#include <string>
 
-#include "BaseExpression.h"
-#include "Expression.h"
+class UTF8 {
+  public:
+    static std::u32string decode(const std::string& string);
+    static std::string encode(char32_t codepoint);
+    static std::string encode(const std::u32string& string);
 
-class ValueExpression: public BaseExpression {
-public:
-    explicit ValueExpression(const Token& token);
-    explicit ValueExpression(Value value): value_(value) {}
-    explicit ValueExpression(uint64_t value): ValueExpression(Value(value)) {}
+  private:
+    class FirstByte {
+      public:
+        FirstByte(uint8_t prefix, uint8_t mask, char32_t max_char): prefix{prefix}, mask{mask}, max_char{max_char} {}
 
-    [[nodiscard]] bool has_value() const override {return true;}
-    [[nodiscard]] std::optional<Value> value() const override {return value_;}
-    [[nodiscard]] std::optional<Value> maximum_value() const override;
-    [[nodiscard]] std::optional<Value> minimum_value() const override {return maximum_value();}
+        uint8_t prefix;
+        uint8_t mask;
+        char32_t max_char;
+    };
 
-protected:
-    [[nodiscard]] std::optional<Expression> evaluated(const EvaluationContext& context) const override {return {};}
+    static void encode(char32_t codepoint, std::string& string);
 
-    void serialize_sub(std::ostream& stream) const override;
-
-private:
-    Value value_;
+    static const int utf8_continuation_bytes[];
+    static const FirstByte first_bytes[];
 };
 
-#endif // VALUE_EXPRESSION_H
+#endif // UTF8_H

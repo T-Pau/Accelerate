@@ -36,16 +36,18 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 class TokenGroup {
 public:
-    TokenGroup() = default;
+    explicit TokenGroup(bool contains_all = false): contains_all{contains_all}, name{contains_all ? "all": "none"} {}
     explicit TokenGroup(Token::Type type): types({ type }), name (Token::type_name(type)) {}
-    explicit TokenGroup(std::unordered_set<Token::Type> types, std::unordered_set<Token> tokens, std::string name): types (std::move(types)), tokens(std::move(tokens)), name(std::move(name)) {}
+    TokenGroup(std::unordered_set<Token::Type> types, std::unordered_set<Token> tokens, std::string name): types (std::move(types)), tokens(std::move(tokens)), name(std::move(name)) {}
 
-    [[nodiscard]] bool contains(const Token& token) const {return  (types.find(token.get_type()) != types.end() || tokens.find(token) != tokens.end());}
+    [[nodiscard]] bool contains(const Token& token) const {return contains_all || (types.find(token.get_type()) != types.end() || tokens.find(token) != tokens.end());}
 
     static const TokenGroup newline;
+    static const TokenGroup all;
 
     std::unordered_set<Token::Type> types;
     std::unordered_set<Token> tokens;
+    bool contains_all{false};
     std::string name;
 };
 

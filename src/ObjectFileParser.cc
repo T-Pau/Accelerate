@@ -93,6 +93,7 @@ std::shared_ptr<ObjectFile> ObjectFileParser::parse(Symbol filename) {
     if (!parse_file(filename)) {
         throw Exception("can't parse object file '%s'", filename.c_str());
     }
+    Target::clear_current_target();
     return file;
 }
 
@@ -136,7 +137,9 @@ void ObjectFileParser::parse_function(Token name, const std::shared_ptr<ParsedVa
 void ObjectFileParser::parse_target() {
     auto name = tokenizer.expect(Token::STRING, TokenGroup::newline);
 
-    file->set_target(&Target::get(name.as_symbol()));
+    auto target = &Target::get(name.as_symbol());
+    Target::set_current_target(target);
+    file->set_target(target);
 }
 
 void ObjectFileParser::parse_macro(Token name, const std::shared_ptr<ParsedValue>& definition) {

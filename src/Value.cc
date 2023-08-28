@@ -50,15 +50,11 @@ Value::Value(int64_t value, uint64_t default_size): explicit_default_size(defaul
 
 
 uint64_t Value::unsigned_value() const {
-    switch (type()) {
-        case BOOLEAN:
-        case FLOAT:
-        case SIGNED:
-        case VOID:
-            throw Exception("can't convert value of type %s to unsigned", type_name().c_str());
-
-        case UNSIGNED:
-            return unsigned_value_;
+    if (type() == UNSIGNED) {
+        return unsigned_value_;
+    }
+    else {
+        throw Exception("can't convert value of type %s to unsigned", type_name().c_str());
     }
 }
 
@@ -67,6 +63,7 @@ int64_t Value::signed_value() const {
     switch (type()) {
         case BOOLEAN:
         case FLOAT:
+        case STRING:
         case VOID:
             throw Exception("can't convert value of type %s to signed", type_name().c_str());
 
@@ -81,10 +78,20 @@ int64_t Value::signed_value() const {
     }
 }
 
+Symbol Value::symbol_value() const {
+    if (type() == STRING) {
+        return string_value_;
+    }
+    else {
+        throw Exception("can't convert value of type %s to string", type_name().c_str());
+    }
+}
+
 
 double Value::float_value() const {
     switch (type()) {
         case BOOLEAN:
+        case STRING:
         case VOID:
             throw Exception("can't convert value of type %s to float", type_name().c_str());
 
@@ -111,6 +118,9 @@ bool Value::boolean_value() const {
         case SIGNED:
             return signed_value_ != 0;
 
+        case STRING:
+            return string_value_;
+
         case UNSIGNED:
             return unsigned_value_ != 0;
 
@@ -128,6 +138,8 @@ std::string Value::type_name() const {
             return "float";
         case SIGNED:
             return "signed";
+        case STRING:
+            return "string";
         case UNSIGNED:
             return "unsigned";
         case VOID:
@@ -391,6 +403,9 @@ bool Value::operator==(const Value &other) const {
         case SIGNED:
             return other.is_signed() && signed_value_ == other.signed_value_;
 
+        case STRING:
+            return other.is_string() && string_value_ == other.string_value_;
+
         case UNSIGNED:
             return other.is_unsigned() && unsigned_value_ == other.unsigned_value_;
 
@@ -411,6 +426,9 @@ bool Value::operator<(const Value &other) const {
         case SIGNED:
             return (other.is_signed() && signed_value_ < other.signed_value_) || other.is_unsigned();
 
+        case STRING:
+            return other.is_string() && string_value_ < other.string_value_;
+
         case UNSIGNED:
             return other.is_unsigned() && unsigned_value_ < other.unsigned_value_;
     }
@@ -428,6 +446,9 @@ bool Value::operator<=(const Value &other) const {
 
         case SIGNED:
             return (other.is_signed() && signed_value_ <= other.signed_value_) || other.is_unsigned();
+
+        case STRING:
+            return other.is_string() && string_value_ <= other.string_value_;
 
         case UNSIGNED:
             return other.is_unsigned() && unsigned_value_ <= other.unsigned_value_;
@@ -473,6 +494,7 @@ Value Value::operator%(const Value &other) const {
 Value Value::operator-() const {
     switch (type()) {
         case BOOLEAN:
+        case STRING:
         case VOID:
             throw Exception("can't negate %s", type_name().c_str());
 
@@ -491,6 +513,7 @@ Value Value::operator~() const {
     switch (type()) {
         case BOOLEAN:
         case FLOAT:
+        case STRING:
         case VOID:
             throw Exception("can't bitwise negate %s", type_name().c_str());
 
@@ -508,6 +531,7 @@ uint64_t Value::default_size() const {
     switch (type()) {
         case BOOLEAN:
         case VOID:
+        case STRING: // TODO: unknown default size
         case FLOAT:
             implicit_default_size = 0;
             break;
@@ -611,3 +635,22 @@ bool operator<=(const std::optional<Value> a, const std::optional<Value> b) {
     return *a <= *b;
 }
 
+std::string Value::string_value() const {
+    switch (type()) {
+        case BOOLEAN:
+        case VOID:
+            throw Exception("can't convert %s to string", type_name().c_str());
+
+        case FLOAT:
+            return std::to_string(float_value_);
+
+        case SIGNED:
+            return std::to_string(signed_value_);
+
+        case STRING:
+            return string_value_.str();
+
+        case UNSIGNED:
+            return std::to_string(unsigned_value_);
+    }
+}

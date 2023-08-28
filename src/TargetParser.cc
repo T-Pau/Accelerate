@@ -40,29 +40,31 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 bool TargetParser::initialized = false;
 std::unordered_map<Symbol, void (TargetParser::*)()> TargetParser::parser_methods;
-Token TargetParser::token_address;
-Token TargetParser::token_colon;
-Token TargetParser::token_cpu;
-Token TargetParser::token_data;
-Token TargetParser::token_data_end;
-Token TargetParser::token_data_size;
-Token TargetParser::token_data_start;
-Token TargetParser::token_extension;
-Token TargetParser::token_memory;
-Token TargetParser::token_minus;
-Token TargetParser::token_output;
-Token TargetParser::token_read_only;
-Token TargetParser::token_read_write;
-Token TargetParser::token_reserve_only;
-Token TargetParser::token_section;
-Token TargetParser::token_segment;
-Token TargetParser::token_segment_name;
-Token TargetParser::token_type;
+const Token TargetParser::token_address = Token(Token::NAME, "address");
+const Token TargetParser::token_colon = Token(Token::PUNCTUATION, ":");
+const Token TargetParser::token_cpu = Token(Token::DIRECTIVE, "cpu");
+const Token TargetParser::token_data = Token(Token::DIRECTIVE, "data");
+const Token TargetParser::token_data_end = Token(Token::NAME, ".data_end");
+const Token TargetParser::token_data_size = Token(Token::NAME, ".data_size");
+const Token TargetParser::token_data_start = Token(Token::NAME, ".data_start");
+const Token TargetParser::token_default_string_encoding = Token(Token::DIRECTIVE, "default_string_encoding");
+const Token TargetParser::token_extension = Token(Token::DIRECTIVE, "extension");
+const Token TargetParser::token_memory = Token(Token::DIRECTIVE, "memory");
+const Token TargetParser::token_output = Token(Token::DIRECTIVE, "output");
+const Token TargetParser::token_read_only = Token(Token::NAME, "read_only");
+const Token TargetParser::token_read_write = Token(Token::NAME, "read_write");
+const Token TargetParser::token_reserve_only = Token(Token::NAME, "reserve_only");
+const Token TargetParser::token_section = Token(Token::DIRECTIVE, "section");
+const Token TargetParser::token_segment = Token(Token::DIRECTIVE, "segment");
+const Token TargetParser::token_segment_name = Token(Token::NAME, "segment");
+const Token TargetParser::token_string_encoding = Token(Token::DIRECTIVE, "string_encoding");
+const Token TargetParser::token_type = Token(Token::NAME, "type");
 
 
 TargetParser::TargetParser(): FileParser(TargetGetter::global.path) {
     initialize();
 
+    tokenizer.add_punctuations({"="});
     tokenizer.add_literal(token_data_end);
     tokenizer.add_literal(token_data_size);
     tokenizer.add_literal(token_data_start);
@@ -71,30 +73,13 @@ TargetParser::TargetParser(): FileParser(TargetGetter::global.path) {
 
 void TargetParser::initialize() {
     if (!initialized) {
-        token_address = Token(Token::NAME, "address");
-        token_colon = Token(Token::PUNCTUATION, ":");
-        token_cpu = Token(Token::DIRECTIVE, "cpu");
-        token_data = Token(Token::DIRECTIVE, "data");
-        token_data_end = Token(Token::NAME, ".data_end");
-        token_data_size = Token(Token::NAME, ".data_size");
-        token_data_start = Token(Token::NAME, ".data_start");
-        token_extension = Token(Token::DIRECTIVE, "extension");
-        token_memory = Token(Token::DIRECTIVE, "memory");
-        token_minus = Token(Token::PUNCTUATION, "-");
-        token_output = Token(Token::DIRECTIVE, "output");
-        token_read_only = Token(Token::NAME, "read_only");
-        token_read_write = Token(Token::NAME, "read_write");
-        token_reserve_only = Token(Token::NAME, "reserve_only");
-        token_section = Token(Token::DIRECTIVE, "section");
-        token_segment = Token(Token::DIRECTIVE, "segment");
-        token_segment_name = Token(Token::NAME, "segment");
-        token_type = Token(Token::NAME, "type");
-
         parser_methods[token_cpu.as_symbol()] = &TargetParser::parse_cpu;
+        parser_methods[token_default_string_encoding.as_symbol()] = &TargetParser::parse_default_string_encoding;
         parser_methods[token_extension.as_symbol()] = &TargetParser::parse_extension;
         parser_methods[token_output.as_symbol()] = &TargetParser::parse_output;
         parser_methods[token_section.as_symbol()] = &TargetParser::parse_section;
         parser_methods[token_segment.as_symbol()] = &TargetParser::parse_segment;
+        parser_methods[token_string_encoding.as_symbol()] = &TargetParser::parse_string_encoding;
 
         initialized = true;
     }
@@ -244,7 +229,7 @@ MemoryMap::Block TargetParser::parse_single_address(const ParsedScalar *address)
     auto start = start_token.as_unsigned();
     uint64_t size = 1;
 
-    if (address->size() == index + 3 && (*address)[index + 1] == token_minus) {
+    if (address->size() == index + 3 && (*address)[index + 1] == Token::minus) {
         auto end_token = (*address)[index + 2];
         if (!end_token.is_unsigned()) {
             throw ParseException(start_token, "unsigned integer expected");
@@ -274,4 +259,21 @@ void TargetParser::parse_extension() {
     auto token = tokenizer.expect(Token::STRING, TokenGroup::newline);
 
     target.extension = token.as_string();
+}
+
+void TargetParser::parse_default_string_encoding() {
+    auto token = tokenizer.expect(Token::STRING, TokenGroup::newline);
+    target.default_string_encoding = target.string_encoding(token.as_symbol());
+    if (!target.default_string_encoding) {
+        throw ParseException(token, "unknown string encoding '%s'", token.as_string().c_str());
+    }
+}
+
+void TargetParser::parse_string_encoding() {
+    auto name = tokenizer.expect(Token::NAME, TokenGroup::newline);
+    auto parse_value = ParsedValue::parse(tokenizer);
+    if (target.string_encoding(name.as_symbol())) {
+        throw ParseException(name, "duplicate string encoding '%s'", name.as_string().c_str());
+    }
+    target.string_encodings[name.as_symbol()] = StringEncoding(name.as_symbol(), parse_value, target);
 }

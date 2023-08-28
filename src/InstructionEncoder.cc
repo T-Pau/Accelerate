@@ -199,9 +199,9 @@ InstructionEncoder::Variant InstructionEncoder::encode(const Instruction* instru
 
     auto data = variant.data.as_data();
     for (const auto& datum: data->data) {
-        if (datum.encoding.has_value()) {
-            auto lower = datum.encoding->minimum_value();
-            auto upper = datum.encoding->maximum_value();
+        if (datum.encoding && datum.encoding->is_integer_encoding()) {
+            auto lower = datum.encoding->as_integer_encoding().minimum_value();
+            auto upper = datum.encoding->as_integer_encoding().maximum_value();
             if (lower.has_value() && upper.has_value()) {
                 variant.add_encoding_constraint(InRangeExpression::create(Expression(*lower), Expression(*upper), datum.expression));
             }

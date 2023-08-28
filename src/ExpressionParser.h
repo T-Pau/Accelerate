@@ -36,10 +36,10 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <utility>
 
 #include "BinaryExpression.h"
+#include "DataBody.h"
+#include "Encoding.h"
 #include "Tokenizer.h"
 #include "UnaryExpression.h"
-#include "Encoding.h"
-#include "DataBody.h"
 #include "VariableExpression.h"
 
 class ExpressionParser {
@@ -50,7 +50,8 @@ public:
 
     Expression parse() { top = Element(Location(), START); return do_parse();}
     Expression parse(Expression& left) { top = Element(left, 0); return do_parse();}
-    Encoding parse_encoding(Token token);
+
+    std::optional<Encoding> parse_encoding();
     Body parse_list();
 
 private:

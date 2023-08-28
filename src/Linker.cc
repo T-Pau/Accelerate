@@ -107,6 +107,8 @@ void Linker::link() {
         return;
     }
 
+    Target::set_current_target(target);
+
     for (auto object: objects) {
         try {
             object->evaluate();
@@ -166,7 +168,7 @@ void Linker::set_target(const Target* new_target) {
     }
     target = new_target;
     memory = target->map.initialize_memory();
-    Encoding::default_byte_order = target->cpu->byte_order;
+    IntegerEncoding::default_byte_order = target->cpu->byte_order;
 }
 
 void Linker::add_library(std::shared_ptr<ObjectFile> library) {

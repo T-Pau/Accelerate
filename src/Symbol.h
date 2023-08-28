@@ -38,7 +38,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 class Symbol {
 public:
-    Symbol(): id(0) {}
+    Symbol() = default;
     explicit Symbol(const std::string& name);
     Symbol& operator=(const std::string& name);
 
@@ -54,9 +54,10 @@ public:
     bool operator<=(const Symbol& other) const {return str() <= other.str();}
     bool operator>(const Symbol& other) const {return str() > other.str();}
     bool operator>=(const Symbol& other) const {return str() >= other.str();}
+    operator bool() const {return id != 0;}
 
 private:
-    uint32_t id;
+    uint32_t id{0};
 
     class Table {
       public:

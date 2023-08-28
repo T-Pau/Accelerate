@@ -1,23 +1,28 @@
+## StringEncoding
+
+- allow stirngs in expressions
+- fix target specified in source file (CPU punctuation doesn't get added, assemlby instructions not recognized)
+- allow adding library in target description
+- fix `.import` in assemlby source file
+
 ## Bugs
 
-- Fix serializing partially resolved object files (compile mode). 
-- Don't use full file name for .import in object file. 
-- .segment not reported as unknown directive while assembling
+- Don't use full file name for `.import` in object file. 
+- `.segment` not reported as unknown directive while assembling
 - columns are off when source contains TAB.
-- Serialize which library object was resolved in (needed to refer to private objects).
+- Serialize which library object was resolved in (needed to refer to private objects). (still needed?)
 - Test/fix labels (named and unnamed) in macros.
 - Resolve macros in library they're defined in. Add placeholders for arguments in local environment.
 
 
 ## Missing Features
 
-- Clean
 - Allow pinning object to fixed address in map file. (`.pin name address`)
 - Evaluate program/library constants in output elements.
 - Add optional priorities to sections.
 - Allow specifying libraries in map file.
-- Support for text. (How to specify encoding?)
-- Support for integer as ASCII (e. g. for start sys).
+- Support for text.
+- Support for integer as text (e. g. for start sys).
 - Check for objects in unknown sections. 
 
 

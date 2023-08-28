@@ -121,20 +121,31 @@ void DataBody::collect_objects(std::unordered_set<Object *> &objects) const {
     }
 }
 
-Body DataBody::appending(const std::vector<DataBodyElement> &elements) {
+Body DataBody::appending(const std::vector<DataBodyElement> &elements) const {
     auto new_data = data;
     new_data.insert(new_data.end(), elements.begin(), elements.end());
     return Body(new_data);
 }
 
 SizeRange DataBodyElement::size_range() const {
-    if (encoding.has_value()) {
-        return SizeRange(encoding->byte_size());
+    if (encoding && encoding->is_integer_encoding()) {
+        return SizeRange(encoding->as_integer_encoding().byte_size());
     }
+
     auto value = expression.value();
+
     if (value) {
-        return SizeRange(value->default_size());
+        if (encoding) {
+            return SizeRange{encoding->encoded_size(*value)};
+        }
+        if (value->is_number()) {
+            return SizeRange(value->default_size());
+        }
+        else {
+            return SizeRange{Encoding(*value).encoded_size(*value)};
+        }
     }
+
     auto minimum_value = expression.minimum_value();
     auto maximum_value = expression.maximum_value();
     if (minimum_value && maximum_value) {
@@ -142,5 +153,10 @@ SizeRange DataBodyElement::size_range() const {
         auto maximum_size = maximum_value->default_size();
         return {std::min(minimum_size, maximum_size), std::max(minimum_size, maximum_size)};
     }
-    return {1, 8};
+    if (minimum_value || maximum_value) {
+        return {1, 8};
+    }
+    else {
+        return {};
+    }
 }

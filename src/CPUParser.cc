@@ -214,7 +214,7 @@ void CPUParser::parse_addressing_mode() {
                 auto variable_name = datum.expression.as_variable()->variable();
                 auto encoding_type = addressing_mode.argument(variable_name)->as_encoding();
                 if (encoding_type && (!datum.encoding || *datum.encoding == encoding_type->encoding)) {
-                    datum.encoding = encoding_type->encoding;
+                    datum.encoding = Encoding{encoding_type->encoding};
                     unencoded_encoding_arguments.erase(variable_name);
                 }
             }
@@ -354,7 +354,12 @@ std::unique_ptr<ArgumentType> CPUParser::parse_argument_type_encoding(const Toke
         throw ParseException(parameters->location, "definition of range argument type '%s' must be scalar", name.as_string().c_str());
     }
     auto tokenizer = SequenceTokenizer(parameters->as_scalar()->tokens);
-    return std::make_unique<ArgumentTypeEncoding>(name.as_symbol(), ExpressionParser(tokenizer).parse_encoding(Token::colon));
+    tokenizer.unget(Token::colon);
+    auto encoding = ExpressionParser(tokenizer).parse_encoding();
+    if (!encoding || !encoding->is_integer_encoding()) {
+        throw ParseException(parameters->location, "invalid encoding");
+    }
+    return std::make_unique<ArgumentTypeEncoding>(name.as_symbol(), encoding->as_integer_encoding());
 }
 
 

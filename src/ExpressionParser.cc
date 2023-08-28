@@ -31,8 +31,9 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "ExpressionParser.h"
 
-#include "ValueExpression.h"
 #include "ParseException.h"
+#include "Target.h"
+#include "ValueExpression.h"
 
 std::unordered_map<Token, ExpressionParser::BinaryOperator> ExpressionParser::binary_operators;
 
@@ -79,7 +80,7 @@ void ExpressionParser::initialize() {
 ExpressionParser::Element ExpressionParser::next_element() {
     auto token = tokenizer.next();
 
-    if (token.is_integer()) {
+    if (token.is_integer() || token.is_string()) {
         return {Expression(token), 0};
     }
     else if (token.is_name()) {
@@ -352,16 +353,11 @@ Body ExpressionParser::parse_list() {
 
     while (true) {
         auto expression = parse();
-        auto encoding = std::optional<Encoding>();
-
-        auto token = tokenizer.next();
-
-        if (token == Token::colon || token == Token::colon_minus || token == Token::colon_plus) {
-            encoding = parse_encoding(token);
-            token = tokenizer.next();
-        }
+        auto encoding = parse_encoding();
 
         list.emplace_back(expression, encoding);
+
+        auto token = tokenizer.next();
 
         if (!token || token.is_newline()) {
             break;
@@ -374,36 +370,54 @@ Body ExpressionParser::parse_list() {
     return Body(list);
 }
 
-Encoding ExpressionParser::parse_encoding(Token token) {
-    Encoding::Type type;
+std::optional<Encoding> ExpressionParser::parse_encoding() {
+    IntegerEncoding::Type type;
+    auto name_allowed = false;
+
+    auto token = tokenizer.next();
 
     if (token == Token::colon) {
         token = tokenizer.next();
         if (token == Token::minus) {
-            type = Encoding::SIGNED;
+            type = IntegerEncoding::SIGNED;
         }
         else if (token == Token::plus) {
-            type = Encoding::UNSIGNED;
+            type = IntegerEncoding::UNSIGNED;
         }
         else {
-            type = Encoding::UNSIGNED;
+            type = IntegerEncoding::UNSIGNED;
+            name_allowed = true;
             tokenizer.unget(token);
         }
     }
     else if (token == Token::colon_minus) {
-        type = Encoding::SIGNED;
+        type = IntegerEncoding::SIGNED;
     }
     else if (token == Token::colon_plus) {
-        type = Encoding::UNSIGNED;
+        type = IntegerEncoding::UNSIGNED;
+    }
+    else {
+        tokenizer.unget(token);
+        return {};
     }
 
     token = tokenizer.next();
 
     if (token.is_unsigned()) {
-        return {type, token.as_unsigned()};
+        return Encoding{IntegerEncoding{type, token.as_unsigned()}};
+    }
+    else if (token.is_name()) {
+        if (!name_allowed) {
+            throw ParseException(token, "expected integer");
+        }
+        auto string_encoding = Target::current_target->string_encoding(token.as_symbol());
+        if (!string_encoding) {
+            throw ParseException(token, "unknown string encoding '%s'", token.as_string().c_str());
+        }
+        return Encoding{string_encoding};
     }
 
-    throw ParseException(token, "expected integer");
+    throw ParseException(token, "expected integer or name");
 }
 
 void ExpressionParser::reduce_argument_list() {

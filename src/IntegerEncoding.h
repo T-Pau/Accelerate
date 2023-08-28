@@ -1,5 +1,5 @@
 /*
-ValueExpression.h --
+IntegerEncoding.h --
 
 Copyright (C) Dieter Baron
 
@@ -29,30 +29,47 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef VALUE_EXPRESSION_H
-#define VALUE_EXPRESSION_H
+#ifndef INTEGER_ENCODING_H
+#define INTEGER_ENCODING_H
+
+#include <string>
 
 #include "BaseExpression.h"
-#include "Expression.h"
+#include "Value.h"
 
-class ValueExpression: public BaseExpression {
+class IntegerEncoding {
 public:
-    explicit ValueExpression(const Token& token);
-    explicit ValueExpression(Value value): value_(value) {}
-    explicit ValueExpression(uint64_t value): ValueExpression(Value(value)) {}
+    enum Type {
+        SIGNED,
+        UNSIGNED
+    };
 
-    [[nodiscard]] bool has_value() const override {return true;}
-    [[nodiscard]] std::optional<Value> value() const override {return value_;}
-    [[nodiscard]] std::optional<Value> maximum_value() const override;
-    [[nodiscard]] std::optional<Value> minimum_value() const override {return maximum_value();}
+    IntegerEncoding(Type type, size_t size, std::optional<uint64_t> byte_order = {}): type(type), size(size), explicit_byte_order(byte_order) {}
 
-protected:
-    [[nodiscard]] std::optional<Expression> evaluated(const EvaluationContext& context) const override {return {};}
+    IntegerEncoding(const Value);
 
-    void serialize_sub(std::ostream& stream) const override;
+    [[nodiscard]] size_t byte_size() const {return size;}
+    void encode(std::string& bytes, const Value& value) const;
+    [[nodiscard]] bool fits(const Value& value) const;
+    [[nodiscard]] bool is_natural_encoding(const Value& value) const;
+    void serialize(std::ostream& stream) const;
+
+    std::optional<Value> maximum_value() const;
+    std::optional<Value> minimum_value() const;
+
+    bool operator==(const IntegerEncoding& other) const;
+    bool operator!=(const IntegerEncoding& other) const {return !(*this == other);}
+
+    static uint64_t default_byte_order;
 
 private:
-    Value value_;
+    Type type;
+    size_t size;
+    std::optional<uint64_t> explicit_byte_order;
+
+    [[nodiscard]] uint64_t byte_order() const {return explicit_byte_order.value_or(default_byte_order);}
 };
 
-#endif // VALUE_EXPRESSION_H
+std::ostream& operator<<(std::ostream& stream, const IntegerEncoding& encoding);
+
+#endif // INTEGER_ENCODING_H

@@ -70,6 +70,7 @@ void Assembler::initialize() {
 std::shared_ptr<ObjectFile> Assembler::parse(Symbol file_name) {
     initialize();
     if (target) {
+        Target::set_current_target(target);
         target->cpu->setup(tokenizer);
     }
     ExpressionParser::setup(tokenizer);
@@ -118,6 +119,8 @@ std::shared_ptr<ObjectFile> Assembler::parse(Symbol file_name) {
     }
 
     object_file->evaluate();
+
+    Target::clear_current_target();
 
     return object_file;
 }

@@ -1,9 +1,12 @@
+#ifndef ENCODING_H
+#define ENCODING_H
+
 /*
-Encoding.h -- 
+Encoding.h --
 
 Copyright (C) Dieter Baron
 
-The authors can be contacted at <assembler@tpau.group>
+The authors can be contacted at <accelerate@tpau.group>
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions
@@ -29,44 +32,33 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef ENCODING_H
-#define ENCODING_H
+#include <variant>
 
-#include <string>
-
-#include "BaseExpression.h"
-#include "Value.h"
+#include "IntegerEncoding.h"
+#include "StringEncoding.h"
 
 class Encoding {
-public:
-    enum Type {
-        SIGNED,
-        UNSIGNED
-    };
+  public:
+    explicit Encoding(IntegerEncoding encoding): encoding{encoding} {}
+    explicit Encoding(const StringEncoding* encoding): encoding{encoding} {}
+    explicit Encoding(const Value& value);
+    explicit Encoding(Tokenizer& tokenizer);
 
-    Encoding(Type type, size_t size, std::optional<uint64_t> byte_order = {}): type(type), size(size), explicit_byte_order(byte_order) {}
-    Encoding(const Value);
+    [[nodiscard]] const IntegerEncoding& as_integer_encoding() const {return std::get<IntegerEncoding>(encoding);}
+    [[nodiscard]] const StringEncoding* as_string_encoding() const {return std::get<const StringEncoding*>(encoding);}
+    [[nodiscard]] bool is_integer_encoding() const {return std::holds_alternative<IntegerEncoding>(encoding);}
+    [[nodiscard]] bool is_string_encoding() const {return std::holds_alternative<const StringEncoding*>(encoding);}
+    [[nodiscard]] bool operator==(const Encoding& other) const;
+    [[nodiscard]] bool operator==(const IntegerEncoding& other) const {return is_integer_encoding() && as_integer_encoding() == other;}
 
-    [[nodiscard]] size_t byte_size() const {return size;}
     void encode(std::string& bytes, const Value& value) const;
+    [[nodiscard]] size_t encoded_size(const Value& value) const;
     [[nodiscard]] bool fits(const Value& value) const;
     [[nodiscard]] bool is_natural_encoding(const Value& value) const;
     void serialize(std::ostream& stream) const;
 
-    std::optional<Value> maximum_value() const;
-    std::optional<Value> minimum_value() const;
-
-    bool operator==(const Encoding& other) const;
-    bool operator!=(const Encoding& other) const {return !(*this == other);}
-
-    static uint64_t default_byte_order;
-
-private:
-    Type type;
-    size_t size;
-    std::optional<uint64_t> explicit_byte_order;
-
-    [[nodiscard]] uint64_t byte_order() const {return explicit_byte_order.value_or(default_byte_order);}
+  private:
+    std::variant<IntegerEncoding,const StringEncoding*> encoding;
 };
 
 std::ostream& operator<<(std::ostream& stream, const Encoding& encoding);
