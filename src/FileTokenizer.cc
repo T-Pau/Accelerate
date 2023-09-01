@@ -181,8 +181,8 @@ Token FileTokenizer::parse_number(unsigned int base, Location location) {
             }
             continue;
         }
+        // TODO: exponent
         int digit = convert_digit(c);
-        // TODO: real numbers
         if (digit < 0 || digit >= base) {
             current_source->unget();
             if (in_fraction) {
@@ -206,7 +206,7 @@ Token FileTokenizer::parse_number(unsigned int base, Location location) {
             floating += double(digit) / double(size);
         }
         else {
-         size += 1;
+            size += 1;
             integer = integer * base + digit;
         }
     }
