@@ -1,4 +1,10 @@
 description Hello World on C64
-arguments --target c64-basic hello-world-c64.s cbm.lib
+arguments --target c64-basic --symbol-map hello-world-c64.sym hello-world-c64.s cbm.lib
 file hello-world-c64.s ../examples/hello-world-c64.s
-file hello-world-c64.prg {} {}
+file cbm.lib ../share/lib/cbm.lib
+file hello-world-c64.prg {} hello-world-c64.prg
+file hello-world-c64.sym {} <inline>
+object	$fb	$0002	ptr	zero_page	reserve
+object	$80e	$0015	start	code	data
+object	$823	$000f	message	data	data
+end-of-inline-data
