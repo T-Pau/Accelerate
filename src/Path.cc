@@ -41,14 +41,14 @@ Symbol Path::find(Symbol name, Symbol base) const {
         for (const auto &directory: directories) {
             auto file = directory / path;
             if (std::filesystem::exists(file)) {
-                return Symbol(file.lexically_normal());
+                return Symbol(file.lexically_normal().string());
             }
         }
 
         if (!base.empty()) {
             auto file = std::filesystem::path(base.str()).parent_path() / path;
             if (std::filesystem::exists(file)) {
-                return Symbol(file.lexically_normal());
+                return Symbol(file.lexically_normal().string());
             }
         }
     }
