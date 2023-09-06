@@ -287,7 +287,7 @@ bool Commandline::Option::operator<(const Option &other) const {
             return compare_char(name[0], other.short_name.value()) < 0;
         }
         else {
-            return strcasecmp(name.c_str(), other.name.c_str()) < 0;
+            return std::lexicographical_compare(name.begin(), name.end(), other.name.begin(), other.name.end());
         }
     }
 }
