@@ -35,6 +35,8 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Target.h"
 #include "ValueExpression.h"
 
+const Token ExpressionParser::token_string = Token{Token::NAME, "string"};
+
 std::unordered_map<Token, ExpressionParser::BinaryOperator> ExpressionParser::binary_operators;
 
 std::unordered_map<Token, Expression::UnaryOperation> ExpressionParser::unary_operators;
@@ -409,6 +411,9 @@ std::optional<Encoding> ExpressionParser::parse_encoding() {
     else if (token.is_name()) {
         if (!name_allowed) {
             throw ParseException(token, "expected integer");
+        }
+        if (token == token_string) {
+            return Encoding{Target::current_target->default_string_encoding};
         }
         auto string_encoding = Target::current_target->string_encoding(token.as_symbol());
         if (!string_encoding) {

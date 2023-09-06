@@ -33,7 +33,7 @@
     .if start < 10000
       .data " "
     .end
-    .data start:petscii, 0 ; start
+    .data start:string, 0 ; start
     .data $0000 ; end BASIC of program
     .memory $080e, .data_end
 }

@@ -118,6 +118,8 @@ private:
     Element top = Element(Location(), START);
     std::vector<Element> stack;
 
+    static const Token token_string;
+
     static std::unordered_map<Token, BinaryOperator> binary_operators;
     static std::unordered_map<Token, Expression::UnaryOperation> unary_operators;
 };
