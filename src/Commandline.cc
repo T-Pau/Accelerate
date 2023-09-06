@@ -37,7 +37,6 @@
 #include <cctype>
 #include <sstream>
 #include <iostream>
-#include <strings.h>
 #include <unordered_map>
 #include <utility>
 
