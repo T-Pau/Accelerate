@@ -1,7 +1,3 @@
-if(NOT HAVE_GETOPT_LONG)
-    list(APPEND COMPATIBILITY getopt_long.cc)
-endif()
-
 add_library(xlr8-library STATIC
         Address.cc
         AddressingMode.cc
@@ -85,8 +81,7 @@ add_library(xlr8-library STATIC
         VariableEntity.cc
         VariableExpression.cc
         Visibility.cc
-        VoidExpression.cc
-        ${COMPATIBILITY})
+        VoidExpression.cc)
 
 target_include_directories(xlr8-library PRIVATE ${PROJECT_BINARY_DIR})
 
