@@ -35,7 +35,6 @@
 
 #include <algorithm>
 #include <cctype>
-#include <ranges>
 #include <sstream>
 #include <iostream>
 #include <unordered_map>
@@ -167,7 +166,9 @@ std::optional<std::string> ParsedCommandline::find_first(const std::string &name
 }
 
 [[maybe_unused]] std::optional<std::string> ParsedCommandline::find_last(const std::string &name) const {
-    for (const auto & option : std::ranges::reverse_view(options)) {
+    for (auto it = options.rbegin(); it != options.rend(); it++) {
+        const auto &option = *it;
+
         if (option.name == name) {
             return option.argument;
         }
