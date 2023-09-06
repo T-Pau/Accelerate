@@ -100,6 +100,7 @@ public:
     // Unary
     Expression(UnaryOperation operation, const Expression& operand);
     // Value
+    explicit Expression(bool value): Expression(Value(value)) {}
     explicit Expression(uint64_t value): Expression(Value(value)) {}
     explicit Expression(Value value);
     // Variable
