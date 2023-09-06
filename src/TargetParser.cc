@@ -120,7 +120,9 @@ void TargetParser::parse_output() {
         throw ParseException(token, "expected '{'");
     }
 
+    Target::set_current_target(&target);
     target.output = BodyParser(tokenizer, target.cpu).parse();
+    Target::clear_current_target();
 }
 
 
