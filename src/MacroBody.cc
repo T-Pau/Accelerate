@@ -48,22 +48,20 @@ std::optional<Body> MacroBody::evaluated(const EvaluationContext& context) const
         }
     }
 
-    auto macro = context.environment->get_macro(name.as_symbol());
-    if (!macro) {
-        context.result.add_unresolved_macro(name.as_symbol());
-        if (changed) {
-            return Body(name, new_arguments);
+    if (auto macro = context.environment->get_macro(name.as_symbol())) {
+        if (!context.conditional) {
+            return macro->expand(new_arguments);
         }
-        else {
-            return {};
-        }
-    }
-
-    if (context.conditional) {
-        return {};
     }
     else {
-        return macro->expand(new_arguments);
+        context.result.add_unresolved_macro(name.as_symbol());
+    }
+
+    if (changed) {
+        return Body(name, new_arguments);
+    }
+    else {
+        return {};
     }
 }
 
