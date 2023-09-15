@@ -1,0 +1,49 @@
+description Test recursive macro
+arguments --create-library --target 6502 a.s
+
+file a.s <inline>
+.macro multiload address, count {
+    .if count > 0
+        lda address
+        multiload address, count - 1
+    .end
+}
+.section code
+test {
+    multiload $0400, 3
+}
+end-of-inline-data
+
+file a.lib {} <inline>
+.format_version 1.0
+.target "6502"
+.macro multiload {
+    visibility: private
+    arguments: address, count
+    body <
+        .if (count>$00)
+          .if .in_range($00, $ff, address)
+            .data $a5, address:1
+          .else
+            .data $ad, address:2
+          .end
+          multiload address, (count-$01)
+        .end
+    >
+}
+.object test {
+    visibility: private
+    section: code
+    body <
+        .scope
+          .data $ad, $0400
+          .scope
+            .data $ad, $0400
+            .scope
+              .data $ad, $0400
+            .end
+          .end
+        .end
+    >
+}
+end-of-inline-data

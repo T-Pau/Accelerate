@@ -59,7 +59,12 @@ std::optional<Body> MacroBody::evaluated(const EvaluationContext& context) const
         }
     }
 
-    return macro->expand(new_arguments);
+    if (context.conditional) {
+        return {};
+    }
+    else {
+        return macro->expand(new_arguments);
+    }
 }
 
 
