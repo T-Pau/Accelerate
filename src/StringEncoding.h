@@ -85,6 +85,8 @@ class StringEncoding {
     void import_base_range(const StringEncoding* base, uint8_t start, uint8_t end, uint8_t offset);
     void set_name_delimiters(const std::shared_ptr<ParsedValue>& delimiters);
 
+    [[nodiscard]] bool has_named() const {return !named_open.empty();}
+
 #if 0
     [[nodiscard]] static std::u32string decode_utf8(const std::string& string);
     [[nodiscard]] static std::string encode_utf8(const std::u32string& string);

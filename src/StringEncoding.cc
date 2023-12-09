@@ -146,7 +146,7 @@ size_t StringEncoding::encode(std::string* bytes, const std::string& string) con
 
     auto i = size_t{0};
     while (i < codepoints.size()) {
-        if (codepoints.compare(i, named_open.size(), named_open) == 0) {
+        if (has_named() && codepoints.compare(i, named_open.size(), named_open) == 0) {
             auto start = i + named_open.size();
             auto end = codepoints.find(named_close, start);
             if (end == std::u32string::npos) {
