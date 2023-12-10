@@ -1,0 +1,39 @@
+.cpu "65c02"
+
+.include "f256-encodings.inc"
+
+.extension "pgz"
+
+.section zero_page {
+    type: reserve_only
+    address: $10 - $ef
+}
+
+.segment program {
+    address: $0300 - $bfff
+}
+
+.section code {
+    segment: program
+}
+
+.section data {
+    segment: program
+}
+
+.section reserved {
+    type: reserve_only
+    segment: program
+}
+
+.output {
+    ; Signature ("Z")
+    .data "Z"
+
+    ; Segment 1
+    .data $300:3, .data_end - $300:3
+    .memory $300, .data_end
+
+    ; Start address
+    .data start:3, 0:3
+}
