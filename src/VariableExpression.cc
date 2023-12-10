@@ -33,6 +33,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "EvaluationContext.h"
 #include "Object.h"
+#include "ObjectExpression.h"
 #include "ObjectNameExpression.h"
 #include "ParseException.h"
 
@@ -50,6 +51,9 @@ std::optional<Expression> VariableExpression::evaluated(const EvaluationContext&
 
     if (value) {
         auto new_value = *value;
+        if (value->is_object()) {
+            context.result.used_objects.insert(value->as_object()->object);
+        }
         if (!context.shallow()) {
             new_value.evaluate(context.evaluating_variable(symbol));
         }

@@ -58,7 +58,7 @@ public:
     void warning(const Location& location, const char* format, ...) PRINTF_LIKE(3, 4);
     void warning(const Location& location, const std::string& message) {output(WARNING, location, message);}
     void error(const Location& location, const char* format, ...) PRINTF_LIKE(3, 4);
-    void error(const Location& location, const std::string& message) {output(ERROR, location, message);}
+    void error(const Location& location, const std::string& message) {output(ERROR, location, message); error_flag = true;}
 
     void output(DiagnosticsSeverity severity, const Location& location, const char* format, ...) PRINTF_LIKE(4, 5);
     void output(DiagnosticsSeverity severity, const Location& location, const std::string& message);

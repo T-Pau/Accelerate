@@ -79,6 +79,14 @@ int Command::run(int argc, char *const *argv) {
 
         create_output();
 
+        if (FileReader::global.had_error()) {
+            // TODO: Remove output file if output_file is not set explicitly.
+            if (output_file) {
+                std::filesystem::remove(*output_file);
+            }
+            throw Exception();
+        }
+
         auto depfile = arguments.find_first("depfile");
         if (depfile.has_value()) {
             if (!output_file.has_value()) {
