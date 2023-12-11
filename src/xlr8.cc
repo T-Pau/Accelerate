@@ -156,7 +156,9 @@ void xlr8::process() {
                 if (linker->mode == Linker::COMPILE) {
                     throw Exception("only compiling, library not used");
                 }
+                Target::clear_current_target();
                 linker->add_library(LibraryGetter::global.get(file_name));
+                Target::clear_current_target();
             }
             else {
                 throw Exception("unrecognized file type '%s'", extension.c_str());
