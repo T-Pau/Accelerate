@@ -390,6 +390,10 @@ if ok:
         namespace.enter("kernel_event")
         structures["kernel_event_event_t"].process(0, file)
 
+        namespace.clear()
+        namespace.enter("kernel_time")
+        structures["kernel_time_t"].process(0, file)
+
 if ok:
     os.rename(temp_name, destination)
     sys.exit(0)
