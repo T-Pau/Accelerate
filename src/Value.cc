@@ -1,5 +1,5 @@
 /*
-Value.cc -- 
+Value.cc --
 
 Copyright (C) Dieter Baron
 
@@ -37,21 +37,19 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Exception.h"
 
 
-Value::Value(int64_t value, uint64_t default_size): explicit_default_size(default_size) {
-    if (value < 0) {
-        type_ = SIGNED;
-        signed_value_ = value;
+Value::Value(int64_t value_, uint64_t default_size): explicit_default_size(default_size) {
+    if (value_ < 0) {
+        value = value_;
     }
     else {
-        type_ = UNSIGNED;
-        unsigned_value_ = static_cast<uint64_t>(value);
+        value = static_cast<uint64_t>(value_);
     }
 }
 
 
 uint64_t Value::unsigned_value() const {
-    if (type() == UNSIGNED) {
-        return unsigned_value_;
+    if (is_unsigned()) {
+        return raw_unsigned_value();
     }
     else {
         throw Exception("can't convert value of type %s to unsigned", type_name().c_str());
@@ -61,6 +59,7 @@ uint64_t Value::unsigned_value() const {
 
 int64_t Value::signed_value() const {
     switch (type()) {
+        case BINARY:
         case BOOLEAN:
         case FLOAT:
         case STRING:
@@ -68,19 +67,19 @@ int64_t Value::signed_value() const {
             throw Exception("can't convert value of type %s to signed", type_name().c_str());
 
         case SIGNED:
-            return signed_value_;
+            return raw_signed_value();
 
         case UNSIGNED:
-            if (unsigned_value_ > std::numeric_limits<int64_t>::max()) {
+            if (raw_unsigned_value() > std::numeric_limits<int64_t>::max()) {
                 throw Exception("can't convert too large value to signed");
             }
-            return static_cast<int64_t>(unsigned_value_);
+            return static_cast<int64_t>(raw_unsigned_value());
     }
 }
 
 Symbol Value::symbol_value() const {
-    if (type() == STRING) {
-        return string_value_;
+    if (is_string()) {
+        return raw_symbol_value();
     }
     else {
         throw Exception("can't convert value of type %s to string", type_name().c_str());
@@ -90,19 +89,20 @@ Symbol Value::symbol_value() const {
 
 double Value::float_value() const {
     switch (type()) {
+        case BINARY:
         case BOOLEAN:
         case STRING:
         case VOID:
             throw Exception("can't convert value of type %s to float", type_name().c_str());
 
         case FLOAT:
-            return float_value_;
+            return raw_float_value();
 
         case SIGNED:
-            return static_cast<double>(signed_value_);
+            return static_cast<double>(raw_signed_value());
 
         case UNSIGNED:
-            return static_cast<double>(unsigned_value_);
+            return static_cast<double>(raw_unsigned_value());
     }
 }
 
@@ -110,28 +110,54 @@ double Value::float_value() const {
 bool Value::boolean_value() const {
     switch (type()) {
         case BOOLEAN:
-            return boolean_value_;
+            return raw_boolean_value();
 
         case FLOAT:
-            return float_value_ != 0.0;
+            return raw_float_value() != 0.0;
 
         case SIGNED:
-            return signed_value_ != 0;
+            return raw_signed_value() != 0;
 
         case STRING:
-            return string_value_;
+            return raw_symbol_value();
 
         case UNSIGNED:
-            return unsigned_value_ != 0;
+            return raw_unsigned_value() != 0;
 
+        case BINARY:
         case VOID:
             throw Exception("can't convert value of type %s to boolean", type_name().c_str());
     }
 }
 
+Value::Type Value::type() const {
+    if (is_binary()) {
+        return BINARY;
+    }
+    else if (is_boolean()) {
+        return BOOLEAN;
+    }
+    else if (is_float()) {
+        return FLOAT;
+    }
+    else if (is_signed()) {
+        return SIGNED;
+    }
+    else if (is_string()) {
+        return STRING;
+    }
+    else if (is_unsigned()) {
+        return UNSIGNED;
+    }
+    else {
+        return VOID;
+    }
+}
 
 std::string Value::type_name() const {
     switch (type()) {
+        case BINARY:
+            return "binary";
         case BOOLEAN:
             return "boolean";
         case FLOAT:
@@ -147,32 +173,41 @@ std::string Value::type_name() const {
     }
 }
 
+std::string Value::binary_value() const {
+    if (is_binary()) {
+        return raw_binary_value();
+    }
+    else {
+        throw Exception("can't convert value of type %s to binary", type_name().c_str());
+    }
+}
+
 Value Value::operator+(const Value &other) const {
     if (is_float() || other.is_float()) {
         return Value(float_value() + other.float_value());
     }
     else if (is_unsigned() && other.is_unsigned()) {
-        return Value(add_unsigned(unsigned_value_, other.unsigned_value_));
+        return Value(add_unsigned(raw_unsigned_value(), other.raw_unsigned_value()));
     }
     else if (is_signed() && other.is_signed()) {
-        return Value(add_signed(signed_value_, other.signed_value_));
+        return Value(add_signed(raw_signed_value(), other.raw_signed_value()));
     }
     else if (is_signed() && other.is_unsigned()) {
-        auto negated_this = negate_signed(signed_value_);
-        if (negated_this >= other.unsigned_value_) {
-            return Value(other.unsigned_value_ - negated_this);
+        auto negated_this = negate_signed(raw_signed_value());
+        if (negated_this >= other.raw_unsigned_value()) {
+            return Value(other.raw_unsigned_value() - negated_this);
         }
         else {
-            return Value(negate_unsigned(negated_this - other.unsigned_value_));
+            return Value(negate_unsigned(negated_this - other.raw_unsigned_value()));
         }
     }
     else if (is_unsigned() && other.is_signed()) {
-        auto negated_other = negate_signed(other.signed_value_);
-        if (negated_other >= unsigned_value_) {
-            return Value(unsigned_value_ - negated_other);
+        auto negated_other = negate_signed(other.raw_signed_value());
+        if (negated_other >= raw_unsigned_value()) {
+            return Value(raw_unsigned_value() - negated_other);
         }
         else {
-            return Value(negate_unsigned(negated_other - unsigned_value_));
+            return Value(negate_unsigned(negated_other - raw_unsigned_value()));
         }
     }
     else {
@@ -185,21 +220,21 @@ Value Value::operator-(const Value &other) const {
         return Value(float_value() - other.float_value());
     }
     else if (is_unsigned() && other.is_unsigned()) {
-        if (unsigned_value_ >= other.unsigned_value_) {
-            return Value(unsigned_value_ - other.unsigned_value_);
+        if (raw_unsigned_value() >= other.raw_unsigned_value()) {
+            return Value(raw_unsigned_value() - other.raw_unsigned_value());
         }
         else {
-            return Value(negate_unsigned(other.unsigned_value_ - unsigned_value_));
+            return Value(negate_unsigned(other.raw_unsigned_value() - raw_unsigned_value()));
         }
     }
     else if (is_signed() && other.is_signed()) {
-        return Value(signed_value_ - other.signed_value_);
+        return Value(raw_signed_value() - other.raw_signed_value());
     }
     else if (is_signed() && other.is_unsigned()) {
-        return Value(add_signed(signed_value_, negate_unsigned(other.unsigned_value_)));
+        return Value(add_signed(raw_signed_value(), negate_unsigned(other.raw_unsigned_value())));
     }
     else if (is_unsigned() && other.is_signed()) {
-        return Value(add_unsigned(unsigned_value_, negate_signed(other.signed_value_)));
+        return Value(add_unsigned(raw_unsigned_value(), negate_signed(other.raw_signed_value())));
     }
     else {
         throw Exception("can't subtract %s and %s", type_name().c_str(), other.type_name().c_str());
@@ -214,16 +249,16 @@ Value Value::operator/(const Value &other) const {
         return Value(float_value() / other.float_value());
     }
     else if (is_unsigned() && other.is_unsigned()) {
-        return Value(unsigned_value_ / other.unsigned_value_);
+        return Value(raw_unsigned_value() / other.raw_unsigned_value());
     }
     else if (is_signed() && other.is_signed()) {
-        return Value(signed_value_ / other.signed_value_);
+        return Value(raw_signed_value() / other.raw_signed_value());
     }
     else if (is_signed() && other.is_unsigned()) {
-        return Value(negate_unsigned(negate_signed(signed_value_) / other.unsigned_value_));
+        return Value(negate_unsigned(negate_signed(raw_signed_value()) / other.raw_unsigned_value()));
     }
     else if (is_unsigned() && other.is_signed()) {
-        return Value(negate_unsigned(unsigned_value_ / negate_signed(other.signed_value_)));
+        return Value(negate_unsigned(raw_unsigned_value() / negate_signed(other.raw_signed_value())));
     }
     else {
         throw Exception("can't divide %s and %s", type_name().c_str(), other.type_name().c_str());
@@ -236,16 +271,16 @@ Value Value::operator*(const Value &other) const {
         return Value(float_value() * other.float_value());
     }
     else if (is_unsigned() && other.is_unsigned()) {
-        return Value(multiply_unsigned(unsigned_value_, other.unsigned_value_));
+        return Value(multiply_unsigned(raw_unsigned_value(), other.raw_unsigned_value()));
     }
     else if (is_signed() && other.is_signed()) {
-        return Value(multiply_unsigned(negate_signed(signed_value_), negate_signed(other.signed_value_)));
+        return Value(multiply_unsigned(negate_signed(raw_signed_value()), negate_signed(other.raw_signed_value())));
     }
     else if (is_signed() && other.is_unsigned()) {
-        return Value(negate_unsigned(multiply_unsigned(negate_signed(signed_value_), other.unsigned_value_)));
+        return Value(negate_unsigned(multiply_unsigned(negate_signed(raw_signed_value()), other.raw_unsigned_value())));
     }
     else if (is_unsigned() && other.is_signed()) {
-        return Value(negate_unsigned(multiply_unsigned(unsigned_value_, negate_signed(other.signed_value_))));
+        return Value(negate_unsigned(multiply_unsigned(raw_unsigned_value(), negate_signed(other.raw_signed_value()))));
     }
     else {
         throw Exception("can't multiply %s and %s", type_name().c_str(), other.type_name().c_str());
@@ -296,7 +331,7 @@ uint64_t Value::multiply_unsigned(uint64_t a, uint64_t b) {
 
 Value Value::operator|(const Value &other) const {
     if (is_unsigned() && other.is_unsigned()) {
-        return Value(unsigned_value_ | other.unsigned_value_);
+        return Value(raw_unsigned_value() | other.raw_unsigned_value());
     }
     else {
         throw Exception("can't bitwise or %s and %s", type_name().c_str(), other.type_name().c_str());
@@ -306,7 +341,7 @@ Value Value::operator|(const Value &other) const {
 
 Value Value::operator&(const Value &other) const {
     if (is_unsigned() && other.is_unsigned()) {
-        return Value(unsigned_value_ & other.unsigned_value_);
+        return Value(raw_unsigned_value() & other.raw_unsigned_value());
     }
     else {
         throw Exception("can't bitwise and %s and %s", type_name().c_str(), other.type_name().c_str());
@@ -316,7 +351,7 @@ Value Value::operator&(const Value &other) const {
 
 Value Value::operator^(const Value &other) const {
     if (is_unsigned() && other.is_unsigned()) {
-        return Value(unsigned_value_ ^ other.unsigned_value_);
+        return Value(raw_unsigned_value() ^ other.raw_unsigned_value());
     }
     else {
         throw Exception("can't bitwise exclusive or %s and %s", type_name().c_str(), other.type_name().c_str());
@@ -333,21 +368,21 @@ Value Value::operator||(const Value &other) const {
 
 Value Value::operator>>(const Value &other) const {
     if (is_unsigned() && other.is_unsigned()) {
-        return Value(unsigned_value_ >> other.unsigned_value_);
+        return Value(raw_unsigned_value() >> other.raw_unsigned_value());
     }
     else if (is_signed() && other.is_unsigned()) {
-        if (other.unsigned_value_ > std::numeric_limits<int64_t>::max()) {
+        if (other.raw_unsigned_value() > std::numeric_limits<int64_t>::max()) {
             return Value(static_cast<uint64_t>(0));
         }
         else {
-            return Value(signed_value_ >> static_cast<int64_t>(other.unsigned_value_));
+            return Value(raw_signed_value() >> static_cast<int64_t>(other.raw_unsigned_value()));
         }
     }
     else if (is_unsigned() && other.is_signed()) {
-        return Value(shift_left_unsigned(unsigned_value_, negate_signed(other.signed_value_)));
+        return Value(shift_left_unsigned(raw_unsigned_value(), negate_signed(other.raw_signed_value())));
     }
     else if (is_signed() && other.is_signed()) {
-        return Value(shift_left_signed(signed_value_, negate_signed(other.signed_value_)));
+        return Value(shift_left_signed(raw_signed_value(), negate_signed(other.raw_signed_value())));
     }
     else {
         throw Exception("can't shift %s and %s", type_name().c_str(), other.type_name().c_str());
@@ -371,21 +406,21 @@ int64_t Value::shift_left_signed(int64_t a, uint64_t b) {
 
 Value Value::operator<<(const Value &other) const {
     if (is_unsigned() && other.is_unsigned()) {
-        return Value(shift_left_unsigned(unsigned_value_, other.unsigned_value_));
+        return Value(shift_left_unsigned(raw_unsigned_value(), other.raw_unsigned_value()));
     }
     else if (is_signed() && other.is_unsigned()) {
-        if (other.unsigned_value_ > std::numeric_limits<int64_t>::max()) {
+        if (other.raw_unsigned_value() > std::numeric_limits<int64_t>::max()) {
             throw Exception("integer overflow");
         }
         else {
-            return Value(shift_left_signed(signed_value_, static_cast<int64_t>(other.unsigned_value_)));
+            return Value(shift_left_signed(raw_signed_value(), static_cast<int64_t>(other.raw_unsigned_value())));
         }
     }
     else if (is_unsigned() && other.is_signed()) {
-        return Value(unsigned_value_ >> negate_signed(other.signed_value_));
+        return Value(raw_unsigned_value() >> negate_signed(other.raw_signed_value()));
     }
     else if (is_signed() && other.is_signed()) {
-        return Value(signed_value_ >> negate_signed(other.signed_value_));
+        return Value(raw_signed_value() >> negate_signed(other.raw_signed_value()));
     }
     else {
         throw Exception("can't shift %s and %s", type_name().c_str(), other.type_name().c_str());
@@ -394,20 +429,23 @@ Value Value::operator<<(const Value &other) const {
 
 bool Value::operator==(const Value &other) const {
     switch (type()) {
+        case BINARY:
+            return other.is_binary() && raw_binary_value() == other.raw_binary_value();
+
         case BOOLEAN:
-            return other.is_boolean() && boolean_value_ == other.boolean_value_;
+            return other.is_boolean() && raw_boolean_value() == other.raw_boolean_value();
 
         case FLOAT:
-            return other.is_number() && float_value_ == other.float_value();
+            return other.is_number() && raw_float_value() == other.float_value();
 
         case SIGNED:
-            return other.is_signed() && signed_value_ == other.signed_value_;
+            return other.is_signed() && raw_signed_value() == other.raw_signed_value();
 
         case STRING:
-            return other.is_string() && string_value_ == other.string_value_;
+            return other.is_string() && raw_symbol_value() == other.raw_symbol_value();
 
         case UNSIGNED:
-            return other.is_unsigned() && unsigned_value_ == other.unsigned_value_;
+            return other.is_unsigned() && raw_unsigned_value() == other.raw_unsigned_value();
 
         case VOID:
             return other.is_void();
@@ -416,48 +454,50 @@ bool Value::operator==(const Value &other) const {
 
 bool Value::operator<(const Value &other) const {
     switch (type()) {
+        case BINARY:
         case BOOLEAN:
         case VOID:
             return false;
 
         case FLOAT:
-            return other.is_number() && float_value_ < other.float_value();
+            return other.is_number() && raw_float_value() < other.float_value();
 
         case SIGNED:
-            return (other.is_signed() && signed_value_ < other.signed_value_) || other.is_unsigned();
+            return (other.is_signed() && raw_signed_value() < other.raw_signed_value()) || other.is_unsigned();
 
         case STRING:
-            return other.is_string() && string_value_ < other.string_value_;
+            return other.is_string() && raw_symbol_value() < other.raw_symbol_value();
 
         case UNSIGNED:
-            return other.is_unsigned() && unsigned_value_ < other.unsigned_value_;
+            return other.is_unsigned() && raw_unsigned_value() < other.raw_unsigned_value();
     }
 }
 
 
 bool Value::operator<=(const Value &other) const {
     switch (type()) {
+        case BINARY:
         case BOOLEAN:
         case VOID:
             return false;
 
         case FLOAT:
-            return other.is_number() && float_value_ <= other.float_value();
+            return other.is_number() && raw_float_value() <= other.float_value();
 
         case SIGNED:
-            return (other.is_signed() && signed_value_ <= other.signed_value_) || other.is_unsigned();
+            return (other.is_signed() && raw_signed_value() <= other.raw_signed_value()) || other.is_unsigned();
 
         case STRING:
-            return other.is_string() && string_value_ <= other.string_value_;
+            return other.is_string() && raw_symbol_value() <= other.raw_symbol_value();
 
         case UNSIGNED:
-            return other.is_unsigned() && unsigned_value_ <= other.unsigned_value_;
+            return other.is_unsigned() && raw_unsigned_value() <= other.raw_unsigned_value();
     }
 }
 
 Value Value::operator%(const Value &other) const {
     if (is_unsigned() && other.is_unsigned()) {
-        return Value(unsigned_value_ % other.unsigned_value_);
+        return Value(raw_unsigned_value() % other.raw_unsigned_value());
     }
     // TODO: signed
     else {
@@ -469,19 +509,19 @@ Value Value::operator%(const Value &other) const {
     type_ = other.type();
     switch (other.type()) {
         case BOOLEAN:
-            boolean_value_ = other.boolean_value_;
+            raw_boolean_value() = other.raw_boolean_value();
             break;
 
         case FLOAT:
-            float_value_ = other.float_value_;
+            raw_float_value() = std::get<double>(other.value);
             break;
 
         case SIGNED:
-            signed_value_ = other.signed_value_;
+            raw_signed_value() = other.raw_signed_value();
             break;
 
         case UNSIGNED:
-            unsigned_value_ = other.unsigned_value_;
+            raw_unsigned_value() = other.raw_unsigned_value();
             break;
 
         case VOID:
@@ -493,24 +533,26 @@ Value Value::operator%(const Value &other) const {
 
 Value Value::operator-() const {
     switch (type()) {
+        case BINARY:
         case BOOLEAN:
         case STRING:
         case VOID:
             throw Exception("can't negate %s", type_name().c_str());
 
         case FLOAT:
-            return Value(-float_value_);
+            return Value(-raw_float_value());
 
         case SIGNED:
-            return Value(negate_signed(signed_value_));
+            return Value(negate_signed(raw_signed_value()));
 
         case UNSIGNED:
-            return Value(negate_unsigned(unsigned_value_));
+            return Value(negate_unsigned(raw_unsigned_value()));
     }
 }
 
 Value Value::operator~() const {
     switch (type()) {
+        case BINARY: // TODO: implement
         case BOOLEAN:
         case FLOAT:
         case STRING:
@@ -518,10 +560,10 @@ Value Value::operator~() const {
             throw Exception("can't bitwise negate %s", type_name().c_str());
 
         case SIGNED:
-            return Value(~signed_value_);
+            return Value(~raw_signed_value());
 
         case UNSIGNED:
-            return Value(~unsigned_value_);
+            return Value(~raw_unsigned_value());
     }
 }
 
@@ -529,6 +571,10 @@ uint64_t Value::default_size() const {
     uint64_t implicit_default_size;
 
     switch (type()) {
+        case BINARY:
+            implicit_default_size = raw_binary_value().size();
+            break;
+
         case BOOLEAN:
         case VOID:
         case STRING: // TODO: unknown default size
@@ -537,11 +583,11 @@ uint64_t Value::default_size() const {
             break;
 
         case SIGNED:
-            implicit_default_size = Int::minimum_byte_size(signed_value_);
+            implicit_default_size = Int::minimum_byte_size(raw_signed_value());
             break;
 
         case UNSIGNED:
-            implicit_default_size = Int::minimum_byte_size(unsigned_value_);
+            implicit_default_size = Int::minimum_byte_size(raw_unsigned_value());
             break;
     }
 
@@ -549,7 +595,7 @@ uint64_t Value::default_size() const {
 }
 
 
-std::optional<Value> operator+(const std::optional<Value> a, const std::optional<Value> b) {
+std::optional<Value> operator+(const std::optional<Value>& a, const std::optional<Value>& b) {
     if (a.has_value() && b.has_value()) {
         return *a + *b;
     }
@@ -559,7 +605,7 @@ std::optional<Value> operator+(const std::optional<Value> a, const std::optional
 }
 
 
-std::optional<Value> operator-(const std::optional<Value> a, const std::optional<Value> b) {
+std::optional<Value> operator-(const std::optional<Value>& a, const std::optional<Value>& b) {
     if (a.has_value() && b.has_value()) {
         return *a - *b;
     }
@@ -569,7 +615,7 @@ std::optional<Value> operator-(const std::optional<Value> a, const std::optional
 }
 
 
-std::optional<Value> operator*(const std::optional<Value> a, const std::optional<Value> b) {
+std::optional<Value> operator*(const std::optional<Value>& a, const std::optional<Value>& b) {
     if (a.has_value() && b.has_value()) {
         return *a * *b;
     }
@@ -579,7 +625,7 @@ std::optional<Value> operator*(const std::optional<Value> a, const std::optional
 }
 
 
-std::optional<Value> operator/(const std::optional<Value> a, const std::optional<Value> b) {
+std::optional<Value> operator/(const std::optional<Value>& a, const std::optional<Value>& b) {
     if (a.has_value() && b.has_value()) {
         return *a / *b;
     }
@@ -588,7 +634,7 @@ std::optional<Value> operator/(const std::optional<Value> a, const std::optional
     }
 }
 
-std::optional<Value> operator&&(const std::optional<Value> a, const std::optional<Value> b) {
+std::optional<Value> operator&&(const std::optional<Value>& a, const std::optional<Value>& b) {
     if (a.has_value() && b.has_value()) {
         return *a && *b;
     }
@@ -597,7 +643,7 @@ std::optional<Value> operator&&(const std::optional<Value> a, const std::optiona
     }
 }
 
-std::optional<Value> operator||(const std::optional<Value> a, const std::optional<Value> b) {
+std::optional<Value> operator||(const std::optional<Value>& a, const std::optional<Value>& b) {
     if (a.has_value() && b.has_value()) {
         return *a || *b;
     }
@@ -607,28 +653,28 @@ std::optional<Value> operator||(const std::optional<Value> a, const std::optiona
 }
 
 
-bool operator>(const std::optional<Value> a, const std::optional<Value> b) {
+bool operator>(const std::optional<Value>& a, const std::optional<Value>& b) {
     if (!a.has_value() || !b.has_value()) {
         return false;
     }
     return *a > *b;
 }
 
-bool operator<(const std::optional<Value> a, const std::optional<Value> b) {
+bool operator<(const std::optional<Value>& a, const std::optional<Value>& b) {
     if (!a.has_value() || !b.has_value()) {
         return false;
     }
     return *a < *b;
 }
 
-bool operator>=(const std::optional<Value> a, const std::optional<Value> b) {
+bool operator>=(const std::optional<Value>& a, const std::optional<Value>& b) {
     if (!a.has_value() || !b.has_value()) {
         return false;
     }
     return *a >= *b;
 }
 
-bool operator<=(const std::optional<Value> a, const std::optional<Value> b) {
+bool operator<=(const std::optional<Value>& a, const std::optional<Value>& b) {
     if (!a.has_value() || !b.has_value()) {
         return false;
     }
@@ -637,20 +683,21 @@ bool operator<=(const std::optional<Value> a, const std::optional<Value> b) {
 
 std::string Value::string_value() const {
     switch (type()) {
+        case BINARY:
         case BOOLEAN:
         case VOID:
             throw Exception("can't convert %s to string", type_name().c_str());
 
         case FLOAT:
-            return std::to_string(float_value_);
+            return std::to_string(raw_float_value());
 
         case SIGNED:
-            return std::to_string(signed_value_);
+            return std::to_string(raw_signed_value());
 
         case STRING:
-            return string_value_.str();
+            return raw_symbol_value().str();
 
         case UNSIGNED:
-            return std::to_string(unsigned_value_);
+            return std::to_string(raw_unsigned_value());
     }
 }

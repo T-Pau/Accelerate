@@ -35,11 +35,12 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <iostream>
 #include <string>
 #include <unordered_map>
+#include <unordered_set>
 #include <vector>
 
 #include "Location.h"
-#include "printf_like.h"
 #include "Symbol.h"
+#include "printf_like.h"
 
 class FileReader {
 public:
@@ -50,6 +51,7 @@ public:
     };
 
     const std::vector<std::string>& read(Symbol file_name, bool optional = false);
+    std::string read_binary(Symbol file_name);
 
     [[nodiscard]] const std::string& get_line(Symbol file, size_t line_number) const;
 
@@ -74,6 +76,7 @@ private:
 
     static std::vector<std::string> empty_file;
 
+    std::unordered_set<Symbol> binary_files;
     std::unordered_map<Symbol,std::vector<std::string>> files;
     bool error_flag = false;
     std::ostream& diagnostics_file = std::cerr;

@@ -54,7 +54,7 @@ public:
     // OUTPUT
     BodyParser(Tokenizer& tokenizer, const CPU* cpu): parsing_type(OUTPUT), cpu(cpu), tokenizer(tokenizer) {}
     // ENTITY
-    BodyParser(Tokenizer& tokenizer, Entity* entity, const CPU* cpu): parsing_type(ENTITY), cpu(cpu), entity(entity), environment(entity->environment), tokenizer(tokenizer) {}
+    BodyParser(Tokenizer& tokenizer, Entity* entity, const CPU* cpu, const std::unordered_set<Symbol>* defines): parsing_type(ENTITY), cpu(cpu), entity(entity), environment(entity->environment), tokenizer(tokenizer), defines(defines) {}
 
     static void setup(FileTokenizer& tokenizer);
 
@@ -115,6 +115,7 @@ private:
     Token end_token = Token::curly_close;
     Entity* entity = nullptr;
     Tokenizer& tokenizer;
+    const std::unordered_set<Symbol>* defines{};
 
     uint64_t next_label = 0;
     Body body;
@@ -124,6 +125,7 @@ private:
 
     [[nodiscard]] bool allow_memory() const {return parsing_type == OUTPUT;}
     [[nodiscard]] bool allow_instructions() const {return cpu != nullptr;}
+    [[nodiscard]] bool is_defined(Symbol symbol) const {return defines && defines->contains(symbol);}
     void parse_assignment(Visibility visibility, const Token& name);
     void parse_directive(const Token& directive);
     void parse_instruction(const Token& name);
@@ -133,7 +135,7 @@ private:
 
     void add_constant(Visibility visibility, Token name, const Expression& value);
     [[nodiscard]] SizeRange current_size();
-    Body* get_body(const NestingIndex& nesting_index) {return (*nesting[nesting_index.nesting_index])[nesting_index.sub_index];}
+    [[nodiscard]] Body* get_body(const NestingIndex& nesting_index) const {return (*nesting[nesting_index.nesting_index])[nesting_index.sub_index];}
     [[nodiscard]] Expression get_pc(Symbol label) const;
     [[nodiscard]] Symbol get_label(bool& is_anonymous);
     [[nodiscard]] Symbol entity_name() const {return entity ? entity->name.as_symbol() : Symbol();};
@@ -142,6 +144,7 @@ private:
     void pop_body();
 
     void handle_name(Visibility visibility, Token name);
+    void parse_binary_file();
     void parse_data();
     void parse_error();
     void parse_else();
@@ -152,6 +155,7 @@ private:
     void parse_scope();
 
     static const Symbol symbol_pc;
+    static const Token token_binary_file;
     static const Token token_data;
     static const Token token_else;
     static const Token token_else_if;

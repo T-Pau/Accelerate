@@ -36,11 +36,10 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Target.h"
 #include "FileTokenizer.h"
 #include "Object.h"
-#include "LabelBody.h"
 
 class Assembler {
 public:
-    explicit Assembler(const Target* target): target(target) {}
+    explicit Assembler(const Target* target, const std::unordered_map<Symbol, bool>& defines_overrides);
 
     std::shared_ptr<ObjectFile> parse(Symbol file_name);
 
@@ -54,8 +53,11 @@ private:
     void parse_section();
     void parse_symbol(Visibility visibility, const Token& name);
     void parse_target();
+    void set_target(const Target* new_target);
 
-    const Target* target;
+    const Target* target{};
+    const std::unordered_map<Symbol, bool>& defines_overrides;
+    std::unordered_set<Symbol> defines;
 
     Symbol current_section;
     Visibility current_visibility = Visibility::PRIVATE;

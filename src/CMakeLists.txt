@@ -5,7 +5,9 @@ add_library(xlr8-library STATIC
         ArgumentType.cc
         Assembler.cc
         AssignmentBody.cc
+        Base64.cc
         BaseExpression.cc
+        BinaryEncoding.cc
         BinaryExpression.cc
         BlockBody.cc
         Body.cc

@@ -31,6 +31,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "ValueExpression.h"
 
+#include "Base64.h"
 #include "ParseException.h"
 
 ValueExpression::ValueExpression(const Token &token) {
@@ -48,6 +49,15 @@ ValueExpression::ValueExpression(const Token &token) {
 
 void ValueExpression::serialize_sub(std::ostream &stream) const {
     switch (value()->type()) {
+        case Value::BINARY: {
+            stream << "{{";
+            auto encoder = Base64StreamEncoder(stream, 72);
+            encoder.encode(value()->binary_value());
+            encoder.end();
+            stream << "}}";
+            break;
+        }
+
         case Value::BOOLEAN:
             stream << (value()->boolean_value() ? "true" : "false");
             break;

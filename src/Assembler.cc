@@ -31,14 +31,10 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "Assembler.h"
 
-#include <memory>
-
 #include "BodyParser.h"
 #include "ParseException.h"
 #include "FileReader.h"
-#include "TokenNode.h"
 #include "ExpressionParser.h"
-#include "VariableExpression.h"
 #include "LabelBody.h"
 
 bool Assembler::initialized = false;
@@ -65,6 +61,10 @@ void Assembler::initialize() {
 
         initialized = true;
     }
+}
+
+Assembler::Assembler(const Target* target, const std::unordered_map<Symbol, bool>& defines_overrides): defines_overrides(defines_overrides) {
+    set_target(target);
 }
 
 std::shared_ptr<ObjectFile> Assembler::parse(Symbol file_name) {
@@ -158,7 +158,7 @@ void Assembler::parse_symbol(Visibility visibility, const Token &name) {
         }
         else if (token == Token::curly_open) {
             // TODO: error if .reserved
-            object->body = BodyParser(tokenizer, object, target->cpu).parse();
+            object->body = BodyParser(tokenizer, object, target->cpu, &defines).parse();
             break;
         }
         // TODO: parameters
@@ -248,6 +248,26 @@ void Assembler::parse_target() {
     }
 }
 
+void Assembler::set_target(const Target* new_target) {
+    if (target) {
+        // TODO: check that target and new_target are compatible
+    }
+    target = new_target;
+    if (target) {
+        defines = target->defines;
+    }
+    else {
+        defines.clear();
+    }
+    for (const auto& pair: defines_overrides) {
+        if (pair.second) {
+            defines.insert(pair.first);
+        }
+        else {
+            defines.erase(pair.first);
+        }
+    }
+}
 
 void Assembler::parse_name(Visibility visibility, const Token& name) {
     auto token = tokenizer.next();

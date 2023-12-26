@@ -31,8 +31,6 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "BodyParser.h"
 
-#include <utility>
-
 #include "ParseException.h"
 #include "FileReader.h"
 #include "ExpressionParser.h"
@@ -40,10 +38,10 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ExpressionNode.h"
 #include "InstructionEncoder.h"
 #include "TokenNode.h"
-#include "MemoryBody.h"
 #include "ObjectNameExpression.h"
 
 const Symbol BodyParser::symbol_pc = Symbol(".pc");
+const Token BodyParser::token_binary_file = Token(Token::DIRECTIVE, "binary_file");
 const Token BodyParser::token_data = Token(Token::DIRECTIVE, "data");
 const Token BodyParser::token_else = Token(Token::DIRECTIVE, "else");
 const Token BodyParser::token_else_if = Token(Token::DIRECTIVE, "else_if");
@@ -54,6 +52,7 @@ const Token BodyParser::token_memory = Token(Token::DIRECTIVE, "memory");
 const Token BodyParser::token_scope = Token(Token::DIRECTIVE, "scope");
 
 const std::unordered_map<Symbol, void (BodyParser::*)()> BodyParser::directive_parser_methods = {
+        {token_binary_file.as_symbol(), &BodyParser::parse_binary_file},
         {token_data.as_symbol(), &BodyParser::parse_data},
         {token_else.as_symbol(), &BodyParser::parse_else},
         {token_else_if.as_symbol(), &BodyParser::parse_else_if},
@@ -484,4 +483,17 @@ void BodyParser::handle_name(Visibility visibility, Token name) {
         }
         current_body->append(Body(name, arguments));
     }
+}
+
+void BodyParser::parse_binary_file() {
+    auto filename = tokenizer.expect(Token::STRING, TokenGroup::newline);
+
+    auto file_tokenizer = dynamic_cast<FileTokenizer*>(&tokenizer);
+    if (!file_tokenizer) {
+        throw ParseException(filename.location, "including from non-file source");
+    }
+
+    auto data = FileReader::global.read_binary(file_tokenizer->find_file(filename.as_symbol()));
+    auto elements = std::vector<DataBodyElement>{DataBodyElement{Expression{Value{data}}, {}}};
+    current_body->append(Body(elements));
 }

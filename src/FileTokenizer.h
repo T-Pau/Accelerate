@@ -96,8 +96,9 @@ private:
 
     Token next_raw();
 
-    Token parse_number(unsigned int base, Location location);
+    Token parse_base64(Location location);
     Token parse_name(Token::Type type, Location location);
+    Token parse_number(unsigned int base, Location location);
     Token parse_string(Location location);
 
     void preprocess(const std::vector<Token>& tokens);

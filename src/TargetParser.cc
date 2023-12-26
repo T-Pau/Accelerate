@@ -48,6 +48,7 @@ const Token TargetParser::token_data_end = Token(Token::NAME, ".data_end");
 const Token TargetParser::token_data_size = Token(Token::NAME, ".data_size");
 const Token TargetParser::token_data_start = Token(Token::NAME, ".data_start");
 const Token TargetParser::token_default_string_encoding = Token(Token::DIRECTIVE, "default_string_encoding");
+const Token TargetParser::token_define = Token(Token::DIRECTIVE, "define");
 const Token TargetParser::token_extension = Token(Token::DIRECTIVE, "extension");
 const Token TargetParser::token_memory = Token(Token::DIRECTIVE, "memory");
 const Token TargetParser::token_output = Token(Token::DIRECTIVE, "output");
@@ -59,6 +60,7 @@ const Token TargetParser::token_segment = Token(Token::DIRECTIVE, "segment");
 const Token TargetParser::token_segment_name = Token(Token::NAME, "segment");
 const Token TargetParser::token_string_encoding = Token(Token::DIRECTIVE, "string_encoding");
 const Token TargetParser::token_type = Token(Token::NAME, "type");
+const Token TargetParser::token_undefine = Token(Token::DIRECTIVE, "undefine");
 
 
 TargetParser::TargetParser(): FileParser(TargetGetter::global.path) {
@@ -75,11 +77,13 @@ void TargetParser::initialize() {
     if (!initialized) {
         parser_methods[token_cpu.as_symbol()] = &TargetParser::parse_cpu;
         parser_methods[token_default_string_encoding.as_symbol()] = &TargetParser::parse_default_string_encoding;
+        parser_methods[token_define.as_symbol()] = &TargetParser::parse_define;
         parser_methods[token_extension.as_symbol()] = &TargetParser::parse_extension;
         parser_methods[token_output.as_symbol()] = &TargetParser::parse_output;
         parser_methods[token_section.as_symbol()] = &TargetParser::parse_section;
         parser_methods[token_segment.as_symbol()] = &TargetParser::parse_segment;
         parser_methods[token_string_encoding.as_symbol()] = &TargetParser::parse_string_encoding;
+        parser_methods[token_undefine.as_symbol()] = &TargetParser::parse_undefine;
 
         initialized = true;
     }
@@ -271,6 +275,12 @@ void TargetParser::parse_default_string_encoding() {
     }
 }
 
+void TargetParser::parse_define() {
+    auto token = tokenizer.expect(Token::NAME, TokenGroup::newline);
+
+    target.defines.insert(token.as_symbol());
+}
+
 void TargetParser::parse_string_encoding() {
     auto name = tokenizer.expect(Token::NAME, TokenGroup::newline);
     auto parse_value = ParsedValue::parse(tokenizer);
@@ -278,4 +288,10 @@ void TargetParser::parse_string_encoding() {
         throw ParseException(name, "duplicate string encoding '%s'", name.as_string().c_str());
     }
     target.string_encodings[name.as_symbol()] = StringEncoding(name.as_symbol(), parse_value, target);
+}
+
+void TargetParser::parse_undefine() {
+    auto token = tokenizer.expect(Token::NAME, TokenGroup::newline);
+
+    target.defines.erase(token.as_symbol());
 }

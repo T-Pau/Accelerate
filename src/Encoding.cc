@@ -35,7 +35,10 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Target.h"
 
 Encoding::Encoding(const Value& value): encoding{nullptr} {
-    if (value.is_integer()) {
+    if (value.is_binary()) {
+        encoding = BinaryEncoding();
+    }
+    else if (value.is_integer()) {
         encoding = IntegerEncoding(value);
     }
     else if (value.is_string()) {
@@ -51,7 +54,10 @@ Encoding::Encoding(const Value& value): encoding{nullptr} {
 }
 
 void Encoding::encode(std::string& bytes, const Value& value) const {
-    if (is_integer_encoding()) {
+    if (is_binary_encoding()) {
+        as_binary_encoding().encode(bytes, value);
+    }
+    else if (is_integer_encoding()) {
         as_integer_encoding().encode(bytes, value);
     }
     else {
@@ -60,7 +66,10 @@ void Encoding::encode(std::string& bytes, const Value& value) const {
 }
 
 size_t Encoding::encoded_size(const Value& value) const {
-    if (is_integer_encoding()) {
+    if (is_binary_encoding()) {
+        return as_binary_encoding().encoded_size(value);
+    }
+    else if (is_integer_encoding()) {
         return as_integer_encoding().byte_size();
     }
     else {
@@ -81,13 +90,18 @@ bool Encoding::is_natural_encoding(const Value& value) const {
     if (is_integer_encoding()) {
         return as_integer_encoding().is_natural_encoding(value);
     }
-    else {
+    else if (is_string_encoding()) {
         return as_string_encoding() == Target::current_target->default_string_encoding;
+    }
+    else {
+        return true;
     }
 }
 
 void Encoding::serialize(std::ostream& stream) const {
-    if (is_integer_encoding()) {
+    if (is_binary_encoding()) {
+    }
+    else if (is_integer_encoding()) {
         stream << as_integer_encoding();
     }
     else {

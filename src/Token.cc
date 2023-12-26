@@ -109,7 +109,7 @@ bool Token::operator==(const Token &other) const {
         case PUNCTUATION:
         case INSTRUCTION:
         case STRING:
-            return symbol == other.symbol;
+            return std::get<Symbol>(value) == std::get<Symbol>(other.value);
 
         case VALUE:
             return value == other.value;
@@ -129,7 +129,7 @@ const std::string &Token::as_string() const {
         case STRING:
         case KEYWORD:
         case INSTRUCTION:
-            return symbol.str();
+            return std::get<Symbol>(value).str();
 
         case VALUE:
         case END:
@@ -147,7 +147,7 @@ Symbol Token::as_symbol() const {
         case STRING:
         case KEYWORD:
         case INSTRUCTION:
-            return symbol;
+            return std::get<Symbol>(value);
 
         case VALUE:
         case END:

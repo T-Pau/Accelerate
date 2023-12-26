@@ -1,5 +1,5 @@
 /*
-Value.h -- 
+Value.h --
 
 Copyright (C) Dieter Baron
 
@@ -35,12 +35,14 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <cstdint>
 #include <optional>
 #include <ostream>
+#include <variant>
 
 #include "Symbol.h"
 
 class Value {
 public:
     enum Type {
+        BINARY,
         BOOLEAN,
         FLOAT,
         SIGNED,
@@ -48,29 +50,28 @@ public:
         UNSIGNED,
         VOID
     };
-    
-    explicit Value(): type_(VOID), unsigned_value_(0) {}
-    explicit Value(uint64_t value, uint64_t default_size = 0): type_(UNSIGNED), unsigned_value_(value), explicit_default_size(default_size) {}
+
+    explicit Value() = default;
+    explicit Value(uint64_t value, uint64_t default_size = 0): value{value}, explicit_default_size{default_size} {}
     explicit Value(int64_t value, uint64_t default_size = 0);
-    explicit Value(bool value): type_(BOOLEAN), boolean_value_(value) {}
-    explicit Value(double value): type_(FLOAT), float_value_(value) {}
-    explicit Value(const std::string& value): Value(Symbol(value)) {}
-    explicit Value(Symbol value): type_(STRING), string_value_(value) {}
-    Value(const Value&other) = default;
+    explicit Value(bool value): value{value} {}
+    explicit Value(double value): value{value} {}
+    explicit Value(const std::string& value): value{value} {}
+    explicit Value(Symbol value): value{value} {}
 
-//    Value& operator=(const Value& other);
-
-    [[nodiscard]] bool is_boolean() const {return type() == BOOLEAN;}
-    [[nodiscard]] bool is_float() const {return type() == FLOAT;}
-    [[nodiscard]] bool is_integer() const {return type() == SIGNED || type() == UNSIGNED;}
+    [[nodiscard]] bool is_binary() const {return value && std::holds_alternative<std::string>(*value);}
+    [[nodiscard]] bool is_boolean() const {return value && std::holds_alternative<bool>(*value);}
+    [[nodiscard]] bool is_float() const {return value && std::holds_alternative<double>(*value);}
+    [[nodiscard]] bool is_integer() const {return is_signed() || is_unsigned();}
     [[nodiscard]] bool is_number() const {return is_integer() || is_float();}
-    [[nodiscard]] bool is_signed() const {return type() == SIGNED;}
-    [[nodiscard]] bool is_string() const {return type() == STRING;}
-    [[nodiscard]] bool is_unsigned() const {return type() == UNSIGNED;}
-    [[nodiscard]] bool is_void() const {return type() == VOID;}
+    [[nodiscard]] bool is_signed() const {return value && std::holds_alternative<int64_t>(*value);}
+    [[nodiscard]] bool is_string() const {return value && std::holds_alternative<Symbol>(*value);}
+    [[nodiscard]] bool is_unsigned() const {return value && std::holds_alternative<uint64_t>(*value);}
+    [[nodiscard]] bool is_void() const {return !value;}
 
-    [[nodiscard]] Type type() const {return type_;}
+    [[nodiscard]] Type type() const;
     [[nodiscard]] std::string type_name() const;
+    [[nodiscard]] std::string binary_value() const;
     [[nodiscard]] bool boolean_value() const;
     [[nodiscard]] double float_value() const;
     [[nodiscard]] int64_t signed_value() const;
@@ -106,15 +107,15 @@ public:
     Value operator||(const Value& other) const;
 
 private:
-    Type type_;
-    union {
-        bool boolean_value_;
-        double float_value_;
-        int64_t signed_value_;
-        uint64_t unsigned_value_;
-        Symbol string_value_;
-    };
-    uint64_t explicit_default_size = 0;
+    std::optional<std::variant<bool, double, int64_t, uint64_t, Symbol, std::string>> value;
+    uint64_t explicit_default_size{0};
+
+    [[nodiscard]] auto raw_binary_value() const {return std::get<std::string>(*value);}
+    [[nodiscard]] auto raw_boolean_value() const {return std::get<bool>(*value);}
+    [[nodiscard]] auto raw_float_value() const {return std::get<double>(*value);}
+    [[nodiscard]] auto raw_signed_value() const {return std::get<int64_t>(*value);}
+    [[nodiscard]] auto raw_symbol_value() const {return std::get<Symbol>(*value);}
+    [[nodiscard]] auto raw_unsigned_value() const {return std::get<uint64_t>(*value);}
 
     [[nodiscard]] static uint64_t negate_signed(int64_t value);
     [[nodiscard]] static int64_t negate_unsigned(uint64_t value);
@@ -129,6 +130,8 @@ template<>
 struct std::hash<Value> {
     std::size_t operator()(Value const &value) const noexcept {
         switch (value.type()) {
+            case Value::BINARY:
+                return std::hash<std::string>{}(value.binary_value());
             case Value::BOOLEAN:
                 return std::hash<bool>{}(value.boolean_value());
             case Value::FLOAT:
@@ -145,17 +148,17 @@ struct std::hash<Value> {
     }
 };
 
-std::optional<Value> operator+(const std::optional<Value> a, const std::optional<Value> b);
-std::optional<Value> operator-(const std::optional<Value> a, const std::optional<Value> b);
-std::optional<Value> operator*(const std::optional<Value> a, const std::optional<Value> b);
-std::optional<Value> operator/(const std::optional<Value> a, const std::optional<Value> b);
-std::optional<Value> operator&&(const std::optional<Value> a, const std::optional<Value> b);
-std::optional<Value> operator||(const std::optional<Value> a, const std::optional<Value> b);
+std::optional<Value> operator+(const std::optional<Value>& a, const std::optional<Value>& b);
+std::optional<Value> operator-(const std::optional<Value>& a, const std::optional<Value>& b);
+std::optional<Value> operator*(const std::optional<Value>& a, const std::optional<Value>& b);
+std::optional<Value> operator/(const std::optional<Value>& a, const std::optional<Value>& b);
+std::optional<Value> operator&&(const std::optional<Value>& a, const std::optional<Value>& b);
+std::optional<Value> operator||(const std::optional<Value>& a, const std::optional<Value>& b);
 
 
-bool operator>(const std::optional<Value> a, const std::optional<Value> b);
-bool operator<(const std::optional<Value> a, const std::optional<Value> b);
-bool operator>=(const std::optional<Value> a, const std::optional<Value> b);
-bool operator<=(const std::optional<Value> a, const std::optional<Value> b);
+bool operator>(const std::optional<Value>& a, const std::optional<Value>& b);
+bool operator<(const std::optional<Value>& a, const std::optional<Value>& b);
+bool operator>=(const std::optional<Value>& a, const std::optional<Value>& b);
+bool operator<=(const std::optional<Value>& a, const std::optional<Value>& b);
 
 #endif // VALUE_H

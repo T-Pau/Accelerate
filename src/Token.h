@@ -53,16 +53,15 @@ public:
         VALUE
     };
 
-    Token(): type(END) {}
+    Token() = default;
     Token(Type type, Location location): type(type), location(location) {}
-    Token(Type type, const std::string& name): Token(type, Location()) {symbol = Symbol(name);}
-    Token(Type type, Location location, Symbol symbol_): Token(type, location) {symbol = symbol_;}
+    Token(Type type, const std::string& name): Token(type, Location()) {value = Symbol(name);}
+    Token(Type type, Location location, Symbol symbol_): Token(type, location) {value = symbol_;}
     Token(Type type, Location location, const std::string& string): Token(type, location, Symbol(string)) {}
     Token(Type type, Location location, uint64_t integer, uint64_t default_size = 0): Token(type, location) {value = Value(integer, default_size);}
     Token(Type type, Location location, double real): Token(type, location) {value = Value(real);}
-//    Token(const Token& other): type(other.type) {*this = other;}
-
-//    Token& operator=(const Token& other);
+    Token(Location location, Value value_): Token(VALUE, location) {value = value_;}
+    ~Token() {}
 
     explicit operator bool() const {return type != END;}
     bool operator==(const Token& other) const;
@@ -70,8 +69,8 @@ public:
     [[nodiscard]] Type get_type() const {return type;}
     [[nodiscard]] bool is_directive() const {return type == DIRECTIVE;}
     [[nodiscard]] bool is_value() const {return type == VALUE;}
-    [[nodiscard]] bool is_integer() const {return is_value() && value.is_integer();}
-    [[nodiscard]] bool is_unsigned() const {return is_value() && value.is_unsigned();}
+    [[nodiscard]] bool is_integer() const {return is_value() && std::get<Value>(value).is_integer();}
+    [[nodiscard]] bool is_unsigned() const {return is_value() && std::get<Value>(value).is_unsigned();}
     [[nodiscard]] bool is_name() const {return type == NAME;}
     [[nodiscard]] bool is_newline() const {return type == NEWLINE;}
     [[nodiscard]] bool is_preprocessor() const {return type == PREPROCESSOR;}
@@ -81,8 +80,8 @@ public:
 
     [[nodiscard]] const std::string& as_string() const;
     [[nodiscard]] Symbol as_symbol() const;
-    [[nodiscard]] uint64_t as_unsigned() const {return is_unsigned() ? value.unsigned_value() : 0;}
-    [[nodiscard]] Value as_value() const {return is_value() ? value : Value();}
+    [[nodiscard]] uint64_t as_unsigned() const {return is_unsigned() ? std::get<Value>(value).unsigned_value() : 0;}
+    [[nodiscard]] Value as_value() const {return is_value() ? std::get<Value>(value) : Value();}
 
     static const char* type_name(Type type);
 
@@ -119,11 +118,8 @@ public:
     static const Token tilde;
 
 private:
-    Type type;
-    union {
-        Value value;
-        Symbol symbol;
-    };
+    Type type{END};
+    std::variant<Symbol, Value> value{};
 
     static const std::string empty_string;
 };

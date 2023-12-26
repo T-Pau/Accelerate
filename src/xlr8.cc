@@ -48,6 +48,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 class xlr8: public Command {
 public:
     xlr8(): Command(options, "file ...", "xlr8") {}
+    virtual ~xlr8() = default;
 
 protected:
     void process() override;
@@ -68,6 +69,7 @@ private:
     Path library_path;
     Path include_path;
     Path system_path;
+    std::unordered_map<Symbol, bool> defines_overrides;
 
     std::vector<File> files;
 };
@@ -75,11 +77,14 @@ private:
 std::vector<Commandline::Option> xlr8::options = {
 //    Commandline::Option("compile", 'c', "compile only, don't link"),
     Commandline::Option("create-library", 'a', "create library"),
+    Commandline::Option("define", 'D', "name", "define NAME for use in conditional compilation"),
     Commandline::Option("include-directory", 'I', "directory", "search for sources in DIRECTORY"),
     Commandline::Option("library-directory", 'L', "directory", "search for libraries in DIRECTORY"),
     Commandline::Option("symbol-map", "file", "write symbol map to FILE"),
     Commandline::Option("system-directory", "directory", "search for system files in DIRECTORY"),
+    Commandline::Option("define", 'D', "name", "define NAME for use in conditional compilation"),
     Commandline::Option("target", "file", "read target definition from FILE"),
+    Commandline::Option("undefine", 'U', "name", "remove definition of NAME for use in conditional compilation"),
 };
 
 
@@ -103,6 +108,9 @@ void xlr8::process() {
             else if (option.name == "create-library") {
                 linker->mode = Linker::CREATE_LIBRARY;
             }
+            else if (option.name == "define") {
+                defines_overrides[Symbol(option.argument)] = true;
+            }
             else if (option.name == "include-directory") {
                 include_path.append_directory(option.argument);
             }
@@ -114,6 +122,9 @@ void xlr8::process() {
             }
             else if (option.name == "target") {
                 target_name = option.argument;
+            }
+            else if (option.name == "undefine") {
+                defines_overrides[Symbol(option.argument)] = false;
             }
         }
         catch (Exception& ex) {
@@ -144,7 +155,7 @@ void xlr8::process() {
             auto extension = std::filesystem::path(file_name).extension();
 
             if (extension == ".s") {
-                files.emplace_back(file_name, Assembler(linker->target).parse(Symbol(file_name)));
+                files.emplace_back(file_name, Assembler(linker->target, defines_overrides).parse(Symbol(file_name)));
             }
 /*            else if (extension == ".o") {
                 if (linker->mode == Linker::COMPILE) {

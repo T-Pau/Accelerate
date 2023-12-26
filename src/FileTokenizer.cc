@@ -31,6 +31,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "FileTokenizer.h"
 
+#include "Base64.h"
 #include <algorithm>
 #include <utility>
 
@@ -85,6 +86,21 @@ Token FileTokenizer::next_raw() {
     while (true) {
         auto location = current_source->location();
 
+        auto c = current_source->next();
+        if (c == '{') {
+            auto c2 = current_source->next();
+            if (c2 == '{') {
+                parse_base64(location);
+            }
+            else {
+                current_source->unget();
+                current_source->unget();
+            }
+        }
+        else {
+            current_source->unget();
+        }
+
         std::string name;
         auto type = matcher.match(*current_source, name);
         if (type.has_value()) {
@@ -95,7 +111,7 @@ Token FileTokenizer::next_raw() {
 
         current_source->reset_to(location);
 
-        auto c = current_source->next();
+        c = current_source->next();
 
         if (c == EOF) {
             eof_location = current_location();
@@ -126,7 +142,8 @@ Token FileTokenizer::next_raw() {
         }
         else if (c == ';') {
             // skip comments
-            while (current_source->next() != '\n') {}
+            while (current_source->next() != '\n') {
+            }
             current_source->unget();
             continue;
         }
@@ -159,6 +176,30 @@ Token FileTokenizer::next_raw() {
     }
 }
 
+Token FileTokenizer::parse_base64(Location location) {
+    auto decoder = Base64Deocder();
+
+    while (true) {
+        current_source->expand_location(location);
+        auto c = current_source->next();
+
+        if (c == '}') {
+            auto c2 = current_source->next();
+            if (c2 != '}') {
+                throw ParseException(location, "invalid character in base64 data");
+            }
+            return {location, Value(decoder.end())};
+        }
+
+        try {
+            decoder.decode(static_cast<char>(c));
+        }
+        catch (Exception& ex) {
+            throw ParseException(location, ex);
+        }
+    }
+}
+
 Token FileTokenizer::parse_number(unsigned int base, Location location) {
     uint64_t size = 0;
     auto leading_zero = false;
@@ -176,7 +217,7 @@ Token FileTokenizer::parse_number(unsigned int base, Location location) {
             }
             else {
                 in_fraction = true;
-                floating = double(integer);
+                floating = static_cast<double>(integer);
                 size = 0;
             }
             continue;
@@ -203,7 +244,7 @@ Token FileTokenizer::parse_number(unsigned int base, Location location) {
         }
         if (in_fraction) {
             size += 10;
-            floating += double(digit) / double(size);
+            floating += static_cast<double>(digit) / static_cast<double>(size);
         }
         else {
             size += 1;

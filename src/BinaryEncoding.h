@@ -1,5 +1,5 @@
 /*
-Target.h --
+BinaryEncoding.h -- 
 
 Copyright (C) Dieter Baron
 
@@ -29,40 +29,17 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef TARGET_H
-#define TARGET_H
+#ifndef BINARYENCODING_H
+#define BINARYENCODING_H
 
-#include <vector>
+#include "Value.h"
 
-#include "CPU.h"
-#include "MemoryMap.h"
-#include "StringEncoding.h"
-
-class Target {
+class BinaryEncoding {
 public:
-    Target() = default;
-    explicit Target(Symbol name): name(name) {}
+    void encode(std::string& bytes, const Value& value) const;
+    [[nodiscard]] size_t encoded_size(const Value& value) const;
 
-    static void clear_current_target() {current_target = &empty;};
-    static const Target& get(Symbol name);
-    static const Target& get(const std::string& name) {return get(Symbol(name));}
-    static void set_current_target(const Target* target) {current_target = target;}
-    static const Target empty;
-    static const Target* current_target;
-
-    [[nodiscard]] bool is_compatible_with(const Target& other) const; // this has everything from other
-    [[nodiscard]] const StringEncoding* string_encoding(Symbol name) const;
-
-    Symbol name;
-    const CPU* cpu = &CPU::empty;
-    MemoryMap map;
-    std::unordered_map<Symbol, StringEncoding> string_encodings;
-    std::unordered_set<Symbol> defines;
-    const StringEncoding* default_string_encoding{};
-
-    Body output;
-
-    std::string extension = "bin";
+    bool operator==(const BinaryEncoding&) const {return true;}
 };
 
-#endif // TARGET_H
+#endif //BINARYENCODING_H

@@ -1,6 +1,6 @@
 This project uses [cmake](https://cmake.org) to build.
 
-For running the tests, you need to have [perl](https://www.perl.org).
+For running the tests, you need to have [nihtest](https://nih.at/nihtest/).
 
 The basic usage is
 ```sh

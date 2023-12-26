@@ -97,6 +97,7 @@ void IntegerEncoding::serialize(std::ostream &stream) const {
 
 IntegerEncoding::IntegerEncoding(const Value value) {
     switch (value.type()) {
+        case Value::BINARY:
         case Value::BOOLEAN:
         case Value::FLOAT:
         case Value::STRING:

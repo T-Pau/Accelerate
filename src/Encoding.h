@@ -34,6 +34,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <variant>
 
+#include "BinaryEncoding.h"
 #include "IntegerEncoding.h"
 #include "StringEncoding.h"
 
@@ -44,8 +45,10 @@ class Encoding {
     explicit Encoding(const Value& value);
     explicit Encoding(Tokenizer& tokenizer);
 
+    [[nodiscard]] const BinaryEncoding& as_binary_encoding() const {return std::get<BinaryEncoding>(encoding);}
     [[nodiscard]] const IntegerEncoding& as_integer_encoding() const {return std::get<IntegerEncoding>(encoding);}
     [[nodiscard]] const StringEncoding* as_string_encoding() const {return std::get<const StringEncoding*>(encoding);}
+    [[nodiscard]] bool is_binary_encoding() const {return std::holds_alternative<BinaryEncoding>(encoding);}
     [[nodiscard]] bool is_integer_encoding() const {return std::holds_alternative<IntegerEncoding>(encoding);}
     [[nodiscard]] bool is_string_encoding() const {return std::holds_alternative<const StringEncoding*>(encoding);}
     [[nodiscard]] bool operator==(const Encoding& other) const;
@@ -58,7 +61,7 @@ class Encoding {
     void serialize(std::ostream& stream) const;
 
   private:
-    std::variant<IntegerEncoding,const StringEncoding*> encoding;
+    std::variant<IntegerEncoding,BinaryEncoding,const StringEncoding*> encoding;
 };
 
 std::ostream& operator<<(std::ostream& stream, const Encoding& encoding);

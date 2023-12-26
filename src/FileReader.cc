@@ -38,6 +38,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Util.h"
 
 #include <fstream>
+#include <iterator>
 
 FileReader FileReader::global;
 
@@ -67,7 +68,17 @@ const std::vector<std::string>& FileReader::read(Symbol file_name, bool optional
         error_flag = true;
         throw Exception("can't open '%s': %s", file_name.c_str(), strerror(errno));
     }
+}
 
+std::string FileReader::read_binary(Symbol file_name) {
+    std::ifstream input_file{file_name.str()};
+    if (input_file) {
+        return std::string{std::istreambuf_iterator<char>{input_file}, {}};
+    }
+    else {
+        error_flag = true;
+        throw Exception("can't open '%s': %s", file_name.c_str(), strerror(errno));
+    }
 }
 
 const std::string &FileReader::get_line(Symbol file, size_t line_number) const {
@@ -160,6 +171,9 @@ std::vector<std::string> FileReader::file_names() const {
 
     for (const auto& pair: files) {
         file_names.emplace_back(pair.first.str());
+    }
+    for (const auto& name: binary_files) {
+        file_names.emplace_back(name.str());
     }
 
     std::sort(file_names.begin(), file_names.end());

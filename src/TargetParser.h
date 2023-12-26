@@ -53,11 +53,13 @@ protected:
 private:
     void parse_cpu();
     void parse_default_string_encoding();
+    void parse_define();
     void parse_extension();
     void parse_output();
     void parse_section();
     void parse_segment();
     void parse_string_encoding();
+    void parse_undefine();
 
     static std::vector<MemoryMap::Block> parse_address(const ParsedValue* address);
     static MemoryMap::Block parse_single_address(const ParsedScalar* address);
@@ -76,6 +78,7 @@ private:
     static const Token token_cpu;
     static const Token token_data;
     static const Token token_default_string_encoding;
+    static const Token token_define;
     static const Token token_extension;
     static const Token token_memory;
     static const Token token_output;
@@ -87,6 +90,7 @@ private:
     static const Token token_segment_name;
     static const Token token_string_encoding;
     static const Token token_type;
+    static const Token token_undefine;
 };
 
 
