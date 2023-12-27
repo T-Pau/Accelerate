@@ -32,11 +32,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef BASE_EXPRESSION_H
 #define BASE_EXPRESSION_H
 
-#include <cstddef>
-
-#include "Node.h"
 #include "FileTokenizer.h"
-#include "Int.h"
 
 class Object;
 class Expression;
@@ -46,7 +42,9 @@ class Environment;
 class BaseExpression {
 public:
     BaseExpression() = default;
-    BaseExpression(Location location): location(location) {}
+    explicit BaseExpression(Location location): location(location) {}
+    virtual ~BaseExpression() = default;
+
     [[nodiscard]] virtual bool has_value() const {return value().has_value();}
     [[nodiscard]] virtual std::optional<Value> value() const {return {};}
     [[nodiscard]] virtual std::optional<Value> minimum_value() const {return value();}

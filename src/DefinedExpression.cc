@@ -1,9 +1,9 @@
 /*
-FunctionExpression.h --
+DefinedExpressin.cc -- 
 
 Copyright (C) Dieter Baron
 
-The authors can be contacted at <accelerate@tpau.group>
+The authors can be contacted at <assembler@tpau.group>
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions
@@ -29,33 +29,31 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef FUNCTION_EXPRESSION_H
-#define FUNCTION_EXPRESSION_H
-
-#include "Expression.h"
-
-class FunctionExpression: public BaseExpression {
-public:
-    FunctionExpression(Symbol name, std::vector<Expression> arguments): name(name), arguments(std::move(arguments)) {}
-
-    void collect_objects(std::unordered_set<Object*>& objects) const override;
-
-    static void setup(FileTokenizer& tokenizer);
-
-protected:
-    static Expression create(Symbol name, const std::vector<Expression>& arguments);
-    [[nodiscard]] std::optional<Expression> evaluated(const EvaluationContext& context) const override;
-
-    void serialize_sub(std::ostream& stream) const override;
-
-    friend class Expression;
-
-private:
-    Symbol name;
-    std::vector<Expression> arguments;
-
-    static const std::unordered_map<Symbol, Expression (*)(const std::vector<Expression>&)> builtin_functions;
-};
+#include "DefinedExpression.h"
 
 
-#endif // FUNCTION_EXPRESSION_H
+#include "ParseException.h"
+#include "VariableExpression.h"
+
+Expression DefinedExpression::create(const std::vector<Expression>& arguments) {
+    if (arguments.size() != 1) {
+        throw ParseException(Location(), "invalid number of arguments");
+    }
+    auto& argument = arguments[0];
+
+    if (!argument.is_variable()) {
+        throw ParseException(argument.location(), "symbol argument required");
+    }
+
+    return Expression(std::make_shared<DefinedExpression>(argument.as_variable()->variable()));
+}
+
+std::optional<Expression> DefinedExpression::evaluated(const EvaluationContext& context) const {
+    // TODO: Add defines to evaluation context and return true/false appropriately.
+    return {};
+}
+
+void DefinedExpression::serialize_sub(std::ostream& stream) const {
+    stream << ".defined(" << symbol << ")";
+}
+

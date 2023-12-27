@@ -20,6 +20,7 @@ add_library(xlr8-library STATIC
         Command.cc
         Commandline.cc
         DataBody.cc
+        DefinedExpression.cc
         EmptyBody.cc
         Encoding.cc
         Entity.cc
@@ -64,6 +65,7 @@ add_library(xlr8-library STATIC
         Range.cc
         ScopeBody.cc
         SequenceTokenizer.cc
+        SizeofExpression.cc
         SizeRange.cc
         StringEncoding.cc
         Symbol.cc

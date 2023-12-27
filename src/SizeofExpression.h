@@ -1,9 +1,9 @@
 /*
-FunctionExpression.h --
+SizeofExpression.h -- 
 
 Copyright (C) Dieter Baron
 
-The authors can be contacted at <accelerate@tpau.group>
+The authors can be contacted at <assembler@tpau.group>
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions
@@ -29,33 +29,34 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef FUNCTION_EXPRESSION_H
-#define FUNCTION_EXPRESSION_H
+#ifndef SIZEOFEXPRESSION_H
+#define SIZEOFEXPRESSION_H
 
-#include "Expression.h"
+#include "BaseExpression.h"
+#include "Object.h"
 
-class FunctionExpression: public BaseExpression {
+class Object;
+
+class SizeofExpression: public BaseExpression {
 public:
-    FunctionExpression(Symbol name, std::vector<Expression> arguments): name(name), arguments(std::move(arguments)) {}
+    explicit SizeofExpression(Symbol object_name): object_name{object_name} {}
+    explicit SizeofExpression(const Object* object): object_name{object->name.as_symbol()}, object{object} {}
 
-    void collect_objects(std::unordered_set<Object*>& objects) const override;
+    static Expression create(const std::vector<Expression>& arguments);
+    static Expression create(const Object* object);
 
-    static void setup(FileTokenizer& tokenizer);
+    [[nodiscard]] std::optional<Expression> evaluated(const EvaluationContext& context) const override;
+    [[nodiscard]] std::optional<Value> minimum_value() const override;
+    [[nodiscard]] std::optional<Value> maximum_value() const override;
 
 protected:
-    static Expression create(Symbol name, const std::vector<Expression>& arguments);
-    [[nodiscard]] std::optional<Expression> evaluated(const EvaluationContext& context) const override;
-
     void serialize_sub(std::ostream& stream) const override;
 
-    friend class Expression;
-
 private:
-    Symbol name;
-    std::vector<Expression> arguments;
 
-    static const std::unordered_map<Symbol, Expression (*)(const std::vector<Expression>&)> builtin_functions;
+    Symbol object_name;
+    const Object* object{};
+
 };
 
-
-#endif // FUNCTION_EXPRESSION_H
+#endif //SIZEOFEXPRESSION_H

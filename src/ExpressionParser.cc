@@ -31,6 +31,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "ExpressionParser.h"
 
+#include "FunctionExpression.h"
 #include "ParseException.h"
 #include "Target.h"
 #include "ValueExpression.h"
@@ -144,6 +145,7 @@ ExpressionParser::Element ExpressionParser::next_element() {
 
 void ExpressionParser::setup(FileTokenizer &tokenizer) {
     tokenizer.add_punctuations({"+", "-", "~", "<", ">", "*", "/", /* mod */ "&", "^", "<<", ">>", "|", "(", ")", ":", ","});
+    FunctionExpression::setup(tokenizer);
     initialize();
 }
 

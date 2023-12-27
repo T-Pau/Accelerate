@@ -31,12 +31,21 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "FunctionExpression.h"
 
-#include "ObjectFileParser.h"
+#include <complex>
+
+#include "DefinedExpression.h"
 #include "EvaluationContext.h"
 #include "Expression.h"
 #include "Function.h"
 #include "InRangeExpression.h"
 #include "LabelExpression.h"
+#include "ObjectFileParser.h"
+#include "SizeofExpression.h"
+
+const std::unordered_map<Symbol, Expression (*)(const std::vector<Expression>&)> FunctionExpression::builtin_functions = {
+    {Symbol(".defined"), &DefinedExpression::create},
+    {Symbol(".sizeof"), &SizeofExpression::create}
+};
 
 void FunctionExpression::serialize_sub(std::ostream &stream) const {
     stream << name << "(";
@@ -51,9 +60,15 @@ void FunctionExpression::serialize_sub(std::ostream &stream) const {
     stream << ")";
 }
 
-void FunctionExpression::collect_objects(std::unordered_set<Object*> &objects) const {
-    for (auto& argument: arguments) {
+void FunctionExpression::collect_objects(std::unordered_set<Object*>& objects) const {
+    for (auto& argument : arguments) {
         argument.collect_objects(objects);
+    }
+}
+
+void FunctionExpression::setup(FileTokenizer& tokenizer) {
+    for (const auto& pair: builtin_functions) {
+        tokenizer.add_literal(Token{Token::Type::NAME, Location(), pair.first});
     }
 }
 
@@ -64,7 +79,10 @@ Expression FunctionExpression::create(Symbol name, const std::vector<Expression>
     else if (name == ObjectFileParser::token_label_offset.as_symbol()) {
         return LabelExpression::create(arguments);
     }
-    // TODO: built in functions
+    const auto it = builtin_functions.find(name);
+    if (it != builtin_functions.end()) {
+        return it->second(arguments);
+    }
     return Expression(std::make_shared<FunctionExpression>(name, arguments));
 }
 
@@ -72,8 +90,7 @@ std::optional<Expression> FunctionExpression::evaluated(const EvaluationContext&
     std::vector<Expression> new_arguments;
     auto changed = false;
     for (auto& argument: arguments) {
-        auto new_argument = argument.evaluated(context);
-        if (new_argument) {
+        if (const auto new_argument = argument.evaluated(context)) {
             new_arguments.emplace_back(*new_argument);
             changed = true;
         }
@@ -82,8 +99,10 @@ std::optional<Expression> FunctionExpression::evaluated(const EvaluationContext&
         }
     }
 
-    auto function = context.environment->get_function(name);
-    if (!function) {
+    if (const auto function = context.environment->get_function(name)) {
+        return function->call(new_arguments);
+    }
+    else {
         context.result.add_unresolved_function(name);
         if (changed) {
             return Expression(name, new_arguments);
@@ -92,6 +111,4 @@ std::optional<Expression> FunctionExpression::evaluated(const EvaluationContext&
             return {};
         }
     }
-
-    return function->call(new_arguments);
 }

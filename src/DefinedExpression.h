@@ -1,9 +1,9 @@
 /*
-FunctionExpression.h --
+DefinedExpression.h --
 
 Copyright (C) Dieter Baron
 
-The authors can be contacted at <accelerate@tpau.group>
+The authors can be contacted at <assembler@tpau.group>
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions
@@ -29,33 +29,26 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef FUNCTION_EXPRESSION_H
-#define FUNCTION_EXPRESSION_H
+#ifndef DEFINEDEXPRESSIN_H
+#define DEFINEDEXPRESSIN_H
 
-#include "Expression.h"
+#include "BaseExpression.h"
 
-class FunctionExpression: public BaseExpression {
+class DefinedExpression: public BaseExpression {
 public:
-    FunctionExpression(Symbol name, std::vector<Expression> arguments): name(name), arguments(std::move(arguments)) {}
+    explicit DefinedExpression(Symbol symbol): symbol{symbol} {}
 
-    void collect_objects(std::unordered_set<Object*>& objects) const override;
+    static Expression create(const std::vector<Expression>& arguments);
 
-    static void setup(FileTokenizer& tokenizer);
-
-protected:
-    static Expression create(Symbol name, const std::vector<Expression>& arguments);
     [[nodiscard]] std::optional<Expression> evaluated(const EvaluationContext& context) const override;
 
+protected:
     void serialize_sub(std::ostream& stream) const override;
 
-    friend class Expression;
-
 private:
-    Symbol name;
-    std::vector<Expression> arguments;
-
-    static const std::unordered_map<Symbol, Expression (*)(const std::vector<Expression>&)> builtin_functions;
+    Symbol symbol;
 };
 
 
-#endif // FUNCTION_EXPRESSION_H
+
+#endif //DEFINEDEXPRESSIN_H
