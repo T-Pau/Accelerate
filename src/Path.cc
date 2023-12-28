@@ -31,6 +31,8 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "Path.h"
 
+const Path Path::empty_path;
+
 Symbol Path::find(Symbol name, Symbol base) const {
     auto path = std::filesystem::path(name.str());
 

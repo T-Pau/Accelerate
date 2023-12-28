@@ -84,7 +84,7 @@ void CPUParser::initialize() {
     }
 }
 
-CPUParser::CPUParser(): FileParser(CPUGetter::global.path) {
+CPUParser::CPUParser(): FileParser(*CPUGetter::global.path) {
     initialize();
 
     tokenizer.add_punctuations({"-", ","});

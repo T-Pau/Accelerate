@@ -39,7 +39,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 class Assembler {
 public:
-    explicit Assembler(const Target* target, const std::unordered_map<Symbol, bool>& defines_overrides);
+    explicit Assembler(const Target* target, const Path& path, const std::unordered_map<Symbol, bool>& defines_overrides);
 
     std::shared_ptr<ObjectFile> parse(Symbol file_name);
 

@@ -34,7 +34,6 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "FunctionExpression.h"
 #include "ParseException.h"
 #include "Target.h"
-#include "ValueExpression.h"
 
 const Token ExpressionParser::token_string = Token{Token::NAME, "string"};
 
@@ -144,9 +143,15 @@ ExpressionParser::Element ExpressionParser::next_element() {
 
 
 void ExpressionParser::setup(FileTokenizer &tokenizer) {
-    tokenizer.add_punctuations({"+", "-", "~", "<", ">", "*", "/", /* mod */ "&", "^", "<<", ">>", "|", "(", ")", ":", ","});
-    FunctionExpression::setup(tokenizer);
     initialize();
+    tokenizer.add_punctuations({"(", ")", ":", ","});
+    for (const auto& pair: binary_operators) {
+        tokenizer.add_literal(pair.first);
+    }
+    for (const auto& pair: unary_operators) {
+        tokenizer.add_literal(pair.first);
+    }
+    FunctionExpression::setup(tokenizer);
 }
 
 Expression ExpressionParser::do_parse() {
@@ -408,7 +413,8 @@ std::optional<Encoding> ExpressionParser::parse_encoding() {
     token = tokenizer.next();
 
     if (token.is_unsigned()) {
-        return Encoding{IntegerEncoding{type, token.as_unsigned()}};
+        // TODO: check overflow
+        return Encoding{IntegerEncoding{type, static_cast<size_t>(token.as_unsigned())}};
     }
     else if (token.is_name()) {
         if (!name_allowed) {

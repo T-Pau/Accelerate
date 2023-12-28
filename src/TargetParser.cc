@@ -63,7 +63,7 @@ const Token TargetParser::token_type = Token(Token::NAME, "type");
 const Token TargetParser::token_undefine = Token(Token::DIRECTIVE, "undefine");
 
 
-TargetParser::TargetParser(): FileParser(TargetGetter::global.path) {
+TargetParser::TargetParser(): FileParser(*TargetGetter::global.path) {
     initialize();
 
     tokenizer.add_punctuations({"="});

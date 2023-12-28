@@ -44,7 +44,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 class FileTokenizer: public Tokenizer {
 public:
-    explicit FileTokenizer(std::shared_ptr<const Path> path = std::make_shared<const Path>(), bool use_preprocessor = true);
+    explicit FileTokenizer(const Path& path = Path::empty_path, bool use_preprocessor = true);
     void push(Symbol filename);
 
     [[nodiscard]] Location current_location() const override;
@@ -109,7 +109,7 @@ private:
     static bool is_identifier(const std::string& s);
 
     bool use_preprocessor;
-    std::shared_ptr<const Path> path;
+    const Path& path;
 
     static bool initialized;
     static Token token_include;

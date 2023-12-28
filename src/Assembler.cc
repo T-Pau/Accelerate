@@ -31,6 +31,8 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "Assembler.h"
 
+#include <utility>
+
 #include "BodyParser.h"
 #include "ParseException.h"
 #include "FileReader.h"
@@ -63,7 +65,7 @@ void Assembler::initialize() {
     }
 }
 
-Assembler::Assembler(const Target* target, const std::unordered_map<Symbol, bool>& defines_overrides): defines_overrides(defines_overrides) {
+Assembler::Assembler(const Target* target, const Path& path, const std::unordered_map<Symbol, bool>& defines_overrides): tokenizer{path} , defines_overrides(defines_overrides) {
     set_target(target);
 }
 

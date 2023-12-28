@@ -493,7 +493,12 @@ void BodyParser::parse_binary_file() {
         throw ParseException(filename.location, "including from non-file source");
     }
 
-    auto data = FileReader::global.read_binary(file_tokenizer->find_file(filename.as_symbol()));
-    auto elements = std::vector<DataBodyElement>{DataBodyElement{Expression{Value{data}}, {}}};
-    current_body->append(Body(elements));
+    if (auto file_name = file_tokenizer->find_file(filename.as_symbol())) {
+        auto data = FileReader::global.read_binary(file_name);
+        auto elements = std::vector<DataBodyElement>{DataBodyElement{Expression{Value{data}}, {}}};
+        current_body->append(Body(elements));
+    }
+    else {
+        throw ParseException(filename.location, "can't find file '%s'", filename.as_string().c_str());
+    }
 }

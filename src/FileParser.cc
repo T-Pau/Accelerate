@@ -39,7 +39,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 TokenGroup FileParser::group_directive = TokenGroup({Token::DIRECTIVE,Token::END}, {}, "directive");
 
 
-FileParser::FileParser(std::shared_ptr<Path> path_): path(std::move(path_)), tokenizer(path) {
+FileParser::FileParser(const Path& path): path(path), tokenizer(path) {
     ParsedValue::setup(tokenizer);
     ExpressionParser::setup(tokenizer);
 }

@@ -40,6 +40,8 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 class Path {
 public:
+    static const Path empty_path;
+
     void append_directory(std::filesystem::path directory) {directories.emplace_back(std::move(directory));}
     void prepend_directory(std::filesystem::path directory) {directories.emplace(directories.begin(), std::move(directory));}
 

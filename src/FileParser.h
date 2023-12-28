@@ -39,9 +39,9 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 class FileParser {
 public:
-    explicit FileParser(std::shared_ptr<Path> path = std::make_shared<Path>());
+    explicit FileParser(const Path& path = Path::empty_path);
 
-    std::shared_ptr<Path> path;
+    const Path& path;
 
 protected:
     FileTokenizer tokenizer;
