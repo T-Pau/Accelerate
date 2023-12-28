@@ -35,6 +35,7 @@ add_library(xlr8-library STATIC
         FileParser.cc
         FileReader.cc
         FileTokenizer.cc
+        FillExpression.cc
         Function.cc
         FunctionExpression.cc
         IfBody.cc
