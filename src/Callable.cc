@@ -117,7 +117,11 @@ Callable::Arguments::Arguments(Tokenizer& tokenizer) {
     auto had_default_argument = false;
 
     while (!tokenizer.ended()) {
-        auto argument_name = tokenizer.expect(Token::NAME);
+        auto argument_name = tokenizer.next();
+        if (!argument_name.is_name()) {
+            tokenizer.unget(argument_name);
+            break;
+        }
         auto default_argument = std::optional<Expression>();
         auto token = tokenizer.next();
         if (token == Token::equals) {
