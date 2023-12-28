@@ -41,44 +41,44 @@
 
 ; display joystick number X
 .global display_joystick {
-	txa
-	asl
-	sta tmp
-	tax
-	lda joystick_positions,x
-	sta ptr2
-	lda joystick_positions + 1,x
-	sta ptr2 + 1
-	lda port_digital
-	and #$f
-	jsr dpad
+    txa
+    asl
+    sta tmp
+    tax
+    lda joystick_positions,x
+    sta ptr2
+    lda joystick_positions + 1,x
+    sta ptr2 + 1
+    lda port_digital
+    and #$f
+    jsr dpad
 
-	; buttons
-	clc
-	ldx tmp
-	lda joystick_positions,x
-	adc #45
-	sta ptr2
-	lda joystick_positions + 1,x
-	adc #0
-	sta ptr2 + 1
-	lda port_digital
+    ; buttons
+    clc
+    ldx tmp
+    lda joystick_positions,x
+    adc #45
+    sta ptr2
+    lda joystick_positions + 1,x
+    adc #0
+    sta ptr2 + 1
+    lda port_digital
 ;.ifdef USE_TED
-;	and #$f0
+;   and #$f0
 ;.else
-	and #$10
+    and #$10
 ;.endif
-	jsr button
+    jsr button
 
 ;.ifdef USE_VICII
-	lda port_digital
-	and #$20
-	jsr button
+    lda port_digital
+    and #$20
+    jsr button
 
-	lda port_digital
-	and #$40
-	jsr button
+    lda port_digital
+    and #$40
+    jsr button
 ;.endif
 
-	rts
+    rts
 }

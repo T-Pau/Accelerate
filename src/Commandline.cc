@@ -256,8 +256,8 @@ void Commandline::add_option(Commandline::Option option) {
 
 void Commandline::sort_options() {
     if (!options_sorted) {
-	std::sort(options.begin(), options.end());
-	options_sorted = true;
+    std::sort(options.begin(), options.end());
+    options_sorted = true;
     }
 }
 

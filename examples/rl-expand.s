@@ -32,12 +32,12 @@
 ; ptr1: runlength encoded string
 ; ptr2: destination to expand to
 .global rl_expand {
-	ldy #0
+    ldy #0
 loop:
-	lda (ptr1),y
-	inc_16 ptr1
-	cmp #$fe
-	bne no_skip
+    lda (ptr1),y
+    inc_16 ptr1
+    cmp #$fe
+    bne no_skip
     lda (ptr1),y
     inc_16 ptr1
     clc
@@ -47,23 +47,23 @@ loop:
     inc ptr2 + 1
     bne loop
 no_skip:
-	ldx #$01
-	cmp #$ff
-	bne runlength_loop
-	lda (ptr1),y
-	inc_16 ptr1
-	cmp #$00
-	bne :+
-	rts
+    ldx #$01
+    cmp #$ff
+    bne runlength_loop
+    lda (ptr1),y
+    inc_16 ptr1
+    cmp #$00
+    bne :+
+    rts
 :   tax
     lda (ptr1),y
     inc_16 ptr1
 runlength_loop:
-	sta (ptr2),y
-	iny
-	dex
-	bne runlength_loop
-	tya
+    sta (ptr2),y
+    iny
+    dex
+    bne runlength_loop
+    tya
     clc
     adc ptr2
     sta ptr2

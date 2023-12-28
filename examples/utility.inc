@@ -41,67 +41,67 @@ no_carry:
 }
 
 .macro store_word value, address {
-	lda #<value
-	sta address
-	lda #>value
-	sta address + 1
+    lda #<value
+    sta address
+    lda #>value
+    sta address + 1
 }
 
 .macro add_word address, value {
-	clc
-	lda address
-	adc #<value
-	sta address
+    clc
+    lda address
+    adc #<value
+    sta address
 .if value < 256
-	bcc end_add_word
-	inc address + 1
+    bcc end_add_word
+    inc address + 1
 end_add_word:
 .else
-	lda address + 1
-	adc #>value
-	sta address + 1
+    lda address + 1
+    adc #>value
+    sta address + 1
 }
 
 .macro subtract_word address, value {
-	sec
-	lda address
-	sbc #<value
-	sta address
+    sec
+    lda address
+    sbc #<value
+    sta address
 .if value < 256
-	bcs subtract_word_end
-	dec address + 1
+    bcs subtract_word_end
+    dec address + 1
 subtract_word_end:
 .else
-	lda address + 1
-	sbc #>value
-	sta address + 1
+    lda address + 1
+    sbc #>value
+    sta address + 1
 .endif
 }
 
 .macro memcpy destination, source, length {
-	store_word destination, ptr2
-	store_word source, ptr1
-	store_word length, ptr3
-	jsr memcpy
+    store_word destination, ptr2
+    store_word source, ptr1
+    store_word length, ptr3
+    jsr memcpy
 }
 
 .macro memset destination, value, length {
-	store_word destination, ptr2
-	store_word length, ptr3
-	lda #value
-	jsr memset
+    store_word destination, ptr2
+    store_word length, ptr3
+    lda #value
+    jsr memset
 }
 
 .macro memset_if destination, old_value, new_value, length {
-	store_word destination, ptr2
-	store_word length, ptr3
-	ldx #new_value
-	lda #old_value
-	jsr memset_if
+    store_word destination, ptr2
+    store_word length, ptr3
+    ldx #new_value
+    lda #old_value
+    jsr memset_if
 }
 
 .macro copy_screen source {
-	store_word source, ptr1
-	store_word screen, ptr2
-	jsr expand
+    store_word source, ptr1
+    store_word screen, ptr2
+    jsr expand
 }
