@@ -19,18 +19,20 @@ file a.lib {} <inline>
     visibility: private
     arguments: address
     body <
-        .if .in_range($00, $ff, address)
+        .if .in_range($00, $ff, address) {
           .data $e6, address:1
-        .else
+        }
+        .else {
           .data $ee, address:2
-        .end
+        }
       .label_1:
         .data $d0, ((:+-(.current_object+.label_offset(.current_object, .label_1)))-$02):-1
-        .if .in_range($00, $ff, (address+$01))
+        .if .in_range($00, $ff, (address+$01)) {
           .data $e6, (address+$01):1
-        .else
+        }
+        .else {
           .data $ee, (address+$01):2
-        .end
+        }
       :
     >
 }
@@ -38,9 +40,9 @@ file a.lib {} <inline>
     visibility: private
     section: code
     body <
-        .scope
+        .scope {
           .data $ee, $1234, $d0, $03:-1, $ee, $1235
-        .end
+        }
         .data $60
     >
 }

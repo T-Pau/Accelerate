@@ -30,9 +30,9 @@
 .output {
     .data $0801 ; load address
     .data $080c, 2023, $9e ; BASIC: 2023 SYS
-    .if start < 10000
+    .if start < 10000 {
       .data " "
-    .end
+    }
     .data start:string, 0 ; start
     .data $0000 ; end BASIC of program
     .memory $080e, .data_end

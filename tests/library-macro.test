@@ -57,11 +57,12 @@ file a.lib {} <inline>
     arguments: address
     body <
         .data $a9, $00
-        .if .in_range($00, $ff, address)
+        .if .in_range($00, $ff, address) {
           .data $85, address:1
-        .else
+        }
+        .else {
           .data $8d, address:2
-        .end
+        }
     >
 }
 .macro same_file {
@@ -69,26 +70,27 @@ file a.lib {} <inline>
     arguments: address
     body <
         .data $a2, $01
-        .if .in_range($00, $ff, address)
+        .if .in_range($00, $ff, address) {
           .data $86, address:1
-        .else
+        }
+        .else {
           .data $8e, address:2
-        .end
+        }
     >
 }
 .object init {
     visibility: public
     section: code
     body <
-        .scope
+        .scope {
           .data $a2, $01, $8e, $1001
-        .end
-        .scope
+        }
+        .scope {
           .data $a9, $00, $8d, $2002
-        .end
-        .scope
+        }
+        .scope {
           .data $a0, $02, $8c, $3003
-        .end
+        }
     >
 }
 end-of-inline-data

@@ -45,7 +45,6 @@ const Token BodyParser::token_binary_file = Token(Token::DIRECTIVE, "binary_file
 const Token BodyParser::token_data = Token(Token::DIRECTIVE, "data");
 const Token BodyParser::token_else = Token(Token::DIRECTIVE, "else");
 const Token BodyParser::token_else_if = Token(Token::DIRECTIVE, "else_if");
-const Token BodyParser::token_end = Token(Token::DIRECTIVE, "end");
 const Token BodyParser::token_error = Token(Token::DIRECTIVE, "error");
 const Token BodyParser::token_if = Token(Token::DIRECTIVE, "if");
 const Token BodyParser::token_memory = Token(Token::DIRECTIVE, "memory");
@@ -56,7 +55,6 @@ const std::unordered_map<Symbol, void (BodyParser::*)()> BodyParser::directive_p
         {token_data.as_symbol(), &BodyParser::parse_data},
         {token_else.as_symbol(), &BodyParser::parse_else},
         {token_else_if.as_symbol(), &BodyParser::parse_else_if},
-        {token_end.as_symbol(), &BodyParser::parse_end},
         {token_error.as_symbol(), &BodyParser::parse_error},
         {token_if.as_symbol(), &BodyParser::parse_if},
         {token_memory.as_symbol(), &BodyParser::parse_memory},
@@ -110,6 +108,12 @@ Body BodyParser::parse() {
                     break;
 
                 case Token::PUNCTUATION:
+                    if (token == Token::curly_close && !nesting.empty()) {
+                        pop_body();
+                        current_body->append(nesting.back()->body());
+                        nesting.pop_back();
+                        break;
+                    }
                     if (token == end_token) {
                         // TODO: move this to Object or ObjectFile.
                         if (entity) {
@@ -205,6 +209,7 @@ void BodyParser::parse_else() {
     }
     pop_body();
     push_clause(Expression(Value(true)));
+    tokenizer.expect(Token::curly_open);
 }
 
 void BodyParser::parse_else_if() {
@@ -213,20 +218,13 @@ void BodyParser::parse_else_if() {
     }
     pop_body();
     push_clause(ExpressionParser(tokenizer).parse());
-}
-
-void BodyParser::parse_end() {
-    if (nesting.empty()) {
-        throw Exception(".end outside .if or .scope");
-    }
-    pop_body();
-    current_body->append(nesting.back()->body());
-    nesting.pop_back();
+    tokenizer.expect(Token::curly_open);
 }
 
 void BodyParser::parse_if() {
     nesting.emplace_back(std::make_unique<IfNesting>());
     push_clause(ExpressionParser(tokenizer).parse());
+    tokenizer.expect(Token::curly_open);
 }
 
 std::shared_ptr<Node> BodyParser::parse_instruction_argument(const Token& token) {
@@ -379,6 +377,7 @@ void BodyParser::parse_instruction(const Token &name) {
 void BodyParser::parse_scope() {
     nesting.emplace_back(std::make_unique<ScopeNesting>());
     push_body(NestingIndex(nesting.size() - 1, 0));
+    tokenizer.expect(Token::curly_open);
 }
 
 

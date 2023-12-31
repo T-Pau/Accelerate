@@ -80,16 +80,18 @@ void IfBody::serialize(std::ostream &stream, const std::string& prefix) const {
     auto first = true;
     for (auto& clause: clauses) {
         if (clause.is_true()) {
-            stream << prefix << ".else" << std::endl;
+            stream << prefix << "}" << std::endl;
+            stream << prefix << ".else {" << std::endl;
         }
         else {
             if (first) {
                 stream << prefix << ".if ";
             }
             else {
+                stream << prefix << "}" << std::endl;
                 stream << prefix << ".else_if ";
             }
-            stream << clause.condition << std::endl;
+            stream << clause.condition << " {" << std::endl;
         }
 
         clause.body.serialize(stream, prefix + "  ");
@@ -97,7 +99,7 @@ void IfBody::serialize(std::ostream &stream, const std::string& prefix) const {
         first = false;
     }
 
-    stream << prefix << ".end" << std::endl;
+    stream << prefix << "}" << std::endl;
 }
 
 void IfBody::collect_objects(std::unordered_set<Object*> &objects) const {

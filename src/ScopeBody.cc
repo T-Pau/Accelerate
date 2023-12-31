@@ -32,9 +32,9 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ScopeBody.h"
 
 void ScopeBody::serialize(std::ostream& stream, const std::string& prefix) const {
-    stream << prefix << ".scope" << std::endl;
+    stream << prefix << ".scope {" << std::endl;
     body.serialize(stream, prefix + "  ");
-    stream << prefix << ".end" << std::endl;
+    stream << prefix << "}" << std::endl;
 }
 
 std::optional<Body> ScopeBody::evaluated(const EvaluationContext& context) const {

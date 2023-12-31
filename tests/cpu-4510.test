@@ -666,11 +666,12 @@ file 4510.lib {} <inline>
     section: code
     body <
         .data $90, -$02
-        .if .in_range(-$80, $7f, (($1234-(test_bcc+$02))-$02))
+        .if .in_range(-$80, $7f, (($1234-(test_bcc+$02))-$02)) {
           .data $90, (($1234-(test_bcc+$02))-$02):-1
-        .else
+        }
+        .else {
           .data $93, (($1234-(test_bcc+$02))-$02):-2
-        .end
+        }
     >
 }
 .object test_bcs {
@@ -678,11 +679,12 @@ file 4510.lib {} <inline>
     section: code
     body <
         .data $b0, -$02
-        .if .in_range(-$80, $7f, (($1234-(test_bcs+$02))-$02))
+        .if .in_range(-$80, $7f, (($1234-(test_bcs+$02))-$02)) {
           .data $b0, (($1234-(test_bcs+$02))-$02):-1
-        .else
+        }
+        .else {
           .data $b3, (($1234-(test_bcs+$02))-$02):-2
-        .end
+        }
     >
 }
 .object test_beq {
@@ -690,11 +692,12 @@ file 4510.lib {} <inline>
     section: code
     body <
         .data $f0, -$02
-        .if .in_range(-$80, $7f, (($1234-(test_beq+$02))-$02))
+        .if .in_range(-$80, $7f, (($1234-(test_beq+$02))-$02)) {
           .data $f0, (($1234-(test_beq+$02))-$02):-1
-        .else
+        }
+        .else {
           .data $f3, (($1234-(test_beq+$02))-$02):-2
-        .end
+        }
     >
 }
 .object test_bit {
@@ -709,11 +712,12 @@ file 4510.lib {} <inline>
     section: code
     body <
         .data $30, -$02
-        .if .in_range(-$80, $7f, (($1234-(test_bmi+$02))-$02))
+        .if .in_range(-$80, $7f, (($1234-(test_bmi+$02))-$02)) {
           .data $30, (($1234-(test_bmi+$02))-$02):-1
-        .else
+        }
+        .else {
           .data $33, (($1234-(test_bmi+$02))-$02):-2
-        .end
+        }
     >
 }
 .object test_bne {
@@ -721,11 +725,12 @@ file 4510.lib {} <inline>
     section: code
     body <
         .data $d0, -$02
-        .if .in_range(-$80, $7f, (($1234-(test_bne+$02))-$02))
+        .if .in_range(-$80, $7f, (($1234-(test_bne+$02))-$02)) {
           .data $d0, (($1234-(test_bne+$02))-$02):-1
-        .else
+        }
+        .else {
           .data $d3, (($1234-(test_bne+$02))-$02):-2
-        .end
+        }
     >
 }
 .object test_bpl {
@@ -733,11 +738,12 @@ file 4510.lib {} <inline>
     section: code
     body <
         .data $10, -$02
-        .if .in_range(-$80, $7f, (($1234-(test_bpl+$02))-$02))
+        .if .in_range(-$80, $7f, (($1234-(test_bpl+$02))-$02)) {
           .data $10, (($1234-(test_bpl+$02))-$02):-1
-        .else
+        }
+        .else {
           .data $13, (($1234-(test_bpl+$02))-$02):-2
-        .end
+        }
     >
 }
 .object test_bra {
@@ -745,11 +751,12 @@ file 4510.lib {} <inline>
     section: code
     body <
         .data $80, -$02
-        .if .in_range(-$80, $7f, (($1234-(test_bra+$02))-$02))
+        .if .in_range(-$80, $7f, (($1234-(test_bra+$02))-$02)) {
           .data $80, (($1234-(test_bra+$02))-$02):-1
-        .else
+        }
+        .else {
           .data $83, (($1234-(test_bra+$02))-$02):-2
-        .end
+        }
     >
 }
 .object test_brk {
@@ -764,11 +771,12 @@ file 4510.lib {} <inline>
     section: code
     body <
         .data $80, -$02
-        .if .in_range(-$80, $7f, (($1234-(test_bru+$02))-$02))
+        .if .in_range(-$80, $7f, (($1234-(test_bru+$02))-$02)) {
           .data $80, (($1234-(test_bru+$02))-$02):-1
-        .else
+        }
+        .else {
           .data $83, (($1234-(test_bru+$02))-$02):-2
-        .end
+        }
     >
 }
 .object test_bsr {
@@ -783,11 +791,12 @@ file 4510.lib {} <inline>
     section: code
     body <
         .data $50, -$02
-        .if .in_range(-$80, $7f, (($1234-(test_bvc+$02))-$02))
+        .if .in_range(-$80, $7f, (($1234-(test_bvc+$02))-$02)) {
           .data $50, (($1234-(test_bvc+$02))-$02):-1
-        .else
+        }
+        .else {
           .data $53, (($1234-(test_bvc+$02))-$02):-2
-        .end
+        }
     >
 }
 .object test_bvs {
@@ -795,11 +804,12 @@ file 4510.lib {} <inline>
     section: code
     body <
         .data $70, -$02
-        .if .in_range(-$80, $7f, (($1234-(test_bvs+$02))-$02))
+        .if .in_range(-$80, $7f, (($1234-(test_bvs+$02))-$02)) {
           .data $70, (($1234-(test_bvs+$02))-$02):-1
-        .else
+        }
+        .else {
           .data $73, (($1234-(test_bvs+$02))-$02):-2
-        .end
+        }
     >
 }
 .object test_clc {
