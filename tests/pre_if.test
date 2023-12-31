@@ -1,0 +1,68 @@
+arguments --target c64-basic --create-library -Dcommandline a.s
+file a.s <>
+.define source_file
+.define undefined
+.undefine undefined
+
+.pre_if .defined(not_defined)
+not_defined = "! not defined"
+.pre_end
+
+.pre_if .defined(undefined)
+undefined = "! undefined"
+.pre_end
+
+.pre_if .defined(commandline)
+commandline = "commandline"
+.pre_end
+
+.pre_if .defined(source_file)
+source_file = "source file"
+.pre_end
+
+.pre_if .defined(C64)
+target = "target"
+.pre_end
+
+.pre_if .defined(undefined)
+.pre_else
+else = "else"
+.pre_end
+
+.pre_if .defined(source_file)
+.pre_else
+false_else = "! false else"
+.pre_end
+
+.pre_if .defined(source_file)
+.pre_else_if .defined(source_file)
+skipped_else_if = "! skipped else if"
+.pre_end
+
+.pre_if .defined(source_file)
+.pre_else_if .defined(undefined)
+.pre_else
+skipped_else = "! skipped else"
+.pre_end
+end-of-inline-data
+
+file a.lib {} <>
+.format_version 1.0
+.target "c64-basic"
+.constant commandline {
+    visibility: private
+    value: "commandline"
+}
+.constant else {
+    visibility: private
+    value: "else"
+}
+.constant source_file {
+    visibility: private
+    value: "source file"
+}
+.constant target {
+    visibility: private
+    value: "target"
+}
+end-of-inline-data

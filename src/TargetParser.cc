@@ -104,6 +104,7 @@ Target TargetParser::parse(Symbol name, Symbol file_name) {
     if (!had_cpu) {
         throw ParseException(Location(), "missing CPU declaration");
     }
+    target.defines = tokenizer.defines;
     return std::move(target);
 }
 

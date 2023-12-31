@@ -1,6 +1,17 @@
+## Soon
+
+- Move location from BaseExpression to Expression, update centrally
+- Use braces to scope `.if` in objects.
+- Treat all source files as one library, only import what's used in target.
+- Add `.pin <name> <address>` to target to specify address of object, mark it as used.
+- Add `.uses <object>`, `.used` modifiers to objects.
+- Add `.use <object>` directive.
+- Allow objects, constants in target.
+- Character constants, optionally with encoding (`'a':screen`)
+- Add `.repeat` in objects.
+
 ## StringEncoding
 
-- allow stirngs in expressions
 - fix target specified in source file (CPU punctuation doesn't get added, assemlby instructions not recognized)
 - allow adding library in target description
 - fix `.import` in assemlby source file
@@ -17,13 +28,8 @@
 
 ## Missing Features
 
-- Allow pinning object to fixed address in map file. (`.pin name address`)
 - Evaluate program/library constants in output elements.
 - Add optional priorities to sections.
-- Allow specifying libraries in map file.
-- Support for text.
-- Support for integer as text (e. g. for start sys).
-- Check for objects in unknown sections. 
 
 
 ## Optimizations

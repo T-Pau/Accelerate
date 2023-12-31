@@ -32,6 +32,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "DefinedExpression.h"
 
 
+#include "EvaluationContext.h"
 #include "ParseException.h"
 #include "VariableExpression.h"
 
@@ -49,8 +50,12 @@ Expression DefinedExpression::create(const std::vector<Expression>& arguments) {
 }
 
 std::optional<Expression> DefinedExpression::evaluated(const EvaluationContext& context) const {
-    // TODO: Add defines to evaluation context and return true/false appropriately.
-    return {};
+    if (context.defines.contains(symbol)) {
+        return Expression(true);
+    }
+    else {
+        return Expression(false);
+    }
 }
 
 void DefinedExpression::serialize_sub(std::ostream& stream) const {

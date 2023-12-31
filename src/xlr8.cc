@@ -69,7 +69,7 @@ private:
     Path library_path;
     Path include_path;
     Path system_path;
-    std::unordered_map<Symbol, bool> defines_overrides;
+    std::unordered_set<Symbol> defines;
 
     std::vector<File> files;
 };
@@ -109,7 +109,7 @@ void xlr8::process() {
                 linker->mode = Linker::CREATE_LIBRARY;
             }
             else if (option.name == "define") {
-                defines_overrides[Symbol(option.argument)] = true;
+                defines.insert(Symbol(option.argument));
             }
             else if (option.name == "include-directory") {
                 include_path.append_directory(option.argument);
@@ -124,7 +124,7 @@ void xlr8::process() {
                 target_name = option.argument;
             }
             else if (option.name == "undefine") {
-                defines_overrides[Symbol(option.argument)] = false;
+                defines.erase(Symbol(option.argument));
             }
         }
         catch (Exception& ex) {
@@ -155,7 +155,7 @@ void xlr8::process() {
             auto extension = std::filesystem::path(file_name).extension();
 
             if (extension == ".s") {
-                files.emplace_back(file_name, Assembler(linker->target, include_path, defines_overrides).parse(Symbol(file_name)));
+                files.emplace_back(file_name, Assembler(linker->target, include_path, defines).parse(Symbol(file_name)));
             }
 /*            else if (extension == ".o") {
                 if (linker->mode == Linker::COMPILE) {

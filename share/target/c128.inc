@@ -1,5 +1,5 @@
 .cpu "6502"
 
-.define __C128_
+.define C128
 
 .include "c64-encodings.inc"

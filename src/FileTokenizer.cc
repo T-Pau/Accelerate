@@ -31,16 +31,45 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "FileTokenizer.h"
 
-#include "Base64.h"
 #include <algorithm>
-#include <utility>
 
+#include "Base64.h"
+#include "ExpressionParser.h"
 #include "FileReader.h"
 #include "Int.h"
 #include "ParseException.h"
+#include "SequenceTokenizer.h"
 
-bool FileTokenizer::initialized = false;
-Token FileTokenizer::token_include;
+const Token FileTokenizer::token_define{Token::Type::PREPROCESSOR, ".define"};
+const Token FileTokenizer::token_include{Token::Type::PREPROCESSOR, ".include"};
+const Token FileTokenizer::token_pre_end{Token::Type::PREPROCESSOR, ".pre_end"};
+const Token FileTokenizer::token_pre_else{Token::Type::PREPROCESSOR, ".pre_else"};
+const Token FileTokenizer::token_pre_else_if{Token::Type::PREPROCESSOR, ".pre_else_if"};
+const Token FileTokenizer::token_pre_if{Token::Type::PREPROCESSOR, ".pre_if"};
+const Token FileTokenizer::token_undefine{Token::Type::PREPROCESSOR, ".undefine"};
+// clang-format off
+const std::unordered_map<Token, FileTokenizer::PreprocessorDirective> FileTokenizer::preprocessor_directives = {
+    {token_define, PreprocessorDirective{1, 1, {TokenGroup{Token::NAME}}, &FileTokenizer::preprocess_define}},
+    {token_include, PreprocessorDirective{1, 1, {TokenGroup{Token::STRING}}, &FileTokenizer::preprocess_include}},
+    {token_pre_end, PreprocessorDirective{0, 0, {}, &FileTokenizer::preprocess_pre_end}},
+    {token_pre_else, PreprocessorDirective{0, 0, {}, &FileTokenizer::preprocess_pre_else}},
+    {token_pre_else_if, PreprocessorDirective{1, {}, {}, &FileTokenizer::preprocess_pre_if}},
+    {token_pre_if, PreprocessorDirective{1, {}, {}, &FileTokenizer::preprocess_pre_if}},
+    {token_undefine, PreprocessorDirective{1, 1, {TokenGroup{Token::NAME}}, &FileTokenizer::preprocess_define}}
+};
+// clang-format on
+
+FileTokenizer::FileTokenizer(const Path& path, bool use_preprocessor, const std::unordered_set<Symbol>& defines) : path{path}, use_preprocessor{use_preprocessor}, defines{defines} {
+    if (use_preprocessor) {
+        add_literal(token_define);
+        add_literal(token_include);
+        add_literal(token_pre_else);
+        add_literal(token_pre_else_if);
+        add_literal(token_pre_end);
+        add_literal(token_pre_if);
+        add_literal(token_undefine);
+    }
+}
 
 void FileTokenizer::push(Symbol file_name) {
     const auto& lines = FileReader::global.read(file_name);
@@ -58,7 +87,12 @@ Token FileTokenizer::sub_next() {
         auto token = next_raw();
 
         if (!use_preprocessor || !token.is_preprocessor()) {
-            return token;
+            if (pre_is_procesing()) {
+                return token;
+            }
+            else {
+                continue;
+            }
         }
 
         if (!beginning_of_line) {
@@ -66,15 +100,41 @@ Token FileTokenizer::sub_next() {
         }
 
         try {
-            std::vector<Token> tokens = {token};
-            while ((token = next_raw()) && !token.is_newline()) {
-                tokens.emplace_back(token);
+            std::vector<Token> arguments = {};
+            Token argument_token;
+            while (((argument_token = next_raw())) && !argument_token.is_newline()) {
+                arguments.emplace_back(argument_token);
             }
-            preprocess(tokens);
-        }
-        catch (ParseException& ex) {
+            preprocess(token, arguments);
+        } catch (ParseException& ex) {
             FileReader::global.error(ex.location, "%s", ex.what());
         }
+    }
+}
+
+void FileTokenizer::PreState::process_else() {
+    if (else_seen) {
+        throw Exception(".pre_else after .pre_else");
+    }
+    if (skip_rest) {
+        processing = false;
+    }
+    else {
+        processing = !processing;
+    }
+    else_seen = true;
+}
+
+void FileTokenizer::PreState::process_else_if(bool condition) {
+    if (else_seen) {
+        throw Exception(".pre_else_if after .pre_else");
+    }
+    if (skip_rest) {
+        processing = false;
+    }
+    else {
+        processing = condition;
+        skip_rest = condition;
     }
 }
 
@@ -115,6 +175,9 @@ Token FileTokenizer::next_raw() {
 
         if (c == EOF) {
             eof_location = current_location();
+            if (!current_source->pre_states.empty()) {
+                FileReader::global.error(eof_location, "unclosed .pre_if at end of file");
+            }
             current_source = nullptr;
             sources.pop_back();
             if (sources.empty()) {
@@ -176,6 +239,16 @@ Token FileTokenizer::next_raw() {
     }
 }
 
+bool FileTokenizer::pre_is_procesing() const {
+    if (!current_source) {
+        return true;
+    }
+    if (current_source->pre_states.empty()) {
+        return true;
+    }
+    return current_source->pre_states.back();
+}
+
 Token FileTokenizer::parse_base64(Location location) {
     auto decoder = Base64Deocder();
 
@@ -193,8 +266,7 @@ Token FileTokenizer::parse_base64(Location location) {
 
         try {
             decoder.decode(static_cast<char>(c));
-        }
-        catch (Exception& ex) {
+        } catch (Exception& ex) {
             throw ParseException(location, ex);
         }
     }
@@ -253,7 +325,6 @@ Token FileTokenizer::parse_number(unsigned int base, Location location) {
     }
 }
 
-
 int FileTokenizer::convert_digit(int c) {
     if (isdigit(c)) {
         return c - '0';
@@ -288,7 +359,6 @@ Token FileTokenizer::parse_name(Token::Type type, Location location) {
         }
     }
 }
-
 
 Token FileTokenizer::parse_string(Location location) {
     std::string value;
@@ -337,7 +407,7 @@ Token FileTokenizer::parse_string(Location location) {
     }
 }
 
-Location FileTokenizer::current_location() const{
+Location FileTokenizer::current_location() const {
     if (current_source == nullptr) {
         return eof_location;
     }
@@ -346,55 +416,90 @@ Location FileTokenizer::current_location() const{
     }
 }
 
-void FileTokenizer::add_punctuations(const std::unordered_set<std::string> &names) {
-    for (const auto& name: names) {
+void FileTokenizer::add_punctuations(const std::unordered_set<std::string>& names) {
+    for (const auto& name : names) {
         add_literal(Token::PUNCTUATION, name);
     }
 }
 
-FileTokenizer::FileTokenizer(const Path& path, bool use_preprocessor): path(path), use_preprocessor(use_preprocessor) {
-    if (use_preprocessor) {
-        if (!initialized) {
-            token_include = Token(Token::PREPROCESSOR, ".include");
-            initialized = true;
-        }
-        matcher.add(".include", Token::PREPROCESSOR);
-    }
-}
+void FileTokenizer::preprocess(const Token& directive, const std::vector<Token>& arguments) {
+    auto it = preprocessor_directives.find(directive);
 
-void FileTokenizer::preprocess(const std::vector<Token>& tokens) {
-    const auto& directive = tokens.front();
-
-    if (directive == token_include) {
-        if (tokens.size() < 2) {
-            throw ParseException(directive, "missing argument for %s", directive.as_string().c_str());
-        }
-        if (tokens.size() > 2) {
-            throw ParseException(directive, "too many arguments for %s", directive.as_string().c_str());
-        }
-        const auto& filename_token = tokens[1];
-
-        if (!filename_token.is_string()) {
-            throw ParseException(filename_token, "expected string");
-        }
-
-        try {
-            auto file = find_file(filename_token.as_symbol());
-            if (file.empty()) {
-                throw ParseException(filename_token, "file not found");
-            }
-            push(file);
-        }
-        catch (Exception& ex) {
-            throw ParseException(filename_token, "%s", ex.what());
-        }
-    }
-    else {
+    if (it == preprocessor_directives.end()) {
         throw ParseException(directive, "unknown preprocessor directive");
     }
+
+    it->second(*this, directive, arguments);
 }
 
-bool FileTokenizer::is_identifier(const std::string &s) {
+void FileTokenizer::preprocess_define(const Token& directive, const std::vector<Token>& arguments) {
+    const auto& name = arguments[0];
+    if (directive == token_define) {
+        define(name.as_symbol());
+    }
+    else {
+        undefine(name.as_symbol());
+    }
+}
+
+void FileTokenizer::preprocess_include(const Token& directive, const std::vector<Token>& arguments) {
+    const auto& filename_token = arguments[0];
+
+    try {
+        auto file = find_file(filename_token.as_symbol());
+        if (file.empty()) {
+            throw ParseException(filename_token, "file not found");
+        }
+        push(file);
+    } catch (Exception& ex) {
+        throw ParseException(filename_token, "%s", ex.what());
+    }
+}
+
+void FileTokenizer::preprocess_pre_end(const Token& directive, const std::vector<Token>& arguments) {
+    if (current_source->pre_states.empty()) {
+        throw ParseException(directive, "%s outside .pre_if", directive.as_string().c_str());
+    }
+    current_source->pre_states.pop_back();
+}
+
+void FileTokenizer::preprocess_pre_else(const Token& directive, const std::vector<Token>& arguments) {
+    if (current_source->pre_states.empty()) {
+        throw ParseException(directive, "%s outside .pre_if", directive.as_string().c_str());
+    }
+
+    current_source->pre_states.back().process_else();
+}
+
+void FileTokenizer::preprocess_pre_if(const Token& directive, const std::vector<Token>& arguments) {
+    if (directive == token_pre_else_if) {
+        if (current_source->pre_states.empty()) {
+            throw ParseException(directive, "%s outside .pre_if", directive.as_string().c_str());
+        }
+        if (current_source->pre_states.back().skipping_rest()) {
+            current_source->pre_states.back().process_else_if(false);
+            return;
+        }
+    }
+
+    auto tokenizer = SequenceTokenizer{arguments};
+    auto expression = ExpressionParser{tokenizer}.parse();
+    auto result = EvaluationResult{};
+    auto context = EvaluationContext{result, EvaluationContext::STANDALONE, std::make_shared<Environment>(), defines};
+    expression.evaluate(context);
+    if (!expression.has_value()) {
+        throw ParseException(directive, "condition in %s must be constant", directive.as_string().c_str());
+    }
+    auto condition = expression.value()->boolean_value();
+    if (directive == token_pre_else_if) {
+        current_source->pre_states.back().process_else_if(condition);
+    }
+    else {
+        current_source->pre_states.emplace_back(condition);
+    }
+}
+
+bool FileTokenizer::is_identifier(const std::string& s) {
     if (s.empty()) {
         return false;
     }
@@ -407,10 +512,13 @@ bool FileTokenizer::is_identifier(const std::string &s) {
     return true;
 }
 
-Symbol FileTokenizer::find_file(Symbol file_name) {
-    return path.find(file_name, current_source->location().file);
-}
+Symbol FileTokenizer::find_file(Symbol file_name) { return path.find(file_name, current_source->location().file); }
 
+void FileTokenizer::define(const std::unordered_set<Symbol>& defines) {
+    for (const auto& name : defines) {
+        define(name);
+    }
+}
 
 int FileTokenizer::Source::next() {
     if (line >= lines.size()) {
@@ -440,7 +548,7 @@ void FileTokenizer::Source::unget() {
     }
 }
 
-void FileTokenizer::Source::reset_to(const Location &new_location) {
+void FileTokenizer::Source::reset_to(const Location& new_location) {
     if (new_location.file != file_) {
         throw ParseException(location(), "can't reset to new_location in different file");
     }
@@ -448,8 +556,7 @@ void FileTokenizer::Source::reset_to(const Location &new_location) {
     column = new_location.start_column;
 }
 
-
-std::optional<Token::Type> FileTokenizer::MatcherNode::match(FileTokenizer::Source &source, std::string& name) {
+std::optional<Token::Type> FileTokenizer::MatcherNode::match(FileTokenizer::Source& source, std::string& name) {
     auto c = source.next();
     if (c == EOF) {
         if (name.empty()) {
@@ -463,7 +570,7 @@ std::optional<Token::Type> FileTokenizer::MatcherNode::match(FileTokenizer::Sour
 
     if (it == next.end()) {
         while (suffix_characters.contains(static_cast<char>(c))) {
-            name += c;
+            name += static_cast<char>(c);
             c = source.next();
             if (c == EOF) {
                 break;
@@ -495,11 +602,10 @@ std::optional<Token::Type> FileTokenizer::MatcherNode::match(FileTokenizer::Sour
     }
 
     name += static_cast<char>(c);
-    return it->second->match(source,name);
+    return it->second->match(source, name);
 }
 
-
-void FileTokenizer::MatcherNode::add(const char *string, Token::Type type, const std::unordered_set<char>& new_suffix, bool match_in_word_) {
+void FileTokenizer::MatcherNode::add(const char* string, Token::Type type, const std::unordered_set<char>& new_suffix, bool match_in_word_) {
     if (string[0] == '\0') {
         if (match_type.has_value() && (match_type.value() != type || match_in_word != match_in_word_)) {
             throw Exception("literal already defined with different type"); // TODO: include more detail
@@ -519,7 +625,7 @@ void FileTokenizer::MatcherNode::add(const char *string, Token::Type type, const
         if (suffix_characters.contains(string[0])) {
             throw Exception("literal conflicts with already defined suffix characters"); // TODO include more detail
         }
-        if (next.find(string[0]) == next.end()) {
+        if (!next.contains(string[0])) {
             next[string[0]] = std::make_unique<MatcherNode>();
         }
         next[string[0]]->add(string + 1, type, new_suffix, match_in_word_);
@@ -527,14 +633,28 @@ void FileTokenizer::MatcherNode::add(const char *string, Token::Type type, const
 }
 
 bool FileTokenizer::MatcherNode::conflicts(const std::unordered_set<char>& new_suffix) const {
-    return std::any_of(new_suffix.begin(), new_suffix.end(), [this](char c) {
-      return next.find(c) != next.end();
-    });
+    return std::any_of(new_suffix.begin(), new_suffix.end(), [this](char c) { return next.contains(c); });
+}
+
+void FileTokenizer::PreprocessorDirective::operator()(FileTokenizer& tokenizer, const Token& directive, const std::vector<Token>& arguments) const {
+    if (min_arguments && arguments.size() < min_arguments) {
+        throw ParseException(directive, "too few arguments to '%s'", directive.as_string().c_str());
+    }
+    if (max_arguments && arguments.size() > max_arguments) {
+        throw ParseException(directive, "too many arguments to '%s'", directive.as_string().c_str());
+    }
+    for (size_t i = 0; i < argument_type.size(); i++) {
+        if (!argument_type[i].contains(arguments[i])) {
+            throw ParseException(arguments[i], "expected %s", argument_type[i].name.c_str());
+        }
+    }
+
+    (tokenizer.*handler)(directive, arguments);
 }
 
 void FileTokenizer::add_literal(Token::Type match, const std::string& name, const std::string& suffix_characters) {
     auto suffix_set = std::unordered_set<char>();
-    for (auto c: suffix_characters) {
+    for (auto c : suffix_characters) {
         suffix_set.insert(c);
     }
     matcher.add(name.c_str(), match, suffix_set);

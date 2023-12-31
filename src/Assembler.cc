@@ -31,8 +31,6 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "Assembler.h"
 
-#include <utility>
-
 #include "BodyParser.h"
 #include "ParseException.h"
 #include "FileReader.h"
@@ -65,7 +63,7 @@ void Assembler::initialize() {
     }
 }
 
-Assembler::Assembler(const Target* target, const Path& path, const std::unordered_map<Symbol, bool>& defines_overrides): tokenizer{path} , defines_overrides(defines_overrides) {
+Assembler::Assembler(const Target* target, const Path& path, std::unordered_set<Symbol> defines): tokenizer{path, true, std::move(defines)} {
     set_target(target);
 }
 
@@ -74,6 +72,7 @@ std::shared_ptr<ObjectFile> Assembler::parse(Symbol file_name) {
     if (target) {
         Target::set_current_target(target);
         target->cpu->setup(tokenizer);
+        tokenizer.define(target->defines);
     }
     ExpressionParser::setup(tokenizer);
     BodyParser::setup(tokenizer);
@@ -160,7 +159,7 @@ void Assembler::parse_symbol(Visibility visibility, const Token &name) {
         }
         else if (token == Token::curly_open) {
             // TODO: error if .reserved
-            object->body = BodyParser(tokenizer, object, target->cpu, &defines).parse();
+            object->body = BodyParser(tokenizer, object, target->cpu, &tokenizer.defines).parse();
             break;
         }
         // TODO: parameters
@@ -256,18 +255,7 @@ void Assembler::set_target(const Target* new_target) {
     }
     target = new_target;
     if (target) {
-        defines = target->defines;
-    }
-    else {
-        defines.clear();
-    }
-    for (const auto& pair: defines_overrides) {
-        if (pair.second) {
-            defines.insert(pair.first);
-        }
-        else {
-            defines.erase(pair.first);
-        }
+        tokenizer.define(target->defines);
     }
 }
 

@@ -39,7 +39,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 class Assembler {
 public:
-    explicit Assembler(const Target* target, const Path& path, const std::unordered_map<Symbol, bool>& defines_overrides);
+    explicit Assembler(const Target* target, const Path& path, std::unordered_set<Symbol> defines);
 
     std::shared_ptr<ObjectFile> parse(Symbol file_name);
 
@@ -56,8 +56,6 @@ private:
     void set_target(const Target* new_target);
 
     const Target* target{};
-    const std::unordered_map<Symbol, bool>& defines_overrides;
-    std::unordered_set<Symbol> defines;
 
     Symbol current_section;
     Visibility current_visibility = Visibility::PRIVATE;

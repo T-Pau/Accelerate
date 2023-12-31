@@ -33,7 +33,6 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define EVALUATION_CONTEXT_H
 
 #include <unordered_set>
-#include <utility>
 
 #include "Environment.h"
 #include "EvaluationResult.h"
@@ -49,11 +48,11 @@ class EvaluationContext {
         ARGUMENTS,          // Bind arguments in function call or instruction encoding.
         ENTITY,             // Evaluate object with completed body.
         MACRO_EXPANSION,    // Bind arguments and duplicate labels in macro invocation.
-        STANDALONE          // TODO: What's this used for? Remove?
+        STANDALONE          // Preprocessor if condition.
     };
 
     // ARGUMENTS, MACRO_EXPANSION, STANDALONE
-    EvaluationContext(EvaluationResult& result, EvaluationType type, std::shared_ptr<Environment> environment, SizeRange offset = SizeRange(0, {})): type(type), environment(std::move(environment)), result(result), offset(offset) {}
+    EvaluationContext(EvaluationResult& result, EvaluationType type, std::shared_ptr<Environment> environment, std::unordered_set<Symbol> defines = {}, SizeRange offset = SizeRange(0, {})): type(type), environment(std::move(environment)), defines{std::move(defines)}, result(result), offset(offset) {}
     // ENTITY
     EvaluationContext(EvaluationResult& result, Entity* entity);
 
@@ -70,6 +69,7 @@ class EvaluationContext {
     EvaluationType type;
     Entity* entity = nullptr;
     std::shared_ptr<Environment> environment;
+    std::unordered_set<Symbol> defines;
     SizeRange offset = SizeRange(0, {});
     bool conditional = false;
     std::unordered_set<Symbol> evaluating_variables; // Variables currently being evaluated (used for loop detection).
