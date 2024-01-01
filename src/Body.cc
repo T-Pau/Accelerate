@@ -138,9 +138,9 @@ ErrorBody *Body::as_error() const {
     return std::dynamic_pointer_cast<ErrorBody>(element).get();
 }
 
-LabelBody *Body::as_label() const {
-    return std::dynamic_pointer_cast<LabelBody>(element).get();
-}
+LabelBody* Body::as_label() const { return std::dynamic_pointer_cast<LabelBody>(element).get(); }
+
+ScopeBody* Body::as_scope() const {return std::dynamic_pointer_cast<ScopeBody>(element).get();}
 
 std::optional<Body> Body::append_sub(Body new_element) {
     return element->append_sub(*this, std::move(new_element));
@@ -156,5 +156,10 @@ Body Body::make_unique() const {
 }
 
 Body Body::scoped() const {
-    return ScopeBody::create(*this);
+    if (is_scope()) {
+        return *this;
+    }
+    else {
+        return ScopeBody::create(*this);
+    }
 }

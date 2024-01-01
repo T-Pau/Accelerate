@@ -32,6 +32,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "RepeatBody.h"
 
 Body RepeatBody::create(Symbol variable, const std::optional<Expression>& start, const Expression& end, const Body& body) {
+    auto scoped_body = body.scoped();
     if ((!start || start.has_value()) && end.has_value()) {
         auto expanded_body = Body();
         auto step = Value(static_cast<uint64_t>(1));
@@ -41,25 +42,24 @@ Body RepeatBody::create(Symbol variable, const std::optional<Expression>& start,
         for (auto index = start ? *start->value() : Value(static_cast<uint64_t>(0)); index < *end.value(); index += step) {
             if (variable) {
                 environment->add(variable, Expression(index));
-                auto new_body = body.evaluated(context);
+                auto new_body = scoped_body.evaluated(context);
                 // TODO: handle result
-                expanded_body.append(new_body ? new_body->scoped() : body);
+                expanded_body.append(new_body ? *new_body : body);
             }
             else {
-                expanded_body.append(body);
+                expanded_body.append(scoped_body);
             }
         }
         return expanded_body;
     }
     else {
-        return Body(std::make_shared<RepeatBody>(variable, start, end, body));
+        return Body(std::make_shared<RepeatBody>(variable, start, end, scoped_body));
     }
 }
 
 std::optional<Body> RepeatBody::evaluated(const EvaluationContext& context) const {
     auto new_start = start ? start->evaluated(context) : std::optional<Expression>{};
     auto new_end = end.evaluated(context);
-    // TODO: isolate unnamed labels
     auto new_body = body.evaluated(context);
 
     if (new_start || new_end || new_body) {

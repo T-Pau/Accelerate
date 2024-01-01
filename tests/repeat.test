@@ -25,7 +25,12 @@ file a.lib {} <>
     visibility: private
     section: data
     body <
-        .data $01, $02, $01, $02
+        .scope {
+          .data $01, $02
+        }
+        .scope {
+          .data $01, $02
+        }
     >
 }
 .object variable {

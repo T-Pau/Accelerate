@@ -44,6 +44,7 @@ class DataBodyElement;
 class ErrorBody;
 class IfBodyClause;
 class LabelBody;
+class ScopeBody;
 
 class Body {
 public:
@@ -72,6 +73,7 @@ public:
     [[nodiscard]] DataBody* as_data() const;
     [[nodiscard]] ErrorBody* as_error() const;
     [[nodiscard]] LabelBody* as_label() const;
+    [[nodiscard]] ScopeBody* as_scope() const;
     void append(const Body& element);
     std::optional<Body> append_sub(Body element);
     [[nodiscard]] std::optional<Body> back() const;
@@ -85,6 +87,7 @@ public:
     [[nodiscard]] bool is_data() const {return as_data() != nullptr;}
     [[nodiscard]] bool is_error() const {return as_error() != nullptr;}
     [[nodiscard]] bool is_label() const {return as_label() != nullptr;}
+    [[nodiscard]] bool is_scope() const {return as_scope() != nullptr;}
     [[nodiscard]] Body scoped() const;
     void serialize(std::ostream& stream, const std::string& prefix = "") const {element->serialize(stream, prefix);}
     [[nodiscard]] std::optional<uint64_t> size() const {return element->size();}
