@@ -32,6 +32,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Object.h"
 
 #include "BodyElement.h"
+#include "ExpressionParser.h"
 #include "ObjectFile.h"
 #include "ParseException.h"
 #include "SequenceTokenizer.h"
@@ -49,11 +50,10 @@ const Token Object::token_reserve{Token::NAME, RESERVE};
 const Token Object::token_section{Token::NAME, SECTION};
 
 
-Object::Object(ObjectFile* owner, Token name_, const std::shared_ptr<ParsedValue>& definition): Entity(owner, name_, definition) {
+Object::Object(ObjectFile* owner, const Token& name, const std::shared_ptr<ParsedValue>& definition): Entity(owner, name, definition) {
     auto parameters = definition->as_dictionary();
 
-    auto address_value = parameters->get_optional(token_address);
-    if (address_value) {
+    if (auto address_value = parameters->get_optional(token_address)) {
         auto tokenizer = SequenceTokenizer(address_value->location, address_value->as_scalar()->tokens);
         address = Address(tokenizer);
         if (!tokenizer.ended()) {
@@ -61,8 +61,7 @@ Object::Object(ObjectFile* owner, Token name_, const std::shared_ptr<ParsedValue
         }
     }
 
-    auto alignment_value = parameters->get_optional(token_alignment);
-    if (alignment_value) {
+    if (auto alignment_value = parameters->get_optional(token_alignment)) {
         auto alignment_token = alignment_value->as_singular_scalar()->token();
         if (!alignment_token.is_unsigned()) {
             throw ParseException(alignment_token, "unsigned integer expected");
@@ -76,11 +75,11 @@ Object::Object(ObjectFile* owner, Token name_, const std::shared_ptr<ParsedValue
         throw ParseException(parameters->location, "object must contain exactly one of reserve and body");
     }
     if (reserve_value) {
-        auto reserve = reserve_value->as_singular_scalar()->token();
-        if (!reserve.is_unsigned()) {
-            throw ParseException(reserve, "unsigned integer expected");
+        if (!reserve_value->is_scalar()) {
+            throw ParseException(reserve_value->location, ".reserve must be scalar");
         }
-        reservation = reserve.as_unsigned();
+        auto tokenizer = SequenceTokenizer{reserve_value->as_scalar()->tokens};
+        reservation_expression = ExpressionParser{tokenizer}.parse();
     }
     else {
         body = body_value->as_body()->body;
@@ -91,7 +90,7 @@ Object::Object(ObjectFile* owner, Token name_, const std::shared_ptr<ParsedValue
 }
 
 
-Object::Object(ObjectFile *owner, const MemoryMap::Section *section, Visibility visibility, Token name): Entity(owner, name, visibility), section(section) {}
+Object::Object(ObjectFile *owner, const MemoryMap::Section *section, Visibility visibility, const Token& name): Entity(owner, name, visibility), section(section) {}
 
 
 std::ostream& operator<< (std::ostream& stream, const Object& object) {
@@ -110,13 +109,13 @@ void Object::serialize(std::ostream &stream) const {
         stream << "    " ALIGNMENT ": " << alignment << std::endl;
     }
     stream << "    " SECTION ": " << section->name << std::endl;
-    if (!body.empty()) {
+    if (is_reservation()) {
+        stream << "    " RESERVE ": " << *reservation_expression << std::endl;
+    }
+    else {
         stream << "    " BODY " <" << std::endl;
         body.serialize(stream, "        ");
         stream << "    >" << std::endl;
-    }
-    else {
-        stream << "    " RESERVE ": " << reservation << std::endl;
     }
     stream << "}" << std::endl;
 }
@@ -124,7 +123,12 @@ void Object::serialize(std::ostream &stream) const {
 
 SizeRange Object::size_range() const {
     if (is_reservation()) {
-        return SizeRange(reservation);
+        auto minimum_value = reservation_expression->minimum_value();
+        auto maximum_value = reservation_expression->maximum_value();
+        if ((minimum_value && !minimum_value->is_unsigned()) || maximum_value && !maximum_value->is_unsigned()) {
+            throw ParseException(reservation_expression->location(), "reservation must be unsigned");
+        }
+        return {minimum_value ? minimum_value->unsigned_value() : 0, maximum_value ? maximum_value->unsigned_value() : std::optional<uint64_t>{}};
     }
     else {
         return body.size_range();
@@ -134,7 +138,13 @@ SizeRange Object::size_range() const {
 
 void Object::evaluate() {
     EvaluationResult result;
-    body.evaluate(EvaluationContext(result, this));
+    auto context = EvaluationContext(result, this);
+    if (is_reservation()) {
+        reservation_expression->evaluate(context);
+    }
+    else {
+        body.evaluate((context));
+    }
     process_result(result);
 }
 

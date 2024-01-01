@@ -23,7 +23,7 @@ file a.lib {} <inline>
 .object foo {
     visibility: private
     section: zero_page
-    reserve: 1
+    reserve: $01
 }
 .object test {
     visibility: private

@@ -59,6 +59,7 @@ Body RepeatBody::create(Symbol variable, const std::optional<Expression>& start,
 std::optional<Body> RepeatBody::evaluated(const EvaluationContext& context) const {
     auto new_start = start ? start->evaluated(context) : std::optional<Expression>{};
     auto new_end = end.evaluated(context);
+    // TODO: isolate unnamed labels
     auto new_body = body.evaluated(context);
 
     if (new_start || new_end || new_body) {

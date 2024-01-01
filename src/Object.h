@@ -46,15 +46,16 @@ class ObjectFile;
 
 class Object: public Entity {
 public:
-    Object(ObjectFile* owner, Token name, const std::shared_ptr<ParsedValue>& definition);
-    Object(ObjectFile* owner, const MemoryMap::Section* section, Visibility visibility, Token name);
+    Object(ObjectFile* owner, const Token& name, const std::shared_ptr<ParsedValue>& definition);
+    Object(ObjectFile* owner, const MemoryMap::Section* section, Visibility visibility, const Token& name);
 
     bool static less_pointers(const Object* a, const Object* b) {return *a < *b;}
 
-    [[nodiscard]] bool is_reservation() const {return reservation > 0;}
+    [[nodiscard]] bool is_reservation() const {return reservation_expression.has_value();}
     [[nodiscard]] bool empty() const {return !is_reservation() && body.empty();}
     void evaluate();
     [[nodiscard]] bool has_address() const {return address.has_value();}
+    [[nodiscard]] std::optional<uint64_t> reservation() const;
     [[nodiscard]] SizeRange size_range() const;
 
     void serialize(std::ostream& stream) const;
@@ -63,7 +64,7 @@ public:
 
     const MemoryMap::Section* section;
     uint64_t alignment = 0;
-    uint64_t reservation = 0;
+    std::optional<Expression> reservation_expression;
     std::optional<Address> address;
 
     Body body;

@@ -15,7 +15,7 @@ file file.lib {} <inline>
 .object ptr {
     visibility: public
     section: zero_page
-    reserve: 2
+    reserve: $02
 }
 .object test {
     visibility: public

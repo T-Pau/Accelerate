@@ -1,0 +1,20 @@
+arguments --target 6502 --create-library a.s
+file a.s <>
+SIZE = $10
+.section reserved
+block .reserve SIZE * 2
+end-of-inline-data
+
+file a.lib {} <>
+.format_version 1.0
+.target "6502"
+.constant SIZE {
+    visibility: private
+    value: $10
+}
+.object block {
+    visibility: private
+    section: reserved
+    reserve: $20
+}
+end-of-inline-data

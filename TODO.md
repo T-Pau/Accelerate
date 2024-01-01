@@ -1,8 +1,5 @@
 ## Soon
 
-- Allow expressions as size of `.reserve`.
-
- 
 - Treat all source files as one library, only import what's used in target.
 - Add `.pin <name> <address>` to target to specify address of object, mark it as used.
 - Add `.uses <object>`, `.used` modifiers to objects.

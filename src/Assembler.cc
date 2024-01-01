@@ -32,10 +32,10 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Assembler.h"
 
 #include "BodyParser.h"
-#include "ParseException.h"
-#include "FileReader.h"
 #include "ExpressionParser.h"
+#include "FileReader.h"
 #include "LabelBody.h"
+#include "ParseException.h"
 
 bool Assembler::initialized = false;
 Symbol Assembler::symbol_opcode;
@@ -46,7 +46,6 @@ Token Assembler::token_reserve;
 Token Assembler::token_section;
 Token Assembler::token_target;
 Token Assembler::token_visibility;
-
 
 void Assembler::initialize() {
     if (!initialized) {
@@ -63,9 +62,7 @@ void Assembler::initialize() {
     }
 }
 
-Assembler::Assembler(const Target* target, const Path& path, std::unordered_set<Symbol> defines): tokenizer{path, true, std::move(defines)} {
-    set_target(target);
-}
+Assembler::Assembler(const Target* target, const Path& path, const std::unordered_set<Symbol>& defines) : tokenizer{path, true, defines} { set_target(target); }
 
 std::shared_ptr<ObjectFile> Assembler::parse(Symbol file_name) {
     initialize();
@@ -112,8 +109,7 @@ std::shared_ptr<ObjectFile> Assembler::parse(Symbol file_name) {
                 case Token::KEYWORD:
                     throw ParseException(token, "unexpected %s", token.type_name());
             }
-        }
-        catch (ParseException &ex) {
+        } catch (ParseException& ex) {
             FileReader::global.error(ex.location, "%s", ex.what());
             tokenizer.skip_until(TokenGroup::newline, true);
         }
@@ -126,8 +122,7 @@ std::shared_ptr<ObjectFile> Assembler::parse(Symbol file_name) {
     return object_file;
 }
 
-
-void Assembler::parse_assignment(Visibility visibility, const Token &name) {
+void Assembler::parse_assignment(Visibility visibility, const Token& name) {
     auto value = ExpressionParser(tokenizer).parse();
     object_file->add_constant(std::make_unique<ObjectFile::Constant>(object_file.get(), name, visibility, value));
 }
@@ -144,7 +139,7 @@ void Assembler::parse_section() {
     current_section = token.as_symbol();
 }
 
-void Assembler::parse_symbol(Visibility visibility, const Token &name) {
+void Assembler::parse_symbol(Visibility visibility, const Token& name) {
     if (!target) {
         tokenizer.skip_until(Token::curly_close, true);
         throw ParseException(name, "no target specified");
@@ -169,19 +164,16 @@ void Assembler::parse_symbol(Visibility visibility, const Token &name) {
         else if (token == token_align || token == token_reserve) {
             auto expression = ExpressionParser(tokenizer).parse();
 
-            auto value = expression.value();
-
             if (token == token_align) {
+                auto value = expression.value();
+
                 if (!value.has_value() || !value->is_unsigned()) {
                     throw ParseException(expression.location(), "alignment must be constant unsigned integer");
                 }
                 object->alignment = value->unsigned_value();
             }
             else {
-                if (!value.has_value() || !value->is_unsigned()) {
-                    throw ParseException(expression.location(), "reservation must be constant expression");
-                }
-                object->reservation = value->unsigned_value();
+                object->reservation_expression = expression;
             }
         }
         else {
@@ -201,8 +193,7 @@ void Assembler::parse_symbol(Visibility visibility, const Token &name) {
 }
 
 void Assembler::parse_directive(const Token& directive) {
-    auto visibility = VisibilityHelper::from_token(directive);
-    if (visibility) {
+    if (auto visibility = VisibilityHelper::from_token(directive)) {
         auto name = tokenizer.next();
         if (name == token_macro) {
             parse_macro(*visibility);
@@ -233,7 +224,6 @@ void Assembler::parse_directive(const Token& directive) {
         throw ParseException(directive, "unknown directive");
     }
     tokenizer.expect(Token::NEWLINE, TokenGroup::newline);
-
 }
 
 void Assembler::parse_target() {
