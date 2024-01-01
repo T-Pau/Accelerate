@@ -32,14 +32,14 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef BODY_PARSER_H
 #define BODY_PARSER_H
 
+#include "Body.h"
+#include "CPU.h"
+#include "IfBody.h"
+#include "ObjectFile.h"
+#include "RepeatBody.h"
+#include "SizeRange.h"
 #include "Token.h"
 #include "Tokenizer.h"
-#include "CPU.h"
-#include "ObjectFile.h"
-#include "Body.h"
-#include "IfBody.h"
-#include "LabelBody.h"
-#include "SizeRange.h"
 
 class BodyParser {
 public:
@@ -62,6 +62,7 @@ public:
 
 private:
     class IfNesting;
+    class RepeatNesting;
     class ScopeNesting;
 
     class Nesting {
@@ -72,15 +73,15 @@ private:
         virtual Body body() = 0;
 
         IfNesting* as_if() {return dynamic_cast<IfNesting*>(this);}
+        RepeatNesting* as_repeat() {return dynamic_cast<RepeatNesting*>(this);}
         ScopeNesting* as_scope() {return dynamic_cast<ScopeNesting*>(this);}
         bool is_if() {return as_if();}
+        bool is_repeat() {return as_repeat();}
         bool is_scope() {return as_scope();}
     };
 
     class IfNesting: public Nesting {
       public:
-        ~IfNesting() override = default;
-
         Body* operator[](size_t index) override {return &clauses[index].body;}
         Body body() override {return Body(clauses);}
 
@@ -91,10 +92,22 @@ private:
         std::vector<IfBodyClause> clauses;
     };
 
+    class RepeatNesting: public Nesting {
+    public:
+        RepeatNesting(Symbol variable, std::optional<Expression> start, Expression end): variable{variable}, start{std::move(start)}, end{std::move(end)} {}
+
+        Body* operator[](size_t index) override {return &inner_body;}
+        Body body() override {return RepeatBody::create(variable, start, end, inner_body);}
+
+    private:
+        Symbol variable;
+        std::optional<Expression> start;
+        Expression end;
+        Body inner_body;
+    };
+
     class ScopeNesting: public Nesting {
       public:
-        ~ScopeNesting() override = default;
-
         Body* operator[](size_t index) override {return &inner_body;}
         Body body() override {return inner_body.scoped();}
 
@@ -151,6 +164,7 @@ private:
     void parse_else_if();
     void parse_if();
     void parse_memory();
+    void parse_repeat();
     void parse_scope();
 
     static const Symbol symbol_pc;
@@ -161,6 +175,7 @@ private:
     static const Token token_error;
     static const Token token_if;
     static const Token token_memory;
+    static const Token token_repeat;
     static const Token token_scope;
 
     static const std::unordered_map<Symbol, void (BodyParser::*)()> directive_parser_methods;

@@ -105,6 +105,10 @@ public:
     Value operator>>(uint64_t other) const {return *this >> Value(other);}
     Value operator&&(const Value& other) const;
     Value operator||(const Value& other) const;
+    Value& operator+=(const Value& other) {*this = *this + other; return *this;}
+    Value& operator-=(const Value& other) {*this = *this - other; return *this;}
+    Value& operator/=(const Value& other) {*this = *this / other; return *this;}
+    Value& operator*=(const Value& other) {*this = *this * other; return *this;}
 
 private:
     std::optional<std::variant<bool, double, int64_t, uint64_t, Symbol, std::string>> value;

@@ -1,0 +1,45 @@
+arguments --target 6502 --create-library a.s
+file a.s <>
+.section data
+no_variable {
+    .repeat 2 {
+        .data $01, $02
+    }
+}
+variable {
+    .repeat i, 2 {
+        .data i * 2
+    }
+}
+variable_start {
+    .repeat i, 2, 4 {
+        .data i
+    }
+}
+end-of-inline-data
+
+file a.lib {} <>
+.format_version 1.0
+.target "6502"
+.object no_variable {
+    visibility: private
+    section: data
+    body <
+        .data $01, $02, $01, $02
+    >
+}
+.object variable {
+    visibility: private
+    section: data
+    body <
+        .data $00, $02
+    >
+}
+.object variable_start {
+    visibility: private
+    section: data
+    body <
+        .data $02, $03
+    >
+}
+end-of-inline-data

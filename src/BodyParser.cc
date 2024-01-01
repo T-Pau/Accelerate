@@ -31,14 +31,14 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "BodyParser.h"
 
-#include "ParseException.h"
-#include "FileReader.h"
-#include "ExpressionParser.h"
-#include "ValueExpression.h"
 #include "ExpressionNode.h"
+#include "ExpressionParser.h"
+#include "FileReader.h"
 #include "InstructionEncoder.h"
-#include "TokenNode.h"
 #include "ObjectNameExpression.h"
+#include "ParseException.h"
+#include "TokenNode.h"
+#include "ValueExpression.h"
 
 const Symbol BodyParser::symbol_pc = Symbol(".pc");
 const Token BodyParser::token_binary_file = Token(Token::DIRECTIVE, "binary_file");
@@ -48,20 +48,12 @@ const Token BodyParser::token_else_if = Token(Token::DIRECTIVE, "else_if");
 const Token BodyParser::token_error = Token(Token::DIRECTIVE, "error");
 const Token BodyParser::token_if = Token(Token::DIRECTIVE, "if");
 const Token BodyParser::token_memory = Token(Token::DIRECTIVE, "memory");
+const Token BodyParser::token_repeat = Token(Token::DIRECTIVE, "repeat");
 const Token BodyParser::token_scope = Token(Token::DIRECTIVE, "scope");
 
-const std::unordered_map<Symbol, void (BodyParser::*)()> BodyParser::directive_parser_methods = {
-        {token_binary_file.as_symbol(), &BodyParser::parse_binary_file},
-        {token_data.as_symbol(), &BodyParser::parse_data},
-        {token_else.as_symbol(), &BodyParser::parse_else},
-        {token_else_if.as_symbol(), &BodyParser::parse_else_if},
-        {token_error.as_symbol(), &BodyParser::parse_error},
-        {token_if.as_symbol(), &BodyParser::parse_if},
-        {token_memory.as_symbol(), &BodyParser::parse_memory},
-        {token_scope.as_symbol(), &BodyParser::parse_scope}
-};
+const std::unordered_map<Symbol, void (BodyParser::*)()> BodyParser::directive_parser_methods = {{token_binary_file.as_symbol(), &BodyParser::parse_binary_file}, {token_data.as_symbol(), &BodyParser::parse_data}, {token_else.as_symbol(), &BodyParser::parse_else}, {token_else_if.as_symbol(), &BodyParser::parse_else_if}, {token_error.as_symbol(), &BodyParser::parse_error}, {token_if.as_symbol(), &BodyParser::parse_if}, {token_memory.as_symbol(), &BodyParser::parse_memory}, {token_repeat.as_symbol(), &BodyParser::parse_repeat}, {token_scope.as_symbol(), &BodyParser::parse_scope}};
 
-void BodyParser::setup(FileTokenizer &tokenizer) {
+void BodyParser::setup(FileTokenizer& tokenizer) {
     VisibilityHelper::setup(tokenizer, true);
     tokenizer.add_literal(Token::colon_minus);
     tokenizer.add_literal(Token::colon_plus);
@@ -109,6 +101,13 @@ Body BodyParser::parse() {
 
                 case Token::PUNCTUATION:
                     if (token == Token::curly_close && !nesting.empty()) {
+                        tokenizer.skip(Token::NEWLINE);
+                        if (nesting.back()->is_if()) {
+                            auto next_token = tokenizer.peek();
+                            if (next_token == token_else || next_token == token_else_if) {
+                                break;
+                            }
+                        }
                         pop_body();
                         current_body->append(nesting.back()->body());
                         nesting.pop_back();
@@ -150,8 +149,7 @@ Body BodyParser::parse() {
                     }
                     break;
             }
-        }
-        catch (ParseException& ex) {
+        } catch (ParseException& ex) {
             FileReader::global.error(ex.location, "%s", ex.what());
             tokenizer.skip_until(TokenGroup::newline);
         }
@@ -170,7 +168,6 @@ void BodyParser::add_constant(Visibility visibility, Token name, const Expressio
     environment->add(name.as_symbol(), value);
 }
 
-
 Symbol BodyParser::get_label(bool& is_anonymous) {
     auto trailing_label = current_body->back();
     if (trailing_label && trailing_label->is_label()) {
@@ -182,11 +179,7 @@ Symbol BodyParser::get_label(bool& is_anonymous) {
     return Symbol(".label_" + std::to_string(next_label));
 }
 
-
-Expression BodyParser::get_pc(Symbol label) const {
-    return {ObjectNameExpression::create(entity->as_object()), Expression::BinaryOperation::ADD, Expression(Location(), entity, label)};
-}
-
+Expression BodyParser::get_pc(Symbol label) const { return {ObjectNameExpression::create(entity->as_object()), Expression::BinaryOperation::ADD, Expression(Location(), entity, label)}; }
 
 void BodyParser::parse_directive(const Token& directive) {
     auto it = directive_parser_methods.find(directive.as_symbol());
@@ -195,7 +188,6 @@ void BodyParser::parse_directive(const Token& directive) {
     }
     (this->*it->second)();
 }
-
 
 void BodyParser::parse_data() {
     EvaluationResult result;
@@ -251,12 +243,10 @@ std::shared_ptr<Node> BodyParser::parse_instruction_argument(const Token& token)
     return std::make_shared<ExpressionNode>(ExpressionParser(tokenizer).parse());
 }
 
-
 void BodyParser::parse_label(Visibility visibility, const Token& name) {
     current_body->append(Body(name.as_symbol(), SizeRange(current_body->size_range())));
     add_constant(visibility, name, get_pc(name.as_symbol()));
 }
-
 
 void BodyParser::parse_memory() {
     auto expression_parser = ExpressionParser(tokenizer);
@@ -276,14 +266,42 @@ void BodyParser::parse_memory() {
     current_body->append(Body(bank, start_address, end_address));
 }
 
-void BodyParser::parse_assignment(Visibility visibility, const Token &name) {
+void BodyParser::parse_repeat() {
+    auto token = tokenizer.next();
+
+    auto variable = Symbol{};
+    if (token.is_name()) {
+        variable = token.as_symbol();
+        tokenizer.expect(Token::comma);
+    }
+    else {
+        tokenizer.unget(token);
+    }
+
+    auto start = std::optional<Expression>{};
+    auto end = ExpressionParser(tokenizer).parse();
+    token = tokenizer.next();
+    if (token == Token::comma) {
+        start = end;
+        end = ExpressionParser(tokenizer).parse();
+    }
+    else {
+        tokenizer.unget(token);
+    }
+
+    nesting.emplace_back(std::make_unique<RepeatNesting>(variable, start, end));
+    push_body(NestingIndex(nesting.size() - 1, 0));
+    tokenizer.expect(Token::curly_open);
+}
+
+void BodyParser::parse_assignment(Visibility visibility, const Token& name) {
     if (!entity) {
         throw ParseException(name, "assignment only allowed in entities");
     }
     current_body->append(Body(visibility, name.as_symbol(), ExpressionParser(tokenizer).parse()));
 }
 
-void BodyParser::parse_instruction(const Token &name) {
+void BodyParser::parse_instruction(const Token& name) {
     std::vector<std::shared_ptr<Node>> arguments;
 
     Token token;
@@ -322,7 +340,6 @@ void BodyParser::parse_instruction(const Token &name) {
                         arguments.emplace_back(parse_instruction_argument(token));
                         arguments.emplace_back(node);
                         arguments.emplace_back(parse_instruction_argument(token2));
-
                     }
                     else {
                         // '(' expression ')' is part of larger expression
@@ -352,7 +369,7 @@ void BodyParser::parse_instruction(const Token &name) {
     {
         auto instruction_environment = std::make_shared<Environment>();
         instruction_environment->add(symbol_pc, label_expression);
-        //instruction_environment->add(Symbol(".label_offset(" + label->name.str() + ")"), Expression(Location(), entity_name(), label));
+        // instruction_environment->add(Symbol(".label_offset(" + label->name.str() + ")"), Expression(Location(), entity_name(), label));
         instruction = encoder.encode(name, arguments, instruction_environment, current_size(), uses_pc);
     }
     if (is_anonymous_label) {
@@ -366,20 +383,18 @@ void BodyParser::parse_instruction(const Token &name) {
         }
     }
 
-    //EvaluationResult result;
-    //instruction.evaluate(result, entity, environment, current_size(), nesting.empty());
-    // TODO: process result
+    // EvaluationResult result;
+    // instruction.evaluate(result, entity, environment, current_size(), nesting.empty());
+    //  TODO: process result
 
     current_body->append(instruction);
 }
-
 
 void BodyParser::parse_scope() {
     nesting.emplace_back(std::make_unique<ScopeNesting>());
     push_body(NestingIndex(nesting.size() - 1, 0));
     tokenizer.expect(Token::curly_open);
 }
-
 
 void BodyParser::push_body(const BodyParser::NestingIndex& body_index) {
     nesting_indices.emplace_back(body_index);
@@ -408,11 +423,10 @@ void BodyParser::push_clause(Expression condition) {
     push_body(NestingIndex(nesting.size() - 1, if_nesting->size() - 1));
 }
 
-
 SizeRange BodyParser::current_size() {
     auto size = body.size_range();
 
-    for (auto& body_index: nesting_indices) {
+    for (auto& body_index : nesting_indices) {
         size += get_body(body_index)->size_range();
     }
 
@@ -447,9 +461,7 @@ void BodyParser::parse_error() {
     }
 }
 
-void BodyParser::parse_unnamed_label() {
-    current_body->append(Body(Symbol(), current_size()));
-}
+void BodyParser::parse_unnamed_label() { current_body->append(Body(Symbol(), current_size())); }
 
 void BodyParser::handle_name(Visibility visibility, Token name) {
     auto token = tokenizer.next();

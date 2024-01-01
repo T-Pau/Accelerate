@@ -1,14 +1,17 @@
 ## Soon
 
-- Move location from BaseExpression to Expression, update centrally
-- Use braces to scope `.if` in objects.
+- Allow expressions as size of `.reserve`.
+
+ 
 - Treat all source files as one library, only import what's used in target.
 - Add `.pin <name> <address>` to target to specify address of object, mark it as used.
 - Add `.uses <object>`, `.used` modifiers to objects.
 - Add `.use <object>` directive.
 - Allow objects, constants in target.
+
+ 
+- Move location from BaseExpression to Expression, update centrally
 - Character constants, optionally with encoding (`'a':screen`)
-- Add `.repeat` in objects.
 
 ## StringEncoding
 

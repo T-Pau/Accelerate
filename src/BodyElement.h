@@ -33,7 +33,6 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define BODY_ELEMENT_H
 
 #include <optional>
-#include <utility>
 
 #include "Environment.h"
 #include "Memory.h"
@@ -45,8 +44,10 @@ class CPU;
 
 class BodyElement {
 public:
-  BodyElement() = default;
-  BodyElement(SizeRange size_range): size_range_(size_range) {}
+    BodyElement() = default;
+    explicit BodyElement(const SizeRange& size_range): size_range_(size_range) {}
+    virtual ~BodyElement() = default;
+
     [[nodiscard]] SizeRange size_range() const {return size_range_;}
     [[nodiscard]] std::optional<uint64_t> size() const {return size_range().size();}
 

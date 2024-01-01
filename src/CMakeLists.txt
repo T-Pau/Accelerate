@@ -64,6 +64,7 @@ add_library(xlr8-library STATIC
         ParsedValue.cc
         Path.cc
         Range.cc
+        RepeatBody.cc
         ScopeBody.cc
         SequenceTokenizer.cc
         SizeofExpression.cc
