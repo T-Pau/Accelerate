@@ -32,14 +32,24 @@ file a.lib {} <>
     visibility: private
     section: data
     body <
-        .data $00, $02
+        .scope {
+          .data $00
+        }
+        .scope {
+          .data $02
+        }
     >
 }
 .object variable_start {
     visibility: private
     section: data
     body <
-        .data $02, $03
+        .scope {
+          .data $02
+        }
+        .scope {
+          .data $03
+        }
     >
 }
 end-of-inline-data

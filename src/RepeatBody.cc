@@ -43,7 +43,7 @@ Body RepeatBody::create(Symbol variable, const std::optional<Expression>& start,
                 environment->add(variable, Expression(index));
                 auto new_body = body.evaluated(context);
                 // TODO: handle result
-                expanded_body.append(new_body ? *new_body : body);
+                expanded_body.append(new_body ? new_body->scoped() : body);
             }
             else {
                 expanded_body.append(body);
