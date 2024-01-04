@@ -123,6 +123,7 @@ public:
     [[nodiscard]] std::optional<Value> maximum_value() const {return expression->maximum_value();}
     [[nodiscard]] std::optional<Value> minimum_value() const {return expression->minimum_value();}
     void serialize(std::ostream& stream) const;
+    [[nodiscard]] std::optional<Value::Type> type() const {return expression->type();}
     [[nodiscard]] std::optional<Value> value() const {return expression->value();}
     [[nodiscard]] Symbol variable_name() const;
 

@@ -67,6 +67,7 @@ public:
     bool operator==(const Token& other) const;
     bool operator!=(const Token& other) const {return !((*this)==other);}
     [[nodiscard]] Type get_type() const {return type;}
+    [[nodiscard]] bool is_end_of_line() const {return !*this || is_newline();}
     [[nodiscard]] bool is_directive() const {return type == DIRECTIVE;}
     [[nodiscard]] bool is_value() const {return type == VALUE;}
     [[nodiscard]] bool is_integer() const {return is_value() && std::get<Value>(value).is_integer();}

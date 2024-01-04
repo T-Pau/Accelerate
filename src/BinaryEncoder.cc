@@ -1,9 +1,9 @@
 /*
-ObjectNameExpression.h --
+BinaryEncoding.cc -- 
 
 Copyright (C) Dieter Baron
 
-The authors can be contacted at <accelerate@tpau.group>
+The authors can be contacted at <assembler@tpau.group>
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions
@@ -29,22 +29,22 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef OBJECT_NAME_EXPRESSION_H
-#define OBJECT_NAME_EXPRESSION_H
+#include "BinaryEncoder.h"
 
-#include "BaseExpression.h"
+#include "Encoder.h"
 
-class ObjectNameExpression: public BaseExpression {
-  public:
-    ObjectNameExpression() = default;
-    ObjectNameExpression(Location location): BaseExpression(location) {}
+void BinaryEncoder::encode(std::string& bytes, const Value& value) const {
+    bytes += value.binary_value();
+}
 
-    static Expression create(Object* object);
-
-    [[nodiscard]] std::optional<Expression> evaluated(const EvaluationContext &context) const override;
-    void serialize_sub(std::ostream &stream) const override;
-    [[nodiscard]] std::optional<Value::Type> type() const override {return Value::UNSIGNED;}
-};
+size_t BinaryEncoder::encoded_size(const Value& value) const { return value.binary_value().size(); }
 
 
-#endif // OBJECT_NAME_EXPRESSION_H
+bool BinaryEncoder::operator==(const Encoder&other) const {
+    if (other.is_binary_encoder()) {
+        return *this == *other.as_binary_encoder();
+    }
+    else {
+        return false;
+    }
+}

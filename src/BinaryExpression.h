@@ -41,6 +41,7 @@ public:
 
     [[nodiscard]] std::optional<Value> minimum_value() const override;
     [[nodiscard]] std::optional<Value> maximum_value() const override;
+    [[nodiscard]] std::optional<Value::Type> type() const override;
 
     void collect_objects(std::unordered_set<Object*>& objects) const override {
         left.collect_objects(objects);

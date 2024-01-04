@@ -33,11 +33,10 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <limits>
 
-#include "Int.h"
 #include "Exception.h"
+#include "Int.h"
 
-
-Value::Value(int64_t value_, uint64_t default_size): explicit_default_size(default_size) {
+Value::Value(int64_t value_, uint64_t default_size) : explicit_default_size(default_size) {
     if (value_ < 0) {
         value = value_;
     }
@@ -45,7 +44,6 @@ Value::Value(int64_t value_, uint64_t default_size): explicit_default_size(defau
         value = static_cast<uint64_t>(value_);
     }
 }
-
 
 uint64_t Value::unsigned_value() const {
     if (is_unsigned()) {
@@ -56,7 +54,6 @@ uint64_t Value::unsigned_value() const {
     }
 }
 
-
 int64_t Value::signed_value() const {
     switch (type()) {
         case BINARY:
@@ -65,6 +62,10 @@ int64_t Value::signed_value() const {
         case STRING:
         case VOID:
             throw Exception("can't convert value of type %s to signed", type_name().c_str());
+
+        case NUMBER:
+        case INTEGER:
+            throw Exception("internal error: value can't have abstract type %s", type_name().c_str());
 
         case SIGNED:
             return raw_signed_value();
@@ -75,6 +76,8 @@ int64_t Value::signed_value() const {
             }
             return static_cast<int64_t>(raw_unsigned_value());
     }
+
+    throw Exception("internal error: invalid value type %d", type());
 }
 
 Symbol Value::symbol_value() const {
@@ -86,7 +89,6 @@ Symbol Value::symbol_value() const {
     }
 }
 
-
 double Value::float_value() const {
     switch (type()) {
         case BINARY:
@@ -94,6 +96,10 @@ double Value::float_value() const {
         case STRING:
         case VOID:
             throw Exception("can't convert value of type %s to float", type_name().c_str());
+
+        case NUMBER:
+        case INTEGER:
+            throw Exception("internal error: value can't have abstract type %s", type_name().c_str());
 
         case FLOAT:
             return raw_float_value();
@@ -104,8 +110,9 @@ double Value::float_value() const {
         case UNSIGNED:
             return static_cast<double>(raw_unsigned_value());
     }
-}
 
+    throw Exception("internal error: invalid value type %d", type());
+}
 
 bool Value::boolean_value() const {
     switch (type()) {
@@ -127,7 +134,14 @@ bool Value::boolean_value() const {
         case BINARY:
         case VOID:
             throw Exception("can't convert value of type %s to boolean", type_name().c_str());
+
+        case NUMBER:
+        case INTEGER:
+            throw Exception("internal error: value can't have abstract type %s", type_name().c_str());
+
     }
+
+    throw Exception("internal error: invalid value type %d", type());
 }
 
 Value::Type Value::type() const {
@@ -154,14 +168,18 @@ Value::Type Value::type() const {
     }
 }
 
-std::string Value::type_name() const {
-    switch (type()) {
+std::string Value::type_name(Type type) {
+    switch (type) {
         case BINARY:
             return "binary";
         case BOOLEAN:
             return "boolean";
         case FLOAT:
             return "float";
+        case INTEGER:
+            return "integer";
+        case NUMBER:
+            return "number";
         case SIGNED:
             return "signed";
         case STRING:
@@ -171,6 +189,8 @@ std::string Value::type_name() const {
         case VOID:
             return "void";
     }
+
+    throw Exception("internal error: invalid value type %d", type);
 }
 
 std::string Value::binary_value() const {
@@ -182,7 +202,7 @@ std::string Value::binary_value() const {
     }
 }
 
-Value Value::operator+(const Value &other) const {
+Value Value::operator+(const Value& other) const {
     if (is_float() || other.is_float()) {
         return Value(float_value() + other.float_value());
     }
@@ -215,7 +235,7 @@ Value Value::operator+(const Value &other) const {
     }
 }
 
-Value Value::operator-(const Value &other) const {
+Value Value::operator-(const Value& other) const {
     if (is_float() || other.is_float()) {
         return Value(float_value() - other.float_value());
     }
@@ -241,7 +261,7 @@ Value Value::operator-(const Value &other) const {
     }
 }
 
-Value Value::operator/(const Value &other) const {
+Value Value::operator/(const Value& other) const {
     if ((other.is_float() && other.float_value() == 0.0) || (other.is_unsigned() && other.unsigned_value() == 0)) {
         throw Exception("division by zero");
     }
@@ -265,8 +285,7 @@ Value Value::operator/(const Value &other) const {
     }
 }
 
-
-Value Value::operator*(const Value &other) const {
+Value Value::operator*(const Value& other) const {
     if (is_float() || other.is_float()) {
         return Value(float_value() * other.float_value());
     }
@@ -286,7 +305,6 @@ Value Value::operator*(const Value &other) const {
         throw Exception("can't multiply %s and %s", type_name().c_str(), other.type_name().c_str());
     }
 }
-
 
 uint64_t Value::negate_signed(int64_t value) {
     if (value == std::numeric_limits<int64_t>::min()) {
@@ -329,7 +347,7 @@ uint64_t Value::multiply_unsigned(uint64_t a, uint64_t b) {
     return value;
 }
 
-Value Value::operator|(const Value &other) const {
+Value Value::operator|(const Value& other) const {
     if (is_unsigned() && other.is_unsigned()) {
         return Value(raw_unsigned_value() | other.raw_unsigned_value());
     }
@@ -338,8 +356,7 @@ Value Value::operator|(const Value &other) const {
     }
 }
 
-
-Value Value::operator&(const Value &other) const {
+Value Value::operator&(const Value& other) const {
     if (is_unsigned() && other.is_unsigned()) {
         return Value(raw_unsigned_value() & other.raw_unsigned_value());
     }
@@ -348,8 +365,7 @@ Value Value::operator&(const Value &other) const {
     }
 }
 
-
-Value Value::operator^(const Value &other) const {
+Value Value::operator^(const Value& other) const {
     if (is_unsigned() && other.is_unsigned()) {
         return Value(raw_unsigned_value() ^ other.raw_unsigned_value());
     }
@@ -358,15 +374,11 @@ Value Value::operator^(const Value &other) const {
     }
 }
 
-Value Value::operator&&(const Value &other) const {
-    return Value(boolean_value() && other.boolean_value());
-}
+Value Value::operator&&(const Value& other) const { return Value(boolean_value() && other.boolean_value()); }
 
-Value Value::operator||(const Value &other) const {
-    return Value(boolean_value() || other.boolean_value());
-}
+Value Value::operator||(const Value& other) const { return Value(boolean_value() || other.boolean_value()); }
 
-Value Value::operator>>(const Value &other) const {
+Value Value::operator>>(const Value& other) const {
     if (is_unsigned() && other.is_unsigned()) {
         return Value(raw_unsigned_value() >> other.raw_unsigned_value());
     }
@@ -404,7 +416,7 @@ int64_t Value::shift_left_signed(int64_t a, uint64_t b) {
     }
 }
 
-Value Value::operator<<(const Value &other) const {
+Value Value::operator<<(const Value& other) const {
     if (is_unsigned() && other.is_unsigned()) {
         return Value(shift_left_unsigned(raw_unsigned_value(), other.raw_unsigned_value()));
     }
@@ -427,7 +439,7 @@ Value Value::operator<<(const Value &other) const {
     }
 }
 
-bool Value::operator==(const Value &other) const {
+bool Value::operator==(const Value& other) const {
     switch (type()) {
         case BINARY:
             return other.is_binary() && raw_binary_value() == other.raw_binary_value();
@@ -449,10 +461,16 @@ bool Value::operator==(const Value &other) const {
 
         case VOID:
             return other.is_void();
+
+        case NUMBER:
+        case INTEGER:
+            throw Exception("internal error: value can't have abstract type %s", type_name().c_str());
     }
+
+    throw Exception("internal error: invalid value type %d", type());
 }
 
-bool Value::operator<(const Value &other) const {
+bool Value::operator<(const Value& other) const {
     switch (type()) {
         case BINARY:
         case BOOLEAN:
@@ -470,11 +488,16 @@ bool Value::operator<(const Value &other) const {
 
         case UNSIGNED:
             return other.is_unsigned() && raw_unsigned_value() < other.raw_unsigned_value();
+
+        case NUMBER:
+        case INTEGER:
+            throw Exception("internal error: value can't have abstract type %s", type_name().c_str());
     }
+
+    throw Exception("internal error: invalid value type %d", type());
 }
 
-
-bool Value::operator<=(const Value &other) const {
+bool Value::operator<=(const Value& other) const {
     switch (type()) {
         case BINARY:
         case BOOLEAN:
@@ -492,10 +515,16 @@ bool Value::operator<=(const Value &other) const {
 
         case UNSIGNED:
             return other.is_unsigned() && raw_unsigned_value() <= other.raw_unsigned_value();
+
+        case NUMBER:
+        case INTEGER:
+            throw Exception("internal error: value can't have abstract type %s", type_name().c_str());
     }
+
+    throw Exception("internal error: invalid value type %d", type());
 }
 
-Value Value::operator%(const Value &other) const {
+Value Value::operator%(const Value& other) const {
     if (is_unsigned() && other.is_unsigned()) {
         return Value(raw_unsigned_value() % other.raw_unsigned_value());
     }
@@ -547,7 +576,13 @@ Value Value::operator-() const {
 
         case UNSIGNED:
             return Value(negate_unsigned(raw_unsigned_value()));
+
+        case NUMBER:
+        case INTEGER:
+            throw Exception("internal error: value can't have abstract type %s", type_name().c_str());
     }
+
+    throw Exception("internal error: invalid value type %d", type());
 }
 
 Value Value::operator~() const {
@@ -564,11 +599,17 @@ Value Value::operator~() const {
 
         case UNSIGNED:
             return Value(~raw_unsigned_value());
+
+        case NUMBER:
+        case INTEGER:
+            throw Exception("internal error: value can't have abstract type %s", type_name().c_str());
     }
+
+    throw Exception("internal error: invalid value type %d", type());
 }
 
-uint64_t Value::default_size() const {
-    uint64_t implicit_default_size;
+std::optional<uint64_t> Value::default_size() const {
+    auto implicit_default_size = std::optional<uint64_t>{};
 
     switch (type()) {
         case BINARY:
@@ -577,9 +618,8 @@ uint64_t Value::default_size() const {
 
         case BOOLEAN:
         case VOID:
-        case STRING: // TODO: unknown default size
+        case STRING:
         case FLOAT:
-            implicit_default_size = 0;
             break;
 
         case SIGNED:
@@ -589,11 +629,19 @@ uint64_t Value::default_size() const {
         case UNSIGNED:
             implicit_default_size = Int::minimum_byte_size(raw_unsigned_value());
             break;
+
+        case NUMBER:
+        case INTEGER:
+            throw Exception("internal error: value can't have abstract type %s", type_name().c_str());
     }
 
-    return std::max(implicit_default_size, explicit_default_size);
+    if (implicit_default_size) {
+        return std::max(*implicit_default_size, explicit_default_size);
+    }
+    else {
+        return {};
+    }
 }
-
 
 std::optional<Value> operator+(const std::optional<Value>& a, const std::optional<Value>& b) {
     if (a.has_value() && b.has_value()) {
@@ -604,7 +652,6 @@ std::optional<Value> operator+(const std::optional<Value>& a, const std::optiona
     }
 }
 
-
 std::optional<Value> operator-(const std::optional<Value>& a, const std::optional<Value>& b) {
     if (a.has_value() && b.has_value()) {
         return *a - *b;
@@ -614,7 +661,6 @@ std::optional<Value> operator-(const std::optional<Value>& a, const std::optiona
     }
 }
 
-
 std::optional<Value> operator*(const std::optional<Value>& a, const std::optional<Value>& b) {
     if (a.has_value() && b.has_value()) {
         return *a * *b;
@@ -623,7 +669,6 @@ std::optional<Value> operator*(const std::optional<Value>& a, const std::optiona
         return {};
     }
 }
-
 
 std::optional<Value> operator/(const std::optional<Value>& a, const std::optional<Value>& b) {
     if (a.has_value() && b.has_value()) {
@@ -651,7 +696,6 @@ std::optional<Value> operator||(const std::optional<Value>& a, const std::option
         return {};
     }
 }
-
 
 bool operator>(const std::optional<Value>& a, const std::optional<Value>& b) {
     if (!a.has_value() || !b.has_value()) {
@@ -699,5 +743,11 @@ std::string Value::string_value() const {
 
         case UNSIGNED:
             return std::to_string(raw_unsigned_value());
+
+        case NUMBER:
+        case INTEGER:
+            throw Exception("internal error: value can't have abstract type %s", type_name().c_str());
     }
+
+    throw Exception("internal error: invalid value type %d", type());
 }

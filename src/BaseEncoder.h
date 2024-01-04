@@ -1,9 +1,9 @@
 /*
-ObjectNameExpression.h --
+BaseEncoder.h -- 
 
 Copyright (C) Dieter Baron
 
-The authors can be contacted at <accelerate@tpau.group>
+The authors can be contacted at <assembler@tpau.group>
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions
@@ -29,22 +29,24 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef OBJECT_NAME_EXPRESSION_H
-#define OBJECT_NAME_EXPRESSION_H
+#ifndef BASEENCODER_H
+#define BASEENCODER_H
 
-#include "BaseExpression.h"
+#include "SizeRange.h"
 
-class ObjectNameExpression: public BaseExpression {
-  public:
-    ObjectNameExpression() = default;
-    ObjectNameExpression(Location location): BaseExpression(location) {}
+class Encoder;
 
-    static Expression create(Object* object);
+class BaseEncoder {
+public:
+    virtual ~BaseEncoder() = default;
 
-    [[nodiscard]] std::optional<Expression> evaluated(const EvaluationContext &context) const override;
-    void serialize_sub(std::ostream &stream) const override;
-    [[nodiscard]] std::optional<Value::Type> type() const override {return Value::UNSIGNED;}
+    virtual void encode(std::string& bytes, const Value& value) const = 0;
+    [[nodiscard]] virtual size_t encoded_size(const Value& value) const = 0;
+    [[nodiscard]] virtual bool fits(const Value& value) const = 0;
+    [[nodiscard]] virtual bool is_natural_encoder(const Value& value) const = 0;
+    virtual void serialize(std::ostream& stream) const = 0;
+    [[nodiscard]] virtual SizeRange size_range() const = 0;
+    virtual bool operator==(const Encoder&other) const = 0;
 };
 
-
-#endif // OBJECT_NAME_EXPRESSION_H
+#endif //BASEENCODER_H

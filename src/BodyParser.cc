@@ -121,7 +121,7 @@ Body BodyParser::parse() {
                             // Evaluate twice to resolve forward label references.
                             body.evaluate(EvaluationContext(result, entity));
                             body.evaluate(EvaluationContext(result, entity));
-                            // TODO: process result
+                            entity->process_result(result);
                         }
                         return body;
                     }

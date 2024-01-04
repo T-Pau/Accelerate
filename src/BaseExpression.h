@@ -49,6 +49,7 @@ public:
     [[nodiscard]] virtual std::optional<Value> value() const {return {};}
     [[nodiscard]] virtual std::optional<Value> minimum_value() const {return value();}
     [[nodiscard]] virtual std::optional<Value> maximum_value() const {return value();}
+    [[nodiscard]] virtual std::optional<Value::Type> type() const {return {};}
 
     void serialize(std::ostream& stream) const;
 

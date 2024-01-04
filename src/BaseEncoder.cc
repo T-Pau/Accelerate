@@ -1,9 +1,9 @@
 /*
-ObjectNameExpression.h --
+BaseEncoder.cc -- 
 
 Copyright (C) Dieter Baron
 
-The authors can be contacted at <accelerate@tpau.group>
+The authors can be contacted at <assembler@tpau.group>
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions
@@ -29,22 +29,4 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef OBJECT_NAME_EXPRESSION_H
-#define OBJECT_NAME_EXPRESSION_H
-
-#include "BaseExpression.h"
-
-class ObjectNameExpression: public BaseExpression {
-  public:
-    ObjectNameExpression() = default;
-    ObjectNameExpression(Location location): BaseExpression(location) {}
-
-    static Expression create(Object* object);
-
-    [[nodiscard]] std::optional<Expression> evaluated(const EvaluationContext &context) const override;
-    void serialize_sub(std::ostream &stream) const override;
-    [[nodiscard]] std::optional<Value::Type> type() const override {return Value::UNSIGNED;}
-};
-
-
-#endif // OBJECT_NAME_EXPRESSION_H
+#include "BaseEncoder.h"

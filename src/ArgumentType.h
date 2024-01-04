@@ -36,7 +36,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "BaseExpression.h"
 #include "Int.h"
-#include "IntegerEncoding.h"
+#include "IntegerEncoder.h"
 #include "Symbol.h"
 #include "Value.h"
 
@@ -73,12 +73,12 @@ public:
 
 class ArgumentTypeEncoding: public ArgumentType {
 public:
-    explicit ArgumentTypeEncoding(Symbol name, IntegerEncoding encoding): ArgumentType(name), encoding(encoding) {}
+    explicit ArgumentTypeEncoding(Symbol name, IntegerEncoder encoding): ArgumentType(name), encoding(encoding) {}
     [[nodiscard]] Type type() const override {return ENCODING;}
 
     [[nodiscard]] std::unique_ptr<ArgumentType> range_type(Symbol range_name) const;
 
-    IntegerEncoding encoding;
+    IntegerEncoder encoding;
 };
 
 class ArgumentTypeEnum: public ArgumentType {

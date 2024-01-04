@@ -31,6 +31,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "Linker.h"
 
+#include "Assembler.h"
 #include <algorithm>
 #include <fstream>
 
@@ -38,7 +39,6 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "FileReader.h"
 #include "ValueExpression.h"
 #include "Exception.h"
-#include "TargetParser.h"
 
 void Linker::link() {
     for (auto& library: libraries) {
@@ -48,17 +48,40 @@ void Linker::link() {
 
     program->evaluate();
     program->evaluate();
+    if (!program->check_unresolved()) {
+        throw Exception();
+    }
 
-    program->check_unresolved();
+    target->object_file->import(program.get());
+    target->object_file->evaluate();
+    target->object_file->evaluate();
+    if (!target->object_file->check_unresolved()) {
+        throw Exception();
+    }
 
-    std::unordered_set<Object*> new_objects;
-
-    // Collect all objects from main program.
-    for (auto object : program->all_objects()) {
-        if (add_object(object)) {
-            new_objects.insert(object);
+    EvaluationResult result;
+    auto environment = std::make_shared<Environment>();
+    environment->add_next(target->object_file->private_environment);
+    environment->add_next(program->public_environment);
+    auto context = EvaluationContext{result, EvaluationContext::ENTITY, environment};
+    auto output_body = target->output;
+    output_body.evaluate(context);
+    for (const auto& name:  result.unresolved_functions) {
+        FileReader::global.error({}, "unresolved function %s", name.c_str());
+    }
+    for (const auto& name:  result.unresolved_variables) {
+        if (name != Assembler::token_data_end.as_symbol() && name != Assembler::token_data_size.as_symbol() && name != Assembler::token_data_start.as_symbol()) {
+            FileReader::global.error({}, "unresolved variable %s", name.c_str());
         }
     }
+
+    if (FileReader::global.had_error()) {
+        throw Exception();
+    }
+
+    std::unordered_set<Object*> new_objects = result.used_objects;
+    target->object_file->collect_explicitly_used_objects(new_objects);
+    objects = new_objects;
 
     // Collect all referenced objects.
     while (!new_objects.empty()) {
@@ -79,6 +102,7 @@ void Linker::link() {
     for (auto object: sorted_objects) {
         if (!object->size_range().size()) {
             FileReader::global.error({}, "object '%s' has unknown size", object->name.as_string().c_str());
+            object->body.serialize(std::cout, "    ");
             continue;
         }
         if (object->address) {
@@ -134,9 +158,9 @@ void Linker::output(const std::string &file_name) {
     // TODO: support for multiple banks
     auto data_range = memory[0].data_range();
 
-    environment->add(TargetParser::token_data_end.as_symbol(), Expression(data_range.end()));
-    environment->add(TargetParser::token_data_size.as_symbol(), Expression(data_range.size));
-    environment->add(TargetParser::token_data_start.as_symbol(), Expression(data_range.start));
+    environment->add(Assembler::token_data_end.as_symbol(), Expression(data_range.end()));
+    environment->add(Assembler::token_data_size.as_symbol(), Expression(data_range.size));
+    environment->add(Assembler::token_data_start.as_symbol(), Expression(data_range.start));
 
     auto body = target->output;
     EvaluationResult result;
@@ -168,7 +192,7 @@ void Linker::set_target(const Target* new_target) {
     }
     target = new_target;
     memory = target->map.initialize_memory();
-    IntegerEncoding::default_byte_order = target->cpu->byte_order;
+    IntegerEncoder::default_byte_order = target->cpu->byte_order;
 }
 
 void Linker::add_library(std::shared_ptr<ObjectFile> library) {

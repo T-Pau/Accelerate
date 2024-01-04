@@ -1,5 +1,5 @@
 /*
-ExpressionParser.cc -- 
+ExpressionParser.cc --
 
 Copyright (C) Dieter Baron
 
@@ -379,8 +379,8 @@ Body ExpressionParser::parse_list() {
     return Body(list);
 }
 
-std::optional<Encoding> ExpressionParser::parse_encoding() {
-    IntegerEncoding::Type type;
+std::optional<Encoder> ExpressionParser::parse_encoding() {
+    IntegerEncoder::Type type;
     auto name_allowed = false;
 
     auto token = tokenizer.next();
@@ -388,22 +388,22 @@ std::optional<Encoding> ExpressionParser::parse_encoding() {
     if (token == Token::colon) {
         token = tokenizer.next();
         if (token == Token::minus) {
-            type = IntegerEncoding::SIGNED;
+            type = IntegerEncoder::SIGNED;
         }
         else if (token == Token::plus) {
-            type = IntegerEncoding::UNSIGNED;
+            type = IntegerEncoder::UNSIGNED;
         }
         else {
-            type = IntegerEncoding::UNSIGNED;
+            type = IntegerEncoder::UNSIGNED;
             name_allowed = true;
             tokenizer.unget(token);
         }
     }
     else if (token == Token::colon_minus) {
-        type = IntegerEncoding::SIGNED;
+        type = IntegerEncoder::SIGNED;
     }
     else if (token == Token::colon_plus) {
-        type = IntegerEncoding::UNSIGNED;
+        type = IntegerEncoder::UNSIGNED;
     }
     else {
         tokenizer.unget(token);
@@ -414,20 +414,33 @@ std::optional<Encoding> ExpressionParser::parse_encoding() {
 
     if (token.is_unsigned()) {
         // TODO: check overflow
-        return Encoding{IntegerEncoding{type, static_cast<size_t>(token.as_unsigned())}};
+        return Encoder{IntegerEncoder{type, static_cast<size_t>(token.as_unsigned())}};
     }
     else if (token.is_name()) {
         if (!name_allowed) {
             throw ParseException(token, "expected integer");
         }
-        if (token == token_string) {
-            return Encoding{Target::current_target->default_string_encoding};
+        auto string_encoding = Target::current_target->default_string_encoding;
+        if (token != token_string) {
+            string_encoding = Target::current_target->string_encoding(token.as_symbol());
         }
-        auto string_encoding = Target::current_target->string_encoding(token.as_symbol());
         if (!string_encoding) {
             throw ParseException(token, "unknown string encoding '%s'", token.as_string().c_str());
         }
-        return Encoding{string_encoding};
+        auto size = std::optional<size_t>{};
+        token = tokenizer.next();
+        if (token == Token::paren_open) {
+            token = tokenizer.expect(Token::VALUE);
+            if (!token.is_unsigned()) {
+                throw ParseException(token, "encoding size must be unsigned");
+            }
+            size = token.as_unsigned();
+            tokenizer.expect(Token::paren_close);
+        }
+        else {
+            tokenizer.unget(token);
+        }
+        return Encoder{string_encoding, size};
     }
 
     throw ParseException(token, "expected integer or name");

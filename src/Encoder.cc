@@ -1,9 +1,9 @@
 /*
-BinaryEncoding.h -- 
+Encoding.cc --
 
 Copyright (C) Dieter Baron
 
-The authors can be contacted at <assembler@tpau.group>
+The authors can be contacted at <accelerate@tpau.group>
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions
@@ -29,17 +29,32 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef BINARYENCODING_H
-#define BINARYENCODING_H
+#include "Encoder.h"
 
-#include "Value.h"
+#include "Exception.h"
+#include "Target.h"
 
-class BinaryEncoding {
-public:
-    void encode(std::string& bytes, const Value& value) const;
-    [[nodiscard]] size_t encoded_size(const Value& value) const;
+Encoder::Encoder(const Value& value) {
+    if (value.is_binary()) {
+        encoder = std::make_shared<BinaryEncoder>();
+    }
+    else if (value.is_integer()) {
+        encoder = std::make_shared<IntegerEncoder>(value);
+    }
+    else if (value.is_string()) {
+        auto string_encoding = Target::current_target->default_string_encoding;
+        if (!string_encoding) {
+            throw Exception("no default string encoding specified");
+        }
+        encoder = std::make_shared<StringEncoder>(string_encoding);
+    }
+    else {
+        throw Exception("can't encode %s", value.type_name().c_str());
+    }
+}
 
-    bool operator==(const BinaryEncoding&) const {return true;}
-};
 
-#endif //BINARYENCODING_H
+std::ostream& operator<<(std::ostream& stream, const Encoder& encoder) {
+    encoder.serialize(stream);
+    return stream;
+}

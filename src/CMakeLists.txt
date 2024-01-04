@@ -6,8 +6,9 @@ add_library(xlr8-library STATIC
         Assembler.cc
         AssignmentBody.cc
         Base64.cc
+        BaseEncoder.cc
         BaseExpression.cc
-        BinaryEncoding.cc
+        BinaryEncoder.cc
         BinaryExpression.cc
         BlockBody.cc
         Body.cc
@@ -22,7 +23,7 @@ add_library(xlr8-library STATIC
         DataBody.cc
         DefinedExpression.cc
         EmptyBody.cc
-        Encoding.cc
+        Encoder.cc
         Entity.cc
         Environment.cc
         ErrorBody.cc
@@ -43,7 +44,7 @@ add_library(xlr8-library STATIC
         Instruction.cc
         InstructionEncoder.cc
         Int.cc
-        IntegerEncoding.cc
+        IntegerEncoder.cc
         LabelBody.cc
         LabelExpression.cc
         LibraryGetter.cc
@@ -69,6 +70,7 @@ add_library(xlr8-library STATIC
         SequenceTokenizer.cc
         SizeofExpression.cc
         SizeRange.cc
+        StringEncoder.cc
         StringEncoding.cc
         Symbol.cc
         Target.cc

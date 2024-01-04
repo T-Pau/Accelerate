@@ -36,18 +36,18 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <utility>
 
 #include "Body.h"
-#include "Encoding.h"
+#include "Encoder.h"
 #include "Expression.h"
 
 class DataBodyElement {
 public:
-    DataBodyElement(Expression expression, std::optional<Encoding> encoding): expression(std::move(expression)), encoding(encoding) {}
+    DataBodyElement(Expression expression, std::optional<Encoder> encoding): expression(std::move(expression)), encoding(encoding) {}
 
     [[nodiscard]] std::optional<uint64_t> size() const {return size_range().size();}
     [[nodiscard]] SizeRange size_range() const;
 
     Expression expression;
-    std::optional<Encoding> encoding;
+    std::optional<Encoder> encoding;
 };
 
 class DataBody: public BodyElement {
@@ -58,7 +58,7 @@ public:
 
     Body appending(const DataBody* body) {return appending(body->data);}
     Body appending(const std::vector<DataBodyElement>& elements) const;
-//    void append(Expression expression, std::optional<IntegerEncoding> encoding = {}) {data.emplace_back(std::move(expression), encoding);}
+//    void append(Expression expression, std::optional<IntegerEncoder> encoding = {}) {data.emplace_back(std::move(expression), encoding);}
     [[nodiscard]] std::shared_ptr<BodyElement> clone() const override {return std::make_shared<DataBody>(data);}
     void collect_objects(std::unordered_set<Object*> &objects) const override;
     [[nodiscard]] bool empty() const override {return data.empty();}

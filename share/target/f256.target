@@ -1,5 +1,7 @@
 .cpu "65c02"
 
+.define F256
+
 .include "f256-encodings.inc"
 
 .extension "pgz"

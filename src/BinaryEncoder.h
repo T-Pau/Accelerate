@@ -1,5 +1,5 @@
 /*
-BinaryEncoding.cc -- 
+BinaryEncoder.h --
 
 Copyright (C) Dieter Baron
 
@@ -29,12 +29,23 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "BinaryEncoding.h"
+#ifndef BINARY_ENCODER_H
+#define BINARY_ENCODER_H
 
-void BinaryEncoding::encode(std::string& bytes, const Value& value) const {
-    bytes += value.binary_value();
-}
+#include "BaseEncoder.h"
+#include "Value.h"
 
-size_t BinaryEncoding::encoded_size(const Value& value) const {
-    return value.binary_value().size();
-}
+class BinaryEncoder: public BaseEncoder {
+public:
+    void encode(std::string& bytes, const Value& value) const override;
+    [[nodiscard]] size_t encoded_size(const Value& value) const override;
+    [[nodiscard]] bool fits(const Value& value) const override {return value.is_binary();}
+    [[nodiscard]] bool is_natural_encoder(const Value& value) const override {return value.is_binary();}
+    void serialize(std::ostream& stream) const override {}
+    [[nodiscard]] SizeRange size_range() const override {return SizeRange{0, {}};}
+    bool operator==(const Encoder&) const override;
+
+    bool operator==(const BinaryEncoder&) const {return true;}
+};
+
+#endif // BINARY_ENCODER_H

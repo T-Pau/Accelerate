@@ -32,7 +32,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "FillExpression.h"
 
 
-#include "Encoding.h"
+#include "Encoder.h"
 #include "Exception.h"
 #include "ParseException.h"
 
@@ -51,7 +51,7 @@ Expression FillExpression::create(const Expression& count, const Expression& val
         }
         auto actual_count = real_count.unsigned_value();
         const auto real_value = *value.value();
-        auto encoding = Encoding(real_value);
+        auto encoding = Encoder(real_value);
         std::string bytes;
         for (uint64_t i = 0; i < actual_count; i++) {
             encoding.encode(bytes, real_value);

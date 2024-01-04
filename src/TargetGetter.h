@@ -32,9 +32,9 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef TARGET_GETTER_H
 #define TARGET_GETTER_H
 
+#include "Assembler.h"
 #include "Getter.h"
 #include "Target.h"
-#include "TargetParser.h"
 
 class TargetGetter: public Getter<Target> {
 public:
@@ -42,8 +42,7 @@ public:
 
 protected:
     [[nodiscard]] std::string filename_extension() const override {return ".target";}
-    Target parse(Symbol name, Symbol filename) override {return TargetParser().parse(name, filename);}
+    Target parse(Symbol name, Symbol filename) override {return Assembler(nullptr, *TargetGetter::global.path, {}).parse_target(name, filename);}
 };
-
 
 #endif // TARGET_GETTER_H

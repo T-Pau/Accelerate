@@ -155,7 +155,7 @@ void xlr8::process() {
             auto extension = std::filesystem::path(file_name).extension();
 
             if (extension == ".s") {
-                files.emplace_back(file_name, Assembler(linker->target, include_path, defines).parse(Symbol(file_name)));
+                files.emplace_back(file_name, Assembler(linker->target, include_path, defines).parse_object_file(Symbol(file_name)));
             }
 /*            else if (extension == ".o") {
                 if (linker->mode == Linker::COMPILE) {

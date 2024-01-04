@@ -1,5 +1,5 @@
 /*
-BinaryExpression.cc -- 
+BinaryExpression.cc --
 
 Copyright (C) Dieter Baron
 
@@ -34,8 +34,8 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "VariableExpression.h"
 
 std::optional<Expression> BinaryExpression::evaluated(const EvaluationContext& context) const {
-    auto new_left = left.evaluated(context);
-    auto new_right= right.evaluated(context);
+    const auto new_left = left.evaluated(context);
+    const auto new_right = right.evaluated(context);
 
     if (!new_left && !new_right) {
         return {};
@@ -44,7 +44,7 @@ std::optional<Expression> BinaryExpression::evaluated(const EvaluationContext& c
     return Expression(new_left.value_or(left), operation, new_right.value_or(right));
 }
 
-void BinaryExpression::serialize_sub(std::ostream &stream) const {
+void BinaryExpression::serialize_sub(std::ostream& stream) const {
     stream << '(' << left;
 
     switch (operation) {
@@ -124,8 +124,9 @@ void BinaryExpression::serialize_sub(std::ostream &stream) const {
     stream << right << ')';
 }
 
-
 Expression BinaryExpression::create(const Expression& left, Expression::BinaryOperation operation, const Expression& right) {
+    // TODO: check that types are compatible
+
     if (left.has_value() && right.has_value()) {
         auto left_value = *left.value();
         auto right_value = *right.value();
@@ -211,7 +212,7 @@ Expression BinaryExpression::create(const Expression& left, Expression::BinaryOp
             case Expression::BinaryOperation::ADD: {
                 if (right.has_value()) {
                     auto right_value = *right.value();
-                    if (right_value == Value(uint64_t(0))) {
+                    if (right_value == Value(uint64_t{0})) {
                         // N + 0 -> N
                         return left;
                     }
@@ -232,7 +233,7 @@ Expression BinaryExpression::create(const Expression& left, Expression::BinaryOp
                 }
                 if (left.has_value()) {
                     auto left_value = *left.value();
-                    if (left_value == Value(uint64_t(0))) {
+                    if (left_value == Value(uint64_t{0})) {
                         // 0 + N -> N
                         return right;
                     }
@@ -297,19 +298,19 @@ Expression BinaryExpression::create(const Expression& left, Expression::BinaryOp
                 break;
 
             case Expression::BinaryOperation::MULTIPLY: {
-                if (left.has_value() && left.value() == Value(uint64_t(1))) {
+                if (left.has_value() && left.value() == Value(uint64_t{1})) {
                     // 0 * N -> 0
                     return left;
                 }
-                if (left.has_value() && left.value() == Value(uint64_t(1))) {
+                if (left.has_value() && left.value() == Value(uint64_t{1})) {
                     // 1 * N -> N
                     return right;
                 }
-                if (right.has_value() && right.value() == Value(uint64_t(1))) {
+                if (right.has_value() && right.value() == Value(uint64_t{1})) {
                     // N * 0 -> 0
                     return right;
                 }
-                if (right.has_value() && right.value() == Value(uint64_t(1))) {
+                if (right.has_value() && right.value() == Value(uint64_t{1})) {
                     // N * 1 -> N
                     return left;
                 }
@@ -323,7 +324,7 @@ Expression BinaryExpression::create(const Expression& left, Expression::BinaryOp
                 break;
 
             case Expression::BinaryOperation::DIVIDE: {
-                if (right.has_value() && right.value() == Value(uint64_t(1))) {
+                if (right.has_value() && right.value() == Value(uint64_t{1})) {
                     // N / 1 -> N
                     return left;
                 }
@@ -331,11 +332,11 @@ Expression BinaryExpression::create(const Expression& left, Expression::BinaryOp
             }
 
             case Expression::BinaryOperation::SUBTRACT: {
-                if (right.has_value() && right.value() == Value(uint64_t(0))) {
+                if (right.has_value() && right.value() == Value(uint64_t{0})) {
                     // N - 0 -> N
                     return left;
                 }
-                if (left.has_value() && left.value() == Value(uint64_t(0))) {
+                if (left.has_value() && left.value() == Value(uint64_t{0})) {
                     // 0 - N -> -N
                     return {Expression::UnaryOperation::MINUS, right};
                 }
@@ -382,7 +383,7 @@ Expression BinaryExpression::create(const Expression& left, Expression::BinaryOp
                     auto left_variable = left.variable_name();
                     auto right_variable = right.variable_name();
                     if (!left_variable.empty() && left_variable == right_variable) {
-                        return Expression(uint64_t(0));
+                        return Expression(uint64_t{0});
                     }
                 }
                 break;
@@ -467,6 +468,8 @@ std::optional<Value> BinaryExpression::minimum_value() const {
         case Expression::BinaryOperation::SUBTRACT:
             return left.minimum_value() - right.maximum_value();
     }
+
+    throw Exception("internal error: invalid binary operation %d", operation);
 }
 
 std::optional<Value> BinaryExpression::maximum_value() const {
@@ -496,4 +499,60 @@ std::optional<Value> BinaryExpression::maximum_value() const {
         case Expression::BinaryOperation::SUBTRACT:
             return left.maximum_value() - right.minimum_value();
     }
-}
+
+    throw Exception("internal error: invalid binary operation %d", operation);}
+
+std::optional<Value::Type> BinaryExpression::type() const {
+    const auto left_type = left.type();
+    const auto right_type = right.type();
+
+    switch (operation) {
+        case Expression::ADD:
+        case Expression::SUBTRACT:
+        case Expression::MULTIPLY:
+        case Expression::DIVIDE:
+            if (left_type && right_type) {
+                if (left_type == Value::FLOAT || right_type == Value::FLOAT) {
+                    return Value::FLOAT;
+                }
+                else if (left_type == Value::UNSIGNED && right_type == Value::UNSIGNED) {
+                    return Value::UNSIGNED;
+                }
+                else {
+                    return Value::INTEGER;
+                }
+            }
+            else {
+                return Value::NUMBER;
+            }
+
+        case Expression::BinaryOperation::MODULO:
+            // TODO
+            return {};
+
+        case Expression::BinaryOperation::SHIFT_LEFT:
+        case Expression::BinaryOperation::SHIFT_RIGHT:
+            if (left_type) {
+                return left_type;
+            }
+            else {
+                return Value::INTEGER;
+            }
+
+        case Expression::BinaryOperation::BITWISE_AND:
+        case Expression::BinaryOperation::BITWISE_OR:
+        case Expression::BinaryOperation::BITWISE_XOR:
+            return Value::UNSIGNED;
+
+        case Expression::EQUAL:
+        case Expression::GREATER:
+        case Expression::GREATER_EQUAL:
+        case Expression::LESS:
+        case Expression::LESS_EQUAL:
+        case Expression::NOT_EQUAL:
+        case Expression::BinaryOperation::LOGICAL_AND:
+        case Expression::BinaryOperation::LOGICAL_OR:
+            return Value::BOOLEAN;
+    }
+
+    throw Exception("internal error: invalid binary operation %d", operation);}

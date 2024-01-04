@@ -1,5 +1,5 @@
 /*
-IntegerEncoding.h --
+IntegerEncoder.h --
 
 Copyright (C) Dieter Baron
 
@@ -29,36 +29,37 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef INTEGER_ENCODING_H
-#define INTEGER_ENCODING_H
+#ifndef INTEGER_ENCODER_H
+#define INTEGER_ENCODER_H
 
-#include <string>
-
+#include "BaseEncoder.h"
 #include "BaseExpression.h"
+#include "Environment.h"
 #include "Value.h"
 
-class IntegerEncoding {
+class IntegerEncoder: public BaseEncoder {
 public:
     enum Type {
         SIGNED,
         UNSIGNED
     };
 
-    IntegerEncoding(Type type, size_t size, std::optional<uint64_t> byte_order = {}): type(type), size(size), explicit_byte_order(byte_order) {}
-
-    IntegerEncoding(const Value);
+    IntegerEncoder(Type type, size_t size, std::optional<uint64_t> byte_order = {}): type(type), size(size), explicit_byte_order(byte_order) {}
+    explicit IntegerEncoder(const Value& value);
 
     [[nodiscard]] size_t byte_size() const {return size;}
-    void encode(std::string& bytes, const Value& value) const;
-    [[nodiscard]] bool fits(const Value& value) const;
-    [[nodiscard]] bool is_natural_encoding(const Value& value) const;
-    void serialize(std::ostream& stream) const;
+    void encode(std::string& bytes, const Value& value) const override;
+    [[nodiscard]] size_t encoded_size(const Value& value) const override {return byte_size();}
+    [[nodiscard]] bool fits(const Value& value) const override;
+    [[nodiscard]] bool is_natural_encoder(const Value& value) const override;
+    void serialize(std::ostream& stream) const override;
+    [[nodiscard]] SizeRange size_range() const override {return SizeRange{byte_size()};}
+    [[nodiscard]] std::optional<Value> maximum_value() const;
+    [[nodiscard]] std::optional<Value> minimum_value() const;
+    bool operator==(const Encoder& other) const override;
 
-    std::optional<Value> maximum_value() const;
-    std::optional<Value> minimum_value() const;
-
-    bool operator==(const IntegerEncoding& other) const;
-    bool operator!=(const IntegerEncoding& other) const {return !(*this == other);}
+    bool operator==(const IntegerEncoder& other) const;
+    bool operator!=(const IntegerEncoder& other) const {return !(*this == other);}
 
     static uint64_t default_byte_order;
 
@@ -70,6 +71,6 @@ private:
     [[nodiscard]] uint64_t byte_order() const {return explicit_byte_order.value_or(default_byte_order);}
 };
 
-std::ostream& operator<<(std::ostream& stream, const IntegerEncoding& encoding);
+std::ostream& operator<<(std::ostream& stream, const IntegerEncoder& encoding);
 
-#endif // INTEGER_ENCODING_H
+#endif // INTEGER_ENCODER_H

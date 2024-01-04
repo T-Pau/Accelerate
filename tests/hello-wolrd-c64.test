@@ -5,6 +5,7 @@ file cbm.lib ../share/lib/cbm.lib
 file hello-world-c64.prg {} hello-world-c64.prg
 file hello-world-c64.sym {} <inline>
 object	$fb	$0002	ptr	zero_page	reserve
+object	$801	$000d	basic_program	data	data
 object	$80e	$0015	start	code	data
 object	$823	$000f	message	data	data
 end-of-inline-data

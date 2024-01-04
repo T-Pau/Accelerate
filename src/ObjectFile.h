@@ -33,7 +33,6 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define OBJECT_FILE_H
 
 #include <map>
-#include <utility>
 
 #include "Function.h"
 #include "Macro.h"
@@ -46,7 +45,7 @@ public:
     class Constant: public Entity {
     public:
         Constant(ObjectFile* owner, Token name, Visibility visibility, Expression value): Entity(owner, name, visibility), value(std::move(value)) {}
-        Constant(ObjectFile* owner, Token name, const std::shared_ptr<ParsedValue>& definition);
+        Constant(ObjectFile* owner, const Token& name, const std::shared_ptr<ParsedValue>& definition);
 
         void serialize(std::ostream& stream) const;
 
@@ -64,11 +63,16 @@ public:
     void add_object(std::unique_ptr<Object> object) {(void)insert_object(std::move(object));}
     void add_object_file(const std::shared_ptr<ObjectFile>& file);
     bool check_unresolved() const;
+    [[nodiscard]] const Constant* constant(Symbol name) const;
     [[nodiscard]] std::vector<Object*> all_objects();
-    Object* create_object(Symbol section_name, Visibility visibility, Token object_name);
+    void collect_explicitly_used_objects(std::unordered_set<Object*>& set) const;
+    Object* create_object(Symbol section_name, Visibility visibility, const Token& object_name);
     void evaluate();
     void import(ObjectFile* library);
     [[nodiscard]] const Object* object(Symbol object_name) const;
+    void mark_used(Object* object) {explicitly_used_objects.insert(object);}
+    void mark_used(Symbol name) {explicitly_used_object_names.insert(name);}
+    void pin(Symbol name, Expression address) {pinned_objects[name] = Pinned{name, address};}
     void remove_private_constants();
     void serialize(std::ostream& stream) const;
     void set_target(const Target* new_target);
@@ -84,6 +88,17 @@ public:
     static const unsigned int format_version_minor;
 
 private:
+    class Pinned {
+    public:
+        Pinned(Symbol name, Expression address): name{name}, address{std::move(address)} {}
+        Pinned() = default;
+
+        Symbol name;
+        Expression address;
+
+        void process(EvaluationContext context);
+    };
+
     Object* insert_object(std::unique_ptr<Object> object);
     void add_to_environment(const Constant& constant) { add_to_environment(constant.name.as_symbol(), constant.visibility, constant.value);}
     void add_to_environment(Object* object);
@@ -93,6 +108,11 @@ private:
     std::unordered_map<Symbol, std::unique_ptr<Function>> functions;
     std::unordered_map<Symbol, std::unique_ptr<Macro>> macros;
     std::unordered_map<Symbol, std::unique_ptr<Object>> objects;
+
+    std::set<Symbol> explicitly_used_object_names;
+    std::set<Object*> explicitly_used_objects;
+    std::map<Symbol, Pinned> pinned_objects;
+    bool have_unresolved{false};
 
     std::unordered_set<ObjectFile*> imported_libraries;
 };

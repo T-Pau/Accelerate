@@ -45,6 +45,7 @@ public:
     [[nodiscard]] std::optional<Value> value() const override {return value_;}
     [[nodiscard]] std::optional<Value> maximum_value() const override;
     [[nodiscard]] std::optional<Value> minimum_value() const override {return maximum_value();}
+    [[nodiscard]] std::optional<Value::Type> type() const override {return value_.type();}
 
 protected:
     [[nodiscard]] std::optional<Expression> evaluated(const EvaluationContext& context) const override {return {};}

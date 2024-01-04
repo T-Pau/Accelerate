@@ -41,6 +41,8 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 template <typename T>
 class Getter {
 public:
+    virtual ~Getter() = default;
+
     const T& get(Symbol name, Symbol base = {}) {
         auto base_filename = name.str();
         if (!base_filename.ends_with(filename_extension())) {

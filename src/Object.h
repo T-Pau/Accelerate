@@ -32,6 +32,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef OBJECT_H
 #define OBJECT_H
 
+#include <set>
 #include <vector>
 
 #include "Address.h"
@@ -57,6 +58,7 @@ public:
     [[nodiscard]] bool has_address() const {return address.has_value();}
     [[nodiscard]] std::optional<uint64_t> reservation() const;
     [[nodiscard]] SizeRange size_range() const;
+    void uses(Symbol name) {explicitly_used_objects.insert(name);}
 
     void serialize(std::ostream& stream) const;
 
@@ -66,6 +68,7 @@ public:
     uint64_t alignment = 0;
     std::optional<Expression> reservation_expression;
     std::optional<Address> address;
+    std::set<Symbol> explicitly_used_objects;
 
     Body body;
 
@@ -75,7 +78,7 @@ public:
     static const Token token_body;
     static const Token token_reserve;
     static const Token token_section;
-
+    static const Token token_uses;
 };
 
 std::ostream& operator<<(std::ostream& stream, const Object& node);

@@ -40,7 +40,7 @@ class Address {
   public:
     Address(uint64_t bank, uint64_t address): bank(bank), address(address) {}
     explicit Address(uint64_t address): address(address) {}
-    explicit Address(Tokenizer& tokenizer);
+    explicit Address(Tokenizer& tokenizer, std::shared_ptr<Environment> environment = {});
 
     void serialize(std::ostream& stream) const;
 

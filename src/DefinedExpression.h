@@ -41,6 +41,7 @@ public:
     static Expression create(const std::vector<Expression>& arguments);
 
     [[nodiscard]] std::optional<Expression> evaluated(const EvaluationContext& context) const override;
+    [[nodiscard]] std::optional<Value::Type> type() const override {return Value::BOOLEAN;}
 
 protected:
     void serialize_sub(std::ostream& stream) const override;

@@ -1,4 +1,4 @@
-.include "c128.inc"
+.include "mega65.inc"
 
 .section zero_page {
     ; TODO: check for correctness
@@ -9,9 +9,12 @@
     ]
 }
 
-basic_start = $1c01
+basic_start = $2001
 basic_end = $7fff
 
-NEED_EXTRA_SETUP = 0
+NEED_EXTRA_SETUP = 1
+.macro extra_setup {
+    .data $fe, $02, "0:" ; BANK 0:
+}
 
 .include "commodore-basic.inc"

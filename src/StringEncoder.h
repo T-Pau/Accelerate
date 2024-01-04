@@ -1,9 +1,9 @@
 /*
-ObjectNameExpression.h --
+StringEncoder.h -- 
 
 Copyright (C) Dieter Baron
 
-The authors can be contacted at <accelerate@tpau.group>
+The authors can be contacted at <assembler@tpau.group>
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions
@@ -29,22 +29,33 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef OBJECT_NAME_EXPRESSION_H
-#define OBJECT_NAME_EXPRESSION_H
+#ifndef STRINGENCODER_H
+#define STRINGENCODER_H
 
-#include "BaseExpression.h"
+#include <optional>
 
-class ObjectNameExpression: public BaseExpression {
-  public:
-    ObjectNameExpression() = default;
-    ObjectNameExpression(Location location): BaseExpression(location) {}
+#include "BaseEncoder.h"
+#include "Value.h"
 
-    static Expression create(Object* object);
+class StringEncoding;
 
-    [[nodiscard]] std::optional<Expression> evaluated(const EvaluationContext &context) const override;
-    void serialize_sub(std::ostream &stream) const override;
-    [[nodiscard]] std::optional<Value::Type> type() const override {return Value::UNSIGNED;}
+class StringEncoder: public BaseEncoder {
+public:
+    StringEncoder() = default;
+    explicit StringEncoder(const StringEncoding* string_encoding, std::optional<size_t> size = {}): string_encoding{string_encoding}, size{size} {}
+
+    void encode(std::string& bytes, const Value& value) const override;
+    [[nodiscard]] size_t encoded_size(const Value& value) const override;
+    [[nodiscard]] bool fits(const Value& value) const override;
+    [[nodiscard]] bool is_natural_encoder(const Value& value) const override;
+    void serialize(std::ostream& stream) const override;
+    [[nodiscard]] SizeRange size_range() const override;
+    bool operator==(const Encoder&other) const override;
+
+    bool operator==(const StringEncoder& other) const {return string_encoding == other.string_encoding && size == other.size;}
+
+    const StringEncoding* string_encoding{};
+    std::optional<size_t> size;
 };
 
-
-#endif // OBJECT_NAME_EXPRESSION_H
+#endif //STRINGENCODER_H

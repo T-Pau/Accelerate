@@ -32,6 +32,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef VALUE_H
 #define VALUE_H
 
+#include "Exception.h"
 #include <cstdint>
 #include <optional>
 #include <ostream>
@@ -45,6 +46,8 @@ public:
         BINARY,
         BOOLEAN,
         FLOAT,
+        INTEGER,
+        NUMBER,
         SIGNED,
         STRING,
         UNSIGNED,
@@ -59,6 +62,8 @@ public:
     explicit Value(const std::string& value): value{value} {}
     explicit Value(Symbol value): value{value} {}
 
+    static std::string type_name(Type type);
+
     [[nodiscard]] bool is_binary() const {return value && std::holds_alternative<std::string>(*value);}
     [[nodiscard]] bool is_boolean() const {return value && std::holds_alternative<bool>(*value);}
     [[nodiscard]] bool is_float() const {return value && std::holds_alternative<double>(*value);}
@@ -70,7 +75,7 @@ public:
     [[nodiscard]] bool is_void() const {return !value;}
 
     [[nodiscard]] Type type() const;
-    [[nodiscard]] std::string type_name() const;
+    [[nodiscard]] std::string type_name() const {return type_name(type());}
     [[nodiscard]] std::string binary_value() const;
     [[nodiscard]] bool boolean_value() const;
     [[nodiscard]] double float_value() const;
@@ -78,7 +83,7 @@ public:
     [[nodiscard]] std::string string_value() const;
     [[nodiscard]] Symbol symbol_value() const;
     [[nodiscard]] uint64_t unsigned_value() const;
-    [[nodiscard]] uint64_t default_size() const;
+    [[nodiscard]] std::optional<uint64_t> default_size() const;
 
     explicit operator bool() const {return boolean_value();}
 
@@ -147,8 +152,11 @@ struct std::hash<Value> {
             case Value::UNSIGNED:
                 return std::hash<::uint64_t>{}(value.unsigned_value());
             case Value::VOID:
+            case Value::NUMBER:
+            case Value::INTEGER:
                 return 0;
         }
+        return 0;
     }
 };
 

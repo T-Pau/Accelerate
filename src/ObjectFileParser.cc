@@ -1,5 +1,5 @@
 /*
-ObjectFileParser.cc -- 
+ObjectFileParser.cc --
 
 Copyright (C) Dieter Baron
 
@@ -35,49 +35,38 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ParsedValue.h"
 #include "ParseException.h"
 #include "ExpressionParser.h"
-#include "SequenceTokenizer.h"
 
-bool ObjectFileParser::initialized = false;
-std::unordered_map<Symbol, void (ObjectFileParser::*)()> ObjectFileParser::parser_methods;
-std::unordered_map<Symbol, void (ObjectFileParser::*)(Token name, const std::shared_ptr<ParsedValue>& definition)> ObjectFileParser::symbol_parser_methods;
-Token ObjectFileParser::token_constant;
-Token ObjectFileParser::token_format_version;
-Token ObjectFileParser::token_function;
-Token ObjectFileParser::token_import;
-Token ObjectFileParser::token_in_range;
-Token ObjectFileParser::token_label_offset;
-Token ObjectFileParser::token_macro;
-Token ObjectFileParser::token_object;
-Token ObjectFileParser::token_object_name;
-Token ObjectFileParser::token_target;
+const Token ObjectFileParser::token_constant = Token(Token::DIRECTIVE, "constant");
+const Token ObjectFileParser::token_format_version = Token(Token::DIRECTIVE, "format_version");
+const Token ObjectFileParser::token_function = Token(Token::DIRECTIVE, "function");
+const Token ObjectFileParser::token_import = Token(Token::DIRECTIVE, "import");
+const Token ObjectFileParser::token_in_range = Token(Token::NAME, ".in_range");
+const Token ObjectFileParser::token_label_offset = Token(Token::NAME, ".label_offset");
+const Token ObjectFileParser::token_macro = Token(Token::DIRECTIVE, "macro");
+const Token ObjectFileParser::token_object = Token(Token::DIRECTIVE, "object");
+const Token ObjectFileParser::token_object_name = Token(Token::NAME, ".current_object");
+const Token ObjectFileParser::token_pin = Token(Token::DIRECTIVE, "pin");
+const Token ObjectFileParser::token_target = Token(Token::DIRECTIVE, "target");
+const Token ObjectFileParser::token_use = Token(Token::DIRECTIVE, "use");
 
-void ObjectFileParser::initialize() {
-    if (!initialized) {
-        token_constant = Token(Token::DIRECTIVE, "constant");
-        token_format_version = Token(Token::DIRECTIVE, "format_version");
-        token_function = Token(Token::DIRECTIVE, "function");
-        token_import = Token(Token::DIRECTIVE, "import");
-        token_in_range = Token(Token::NAME, ".in_range");
-        token_label_offset = Token(Token::NAME, ".label_offset");
-        token_macro = Token(Token::DIRECTIVE, "macro");
-        token_object = Token(Token::DIRECTIVE, "object");
-        token_object_name = Token(Token::NAME, ".current_object");
-        token_target = Token(Token::DIRECTIVE, "target");
+// clang-format off
+const std::unordered_map<Symbol, void (ObjectFileParser::*)()> ObjectFileParser::parser_methods ={
+    {token_format_version.as_symbol(), &ObjectFileParser::parse_format_version},
+    {token_import.as_symbol(), &ObjectFileParser::parse_import},
+    {token_pin.as_symbol(), &ObjectFileParser::parse_pin},
+    {token_target.as_symbol(), &ObjectFileParser::parse_target},
+    {token_use.as_symbol(), &ObjectFileParser::parse_use}
+};
 
-        parser_methods[token_format_version.as_symbol()] = &ObjectFileParser::parse_format_version;
-        parser_methods[token_target.as_symbol()] = &ObjectFileParser::parse_target;
-        parser_methods[token_import.as_symbol()] = &ObjectFileParser::parse_import;
-        symbol_parser_methods[token_constant.as_symbol()] = &ObjectFileParser::parse_constant;
-        symbol_parser_methods[token_function.as_symbol()] = &ObjectFileParser::parse_function;
-        symbol_parser_methods[token_object.as_symbol()] = &ObjectFileParser::parse_object;
-        symbol_parser_methods[token_macro.as_symbol()] = &ObjectFileParser::parse_macro;
-
-        initialized = true;
-    }
-}
+const std::unordered_map<Symbol, void (ObjectFileParser::*)(const Token& name, const std::shared_ptr<ParsedValue>& definition)> ObjectFileParser::symbol_parser_methods = {
+    {token_constant.as_symbol(), &ObjectFileParser::parse_constant},
+    {token_function.as_symbol(), &ObjectFileParser::parse_function},
+    {token_macro.as_symbol(), &ObjectFileParser::parse_macro},
+    {token_object.as_symbol(), &ObjectFileParser::parse_object}
+};
+// clang-format on
 
 ObjectFileParser::ObjectFileParser() {
-    initialize();
     tokenizer.add_literal(token_in_range);
     tokenizer.add_literal(token_label_offset);
     tokenizer.add_literal(token_object_name);
@@ -114,22 +103,26 @@ void ObjectFileParser::parse_directive(const Token &directive) {
 }
 
 
-void ObjectFileParser::parse_constant(Token name, const std::shared_ptr<ParsedValue>& definition) {
+void ObjectFileParser::parse_constant(const Token& name, const std::shared_ptr<ParsedValue>& definition) {
     file->add_constant(std::make_unique<ObjectFile::Constant>(file.get(), name, definition));
 }
 
 
-void ObjectFileParser::parse_object(Token name, const std::shared_ptr<ParsedValue>& definition) {
-    file->add_object(std::make_unique<Object>(file.get(), name, definition));
-}
+void ObjectFileParser::parse_object(const Token& name, const std::shared_ptr<ParsedValue>& definition) { file->add_object(std::make_unique<Object>(file.get(), name, definition)); }
 
+void ObjectFileParser::parse_pin() {
+    auto name = tokenizer.expect(Token::NAME);
+    auto address = ExpressionParser(tokenizer).parse();
+
+    file->pin(name.as_symbol(), address);
+}
 
 void ObjectFileParser::parse_format_version() {
     auto token = tokenizer.expect(Token::VALUE);
     // TODO: implement
 }
 
-void ObjectFileParser::parse_function(Token name, const std::shared_ptr<ParsedValue>& definition) {
+void ObjectFileParser::parse_function(const Token& name, const std::shared_ptr<ParsedValue>& definition) {
    file->add_function(std::make_unique<Function>(file.get(), name, definition));
 }
 
@@ -141,7 +134,21 @@ void ObjectFileParser::parse_target() {
     file->set_target(target);
 }
 
-void ObjectFileParser::parse_macro(Token name, const std::shared_ptr<ParsedValue>& definition) {
+void ObjectFileParser::parse_use() {
+    while (true) {
+        auto token = tokenizer.next();
+        if (!token.is_name()) {
+            if (token && !token.is_newline()) {
+                throw ParseException(token, "expected newline");
+            }
+            break;
+        }
+
+        file->mark_used(token.as_symbol());
+    }
+}
+
+void ObjectFileParser::parse_macro(const Token& name, const std::shared_ptr<ParsedValue>& definition) {
     file->add_macro(std::make_unique<Macro>(file.get(), name, definition));
 }
 

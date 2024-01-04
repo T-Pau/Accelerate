@@ -39,7 +39,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ParseException.h"
 #include "VariableExpression.h"
 
-LabelExpression::LabelExpression(Location location, const Entity* object, Symbol label_name, SizeRange offset): BaseExpression(location), type(LabelExpressionType::NAMED), object(object), object_name(object ? object->name.as_symbol() : Symbol()), label_name(label_name), offset(offset) {}
+LabelExpression::LabelExpression(Location location, const Entity* object, Symbol label_name, SizeRange offset): BaseExpression(location), label_type(LabelExpressionType::NAMED), object(object), object_name(object ? object->name.as_symbol() : Symbol()), label_name(label_name), offset(offset) {}
 
 Expression LabelExpression::create(const std::vector<Expression>& arguments) {
     if (arguments.size() == 1) {
@@ -80,7 +80,7 @@ Expression LabelExpression::create(Location location, const Entity* object, Symb
 
 
 std::optional<Expression> LabelExpression::evaluated(const EvaluationContext& context) const {
-    switch (type) {
+    switch (label_type) {
         case NAMED: {
             const Entity* new_object = object;
             auto new_offset = offset;
@@ -123,18 +123,18 @@ std::optional<Expression> LabelExpression::evaluated(const EvaluationContext& co
             if (context.entity) {
                 if (!added_to_environment()) {
                     auto new_unnamed_index = context.environment->unnamed_labels.add_user();
-                    return Expression(location, type, new_unnamed_index);
+                    return Expression(location, label_type, new_unnamed_index);
                 }
                 else {
                     SizeRange new_offset;
-                    if (type == NEXT_UNNAMED) {
+                    if (label_type == NEXT_UNNAMED) {
                         new_offset = context.environment->unnamed_labels.get_next(unnamed_index);
                     }
                     else {
                         new_offset = context.environment->unnamed_labels.get_previous(unnamed_index);
                     }
                     if (new_offset != offset) {
-                        return Expression(location, type, unnamed_index, new_offset);
+                        return Expression(location, label_type, unnamed_index, new_offset);
                     }
                 }
             }
@@ -147,7 +147,7 @@ std::optional<Expression> LabelExpression::evaluated(const EvaluationContext& co
 
 void LabelExpression::serialize_sub(std::ostream &stream) const {
     stream << ".label_offset(";
-    switch (type) {
+    switch (label_type) {
         case NAMED:
             if (object_name.empty()) {
                 stream << ".current_object";

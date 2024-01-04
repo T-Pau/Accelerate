@@ -1,5 +1,5 @@
 /*
-IntegerEncoding.cc --
+IntegerEncoder.cc --
 
 Copyright (C) Dieter Baron
 
@@ -29,23 +29,24 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "IntegerEncoding.h"
+#include "IntegerEncoder.h"
 
+#include "Encoder.h"
 #include "Exception.h"
 #include "Int.h"
 
-uint64_t IntegerEncoding::default_byte_order;
+uint64_t IntegerEncoder::default_byte_order;
 
-std::ostream& operator<<(std::ostream& stream, const IntegerEncoding& encoding) {
+std::ostream& operator<<(std::ostream& stream, const IntegerEncoder& encoding) {
     encoding.serialize(stream);
     return stream;
 }
 
-bool IntegerEncoding::operator==(const IntegerEncoding&other) const {
+bool IntegerEncoder::operator==(const IntegerEncoder&other) const {
     return type == other.type && size == other.size && explicit_byte_order == other.explicit_byte_order;
 }
 
-void IntegerEncoding::encode(std::string &bytes, const Value &value) const {
+void IntegerEncoder::encode(std::string &bytes, const Value &value) const {
     if (!fits(value)) {
         throw Exception("value overflow");
     }
@@ -64,7 +65,7 @@ void IntegerEncoding::encode(std::string &bytes, const Value &value) const {
     }
 }
 
-bool IntegerEncoding::fits(const Value &value) const {
+bool IntegerEncoder::fits(const Value &value) const {
     switch (type) {
         case SIGNED:
         case UNSIGNED:
@@ -72,7 +73,7 @@ bool IntegerEncoding::fits(const Value &value) const {
     }
 }
 
-bool IntegerEncoding::is_natural_encoding(const Value &value) const {
+bool IntegerEncoder::is_natural_encoder(const Value &value) const {
     switch (type) {
         case SIGNED:
             return value.is_signed() && value.default_size() == size && byte_order() == default_byte_order;
@@ -82,7 +83,7 @@ bool IntegerEncoding::is_natural_encoding(const Value &value) const {
     }
 }
 
-void IntegerEncoding::serialize(std::ostream &stream) const {
+void IntegerEncoder::serialize(std::ostream &stream) const {
     switch (type) {
         case SIGNED:
             stream << ":-" << size;
@@ -95,7 +96,7 @@ void IntegerEncoding::serialize(std::ostream &stream) const {
     // TODO: encode byte_order if byte_order != default_byte_order
 }
 
-IntegerEncoding::IntegerEncoding(const Value value) {
+IntegerEncoder::IntegerEncoder(const Value& value) {
     switch (value.type()) {
         case Value::BINARY:
         case Value::BOOLEAN:
@@ -111,11 +112,16 @@ IntegerEncoding::IntegerEncoding(const Value value) {
         case Value::UNSIGNED:
             type = UNSIGNED;
             break;
+
+
+        case Value::NUMBER:
+        case Value::INTEGER:
+            throw Exception("internal error: value can't have abstract type %s", value.type_name().c_str());
     }
-    size = value.default_size();
+    size = *value.default_size();
 }
 
-std::optional<Value> IntegerEncoding::minimum_value() const {
+std::optional<Value> IntegerEncoder::minimum_value() const {
     switch (type) {
         case SIGNED:
             if (size == 8) {
@@ -124,19 +130,32 @@ std::optional<Value> IntegerEncoding::minimum_value() const {
             return Value(-(static_cast<int64_t>(1) << (size * 8 - 1)));
 
         case UNSIGNED:
-            return Value(uint64_t(0));
+            return Value(uint64_t{0});
+    }
+
+    throw Exception("internal error: invalid integer encoder type %d", type);
+}
+
+bool IntegerEncoder::operator==(const Encoder& other) const {
+    if (other.is_integer_encoder()) {
+        return *this == *other.as_integer_encoder();
+    }
+    else {
+        return false;
     }
 }
 
-std::optional<Value> IntegerEncoding::maximum_value() const {
+std::optional<Value> IntegerEncoder::maximum_value() const {
     switch (type) {
         case SIGNED:
-            return Value((int64_t(1) << (size * 8 - 1)) - 1);
+            return Value((int64_t{1} << (size * 8 - 1)) - 1);
 
         case UNSIGNED:
             if (size == 8) {
                 return Value(std::numeric_limits<uint64_t>::max());
             }
-            return Value((uint64_t(1) << (size * 8)) - 1);
+            return Value((uint64_t{1} << (size * 8)) - 1);
     }
+
+    throw Exception("internal error: invalid integer encoder type %d", type);
 }

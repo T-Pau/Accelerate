@@ -42,12 +42,14 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define BODY "body"
 #define RESERVE "reserve"
 #define SECTION "section"
+#define USES "uses"
 
 const Token Object::token_address{Token::NAME, ADDRESS};
 const Token Object::token_alignment{Token::NAME, ALIGNMENT};
 const Token Object::token_body{Token::NAME, BODY};
 const Token Object::token_reserve{Token::NAME, RESERVE};
 const Token Object::token_section{Token::NAME, SECTION};
+const Token Object::token_uses{Token::NAME, USES};
 
 
 Object::Object(ObjectFile* owner, const Token& name, const std::shared_ptr<ParsedValue>& definition): Entity(owner, name, definition) {
@@ -67,6 +69,12 @@ Object::Object(ObjectFile* owner, const Token& name, const std::shared_ptr<Parse
             throw ParseException(alignment_token, "unsigned integer expected");
         }
         alignment = alignment_token.as_unsigned();
+    }
+
+    if (auto uses_value = parameters->get_optional(token_uses)) {
+        for (const auto& object_name: uses_value->as_scalar()->tokens) {
+            uses(object_name.as_symbol());
+        }
     }
 
     auto body_value = parameters->get_optional(token_body);
@@ -109,6 +117,13 @@ void Object::serialize(std::ostream &stream) const {
         stream << "    " ALIGNMENT ": " << alignment << std::endl;
     }
     stream << "    " SECTION ": " << section->name << std::endl;
+    if (!explicitly_used_objects.empty()) {
+        stream << "    " USES ":";
+        for (const auto& name: explicitly_used_objects) {
+            stream << " " << name;
+        }
+        stream << std::endl;
+    }
     if (is_reservation()) {
         stream << "    " RESERVE ": " << *reservation_expression << std::endl;
     }
@@ -143,9 +158,23 @@ void Object::evaluate() {
         reservation_expression->evaluate(context);
     }
     else {
-        body.evaluate((context));
+        body.evaluate(context);
     }
     process_result(result);
+
+#if 0
+    std::cout << "evaluating " << name.as_string() << ": used:";
+    for (const auto& o: referenced_objects) {
+        std::cout << " " << o->name.as_string();
+    }
+    std::cout << ", unresolved:";
+    for (const auto& o: unresolved_variables) {
+        std::cout << " " << o;
+    }
+    std::cout << " <" << std::endl;
+    body.serialize(std::cout, "    ");
+    std::cout << ">" << std::endl;
+#endif
 }
 
 

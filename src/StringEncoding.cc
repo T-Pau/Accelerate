@@ -510,8 +510,17 @@ size_t StringEncoding::encoded_size(const Value& value) const {
     return encoded_size(value.string_value());
 }
 
-void StringEncoding::encode(std::string& bytes, const Value& value) const {
-    return encode(bytes, value.string_value());
+void StringEncoding::encode(std::string& bytes, const Value& value, std::optional<size_t> size) const {
+    auto string = value.string_value();
+    if (size) {
+        if (string.size() < *size) {
+            string.insert(string.size(), *size - string.size(), ' ');
+        }
+        else if (string.size() > *size) {
+            throw Exception("value doesn't fit");
+        }
+    }
+    return encode(bytes, string);
 }
 
 std::ostream& operator<<(std::ostream& stream, const StringEncoding& encoding) {

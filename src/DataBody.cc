@@ -33,20 +33,18 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "Exception.h"
 
-DataBody::DataBody(std::vector<DataBodyElement> data_): data(std::move(data_)) {
-    for (const auto& datum: data) {
+DataBody::DataBody(std::vector<DataBodyElement> data_) : data(std::move(data_)) {
+    for (const auto& datum : data) {
         size_range_ += datum.size_range();
     }
 }
-
 
 std::optional<Body> DataBody::evaluated(const EvaluationContext& context) const {
     auto new_data = std::vector<DataBodyElement>();
     auto changed = false;
 
-    for (auto& datum: data) {
-        auto new_expression = datum.expression.evaluated(context);
-        if (new_expression) {
+    for (auto& datum : data) {
+        if (auto new_expression = datum.expression.evaluated(context)) {
             changed = true;
             new_data.emplace_back(*new_expression, datum.encoding);
         }
@@ -62,10 +60,10 @@ std::optional<Body> DataBody::evaluated(const EvaluationContext& context) const 
     return {};
 }
 
-void DataBody::serialize(std::ostream &stream, const std::string& prefix) const {
+void DataBody::serialize(std::ostream& stream, const std::string& prefix) const {
     stream << prefix << ".data ";
     auto first = true;
-    for (auto& datum: data) {
+    for (auto& datum : data) {
         if (first) {
             first = false;
         }
@@ -75,7 +73,7 @@ void DataBody::serialize(std::ostream &stream, const std::string& prefix) const 
         stream << datum.expression;
         if (datum.encoding.has_value()) {
             auto value = datum.expression.value();
-            if (!value.has_value() || !datum.encoding->is_natural_encoding(*value)) {
+            if (!value.has_value() || !datum.encoding->is_natural_encoder(*value)) {
                 stream << *datum.encoding;
             }
         }
@@ -85,22 +83,22 @@ void DataBody::serialize(std::ostream &stream, const std::string& prefix) const 
 }
 
 std::optional<Body> DataBody::append_sub(Body body, Body element) {
-    auto data_element = element.as_data();
+    const auto data_element = element.as_data();
 
     if (!data_element) {
         return {};
     }
 
     auto new_body = body.make_unique();
-    auto new_data_body = new_body.as_data();
+    const auto new_data_body = new_body.as_data();
 
     new_data_body->data.insert(new_data_body->data.end(), data_element->data.begin(), data_element->data.end());
     new_data_body->size_range_ += element.size_range();
     return new_body;
 }
 
-void DataBody::encode(std::string &bytes, const Memory* memory) const {
-    for (auto& datum: data) {
+void DataBody::encode(std::string& bytes, const Memory* memory) const {
+    for (auto& datum : data) {
         auto value = datum.expression.value();
         if (!value.has_value()) {
             throw Exception("unknown value");
@@ -110,53 +108,67 @@ void DataBody::encode(std::string &bytes, const Memory* memory) const {
             datum.encoding->encode(bytes, *value);
         }
         else {
-            Encoding(*value).encode(bytes, *value);
+            Encoder(*value).encode(bytes, *value);
         }
     }
 }
 
-void DataBody::collect_objects(std::unordered_set<Object *> &objects) const {
-    for (auto& datum: data) {
+void DataBody::collect_objects(std::unordered_set<Object*>& objects) const {
+    for (auto& datum : data) {
         datum.expression.collect_objects(objects);
     }
 }
 
-Body DataBody::appending(const std::vector<DataBodyElement> &elements) const {
+Body DataBody::appending(const std::vector<DataBodyElement>& elements) const {
     auto new_data = data;
     new_data.insert(new_data.end(), elements.begin(), elements.end());
     return Body(new_data);
 }
 
 SizeRange DataBodyElement::size_range() const {
-    if (encoding && encoding->is_integer_encoding()) {
-        return SizeRange(encoding->as_integer_encoding().byte_size());
-    }
-
-    auto value = expression.value();
-
-    if (value) {
+    if (const auto value = expression.value()) {
         if (encoding) {
             return SizeRange{encoding->encoded_size(*value)};
         }
-        if (value->is_number()) {
-            return SizeRange(value->default_size());
-        }
         else {
-            return SizeRange{Encoding(*value).encoded_size(*value)};
+            return SizeRange{Encoder(*value).encoded_size(*value)};
         }
     }
 
-    auto minimum_value = expression.minimum_value();
-    auto maximum_value = expression.maximum_value();
+    const auto minimum_value = expression.minimum_value();
+    const auto maximum_value = expression.maximum_value();
     if (minimum_value && maximum_value) {
-        auto minimum_size = minimum_value->default_size();
-        auto maximum_size = maximum_value->default_size();
-        return {std::min(minimum_size, maximum_size), std::max(minimum_size, maximum_size)};
+        std::optional<size_t> minimum_size, maximum_size;
+        if (encoding) {
+            minimum_size = encoding->encoded_size(*minimum_value);
+            maximum_size = encoding->encoded_size(*maximum_value);
+        }
+        else {
+            minimum_size = minimum_value->default_size();
+            maximum_size = maximum_value->default_size();
+        }
+        if (minimum_size && maximum_size) {
+            return {std::min(*minimum_size, *maximum_size), std::max(*minimum_size, *maximum_size)};
+        }
+        else {
+            return {0, {}};
+        }
     }
-    if (minimum_value || maximum_value) {
-        return {1, 8};
+    else if (encoding) {
+        return encoding->size_range();
+    }
+    else if (const auto type = expression.type()) {
+        switch (*type) {
+            case Value::INTEGER:
+            case Value::SIGNED:
+            case Value::UNSIGNED:
+                return SizeRange{1, 8};
+
+            default:
+                return {0, {}};
+        }
     }
     else {
-        return {};
+        return {0, {}};
     }
 }

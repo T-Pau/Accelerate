@@ -38,9 +38,11 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "MemoryMap.h"
 #include "StringEncoding.h"
 
+class ObjectFile;
+
 class Target {
 public:
-    Target() = default;
+    Target();
     explicit Target(Symbol name): name(name) {}
 
     static void clear_current_target() {current_target = &empty;};
@@ -60,6 +62,7 @@ public:
     std::unordered_set<Symbol> defines;
     const StringEncoding* default_string_encoding{};
 
+    std::shared_ptr<ObjectFile> object_file;
     Body output;
 
     std::string extension = "bin";

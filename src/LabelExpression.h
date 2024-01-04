@@ -39,14 +39,15 @@ class LabelExpression: public BaseExpression {
 public:
     static Expression create(Location location, const Entity* object, Symbol label_name, SizeRange offset);
     static Expression create(const std::vector<Expression>& arguments);
-    LabelExpression(Location location, Symbol object_name, Symbol label_name): BaseExpression(location), type(LabelExpressionType::NAMED), object_name(object_name), label_name(label_name) {}
-    LabelExpression(Location location, Symbol object_name, Symbol label_name, SizeRange offset): BaseExpression(location), type(LabelExpressionType::NAMED), object_name(object_name), label_name(label_name), offset(offset) {}
+    LabelExpression(Location location, Symbol object_name, Symbol label_name): BaseExpression(location), label_type(LabelExpressionType::NAMED), object_name(object_name), label_name(label_name) {}
+    LabelExpression(Location location, Symbol object_name, Symbol label_name, SizeRange offset): BaseExpression(location), label_type(LabelExpressionType::NAMED), object_name(object_name), label_name(label_name), offset(offset) {}
     LabelExpression(Location location, const Entity* object, Symbol label_name, SizeRange offset);
-    LabelExpression(Location location, LabelExpressionType type, size_t unnamed_index = std::numeric_limits<size_t>::max(), SizeRange offset = SizeRange(0, {})): BaseExpression(location), type(type), offset(offset), unnamed_index(unnamed_index) {}
+    LabelExpression(Location location, LabelExpressionType type, size_t unnamed_index = std::numeric_limits<size_t>::max(), SizeRange offset = SizeRange(0, {})): BaseExpression(location), label_type(type), offset(offset), unnamed_index(unnamed_index) {}
 
     [[nodiscard]] std::optional<Value> minimum_value() const override {return offset.minimum_value();}
     [[nodiscard]] std::optional<Value> maximum_value() const override {return offset.maximum_value();}
     [[nodiscard]] std::optional<Value> value() const override {return offset.value();}
+    [[nodiscard]] std::optional<Value::Type> type() const override {return Value::UNSIGNED;}
 
 protected:
     [[nodiscard]] std::optional<Expression> evaluated(const EvaluationContext& context) const override;
@@ -55,7 +56,7 @@ protected:
 private:
     [[nodiscard]] bool added_to_environment() const {return unnamed_index != std::numeric_limits<size_t>::max();}
 
-    LabelExpressionType type;
+    LabelExpressionType label_type;
     Symbol object_name;
     Symbol label_name;
     const Entity* object = nullptr;

@@ -1,5 +1,5 @@
 /*
-UnaryExpression.cc -- 
+UnaryExpression.cc --
 
 Copyright (C) Dieter Baron
 
@@ -75,9 +75,8 @@ Expression UnaryExpression::create(Expression::UnaryOperation operation, Express
     }
 }
 
-
 std::optional<Expression> UnaryExpression::evaluated(const EvaluationContext& context) const {
-    auto new_operand = operand.evaluated(context);
+    const auto new_operand = operand.evaluated(context);
 
     if (!new_operand) {
         return {};
@@ -86,10 +85,7 @@ std::optional<Expression> UnaryExpression::evaluated(const EvaluationContext& co
     return Expression(operation, new_operand ? *new_operand : operand);
 }
 
-
-
-
-void UnaryExpression::serialize_sub(std::ostream &stream) const {
+void UnaryExpression::serialize_sub(std::ostream& stream) const {
     switch (operation) {
         case Expression::UnaryOperation::BANK_BYTE:
             stream << '^';
@@ -122,7 +118,6 @@ void UnaryExpression::serialize_sub(std::ostream &stream) const {
     stream << operand;
 }
 
-
 std::optional<Value> UnaryExpression::minimum_value() const {
     switch (operation) {
         case Expression::UnaryOperation::BANK_BYTE:
@@ -135,7 +130,7 @@ std::optional<Value> UnaryExpression::minimum_value() const {
             return {};
 
         case Expression::UnaryOperation::MINUS: {
-            auto v = operand.maximum_value();
+            const auto v = operand.maximum_value();
             if (v.has_value()) {
                 return -v.value();
             }
@@ -147,8 +142,9 @@ std::optional<Value> UnaryExpression::minimum_value() const {
         case Expression::UnaryOperation::PLUS:
             return operand.minimum_value();
     }
-}
 
+    throw Exception("internal error: invalid unary operation %d", operation);
+}
 
 std::optional<Value> UnaryExpression::maximum_value() const {
     switch (operation) {
@@ -162,7 +158,7 @@ std::optional<Value> UnaryExpression::maximum_value() const {
             return {};
 
         case Expression::UnaryOperation::MINUS: {
-            auto v = operand.minimum_value();
+            const auto v = operand.minimum_value();
             if (v.has_value()) {
                 return -v.value();
             }
@@ -174,4 +170,40 @@ std::optional<Value> UnaryExpression::maximum_value() const {
         case Expression::UnaryOperation::PLUS:
             return operand.maximum_value();
     }
+
+    throw Exception("internal error: invalid unary operation %d", operation);
 }
+
+std::optional<Value::Type> UnaryExpression::type() const {
+    const auto operand_type = operand.type();
+
+    switch (operation) {
+        case Expression::UnaryOperation::BANK_BYTE:
+        case Expression::UnaryOperation::HIGH_BYTE:
+        case Expression::UnaryOperation::LOW_BYTE:
+            return Value::UNSIGNED;
+
+        case Expression::UnaryOperation::BITWISE_NOT:
+            if (operand_type) {
+                return *operand_type;
+            }
+            else {
+                return Value::INTEGER;
+            }
+
+        case Expression::UnaryOperation::NOT:
+            return Value::BOOLEAN;
+
+        case Expression::UnaryOperation::MINUS:
+        case Expression::UnaryOperation::PLUS:
+            if (operand_type) {
+                return *operand_type;
+            }
+            else {
+                return Value::NUMBER;
+            }
+    }
+
+    throw Exception("internal error: invalid unary operation %d", operation);
+}
+

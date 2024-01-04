@@ -68,7 +68,7 @@ void ValueExpression::serialize_sub(std::ostream &stream) const {
 
         case Value::SIGNED:
         case Value::UNSIGNED: {
-            auto width = static_cast<int>(value()->default_size()) * 2;
+            auto width = static_cast<int>(*value()->default_size()) * 2;
             uint64_t v;
             if (value()->is_signed()) {
                 stream << "-";

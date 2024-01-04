@@ -1,5 +1,5 @@
 /*
-Target.cc --
+StringEncoder.cc -- 
 
 Copyright (C) Dieter Baron
 
@@ -29,30 +29,58 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+#include "StringEncoder.h"
+
+#include "StringEncoding.h"
 #include "Target.h"
 
-#include "ObjectFile.h"
-#include "TargetGetter.h"
-
-const Target Target::empty = Target();
-const Target* Target::current_target = &empty;
-
-Target::Target(): object_file{std::make_shared<ObjectFile>()} {}
-
-const Target &Target::get(Symbol name) {
-    return TargetGetter::global.get(name);
+void StringEncoder::encode(std::string& bytes, const Value& value) const {
+    string_encoding->encode(bytes, value, size);
 }
 
-bool Target::is_compatible_with(const Target &other) const {
-    return map.is_compatible_with(other.map) && cpu->is_compatible_with(*other.cpu);
-}
-
-const StringEncoding* Target::string_encoding(Symbol name) const {
-    auto it = string_encodings.find(name);
-    if (it != string_encodings.end()) {
-        return &it->second;
+size_t StringEncoder::encoded_size(const Value& value) const {
+    if (size) {
+        return *size;
     }
     else {
-        return {};
+        return string_encoding->encoded_size(value);
+    }
+}
+
+bool StringEncoder::fits(const Value& value) const {
+    if (size) {
+        return string_encoding->encoded_size(value) <= *size;
+    }
+    else {
+        return true;
+    }
+}
+
+bool StringEncoder::is_natural_encoder(const Value& value) const {
+    return !size && string_encoding == Target::current_target->default_string_encoding;
+}
+
+void StringEncoder::serialize(std::ostream& stream) const {
+    stream << *string_encoding;
+    if (size) {
+        stream << "(" << *size << ")";
+    }
+}
+
+SizeRange StringEncoder::size_range() const {
+    if (size) {
+        return SizeRange{*size};
+    }
+    else {
+        return SizeRange{0, {}};
+    }
+}
+
+bool StringEncoder::operator==(const Encoder& other) const {
+    if (other.is_string_encoder()) {
+        return *this == *other.as_string_encoder();
+    }
+    else {
+        return false;
     }
 }

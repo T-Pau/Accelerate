@@ -48,7 +48,7 @@ class StringEncoding {
     [[nodiscard]] size_t encoded_size(const std::string& string) const {return encode(nullptr, string);}
     [[nodiscard]] size_t encoded_size(const Value& value) const;
     void encode(std::string& bytes, const std::string& string) const {(void)encode(&bytes, string);}
-    void encode(std::string& bytes, const Value& value) const;
+    void encode(std::string& bytes, const Value& value, std::optional<size_t> size = {}) const;
 
     void serialize(std::ostream& stream) const;
 

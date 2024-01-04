@@ -30,12 +30,18 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include "Address.h"
+
 #include "ExpressionParser.h"
 #include "Int.h"
 #include "ParseException.h"
 
-Address::Address(Tokenizer& tokenizer) {
+Address::Address(Tokenizer& tokenizer, std::shared_ptr<Environment> environment) {
     auto expression = ExpressionParser(tokenizer).parse();
+    if (environment) {
+        auto result = EvaluationResult{};
+        auto context = EvaluationContext{result, EvaluationContext::STANDALONE, std::move(environment)};
+        expression.evaluate(context);
+    }
     auto value = expression.value();
     if (!value.has_value() || !value->is_unsigned()) {
         throw ParseException(expression.location(), "constant unsigned integer expression expected");

@@ -34,6 +34,7 @@
 
 ## Optimizations
 
+- evaluate ScopeBody to inner body when scope no longer needed.
 - Don't serialize signed encoding when value is known to fit.
 - Simplify X + N + M and similar.
 

@@ -50,6 +50,9 @@ class Entity {
     [[nodiscard]] bool is_object() {return as_object();}
     void set_owner(ObjectFile* new_owner);
 
+    // TODO: make protected once BodyParser doesn't evaluate body directly.
+    void process_result(EvaluationResult& result);
+
     Token name;
     Visibility visibility;
     ObjectFile* owner = nullptr;
@@ -60,13 +63,12 @@ class Entity {
     std::shared_ptr<Environment> environment;
 
   protected:
-    void process_result(EvaluationResult& result);
     void serialize_entity(std::ostream& stream) const;
 
   private:
     static void initialize();
 
-    bool check_unresolved(const std::string& singular, const std::string& plural, const std::unordered_set<Symbol>& unresolved) const;
+    [[nodiscard]] bool check_unresolved(const std::string& singular, const std::string& plural, const std::unordered_set<Symbol>& unresolved) const;
 
     static bool initialized;
     static Token token_visibility;
