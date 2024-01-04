@@ -326,7 +326,9 @@ void Assembler::parse_directive(const Token& directive) {
         else if (name.get_type() != Token::NAME) {
             throw ParseException(name, "name expected");
         }
-        parse_name(*visibility, name);
+        else {
+            parse_name(*visibility, name);
+        }
     }
     else if (directive == token_macro) {
         parse_macro(current_visibility);

@@ -52,15 +52,16 @@ add_word address, value {
     lda address
     adc #<value
     sta address
-.if value < 256
-    bcc :+
-    inc address + 1
-:
-.else
-    lda address + 1
-    adc #>value
-    sta address + 1
-.end
+    .if value < 256 {
+        bcc :+
+        inc address + 1
+    :
+    }
+    .else {
+        lda address + 1
+        adc #>value
+        sta address + 1
+    }
 }
 
 subtract_word address, value {
@@ -68,14 +69,16 @@ subtract_word address, value {
     lda address
     sbc #<value
     sta address
-.if value < 256
-    bcs :+
-    dec address + 1
-:
-.else
-    lda address + 1
-    sbc #>value
-    sta address + 1
+    .if value < 256 {
+        bcs :+
+        dec address + 1
+    :
+    }
+    .else {
+        lda address + 1
+        sbc #>value
+        sta address + 1
+    }
 }
 
 memcpy destination, source, length {
