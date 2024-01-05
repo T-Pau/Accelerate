@@ -1,3 +1,5 @@
+# TODO: add dependencies (c128.s and mega65.s include c64.s)
+
 file(GLOB SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/*.s)
 
 set(XLR8 ${CMAKE_BINARY_DIR}/src/xlr8)

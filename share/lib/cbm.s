@@ -4,6 +4,10 @@
 
 .visibility public
 
+; TODO: different address for PET
+IRQ_VECTOR = $0314
+NMI_VECTOR = $0318
+
 ACPTR = $ffa5
 CHKIN = $ffc6
 CHKOUT = $ffc9
