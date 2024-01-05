@@ -106,7 +106,7 @@ void Linker::link() {
     for (auto object: sorted_objects) {
         if (!object->size_range().size()) {
             FileReader::global.error({}, "object '%s' has unknown size", object->name.as_string().c_str());
-            object->body.serialize(std::cout, "    ");
+            //object->body.serialize(std::cout, "    ");
             continue;
         }
         if (object->address) {
