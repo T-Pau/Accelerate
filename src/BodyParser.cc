@@ -117,9 +117,13 @@ Body BodyParser::parse() {
                         // TODO: move this to Object or ObjectFile.
                         if (entity) {
                             // TODO: check that ifs is empty
-                            EvaluationResult result;
+                            auto result = EvaluationResult{};
+                            auto context = EvaluationContext(result, entity);
+                            if (auto file_tokenizer = dynamic_cast<FileTokenizer*>(&tokenizer)) {
+                                context.defines = file_tokenizer->defines;
+                            }
+                            body.evaluate(context);
                             // Evaluate twice to resolve forward label references.
-                            body.evaluate(EvaluationContext(result, entity));
                             body.evaluate(EvaluationContext(result, entity));
                             entity->process_result(result);
                         }

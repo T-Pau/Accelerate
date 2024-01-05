@@ -433,6 +433,9 @@ void FileTokenizer::preprocess(const Token& directive, const std::vector<Token>&
 }
 
 void FileTokenizer::preprocess_define(const Token& directive, const std::vector<Token>& arguments) {
+    if (!pre_is_procesing()) {
+        return;
+    }
     const auto& name = arguments[0];
     if (directive == token_define) {
         define(name.as_symbol());

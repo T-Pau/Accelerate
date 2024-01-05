@@ -1,14 +1,19 @@
 ## Soon
 
-- Treat all source files as one library, only import what's used in target.
 - Add `.pin <name> <address>` to target to specify address of object, mark it as used.
 - Add `.uses <object>`, `.used` modifiers to objects.
 - Add `.use <object>` directive.
-- Allow objects, constants in target.
 
  
 - Move location from BaseExpression to Expression, update centrally
 - Character constants, optionally with encoding (`'a':screen`)
+
+
+## Tests
+
+- `.if .defined` in body
+- `.use`, `.uses`, `.pin`, `.used`
+- `.define` and `.undefine` are ignored if preprocessor is skipping.
 
 ## StringEncoding
 
