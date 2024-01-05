@@ -39,6 +39,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Object.h"
 #include "Symbol.h"
 #include "Target.h"
+#include "Unresolved.h"
 
 class ObjectFile {
 public:
@@ -62,7 +63,7 @@ public:
     void add_macro(std::unique_ptr<Macro> macro);
     void add_object(std::unique_ptr<Object> object) {(void)insert_object(std::move(object));}
     void add_object_file(const std::shared_ptr<ObjectFile>& file);
-    bool check_unresolved() const;
+    bool check_unresolved(Unresolved& unresolved) const;
     [[nodiscard]] const Constant* constant(Symbol name) const;
     [[nodiscard]] std::vector<Object*> all_objects();
     void collect_explicitly_used_objects(std::unordered_set<Object*>& set) const;

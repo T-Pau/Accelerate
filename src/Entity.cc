@@ -98,24 +98,19 @@ void Entity::process_result(EvaluationResult& result) {
     unresolved_variables = std::move(result.unresolved_variables);
 }
 
-bool Entity::check_unresolved() const {
-    auto ok = check_unresolved("function", "functions", unresolved_functions);
-    ok = check_unresolved("macro", "macros", unresolved_macros) && ok;
-    return check_unresolved("variable", "variables", unresolved_variables) && ok;
+bool Entity::check_unresolved(Unresolved& unresolved) const {
+    auto ok = check_unresolved(unresolved_functions, unresolved.functions);
+    ok = check_unresolved(unresolved_macros, unresolved.macros) && ok;
+    return check_unresolved(unresolved_variables, unresolved.variables) && ok;
 }
 
-bool Entity::check_unresolved(const std::string& singular, const std::string& plural, const std::unordered_set<Symbol>& unresolved) const {
+bool Entity::check_unresolved(const std::unordered_set<Symbol>& unresolved, Unresolved::Part& part) const {
     if (unresolved.empty()) {
         return true;
     }
 
-    auto list = std::vector<Symbol>(unresolved.begin(), unresolved.end());
-    if (list.size() == 1) {
-        FileReader::global.error(name.location, "unresolved %s: %s", singular.c_str(), list[0].c_str());
-    }
-    else {
-        std::sort(list.begin(), list.end());
-        FileReader::global.error(name.location, "unresolved %s: %s", plural.c_str(), join(list).c_str());
+    for (auto& unresolved_name: unresolved) {
+        part.add(name, unresolved_name);
     }
     return false;
 }

@@ -372,19 +372,19 @@ std::shared_ptr<Environment> ObjectFile::environment(Visibility visibility) cons
     }
 }
 
-bool ObjectFile::check_unresolved() const {
+bool ObjectFile::check_unresolved(Unresolved& unresolved) const {
     auto ok = true;
     for (auto& pair : constants) {
-        ok = pair.second->check_unresolved() && ok;
+        ok = pair.second->check_unresolved(unresolved) && ok;
     }
     for (auto& pair : functions) {
-        ok = pair.second->check_unresolved() && ok;
+        ok = pair.second->check_unresolved(unresolved) && ok;
     }
     for (auto& pair : macros) {
-        ok = pair.second->check_unresolved() && ok;
+        ok = pair.second->check_unresolved(unresolved) && ok;
     }
     for (auto& pair : objects) {
-        ok = pair.second->check_unresolved() && ok;
+        ok = pair.second->check_unresolved(unresolved) && ok;
     }
     return ok;
 }

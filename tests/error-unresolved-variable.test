@@ -1,0 +1,13 @@
+description Test detection of unresolved variable.
+arguments --create-library --target 6502 file.s
+return 1
+file file.s <inline>
+.section code
+test {
+    .data unresolved
+}
+end-of-inline-data
+stderr
+error: unresolved variable unresolved, referenced by:
+error:     test (file.s:2.0)
+end-of-inline-data

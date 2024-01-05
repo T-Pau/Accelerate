@@ -35,10 +35,11 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <algorithm>
 #include <fstream>
 
-#include "ObjectExpression.h"
-#include "FileReader.h"
-#include "ValueExpression.h"
 #include "Exception.h"
+#include "FileReader.h"
+#include "ObjectExpression.h"
+#include "Unresolved.h"
+#include "ValueExpression.h"
 
 void Linker::link() {
     for (auto& library: libraries) {
@@ -48,14 +49,17 @@ void Linker::link() {
 
     program->evaluate();
     program->evaluate();
-    if (!program->check_unresolved()) {
+    Unresolved unresolved;
+    if (!program->check_unresolved(unresolved)) {
+        unresolved.report();
         throw Exception();
     }
 
     target->object_file->import(program.get());
     target->object_file->evaluate();
     target->object_file->evaluate();
-    if (!target->object_file->check_unresolved()) {
+    if (!target->object_file->check_unresolved(unresolved)) {
+        unresolved.report();
         throw Exception();
     }
 

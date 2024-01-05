@@ -249,7 +249,9 @@ void xlr8::process() {
         else {
             linker->program->evaluate();
             linker->program->evaluate(); // TODO: shouldn't be necessary
-            if (!linker->program->check_unresolved()) {
+            Unresolved unresolved;
+            if (!linker->program->check_unresolved(unresolved)) {
+                unresolved.report();
                 throw Exception();
             }
             //linker->program->remove_private_constants();

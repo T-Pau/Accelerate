@@ -33,6 +33,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define ENTITY_H
 
 #include "ParsedValue.h"
+#include "Unresolved.h"
 
 class Macro;
 class Object;
@@ -45,7 +46,7 @@ class Entity {
 
     [[nodiscard]] Macro* as_macro();
     [[nodiscard]] Object* as_object();
-    [[nodiscard]] bool check_unresolved() const;
+    [[nodiscard]] bool check_unresolved(Unresolved& unresolved) const;
     [[nodiscard]] bool is_macro() {return as_macro();}
     [[nodiscard]] bool is_object() {return as_object();}
     void set_owner(ObjectFile* new_owner);
@@ -68,7 +69,7 @@ class Entity {
   private:
     static void initialize();
 
-    [[nodiscard]] bool check_unresolved(const std::string& singular, const std::string& plural, const std::unordered_set<Symbol>& unresolved) const;
+    [[nodiscard]] bool check_unresolved(const std::unordered_set<Symbol>& unresolved, Unresolved::Part& part) const;
 
     static bool initialized;
     static Token token_visibility;

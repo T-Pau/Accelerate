@@ -1,9 +1,9 @@
 /*
-Location.cc -- 
+Unresolved.h -- 
 
 Copyright (C) Dieter Baron
 
-The authors can be contacted at <accelerate@tpau.group>
+The authors can be contacted at <assembler@tpau.group>
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions
@@ -29,23 +29,37 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "Location.h"
+#ifndef UNRESOLVED_H
+#define UNRESOLVED_H
 
-void Location::extend(const Location &end) {
-    if (file != end.file || start_line_number != end.start_line_number || end_column >= end.end_column) {
-        return;
-    }
+#include <unordered_map>
+#include <unordered_set>
+#include <string>
 
-    end_column = end.end_column;
-}
+#include "Symbol.h"
+#include "Token.h"
 
-std::string Location::to_string() const {
-    if (!file) {
-        return "";
-    }
-    auto s = file.str();
-    if (start_line_number > 0) {
-        s += ":" + std::to_string(start_line_number) + "." + std::to_string(start_column);
-    }
-    return s;
-}
+class Unresolved {
+public:
+    class Part {
+    public:
+        Part(std::string type): type{std::move(type)} {}
+
+        void add(const Token& user, Symbol used);
+        [[nodiscard]] bool empty() const { return unresolved.empty();}
+        void report() const;
+
+    private:
+        std::string type;
+
+        std::unordered_map<Symbol, std::unordered_set<Token>> unresolved;
+    };
+
+    [[nodiscard]] bool empty() const {return functions.empty() && macros.empty() && variables.empty();}
+    void report() const;
+
+    Part functions{"function"};
+    Part macros{"macro"};
+    Part variables{"variable"};
+};
+#endif //UNRESOLVED_H

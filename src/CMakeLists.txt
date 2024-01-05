@@ -82,6 +82,7 @@ add_library(xlr8-library STATIC
         Tokenizer.cc
         UnaryExpression.cc
         UnnamedLabelList.cc
+        Unresolved.cc
         UTF8.cc
         Util.cc
         Value.cc

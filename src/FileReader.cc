@@ -146,7 +146,11 @@ void FileReader::output(FileReader::DiagnosticsSeverity severity, const Location
 }
 
 void FileReader::output(FileReader::DiagnosticsSeverity severity, const Location &location, const std::string &message) {
-    diagnostics_file << location.to_string() << ": " << diagnostics_severity_name(severity) << ": " << message << std::endl;
+    auto location_string = location.to_string();
+    if (!location_string.empty()) {
+        diagnostics_file << location_string << ": ";
+    }
+    diagnostics_file << diagnostics_severity_name(severity) << ": " << message << std::endl;
 
     try {
         auto line = get_line(location.file, location.start_line_number);
