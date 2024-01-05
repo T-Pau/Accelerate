@@ -250,6 +250,9 @@ test_dey {
 test_dez {
     dez
 }
+test_eom {
+    eom
+}
 test_eor {
     eor #$12
     eor $12
@@ -1071,6 +1074,13 @@ file 45gs02.lib {} <inline>
     section: code
     body <
         .data $3b
+    >
+}
+.object test_eom {
+    visibility: private
+    section: code
+    body <
+        .data $ea
     >
 }
 .object test_eor {

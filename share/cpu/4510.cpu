@@ -238,6 +238,10 @@
     implied: $3b
 }
 
+.instruction eom {
+    implied: $ea
+}
+
 .instruction eor {
     indirect_z_indexed: $52
 }
