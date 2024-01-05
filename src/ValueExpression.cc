@@ -34,7 +34,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Base64.h"
 #include "ParseException.h"
 
-ValueExpression::ValueExpression(const Token &token) {
+ValueExpression::ValueExpression(const Token& token) {
     if (token.is_value()) {
         value_ = token.as_value();
     }
@@ -46,8 +46,7 @@ ValueExpression::ValueExpression(const Token &token) {
     }
 }
 
-
-void ValueExpression::serialize_sub(std::ostream &stream) const {
+void ValueExpression::serialize_sub(std::ostream& stream) const {
     switch (value()->type()) {
         case Value::BINARY: {
             stream << "{{";
@@ -88,6 +87,10 @@ void ValueExpression::serialize_sub(std::ostream &stream) const {
         case Value::VOID:
             stream << "void";
             break;
+
+        case Value::INTEGER:
+        case Value::NUMBER:
+            throw Exception("internal error: value can't have abstract type %s", value()->type_name().c_str());
     }
 }
 
