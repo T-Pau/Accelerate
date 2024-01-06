@@ -1,4 +1,4 @@
-.target "c64-basic"
+SCREEN = $f800
 
 .section zero_page
 
@@ -12,20 +12,19 @@ ptr .reserve 2
     sta ptr
     lda #>message
     sta ptr + 1
-    ldy #0
-loop:
-    lda (ptr),y
+    ldy 0
+:   lda (ptr),y
     beq end
-    jsr CHROUT
+    sta SCREEN,y
     iny
-    bne loop
+    bne :-
 end:
-    rts
+    jmp end
 }
 
 
 .section data
 
 message {
-    .data "{clear}hello world!{return}", 0
+    .data "Hello world!", 0
 }

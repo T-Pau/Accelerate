@@ -31,11 +31,10 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "ObjectFile.h"
 
+#include <algorithm>
+
 #include "FileParser.h"
 #include "FileReader.h"
-#include <algorithm>
-#include <utility>
-
 #include "ObjectExpression.h"
 #include "ParseException.h"
 #include "SequenceTokenizer.h"
@@ -186,37 +185,42 @@ void ObjectFile::evaluate() {
     for (auto& pair : constants) {
         EvaluationResult result;
         pair.second->value.evaluate(EvaluationContext(result, pair.second.get()));
-        // TODO: process result
+        pair.second->process_result(result);
     }
     for (auto& pair : objects) {
         pair.second->evaluate();
     }
-    for (const auto& name : explicitly_used_object_names) {
-        auto it = objects.find(name);
-        if (it == objects.end()) {
-            FileReader::global.error({}, "explicitly used object '%s' doesn't exist", name.c_str());
-            have_unresolved = true;
+
+    unresolved_used.clear();
+    auto new_explicitly_used_objects = std::unordered_set<Symbol>{};
+    for (const auto& symbol : explicitly_used_object_names) {
+        auto it = objects.find(symbol);
+        if (it != objects.end()) {
+            explicitly_used_objects.insert(it->second.get());
+            new_explicitly_used_objects.insert(symbol);
         }
         else {
-            explicitly_used_objects.insert(it->second.get());
+            unresolved_used.variables.add(Token(Token::NAME, {}, name), symbol);
         }
     }
-    explicitly_used_object_names.clear();
+    explicitly_used_object_names = new_explicitly_used_objects;
 
     if (!pinned_objects.empty()) {
+        auto new_pinned_objects = std::unordered_map<Symbol, Pinned>{};
+
         EvaluationResult result;
         auto context = EvaluationContext{result, EvaluationContext::STANDALONE, private_environment};
         for (auto& pair : pinned_objects) {
             auto& pin = pair.second;
             pin.address.evaluate(context);
-            auto it = objects.find(pair.first);
-            if (it == objects.end()) {
-                FileReader::global.error({}, "pinned object '%s' doesn't exist", name.c_str());
-                have_unresolved = true;
-            }
-            else {
-                auto& pinned_object = it->second;
-                if (!pin.address.has_value() || !pin.address.value()->is_unsigned()) {
+            auto object_expression = private_environment->get_variable(pair.first);
+            if (object_expression && object_expression->is_object()) {
+                auto pinned_object = object_expression->as_object()->object;
+                if (!pin.address.has_value()) {
+                    unresolved_used.variables.add({}, pair.first);
+                    new_pinned_objects[pair.first] = pair.second;
+                }
+                else if (!pin.address.value()->is_unsigned()) {
                     FileReader::global.error(pin.address.location(), "pin address for '%s' must be unsigned constant", pair.first.c_str());
                 }
                 else if (pinned_object->address && pinned_object->address->address != pin.address.value()->unsigned_value()) {
@@ -224,13 +228,16 @@ void ObjectFile::evaluate() {
                 }
                 else {
                     pinned_object->address = Address(pin.address.value()->unsigned_value());
-                    explicitly_used_objects.insert(pinned_object.get());
+                    explicitly_used_objects.insert(pinned_object);
                 }
             }
+            else {
+                unresolved_used.variables.add({}, pair.first);
+                new_pinned_objects[pair.first] = pair.second;
+            }
         }
-        if (!result.unresolved_functions.empty() || !result.unresolved_macros.empty() || !result.unresolved_variables.empty()) {
-            have_unresolved = true;
-        }
+        pinned_objects = new_pinned_objects;
+        unresolved_used.add(Token(Token::NAME, {}, name), result);
     }
 }
 
@@ -370,6 +377,8 @@ std::shared_ptr<Environment> ObjectFile::environment(Visibility visibility) cons
         case Visibility::PUBLIC:
             return public_environment;
     }
+
+    throw Exception("internal error: invalid visibility: %d", visibility);
 }
 
 bool ObjectFile::check_unresolved(Unresolved& unresolved) const {
@@ -385,6 +394,10 @@ bool ObjectFile::check_unresolved(Unresolved& unresolved) const {
     }
     for (auto& pair : objects) {
         ok = pair.second->check_unresolved(unresolved) && ok;
+    }
+    if (!unresolved_used.empty()) {
+        unresolved.add(unresolved_used);
+        ok = false;
     }
     return ok;
 }

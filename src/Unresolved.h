@@ -1,5 +1,5 @@
 /*
-Unresolved.h -- 
+Unresolved.h --
 
 Copyright (C) Dieter Baron
 
@@ -32,10 +32,11 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef UNRESOLVED_H
 #define UNRESOLVED_H
 
+#include <string>
 #include <unordered_map>
 #include <unordered_set>
-#include <string>
 
+#include "EvaluationResult.h"
 #include "Symbol.h"
 #include "Token.h"
 
@@ -46,6 +47,8 @@ public:
         Part(std::string type): type{std::move(type)} {}
 
         void add(const Token& user, Symbol used);
+        void add(const Part& other);
+        void clear() {unresolved.clear();}
         [[nodiscard]] bool empty() const { return unresolved.empty();}
         void report() const;
 
@@ -55,6 +58,9 @@ public:
         std::unordered_map<Symbol, std::unordered_set<Token>> unresolved;
     };
 
+    void add(const Token& user, const EvaluationResult& result);
+    void add(const Unresolved& other);
+    void clear();
     [[nodiscard]] bool empty() const {return functions.empty() && macros.empty() && variables.empty();}
     void report() const;
 

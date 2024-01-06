@@ -67,7 +67,6 @@ std::ostream& operator<<(std::ostream& stream, const Macro& macro) {
 Body Macro::expand(const std::vector<Expression>& arguments) const {
     EvaluationResult result;
     return body.evaluated(EvaluationContext(result, EvaluationContext::MACRO_EXPANSION, bind(arguments))).value_or(body).scoped();
-    // TODO: process result
 }
 
 

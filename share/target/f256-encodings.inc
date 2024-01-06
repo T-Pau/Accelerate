@@ -21,4 +21,4 @@
     }
 }
 
-.default_string_encoding "screen"
+.default_string_encoding screen

@@ -34,7 +34,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "FileReader.h"
 
 void Unresolved::Part::add(const Token& user, Symbol used) {
-    auto it = unresolved.find(used);
+    const auto it = unresolved.find(used);
 
     if (it == unresolved.end()) {
         unresolved[used] = std::unordered_set<Token>{user};
@@ -42,6 +42,34 @@ void Unresolved::Part::add(const Token& user, Symbol used) {
     else {
         it->second.insert(user);
     }
+}
+
+void Unresolved::Part::add(const Part& other) {
+    unresolved.insert(other.unresolved.begin(), other.unresolved.end());
+}
+
+void Unresolved::add(const Token& user, const EvaluationResult& result) {
+    for (auto& name : result.unresolved_functions) {
+        functions.add(user, name);
+    }
+    for (auto& name : result.unresolved_macros) {
+        macros.add(user, name);
+    }
+    for (auto& name : result.unresolved_variables) {
+        variables.add(user, name);
+    }
+}
+
+void Unresolved::add(const Unresolved& other) {
+    functions.add(other.functions);
+    macros.add(other.macros);
+    variables.add(other.variables);
+}
+
+void Unresolved::clear() {
+    functions.clear();
+    macros.clear();
+    variables.clear();
 }
 
 void Unresolved::Part::report() const {
@@ -64,7 +92,13 @@ void Unresolved::Part::report() const {
         });
         FileReader::global.error({}, "unresolved %s %s, referenced by:", type.c_str(), unresolved_symbol.c_str());
         for (auto& user : sorted_users) {
-            FileReader::global.error({}, "    %s (%s)", user.as_symbol().c_str(), user.location.to_string().c_str());
+            auto location = user.location.to_string();
+            if (location.empty()) {
+                FileReader::global.error({}, "    %s", user.as_symbol().c_str());
+            }
+            else {
+                FileReader::global.error({}, "    %s (%s)", user.as_symbol().c_str(), location.c_str());
+            }
         }
     }
 }

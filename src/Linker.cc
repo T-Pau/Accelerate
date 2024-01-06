@@ -70,6 +70,7 @@ void Linker::link() {
     auto context = EvaluationContext{result, EvaluationContext::ENTITY, environment};
     auto output_body = target->output;
     output_body.evaluate(context);
+    // TODO: use Unresolved to report errors.
     for (const auto& name:  result.unresolved_functions) {
         FileReader::global.error({}, "unresolved function %s", name.c_str());
     }
@@ -85,6 +86,7 @@ void Linker::link() {
 
     std::unordered_set<Object*> new_objects = result.used_objects;
     target->object_file->collect_explicitly_used_objects(new_objects);
+    // TODO: warn/error if no used objects?
     objects = new_objects;
 
     // Collect all referenced objects.

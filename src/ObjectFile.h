@@ -110,10 +110,10 @@ private:
     std::unordered_map<Symbol, std::unique_ptr<Macro>> macros;
     std::unordered_map<Symbol, std::unique_ptr<Object>> objects;
 
-    std::set<Symbol> explicitly_used_object_names;
-    std::set<Object*> explicitly_used_objects;
-    std::map<Symbol, Pinned> pinned_objects;
-    bool have_unresolved{false};
+    std::unordered_set<Symbol> explicitly_used_object_names;
+    std::unordered_set<Object*> explicitly_used_objects;
+    std::unordered_map<Symbol, Pinned> pinned_objects;
+    Unresolved unresolved_used;
 
     std::unordered_set<ObjectFile*> imported_libraries;
 };

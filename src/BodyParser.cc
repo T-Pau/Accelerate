@@ -389,7 +389,7 @@ void BodyParser::parse_instruction(const Token& name) {
 
     // EvaluationResult result;
     // instruction.evaluate(result, entity, environment, current_size(), nesting.empty());
-    //  TODO: process result
+    // // TODO: process result
 
     current_body->append(instruction);
 }

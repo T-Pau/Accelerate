@@ -195,7 +195,6 @@ InstructionEncoder::Variant InstructionEncoder::encode(const Instruction* instru
     variant.data = addressing_mode->encoding;
     EvaluationResult result;
     variant.data.evaluate(EvaluationContext(result, EvaluationContext::ARGUMENTS, environment, {}, offset));
-    // TODO: process result
 
     auto data = variant.data.as_data();
     for (const auto& datum: data->data) {

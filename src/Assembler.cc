@@ -177,7 +177,7 @@ void Assembler::parse_cpu() {
 }
 
 void Assembler::parse_default_string_encoding() {
-    auto token = tokenizer.expect(Token::STRING, TokenGroup::newline);
+    auto token = tokenizer.expect(Token::NAME, TokenGroup::newline);
     parsed_target.default_string_encoding = parsed_target.string_encoding(token.as_symbol());
     if (!parsed_target.default_string_encoding) {
         throw ParseException(token, "unknown string encoding '%s'", token.as_string().c_str());

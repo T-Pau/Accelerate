@@ -186,4 +186,4 @@
     }
 }
 
-.default_string_encoding "petscii"
+.default_string_encoding petscii

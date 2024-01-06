@@ -67,8 +67,8 @@ VIC_SPRITE_4_COLOR = VIC + $2b
 VIC_SPRITE_5_COLOR = VIC + $2c
 VIC_SPRITE_6_COLOR = VIC + $2d
 VIC_SPRITE_7_COLOR = VIC + $2e
-VIC_KEYBOARD_128 = VIC + $2f
-VIC_CLOCK_128 = VIC + $30
+VIC_C128_KEYBOARD = VIC + $2f
+VIC_C128_CLOCK = VIC + $30
 
 VIC_ADDRESS(screen, charset) = ((screen & $3c00) >> 6) | ((charset & $3800) >> 10)
 
