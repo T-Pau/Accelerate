@@ -70,15 +70,12 @@ void Linker::link() {
     auto context = EvaluationContext{result, EvaluationContext::ENTITY, environment};
     auto output_body = target->output;
     output_body.evaluate(context);
-    // TODO: use Unresolved to report errors.
-    for (const auto& name:  result.unresolved_functions) {
-        FileReader::global.error({}, "unresolved function %s", name.c_str());
-    }
-    for (const auto& name:  result.unresolved_variables) {
-        if (name != Assembler::token_data_end.as_symbol() && name != Assembler::token_data_size.as_symbol() && name != Assembler::token_data_start.as_symbol()) {
-            FileReader::global.error({}, "unresolved variable %s", name.c_str());
-        }
-    }
+    result.unresolved_variables.erase(Assembler::token_data_end.as_symbol());
+    result.unresolved_variables.erase(Assembler::token_data_size.as_symbol());
+    result.unresolved_variables.erase(Assembler::token_data_start.as_symbol());
+    unresolved.clear();
+    unresolved.add(Token(Token::NAME, ".output"), result);
+    unresolved.report();
 
     if (FileReader::global.had_error()) {
         throw Exception();
