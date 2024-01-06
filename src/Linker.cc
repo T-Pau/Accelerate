@@ -144,7 +144,8 @@ void Linker::link() {
             memory[object->address->bank].copy(object->address->address, bytes);
         }
         catch (Exception& ex) {
-            FileReader::global.error(Location(), "can't evaluate '%s': %s", object->name.as_string().c_str(), ex.what());
+            FileReader::global.error(Location(), "can't encode '%s': %s", object->name.as_string().c_str(), ex.what());
+            // object->body.serialize(std::cout, "    ");
         }
     }
 }

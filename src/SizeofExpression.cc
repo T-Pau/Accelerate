@@ -1,5 +1,5 @@
 /*
-SizeofExpression.cc -- 
+SizeofExpression.cc --
 
 Copyright (C) Dieter Baron
 
@@ -61,35 +61,24 @@ Expression SizeofExpression::create(const Object* object) {
 }
 
 std::optional<Expression> SizeofExpression::evaluated(const EvaluationContext& context) const {
-    if (!object) {
-        if (const auto new_object = context.environment->get_variable(object_name)) {
-            if (!new_object->is_object()) {
-                throw Exception(".sizeof requires object");
-            }
-            return create(new_object->as_object()->object);
+    if (object) {
+        if (size_range != object->size_range()) {
+            return create(object);
+        }
+        else {
+            return {};
         }
     }
-    return {};
-}
-
-std::optional<Value> SizeofExpression::maximum_value() const {
-    if (object && object->size_range().maximum_value()) {
-        return Value(*object->size_range().maximum_value());
+    else if (const auto new_object = context.environment->get_variable(object_name)) {
+        if (!new_object->is_object()) {
+            throw Exception(".sizeof requires object");
+        }
+        return create(new_object->as_object()->object);
     }
     else {
         return {};
     }
 }
 
-void SizeofExpression::serialize_sub(std::ostream& stream) const {
-    stream << ".sizeof(" << object_name << ")";
-}
 
-std::optional<Value> SizeofExpression::minimum_value() const {
-    if (object) {
-        return Value(object->size_range().minimum_value());
-    }
-    else {
-        return Value(uint64_t{0});
-    }
-}
+void SizeofExpression::serialize_sub(std::ostream& stream) const { stream << ".sizeof(" << object_name << ")"; }

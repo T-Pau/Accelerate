@@ -40,14 +40,14 @@ class Object;
 class SizeofExpression: public BaseExpression {
 public:
     explicit SizeofExpression(Symbol object_name): object_name{object_name} {}
-    explicit SizeofExpression(const Object* object): object_name{object->name.as_symbol()}, object{object} {}
+    explicit SizeofExpression(const Object* object): object_name{object->name.as_symbol()}, object{object}, size_range{object->size_range()} {}
 
     static Expression create(const std::vector<Expression>& arguments);
     static Expression create(const Object* object);
 
     [[nodiscard]] std::optional<Expression> evaluated(const EvaluationContext& context) const override;
-    [[nodiscard]] std::optional<Value> minimum_value() const override;
-    [[nodiscard]] std::optional<Value> maximum_value() const override;
+    [[nodiscard]] std::optional<Value> minimum_value() const override {return Value{size_range.minimum_value()};}
+    [[nodiscard]] std::optional<Value> maximum_value() const override {return size_range.maximum_value() ? Value{*size_range.maximum_value()}: std::optional<Value>{}; }
     [[nodiscard]] std::optional<Value::Type> type() const override {return  Value::UNSIGNED;}
 
 protected:
@@ -57,6 +57,7 @@ private:
 
     Symbol object_name;
     const Object* object{};
+    SizeRange size_range = {0, {}};
 
 };
 
