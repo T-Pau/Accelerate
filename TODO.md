@@ -1,7 +1,5 @@
 ## Soon
 
-- add option to output body on errors
-- branch after anonymous label doesn't resolve 
 - Move location from BaseExpression to Expression, update centrally
 - Character constants, optionally with encoding (`'a':screen`)
 

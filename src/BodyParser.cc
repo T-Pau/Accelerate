@@ -38,7 +38,6 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ObjectNameExpression.h"
 #include "ParseException.h"
 #include "TokenNode.h"
-#include "ValueExpression.h"
 
 const Symbol BodyParser::symbol_pc = Symbol(".pc");
 const Token BodyParser::token_binary_file = Token(Token::DIRECTIVE, "binary_file");
@@ -183,7 +182,10 @@ Symbol BodyParser::get_label(bool& is_anonymous) {
     return Symbol(".label_" + std::to_string(next_label));
 }
 
-Expression BodyParser::get_pc(Symbol label) const { return {ObjectNameExpression::create(entity->as_object()), Expression::BinaryOperation::ADD, Expression(Location(), entity, label)}; }
+Expression BodyParser::get_pc(Symbol label) const {
+    auto label_expression = label ? Expression(Location(), entity, label) : Expression({}, LabelExpressionType::PREVIOUS_UNNAMED);
+    return {ObjectNameExpression::create(entity->as_object()), Expression::BinaryOperation::ADD, label_expression};
+}
 
 void BodyParser::parse_directive(const Token& directive) {
     auto it = directive_parser_methods.find(directive.as_symbol());
@@ -254,7 +256,7 @@ void BodyParser::parse_label(Visibility visibility, const Token& name) {
 
 void BodyParser::parse_memory() {
     auto expression_parser = ExpressionParser(tokenizer);
-    auto bank = Expression(uint64_t(0));
+    auto bank = Expression(uint64_t{0});
     auto start_address = expression_parser.parse();
     tokenizer.expect(Token::comma);
     auto end_address = expression_parser.parse();
