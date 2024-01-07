@@ -1,5 +1,5 @@
 /*
-Linker.h -- 
+HexStringDecoder.h --
 
 Copyright (C) Dieter Baron
 
@@ -29,47 +29,26 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef LINKER_H
-#define LINKER_H
+#ifndef HEXSTRING_H
+#define HEXSTRING_H
 
-#include <unordered_set>
-#include <vector>
+#include <optional>
+#include <string>
 
-#include "Target.h"
-#include "ObjectFile.h"
-
-class Linker {
+class HexStringDecoder {
 public:
-    enum Mode {
-        CREATE_LIBRARY,
-        LINK
-    };
+    void decode(const std::string& string);
+    void decode(char character);
 
-    Linker() = default;
-    explicit Linker(const Target* target_) {set_target(target_);}
-
-    void add_file(const std::shared_ptr<ObjectFile>& file) {program->add_object_file(file);}
-    void add_library(std::shared_ptr<ObjectFile> library);
-    void set_target(const Target* new_target);
-
-    void link();
-    void output(const std::string& file_name);
-    void output_symbol_map(const std::string& file_name);
-
-    const Target* target = nullptr;
-    Mode mode = LINK;
-
-    std::shared_ptr<ObjectFile> program = std::make_shared<ObjectFile>();
+    std::string end();
 
 private:
+    static uint8_t value(char digit);
 
-    std::vector<std::shared_ptr<ObjectFile>> libraries;
-
-    bool add_object(Object* object);
-
-    std::unordered_set<Object*> objects;
-
-    Memory memory;
+    std::string string;
+    std::optional<uint8_t> partial;
 };
 
-#endif // LINKER_H
+
+
+#endif //HEXSTRING_H

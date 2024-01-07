@@ -133,7 +133,7 @@ private:
 
     [[nodiscard]] bool pre_is_procesing() const;
 
-    Token parse_base64(Location location);
+    Token parse_hex(Location location);
     Token parse_name(Token::Type type, Location location);
     Token parse_number(unsigned int base, Location location);
     Token parse_string(Location location);

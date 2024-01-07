@@ -1,5 +1,5 @@
 /*
-Linker.h -- 
+HexString.cc -- 
 
 Copyright (C) Dieter Baron
 
@@ -29,47 +29,48 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef LINKER_H
-#define LINKER_H
+#include "HexStringDecoder.h"
 
-#include <unordered_set>
-#include <vector>
+#include "Exception.h"
 
-#include "Target.h"
-#include "ObjectFile.h"
+void HexStringDecoder::decode(const std::string& string) {
+    for (const auto character : string) {
+        decode(character);
+    }
+}
 
-class Linker {
-public:
-    enum Mode {
-        CREATE_LIBRARY,
-        LINK
-    };
+void HexStringDecoder::decode(char character) {
+    if (character == ' ' || character == '\t' || character == '\r' || character == '\n') {
+        return;
+    }
 
-    Linker() = default;
-    explicit Linker(const Target* target_) {set_target(target_);}
+    if (partial) {
+        string += (static_cast<char>(*partial & value(character)));
+    }
+    else {
+        partial = value(character) << 4;
+    }
+}
 
-    void add_file(const std::shared_ptr<ObjectFile>& file) {program->add_object_file(file);}
-    void add_library(std::shared_ptr<ObjectFile> library);
-    void set_target(const Target* new_target);
+std::string HexStringDecoder::end() {
+    if (partial) {
+        partial = {};
+        string.clear();
+        throw Exception("partial hex byte");
+    }
 
-    void link();
-    void output(const std::string& file_name);
-    void output_symbol_map(const std::string& file_name);
+    return std::move(string);
+}
 
-    const Target* target = nullptr;
-    Mode mode = LINK;
-
-    std::shared_ptr<ObjectFile> program = std::make_shared<ObjectFile>();
-
-private:
-
-    std::vector<std::shared_ptr<ObjectFile>> libraries;
-
-    bool add_object(Object* object);
-
-    std::unordered_set<Object*> objects;
-
-    Memory memory;
-};
-
-#endif // LINKER_H
+uint8_t HexStringDecoder::value(char digit) {
+    if (digit >= '0' && digit <= '9') {
+        return digit - '0';
+    }
+    if (digit >= 'A' && digit <= 'F') {
+        return digit - 'A' + 10;
+    }
+    if (digit >= 'a' && digit <= 'f') {
+        return digit - 'a' + 10;
+    }
+    throw Exception("invalid hex digit");
+}

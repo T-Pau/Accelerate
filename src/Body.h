@@ -65,7 +65,7 @@ public:
     explicit Body(Symbol name);
     Body(Symbol name, SizeRange offset, bool added_to_environment = false, size_t unnamed_index = std::numeric_limits<size_t>::max());
     // Macro
-    Body(Token name, std::vector<Expression> arguments);
+    Body(const Token& name, std::vector<Expression> arguments);
     // Memory
     Body(Expression bank, Expression start_address, Expression end_address);
 
@@ -96,8 +96,8 @@ public:
 
 private:
     std::shared_ptr<BodyElement> element;
-
-
 };
+
+std::ostream& operator<<(std::ostream& stream, const Body& body);
 
 #endif // BODY_H

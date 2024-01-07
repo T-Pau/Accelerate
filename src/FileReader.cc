@@ -38,14 +38,13 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Util.h"
 
 #include <fstream>
-#include <iterator>
 
 FileReader FileReader::global;
 
 std::vector<std::string> FileReader::empty_file;
 
 const std::vector<std::string>& FileReader::read(Symbol file_name, bool optional) {
-    auto it = files.find(file_name);
+    const auto it = files.find(file_name);
     if (it != files.end()) {
         return it->second;
     }
@@ -71,8 +70,7 @@ const std::vector<std::string>& FileReader::read(Symbol file_name, bool optional
 }
 
 std::string FileReader::read_binary(Symbol file_name) {
-    std::ifstream input_file{file_name.str()};
-    if (input_file) {
+    if (std::ifstream input_file{file_name.str()}) {
         return std::string{std::istreambuf_iterator<char>{input_file}, {}};
     }
     else {
@@ -82,7 +80,7 @@ std::string FileReader::read_binary(Symbol file_name) {
 }
 
 const std::string &FileReader::get_line(Symbol file, size_t line_number) const {
-    auto it = files.find(file);
+    const auto it = files.find(file);
 
     if (it == files.end()) {
         throw Exception("unknown file '%s'",file.c_str());
@@ -107,22 +105,24 @@ const char* FileReader::diagnostics_severity_name(DiagnosticsSeverity severity) 
         case ERROR:
             return "error";
     }
+
+    throw Exception("invalid serverity");
 }
 
 
-void FileReader::notice(const Location &location, const char *format, ...) {
+void FileReader::notice(const Location &location, const char *format, ...) const {
     va_list ap;
     va_start(ap, format);
-    auto message = string_format_v(format, ap);
+    const auto message = string_format_v(format, ap);
     va_end(ap);
     notice(location, message);
 }
 
 
-void FileReader::warning(const Location &location, const char *format, ...) {
+void FileReader::warning(const Location &location, const char *format, ...) const {
     va_list ap;
     va_start(ap, format);
-    auto message = string_format_v(format, ap);
+    const auto message = string_format_v(format, ap);
     va_end(ap);
     warning(location, message);
 }
@@ -131,29 +131,29 @@ void FileReader::warning(const Location &location, const char *format, ...) {
 void FileReader::error(const Location &location, const char *format, ...) {
     va_list ap;
     va_start(ap, format);
-    auto message = string_format_v(format, ap);
+    const auto message = string_format_v(format, ap);
     va_end(ap);
     error(location, message);
 }
 
 
-void FileReader::output(FileReader::DiagnosticsSeverity severity, const Location &location, const char *format, ...) {
+void FileReader::output(FileReader::DiagnosticsSeverity severity, const Location &location, const char *format, ...) const {
     va_list ap;
     va_start(ap, format);
-    auto message = string_format_v(format, ap);
+    const auto message = string_format_v(format, ap);
     va_end(ap);
     output(severity, location, message);
 }
 
-void FileReader::output(FileReader::DiagnosticsSeverity severity, const Location &location, const std::string &message) {
-    auto location_string = location.to_string();
+void FileReader::output(FileReader::DiagnosticsSeverity severity, const Location &location, const std::string &message) const {
+    const auto location_string = location.to_string();
     if (!location_string.empty()) {
         diagnostics_file << location_string << ": ";
     }
     diagnostics_file << diagnostics_severity_name(severity) << ": " << message << std::endl;
 
     try {
-        auto line = get_line(location.file, location.start_line_number);
+        const auto line = get_line(location.file, location.start_line_number);
         diagnostics_file << line << std::endl;
         auto width = location.end_column - location.start_column;
         if (width < 1) {

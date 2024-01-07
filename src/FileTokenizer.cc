@@ -33,9 +33,9 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <algorithm>
 
-#include "Base64.h"
 #include "ExpressionParser.h"
 #include "FileReader.h"
+#include "HexStringDecoder.h"
 #include "Int.h"
 #include "ParseException.h"
 #include "SequenceTokenizer.h"
@@ -150,7 +150,7 @@ Token FileTokenizer::next_raw() {
         if (c == '{') {
             auto c2 = current_source->next();
             if (c2 == '{') {
-                parse_base64(location);
+                parse_hex(location);
             }
             else {
                 current_source->unget();
@@ -249,8 +249,8 @@ bool FileTokenizer::pre_is_procesing() const {
     return current_source->pre_states.back();
 }
 
-Token FileTokenizer::parse_base64(Location location) {
-    auto decoder = Base64Deocder();
+Token FileTokenizer::parse_hex(Location location) {
+    auto decoder = HexStringDecoder();
 
     while (true) {
         current_source->expand_location(location);
@@ -259,7 +259,7 @@ Token FileTokenizer::parse_base64(Location location) {
         if (c == '}') {
             auto c2 = current_source->next();
             if (c2 != '}') {
-                throw ParseException(location, "invalid character in base64 data");
+                throw ParseException(location, "invalid character in hex data");
             }
             return {location, Value(decoder.end())};
         }

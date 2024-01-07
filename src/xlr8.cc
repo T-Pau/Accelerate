@@ -75,7 +75,6 @@ private:
 };
 
 std::vector<Commandline::Option> xlr8::options = {
-//    Commandline::Option("compile", 'c', "compile only, don't link"),
     Commandline::Option("create-library", 'a', "create library"),
     Commandline::Option("define", 'D', "name", "define NAME for use in conditional compilation"),
     Commandline::Option("include-directory", 'I', "directory", "search for sources in DIRECTORY"),
@@ -84,7 +83,8 @@ std::vector<Commandline::Option> xlr8::options = {
     Commandline::Option("system-directory", "directory", "search for system files in DIRECTORY"),
     Commandline::Option("define", 'D', "name", "define NAME for use in conditional compilation"),
     Commandline::Option("target", "file", "read target definition from FILE"),
-    Commandline::Option("undefine", 'U', "name", "remove definition of NAME for use in conditional compilation"),
+    Commandline::Option("undefine", "name", "remove definition of NAME for use in conditional compilation"),
+    Commandline::Option("verbose-errors", "include body in error messages")
 };
 
 
@@ -102,10 +102,7 @@ void xlr8::process() {
 
     for (const auto& option: arguments.options) {
         try {
-            if (option.name == "compile") {
-                linker->mode = Linker::COMPILE;
-            }
-            else if (option.name == "create-library") {
+            if (option.name == "create-library") {
                 linker->mode = Linker::CREATE_LIBRARY;
             }
             else if (option.name == "define") {
@@ -126,6 +123,9 @@ void xlr8::process() {
             else if (option.name == "undefine") {
                 defines.erase(Symbol(option.argument));
             }
+            else if (option.name == "verbose-errors") {
+                FileReader::global.verbose_error_messages = true;
+            }
         }
         catch (Exception& ex) {
             FileReader::global.error({}, "%s", ex.what());
@@ -133,13 +133,13 @@ void xlr8::process() {
         }
     }
 
-    if (linker->mode == Linker::COMPILE && !library_path.empty()) {
-        FileReader::global.warning({}, "compiling only, --library-path not used");
-    }
-
     system_path.append_path(include_path);
-    auto system_directory = getenv("XLR8_SYSTEM_DIRECTORY");
+    const auto system_directory = getenv("XLR8_SYSTEM_DIRECTORY");
     system_path.append_directory(system_directory ? system_directory : SYSTEM_DIRECTORY);
+
+    if (getenv("XLR8_VERBOSE_ERRORS")) {
+        FileReader::global.verbose_error_messages = true;
+    }
 
     LibraryGetter::global.path->append_path(library_path);
     LibraryGetter::global.path->append_path(system_path, "lib");
@@ -157,16 +157,7 @@ void xlr8::process() {
             if (extension == ".s") {
                 files.emplace_back(file_name, Assembler(linker->target, include_path, defines).parse_object_file(Symbol(file_name)));
             }
-/*            else if (extension == ".o") {
-                if (linker->mode == Linker::COMPILE) {
-                    throw Exception("only compiling, object file not used");
-                }
-                files.emplace_back(file_name, ObjectFileParser().parse(Symbol(file_name)));
-            } */
             else if (extension == ".lib") {
-                if (linker->mode == Linker::COMPILE) {
-                    throw Exception("only compiling, library not used");
-                }
                 Target::clear_current_target();
                 linker->add_library(LibraryGetter::global.get(file_name));
                 Target::clear_current_target();
@@ -204,71 +195,46 @@ void xlr8::process() {
         case 1:
             if (!output_file) {
                 switch (linker->mode) {
-                    case Linker::COMPILE:
-                        break;
-
                     case Linker::CREATE_LIBRARY:
                         set_output_file(files[0].name, "lib");
-                        break;
+                    break;
 
                     case Linker::LINK:
                         set_output_file(files[0].name, linker->target->extension);
-                        break;
+                    break;
                 }
             }
-            if (linker->mode == Linker::LINK && !output_file.has_value()) {
-            }
-            break;
+        if (linker->mode == Linker::LINK && !output_file.has_value()) {
+        }
+        break;
 
         default:
-            if (linker->mode != Linker::COMPILE) {
-                if (!output_file.has_value()) {
-                    throw Exception("option --output required with multiple source files");
-                }
+            if (!output_file.has_value()) {
+                throw Exception("option --output required with multiple source files");
             }
-            else {
-                if (output_file.has_value()) {
-                    throw Exception("option --output not allowed when assembling multiple source files");
-                }
-            }
-            break;
+        break;
     }
 
-    if (linker->mode == Linker::COMPILE) {
-        for (auto& file: files) {
-            file.file->evaluate();
-        }
+    for (const auto& file: files) {
+        linker->add_file(file.file);
+    }
+    if (linker->mode == Linker::LINK) {
+        linker->link();
     }
     else {
-        for (const auto& file: files) {
-            linker->add_file(file.file);
+        linker->program->evaluate();
+        linker->program->evaluate(); // TODO: shouldn't be necessary
+        Unresolved unresolved;
+        if (!linker->program->check_unresolved(unresolved)) {
+            unresolved.report();
+            throw Exception();
         }
-        if (linker->mode == Linker::LINK) {
-            linker->link();
-        }
-        else {
-            linker->program->evaluate();
-            linker->program->evaluate(); // TODO: shouldn't be necessary
-            Unresolved unresolved;
-            if (!linker->program->check_unresolved(unresolved)) {
-                unresolved.report();
-                throw Exception();
-            }
-            //linker->program->remove_private_constants();
-        }
+        //linker->program->remove_private_constants();
     }
 }
 
 void xlr8::create_output() {
     switch (linker->mode) {
-        case Linker::COMPILE:
-            for (const auto& file: files) {
-                auto file_name = output_file.has_value() ? output_file.value() : default_output_filename(file.name, "o");
-                auto stream = std::ofstream(file_name);
-                stream << file.file;
-            }
-            break;
-
         case Linker::CREATE_LIBRARY: {
             auto stream = std::ofstream(output_file.value());
             stream << *(linker->program);
@@ -277,8 +243,7 @@ void xlr8::create_output() {
 
         case Linker::LINK: {
             linker->output(output_file.value());
-            auto map_file = arguments.find_last("symbol-map");
-            if (map_file) {
+            if (auto map_file = arguments.find_last("symbol-map")) {
                 linker->output_symbol_map(*map_file);
             }
             break;

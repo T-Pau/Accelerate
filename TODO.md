@@ -1,10 +1,7 @@
 ## Soon
 
-- Add `.pin <name> <address>` to target to specify address of object, mark it as used.
-- Add `.uses <object>`, `.used` modifiers to objects.
-- Add `.use <object>` directive.
-
- 
+- add option to output body on errors
+- branch after anonymous label doesn't resolve 
 - Move location from BaseExpression to Expression, update centrally
 - Character constants, optionally with encoding (`'a':screen`)
 
@@ -14,15 +11,18 @@
 - `.if .defined` in body
 - `.use`, `.uses`, `.pin`, `.used`
 - `.define` and `.undefine` are ignored if preprocessor is skipping.
+- hex encoding: `.binary_include`, `{{`/`}}` literal in source and object
+
 
 ## StringEncoding
 
-- fix target specified in source file (CPU punctuation doesn't get added, assemlby instructions not recognized)
-- allow adding library in target description
-- fix `.import` in assemlby source file
+- add support for `\\` escapes
+
 
 ## Bugs
 
+- fix target specified in source file (CPU punctuation doesn't get added, assemlby instructions not recognized)
+- fix `.import` in assemlby source file
 - Don't use full file name for `.import` in object file. 
 - `.segment` not reported as unknown directive while assembling
 - columns are off when source contains TAB.

@@ -105,7 +105,9 @@ void Linker::link() {
     for (auto object: sorted_objects) {
         if (!object->size_range().size()) {
             FileReader::global.error({}, "object '%s' has unknown size", object->name.as_string().c_str());
-            //object->body.serialize(std::cout, "    ");
+            if (FileReader::global.verbose_error_messages) {
+                std::cout << object->body;
+            }
             continue;
         }
         if (object->address) {
@@ -145,7 +147,9 @@ void Linker::link() {
         }
         catch (Exception& ex) {
             FileReader::global.error(Location(), "can't encode '%s': %s", object->name.as_string().c_str(), ex.what());
-            // object->body.serialize(std::cout, "    ");
+            if (FileReader::global.verbose_error_messages) {
+                std::cout << object->body;
+            }
         }
     }
 }
@@ -200,9 +204,7 @@ void Linker::set_target(const Target* new_target) {
 }
 
 void Linker::add_library(std::shared_ptr<ObjectFile> library) {
-    if (mode != COMPILE) {
-        program->import(library.get());
-    }
+    program->import(library.get());
     libraries.emplace_back(std::move(library));
 }
 

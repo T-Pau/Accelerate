@@ -31,7 +31,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "ValueExpression.h"
 
-#include "Base64.h"
+#include "HexStreamEncoder.h"
 #include "ParseException.h"
 
 ValueExpression::ValueExpression(const Token& token) {
@@ -50,9 +50,8 @@ void ValueExpression::serialize_sub(std::ostream& stream) const {
     switch (value()->type()) {
         case Value::BINARY: {
             stream << "{{";
-            auto encoder = Base64StreamEncoder(stream, 72);
+            auto encoder = HexStreamEncoder(stream, 72);
             encoder.encode(value()->binary_value());
-            encoder.end();
             stream << "}}";
             break;
         }
@@ -67,7 +66,7 @@ void ValueExpression::serialize_sub(std::ostream& stream) const {
 
         case Value::SIGNED:
         case Value::UNSIGNED: {
-            auto width = static_cast<int>(*value()->default_size()) * 2;
+            const auto width = static_cast<int>(*value()->default_size()) * 2;
             uint64_t v;
             if (value()->is_signed()) {
                 stream << "-";

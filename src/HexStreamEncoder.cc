@@ -1,5 +1,5 @@
 /*
-Linker.h -- 
+HexStreamEncoder.cc -- 
 
 Copyright (C) Dieter Baron
 
@@ -29,47 +29,36 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef LINKER_H
-#define LINKER_H
+#include "HexStreamEncoder.h"
 
-#include <unordered_set>
-#include <vector>
 
-#include "Target.h"
-#include "ObjectFile.h"
+#include "Exception.h"
 
-class Linker {
-public:
-    enum Mode {
-        CREATE_LIBRARY,
-        LINK
-    };
+void HexStreamEncoder::encode(const std::string& string) {
+    for (const auto character : string) {
+        encode(character);
+    }
+}
 
-    Linker() = default;
-    explicit Linker(const Target* target_) {set_target(target_);}
+void HexStreamEncoder::encode(char character) {
+    if (line_length > 0 && line_position + 2 > line_length) {
+        stream << std::endl << indent;
+        line_position = 0;
+    }
 
-    void add_file(const std::shared_ptr<ObjectFile>& file) {program->add_object_file(file);}
-    void add_library(std::shared_ptr<ObjectFile> library);
-    void set_target(const Target* new_target);
+    stream << digit(static_cast<uint8_t>(character) >> 4) << digit(static_cast<uint8_t>(character) & 0xf);
+    line_position += 2;
+}
 
-    void link();
-    void output(const std::string& file_name);
-    void output_symbol_map(const std::string& file_name);
+char HexStreamEncoder::digit(uint8_t value) {
+    if (value < 10) {
+        return static_cast<char>(value + '0');
+    }
+    else if (value < 16) {
+        return static_cast<char>(value - 10 + 'a');
+    }
+    else {
+        throw Exception("internal error: invalid nibble in hex encoder");
+    }
+}
 
-    const Target* target = nullptr;
-    Mode mode = LINK;
-
-    std::shared_ptr<ObjectFile> program = std::make_shared<ObjectFile>();
-
-private:
-
-    std::vector<std::shared_ptr<ObjectFile>> libraries;
-
-    bool add_object(Object* object);
-
-    std::unordered_set<Object*> objects;
-
-    Memory memory;
-};
-
-#endif // LINKER_H

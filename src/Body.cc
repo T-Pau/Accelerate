@@ -31,8 +31,6 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "Body.h"
 
-#include <utility>
-
 #include "AssignmentBody.h"
 #include "BlockBody.h"
 #include "DataBody.h"
@@ -75,7 +73,7 @@ Body::Body(const std::vector<IfBodyClause>& clauses) {
 Body::Body(Symbol name): element(std::make_shared<LabelBody>(name)) {}
 Body::Body(Symbol name, SizeRange offset, bool added_to_environment, size_t unnamed_index): element(std::make_shared<LabelBody>(name, offset, added_to_environment, unnamed_index)) {}
 
-Body::Body(Token name, std::vector<Expression> arguments): element(std::make_shared<MacroBody>(name, std::move(arguments))) {}
+Body::Body(const Token& name, std::vector<Expression> arguments): element(std::make_shared<MacroBody>(name, std::move(arguments))) {}
 
 Body::Body(Expression bank, Expression start_address, Expression end_address): element(std::make_shared<MemoryBody>(std::move(bank), std::move(start_address), std::move(end_address))) {}
 
@@ -87,8 +85,7 @@ void Body::append(const Body& new_element) {
         element = new_element.element;
     }
     else {
-        auto new_body = append_sub(new_element);
-        if (new_body) {
+        if (const auto new_body = append_sub(new_element)) {
             element = new_body->element;
         }
         else {
@@ -98,8 +95,7 @@ void Body::append(const Body& new_element) {
 }
 
 bool Body::evaluate(const EvaluationContext& context) {
-    auto new_elements = element->evaluated(context);
-    if (new_elements) {
+    if (const auto new_elements = element->evaluated(context)) {
         element = new_elements->element;
         return true;
     }
@@ -109,9 +105,7 @@ bool Body::evaluate(const EvaluationContext& context) {
 }
 
 std::optional<Body> Body::back() const {
-    auto block = as_block();
-
-    if (block) {
+    if (const auto block = as_block()) {
         return block->back();
     }
     else if (!empty()) {
@@ -162,4 +156,9 @@ Body Body::scoped() const {
     else {
         return ScopeBody::create(*this);
     }
+}
+
+std::ostream& operator<<(std::ostream& stream, const Body& body) {
+    body.serialize(stream, "    ");
+    return stream;
 }

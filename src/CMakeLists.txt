@@ -5,7 +5,6 @@ add_library(xlr8-library STATIC
         ArgumentType.cc
         Assembler.cc
         AssignmentBody.cc
-        Base64.cc
         BaseEncoder.cc
         BaseExpression.cc
         BinaryEncoder.cc
@@ -39,6 +38,8 @@ add_library(xlr8-library STATIC
         FillExpression.cc
         Function.cc
         FunctionExpression.cc
+        HexStreamEncoder.cc
+        HexStringDecoder.cc
         IfBody.cc
         InRangeExpression.cc
         Instruction.cc
