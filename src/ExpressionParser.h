@@ -33,7 +33,6 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define EXPRESSION_PARSER_H
 
 
-#include <utility>
 
 #include "BinaryExpression.h"
 #include "DataBody.h"
@@ -49,7 +48,7 @@ public:
     static void setup(FileTokenizer& tokenizer);
 
     Expression parse() { top = Element(Location(), START); return do_parse();}
-    Expression parse(Expression& left) { top = Element(left, 0); return do_parse();}
+    Expression parse(const Expression& left) { top = Element(left, 0); return do_parse();}
 
     std::optional<Encoder> parse_encoding();
     Body parse_list();
@@ -78,11 +77,11 @@ private:
 
     class Element {
     public:
-        explicit Element(const Token& token, ElementType type = OPERAND): type(type), node(std::make_shared<VariableExpression>(token.as_symbol())), level(0), location(token.location) {}
-        Element(const Expression& node, int level, ElementType type = OPERAND): type(type), node(node), level(level), location(node.location()) {}
-        Element(Location location, BinaryOperator binary);
-        Element(Location location, Expression::UnaryOperation unary);
-        explicit Element(Location location, ElementType type): type(type), location(location) {}
+        explicit Element(const Token& token, ElementType type = OPERAND): type(type), node(std::make_shared<VariableExpression>(token.as_symbol())), location(token.location) {}
+        Element(const Expression& node, int level = 0, ElementType type = OPERAND): type(type), level(level), node(node), location(node.location()) {}
+        Element(const Location& location, BinaryOperator binary);
+        Element(const Location& location, Expression::UnaryOperation unary);
+        explicit Element(const Location& location, ElementType type): type(type), location(location) {}
 
         [[nodiscard]] const char* description() const;
         [[nodiscard]] bool is_binary_operator() const {return type == BINARY_OPERATOR;}
@@ -90,7 +89,7 @@ private:
         [[nodiscard]] bool is_unary_operator() const {return type == UNARY_OPERATOR;}
 
         ElementType type;
-        int level = 0;
+        int level{0};
 
         Expression node;
         std::vector<Expression> arguments;
@@ -118,7 +117,9 @@ private:
     Element top = Element(Location(), START);
     std::vector<Element> stack;
 
+    static const Token token_false;
     static const Token token_string;
+    static const Token token_true;
 
     static std::unordered_map<Token, BinaryOperator> binary_operators;
     static std::unordered_map<Token, Expression::UnaryOperation> unary_operators;

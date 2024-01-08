@@ -35,7 +35,9 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ParseException.h"
 #include "Target.h"
 
+const Token ExpressionParser::token_false = Token{Token::NAME, ".false"};
 const Token ExpressionParser::token_string = Token{Token::NAME, "string"};
+const Token ExpressionParser::token_true = Token{Token::NAME, ".true"};
 
 std::unordered_map<Token, ExpressionParser::BinaryOperator> ExpressionParser::binary_operators;
 
@@ -83,9 +85,15 @@ ExpressionParser::Element ExpressionParser::next_element() {
     auto token = tokenizer.next();
 
     if (token.is_value() || token.is_string()) {
-        return {Expression(token), 0};
+        return {Expression(token)};
     }
     else if (token.is_name()) {
+        if (token == token_false) {
+            return {Expression{false}};
+        }
+        else if (token == token_true) {
+            return {Expression{true}};
+        }
         auto next_token = tokenizer.next();
         if (next_token == Token::paren_open) {
             return Element(token, FUNCTION_CALL);
@@ -151,6 +159,8 @@ void ExpressionParser::setup(FileTokenizer &tokenizer) {
     for (const auto& pair: unary_operators) {
         tokenizer.add_literal(pair.first);
     }
+    tokenizer.add_literal(token_false);
+    tokenizer.add_literal(token_true);
     FunctionExpression::setup(tokenizer);
 }
 
@@ -454,7 +464,7 @@ void ExpressionParser::reduce_argument_list() {
 }
 
 void ExpressionParser::reduce_function_call() {
-    auto name = top.node.as_variable();
+    const auto name = top.node.as_variable();
     top = Element(Expression(name->variable(), top.arguments), 0);
 }
 
@@ -492,12 +502,14 @@ const char *ExpressionParser::Element::description() const {
             return "unnamed label";
 
     }
+
+    throw Exception("invalid element type %d", type);
 }
 
-ExpressionParser::Element::Element(Location location, ExpressionParser::BinaryOperator binary): type(BINARY_OPERATOR), level(binary.level), location(location) {
+ExpressionParser::Element::Element(const Location& location, ExpressionParser::BinaryOperator binary): type(BINARY_OPERATOR), level(binary.level), location(location) {
     operation.binary = binary;
 }
 
-ExpressionParser::Element::Element(Location location, Expression::UnaryOperation unary): type(UNARY_OPERATOR), level(0), location(location) {
+ExpressionParser::Element::Element(const Location& location, Expression::UnaryOperation unary): type(UNARY_OPERATOR), level(0), location(location) {
     operation.unary = unary;
 }

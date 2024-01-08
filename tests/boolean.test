@@ -1,0 +1,22 @@
+arguments --target 6502 --create-library --output test.lib test.s
+file test.s <>
+true = .true
+false = .false
+both = .true && .false
+end-of-inline-data
+file test.lib {} <>
+.format_version 1.0
+.target "6502"
+.constant both {
+    visibility: private
+    value: .false
+}
+.constant false {
+    visibility: private
+    value: .false
+}
+.constant true {
+    visibility: private
+    value: .true
+}
+end-of-inline-data

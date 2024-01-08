@@ -57,7 +57,7 @@ void ValueExpression::serialize_sub(std::ostream& stream) const {
         }
 
         case Value::BOOLEAN:
-            stream << (value()->boolean_value() ? "true" : "false");
+            stream << (value()->boolean_value() ? ".true" : ".false");
             break;
 
         case Value::FLOAT:
