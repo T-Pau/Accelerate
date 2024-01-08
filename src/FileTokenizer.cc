@@ -150,7 +150,7 @@ Token FileTokenizer::next_raw() {
         if (c == '{') {
             auto c2 = current_source->next();
             if (c2 == '{') {
-                parse_hex(location);
+                return parse_hex(location);
             }
             else {
                 current_source->unget();
@@ -259,15 +259,23 @@ Token FileTokenizer::parse_hex(Location location) {
         if (c == '}') {
             auto c2 = current_source->next();
             if (c2 != '}') {
-                throw ParseException(location, "invalid character in hex data");
+                current_source->unget();
+                throw ParseException(current_location(), "invalid character in hex data");
             }
-            return {location, Value(decoder.end())};
+            current_source->expand_location(location);
+            try {
+                return {location, Value(decoder.end())};
+            }
+            catch (Exception& ex) {
+                throw ParseException(current_location(), ex);
+            }
         }
 
         try {
             decoder.decode(static_cast<char>(c));
-        } catch (Exception& ex) {
-            throw ParseException(location, ex);
+        }
+        catch (Exception& ex) {
+            throw ParseException(current_location(), ex);
         }
     }
 }

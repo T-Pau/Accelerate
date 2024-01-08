@@ -45,7 +45,8 @@ void HexStringDecoder::decode(char character) {
     }
 
     if (partial) {
-        string += (static_cast<char>(*partial & value(character)));
+        string += (static_cast<char>(*partial | value(character)));
+        partial = {};
     }
     else {
         partial = value(character) << 4;

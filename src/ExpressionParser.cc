@@ -82,7 +82,7 @@ void ExpressionParser::initialize() {
 ExpressionParser::Element ExpressionParser::next_element() {
     auto token = tokenizer.next();
 
-    if (token.is_integer() || token.is_string()) {
+    if (token.is_value() || token.is_string()) {
         return {Expression(token), 0};
     }
     else if (token.is_name()) {

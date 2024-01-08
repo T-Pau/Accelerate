@@ -2,6 +2,9 @@
 
 - Move location from BaseExpression to Expression, update centrally
 - Character constants, optionally with encoding (`'a':screen`)
+- Track constant usage, include used constants in symbol table.
+- Optionally omit private symbols of libraries from symbol talbe. 
+- Include library name in symbol table.
 
 
 ## Tests
@@ -9,7 +12,6 @@
 - `.if .defined` in body
 - `.use`, `.uses`, `.pin`, `.used`
 - `.define` and `.undefine` are ignored if preprocessor is skipping.
-- hex encoding: `.binary_include`, `{{`/`}}` literal in source and object
 
 
 ## StringEncoding

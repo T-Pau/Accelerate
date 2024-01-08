@@ -1,0 +1,56 @@
+arguments --target 6502 --create-library --output test.lib test.s hex.lib
+file hex.lib <>
+.format_version 1.0
+.target "6502"
+.macro library_hex {
+    visibility: public
+    arguments:
+    body <
+        .data {{04050607}}
+    >
+}
+end-of-inline-data
+file test.bin <>
+bin
+end-of-inline-data
+file test.s <>
+.section data
+inline {
+    .data {{00 01 02 03}}
+}
+inlcuded {
+    .binary_file "test.bin"
+}
+library {
+    library_hex
+}
+end-of-inline-data
+
+file test.lib {} <>
+.format_version 1.0
+.target "6502"
+.import "hex.lib"
+.object inlcuded {
+    visibility: private
+    section: data
+    body <
+        .data {{62696e0a}}
+    >
+}
+.object inline {
+    visibility: private
+    section: data
+    body <
+        .data {{00010203}}
+    >
+}
+.object library {
+    visibility: private
+    section: data
+    body <
+        .scope {
+          .data {{04050607}}
+        }
+    >
+}
+end-of-inline-data
