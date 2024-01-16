@@ -1,0 +1,36 @@
+.include "c64.inc"
+
+.include "ascii-encoding.inc"
+
+.section zero_page {
+    type: reserve_only
+    address [
+         : $02       ; Unused.
+         : $19 - $21 ; Temporary string stack.
+         : $26 - $2a ; Floating point result of multiplication or division.
+         : $fb - $fe ; Unused.
+    ]
+}
+
+.include "commodore-cartridge.inc"
+
+.extension "crt"
+
+.output {
+    .data "C64  CARTRIDGE":ascii(16) ; signature
+    .data $00, $00, $00, $40 ; $40:big_endian(4) ; header length
+    .data $01, $00 ; version
+    .data $00, $00 ; CARTRIDGE_TPYE:big_endian(2) ; cartridge type
+    .data $00 ; EXROM
+    .data $01 ; GAME
+    .data .fill($00, 6) ; reserved
+    .data CARTRIDGE_NAME:ascii(32) ; TODO: padded with NUL, not space
+
+    .data "CHIP":ascii
+    .data $20, $10 ; $2010:big_endian ; length of section
+    .data $0000 ; type ROM
+    .data $0000 ; bank
+    .data $80, $00 ; $8000:big_endian ; load address
+    .data $20, $00 ; $2000:big_endian ; data size
+    .memory $8000, $9fff
+}

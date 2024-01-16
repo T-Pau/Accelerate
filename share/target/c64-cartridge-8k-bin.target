@@ -1,0 +1,19 @@
+.include "c64.inc"
+
+.section zero_page {
+    type: reserve_only
+    address [
+         : $02       ; Unused.
+         : $19 - $21 ; Temporary string stack.
+         : $26 - $2a ; Floating point result of multiplication or division.
+         : $fb - $fe ; Unused.
+    ]
+}
+
+.include "commodore-cartridge.inc"
+
+.extension "bin"
+
+.output {
+    .memory $8000, $9fff
+}
