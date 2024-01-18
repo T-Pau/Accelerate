@@ -1,9 +1,9 @@
 ## Soon
 
+- specify padding character in string encoding (`:string(<n>, '<c>')`)
 - parse signed non-native integer encoding (`:-big_endian[(<n>)]`, `:little_endian(-<n>)`)
 - verify that integer encoding size <= 8
-- specify padding character in string encoding (`:string(<n>, '<c>')`)
-- Set range for `.binary_file`: `.binary_file <filename> [.start <n>] [.length <n>] [.end <n>]`
+- Allow non-constant expressions for range in `.binary_file`.
 - Character constants, optionally with encoding (`'a':screen`)
 - Track constant usage, include used constants in symbol table.
 - Optionally omit private symbols of libraries from symbol talbe. 
@@ -16,6 +16,18 @@
 - `.if .defined` in body
 - `.use`, `.uses`, `.pin`, `.used`
 - `.define` and `.undefine` are ignored if preprocessor is skipping.
+- non-native integer encodings
+- range for `.binary_file`
+
+
+## Documentation
+
+- preprocessor
+- target additions (objects in target, only used from `.output` included in program)
+- non-native integer encodings
+- range for `.binary_file`
+- in-body `.if` syntax
+- `.repeat`, `.fill`
 
 
 ## StringEncoding

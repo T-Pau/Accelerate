@@ -170,13 +170,16 @@ private:
     static const Symbol symbol_pc;
     static const Token token_binary_file;
     static const Token token_data;
+    static const Token token_end;
     static const Token token_else;
     static const Token token_else_if;
     static const Token token_error;
     static const Token token_if;
+    static const Token token_length;
     static const Token token_memory;
     static const Token token_repeat;
     static const Token token_scope;
+    static const Token token_start;
 
     static const std::unordered_map<Symbol, void (BodyParser::*)()> directive_parser_methods;
 };
