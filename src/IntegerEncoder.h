@@ -44,16 +44,16 @@ public:
         UNSIGNED
     };
 
-    IntegerEncoder(Type type, size_t size, std::optional<uint64_t> byte_order = {}): type(type), size(size), explicit_byte_order(byte_order) {}
+    IntegerEncoder(Type type, std::optional<size_t> size, std::optional<uint64_t> byte_order = {}): type(type), size(size), explicit_byte_order(byte_order) {}
     explicit IntegerEncoder(const Value& value);
 
-    [[nodiscard]] size_t byte_size() const {return size;}
+    [[nodiscard]] std::optional<size_t> byte_size() const {return size;}
     void encode(std::string& bytes, const Value& value) const override;
-    [[nodiscard]] size_t encoded_size(const Value& value) const override {return byte_size();}
+    [[nodiscard]] size_t encoded_size(const Value& value) const override;
     [[nodiscard]] bool fits(const Value& value) const override;
     [[nodiscard]] bool is_natural_encoder(const Value& value) const override;
     void serialize(std::ostream& stream) const override;
-    [[nodiscard]] SizeRange size_range() const override {return SizeRange{byte_size()};}
+    [[nodiscard]] SizeRange size_range() const override;
     [[nodiscard]] std::optional<Value> maximum_value() const;
     [[nodiscard]] std::optional<Value> minimum_value() const;
     bool operator==(const Encoder& other) const override;
@@ -62,10 +62,12 @@ public:
     bool operator!=(const IntegerEncoder& other) const {return !(*this == other);}
 
     static uint64_t default_byte_order;
+    static const uint64_t little_endian_byte_order;
+    static const uint64_t big_endian_byte_order;
 
 private:
     Type type;
-    size_t size;
+    std::optional<size_t> size;
     std::optional<uint64_t> explicit_byte_order;
 
     [[nodiscard]] uint64_t byte_order() const {return explicit_byte_order.value_or(default_byte_order);}

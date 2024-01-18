@@ -55,6 +55,7 @@ void Linker::link() {
         throw Exception();
     }
 
+    Target::set_current_target(target);
     target->object_file->import(program.get());
     target->object_file->evaluate();
     target->object_file->evaluate();
@@ -169,6 +170,8 @@ void Linker::output(const std::string &file_name) {
     environment->add(Assembler::token_data_end.as_symbol(), Expression(data_range.end()));
     environment->add(Assembler::token_data_size.as_symbol(), Expression(data_range.size));
     environment->add(Assembler::token_data_start.as_symbol(), Expression(data_range.start));
+    environment->add_next(target->object_file->private_environment);
+    environment->add_next(program->public_environment);
 
     auto body = target->output;
     EvaluationResult result;

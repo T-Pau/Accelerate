@@ -41,7 +41,7 @@ Range Range::intersect(const Range &other) const {
     if (new_end < new_start) {
         return {};
     }
-    auto new_size = std::max(new_end - new_start, static_cast<uint64_t>(0));
+    auto new_size = std::max(new_end - new_start + 1, static_cast<uint64_t>(0));
 
     return {new_start, new_size};
 }

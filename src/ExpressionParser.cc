@@ -35,7 +35,9 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ParseException.h"
 #include "Target.h"
 
+const Token ExpressionParser::token_big_endian = Token{Token::NAME, "big_endian"};
 const Token ExpressionParser::token_false = Token{Token::NAME, ".false"};
+const Token ExpressionParser::token_little_endian = Token{Token::NAME, "little_endian"};
 const Token ExpressionParser::token_string = Token{Token::NAME, "string"};
 const Token ExpressionParser::token_true = Token{Token::NAME, ".true"};
 
@@ -430,25 +432,32 @@ std::optional<Encoder> ExpressionParser::parse_encoding() {
         if (!name_allowed) {
             throw ParseException(token, "expected integer");
         }
+        auto size = std::optional<size_t>{};
+        auto token2 = tokenizer.next();
+        if (token2 == Token::paren_open) {
+            token2 = tokenizer.expect(Token::VALUE);
+            if (!token2.is_unsigned()) {
+                throw ParseException(token2, "encoding size must be unsigned");
+            }
+            size = token2.as_unsigned();
+            tokenizer.expect(Token::paren_close);
+        }
+        else {
+            tokenizer.unget(token2);
+        }
+
+        if (token == token_big_endian) {
+            return Encoder(IntegerEncoder(IntegerEncoder::UNSIGNED, size, IntegerEncoder::big_endian_byte_order));
+        }
+        else if (token == token_little_endian) {
+            return Encoder(IntegerEncoder(IntegerEncoder::UNSIGNED, size, IntegerEncoder::little_endian_byte_order));
+        }
         auto string_encoding = Target::current_target->default_string_encoding;
         if (token != token_string) {
             string_encoding = Target::current_target->string_encoding(token.as_symbol());
         }
         if (!string_encoding) {
             throw ParseException(token, "unknown string encoding '%s'", token.as_string().c_str());
-        }
-        auto size = std::optional<size_t>{};
-        token = tokenizer.next();
-        if (token == Token::paren_open) {
-            token = tokenizer.expect(Token::VALUE);
-            if (!token.is_unsigned()) {
-                throw ParseException(token, "encoding size must be unsigned");
-            }
-            size = token.as_unsigned();
-            tokenizer.expect(Token::paren_close);
-        }
-        else {
-            tokenizer.unget(token);
         }
         return Encoder{string_encoding, size};
     }

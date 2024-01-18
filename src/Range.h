@@ -40,7 +40,7 @@ public:
     Range(uint64_t start, uint64_t size): start(start), size(size) {}
 
     [[nodiscard]] bool empty() const {return size == 0;}
-    [[nodiscard]] uint64_t end() const {return start + size;}
+    [[nodiscard]] uint64_t end() const {return empty() ? start : start - 1 + size;} // last byte included in range
     [[nodiscard]] Range intersect(const Range& other) const;
     [[nodiscard]] Range add(const Range& other) const;
 

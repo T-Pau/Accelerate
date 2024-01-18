@@ -1,5 +1,5 @@
 /*
-Memory.cc -- 
+Memory.cc --
 
 Copyright (C) Dieter Baron
 
@@ -34,17 +34,16 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <ostream>
 
 #include "Int.h"
+#include <iostream>
 
-Memory::Bank::Bank(Range range): range(range) {
+Memory::Bank::Bank(Range range) : range(range) {
     memory = std::string(range.size, 0);
     blocks.emplace_back(FREE, range);
 }
 
-void Memory::Bank::copy(uint64_t address, const std::string& data) {
-    memory.replace(address, data.size(), data);
-}
+void Memory::Bank::copy(uint64_t address, const std::string& data) { memory.replace(address, data.size(), data); }
 
-std::optional<uint64_t> Memory::Bank::allocate(const Range &allowed_range, Memory::Allocation allocation, uint64_t alignment, uint64_t size) {
+std::optional<uint64_t> Memory::Bank::allocate(const Range& allowed_range, Memory::Allocation allocation, uint64_t alignment, uint64_t size) {
     if (allowed_range.size < size) {
         return {};
     }
@@ -99,7 +98,7 @@ Range Memory::Bank::data_range() const {
     uint64_t start = 0;
     uint64_t end = 0;
 
-    for (const auto& block: blocks) {
+    for (const auto& block : blocks) {
         if (block.allocation == DATA) {
             if (!have_data) {
                 have_data = true;
@@ -110,21 +109,29 @@ Range Memory::Bank::data_range() const {
     }
 
     if (have_data) {
-        return {start, end - start};
+        return {start, end - start + 1};
     }
     else {
         return {};
     }
 }
 
-
 std::string Memory::Bank::data(const Range& range) const {
-    return memory.substr(range.start, range.size);
+    if (range.start >= memory.size()) {
+        return std::string(range.size, 0);
+    }
+    if (range.start + range.size > memory.size()) {
+        auto padding = range.start + range.size - memory.size();
+        return memory.substr(range.start) + std::string(padding, 0);
+    }
+    else {
+        return memory.substr(range.start, range.size);
+    }
 }
 
 void Memory::Bank::debug_blocks(std::ostream& stream) const {
     stream << "allocation blocks:" << std::endl;
-    for (const auto& block: blocks) {
+    for (const auto& block : blocks) {
         stream << "  " << block.range.start << "-" << block.range.end() << ": ";
         switch (block.allocation) {
             case DATA:
@@ -141,10 +148,8 @@ void Memory::Bank::debug_blocks(std::ostream& stream) const {
     }
 }
 
-
 Memory::Memory(const std::vector<Range>& bank_ranges) {
-    for (const auto& bank_range: bank_ranges) {
+    for (const auto& bank_range : bank_ranges) {
         banks.emplace_back(bank_range);
     }
 }
-

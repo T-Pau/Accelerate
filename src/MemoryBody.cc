@@ -61,7 +61,11 @@ std::optional<Body> MemoryBody::evaluated(const EvaluationContext& context) cons
 }
 
 void MemoryBody::serialize(std::ostream &stream, const std::string &prefix) const {
-    stream << prefix << ".memory " << start_address << ", " << end_address << std::endl;
+    stream << prefix << ".memory ";
+    if (!bank.has_value() || bank.value() != Value(uint64_t{0})) {
+        stream << bank << ", ";
+    }
+    stream << start_address << ", " << end_address << std::endl;
 }
 
 
@@ -77,5 +81,5 @@ void MemoryBody::encode(std::string &bytes, const Memory *memory) const {
     auto start_value = start_address.value()->unsigned_value();
     auto end_value = end_address.value()->unsigned_value();
 
-    bytes += (*memory)[bank_value].data(Range(start_value, end_value - start_value));
+    bytes += (*memory)[bank_value].data(Range(start_value, end_value - start_value + 1));
 }

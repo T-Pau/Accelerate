@@ -1,5 +1,5 @@
 /*
-ExpressionParser.h -- 
+ExpressionParser.h --
 
 Copyright (C) Dieter Baron
 
@@ -34,11 +34,9 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 
-#include "BinaryExpression.h"
 #include "DataBody.h"
 #include "Encoder.h"
 #include "Tokenizer.h"
-#include "UnaryExpression.h"
 #include "VariableExpression.h"
 
 class ExpressionParser {
@@ -117,7 +115,9 @@ private:
     Element top = Element(Location(), START);
     std::vector<Element> stack;
 
+    static const Token token_big_endian;
     static const Token token_false;
+    static const Token token_little_endian;
     static const Token token_string;
     static const Token token_true;
 

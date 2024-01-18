@@ -1,9 +1,13 @@
 ## Soon
 
-- Move location from BaseExpression to Expression, update centrally
+- parse signed non-native integer encoding (`:-big_endian[(<n>)]`, `:little_endian(-<n>)`)
+- verify that integer encoding size <= 8
+- specify padding character in string encoding (`:string(<n>, '<c>')`)
+- Set range for `.binary_file`: `.binary_file <filename> [.start <n>] [.length <n>] [.end <n>]`
 - Character constants, optionally with encoding (`'a':screen`)
 - Track constant usage, include used constants in symbol table.
 - Optionally omit private symbols of libraries from symbol talbe. 
+- Move location from BaseExpression to Expression, update centrally
 - Include library name in symbol table.
 
 
@@ -33,7 +37,6 @@
 
 ## Missing Features
 
-- Evaluate program/library constants in output elements.
 - Add optional priorities to sections.
 
 
