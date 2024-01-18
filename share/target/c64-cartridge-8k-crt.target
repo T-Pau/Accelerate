@@ -1,6 +1,6 @@
-.include "c64.inc"
-
 .include "ascii-encoding.inc"
+
+.include "c64.inc"
 
 .section zero_page {
     type: reserve_only
@@ -12,25 +12,40 @@
     ]
 }
 
+.segment cartridge {
+    ; type: read_only
+    address: $8000 - $9fff
+}
+
+.section code {
+    segment: cartridge
+}
+
+.section data {
+    segment: cartridge
+}
+
+; TODO: section reserved
+
 .include "commodore-cartridge.inc"
 
 .extension "crt"
 
 .output {
-    .data "C64  CARTRIDGE":ascii(16) ; signature
-    .data $00, $00, $00, $40 ; $40:big_endian(4) ; header length
+    .data "C64 CARTRIDGE":ascii(16) ; signature
+    .data $40:big_endian(4) ; header length
     .data $01, $00 ; version
-    .data $00, $00 ; CARTRIDGE_TPYE:big_endian(2) ; cartridge type
+    .data CARTRIDGE_TPYE:big_endian(2) ; cartridge type
     .data $00 ; EXROM
     .data $01 ; GAME
-    .data .fill($00, 6) ; reserved
+    .data $00, $00, $00, $00, $00, $00 ; TODO: ignored?! .fill(6, $00) ; reserved
     .data CARTRIDGE_NAME:ascii(32) ; TODO: padded with NUL, not space
 
     .data "CHIP":ascii
-    .data $20, $10 ; $2010:big_endian ; length of section
+    .data $2010:big_endian(4) ; length of section
     .data $0000 ; type ROM
     .data $0000 ; bank
-    .data $80, $00 ; $8000:big_endian ; load address
-    .data $20, $00 ; $2000:big_endian ; data size
+    .data $8000:big_endian ; load address
+    .data $2000:big_endian ; data size
     .memory $8000, $9fff
 }

@@ -10,6 +10,21 @@
     ]
 }
 
+.segment cartridge {
+    ; type: read_only
+    address: $8000 - $9fff
+}
+
+.section code {
+    segment: cartridge
+}
+
+.section data {
+    segment: cartridge
+}
+
+; TODO: section reserved
+
 .include "commodore-cartridge.inc"
 
 .extension "bin"
