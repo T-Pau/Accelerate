@@ -34,11 +34,10 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define PRIVATE_LITERAL "private"
 #define PUBLIC_LITERAL "public"
 
-bool VisibilityHelper::initialized = false;
-Token VisibilityHelper::token_private_directive;
-Token VisibilityHelper::token_private_name;
-Token VisibilityHelper::token_public_directive;
-Token VisibilityHelper::token_public_name;
+const Token VisibilityHelper::token_private_directive = Token(Token::DIRECTIVE, PRIVATE_LITERAL);
+const Token VisibilityHelper::token_private_name = Token(Token::NAME, PRIVATE_LITERAL);
+const Token VisibilityHelper::token_public_directive = Token(Token::DIRECTIVE, PUBLIC_LITERAL);
+const Token VisibilityHelper::token_public_name = Token(Token::NAME, PUBLIC_LITERAL);
 
 std::ostream& operator<<(std::ostream& stream, Visibility visibility) {
     switch  (visibility) {
@@ -55,21 +54,7 @@ std::ostream& operator<<(std::ostream& stream, Visibility visibility) {
     return stream;
 }
 
-void VisibilityHelper::initialize() {
-    if (!initialized) {
-        token_public_directive = Token(Token::DIRECTIVE, PUBLIC_LITERAL);
-        token_public_name = Token(Token::NAME, PUBLIC_LITERAL);
-        token_private_directive = Token(Token::DIRECTIVE, PRIVATE_LITERAL);
-        token_private_name = Token(Token::NAME, PRIVATE_LITERAL);
-        initialized = true;
-    }
-}
-
-void VisibilityHelper::setup(FileTokenizer& tokenizer, bool use_directives) {
-    initialize();
-}
-
-std::optional<Visibility> VisibilityHelper::from_token(Token token) {
+std::optional<Visibility> VisibilityHelper::from_token(const Token& token) {
     if (token == token_private_directive || token == token_private_name) {
         return Visibility::PRIVATE;
     }

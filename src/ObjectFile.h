@@ -45,7 +45,7 @@ class ObjectFile {
 public:
     class Constant: public Entity {
     public:
-        Constant(ObjectFile* owner, Token name, Visibility visibility, Expression value): Entity(owner, name, visibility), value(std::move(value)) {}
+        Constant(ObjectFile* owner, Token name, Visibility visibility, bool default_only, Expression value): Entity(owner, name, visibility, default_only), value(std::move(value)) {}
         Constant(ObjectFile* owner, const Token& name, const std::shared_ptr<ParsedValue>& definition);
 
         void serialize(std::ostream& stream) const;
@@ -67,7 +67,7 @@ public:
     [[nodiscard]] const Constant* constant(Symbol name) const;
     [[nodiscard]] std::vector<Object*> all_objects();
     void collect_explicitly_used_objects(std::unordered_set<Object*>& set) const;
-    Object* create_object(Symbol section_name, Visibility visibility, const Token& object_name);
+    Object* create_object(Symbol section_name, Visibility visibility, bool default_only, const Token& object_name);
     void evaluate();
     void import(ObjectFile* library);
     [[nodiscard]] const Object* object(Symbol object_name) const;
@@ -75,6 +75,7 @@ public:
     void mark_used(Symbol name) {explicitly_used_object_names.insert(name);}
     void pin(Symbol name, Expression address) {pinned_objects[name] = Pinned{name, address};}
     void remove_private_constants();
+    void resolve_defaults();
     void serialize(std::ostream& stream) const;
     void set_target(const Target* new_target);
     std::shared_ptr<Environment> environment(Visibility visibility) const;
@@ -109,6 +110,7 @@ private:
     std::unordered_map<Symbol, std::unique_ptr<Function>> functions;
     std::unordered_map<Symbol, std::unique_ptr<Macro>> macros;
     std::unordered_map<Symbol, std::unique_ptr<Object>> objects;
+    std::unordered_set<std::unique_ptr<Object>> unused_default_objects;
 
     std::unordered_set<Symbol> explicitly_used_object_names;
     std::unordered_set<Object*> explicitly_used_objects;

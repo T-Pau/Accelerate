@@ -15,14 +15,14 @@
     segment: program
 }
 
+.default .macro extra_setup {
+}
 
 .section data
 
 basic_program .address basic_start .used {
     .data next_line, 0:2
-    .if NEED_EXTRA_SETUP {
-        extra_setup
-    }
+    extra_setup
     .data $9e, start:string(5), 0  ; BASIC: SYS start
 next_line:
     .data $0000 ; end of BASIC program

@@ -1,3 +1,9 @@
+.section code
+
+.default nmi {
+    jmp $fe5e ; Kernal NMI routine when no cartridge is present
+}
+
 .section data
 
 cartridge_header .address $8000 .used {

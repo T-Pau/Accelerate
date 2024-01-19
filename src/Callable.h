@@ -56,7 +56,7 @@ class Callable: public Entity {
     };
 
     Callable(ObjectFile* owner, Token name, const std::shared_ptr<ParsedValue>& definition);
-    Callable(ObjectFile* owner, Token name, Visibility visibility, Arguments arguments): Entity(owner, name, visibility), arguments(std::move(arguments)) {}
+    Callable(ObjectFile* owner, Token name, Visibility visibility, bool default_only, Arguments arguments): Entity(owner, name, visibility, default_only), arguments(std::move(arguments)) {}
     [[nodiscard]] Symbol argument_name(size_t index) const {return arguments.name(index);}
     [[nodiscard]] std::optional<Expression> default_argument(size_t index) const {return arguments.default_argument(index);}
 

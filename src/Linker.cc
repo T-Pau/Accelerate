@@ -47,8 +47,10 @@ void Linker::link() {
         program->import(library.get());
     }
 
+    program->resolve_defaults();
     program->evaluate();
     program->evaluate();
+
     Unresolved unresolved;
     if (!program->check_unresolved(unresolved)) {
         unresolved.report();
@@ -57,8 +59,10 @@ void Linker::link() {
 
     Target::set_current_target(target);
     target->object_file->import(program.get());
+    target->object_file->resolve_defaults();
     target->object_file->evaluate();
     target->object_file->evaluate();
+
     if (!target->object_file->check_unresolved(unresolved)) {
         unresolved.report();
         throw Exception();

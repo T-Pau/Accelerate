@@ -42,6 +42,7 @@ const Token Assembler::token_address = Token{Token::DIRECTIVE, "address"};
 const Token Assembler::token_address_name = Token{Token::NAME, "address"};
 const Token Assembler::token_align = Token(Token::DIRECTIVE, "align");
 const Token Assembler::token_cpu = Token(Token::DIRECTIVE, "cpu");
+const Token Assembler::token_default = Token(Token::DIRECTIVE, "default");
 const Token Assembler::token_data_end = Token(Token::NAME, ".data_end");
 const Token Assembler::token_data_size = Token(Token::NAME, ".data_size");
 const Token Assembler::token_data_start = Token(Token::NAME, ".data_start");
@@ -68,6 +69,7 @@ const Token Assembler::token_visibility = Token(Token::DIRECTIVE, "visibility");
 // clang-format off
 const std::unordered_map<Token, Assembler::Directive> Assembler::directives = {
     {token_cpu, Directive{&Assembler::parse_cpu, true}},
+    {token_default, Directive(&Assembler::parse_default)},
     {token_default_string_encoding, Directive{&Assembler::parse_default_string_encoding, true}},
     {token_extension, Directive{&Assembler::parse_extension, true}},
     {token_output, Directive{&Assembler::parse_output, true}},
@@ -162,7 +164,7 @@ void Assembler::parse(Symbol file_name) {
 
 void Assembler::parse_assignment(Visibility visibility, const Token& name) {
     auto value = ExpressionParser(tokenizer).parse();
-    object_file->add_constant(std::make_unique<ObjectFile::Constant>(object_file.get(), name, visibility, value));
+    object_file->add_constant(std::make_unique<ObjectFile::Constant>(object_file.get(), name, visibility, false, value));
 }
 
 void Assembler::parse_cpu() {
@@ -171,8 +173,35 @@ void Assembler::parse_cpu() {
     try {
         had_cpu = true;
         parsed_target.cpu = &CPU::get(name.as_symbol(), tokenizer.current_file());
+        parsed_target.cpu->setup(tokenizer);
     } catch (Exception& ex) {
         throw ParseException(name, "%s", ex.what());
+    }
+}
+
+void Assembler::parse_default() {
+    auto visibility = std::optional<Visibility>();
+
+    while (true) {
+        auto token = tokenizer.next();
+
+        if (token.is_name()) {
+            parse_name(visibility.value_or(current_visibility), token, true);
+            return;
+        }
+        else if (token == token_macro) {
+            parse_macro(visibility.value_or(current_visibility), true);
+            return;
+        }
+        else {
+            if (visibility) {
+                throw ParseException(token, "assignment or definition of macro, function or object expected");
+            }
+            visibility = VisibilityHelper::from_token(token);
+            if (!visibility) {
+                throw ParseException(token, "assignment or definition of macro, function or object expected");
+            }
+        }
     }
 }
 
@@ -256,13 +285,13 @@ void Assembler::parse_segment() {
     parsed_target.map.add_segment(name.as_symbol(), parse_address((*parameters)[token_address_name].get()));
 }
 
-void Assembler::parse_symbol(Visibility visibility, const Token& name) {
+void Assembler::parse_symbol(Visibility visibility, const Token& name, bool default_only) {
     if (!target) {
         // TODO: skip until matching curly close
         tokenizer.skip_until(Token::curly_close, true);
         throw ParseException(name, "no target specified");
     }
-    auto object = object_file->create_object(current_section, visibility, name);
+    auto object = object_file->create_object(current_section, visibility, default_only, name);
 
     while (true) {
         auto token = tokenizer.next();
@@ -422,7 +451,7 @@ void Assembler::set_target(const Target* new_target) {
     }
 }
 
-void Assembler::parse_name(Visibility visibility, const Token& name) {
+void Assembler::parse_name(Visibility visibility, const Token& name, bool default_only) {
     auto token = tokenizer.next();
     if (token == Token::equals) {
         parse_assignment(visibility, name);
@@ -434,7 +463,7 @@ void Assembler::parse_name(Visibility visibility, const Token& name) {
         tokenizer.expect(Token::equals);
 
         auto definition = ExpressionParser(tokenizer).parse();
-        object_file->add_function(std::make_unique<Function>(object_file.get(), name, visibility, arguments, definition));
+        object_file->add_function(std::make_unique<Function>(object_file.get(), name, visibility, default_only, arguments, definition));
     }
     else {
         tokenizer.unget(token);
@@ -442,12 +471,12 @@ void Assembler::parse_name(Visibility visibility, const Token& name) {
     }
 }
 
-void Assembler::parse_macro(Visibility visibility) {
+void Assembler::parse_macro(Visibility visibility, bool default_only) {
     auto name = tokenizer.expect(Token::NAME);
     auto arguments = Callable::Arguments(tokenizer);
     tokenizer.expect(Token::curly_open);
     auto body = BodyParser(tokenizer, object_file->target->cpu).parse(); // TODO: proper mode for macros
-    object_file->add_macro(std::make_unique<Macro>(object_file.get(), name, visibility, arguments, body));
+    object_file->add_macro(std::make_unique<Macro>(object_file.get(), name, visibility, default_only, arguments, body));
 }
 
 std::vector<MemoryMap::Block> Assembler::parse_address(const ParsedValue* address) {

@@ -45,17 +45,12 @@ enum class Visibility {
 
 class VisibilityHelper {
   public:
-    static std::optional<Visibility> from_token(Token token);
-    static Token token_public_directive;
-    static Token token_public_name;
-    static Token token_private_directive;
-    static Token token_private_name;
+    static std::optional<Visibility> from_token(const Token& token);
 
-    static void initialize();
-    static void setup(FileTokenizer& tokenizer, bool use_directives);
-
-  private:
-    static bool initialized;
+    static const Token token_public_directive;
+    static const Token token_public_name;
+    static const Token token_private_directive;
+    static const Token token_private_name;
 };
 
 std::ostream& operator<<(std::ostream& stream, Visibility visibility);

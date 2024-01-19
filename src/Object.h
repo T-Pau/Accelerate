@@ -48,7 +48,7 @@ class ObjectFile;
 class Object: public Entity {
 public:
     Object(ObjectFile* owner, const Token& name, const std::shared_ptr<ParsedValue>& definition);
-    Object(ObjectFile* owner, const MemoryMap::Section* section, Visibility visibility, const Token& name);
+    Object(ObjectFile* owner, const MemoryMap::Section* section, Visibility visibility, bool default_only, const Token& name);
 
     bool static less_pointers(const Object* a, const Object* b) {return *a < *b;}
 

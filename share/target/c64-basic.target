@@ -13,6 +13,4 @@
 basic_start = $0801
 basic_end = $7fff
 
-NEED_EXTRA_SETUP = 0
-
 .include "commodore-basic.inc"

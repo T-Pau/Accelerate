@@ -53,7 +53,7 @@ Macro::Macro(ObjectFile* owner, Token name, const std::shared_ptr<ParsedValue>& 
     body = (*parameters)[token_body]->as_body()->body;
 }
 
-Macro::Macro(ObjectFile* owner, Token name, Visibility visibility, Callable::Arguments arguments, Body body_): Callable(owner, name, visibility, std::move(arguments)), body(std::move(body_)) {
+Macro::Macro(ObjectFile* owner, Token name, Visibility visibility, bool default_only, Callable::Arguments arguments, Body body_): Callable(owner, name, visibility, default_only, std::move(arguments)), body(std::move(body_)) {
     EvaluationResult result;
 }
 

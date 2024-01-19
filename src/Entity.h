@@ -40,13 +40,14 @@ class Object;
 
 class Entity {
   public:
-    Entity(ObjectFile* owner, Token name, const std::shared_ptr<ParsedValue>& definition);
-    Entity(ObjectFile* owner, Token name, Visibility visibility);
+    Entity(ObjectFile* owner, const Token& name, const std::shared_ptr<ParsedValue>& definition);
+    Entity(ObjectFile* owner, const Token& name, Visibility visibility, bool default_only);
     virtual ~Entity() = default;
 
     [[nodiscard]] Macro* as_macro();
     [[nodiscard]] Object* as_object();
     [[nodiscard]] bool check_unresolved(Unresolved& unresolved) const;
+    [[nodiscard]] bool is_default_only() const {return default_only;}
     [[nodiscard]] bool is_macro() {return as_macro();}
     [[nodiscard]] bool is_object() {return as_object();}
     void set_owner(ObjectFile* new_owner);
@@ -67,12 +68,11 @@ class Entity {
     void serialize_entity(std::ostream& stream) const;
 
   private:
-    static void initialize();
-
     [[nodiscard]] bool check_unresolved(const std::unordered_set<Symbol>& unresolved, Unresolved::Part& part) const;
 
-    static bool initialized;
-    static Token token_visibility;
+    static const Token token_visibility;
+
+    bool default_only;
 };
 
 

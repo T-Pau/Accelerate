@@ -57,7 +57,6 @@ const Token BodyParser::token_start = Token(Token::DIRECTIVE, "start");
 const std::unordered_map<Symbol, void (BodyParser::*)()> BodyParser::directive_parser_methods = {{token_binary_file.as_symbol(), &BodyParser::parse_binary_file}, {token_data.as_symbol(), &BodyParser::parse_data}, {token_else.as_symbol(), &BodyParser::parse_else}, {token_else_if.as_symbol(), &BodyParser::parse_else_if}, {token_error.as_symbol(), &BodyParser::parse_error}, {token_if.as_symbol(), &BodyParser::parse_if}, {token_memory.as_symbol(), &BodyParser::parse_memory}, {token_repeat.as_symbol(), &BodyParser::parse_repeat}, {token_scope.as_symbol(), &BodyParser::parse_scope}};
 
 void BodyParser::setup(FileTokenizer& tokenizer) {
-    VisibilityHelper::setup(tokenizer, true);
     tokenizer.add_literal(Token::colon_minus);
     tokenizer.add_literal(Token::colon_plus);
 }
@@ -170,7 +169,7 @@ void BodyParser::add_constant(Visibility visibility, Token name, const Expressio
         if (!entity) {
             throw ParseException(name, "unsupported visibility");
         }
-        entity->owner->add_constant(std::make_unique<ObjectFile::Constant>(entity->owner, name, visibility, value));
+        entity->owner->add_constant(std::make_unique<ObjectFile::Constant>(entity->owner, name, visibility, false, value));
     }
     environment->add(name.as_symbol(), value);
 }

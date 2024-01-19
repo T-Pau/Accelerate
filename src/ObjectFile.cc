@@ -142,10 +142,15 @@ void ObjectFile::add_constant(std::unique_ptr<Constant> constant) {
     auto pair = constants.insert({constant_name.as_symbol(), std::move(constant)});
 
     if (!pair.second) {
+        if (constant->is_default_only()) {
+            return;
+        }
         throw ParseException(Location(), "duplicate symbol '%s'", constant_name.as_string().c_str());
     }
 
-    add_to_environment(pair.first->second->name.as_symbol(), pair.first->second->visibility, pair.first->second->value);
+    if (!pair.first->second->is_default_only()) {
+        add_to_environment(pair.first->second->name.as_symbol(), pair.first->second->visibility, pair.first->second->value);
+    }
 }
 
 void ObjectFile::add_object_file(const std::shared_ptr<ObjectFile>& file) {
@@ -184,7 +189,7 @@ void ObjectFile::add_object_file(const std::shared_ptr<ObjectFile>& file) {
     file->explicitly_used_object_names.clear();
     explicitly_used_objects.insert(file->explicitly_used_objects.begin(), explicitly_used_objects.end());
     file->explicitly_used_objects.clear();
-    for (const auto& pair: file->pinned_objects) {
+    for (const auto& pair : file->pinned_objects) {
         pin(pair.first, pair.second.address);
     }
     file->pinned_objects.clear();
@@ -260,6 +265,34 @@ void ObjectFile::remove_private_constants() {
     });
 }
 
+void ObjectFile::resolve_defaults() {
+    for (auto& pair : constants) {
+        if (pair.second->is_default_only() && !private_environment->get_variable(pair.first)) {
+            add_to_environment(pair.second->name.as_symbol(), pair.second->visibility, pair.second->value);
+        }
+    }
+
+    for (auto& pair : functions) {
+        if (pair.second->is_default_only() && !private_environment->get_function(pair.first)) {
+            environment(pair.second->visibility)->add(pair.second->name.as_symbol(), pair.second.get());
+        }
+    }
+
+    for (auto& pair: macros) {
+        if (pair.second->is_default_only() && !private_environment->get_macro(pair.first)) {
+            environment(pair.second->visibility)->add(pair.second->name.as_symbol(), pair.second.get());
+        }
+    }
+
+    for (auto& pair: objects) {
+        if (pair.second->is_default_only() && !private_environment->get_variable(pair.first)) {
+            add_to_environment(pair.second.get());
+        }
+    }
+
+    unused_default_objects.clear();
+}
+
 const Object* ObjectFile::object(Symbol object_name) const {
     auto it = objects.find(object_name);
 
@@ -271,12 +304,12 @@ const Object* ObjectFile::object(Symbol object_name) const {
     }
 }
 
-Object* ObjectFile::create_object(Symbol section_name, Visibility visibility, const Token& object_name) {
+Object* ObjectFile::create_object(Symbol section_name, Visibility visibility, bool default_only, const Token& object_name) {
     auto section = target->map.section(section_name);
     if (section == nullptr) {
         throw ParseException(object_name, "unknown section '%s'", section_name.c_str());
     }
-    return insert_object(std::make_unique<Object>(this, section, visibility, object_name));
+    return insert_object(std::make_unique<Object>(this, section, visibility, default_only, object_name));
 }
 
 ObjectFile::ObjectFile() noexcept {
@@ -310,7 +343,7 @@ void ObjectFile::collect_explicitly_used_objects(std::unordered_set<Object*>& se
     for (auto object : explicitly_used_objects) {
         set.insert(object);
     }
-    for (auto& library: imported_libraries) {
+    for (auto& library : imported_libraries) {
         library->collect_explicitly_used_objects(set);
     }
 }
@@ -319,6 +352,11 @@ Object* ObjectFile::insert_object(std::unique_ptr<Object> object) {
     auto own_object = object.get();
     auto pair = objects.insert({own_object->name.as_symbol(), std::move(object)});
     if (!pair.second) {
+        if (object->is_default_only()) {
+            own_object->set_owner(this);
+            unused_default_objects.insert(std::move(object));
+            return own_object;
+        }
         throw ParseException(own_object->name, "redefinition of object %s", own_object->name.as_string().c_str());
     }
     own_object->set_owner(this);
@@ -331,8 +369,21 @@ void ObjectFile::add_function(std::unique_ptr<Function> function) {
         // TODO: error
         return;
     }
+
+    auto it = functions.find(function->name.as_symbol());
+    if (it != functions.end()) {
+        if (function->is_default_only()) {
+            return;
+        }
+        else {
+            throw ParseException(function->name, "redefinition of function %s", function->name.as_string().c_str());
+        }
+    }
+
     function->set_owner(this);
-    environment(function->visibility)->add(function->name.as_symbol(), function.get());
+    if (!function->is_default_only()) {
+        environment(function->visibility)->add(function->name.as_symbol(), function.get());
+    }
     functions[function->name.as_symbol()] = std::move(function);
 }
 
@@ -341,8 +392,21 @@ void ObjectFile::add_macro(std::unique_ptr<Macro> macro) {
         // TODO: error
         return;
     }
+
+    auto it = macros.find(macro->name.as_symbol());
+    if (it != macros.end()) {
+        if (macro->is_default_only()) {
+            return;
+        }
+        else {
+            throw ParseException(macro->name, "redefinition of macro %s", macro->name.as_string().c_str());
+        }
+    }
+
     macro->set_owner(this);
-    environment(macro->visibility)->add(macro->name.as_symbol(), macro.get());
+    if (!macro->is_default_only()) {
+        environment(macro->visibility)->add(macro->name.as_symbol(), macro.get());
+    }
     macros[macro->name.as_symbol()] = std::move(macro);
 }
 

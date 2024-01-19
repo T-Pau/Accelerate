@@ -53,7 +53,7 @@ AssignmentBody::evaluated(const EvaluationContext &context) const {
     }
     else {
         // TODO: this can't be written out if label is not resolved yet.
-        context.entity->owner->add_constant(std::make_unique<ObjectFile::Constant>(context.entity->owner, Token(Token::NAME, {}, name), visibility, new_value.value_or(value)));
+        context.entity->owner->add_constant(std::make_unique<ObjectFile::Constant>(context.entity->owner, Token(Token::NAME, {}, name), visibility, false, new_value.value_or(value)));
     }
 
     return Body();

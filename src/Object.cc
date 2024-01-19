@@ -98,7 +98,7 @@ Object::Object(ObjectFile* owner, const Token& name, const std::shared_ptr<Parse
 }
 
 
-Object::Object(ObjectFile *owner, const MemoryMap::Section *section, Visibility visibility, const Token& name): Entity(owner, name, visibility), section(section) {}
+Object::Object(ObjectFile *owner, const MemoryMap::Section *section, Visibility visibility, bool default_only, const Token& name): Entity(owner, name, visibility, default_only), section(section) {}
 
 
 std::ostream& operator<< (std::ostream& stream, const Object& object) {

@@ -18,6 +18,7 @@
 - `.define` and `.undefine` are ignored if preprocessor is skipping.
 - non-native integer encodings
 - range for `.binary_file`
+- `.default`
 
 
 ## Documentation
@@ -28,6 +29,7 @@
 - range for `.binary_file`
 - in-body `.if` syntax
 - `.repeat`, `.fill`
+- `.default`
 
 
 ## StringEncoding

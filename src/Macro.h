@@ -39,7 +39,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 class Macro: public Callable {
   public:
     Macro(ObjectFile* owner, Token name, const std::shared_ptr<ParsedValue>& definition);
-    Macro(ObjectFile* owner, Token name, Visibility visibility, Callable::Arguments arguments, Body body);
+    Macro(ObjectFile* owner, Token name, Visibility visibility, bool default_only, Callable::Arguments arguments, Body body);
 
     [[nodiscard]] Body expand(const std::vector<Expression>& arguments) const;
     void serialize(std::ostream& stream) const;

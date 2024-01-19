@@ -67,6 +67,12 @@ int Command::run(int argc, char *const *argv) {
 
         if (arguments.arguments.size() < minimum_arguments() || arguments.arguments.size() > maximum_arguments()) {
             commandline.usage(false, stderr);
+            if (arguments.arguments.size() < minimum_arguments()) {
+                    std::cerr << "at least " << minimum_arguments() << " required" << std::endl;
+            }
+            else {
+                std::cerr << "at most " << maximum_arguments() << " required" << std::endl;
+            }
             throw Exception();
         }
 

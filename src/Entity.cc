@@ -31,42 +31,29 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "Entity.h"
 
-#include <algorithm>
-
 #include "FileReader.h"
 #include "ObjectFile.h"
 #include "ParseException.h"
-#include "Util.h"
 
 #define VISIBILITY "visibility"
 
-bool Entity::initialized = false;
-Token Entity::token_visibility;
-
-void Entity::initialize() {
-    if (!initialized) {
-        initialized = true;
-        token_visibility = Token(Token::NAME, VISIBILITY);
-        VisibilityHelper::initialize();
-    }
-}
+const Token Entity::token_visibility = Token(Token::NAME, VISIBILITY);
 
 
-Entity::Entity(ObjectFile* owner, Token name_, const std::shared_ptr<ParsedValue>& definition): environment(std::make_shared<Environment>(owner->private_environment)), owner(owner) {
-    initialize();
-    auto parameters = definition->as_dictionary();
+Entity::Entity(ObjectFile* owner, const Token& name_, const std::shared_ptr<ParsedValue>& definition): environment(std::make_shared<Environment>(owner->private_environment)), owner(owner) {
+    const auto parameters = definition->as_dictionary();
 
     name = name_;
 
-    auto visibility_value = (*parameters)[token_visibility]->as_singular_scalar()->token();
-    auto visibility_ = VisibilityHelper::from_token(visibility_value);
+    const auto visibility_value = (*parameters)[token_visibility]->as_singular_scalar()->token();
+    const auto visibility_ = VisibilityHelper::from_token(visibility_value);
     if (!visibility_) {
         throw ParseException(visibility_value, "invalid visibility '%s'", visibility_value.as_string().c_str());
     }
     visibility = *visibility_;
 }
 
-Entity::Entity(ObjectFile* owner, Token name, Visibility visibility): name(name), visibility(visibility), owner(owner), environment(std::make_shared<Environment>(owner->private_environment)) {}
+Entity::Entity(ObjectFile* owner, const Token& name, Visibility visibility, bool default_only): name(name), visibility(visibility), owner(owner), environment(std::make_shared<Environment>(owner->private_environment)), default_only{default_only} {}
 
 
 void Entity::serialize_entity(std::ostream& stream) const {
