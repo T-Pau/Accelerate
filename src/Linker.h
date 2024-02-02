@@ -58,6 +58,7 @@ public:
 
     const Target* target = nullptr;
     Mode mode = LINK;
+    Body output_body;
 
     std::shared_ptr<ObjectFile> program = std::make_shared<ObjectFile>();
 

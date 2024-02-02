@@ -73,7 +73,7 @@ void Linker::link() {
     environment->add_next(target->object_file->private_environment);
     environment->add_next(program->public_environment);
     auto context = EvaluationContext{result, EvaluationContext::ENTITY, environment};
-    auto output_body = target->output;
+    output_body = target->output;
     output_body.evaluate(context);
     result.unresolved_variables.erase(Assembler::token_data_end.as_symbol());
     result.unresolved_variables.erase(Assembler::token_data_size.as_symbol());
@@ -177,15 +177,14 @@ void Linker::output(const std::string &file_name) {
     environment->add_next(target->object_file->private_environment);
     environment->add_next(program->public_environment);
 
-    auto body = target->output;
     EvaluationResult result;
-    body.evaluate(EvaluationContext(result, EvaluationContext::STANDALONE, environment, target->defines, SizeRange()));
+    output_body.evaluate(EvaluationContext(result, EvaluationContext::STANDALONE, environment, target->defines, SizeRange()));
     // TODO: process result
 
     auto bytes = std::string();
-    bytes.reserve(body.size_range().minimum);
+    bytes.reserve(output_body.size_range().minimum);
 
-    body.encode(bytes, &memory);
+    output_body.encode(bytes, &memory);
 
     auto stream = std::ofstream(file_name);
     stream << bytes;
@@ -206,6 +205,7 @@ void Linker::set_target(const Target* new_target) {
         return;
     }
     target = new_target;
+    program->private_environment->add_next(target->object_file->public_environment);
     memory = target->map.initialize_memory();
     IntegerEncoder::default_byte_order = target->cpu->byte_order;
 }

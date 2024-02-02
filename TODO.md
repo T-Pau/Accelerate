@@ -1,5 +1,7 @@
 ## Soon
 
+- Fix: `.default` in target overrides definition in program.
+- Fix: string encoding not serialized correctly.
 - specify padding character in string encoding (`:string(<n>, '<c>')`)
 - parse signed non-native integer encoding (`:-big_endian[(<n>)]`, `:little_endian(-<n>)`)
 - verify that integer encoding size <= 8
@@ -14,6 +16,7 @@
 ## Tests
 
 - `.if .defined` in body
+- `.pre_if .true` inside `.pre_if .false` 
 - `.use`, `.uses`, `.pin`, `.used`
 - `.define` and `.undefine` are ignored if preprocessor is skipping.
 - non-native integer encodings

@@ -2,6 +2,8 @@
 
 .include "c64.inc"
 
+.include "commodore-crt.inc"
+
 .section zero_page {
     type: reserve_only
     address [
@@ -29,23 +31,13 @@
 
 .include "commodore-cartridge.inc"
 
+;.default CARTRIDGE_TYPE = CRT_TYPE_GENERIC
+;.default CARTRIDGE_NAME = ""
+
 .extension "crt"
 
 .output {
-    .data "C64 CARTRIDGE":ascii(16) ; signature
-    .data $40:big_endian(4) ; header length
-    .data $01, $00 ; version
-    .data CARTRIDGE_TPYE:big_endian(2) ; cartridge type
-    .data $00 ; EXROM
-    .data $01 ; GAME
-    .data $00, $00, $00, $00, $00, $00 ; TODO: ignored?! .fill(6, $00) ; reserved
-    .data CARTRIDGE_NAME:ascii(32) ; TODO: padded with NUL, not space
-
-    .data "CHIP":ascii
-    .data $2010:big_endian(4) ; length of section
-    .data $0000 ; type ROM
-    .data $0000 ; bank
-    .data $8000:big_endian ; load address
-    .data $2000:big_endian ; data size
+    crt_header CARTRIDGE_TYPE, 0, 1, CARTRIDGE_NAME
+    crt_chip_header CRT_CHIP_TYPE_ROM, 0, $8000, $2000
     .memory $8000, $9fff
 }
