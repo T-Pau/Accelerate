@@ -246,7 +246,7 @@ bool FileTokenizer::pre_is_procesing() const {
     if (current_source->pre_states.empty()) {
         return true;
     }
-    return current_source->pre_states.back();
+    return std::all_of(current_source->pre_states.begin(), current_source->pre_states.end(), [](auto state){return state;});
 }
 
 Token FileTokenizer::parse_hex(Location location) {
