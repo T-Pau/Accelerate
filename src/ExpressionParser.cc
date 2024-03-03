@@ -38,14 +38,18 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 const Token ExpressionParser::token_big_endian = Token{Token::NAME, "big_endian"};
 const Token ExpressionParser::token_false = Token{Token::NAME, ".false"};
 const Token ExpressionParser::token_little_endian = Token{Token::NAME, "little_endian"};
+const Token ExpressionParser::token_mod = Token{Token::NAME, ".mod"};
 const Token ExpressionParser::token_string = Token{Token::NAME, "string"};
 const Token ExpressionParser::token_true = Token{Token::NAME, ".true"};
 
 std::unordered_map<Token, ExpressionParser::BinaryOperator> ExpressionParser::binary_operators;
-
 std::unordered_map<Token, Expression::UnaryOperation> ExpressionParser::unary_operators;
+bool ExpressionParser::initialized = false;
 
 void ExpressionParser::initialize() {
+    if (initialized) {
+        return;
+    }
     binary_operators = {
         {Token::double_pipe, BinaryOperator(Expression::BinaryOperation::LOGICAL_OR, 1)},
 
@@ -66,6 +70,7 @@ void ExpressionParser::initialize() {
         {Token::star, BinaryOperator(Expression::BinaryOperation::MULTIPLY, 5)},
         {Token::slash, BinaryOperator(Expression::BinaryOperation::DIVIDE, 5)},
         {Token::ampersand, BinaryOperator(Expression::BinaryOperation::BITWISE_AND, 5)},
+        {token_mod, BinaryOperator(Expression::BinaryOperation::MODULO, 5)},
 
         {Token::double_less, BinaryOperator(Expression::BinaryOperation::SHIFT_LEFT, 6)},
         {Token::double_greater, BinaryOperator(Expression::BinaryOperation::SHIFT_RIGHT, 6)}
@@ -80,6 +85,8 @@ void ExpressionParser::initialize() {
         {Token::greater, Expression::UnaryOperation::HIGH_BYTE},
         {Token::tilde, Expression::UnaryOperation::BITWISE_NOT}
     };
+
+    initialized = true;
 }
 
 

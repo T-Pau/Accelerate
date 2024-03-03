@@ -118,11 +118,13 @@ private:
     static const Token token_big_endian;
     static const Token token_false;
     static const Token token_little_endian;
+    static const Token token_mod;
     static const Token token_string;
     static const Token token_true;
 
     static std::unordered_map<Token, BinaryOperator> binary_operators;
     static std::unordered_map<Token, Expression::UnaryOperation> unary_operators;
+    static bool initialized;
 };
 
 

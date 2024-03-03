@@ -216,8 +216,18 @@ void xlr8::process() {
     }
 
     for (const auto& file: files) {
-        linker->add_file(file.file);
+        try {
+            linker->add_file(file.file);
+        }
+        catch (Exception& ex) {
+            FileReader::global.error(ex);
+            ok = false;
+        }
     }
+    if (!ok) {
+        throw Exception();
+    }
+
     if (linker->mode == Linker::LINK) {
         linker->link();
     }

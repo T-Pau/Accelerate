@@ -34,7 +34,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <algorithm>
 #include <cstring>
 
-#include "Exception.h"
+#include "ParseException.h"
 #include "Util.h"
 
 #include <fstream>
@@ -183,4 +183,17 @@ std::vector<std::string> FileReader::file_names() const {
     std::sort(file_names.begin(), file_names.end());
 
     return file_names;
+}
+
+void FileReader::error(const Exception& exception) {
+    if (exception.empty()) {
+        error_flag = true;
+        return;
+    }
+    if (auto parsed_exception = dynamic_cast<const ParseException*>(&exception)) {
+        error(parsed_exception->location, "%s", exception.what());
+    }
+    else {
+        error({}, "%s", exception.what());
+    }
 }

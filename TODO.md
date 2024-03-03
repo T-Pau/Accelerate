@@ -12,6 +12,10 @@
 - Move location from BaseExpression to Expression, update centrally
 - Include library name in symbol table.
 
+## Bugs
+
+- `.include_bianry` is parsed as `.include _binary`.
+- Fix `.mod`.
 
 ## Tests
 
@@ -22,7 +26,7 @@
 - non-native integer encodings
 - range for `.binary_file`
 - `.default`
-
+- `.mod`
 
 ## Documentation
 
@@ -33,7 +37,7 @@
 - in-body `.if` syntax
 - `.repeat`, `.fill`
 - `.default`
-
+- `.mod`
 
 ## StringEncoding
 

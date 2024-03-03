@@ -44,6 +44,7 @@ ValueExpression::ValueExpression(const Token& token) {
     else {
         throw ParseException(token, "internal error: can't create value node from %s", token.type_name());
     }
+    location = token.location;
 }
 
 void ValueExpression::serialize_sub(std::ostream& stream) const {

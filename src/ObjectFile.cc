@@ -136,24 +136,24 @@ void ObjectFile::serialize(std::ostream& stream) const {
 }
 
 void ObjectFile::add_constant(std::unique_ptr<Constant> constant) {
-    auto constant_name = constant->name;
-    constant->set_owner(this);
-
-    auto pair = constants.insert({constant_name.as_symbol(), std::move(constant)});
-
-    if (!pair.second) {
+    auto own_constant = constant.get();
+    if (constants.find(constant->name.as_symbol()) != constants.end()) {
         if (constant->is_default_only()) {
             return;
         }
-        throw ParseException(Location(), "duplicate symbol '%s'", constant_name.as_string().c_str());
+        throw ParseException(constant->name, "redefinition of constant '%s'", constant->name.as_string().c_str());
     }
 
-    if (!pair.first->second->is_default_only()) {
-        add_to_environment(pair.first->second->name.as_symbol(), pair.first->second->visibility, pair.first->second->value);
+    constant->set_owner(this);
+    constants[constant->name.as_symbol()] = std::move(constant);
+    if (!own_constant->is_default_only()) {
+        add_to_environment(own_constant->name.as_symbol(), own_constant->visibility, own_constant->value);
     }
 }
 
 void ObjectFile::add_object_file(const std::shared_ptr<ObjectFile>& file) {
+    auto ok = true;
+
     if (file->target) {
         if (target && !target->name.empty() && target != file->target) {
             throw Exception("can't combine files for different targets");
@@ -162,27 +162,57 @@ void ObjectFile::add_object_file(const std::shared_ptr<ObjectFile>& file) {
     }
 
     for (auto& pair : file->constants) {
-        add_constant(std::move(pair.second));
+        try {
+            add_constant(std::move(pair.second));
+        }
+        catch (Exception &ex) {
+            FileReader::global.error(ex);
+            ok = false;
+        }
     }
     file->constants.clear();
 
     for (auto& pair : file->macros) {
-        add_macro(std::move(pair.second));
+        try {
+            add_macro(std::move(pair.second));
+        }
+        catch (Exception &ex) {
+            FileReader::global.error(ex);
+            ok = false;
+        }
     }
     file->macros.clear();
 
     for (auto& pair : file->functions) {
-        add_function(std::move(pair.second));
+        try {
+            add_function(std::move(pair.second));
+        }
+        catch (Exception &ex) {
+            FileReader::global.error(ex);
+            ok = false;
+        }
     }
     file->functions.clear();
 
     for (auto& pair : file->objects) {
-        add_object(std::move(pair.second));
+        try {
+            add_object(std::move(pair.second));
+        }
+        catch (Exception &ex) {
+            FileReader::global.error(ex);
+            ok = false;
+        }
     }
     file->objects.clear();
 
     for (auto& library : file->imported_libraries) {
-        import(library);
+        try {
+            import(library);
+        }
+        catch (Exception &ex) {
+            FileReader::global.error(ex);
+            ok = false;
+        }
     }
 
     explicitly_used_object_names.insert(file->explicitly_used_object_names.begin(), explicitly_used_object_names.end());
@@ -190,9 +220,19 @@ void ObjectFile::add_object_file(const std::shared_ptr<ObjectFile>& file) {
     explicitly_used_objects.insert(file->explicitly_used_objects.begin(), explicitly_used_objects.end());
     file->explicitly_used_objects.clear();
     for (const auto& pair : file->pinned_objects) {
-        pin(pair.first, pair.second.address);
+        try {
+            pin(pair.first, pair.second.address);
+        }
+        catch (Exception &ex) {
+            FileReader::global.error(ex);
+            ok = false;
+        }
     }
     file->pinned_objects.clear();
+
+    if (!ok) {
+        throw Exception();
+    }
 }
 
 void ObjectFile::evaluate() {
@@ -350,15 +390,15 @@ void ObjectFile::collect_explicitly_used_objects(std::unordered_set<Object*>& se
 
 Object* ObjectFile::insert_object(std::unique_ptr<Object> object) {
     auto own_object = object.get();
-    auto pair = objects.insert({own_object->name.as_symbol(), std::move(object)});
-    if (!pair.second) {
+    if (objects.find(object->name.as_symbol()) != objects.end()) {
         if (object->is_default_only()) {
-            own_object->set_owner(this);
+            object->set_owner(this);
             unused_default_objects.insert(std::move(object));
             return own_object;
         }
-        throw ParseException(own_object->name, "redefinition of object %s", own_object->name.as_string().c_str());
+        throw ParseException(object->name, "redefinition of object '%s'", object->name.as_string().c_str());
     }
+    objects[object->name.as_symbol()] = std::move(object);
     own_object->set_owner(this);
     add_to_environment(own_object);
     return own_object;

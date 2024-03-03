@@ -50,6 +50,7 @@ public:
     Exception append_detail(const std::string &str);
     Exception append_system_error(int code = -1); // default: use current errno
 
+    [[nodiscard]] bool empty() const noexcept {return message.empty();}
     [[nodiscard]] const char* what() const noexcept override;
 
 protected:
