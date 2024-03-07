@@ -106,7 +106,7 @@ const char* FileReader::diagnostics_severity_name(DiagnosticsSeverity severity) 
             return "error";
     }
 
-    throw Exception("invalid serverity");
+    throw Exception("invalid severity");
 }
 
 
@@ -192,6 +192,9 @@ void FileReader::error(const Exception& exception) {
     }
     if (auto parsed_exception = dynamic_cast<const ParseException*>(&exception)) {
         error(parsed_exception->location, "%s", exception.what());
+        for (const auto& note: parsed_exception->notes) {
+            notice(note.location, note.text);
+        }
     }
     else {
         error({}, "%s", exception.what());

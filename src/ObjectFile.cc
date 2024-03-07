@@ -33,7 +33,6 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <algorithm>
 
-#include "FileParser.h"
 #include "FileReader.h"
 #include "ObjectExpression.h"
 #include "ParseException.h"
@@ -137,11 +136,12 @@ void ObjectFile::serialize(std::ostream& stream) const {
 
 void ObjectFile::add_constant(std::unique_ptr<Constant> constant) {
     auto own_constant = constant.get();
-    if (constants.find(constant->name.as_symbol()) != constants.end()) {
+    auto it = constants.find(constant->name.as_symbol());
+    if (it != constants.end()) {
         if (constant->is_default_only()) {
             return;
         }
-        throw ParseException(constant->name, "redefinition of constant '%s'", constant->name.as_string().c_str());
+        throw ParseException(constant->name, "redefinition of constant '%s'", constant->name.as_string().c_str()).appending(it->second->name.location, "previously defined here");
     }
 
     constant->set_owner(this);
@@ -390,13 +390,14 @@ void ObjectFile::collect_explicitly_used_objects(std::unordered_set<Object*>& se
 
 Object* ObjectFile::insert_object(std::unique_ptr<Object> object) {
     auto own_object = object.get();
-    if (objects.find(object->name.as_symbol()) != objects.end()) {
+    const auto it = objects.find(own_object->name.as_symbol());
+    if (it != objects.end()) {
         if (object->is_default_only()) {
             object->set_owner(this);
             unused_default_objects.insert(std::move(object));
             return own_object;
         }
-        throw ParseException(object->name, "redefinition of object '%s'", object->name.as_string().c_str());
+        throw ParseException(object->name, "redefinition of object '%s'", object->name.as_string().c_str()).appending(it->second->name.location, "previously defined here");
     }
     objects[object->name.as_symbol()] = std::move(object);
     own_object->set_owner(this);

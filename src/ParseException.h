@@ -41,6 +41,14 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 class ParseException: public Exception {
 public:
+    class Note {
+      public:
+        Note(Location location, std::string text) : location(location), text(std::move(text)) {}
+
+        Location location;
+        std::string text;
+    };
+
     ParseException(const Token& token, const Exception& exception): ParseException(token.location, exception) {}
     ParseException(Location location, const Exception& exception): Exception(std::string(exception.what())), location(location) {}
     ParseException(Location location, const char *format, ...) PRINTF_LIKE(3, 4);
@@ -48,8 +56,12 @@ public:
 
     explicit ParseException(Location location, std::string message): Exception(std::move(message)), location(location) { }
     ParseException(const Token& token, std::string message): ParseException(token.location, std::move(message)) {}
+    ParseException(Location location, std::string message, std::vector<Note> notes): Exception(std::move(message)), location(location), notes(std::move(notes)) {}
+
+    [[nodiscard]] ParseException appending(Location location, const std::string& text) const;
 
     Location location;
+    std::vector<Note> notes;
 };
 
 
