@@ -341,7 +341,7 @@ int64_t Value::add_signed(int64_t a, int64_t b) {
 
 uint64_t Value::multiply_unsigned(uint64_t a, uint64_t b) {
     auto value = a * b;
-    if (value < a) {
+    if (value < a && b > 0) {
         throw Exception("integer overflow");
     }
     return value;
