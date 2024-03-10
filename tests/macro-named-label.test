@@ -2,9 +2,9 @@ arguments --create-library --target 6502 a.s
 file a.s <inline>
 .macro inc16 address {
     inc address
-    bne :+
+    bne no_overflow
     inc address + 1
-:
+no_overflow:
 }
 .section code
 test {
@@ -34,14 +34,14 @@ file a.lib {} <inline>
           .data $ee, address:2
         }
       .label_1:
-        .data $d0, ((:+-(.current_object+.label_offset(.current_object, .label_1)))-$02):-1
+        .data $d0, ((no_overflow-(.current_object+.label_offset(.current_object, .label_1)))-$02):-1
         .if .in_range($00, $ff, (address+$01)) {
           .data $e6, (address+$01):1
         }
         .else {
           .data $ee, (address+$01):2
         }
-      :
+      no_overflow:
     >
 }
 .object test {

@@ -1,6 +1,7 @@
 
 set(XFAIL_TESTS
         error-unclosed-object.test
+        macro-named-label.test
         # undefined variable in library
         # undefined variable in library
 )
