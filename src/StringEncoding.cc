@@ -325,18 +325,41 @@ void StringEncoding::import_base(const Token& base_token, const std::shared_ptr<
                 if (auto uses = uses_v->as_array()) {
                     for (const auto& use_range_v: (*uses)) {
                         if (auto use_range = use_range_v->as_scalar()) {
-                            if ((use_range->size() != 3 && use_range->size() != 5) || !(*use_range)[0].is_unsigned()|| (*use_range)[1] != Token::minus || !(*use_range)[2].is_unsigned()) {
+                            if (use_range->size() == 0 || !(*use_range)[0].is_unsigned()) {
                                 throw ParseException(use_range_v->location, "invalid use range");
                             }
-                            auto start = get_uint8((*use_range)[0]);
-                            auto end = get_uint8((*use_range)[2]);
-                            auto offset = uint64_t{};
 
-                            if (use_range->size() == 5) {
-                                if ((*use_range)[3] != Token::colon) {
+                            auto start = get_uint8((*use_range)[0]);
+                            auto end = start;
+                            auto offset = uint8_t{};
+                            switch (use_range->size()) {
+                                case 1:
+                                    break;
+
+                                case 3:
+                                    if ((*use_range)[1] == Token::minus) {
+                                        end = get_uint8((*use_range)[2]);
+                                    }
+                                    else if ((*use_range)[1] == Token::colon) {
+                                        offset = get_uint8((*use_range)[2]);
+                                    }
+                                    else {
+                                        throw ParseException(use_range_v->location, "invalid use range");
+                                    }
+                                    break;
+
+                                case 5:
+                                    if ((*use_range)[1] == Token::minus && (*use_range)[3] == Token::colon) {
+                                        end = get_uint8((*use_range)[2]);
+                                        offset = get_uint8((*use_range)[4]);
+                                    }
+                                    else {
+                                        throw ParseException(use_range_v->location, "invalid use range");
+                                    }
+                                    break;
+
+                                default:
                                     throw ParseException(use_range_v->location, "invalid use range");
-                                }
-                                offset = get_uint8((*use_range)[4]);
                             }
 
                             if (end - start + offset > std::numeric_limits<uint8_t>::max()) {

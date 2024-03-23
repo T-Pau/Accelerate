@@ -128,6 +128,38 @@
     }
 }
 
+.string_encoding screen_lowercase {
+    base {
+        screen {
+            use [
+                : $00
+                : $1b - $40
+                : $5b - $5c
+                : $60 - $80
+                : $9b - $c0
+                : $db - $dc
+                : $e0 - $ff
+            ]
+        }
+    }
+    ranges [
+        : $00 - $ff : $ef00
+        : $01: "a" - "z"
+        : $20: " " - "?"
+        : $41 : "A" - "Z"
+    ] ; TODO: add singletons for $7e, $7f
+}
+
+.string_encoding screen_lowercase_inverted {
+    base {
+        screen_lowercase {
+            use [
+                : $00 - $7f: $80
+            ]
+        }
+    }
+}
+
 .string_encoding petscii {
     base {
         screen {
