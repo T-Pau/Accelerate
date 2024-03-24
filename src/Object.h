@@ -54,7 +54,6 @@ public:
 
     [[nodiscard]] bool is_reservation() const {return reservation_expression.has_value();}
     [[nodiscard]] bool empty() const {return !is_reservation() && body.empty();}
-    void evaluate();
     [[nodiscard]] bool has_address() const {return address.has_value();}
     [[nodiscard]] std::optional<uint64_t> reservation() const;
     [[nodiscard]] SizeRange size_range() const;
@@ -71,6 +70,9 @@ public:
     std::set<Symbol> explicitly_used_objects;
 
     Body body;
+
+  protected:
+    void evaluate_inner(EvaluationContext &context) override;
 
   private:
     static const Token token_address;

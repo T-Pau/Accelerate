@@ -86,7 +86,7 @@ std::optional<Expression> LabelExpression::evaluated(const EvaluationContext& co
             auto new_offset = offset;
 
             if (!object) {
-                if (context.entity) {
+                if (context.entity && context.entity->is_object()) {
                     if (object_name.empty() || object_name == context.entity->name.as_symbol()) {
                         new_object = context.entity;
                     }

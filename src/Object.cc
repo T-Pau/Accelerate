@@ -151,30 +151,13 @@ SizeRange Object::size_range() const {
 }
 
 
-void Object::evaluate() {
-    EvaluationResult result;
-    auto context = EvaluationContext(result, this);
+void Object::evaluate_inner(EvaluationContext& context) {
     if (is_reservation()) {
         reservation_expression->evaluate(context);
     }
     else {
         body.evaluate(context);
     }
-    process_result(result);
-
-#if 0
-    std::cout << "evaluating " << name.as_string() << ": used:";
-    for (const auto& o: referenced_objects) {
-        std::cout << " " << o->name.as_string();
-    }
-    std::cout << ", unresolved:";
-    for (const auto& o: unresolved_variables) {
-        std::cout << " " << o;
-    }
-    std::cout << " <" << std::endl;
-    body.serialize(std::cout, "    ");
-    std::cout << ">" << std::endl;
-#endif
 }
 
 

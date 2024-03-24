@@ -46,6 +46,9 @@ class Macro: public Callable {
 
     Body body;
 
+  protected:
+    void evaluate_inner(EvaluationContext &context) override {/*body.evaluate(context);*/}
+
   private:
     static void initialize();
 

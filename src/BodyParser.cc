@@ -129,6 +129,14 @@ Body BodyParser::parse() {
                             body.evaluate(EvaluationContext(result, entity));
                             entity->process_result(result);
                         }
+                        else if (defines){
+                            auto result = EvaluationResult{};
+                            auto context = EvaluationContext(result, EvaluationContext::STANDALONE, std::make_shared<Environment>(), *defines);
+                            body.evaluate(context);
+                            // Evaluate twice to resolve forward label references.
+                            body.evaluate(context);
+                            // Result can be ignored, since we're only resolving defines.
+                        }
                         return body;
                     }
                     else if (token == Token::colon) {

@@ -41,7 +41,7 @@ class Callable: public Entity {
     class Arguments {
       public:
         Arguments() = default;
-        Arguments(Tokenizer &tokenizer);
+        explicit Arguments(Tokenizer &tokenizer);
 
         void add(Symbol name, std::optional<Expression> default_argument);
         [[nodiscard]] bool empty() const {return names.empty();}
@@ -62,6 +62,8 @@ class Callable: public Entity {
 
   protected:
     Arguments arguments;
+
+    [[nodiscard]] EvaluationContext evaluation_context(EvaluationResult& result) override;
 
     [[nodiscard]] std::shared_ptr<Environment> bind(const std::vector<Expression>& actual_arguments) const;
     void serialize_callable(std::ostream& stream) const;

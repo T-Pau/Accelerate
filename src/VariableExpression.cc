@@ -47,20 +47,20 @@ std::optional<Expression> VariableExpression::evaluated(const EvaluationContext&
         throw Exception("circular definition of %s", symbol.c_str());
     }
 
-    auto value = (*context.environment)[symbol];
-
-    if (value) {
-        auto new_value = *value;
-        if (value->is_object()) {
-            context.result.used_objects.insert(value->as_object()->object);
+    if (!context.skipping(symbol)) {
+        if (auto value = context.lookup_variable(symbol)) {
+            auto new_value = *value;
+            if (new_value.is_object()) {
+                context.result.used_objects.insert(value->as_object()->object);
+            }
+            if (!context.shallow()) {
+                new_value.evaluate(context.evaluating_variable(symbol));
+            }
+            return new_value;
         }
-        if (!context.shallow()) {
-            new_value.evaluate(context.evaluating_variable(symbol));
+        else {
+            context.result.unresolved_variables.insert(symbol);
         }
-        return new_value;
     }
-    else {
-        context.result.unresolved_variables.insert(symbol);
-        return {};
-    }
+    return {};
 }

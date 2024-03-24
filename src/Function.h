@@ -43,6 +43,9 @@ class Function: public Callable {
 
     Expression definition;
 
+  protected:
+    void evaluate_inner(EvaluationContext &context) override {definition.evaluate(context);}
+
   private:
     static void initialize();
 

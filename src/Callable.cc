@@ -113,6 +113,10 @@ std::shared_ptr<Environment> Callable::bind(const std::vector<Expression>& actua
     return environment;
 }
 
+EvaluationContext Callable::evaluation_context(EvaluationResult& result) {
+    return Entity::evaluation_context(result).skipping_variables(arguments.names);
+}
+
 Callable::Arguments::Arguments(Tokenizer& tokenizer) {
     auto had_default_argument = false;
 

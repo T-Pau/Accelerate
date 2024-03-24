@@ -475,7 +475,7 @@ void Assembler::parse_macro(Visibility visibility, bool default_only) {
     auto name = tokenizer.expect(Token::NAME);
     auto arguments = Callable::Arguments(tokenizer);
     tokenizer.expect(Token::curly_open);
-    auto body = BodyParser(tokenizer, object_file->target->cpu).parse(); // TODO: proper mode for macros
+    auto body = BodyParser(tokenizer, object_file->target->cpu, &tokenizer.defines).parse(); // TODO: proper mode for macros
     object_file->add_macro(std::make_unique<Macro>(object_file.get(), name, visibility, default_only, arguments, body));
 }
 

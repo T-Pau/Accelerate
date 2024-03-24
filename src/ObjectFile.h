@@ -52,6 +52,9 @@ public:
 
         Expression value;
 
+      protected:
+        void evaluate_inner(EvaluationContext &context) override {value.evaluate(context);}
+
       private:
         static const Token token_value;
     };

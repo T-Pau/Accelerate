@@ -244,6 +244,12 @@ void ObjectFile::evaluate() {
     for (auto& pair : objects) {
         pair.second->evaluate();
     }
+    for (auto& pair : functions) {
+        pair.second->evaluate();
+    }
+    for (auto& pair : macros) {
+        pair.second->evaluate();
+    }
 
     unresolved_used.clear();
     auto new_explicitly_used_objects = std::unordered_set<Symbol>{};

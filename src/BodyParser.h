@@ -52,7 +52,7 @@ public:
     // PARSED_VALUE
     explicit BodyParser(Tokenizer& tokenizer): parsing_type(PARSED_VALUE), end_token(Token::greater), tokenizer(tokenizer) {}
     // OUTPUT
-    BodyParser(Tokenizer& tokenizer, const CPU* cpu): parsing_type(OUTPUT), cpu(cpu), tokenizer(tokenizer) {}
+    BodyParser(Tokenizer& tokenizer, const CPU* cpu, const std::unordered_set<Symbol>* defines = {}): parsing_type(OUTPUT), cpu(cpu), tokenizer(tokenizer), defines(defines) {}
     // ENTITY
     BodyParser(Tokenizer& tokenizer, Entity* entity, const CPU* cpu, const std::unordered_set<Symbol>* defines): parsing_type(ENTITY), cpu(cpu), entity(entity), environment(entity->environment), tokenizer(tokenizer), defines(defines) {}
 

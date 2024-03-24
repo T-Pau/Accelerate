@@ -46,6 +46,7 @@ class Entity {
 
     [[nodiscard]] Macro* as_macro();
     [[nodiscard]] Object* as_object();
+    void evaluate();
     [[nodiscard]] bool check_unresolved(Unresolved& unresolved) const;
     [[nodiscard]] bool is_default_only() const {return default_only;}
     [[nodiscard]] bool is_macro() {return as_macro();}
@@ -66,6 +67,9 @@ class Entity {
 
   protected:
     void serialize_entity(std::ostream& stream) const;
+
+    [[nodiscard]] virtual EvaluationContext evaluation_context(EvaluationResult& result) {return EvaluationContext(result, this);}
+    virtual void evaluate_inner(EvaluationContext& context) = 0;
 
   private:
     [[nodiscard]] bool check_unresolved(const std::unordered_set<Symbol>& unresolved, Unresolved::Part& part) const;

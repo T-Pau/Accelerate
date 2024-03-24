@@ -61,10 +61,13 @@ class EvaluationContext {
     [[nodiscard]] bool shallow() const;
 
     [[nodiscard]] EvaluationContext evaluating_variable(Symbol variable) const;
+    [[nodiscard]] EvaluationContext skipping_variables(const std::vector<Symbol>& variables) const;
     [[nodiscard]] EvaluationContext adding_offset(SizeRange size) const;
     [[nodiscard]] EvaluationContext setting_offset(SizeRange offset) const;
     [[nodiscard]] EvaluationContext making_conditional() const;
     [[nodiscard]] bool evaluating(Symbol variable) const {return evaluating_variables.contains(variable);}
+    [[nodiscard]] bool skipping(Symbol variable) const {return skip_variables.contains(variable);}
+    [[nodiscard]] std::optional<Expression> lookup_variable(Symbol variable) const;
 
     EvaluationType type;
     Entity* entity = nullptr;
@@ -72,7 +75,8 @@ class EvaluationContext {
     std::unordered_set<Symbol> defines;
     SizeRange offset = SizeRange(0, {});
     bool conditional = false;
-    std::unordered_set<Symbol> evaluating_variables; // Variables currently being evaluated (used for loop detection).
+    std::unordered_set<Symbol> skip_variables; // For preserving arguments in macro/function bodies.
+    std::unordered_set<Symbol> evaluating_variables; // Variables currently being evaluated (used for circular definition detection).
     EvaluationResult& result;
 };
 

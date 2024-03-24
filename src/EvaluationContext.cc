@@ -71,3 +71,16 @@ bool EvaluationContext::shallow() const {
             return false;
     }
 }
+
+EvaluationContext EvaluationContext::skipping_variables(const std::vector<Symbol>& variables) const {
+    auto new_context = *this;
+    new_context.skip_variables.insert(variables.begin(), variables.end());
+    return new_context;
+}
+
+std::optional<Expression> EvaluationContext::lookup_variable(Symbol variable) const {
+    if (skipping(variable)) {
+        return {};
+    }
+    return (*environment)[variable];
+}

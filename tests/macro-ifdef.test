@@ -1,0 +1,44 @@
+arguments --create-library --target c64-basic a.s
+file a.s <inline>
+.macro choose value64, value128, address {
+    .if .defined(C64) {
+        ldx #value64
+    }
+    .else {
+        ldx #value128
+    }
+    stx address
+}
+.section code
+test {
+    choose $40, $80, $4567
+    rts
+}
+end-of-inline-data
+file a.lib {} <inline>
+.format_version 1.0
+.target "c64-basic"
+.macro choose {
+    visibility: private
+    arguments: value64, value128, address
+    body <
+        .data $a2, value64:1
+        .if .in_range($00, $ff, address) {
+          .data $86, address:1
+        }
+        .else {
+          .data $8e, address:2
+        }
+    >
+}
+.object test {
+    visibility: private
+    section: code
+    body <
+        .scope {
+          .data $a2, $40, $8e, $4567
+        }
+        .data $60
+    >
+}
+end-of-inline-data

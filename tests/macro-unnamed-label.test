@@ -34,7 +34,7 @@ file a.lib {} <inline>
           .data $ee, address:2
         }
       .label_1:
-        .data $d0, ((:+-(.current_object+.label_offset(.current_object, .label_1)))-$02):-1
+        .data $d0, (((.current_object+.label_offset(:+))-(.current_object+.label_offset(.current_object, .label_1)))-$02):-1
         .if .in_range($00, $ff, (address+$01)) {
           .data $e6, (address+$01):1
         }
