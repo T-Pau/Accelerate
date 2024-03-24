@@ -126,16 +126,21 @@ std::optional<Expression> LabelExpression::evaluated(const EvaluationContext& co
                     return Expression(location, label_type, new_unnamed_index);
                 }
                 else {
-                    SizeRange new_offset;
-                    if (label_type == NEXT_UNNAMED) {
-                        new_offset = context.environment->unnamed_labels.get_next(unnamed_index);
-                    }
-                    else {
-                        new_offset = context.environment->unnamed_labels.get_previous(unnamed_index);
-                    }
-                    if (new_offset != offset) {
-                        return Expression(location, label_type, unnamed_index, new_offset);
-                    }
+                        SizeRange new_offset;
+                        try {
+                            if (label_type == NEXT_UNNAMED) {
+                                new_offset = context.environment->unnamed_labels.get_next(unnamed_index);
+                            }
+                            else {
+                                new_offset = context.environment->unnamed_labels.get_previous(unnamed_index);
+                            }
+                        }
+                        catch (Exception &ex) {
+                            throw ParseException(location, ex);
+                        }
+                        if (new_offset != offset) {
+                            return Expression(location, label_type, unnamed_index, new_offset);
+                        }
                 }
             }
             break;

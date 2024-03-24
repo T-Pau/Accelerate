@@ -106,6 +106,12 @@ bool Entity::check_unresolved(const std::unordered_set<Symbol>& unresolved, Unre
 void Entity::evaluate() {
     auto result = EvaluationResult{};
     auto context = evaluation_context(result);
-    evaluate_inner(context);
-    process_result(result);
+    try {
+        evaluate_inner(context);
+        process_result(result);
+    }
+    catch (Exception &ex) {
+        FileReader::global.error(ParseException(name.location, ex));
+        // TODO: throw empty expression?
+    }
 }

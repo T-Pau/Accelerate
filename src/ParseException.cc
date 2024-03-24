@@ -52,3 +52,13 @@ ParseException::ParseException(const Token& token, const char *format, ...): loc
 ParseException ParseException::appending(Location note_location, const std::string& text) const {
     return ParseException(location, message, {{note_location, text}});
 }
+
+ParseException::ParseException(Location location_, const Exception& exception): location(location_) {
+    if (auto parsed_exception = dynamic_cast<const ParseException*>(&exception)) {
+        if (!parsed_exception->location.empty()) {
+            location = parsed_exception->location;
+        }
+        notes = parsed_exception->notes;
+    }
+    message = exception.what();
+}

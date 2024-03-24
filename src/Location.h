@@ -45,6 +45,7 @@ public:
 
     void extend(const Location& end);
 
+    [[nodiscard]] bool empty() const {return file.empty();}
     [[nodiscard]] std::string to_string() const;
 
     Symbol file;

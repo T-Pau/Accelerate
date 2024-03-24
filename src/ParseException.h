@@ -50,7 +50,7 @@ public:
     };
 
     ParseException(const Token& token, const Exception& exception): ParseException(token.location, exception) {}
-    ParseException(Location location, const Exception& exception): Exception(std::string(exception.what())), location(location) {}
+    ParseException(Location location, const Exception& exception);
     ParseException(Location location, const char *format, ...) PRINTF_LIKE(3, 4);
     ParseException(const Token& token, const char* format, ...) PRINTF_LIKE(3, 4);
 
