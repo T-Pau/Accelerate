@@ -49,6 +49,8 @@ public:
 
     void serialize(std::ostream &stream, const std::string& prefix) const override;
 
+    static Symbol unnamed_label_name(uint64_t number);
+
     Symbol name;
     SizeRange offset = SizeRange(0, {});
     size_t unnamed_index = std::numeric_limits<size_t>::max();

@@ -47,6 +47,7 @@ public:
     void add_unresolved_macro(Symbol name) {unresolved_macros.insert(name);}
     void add_unresolved_variable(Symbol name) {unresolved_variables.insert(name);}
 
+    uint64_t next_unnamed_label{1};
     std::unordered_set<Symbol> unresolved_functions;
     std::unordered_set<Symbol> unresolved_macros;
     std::unordered_set<Symbol> unresolved_variables;

@@ -1,0 +1,65 @@
+arguments --create-library --target 6502 a.s
+file a.s <inline>
+.macro store value, address {
+    ldx #value
+    beq :+
+    stx address
+:
+}
+.section code
+test {
+    nop
+    store $78, $1234
+    rts
+}
+test2 {
+    nop
+:
+    beq :+
+    store $78, $1234
+    beq :-
+    nop
+:
+    rts
+}
+end-of-inline-data
+file a.lib {} <inline>
+.format_version 1.0
+.target "6502"
+.macro store {
+    visibility: private
+    arguments: value, address
+    body <
+        .data $a2, value:1, $f0, ((.label_offset(.unnamed_1)-.label_offset($02))-$02):-1
+        .if .in_range($00, $ff, address) {
+          .data $86, address:1
+        }
+        .else {
+          .data $8e, address:2
+        }
+      .unnamed_1:
+    >
+}
+.object test {
+    visibility: private
+    section: code
+    body <
+        .data $ea
+        .scope {
+          .data $a2, $78, $f0, $03:-1, $8e, $1234
+        }
+        .data $60
+    >
+}
+.object test2 {
+    visibility: private
+    section: code
+    body <
+        .data $ea, $f0, $0a:-1
+        .scope {
+          .data $a2, $78, $f0, $03:-1, $8e, $1234
+        }
+        .data $f0, -$0b, $ea, $60
+    >
+}
+end-of-inline-data

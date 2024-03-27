@@ -40,17 +40,23 @@ SizeRange SizeRange::operator+(const SizeRange &other) const {
     }
 }
 
+
 SizeRange SizeRange::operator-(const SizeRange &other) const {
-    if (!maximum || !other.maximum) {
-        return {minimum - other.minimum, {}};
+    if (!other.maximum) {
+        return {0, {}};
+    }
+    auto new_minimum = minimum - *other.maximum;
+    if (!maximum) {
+        return {new_minimum, {}};
     }
     else {
-        return {minimum - other.minimum, *maximum - *other.maximum};
+        return {new_minimum, *maximum - other.minimum};
     }
 }
 
+
 std::optional<uint64_t> SizeRange::size() const {
-    if (maximum.has_value() && minimum == *maximum) {
+    if (has_size()) {
         return minimum;
     }
     else {

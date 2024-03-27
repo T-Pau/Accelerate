@@ -1,0 +1,57 @@
+arguments --create-library --target 6502 a.s
+file a.s <inline>
+.macro store value, address {
+    lda #value
+    sta address
+}
+
+.macro store_twice value {
+    store value, $1234
+    store value, $5678
+}
+.section code
+test {
+    store_twice $12
+    rts
+}
+end-of-inline-data
+file a.lib {} <inline>
+.format_version 1.0
+.target "6502"
+.macro store {
+    visibility: private
+    arguments: value, address
+    body <
+        .data $a9, value:1
+        .if .in_range($00, $ff, address) {
+          .data $85, address:1
+        }
+        .else {
+          .data $8d, address:2
+        }
+    >
+}
+.macro store_twice {
+    visibility: private
+    arguments: value
+    body <
+        store value, $1234
+        store value, $5678
+    >
+}
+.object test {
+    visibility: private
+    section: code
+    body <
+        .scope {
+          .scope {
+            .data $a9, $12, $8d, $1234
+          }
+          .scope {
+            .data $a9, $12, $8d, $5678
+          }
+        }
+        .data $60
+    >
+}
+end-of-inline-data

@@ -115,3 +115,21 @@ void Entity::evaluate() {
         // TODO: throw empty expression?
     }
 }
+
+void Entity::resolve_labels() {
+    try {
+        auto result = EvaluationResult{};
+        auto context = evaluation_context(result);
+        context.type = EvaluationContext::LABELS;
+        evaluate_inner(context);
+
+        result = EvaluationResult{};
+        auto context2 = evaluation_context(result);
+        context2.type = EvaluationContext::LABELS_2;
+        evaluate_inner(context2);
+    }
+    catch (Exception &ex) {
+        FileReader::global.error(ParseException(name.location, ex));
+        // TODO: throw empty expression?
+    }
+}

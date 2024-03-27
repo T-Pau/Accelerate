@@ -48,32 +48,31 @@ void LabelBody::serialize(std::ostream &stream, const std::string& prefix) const
 
 std::optional<Body> LabelBody::evaluated(const EvaluationContext& context) const {
     auto new_added_to_environment = added_to_environment;
+    auto new_name = name;
     auto new_unnamed_index = unnamed_index;
+
+    if (name.empty()) {
+        new_name = unnamed_label_name(context.result.next_unnamed_label++);
+    }
 
     if (context.entity) {
         if (!added_to_environment) {
-            if (name.empty()) {
-                new_unnamed_index = context.environment->unnamed_labels.add_label(context.offset);
-            }
-            else {
-                context.environment->add(name, context.offset);
-            }
+            context.environment->add(name, context.offset - context.label_offset);
             new_added_to_environment = true;
         }
         else if (offset != context.offset) {
-            if (name.empty()) {
-                context.environment->unnamed_labels.update_label(unnamed_index, context.offset);
-            }
-            else {
-                context.environment->update(name, context.offset);
-            }
+            context.environment->update(name, context.offset - context.label_offset);
         }
     }
 
-    if (new_added_to_environment != added_to_environment || context.offset != offset) {
-        return Body(name, context.offset, new_added_to_environment, new_unnamed_index);
+    if (new_added_to_environment != added_to_environment || new_name != name || context.offset != offset) {
+        return Body(new_name, context.offset, new_added_to_environment, new_unnamed_index);
     }
     else {
         return {};
     }
+}
+
+Symbol LabelBody::unnamed_label_name(uint64_t number) {
+    return Symbol(".unnamed_" + std::to_string(number));
 }

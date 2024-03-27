@@ -51,10 +51,8 @@ public:
 
     // PARSED_VALUE
     explicit BodyParser(Tokenizer& tokenizer): parsing_type(PARSED_VALUE), end_token(Token::greater), tokenizer(tokenizer) {}
-    // OUTPUT
-    BodyParser(Tokenizer& tokenizer, const CPU* cpu, const std::unordered_set<Symbol>* defines = {}): parsing_type(OUTPUT), cpu(cpu), tokenizer(tokenizer), defines(defines) {}
-    // ENTITY
-    BodyParser(Tokenizer& tokenizer, Entity* entity, const CPU* cpu, const std::unordered_set<Symbol>* defines): parsing_type(ENTITY), cpu(cpu), entity(entity), environment(entity->environment), tokenizer(tokenizer), defines(defines) {}
+    // ENTITY / OUTPUT
+    BodyParser(Tokenizer& tokenizer, const CPU* cpu, bool allow_assignes, const std::unordered_set<Symbol>* defines = {}): parsing_type(allow_assignes ? ENTITY : OUTPUT), cpu(cpu), tokenizer(tokenizer), defines(defines) {}
 
     static void setup(FileTokenizer& tokenizer);
 
@@ -126,7 +124,6 @@ private:
     const CPU* cpu = nullptr;
     std::shared_ptr<Environment> environment = std::make_shared<Environment>();
     Token end_token = Token::curly_close;
-    Entity* entity = nullptr;
     Tokenizer& tokenizer;
     const std::unordered_set<Symbol>* defines{};
 
@@ -138,6 +135,7 @@ private:
 
     [[nodiscard]] bool allow_memory() const {return parsing_type == OUTPUT;}
     [[nodiscard]] bool allow_instructions() const {return cpu != nullptr;}
+    [[nodiscard]] bool allow_assignment() const {return parsing_type == ENTITY;}
     [[nodiscard]] bool is_defined(Symbol symbol) const {return defines && defines->contains(symbol);}
     void parse_assignment(Visibility visibility, const Token& name);
     void parse_directive(const Token& directive);
@@ -146,17 +144,16 @@ private:
     void parse_label(Visibility visibility, const Token& name);
     void parse_unnamed_label();
 
-    void add_constant(Visibility visibility, Token name, const Expression& value);
+    void add_constant(Visibility visibility, const Token& name, const Expression& value);
     [[nodiscard]] SizeRange current_size();
     [[nodiscard]] Body* get_body(const NestingIndex& nesting_index) const {return (*nesting[nesting_index.nesting_index])[nesting_index.sub_index];}
     [[nodiscard]] Expression get_pc(Symbol label) const;
     [[nodiscard]] Symbol get_label(bool& is_anonymous);
-    [[nodiscard]] Symbol entity_name() const {return entity ? entity->name.as_symbol() : Symbol();};
     void push_clause(Expression condition);
     void push_body(const NestingIndex& body_index);
     void pop_body();
 
-    void handle_name(Visibility visibility, Token name);
+    void handle_name(Visibility visibility, const Token& name);
     void parse_binary_file();
     void parse_data();
     void parse_error();

@@ -166,12 +166,8 @@ void xlr8::process() {
                 throw Exception("unrecognized file type '%s'", extension.c_str());
             }
         }
-        catch (ParseException& ex) {
-            FileReader::global.error(ex.location, "%s", ex.what());
-            ok = false;
-        }
         catch (Exception& ex) {
-            FileReader::global.error(Location(file_name), "%s", ex.what());
+            FileReader::global.error(ex, Location(file_name));
             ok = false;
         }
     }

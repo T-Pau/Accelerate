@@ -32,27 +32,36 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ScopeBody.h"
 
 void ScopeBody::serialize(std::ostream& stream, const std::string& prefix) const {
+    // TODO: serialize environment
     stream << prefix << ".scope {" << std::endl;
     body.serialize(stream, prefix + "  ");
     stream << prefix << "}" << std::endl;
 }
 
 std::optional<Body> ScopeBody::evaluated(const EvaluationContext& context) const {
-    // TODO: implement properly to isolate unnamed labels
-    auto new_body = body.evaluated(context);
+    auto new_body = std::optional<Body>{};
+
+    if (environment) {
+        auto inner_context = context.adding_scope(environment, context.offset);
+        new_body = body.evaluated(inner_context);
+    }
+    else {
+        new_body = body.evaluated(context);
+    }
+
     if (new_body) {
-        return new_body->scoped();
+        return new_body->scoped(environment);
     }
     else {
         return {};
     }
 }
 
-Body ScopeBody::create(Body body) {
+Body ScopeBody::create(Body body, const std::shared_ptr<Environment>& inner_environment) {
     if (body.empty()) {
         return body;
     }
     else {
-        return Body(std::make_shared<ScopeBody>(std::move(body)));
+        return Body(std::make_shared<ScopeBody>(std::move(body), inner_environment));
     }
 }

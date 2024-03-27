@@ -48,18 +48,27 @@ std::optional<Expression> VariableExpression::evaluated(const EvaluationContext&
     }
 
     if (!context.skipping(symbol)) {
-        if (auto value = context.lookup_variable(symbol)) {
-            auto new_value = *value;
-            if (new_value.is_object()) {
-                context.result.used_objects.insert(value->as_object()->object);
+        if (context.type == EvaluationContext::LABELS || context.type == EvaluationContext::LABELS_2) {
+            if (auto label = context.environment->get_label(symbol)) {
+                auto label_expression = Expression(ObjectNameExpression::create(nullptr), Expression::ADD, Expression(location, nullptr, symbol, *label));
+                label_expression.evaluate(context);
+                return label_expression;
             }
-            if (!context.shallow()) {
-                new_value.evaluate(context.evaluating_variable(symbol));
-            }
-            return new_value;
         }
-        else {
-            context.result.unresolved_variables.insert(symbol);
+        else if (context.type != EvaluationContext::LABELS) {
+            if (auto value = context.lookup_variable(symbol)) {
+                auto new_value = *value;
+                if (new_value.is_object()) {
+                    context.result.used_objects.insert(value->as_object()->object);
+                }
+                if (!context.shallow()) {
+                    new_value.evaluate(context.evaluating_variable(symbol));
+                }
+                return new_value;
+            }
+            else {
+                context.result.unresolved_variables.insert(symbol);
+            }
         }
     }
     return {};

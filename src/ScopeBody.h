@@ -37,8 +37,8 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 class ScopeBody: public BodyElement {
   public:
-    static Body create(Body body);
-    explicit ScopeBody(Body body_): body(std::move(body_)) {size_range_=body.size_range();}
+    static Body create(Body body, const std::shared_ptr<Environment>& inner_environment);
+    explicit ScopeBody(Body body_, const std::shared_ptr<Environment>& inner_environment): body(std::move(body_)), environment(inner_environment) {size_range_=body.size_range();}
 
     [[nodiscard]] std::shared_ptr<BodyElement> clone() const override {throw Exception("can't clone ScopeBody");}
     [[nodiscard]] bool empty() const override {return body.empty();}

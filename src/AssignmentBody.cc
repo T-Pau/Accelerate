@@ -35,16 +35,22 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 std::optional<Body>
 AssignmentBody::evaluated(const EvaluationContext &context) const {
-    if (context.conditional) {
+    if (context.entity && context.conditional) {
         return Body(Location(), "assignment in unresolved conditional not supported");
     }
 
+    if (context.type == EvaluationContext::LABELS) {
+        return {};
+    }
 
     auto new_value = value.evaluated(context);
 
     if (!context.entity) {
         if (new_value) {
             return Body(visibility, name, *new_value);
+        }
+        else {
+            return {};
         }
     }
 

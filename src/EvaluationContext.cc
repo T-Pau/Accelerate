@@ -31,7 +31,16 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "EvaluationContext.h"
 
+#include <utility>
+
 #include "Entity.h"
+
+EvaluationContext::EvaluationContext(EvaluationResult& result, EvaluationType type, std::shared_ptr<Environment> environment, std::unordered_set<Symbol> defines, SizeRange offset): type(type), environment(std::move(environment)), defines{std::move(defines)}, result(result), offset(offset) {
+    if (type == MACRO_EXPANSION) {
+        label_offset = SizeRange(0, {});
+        labels_are_offset = true;
+    }
+}
 
 EvaluationContext::EvaluationContext(EvaluationResult& result, Entity* entity): type(ENTITY), entity(entity), environment(entity->environment), result(result), offset(0) {}
 
@@ -63,6 +72,8 @@ EvaluationContext EvaluationContext::making_conditional() const {
 bool EvaluationContext::shallow() const {
     switch (type) {
         case ARGUMENTS:
+        case LABELS:
+        case LABELS_2:
         case MACRO_EXPANSION:
             return true;
 
@@ -83,4 +94,18 @@ std::optional<Expression> EvaluationContext::lookup_variable(Symbol variable) co
         return {};
     }
     return (*environment)[variable];
+}
+
+EvaluationContext EvaluationContext::adding_scope(std::shared_ptr<Environment> new_environment, SizeRange new_label_offset) const {
+    auto new_context = *this;
+    new_context.environment = std::move(new_environment);
+    new_context.label_offset = new_label_offset;
+    new_context.labels_are_offset = true;
+    return new_context;
+}
+
+EvaluationContext EvaluationContext::keeping_label_offsets() const {
+    auto new_context = *this;
+    new_context.keep_label_offsets = true;
+    return new_context;
 }

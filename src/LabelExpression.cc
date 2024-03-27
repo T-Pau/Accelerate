@@ -33,7 +33,6 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "Entity.h"
 #include "Expression.h"
-#include "Object.h"
 #include "ObjectExpression.h"
 #include "ObjectFile.h"
 #include "ParseException.h"
@@ -43,16 +42,25 @@ LabelExpression::LabelExpression(Location location, const Entity* object, Symbol
 
 Expression LabelExpression::create(const std::vector<Expression>& arguments) {
     if (arguments.size() == 1) {
+        if (arguments[0].has_value()) {
+            auto& value = arguments[0];
+            if (value.value()->is_unsigned()) {
+                return create(arguments[0].location(), nullptr, Symbol(), SizeRange(arguments[0].value()->unsigned_value()));
+            }
+            else {
+                throw ParseException(arguments[0].location(), "invalid arguments for .label_offset()");
+            }
+        }
         auto label_name = arguments[0].as_variable();
         if (!label_name) {
             throw ParseException(arguments[0].location(), "invalid arguments for .label_offset()");
         }
         else if (label_name->variable() == Token::colon_minus.as_symbol()) {
-            return Expression(std::make_shared<LabelExpression>(label_name->location, PREVIOUS_UNNAMED));
+            return create(label_name->location, PREVIOUS_UNNAMED);
 
         }
         else if (label_name->variable() == Token::colon_plus.as_symbol()) {
-            return Expression(std::make_shared<LabelExpression>(label_name->location, NEXT_UNNAMED));
+            return create(label_name->location, NEXT_UNNAMED);
         }
         else {
             throw ParseException(arguments[0].location(), "invalid arguments for .label_offset()");
@@ -69,82 +77,76 @@ Expression LabelExpression::create(const std::vector<Expression>& arguments) {
     return Expression(std::make_shared<LabelExpression>(object_name->location, object_name->variable(), label_name->variable()));
 }
 
-Expression LabelExpression::create(Location location, const Entity* object, Symbol label_name, SizeRange offset) {
-    if (offset.size()) {
-        return Expression(*offset.size());
+Expression LabelExpression::create(Location location, const Entity* object, Symbol label_name, SizeRange offset, SizeRange scope_offset, bool keep) {
+    if (!keep && offset.has_size() && scope_offset.has_size()) {
+        return {Expression(*offset.size()), Expression::ADD, Expression(*scope_offset.size())};
     }
     else {
         return Expression(std::make_shared<LabelExpression>(location, object, label_name, offset));
     }
 }
 
+Expression LabelExpression::create(Location location, LabelExpressionType type, size_t unnamed_index, SizeRange offset) {
+    if (offset.size()) {
+        return Expression(*offset.size());
+    }
+    else {
+        return Expression(std::make_shared<LabelExpression>(location, type, unnamed_index, offset));
+    }
+}
 
 std::optional<Expression> LabelExpression::evaluated(const EvaluationContext& context) const {
-    switch (label_type) {
-        case NAMED: {
-            const Entity* new_object = object;
-            auto new_offset = offset;
+    const Entity* new_object = object;
+    auto new_offset = offset;
+    auto new_label_name = label_name;
 
-            if (!object) {
-                if (context.entity && context.entity->is_object()) {
-                    if (object_name.empty() || object_name == context.entity->name.as_symbol()) {
-                        new_object = context.entity;
-                    }
-                    else {
-                        new_object = context.entity->owner->object(object_name); // TODO: search in included libraries too
-                    }
+    if (label_type == PREVIOUS_UNNAMED || label_type == NEXT_UNNAMED) {
+        auto unnamed_label = context.result.next_unnamed_label;
+        if (label_type == PREVIOUS_UNNAMED) {
+            if (unnamed_label == 0) {
+                throw ParseException(location, "no previous unnamed label");
+            }
+            unnamed_label -= 1;
+        }
+        new_label_name = LabelBody::unnamed_label_name(unnamed_label);
+    }
+
+    if (!object_name.empty() || !context.labels_are_offset) {
+        // TODO: review this section for new label resolution
+        if (!object) {
+            if (context.entity && context.entity->is_object()) {
+                if (object_name.empty() || object_name == context.entity->name.as_symbol()) {
+                    new_object = context.entity;
                 }
                 else {
-                    auto value = context.environment->get_variable(object_name);
-                    if (value && value->is_object()) {
-                        context.result.used_objects.insert(value->as_object()->object);
-                        new_object = value->as_object()->object;
-                    }
-                    // TODO: handle unresolved label
+                    new_object = context.entity->owner->object(object_name); // TODO: search in included libraries too
                 }
             }
-
-            if (new_object) {
-                // TODO: handle scope
-                auto found_offset = new_object->environment->get_label(label_name);
-                if (found_offset) {
-                    new_offset = *found_offset;
+            else if (!object_name.empty()) {
+                auto value = context.environment->get_variable(object_name);
+                if (value && value->is_object()) {
+                    context.result.used_objects.insert(value->as_object()->object);
+                    new_object = value->as_object()->object;
                 }
+                // TODO: handle unresolved label
             }
-
-            if (new_object != object || new_offset != offset) {
-                    return Expression(location, new_object, label_name, new_offset);
-            }
-            break;
         }
+    }
 
-        case NEXT_UNNAMED:
-        case PREVIOUS_UNNAMED: {
-            if (context.entity) {
-                if (!added_to_environment()) {
-                    auto new_unnamed_index = context.environment->unnamed_labels.add_user();
-                    return Expression(location, label_type, new_unnamed_index);
-                }
-                else {
-                        SizeRange new_offset;
-                        try {
-                            if (label_type == NEXT_UNNAMED) {
-                                new_offset = context.environment->unnamed_labels.get_next(unnamed_index);
-                            }
-                            else {
-                                new_offset = context.environment->unnamed_labels.get_previous(unnamed_index);
-                            }
-                        }
-                        catch (Exception &ex) {
-                            throw ParseException(location, ex);
-                        }
-                        if (new_offset != offset) {
-                            return Expression(location, label_type, unnamed_index, new_offset);
-                        }
-                }
-            }
-            break;
+    if (new_object) {
+        // TODO: handle scope
+        if (auto found_offset = new_object->environment->get_label(label_name)) {
+            new_offset = *found_offset;
         }
+    }
+    else if (object_name.empty()) {
+        if (auto found_offset = context.environment->get_label(label_name)) {
+            new_offset = *found_offset;
+        }
+    }
+
+    if (new_object != object || new_label_name != label_name || new_offset != offset || (new_offset.has_size() && context.label_offset.has_size())) {
+        return Expression(location, new_object, new_label_name, new_offset, context.label_offset, context.keep_label_offsets);
     }
 
     return {};
@@ -152,23 +154,27 @@ std::optional<Expression> LabelExpression::evaluated(const EvaluationContext& co
 
 void LabelExpression::serialize_sub(std::ostream &stream) const {
     stream << ".label_offset(";
-    switch (label_type) {
-        case NAMED:
-            if (object_name.empty()) {
-                stream << ".current_object";
-            }
-            else {
-                stream << object_name;
-            }
-            stream << ", " << label_name;
-            break;
+    if (offset.has_size()) {
+        auto value = *offset.size();
 
-        case NEXT_UNNAMED:
-            stream << ":+";
-            break;
+        stream << "$" << std::setfill('0') << std::setw(static_cast<int>(Int::minimum_byte_size(value)*2)) << std::hex << value << std::dec;
+    }
+    else {
+        switch (label_type) {
+            case NAMED:
+                if (!object_name.empty()) {
+                    stream << object_name << ", ";
+                }
+                stream << label_name;
+                break;
 
-        case PREVIOUS_UNNAMED:
-            stream << ":-";
+            case NEXT_UNNAMED:
+                stream << ":+";
+                break;
+
+            case PREVIOUS_UNNAMED:
+                stream << ":-";
+        }
     }
     stream << ")";
 }

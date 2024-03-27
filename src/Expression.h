@@ -49,6 +49,7 @@ class Entity;
 class EvaluationContext;
 class Object;
 class ObjectExpression;
+class ObjectNameExpression;
 class VariableExpression;
 
 class Expression {
@@ -93,7 +94,7 @@ public:
     Expression(Symbol name, const std::vector<Expression>& arguments);
     // Label
     Expression(Location location, Symbol object_name, Symbol label_name, SizeRange offset = SizeRange(0, {}));
-    Expression(Location location, const Entity* object, Symbol label_name, SizeRange offset = SizeRange(0, {}));
+    Expression(Location location, const Entity* object, Symbol label_name, SizeRange offset = SizeRange(0, {}), SizeRange scope_offset = SizeRange(0, {}), bool keep = false);
     Expression(Location location, LabelExpressionType type, size_t unnamed_index = std::numeric_limits<size_t>::max(), SizeRange offset = SizeRange(0, {}));
     // Object
     explicit Expression(Object* object);
@@ -110,6 +111,7 @@ public:
 
     [[nodiscard]] const BinaryExpression* as_binary() const;
     [[nodiscard]] const ObjectExpression* as_object() const;
+    [[nodiscard]] const ObjectNameExpression* as_object_name() const;
     [[nodiscard]] const VariableExpression* as_variable() const;
     void collect_objects(std::unordered_set<Object*>& variables) const {expression->collect_objects(variables);}
     bool evaluate(const EvaluationContext& context);
@@ -117,6 +119,7 @@ public:
     [[nodiscard]] bool has_value() const {return value().has_value();}
     [[nodiscard]] bool is_binary() const {return as_binary() != nullptr;}
     [[nodiscard]] bool is_object() const {return as_object() != nullptr;}
+    [[nodiscard]] bool is_object_name() const {return as_object_name() != nullptr;}
     [[nodiscard]] bool is_unique() const {return expression.use_count() <= 1;}
     [[nodiscard]] bool is_variable() const {return as_variable() != nullptr;}
     [[nodiscard]] const Location& location() const {return expression->location;}

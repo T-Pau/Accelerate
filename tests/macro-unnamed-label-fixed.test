@@ -1,0 +1,59 @@
+arguments --create-library --target 6502 a.s
+file a.s <inline>
+.macro store value {
+    ldx #value
+    beq :+
+    stx $1234
+:
+    ldx #value
+    beq :-
+}
+.section code
+test {
+    store $78
+    rts
+}
+test2 {
+    nop
+:
+    beq :+
+    store $78
+    beq :-
+    rts
+:
+    inc $12
+    rts
+}
+end-of-inline-data
+file a.lib {} <inline>
+.format_version 1.0
+.target "6502"
+.macro store {
+    visibility: private
+    arguments: value
+    body <
+        .data $a2, value:1, $f0, $03:-1, $8e, $1234, $a2, value:1, $f0, -$04
+    >
+}
+.object test {
+    visibility: private
+    section: code
+    body <
+        .scope {
+          .data $a2, $78, $f0, $03:-1, $8e, $1234, $a2, $78, $f0, -$04
+        }
+        .data $60
+    >
+}
+.object test2 {
+    visibility: private
+    section: code
+    body <
+        .data $ea, $f0, $0e:-1
+        .scope {
+          .data $a2, $78, $f0, $03:-1, $8e, $1234, $a2, $78, $f0, -$04
+        }
+        .data $f0, -$0f, $60, $e6, $12, $60
+    >
+}
+end-of-inline-data

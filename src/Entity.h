@@ -47,6 +47,7 @@ class Entity {
     [[nodiscard]] Macro* as_macro();
     [[nodiscard]] Object* as_object();
     void evaluate();
+    void resolve_labels();
     [[nodiscard]] bool check_unresolved(Unresolved& unresolved) const;
     [[nodiscard]] bool is_default_only() const {return default_only;}
     [[nodiscard]] bool is_macro() {return as_macro();}

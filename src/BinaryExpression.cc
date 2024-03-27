@@ -343,15 +343,17 @@ Expression BinaryExpression::create(const Expression& left, Expression::BinaryOp
                 // This special case is for resolving relative addressing within an object.
                 if (left.is_binary() && right.is_binary()) {
                     // (object_name + N) - (object_name + M) -> N - M
+                    // (.current_object + N) - (.current_object + M) -> N - M
                     auto left_binary = left.as_binary();
                     auto right_binary = right.as_binary();
 
                     if (left_binary->operation == Expression::BinaryOperation::ADD && right_binary->operation == Expression::BinaryOperation::ADD) {
                         auto left_variable = left_binary->left.variable_name();
                         auto right_variable = right_binary->left.variable_name();
-                        if (!left_variable.empty() && left_variable == right_variable) {
+                        if ((!left_variable.empty() && left_variable == right_variable) || (left_binary->left.is_object_name() && right_binary->left.is_object_name())) {
                             return {left_binary->right, operation, right_binary->right};
                         }
+
                     }
                 }
                 else if (right.is_binary()) {

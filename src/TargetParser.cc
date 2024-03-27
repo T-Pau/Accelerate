@@ -126,7 +126,7 @@ void TargetParser::parse_output() {
     }
 
     Target::set_current_target(&target);
-    target.output = BodyParser(tokenizer, target.cpu).parse();
+    target.output = BodyParser(tokenizer, target.cpu, false).parse();
     Target::clear_current_target();
 }
 

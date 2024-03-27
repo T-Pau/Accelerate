@@ -74,6 +74,7 @@ public:
     void evaluate();
     void import(ObjectFile* library);
     [[nodiscard]] const Object* object(Symbol object_name) const;
+    [[nodiscard]] Macro* macro(Symbol macro_name);
     void mark_used(Object* object) {explicitly_used_objects.insert(object);}
     void mark_used(Symbol name) {explicitly_used_object_names.insert(name);}
     void pin(Symbol name, Expression address) {pinned_objects[name] = Pinned{name, address};}

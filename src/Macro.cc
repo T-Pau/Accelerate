@@ -45,7 +45,7 @@ void Macro::initialize() {
 }
 
 
-Macro::Macro(ObjectFile* owner, Token name, const std::shared_ptr<ParsedValue>& definition) : Callable(owner, name, definition) {
+Macro::Macro(ObjectFile* owner, const Token& name, const std::shared_ptr<ParsedValue>& definition) : Callable(owner, name, definition) {
     initialize();
 
     auto parameters = definition->as_dictionary();
@@ -53,7 +53,7 @@ Macro::Macro(ObjectFile* owner, Token name, const std::shared_ptr<ParsedValue>& 
     body = (*parameters)[token_body]->as_body()->body;
 }
 
-Macro::Macro(ObjectFile* owner, Token name, Visibility visibility, bool default_only, Callable::Arguments arguments, Body body_): Callable(owner, name, visibility, default_only, std::move(arguments)), body(std::move(body_)) {
+Macro::Macro(ObjectFile* owner, const Token& name, Visibility visibility, bool default_only, Callable::Arguments arguments, Body body_): Callable(owner, name, visibility, default_only, std::move(arguments)), body(std::move(body_)) {
     EvaluationResult result;
 }
 
@@ -64,9 +64,12 @@ std::ostream& operator<<(std::ostream& stream, const Macro& macro) {
 }
 
 
-Body Macro::expand(const std::vector<Expression>& arguments) const {
+Body Macro::expand(const std::vector<Expression>& arguments, std::shared_ptr<Environment> outer_environment) const {
     EvaluationResult result;
-    return body.evaluated(EvaluationContext(result, EvaluationContext::MACRO_EXPANSION, bind(arguments))).value_or(body).scoped();
+    auto inner_environment = std::make_shared<Environment>(*environment);
+    inner_environment->clear_next();
+    inner_environment->add_next(std::move(outer_environment));
+    return body.evaluated(EvaluationContext(result, EvaluationContext::MACRO_EXPANSION, bind(arguments))).value_or(body).scoped(inner_environment);
 }
 
 
@@ -78,4 +81,8 @@ void Macro::serialize(std::ostream& stream) const {
     stream << "    >" << std::endl;
     stream << "}" << std::endl;
 
+}
+
+EvaluationContext Macro::evaluation_context(EvaluationResult& result) {
+    return Callable::evaluation_context(result).keeping_label_offsets();
 }

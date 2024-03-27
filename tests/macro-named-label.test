@@ -12,12 +12,20 @@ test {
     rts
 }
 test2 {
+    nop
+:
     beq :+
     inc16 $1234
-    rts
-:
+    beq :-
     inc $12
+:
     rts
+}
+test3 {
+    beq no_overflow
+no_overflow:
+    inc16 $1234
+    beq no_overflow
 }
 end-of-inline-data
 file a.lib {} <inline>
@@ -34,7 +42,7 @@ file a.lib {} <inline>
           .data $ee, address:2
         }
       .label_1:
-        .data $d0, ((no_overflow-(.current_object+.label_offset(.current_object, .label_1)))-$02):-1
+        .data $d0, ((.label_offset(no_overflow)-.label_offset(.label_1))-$02):-1
         .if .in_range($00, $ff, (address+$01)) {
           .data $e6, (address+$01):1
         }
@@ -58,11 +66,22 @@ file a.lib {} <inline>
     visibility: private
     section: code
     body <
-        .data $f0, $09:-1
+        .data $ea, $f0, $0c:-1
         .scope {
           .data $ee, $1234, $d0, $03:-1, $ee, $1235
         }
-        .data $60, $e6, $12, $60
+        .data $f0, -$0c, $e6, $12, $60
+    >
+}
+.object test3 {
+    visibility: private
+    section: code
+    body <
+        .data $f0, $00:-1
+        .scope {
+          .data $ee, $1234, $d0, $03:-1, $ee, $1235
+        }
+        .data $f0, -$0a
     >
 }
 end-of-inline-data

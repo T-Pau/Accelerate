@@ -185,13 +185,14 @@ std::vector<std::string> FileReader::file_names() const {
     return file_names;
 }
 
-void FileReader::error(const Exception& exception) {
+void FileReader::error(const Exception& exception, const Location& default_location) {
     if (exception.empty()) {
         error_flag = true;
         return;
     }
     if (auto parsed_exception = dynamic_cast<const ParseException*>(&exception)) {
-        error(parsed_exception->location, "%s", exception.what());
+
+        error(parsed_exception->location.empty() ? default_location : parsed_exception->location, "%s", exception.what());
         for (const auto& note: parsed_exception->notes) {
             notice(note.location, note.text);
         }

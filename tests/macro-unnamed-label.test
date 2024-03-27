@@ -12,8 +12,11 @@ test {
     rts
 }
 test2 {
+    nop
+:
     beq :+
     inc16 $1234
+    beq :-
     rts
 :
     inc $12
@@ -34,14 +37,14 @@ file a.lib {} <inline>
           .data $ee, address:2
         }
       .label_1:
-        .data $d0, (((.current_object+.label_offset(:+))-(.current_object+.label_offset(.current_object, .label_1)))-$02):-1
+        .data $d0, ((.label_offset(.unnamed_1)-.label_offset(.label_1))-$02):-1
         .if .in_range($00, $ff, (address+$01)) {
           .data $e6, (address+$01):1
         }
         .else {
           .data $ee, (address+$01):2
         }
-      :
+      .unnamed_1:
     >
 }
 .object test {
@@ -58,11 +61,11 @@ file a.lib {} <inline>
     visibility: private
     section: code
     body <
-        .data $f0, $09:-1
+        .data $ea, $f0, $0b:-1
         .scope {
           .data $ee, $1234, $d0, $03:-1, $ee, $1235
         }
-        .data $60, $e6, $12, $60
+        .data $f0, -$0c, $60, $e6, $12, $60
     >
 }
 end-of-inline-data

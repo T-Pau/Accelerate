@@ -291,6 +291,7 @@ void Assembler::parse_symbol(Visibility visibility, const Token& name, bool defa
         tokenizer.skip_until(Token::curly_close, true);
         throw ParseException(name, "no target specified");
     }
+
     auto object = object_file->create_object(current_section, visibility, default_only, name);
 
     while (true) {
@@ -301,7 +302,8 @@ void Assembler::parse_symbol(Visibility visibility, const Token& name, bool defa
         }
         else if (token == Token::curly_open) {
             // TODO: error if .reserved
-            object->body = BodyParser(tokenizer, object, target->cpu, &tokenizer.defines).parse();
+            object->body = BodyParser(tokenizer, target->cpu, true, &tokenizer.defines).parse();
+            object->resolve_labels();
             break;
         }
         // TODO: parameters
@@ -387,7 +389,7 @@ void Assembler::parse_output() {
         throw ParseException(token, "expected '{'");
     }
 
-    parsed_target.output = BodyParser(tokenizer, parsed_target.cpu).parse();
+    parsed_target.output = BodyParser(tokenizer, parsed_target.cpu, false, &tokenizer.defines).parse();
 }
 
 void Assembler::parse_string_encoding() {
@@ -475,8 +477,13 @@ void Assembler::parse_macro(Visibility visibility, bool default_only) {
     auto name = tokenizer.expect(Token::NAME);
     auto arguments = Callable::Arguments(tokenizer);
     tokenizer.expect(Token::curly_open);
-    auto body = BodyParser(tokenizer, object_file->target->cpu, &tokenizer.defines).parse(); // TODO: proper mode for macros
+    auto body = BodyParser(tokenizer, object_file->target->cpu, false, &tokenizer.defines).parse();
+
     object_file->add_macro(std::make_unique<Macro>(object_file.get(), name, visibility, default_only, arguments, body));
+
+    if (auto macro = object_file->macro(name.as_symbol())) {
+        macro->resolve_labels();
+    }
 }
 
 std::vector<MemoryMap::Block> Assembler::parse_address(const ParsedValue* address) {

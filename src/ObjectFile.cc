@@ -532,3 +532,13 @@ const ObjectFile::Constant* ObjectFile::constant(Symbol name) const {
         return {};
     }
 }
+
+Macro* ObjectFile::macro(Symbol macro_name) {
+    auto it = macros.find(macro_name);
+    if (it != macros.end()) {
+        return it->second.get();
+    }
+    else {
+        return nullptr;
+    }
+}

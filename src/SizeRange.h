@@ -48,6 +48,7 @@ public:
     [[nodiscard]] Value minimum_value() const {return Value(minimum);}
     [[nodiscard]] std::optional<Value> value() const;
     [[nodiscard]] std::optional<uint64_t> size() const;
+    [[nodiscard]] bool has_size() const {return maximum.has_value() && minimum == *maximum;}
 
     bool operator==(const SizeRange&other) const {return minimum == other.minimum && maximum == other.maximum;}
     bool operator!=(const SizeRange&other) const {return !(*this == other);}

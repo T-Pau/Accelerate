@@ -62,10 +62,12 @@ Expression::Expression(const Token& token) {
 }
 
 Expression::Expression(Location location, Symbol object_name, Symbol label_name, SizeRange offset): expression(std::make_shared<LabelExpression>(location, object_name, label_name, offset)) {}
-Expression::Expression(Location location, const Entity* object, Symbol label_name, SizeRange offset) {
-    *this = LabelExpression::create(location, object, label_name, offset);
+Expression::Expression(Location location, const Entity* object, Symbol label_name, SizeRange offset, SizeRange scope_offset, bool keep) {
+    *this = LabelExpression::create(location, object, label_name, offset, scope_offset, keep);
 }
-Expression::Expression(Location location, LabelExpressionType type, size_t unnamed_index, SizeRange offset): expression(std::make_shared<LabelExpression>(location, type, unnamed_index, offset)) {}
+Expression::Expression(Location location, LabelExpressionType type, size_t unnamed_index, SizeRange offset) {
+    *this = LabelExpression::create(location, type, unnamed_index, offset);
+}
 Expression::Expression(Symbol name): expression(std::make_shared<VariableExpression>(name)) {}
 Expression::Expression(Value value): expression(std::make_shared<ValueExpression>(value)) {}
 Expression::Expression(Symbol name, const std::vector<Expression>& arguments): expression(FunctionExpression::create(name, arguments).expression) {}
@@ -77,6 +79,10 @@ const BinaryExpression *Expression::as_binary() const {
 
 const ObjectExpression *Expression::as_object() const {
     return std::dynamic_pointer_cast<ObjectExpression>(expression).get();
+}
+
+const ObjectNameExpression *Expression::as_object_name() const {
+    return std::dynamic_pointer_cast<ObjectNameExpression>(expression).get();
 }
 
 const VariableExpression *Expression::as_variable() const {

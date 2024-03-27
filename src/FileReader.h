@@ -60,7 +60,7 @@ public:
     void notice(const Location& location, const std::string& message) const {output(NOTICE, location, message);}
     void warning(const Location& location, const char* format, ...) const PRINTF_LIKE(3, 4);
     void warning(const Location& location, const std::string& message) const {output(WARNING, location, message);}
-    void error(const Exception& exception);
+    void error(const Exception& exception, const Location& default_location = {});
     void error(const Location& location, const char* format, ...) PRINTF_LIKE(3, 4);
     void error(const Location& location, const std::string& message) {output(ERROR, location, message); error_flag = true;}
 

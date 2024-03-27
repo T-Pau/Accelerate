@@ -149,12 +149,12 @@ Body Body::make_unique() const {
     }
 }
 
-Body Body::scoped() const {
-    if (is_scope()) {
+Body Body::scoped(std::shared_ptr<Environment> inner_environment) const {
+    if (is_scope() && !inner_environment) {
         return *this;
     }
     else {
-        return ScopeBody::create(*this);
+        return ScopeBody::create(*this, inner_environment);
     }
 }
 

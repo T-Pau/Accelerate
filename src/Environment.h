@@ -46,12 +46,14 @@ class Environment {
 public:
     Environment() = default;
     explicit Environment(std::shared_ptr<Environment> next): next({std::move(next)}) {}
+    Environment(const Environment& env) = default;
 
     void add(Symbol name, Expression value) {variables[name] = std::move(value);} // TODO: check for duplicates
     void add(Symbol name, const Function* function) {functions[name] = function;} // TODO: check for duplicates
     void add(Symbol name, SizeRange offset) {labels[name] = offset;} // TODO: check for duplicates
     void add(Symbol name, const Macro* macro) {macros[name] = macro;} // TODO: check for duplicates
     void add_next(std::shared_ptr<Environment> new_next) {next.emplace_back(std::move(new_next));}
+    void clear_next() {next.clear();}
     [[nodiscard]] const std::unordered_map<Symbol, const Function*>& all_functions() const {return functions;}
     [[nodiscard]] const std::unordered_map<Symbol, SizeRange>& all_labels() const {return labels;}
     [[nodiscard]] const std::unordered_map<Symbol, const Macro*>& all_macros() const {return macros;}
