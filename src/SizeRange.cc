@@ -45,12 +45,13 @@ SizeRange SizeRange::operator-(const SizeRange &other) const {
     if (!other.maximum) {
         return {0, {}};
     }
-    auto new_minimum = minimum - *other.maximum;
+    auto new_minimum = *other.maximum > minimum ? 0 : minimum - *other.maximum;
     if (!maximum) {
         return {new_minimum, {}};
     }
     else {
-        return {new_minimum, *maximum - other.minimum};
+        auto new_maximum = other.minimum > *maximum ? 0 : *maximum - other.minimum;
+        return {new_minimum, std::max(new_minimum, new_maximum)};
     }
 }
 

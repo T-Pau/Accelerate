@@ -1,0 +1,108 @@
+arguments --create-library --target 45gs02 a.s
+file a.s <inline>
+.define YES
+.section code
+test {
+    lda drive
+    bne skip
+    lda #8
+    sta drive
+skip:
+    rts
+}
+test2 {
+    store_word $5678, drive
+    lda drive
+    bne skip
+    store_word $abcd, drive
+skip:
+    rts
+}
+test3 {
+    .if .defined(NO) {
+        .repeat $80 {
+            nop
+        }
+    }
+    .if .defined(YES) {
+        jsr $5678
+    }
+    store_word $5678, drive
+    lda drive
+    bne skip
+    store_word $abcd, drive
+skip:
+    rts
+}
+.macro store_word value, address {
+    lda #<(value)
+    sta address
+    lda #>(value)
+    sta address + 1
+}
+drive = $1234
+end-of-inline-data
+file a.lib {} <inline>
+.format_version 1.0
+.target "45gs02"
+.constant drive {
+    visibility: private
+    value: $1234
+}
+.macro store_word {
+    visibility: private
+    arguments: value, address
+    body <
+        .data $a9, <value:1
+        .if .in_range($00, $ff, address) {
+          .data $85, address:1
+        }
+        .else {
+          .data $8d, address:2
+        }
+        .data $a9, >value:1
+        .if .in_range($00, $ff, (address+$01)) {
+          .data $85, (address+$01):1
+        }
+        .else {
+          .data $8d, (address+$01):2
+        }
+    >
+}
+.object test {
+    visibility: private
+    section: code
+    body <
+        .data $ad, $1234, $d0, $05:-1, $a9, $08, $8d, $1234, $60
+    >
+}
+.object test2 {
+    visibility: private
+    section: code
+    body <
+        .scope {
+          .data $a9, $78, $8d, $1234, $a9, $56, $8d, $1235
+        }
+        .data $ad, $1234, $d0, $0a:-1
+        .scope {
+          .data $a9, $cd, $8d, $1234, $a9, $ab, $8d, $1235
+        }
+        .data $60
+    >
+}
+.object test3 {
+    visibility: private
+    section: code
+    body <
+        .data $20, $5678
+        .scope {
+          .data $a9, $78, $8d, $1234, $a9, $56, $8d, $1235
+        }
+        .data $ad, $1234, $d0, $0a:-1
+        .scope {
+          .data $a9, $cd, $8d, $1234, $a9, $ab, $8d, $1235
+        }
+        .data $60
+    >
+}
+end-of-inline-data
