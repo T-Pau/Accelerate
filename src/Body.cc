@@ -73,7 +73,7 @@ Body::Body(const std::vector<IfBodyClause>& clauses) {
 Body::Body(Symbol name): element(std::make_shared<LabelBody>(name)) {}
 Body::Body(Symbol name, SizeRange offset, bool added_to_environment, size_t unnamed_index): element(std::make_shared<LabelBody>(name, offset, added_to_environment, unnamed_index)) {}
 
-Body::Body(const Token& name, std::vector<Expression> arguments): element(std::make_shared<MacroBody>(name, std::move(arguments))) {}
+Body::Body(const Token& name, std::vector<Expression> arguments, const Macro* macro): element(std::make_shared<MacroBody>(name, std::move(arguments), macro)) {}
 
 Body::Body(Expression bank, Expression start_address, Expression end_address): element(std::make_shared<MemoryBody>(std::move(bank), std::move(start_address), std::move(end_address))) {}
 

@@ -38,7 +38,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 class MacroBody: public BodyElement {
   public:
-    MacroBody(Token name, std::vector<Expression> arguments): BodyElement(SizeRange(0,{})), name(name), arguments(std::move(arguments)) {}
+    MacroBody(Token name, std::vector<Expression> arguments, const Macro* macro = {}): BodyElement(SizeRange(0,{})), name(name), arguments(std::move(arguments)), macro(macro) {}
 
     [[nodiscard]] std::shared_ptr<BodyElement> clone() const override {throw Exception("can't clone MacroBody");}
     [[nodiscard]] bool empty() const override {return false;}
@@ -47,8 +47,8 @@ class MacroBody: public BodyElement {
     void serialize(std::ostream &stream, const std::string &prefix) const override;
 
     Token name;
+    const Macro* macro{};
     std::vector<Expression> arguments;
 };
-
 
 #endif // MACRO_BODY_H

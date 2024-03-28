@@ -50,6 +50,7 @@ void Linker::link() {
     program->resolve_defaults();
     program->evaluate();
     program->evaluate();
+    program->evaluate();
 
     Unresolved unresolved;
     if (!program->check_unresolved(unresolved)) {

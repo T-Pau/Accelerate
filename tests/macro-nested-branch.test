@@ -1,0 +1,74 @@
+description branch across nested macro calls
+arguments --create-library --target mega65-basic -o a.lib a.s b.s
+file a.s <inline>
+.section code
+.public init_state {
+    memcpy $1000
+    cmp #12
+    bne high_keyboard
+    rts
+high_keyboard:
+    rts
+}
+end-of-inline-data
+file b.s <inline>
+.section zero_page
+.public ptr1 .reserve 2
+.public .macro store_word value, address {
+    lda #<(value)
+    sta address
+    lda #>(value)
+    sta address + 1
+}
+.macro memcpy source {
+    store_word source, ptr1
+}
+end-of-inline-data
+file a.lib {} <inline>
+.format_version 1.0
+.target "mega65-basic"
+.macro memcpy {
+    visibility: private
+    arguments: source
+    body <
+        store_word source, ptr1
+    >
+}
+.macro store_word {
+    visibility: public
+    arguments: value, address
+    body <
+        .data $a9, <value:1
+        .if .in_range($00, $ff, address) {
+          .data $85, address:1
+        }
+        .else {
+          .data $8d, address:2
+        }
+        .data $a9, >value:1
+        .if .in_range($00, $ff, (address+$01)) {
+          .data $85, (address+$01):1
+        }
+        .else {
+          .data $8d, (address+$01):2
+        }
+    >
+}
+.object init_state {
+    visibility: public
+    section: code
+    body <
+        .scope {
+          .scope {
+            .data $a9, $00, $85, ptr1:1, $a9, $10, $85, (ptr1+$01):1
+          }
+        }
+        .data $c9, $0c, $d0, $01:-1, $60, $60
+    >
+}
+.object ptr1 {
+    visibility: public
+    section: zero_page
+    reserve: $02
+}
+end-of-inline-data

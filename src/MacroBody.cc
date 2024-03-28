@@ -36,6 +36,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 std::optional<Body> MacroBody::evaluated(const EvaluationContext& context) const {
     std::vector<Expression> new_arguments;
+    auto new_macro = macro;
     auto changed = false;
     for (auto& argument: arguments) {
         auto new_argument = argument.evaluated(context);
@@ -48,11 +49,21 @@ std::optional<Body> MacroBody::evaluated(const EvaluationContext& context) const
         }
     }
 
-    if (context.entity && context.entity->is_object()) {
-        // Do not expand macros inside macros, since that could pass an unbound argument to the inner macro, which won't resolve.
-        if (auto macro = context.environment->get_macro(name.as_symbol())) {
-            if (!context.conditional) {
-                return macro->expand(new_arguments, context.environment);
+    if (context.entity) {
+        if (!new_macro) {
+            if (auto found_macro = context.environment->get_macro(name.as_symbol())) {
+                new_macro = found_macro;
+                changed = true;
+            }
+        }
+        if (new_macro) {
+            if (context.entity->is_object()) {
+                // Do not expand macros inside macros, since that could pass an unbound argument to the inner macro, which won't resolve.
+                if (!context.conditional) {
+                    auto expanded = new_macro->expand(new_arguments, context.environment);
+                    expanded.evaluate(context);
+                    return expanded;
+                }
             }
         }
         else {
@@ -61,7 +72,7 @@ std::optional<Body> MacroBody::evaluated(const EvaluationContext& context) const
     }
 
     if (changed) {
-        return Body(name, new_arguments);
+        return Body(name, new_arguments, new_macro);
     }
     else {
         return {};
