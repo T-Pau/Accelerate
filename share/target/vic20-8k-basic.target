@@ -1,0 +1,15 @@
+.include "vic20.inc"
+
+.section zero_page {
+    type: reserve_only
+    address [
+         : $19 - $21 ; Temporary string stack.
+         : $26 - $2a ; Floating point result of multiplication or division.
+         : $fb - $fe ; Unused.
+    ]
+}
+
+basic_start = $1201
+basic_end = $7fff
+
+.include "commodore-basic.inc"
