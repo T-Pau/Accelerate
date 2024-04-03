@@ -1,9 +1,0 @@
-description Hello World on Cerberus 2080 for 6502 CPU
-arguments --target cerberus-2080-6502 --symbol-map hello-world.sym -o hello-world.prg hello-world.s
-file hello-world.s ../examples/hello-world-cerberus-2080-6502.s
-file hello-world.prg {} hello-world-cerberus-2080-6502.prg
-file hello-world.sym {} <inline>
-object	$02	$0002	ptr	zero_page	reserve
-object	$202	$0017	start	code	data
-object	$219	$000d	message	data	data
-end-of-inline-data

@@ -21,6 +21,7 @@
 
 ## Tests
 
+- Z80 CPU.
 - `.if .defined` in body
 - `.pre_if .true` inside `.pre_if .false` 
 - `.use`, `.uses`, `.pin`, `.used`
