@@ -204,7 +204,7 @@
         cc: basic_condition
         nn: word
     }
-    encoding: .opcode | cc << 3, address - .pc - 2 ; : 1
+    encoding: .opcode | cc << 3, nn - .pc - 2 ; : 1
 }
 
 .addressing_mode bit_number__indexed {
@@ -327,7 +327,7 @@
         i: index_register
         nn: word
     }
-    encoding: .opcode | i << 13, word
+    encoding: .opcode | i << 13, nn
 }
 
 .addressing_mode index_register__indirect {
@@ -336,7 +336,7 @@
         i: index_register
         nn: word
     }
-    encoding: .opcode | i << 13, word
+    encoding: .opcode | i << 13, nn
 }
 
 .addressing_mode indirect__a {
@@ -602,7 +602,7 @@
 
 .instruction bit {
     bit_number__indexed: $ddcb0046
-    bit_number__indirect: $cb46
+    bit_number__indirect_hl: $cb46
     bit_number__register: $cb40
 }
 
@@ -682,7 +682,7 @@
 }
 
 .instruction im {
-    inerrupt_mode: $ed46
+    interrupt_mode: $ed46
 }
 
 .instruction in {
@@ -816,7 +816,7 @@
 
 .instruction res {
     bit_number__indexed: $ddcb0086
-    bit_number__indirect: $cb86
+    bit_number__indirect_hl: $cb86
     bit_number__register: $cb80
 }
 
@@ -899,7 +899,7 @@
 
 .instruction set {
     bit_number__indexed: $ddcb00c6
-    bit_number__indirect: $cbc6
+    bit_number__indirect_hl: $cbc6
     bit_number__register: $cbc0
 }
 
