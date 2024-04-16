@@ -11,7 +11,9 @@ same_function(argument) = $1000 + argument
 same_value = 1
 .section code
 .public init {
-    .data same_function(same_value), other_function(other_value), library_function(library_value)
+    .data same_function(same_value), same_function(other_value), same_function(library_value)
+    .data other_function(same_value), other_function(other_value), other_function(library_value)
+    .data library_function(same_value), library_function(other_value), library_function(library_value)
 }
 end-of-inline-data
 
@@ -56,7 +58,7 @@ file a.lib {} <inline>
     visibility: public
     section: code
     body <
-        .data $1001, $2002, $3003
+        .data $1001, $1002, $1003, $2001, $2002, $2003, $3001, $3002, $3003
     >
 }
 end-of-inline-data
