@@ -62,8 +62,7 @@ const Function* Environment::get_function(Symbol name) const {
         return it->second;
     }
     for (auto& environment: next) {
-        auto function = environment->get_function(name);
-        if (function) {
+        if (auto function = environment->get_function(name)) {
             return function;
         }
     }
@@ -77,8 +76,7 @@ std::optional<SizeRange> Environment::get_label(Symbol name) const {
         return it->second;
     }
     for (auto& environment: next) {
-        auto label = environment->get_label(name);
-        if (label) {
+        if (auto label = environment->get_label(name)) {
             return label;
         }
     }
@@ -93,8 +91,7 @@ const Macro* Environment::get_macro(Symbol name) const {
         return it->second;
     }
     for (auto& environment: next) {
-        auto macro = environment->get_macro(name);
-        if (macro) {
+        if (auto macro = environment->get_macro(name)) {
             return macro;
         }
     }
