@@ -34,14 +34,18 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Exception.h"
 
 Symbol::Table* Symbol::global = nullptr;
+const char* Symbol::empty_id = "";
 
 Symbol::Symbol(const std::string &name) {
     init_global();
     auto it = global->symbols.find(name);
     if (it == global->symbols.end()) {
-        id = global->names.size();
-        global->names.push_back(name);
-        global->symbols[name] = id;
+        auto length = name.length() + 1;
+        char *interned_name = static_cast<char *>(malloc(length));
+        strncpy(interned_name, name.c_str(), length);
+
+        global->symbols[name] = interned_name;
+        id = interned_name;
     }
     else {
         id = it->second;
@@ -58,4 +62,12 @@ Symbol& Symbol::operator=(const std::string& name) {
 std::ostream& operator<<(std::ostream& stream, const Symbol& symbol) {
     stream << symbol.str();
     return stream;
+}
+
+Symbol::Table::~Table() {
+    for (auto& [string, interned_name]: symbols) {
+        if (interned_name != empty_id) {
+            free(interned_name);
+        }
+    }
 }

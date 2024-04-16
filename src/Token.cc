@@ -120,7 +120,7 @@ bool Token::operator==(const Token &other) const {
     }
 }
 
-const std::string &Token::as_string() const {
+std::string Token::as_string() const {
     switch (type) {
         case NAME:
         case DIRECTIVE:

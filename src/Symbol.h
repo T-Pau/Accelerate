@@ -32,6 +32,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef SYMBOL_H
 #define SYMBOL_H
 
+#include <cstring>
 #include <ostream>
 #include <string>
 #include <unordered_map>
@@ -44,27 +45,30 @@ public:
     Symbol& operator=(const std::string& name);
 
 
-    [[nodiscard]] const std::string& str() const {return global->names[id];}
-    [[nodiscard]] const char* c_str() const {return str().c_str();}
-    [[nodiscard]] uint32_t value() const {return id;}
-    [[nodiscard]] bool empty() const {return id==0;}
+    [[nodiscard]] std::string str() const {return {id};}
+    [[nodiscard]] const char* c_str() const {return id;}
+    [[nodiscard]] bool empty() const {return id==empty_id;}
 
     bool operator==(const Symbol& other) const {return id == other.id;}
     bool operator!=(const Symbol& other) const {return id != other.id;}
-    bool operator<(const Symbol& other) const {return str() < other.str();}
-    bool operator<=(const Symbol& other) const {return str() <= other.str();}
-    bool operator>(const Symbol& other) const {return str() > other.str();}
-    bool operator>=(const Symbol& other) const {return str() >= other.str();}
-    operator bool() const {return id != 0;}
+    bool operator<(const Symbol& other) const {return strcmp(id, other.id) < 0;}
+    bool operator<=(const Symbol& other) const {return strcmp(id, other.id) <= 0;}
+    bool operator>(const Symbol& other) const {return strcmp(id, other.id) > 0;}
+    bool operator>=(const Symbol& other) const {return strcmp(id, other.id) >= 0;}
+    operator bool() const {return !empty();} // NOLINT(*-explicit-constructor)
 
 private:
-    uint32_t id{0};
+    const char* id{empty_id};
 
     class Table {
       public:
-        std::unordered_map<std::string, uint32_t> symbols = {{"", 0}};
+        ~Table();
+
+        std::unordered_map<std::string, char*> symbols = {{"", const_cast<char*>(empty_id)}};
         std::vector<std::string> names = {""};
     };
+
+    static const char* empty_id;
 
     static void init_global() {if (!global) {global = new Table();}}
     static Table* global;
@@ -74,7 +78,7 @@ template<>
 struct std::hash<Symbol>
 {
     std::size_t operator()(Symbol const& symbol) const noexcept {
-        return std::hash<uint32_t>{}(symbol.value());
+        return std::hash<const char*>{}(symbol.c_str());
     }
 };
 
