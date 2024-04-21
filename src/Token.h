@@ -79,7 +79,7 @@ public:
     [[nodiscard]] bool is_string() const {return type == STRING;}
     [[nodiscard]] const char* type_name() const {return type_name(type);}
 
-    [[nodiscard]] std::string as_string() const;
+    [[nodiscard]] const std::string& as_string() const;
     [[nodiscard]] Symbol as_symbol() const;
     [[nodiscard]] uint64_t as_unsigned() const {return is_unsigned() ? std::get<Value>(value).unsigned_value() : 0;}
     [[nodiscard]] Value as_value() const {return is_value() ? std::get<Value>(value) : Value();}

@@ -38,6 +38,8 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <unordered_map>
 #include <vector>
 
+class SymbolTable;
+
 class Symbol {
 public:
     Symbol() = default;
@@ -45,9 +47,9 @@ public:
     Symbol& operator=(const std::string& name);
 
 
-    [[nodiscard]] std::string str() const {return {id};}
+    [[nodiscard]] const std::string& str() const {return global->recover(id);}
     [[nodiscard]] const char* c_str() const {return id;}
-    [[nodiscard]] bool empty() const {return id==empty_id;}
+    [[nodiscard]] bool empty() const {return id==empty_string.c_str();}
 
     bool operator==(const Symbol& other) const {return id == other.id;}
     bool operator!=(const Symbol& other) const {return id != other.id;}
@@ -57,21 +59,36 @@ public:
     bool operator>=(const Symbol& other) const {return strcmp(id, other.id) >= 0;}
     operator bool() const {return !empty();} // NOLINT(*-explicit-constructor)
 
-private:
-    const char* id{empty_id};
-
-    class Table {
+  private:
+    struct StringPtrHash {
+        auto operator()(const char* const& string) const noexcept {
+            return std::hash<std::string_view>{}(string);
+        }
+    };
+    struct StringPtrEqual {
+        auto operator()(const char* const& a, const char* const& b) const {
+            return strcmp(a, b) == 0;
+        }
+    };
+    struct Table {
       public:
-        ~Table();
+        const char* intern(const std::string& string);
+        const std::string& recover(const char* interened);
 
-        std::unordered_map<std::string, char*> symbols = {{"", const_cast<char*>(empty_id)}};
-        std::vector<std::string> names = {""};
+      private:
+        // This table maps uninterned strings to their canonical std::string.
+        std::unordered_map<const char*,std::unique_ptr<std::string>,StringPtrHash,StringPtrEqual> symbols;
+        // This table maps interned strings to their canonical std::string.
+        std::unordered_map<const char*,const std::string*> names;
     };
 
-    static const char* empty_id;
+    const char* id{empty_string.c_str()};
 
-    static void init_global() {if (!global) {global = new Table();}}
-    static Table* global;
+    static const std::string empty_string;
+
+    // The global symbol table must be a pointer to an object so we can for initialization before we use it in constructing symbols.
+    static void init_global();
+    static Table *global;
 };
 
 template<>

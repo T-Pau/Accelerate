@@ -34,24 +34,12 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Exception.h"
 
 Symbol::Table* Symbol::global = nullptr;
-const char* Symbol::empty_id = "";
+const std::string Symbol::empty_string{};
 
 Symbol::Symbol(const std::string &name) {
     init_global();
-    auto it = global->symbols.find(name);
-    if (it == global->symbols.end()) {
-        auto length = name.length() + 1;
-        char *interned_name = static_cast<char *>(malloc(length));
-        strncpy(interned_name, name.c_str(), length);
-
-        global->symbols[name] = interned_name;
-        id = interned_name;
-    }
-    else {
-        id = it->second;
-    }
+    id = global->intern(name);
 }
-
 
 Symbol& Symbol::operator=(const std::string& name) {
     *this = Symbol(name);
@@ -60,14 +48,40 @@ Symbol& Symbol::operator=(const std::string& name) {
 
 
 std::ostream& operator<<(std::ostream& stream, const Symbol& symbol) {
-    stream << symbol.str();
+    stream << symbol.c_str();
     return stream;
 }
 
-Symbol::Table::~Table() {
-    for (auto& [string, interned_name]: symbols) {
-        if (interned_name != empty_id) {
-            free(interned_name);
-        }
+void Symbol::init_global() {
+    if (!global) {
+        global = new Symbol::Table();
     }
+}
+
+const char* Symbol::Table::intern(const std::string& string) {
+    if (string.empty()) {
+        return empty_string.c_str();
+    }
+    auto it = symbols.find(string.c_str());
+    if (it == symbols.end()) {
+        auto interned_string = std::make_unique<std::string>(string);
+        auto new_id = interned_string->c_str();
+        names[new_id] = interned_string.get();
+        symbols[new_id] = std::move(interned_string);
+        return new_id;
+    }
+    else {
+        return it->second->c_str();
+    }
+}
+
+const std::string& Symbol::Table::recover(const char* interened) {
+    if (interened == empty_string.c_str()) {
+        return empty_string;
+    }
+    auto it = names.find(interened);
+    if (it == names.end()) {
+        throw Exception("internal error: unknown symbol '%s'", interened);
+    }
+    return *it->second;
 }
