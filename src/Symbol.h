@@ -47,16 +47,16 @@ public:
     Symbol& operator=(const std::string& name);
 
 
-    [[nodiscard]] const std::string& str() const {return global->recover(id);}
-    [[nodiscard]] const char* c_str() const {return id;}
-    [[nodiscard]] bool empty() const {return id==empty_string.c_str();}
+    [[nodiscard]] const std::string& str() const {return *id;}
+    [[nodiscard]] const char* c_str() const {return id->c_str();}
+    [[nodiscard]] bool empty() const {return id==&empty_string;}
 
     bool operator==(const Symbol& other) const {return id == other.id;}
     bool operator!=(const Symbol& other) const {return id != other.id;}
-    bool operator<(const Symbol& other) const {return strcmp(id, other.id) < 0;}
-    bool operator<=(const Symbol& other) const {return strcmp(id, other.id) <= 0;}
-    bool operator>(const Symbol& other) const {return strcmp(id, other.id) > 0;}
-    bool operator>=(const Symbol& other) const {return strcmp(id, other.id) >= 0;}
+    bool operator<(const Symbol& other) const {return *id < *other.id;}
+    bool operator<=(const Symbol& other) const {return *id <= *other.id;}
+    bool operator>(const Symbol& other) const {return *id > *other.id;}
+    bool operator>=(const Symbol& other) const {return *id >= *other.id;}
     operator bool() const {return !empty();} // NOLINT(*-explicit-constructor)
 
   private:
@@ -72,17 +72,14 @@ public:
     };
     struct Table {
       public:
-        const char* intern(const std::string& string);
-        const std::string& recover(const char* interened);
+        const std::string* intern(const std::string& string);
 
       private:
         // This table maps uninterned strings to their canonical std::string.
         std::unordered_map<const char*,std::unique_ptr<std::string>,StringPtrHash,StringPtrEqual> symbols;
-        // This table maps interned strings to their canonical std::string.
-        std::unordered_map<const char*,const std::string*> names;
     };
 
-    const char* id{empty_string.c_str()};
+    const std::string* id{&empty_string};
 
     static const std::string empty_string;
 

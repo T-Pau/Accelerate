@@ -58,30 +58,18 @@ void Symbol::init_global() {
     }
 }
 
-const char* Symbol::Table::intern(const std::string& string) {
+const std::string* Symbol::Table::intern(const std::string& string) {
     if (string.empty()) {
-        return empty_string.c_str();
+        return &empty_string;
     }
     auto it = symbols.find(string.c_str());
     if (it == symbols.end()) {
         auto interned_string = std::make_unique<std::string>(string);
-        auto new_id = interned_string->c_str();
-        names[new_id] = interned_string.get();
-        symbols[new_id] = std::move(interned_string);
+        auto new_id = interned_string.get();
+        symbols[new_id->c_str()] = std::move(interned_string);
         return new_id;
     }
     else {
-        return it->second->c_str();
+        return it->second.get();
     }
-}
-
-const std::string& Symbol::Table::recover(const char* interened) {
-    if (interened == empty_string.c_str()) {
-        return empty_string;
-    }
-    auto it = names.find(interened);
-    if (it == names.end()) {
-        throw Exception("internal error: unknown symbol '%s'", interened);
-    }
-    return *it->second;
 }
