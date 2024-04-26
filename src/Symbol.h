@@ -32,6 +32,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef SYMBOL_H
 #define SYMBOL_H
 
+#include <memory>
 #include <ostream>
 #include <string>
 #include <unordered_map>

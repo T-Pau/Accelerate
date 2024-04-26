@@ -32,6 +32,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef HEXSTRING_H
 #define HEXSTRING_H
 
+#include <cstdint>
 #include <optional>
 #include <string>
 

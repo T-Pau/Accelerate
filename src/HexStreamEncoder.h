@@ -32,6 +32,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef HEXSTREAMENCODER_H
 #define HEXSTREAMENCODER_H
 
+#include <cstdint>
 #include <ostream>
 
 class HexStreamEncoder {
