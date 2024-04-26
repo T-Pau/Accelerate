@@ -32,7 +32,6 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef SYMBOL_H
 #define SYMBOL_H
 
-#include <cstring>
 #include <ostream>
 #include <string>
 #include <unordered_map>
@@ -61,13 +60,13 @@ public:
 
   private:
     struct StringPtrHash {
-        auto operator()(const char* const& string) const noexcept {
-            return std::hash<std::string_view>{}(string);
+        auto operator()(const std::string* const& string) const noexcept {
+            return std::hash<std::string>{}(*string);
         }
     };
     struct StringPtrEqual {
-        auto operator()(const char* const& a, const char* const& b) const {
-            return strcmp(a, b) == 0;
+        auto operator()(const std::string* const& a, const std::string* const& b) const {
+            return *a == *b;
         }
     };
     struct Table {
@@ -76,7 +75,7 @@ public:
 
       private:
         // This table maps uninterned strings to their canonical std::string.
-        std::unordered_map<const char*,std::unique_ptr<std::string>,StringPtrHash,StringPtrEqual> symbols;
+        std::unordered_map<const std::string*,std::unique_ptr<std::string>,StringPtrHash,StringPtrEqual> symbols;
     };
 
     const std::string* id{&empty_string};

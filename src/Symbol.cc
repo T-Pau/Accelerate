@@ -62,11 +62,11 @@ const std::string* Symbol::Table::intern(const std::string& string) {
     if (string.empty()) {
         return &empty_string;
     }
-    auto it = symbols.find(string.c_str());
+    auto it = symbols.find(&string);
     if (it == symbols.end()) {
         auto interned_string = std::make_unique<std::string>(string);
         auto new_id = interned_string.get();
-        symbols[new_id->c_str()] = std::move(interned_string);
+        symbols[new_id] = std::move(interned_string);
         return new_id;
     }
     else {
