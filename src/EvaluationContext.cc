@@ -81,6 +81,8 @@ bool EvaluationContext::shallow() const {
         case STANDALONE:
             return false;
     }
+
+    throw Exception("internal error: invalid evaluation type");
 }
 
 EvaluationContext EvaluationContext::skipping_variables(const std::vector<Symbol>& variables) const {

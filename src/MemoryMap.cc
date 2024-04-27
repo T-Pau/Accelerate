@@ -33,6 +33,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <algorithm>
 
+#include "Exception.h"
 #include "Int.h"
 
 const std::vector<MemoryMap::Block> *MemoryMap::segment(Symbol name) const {
@@ -99,6 +100,8 @@ bool MemoryMap::access_type_less(MemoryMap::AccessType a, MemoryMap::AccessType 
             }
             return true;
     }
+
+    throw Exception("internal error: invalid access type");
 }
 
 bool MemoryMap::is_abstract() const {

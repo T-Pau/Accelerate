@@ -95,6 +95,8 @@ const char* Token::type_name(Type type) {
         case INSTRUCTION:
             return "instruction";
     }
+
+    throw Exception("invalid token type");
 }
 
 bool Token::operator==(const Token &other) const {
@@ -136,6 +138,8 @@ const std::string& Token::as_string() const {
         case NEWLINE:
             return empty_string;
     }
+
+    throw Exception("invalid token type");
 }
 
 Symbol Token::as_symbol() const {
@@ -154,29 +158,6 @@ Symbol Token::as_symbol() const {
         case NEWLINE:
             return {};
     }
+
+    throw Exception("invalid token type");
 }
-
-/*Token& Token::operator=(const Token& other) {
-    type = other.type;
-    switch (type) {
-        case DIRECTIVE:
-        case PUNCTUATION:
-        case NAME:
-        case PREPROCESSOR:
-        case STRING:
-        case KEYWORD:
-        case INSTRUCTION:
-            symbol = other.symbol;
-            break;
-
-        case VALUE:
-            value = other.value;
-            break;
-
-        case END:
-        case NEWLINE:
-            break;
-    }
-
-    return *this;
-}*/

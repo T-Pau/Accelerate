@@ -80,6 +80,8 @@ bool AddressingModeMatcherElement::operator==(const AddressingModeMatcherElement
         case PUNCTUATION:
             return symbol == other.symbol;
     }
+
+    throw Exception("internal error: invalid addressing mode");
 }
 
 

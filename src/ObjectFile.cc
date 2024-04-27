@@ -498,7 +498,7 @@ std::shared_ptr<Environment> ObjectFile::environment(Visibility visibility) cons
             return public_environment;
     }
 
-    throw Exception("internal error: invalid visibility: %d", visibility);
+    throw Exception("internal error: invalid visibility");
 }
 
 bool ObjectFile::check_unresolved(Unresolved& unresolved) const {
