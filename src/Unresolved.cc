@@ -31,6 +31,8 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "Unresolved.h"
 
+#include <algorithm>
+
 #include "FileReader.h"
 
 void Unresolved::Part::add(const Token& user, Symbol used) {

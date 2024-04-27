@@ -40,6 +40,17 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 class SymbolTable;
 
+struct StringPtrHash {
+    auto operator()(const std::string* string) const noexcept {
+        return std::hash<std::string>{}(*string);
+    }
+};
+struct StringPtrEqual {
+    auto operator()(const std::string* a, const std::string* b) const {
+        return *a == *b;
+    }
+};
+
 class Symbol {
 public:
     Symbol() = default;
@@ -60,16 +71,6 @@ public:
     operator bool() const {return !empty();} // NOLINT(*-explicit-constructor)
 
   private:
-    struct StringPtrHash {
-        auto operator()(const std::string* string) const noexcept {
-            return std::hash<std::string>{}(*string);
-        }
-    };
-    struct StringPtrEqual {
-        auto operator()(const std::string* a, const std::string* b) const {
-            return *a == *b;
-        }
-    };
     struct Table {
       public:
         const std::string* intern(const std::string& string);
