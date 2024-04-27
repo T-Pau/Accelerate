@@ -120,6 +120,8 @@ bool Token::operator==(const Token &other) const {
         case NEWLINE:
             return true;
     }
+
+    throw Exception("invalid token type");
 }
 
 const std::string& Token::as_string() const {
