@@ -61,12 +61,12 @@ public:
 
   private:
     struct StringPtrHash {
-        auto operator()(const std::string* const& string) const noexcept {
+        auto operator()(const std::string* string) const noexcept {
             return std::hash<std::string>{}(*string);
         }
     };
     struct StringPtrEqual {
-        auto operator()(const std::string* const& a, const std::string* const& b) const {
+        auto operator()(const std::string* a, const std::string* b) const {
             return *a == *b;
         }
     };
