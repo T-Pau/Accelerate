@@ -84,6 +84,7 @@ private:
     static MemoryMap::AccessType parse_type(const Token& type);
 
     const Target* target{};
+    const CPU *cpu;
 
     Symbol current_section;
     Visibility current_visibility{Visibility::PRIVATE};

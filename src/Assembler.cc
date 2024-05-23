@@ -68,7 +68,7 @@ const Token Assembler::token_visibility = Token(Token::DIRECTIVE, "visibility");
 
 // clang-format off
 const std::unordered_map<Token, Assembler::Directive> Assembler::directives = {
-    {token_cpu, Directive{&Assembler::parse_cpu, true}},
+    {token_cpu, Directive{&Assembler::parse_cpu}},
     {token_default, Directive(&Assembler::parse_default)},
     {token_default_string_encoding, Directive{&Assembler::parse_default_string_encoding, true}},
     {token_extension, Directive{&Assembler::parse_extension, true}},
@@ -112,6 +112,7 @@ void Assembler::parse(Symbol file_name) {
     if (target) {
         Target::set_current_target(target);
         target->cpu->setup(tokenizer);
+        cpu = target->cpu;
         tokenizer.define(target->defines);
     }
     ExpressionParser::setup(tokenizer);
@@ -171,9 +172,14 @@ void Assembler::parse_cpu() {
     auto name = tokenizer.expect(Token::STRING, TokenGroup::newline);
 
     try {
-        had_cpu = true;
-        parsed_target.cpu = &CPU::get(name.as_symbol(), tokenizer.current_file());
-        parsed_target.cpu->setup(tokenizer);
+        auto new_cpu = &CPU::get(name.as_symbol(), tokenizer.current_file());
+
+        if (target) {
+            had_cpu = true;
+            parsed_target.cpu = &CPU::get(name.as_symbol(), tokenizer.current_file());
+        }
+        new_cpu->setup(tokenizer);
+        cpu = new_cpu;
     } catch (Exception& ex) {
         throw ParseException(name, "%s", ex.what());
     }
@@ -302,7 +308,7 @@ void Assembler::parse_symbol(Visibility visibility, const Token& name, bool defa
         }
         else if (token == Token::curly_open) {
             // TODO: error if .reserved
-            object->body = BodyParser(tokenizer, target->cpu, true, &tokenizer.defines).parse();
+            object->body = BodyParser(tokenizer, cpu, true, &tokenizer.defines).parse();
             object->resolve_labels();
             break;
         }
@@ -477,7 +483,7 @@ void Assembler::parse_macro(Visibility visibility, bool default_only) {
     auto name = tokenizer.expect(Token::NAME);
     auto arguments = Callable::Arguments(tokenizer);
     tokenizer.expect(Token::curly_open);
-    auto body = BodyParser(tokenizer, object_file->target->cpu, false, &tokenizer.defines).parse();
+    auto body = BodyParser(tokenizer, cpu, false, &tokenizer.defines).parse();
 
     object_file->add_macro(std::make_unique<Macro>(object_file.get(), name, visibility, default_only, arguments, body));
 
