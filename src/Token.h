@@ -97,6 +97,7 @@ public:
     static const Token curly_close;
     static const Token curly_open;
     static const Token double_ampersand;
+    static const Token double_equals;
     static const Token double_greater;
     static const Token double_less;
     static const Token double_pipe;

@@ -85,7 +85,7 @@ void ValueExpression::serialize_sub(std::ostream& stream) const {
             break;
 
         case Value::VOID:
-            stream << "void";
+            stream << ".none";
             break;
 
         case Value::INTEGER:

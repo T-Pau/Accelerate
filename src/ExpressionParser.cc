@@ -39,6 +39,7 @@ const Token ExpressionParser::token_big_endian = Token{Token::NAME, "big_endian"
 const Token ExpressionParser::token_false = Token{Token::NAME, ".false"};
 const Token ExpressionParser::token_little_endian = Token{Token::NAME, "little_endian"};
 const Token ExpressionParser::token_mod = Token{Token::NAME, ".mod"};
+const Token ExpressionParser::token_none = Token{Token::NAME, ".none"};
 const Token ExpressionParser::token_string = Token{Token::NAME, "string"};
 const Token ExpressionParser::token_true = Token{Token::NAME, ".true"};
 
@@ -55,7 +56,7 @@ void ExpressionParser::initialize() {
 
         {Token::double_ampersand, BinaryOperator(Expression::BinaryOperation::LOGICAL_AND, 2)},
 
-        {Token::equals, BinaryOperator(Expression::BinaryOperation::EQUAL, 3)},
+        {Token::double_equals, BinaryOperator(Expression::BinaryOperation::EQUAL, 3)},
         {Token::greater, BinaryOperator(Expression::BinaryOperation::GREATER, 3)},
         {Token::greater_equals, BinaryOperator(Expression::BinaryOperation::GREATER_EQUAL, 3)},
         {Token::less, BinaryOperator(Expression::BinaryOperation::LESS, 3)},
@@ -102,6 +103,9 @@ ExpressionParser::Element ExpressionParser::next_element() {
         }
         else if (token == token_true) {
             return {Expression{true}};
+        }
+        else if (token == token_none) {
+            return {Expression{Value{}}};
         }
         auto next_token = tokenizer.next();
         if (next_token == Token::paren_open) {
@@ -169,6 +173,7 @@ void ExpressionParser::setup(FileTokenizer &tokenizer) {
         tokenizer.add_literal(pair.first);
     }
     tokenizer.add_literal(token_false);
+    tokenizer.add_literal(token_none);
     tokenizer.add_literal(token_true);
     FunctionExpression::setup(tokenizer);
 }

@@ -119,6 +119,7 @@ private:
     static const Token token_false;
     static const Token token_little_endian;
     static const Token token_mod;
+    static const Token token_none;
     static const Token token_string;
     static const Token token_true;
 

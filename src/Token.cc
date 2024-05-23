@@ -42,6 +42,7 @@ const Token Token::comma = Token(PUNCTUATION, ",");
 const Token Token::curly_close = Token(PUNCTUATION, "}");
 const Token Token::curly_open = Token(PUNCTUATION, "{");
 const Token Token::double_ampersand = Token(Token::PUNCTUATION, "&&");
+const Token Token::double_equals = Token(Token::PUNCTUATION, "==");
 const Token Token::double_greater = Token(Token::PUNCTUATION, ">>");
 const Token Token::double_less = Token(Token::PUNCTUATION, "<<");
 const Token Token::double_pipe = Token(Token::PUNCTUATION, "||");
