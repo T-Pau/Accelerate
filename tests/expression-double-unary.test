@@ -1,0 +1,50 @@
+description Test two consecutive unary expressions
+arguments --create-library --target 6502 a.s
+
+file a.s <inline>
+.section code
+.macro load_absolute offset = 0 {
+    .if offset > 0 {
+        ldx #<offset
+        ldy #>offset
+    }
+    .else_if offset < 0 {
+        ldx #<-offset
+        ldy #>-offset
+    }
+}
+test {
+    load_absolute 40
+    load_absolute 0
+    load_absolute -40
+}
+end-of-inline-data
+
+file a.lib {} <inline>
+.format_version 1.0
+.target "6502"
+.macro load_absolute {
+    visibility: private
+    arguments: offset = $00
+    body <
+        .if (offset>$00) {
+          .data $a2, <offset:1, $a0, >offset:1
+        }
+        .else_if (offset<$00) {
+          .data $a2, <-offset:1, $a0, >-offset:1
+        }
+    >
+}
+.object test {
+    visibility: private
+    section: code
+    body <
+        .scope {
+          .data $a2, $28, $a0, $00
+        }
+        .scope {
+          .data $a2, $28, $a0, $00
+        }
+    >
+}
+end-of-inline-data

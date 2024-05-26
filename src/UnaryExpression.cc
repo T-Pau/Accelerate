@@ -31,6 +31,8 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "UnaryExpression.h"
 
+#include "EvaluationContext.h"
+
 Expression UnaryExpression::create(Expression::UnaryOperation operation, Expression operand) {
     std::shared_ptr<BaseExpression> node;
 
@@ -76,13 +78,23 @@ Expression UnaryExpression::create(Expression::UnaryOperation operation, Express
 }
 
 std::optional<Expression> UnaryExpression::evaluated(const EvaluationContext& context) const {
-    const auto new_operand = operand.evaluated(context);
+    try {
+        const auto new_operand = operand.evaluated(context);
 
-    if (!new_operand) {
-        return {};
+        if (!new_operand) {
+            return {};
+        }
+
+        return Expression(operation, new_operand ? *new_operand : operand);
     }
-
-    return Expression(operation, new_operand ? *new_operand : operand);
+    catch (Exception &ex) {
+        if (context.conditional) {
+            return {};
+        }
+        else {
+            throw ex;
+        }
+    }
 }
 
 void UnaryExpression::serialize_sub(std::ostream& stream) const {

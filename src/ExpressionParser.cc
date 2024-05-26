@@ -133,7 +133,8 @@ ExpressionParser::Element ExpressionParser::next_element() {
             case FUNCTION_CALL:
             case BINARY_OPERATOR:
             case PARENTHESIS_OPEN:
-            case START: {
+            case START:
+            case UNARY_OPERATOR: {
                 auto it = unary_operators.find(token);
                 if (it != unary_operators.end()) {
                     return {token.location, it->second};
@@ -153,7 +154,6 @@ ExpressionParser::Element ExpressionParser::next_element() {
 
             case COMMA:
             case END:
-            case UNARY_OPERATOR:
                 break;
         }
     }
@@ -220,7 +220,6 @@ Expression ExpressionParser::do_parse() {
                     case COMMA:
                     case END:
                     case PARENTHESIS_CLOSED:
-                    case UNARY_OPERATOR:
                         throw ParseException(next.location, "unexpected %s", next.description());
 
                     case OPERAND:
@@ -230,6 +229,7 @@ Expression ExpressionParser::do_parse() {
 
                     case FUNCTION_CALL:
                     case PARENTHESIS_OPEN:
+                    case UNARY_OPERATOR:
                         shift(next);
                         break;
 
