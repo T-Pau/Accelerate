@@ -14,6 +14,7 @@
 
 ## Bugs
 
+- Fix `.repeat` without index variable but count expression begins with variable 
 - Places 2-byte reserve in 1-byte block.
 - Named label in macro results in unresolved variable. (`macro-named-label.test`)
 - `.include_bianry` is parsed as `.include _binary`.
