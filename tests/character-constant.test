@@ -4,6 +4,7 @@ file test.s <>
 test {
     lda #'a'
     cmp #'a':screen
+    ldx #'{f7}'
 }
 end-of-inline-data
 
@@ -14,7 +15,7 @@ file test.lib {} <>
     visibility: private
     section: code
     body <
-        .data $a9, $41, $c9, $01
+        .data $a9, $41, $c9, $01, $a2, $88
     >
 }
 end-of-inline-data

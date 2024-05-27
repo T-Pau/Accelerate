@@ -413,7 +413,7 @@ Token FileTokenizer::parse_char(Location location) {
         throw ParseException(location, "multi-byte character constant");
     }
     else {
-        return Token(location, Value(static_cast<uint64_t>(bytes[0])));
+        return Token(location, Value(static_cast<uint64_t>(static_cast<uint8_t>(bytes[0]))));
     }
 }
 
