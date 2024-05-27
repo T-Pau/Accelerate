@@ -37,9 +37,11 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "FileTokenizer.h"
 #include "Path.h"
 
+class Target;
+
 class FileParser {
 public:
-    explicit FileParser(const Path& path = Path::empty_path);
+    explicit FileParser(const Path& path = Path::empty_path, const Target* target = {});
 
     const Path& path;
 

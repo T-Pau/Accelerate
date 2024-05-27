@@ -41,9 +41,11 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Location.h"
 #include "Path.h"
 
+class Target;
+
 class FileTokenizer: public Tokenizer {
 public:
-    explicit FileTokenizer(const Path& path = Path::empty_path, bool use_preprocessor = true, const std::unordered_set<Symbol>& defines = {});
+    explicit FileTokenizer(const Path& path = Path::empty_path, const Target* target = {}, bool use_preprocessor = true, const std::unordered_set<Symbol>& defines = {});
     void push(Symbol filename);
 
     [[nodiscard]] Location current_location() const override;
@@ -53,6 +55,7 @@ public:
     void define(Symbol name) {defines.insert(name);}
     void define(const std::unordered_set<Symbol>& defines);
     void undefine(Symbol name) {defines.erase(name);}
+    void set_target(const Target* new_target) {target = new_target;}
 
     void add_punctuations(const std::unordered_set<std::string>& names);
     void add_literal(const Token& token) { add_literal(token.get_type(), token.as_string());}
@@ -131,12 +134,14 @@ private:
 
     Token next_raw();
 
-    [[nodiscard]] bool pre_is_procesing() const;
+    [[nodiscard]] bool pre_is_processing() const;
 
+    Token parse_char(Location location);
     Token parse_hex(Location location);
     Token parse_name(Token::Type type, Location location);
     Token parse_number(unsigned int base, Location location);
     Token parse_string(Location location);
+    std::string parse_string_literal(Location location, int terminator);
 
     void preprocess(const Token& directive, const std::vector<Token>& tokens);
     void preprocess_define(const Token& directive, const std::vector<Token>& tokens);
@@ -152,6 +157,7 @@ private:
 
     bool use_preprocessor;
     const Path& path;
+    const Target* target;
 
     static const Token token_define;
     static const Token token_include;

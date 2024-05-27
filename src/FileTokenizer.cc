@@ -39,6 +39,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Int.h"
 #include "ParseException.h"
 #include "SequenceTokenizer.h"
+#include "Target.h"
 
 const Token FileTokenizer::token_define{Token::Type::PREPROCESSOR, ".define"};
 const Token FileTokenizer::token_include{Token::Type::PREPROCESSOR, ".include"};
@@ -59,7 +60,7 @@ const std::unordered_map<Token, FileTokenizer::PreprocessorDirective> FileTokeni
 };
 // clang-format on
 
-FileTokenizer::FileTokenizer(const Path& path, bool use_preprocessor, const std::unordered_set<Symbol>& defines) : path{path}, use_preprocessor{use_preprocessor}, defines{defines} {
+FileTokenizer::FileTokenizer(const Path& path, const Target* target, bool use_preprocessor, const std::unordered_set<Symbol>& defines) : path{path}, use_preprocessor{use_preprocessor}, defines{defines}, target{target} {
     if (use_preprocessor) {
         add_literal(token_define);
         add_literal(token_include);
@@ -87,7 +88,7 @@ Token FileTokenizer::sub_next() {
         auto token = next_raw();
 
         if (!use_preprocessor || !token.is_preprocessor()) {
-            if (pre_is_procesing()) {
+            if (pre_is_processing()) {
                 return token;
             }
             else {
@@ -233,13 +234,16 @@ Token FileTokenizer::next_raw() {
         else if (c == '"') {
             return parse_string(location);
         }
+        else if (c == '\'') {
+            return parse_char(location);
+        }
         else {
             throw ParseException(location, "illegal character '%c'", c);
         }
     }
 }
 
-bool FileTokenizer::pre_is_procesing() const {
+bool FileTokenizer::pre_is_processing() const {
     if (!current_source) {
         return true;
     }
@@ -369,19 +373,66 @@ Token FileTokenizer::parse_name(Token::Type type, Location location) {
 }
 
 Token FileTokenizer::parse_string(Location location) {
+    return {Token::STRING, location, Symbol(parse_string_literal(location, '"'))};
+}
+
+Token FileTokenizer::parse_char(Location location) {
+    auto value= parse_string_literal(location, '\'');
+
+    auto encoding_name = Symbol{};
+    auto c = current_source->next();
+    if (c == ':') {
+        encoding_name = parse_name(Token::NAME, location).as_symbol();
+    }
+    else {
+        current_source->unget();
+    }
+
+    if (!target) {
+        throw ParseException(location, "no string encoding");
+    }
+    auto encoding = target->default_string_encoding;
+    if (encoding_name) {
+        encoding = target->string_encoding(encoding_name);
+    }
+    if (!encoding) {
+        if (encoding_name) {
+            throw ParseException(location, "unknown string encoding %s", encoding_name.c_str());
+        }
+        else {
+            throw ParseException(location, "no default string encoding");
+        }
+    }
+
+    auto bytes = std::string{};
+    encoding->encode(bytes, value);
+    if (bytes.empty()) {
+        throw ParseException(location, "empty character constant");
+    }
+    else if (bytes.size() > 1) {
+        throw ParseException(location, "multi-byte character constant");
+    }
+    else {
+        return Token(location, Value(static_cast<uint64_t>(bytes[0])));
+    }
+}
+
+std::string FileTokenizer::parse_string_literal(Location location, int terminator){
     std::string value;
 
     while (true) {
         current_source->expand_location(location);
         auto c = current_source->next();
 
+        if (c == terminator) {
+            current_source->expand_location(location);
+            return value;
+        }
+
         switch (c) {
             case '\n':
                 throw ParseException(location, "unterminated string");
 
-            case '"':
-                current_source->expand_location(location);
-                return {Token::STRING, location, Symbol(value)};
 
             case '\\': {
                 current_source->expand_location(location);
@@ -441,7 +492,7 @@ void FileTokenizer::preprocess(const Token& directive, const std::vector<Token>&
 }
 
 void FileTokenizer::preprocess_define(const Token& directive, const std::vector<Token>& arguments) {
-    if (!pre_is_procesing()) {
+    if (!pre_is_processing()) {
         return;
     }
     const auto& name = arguments[0];

@@ -39,7 +39,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 TokenGroup FileParser::group_directive = TokenGroup({Token::DIRECTIVE,Token::END}, {}, "directive");
 
 
-FileParser::FileParser(const Path& path): path(path), tokenizer(path) {
+FileParser::FileParser(const Path& path, const Target* target): path(path), tokenizer(path, target) {
     ParsedValue::setup(tokenizer);
     ExpressionParser::setup(tokenizer);
 }

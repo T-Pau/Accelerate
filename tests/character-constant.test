@@ -1,0 +1,20 @@
+arguments --target c64-basic --create-library --output test.lib test.s
+file test.s <>
+.section code
+test {
+    lda #'a'
+    cmp #'a':screen
+}
+end-of-inline-data
+
+file test.lib {} <>
+.format_version 1.0
+.target "c64-basic"
+.object test {
+    visibility: private
+    section: code
+    body <
+        .data $a9, $41, $c9, $01
+    >
+}
+end-of-inline-data
