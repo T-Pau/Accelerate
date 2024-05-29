@@ -228,6 +228,7 @@ void xlr8::process() {
         linker->link();
     }
     else {
+        Target::set_current_target(linker->target);
         linker->program->evaluate();
         linker->program->evaluate(); // TODO: shouldn't be necessary
         linker->program->evaluate(); // TODO: shouldn't be necessary
