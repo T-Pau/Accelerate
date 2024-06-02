@@ -14,3 +14,7 @@ basic_start = $0801
 basic_end = $7fff
 
 .include "commodore-basic.inc"
+
+.section reserved .extend {
+    address: $c000 - $cfff
+}

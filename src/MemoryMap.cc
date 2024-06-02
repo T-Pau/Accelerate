@@ -34,7 +34,6 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <algorithm>
 
 #include "Exception.h"
-#include "Int.h"
 
 const std::vector<MemoryMap::Block> *MemoryMap::segment(Symbol name) const {
     auto it = segments.find(name);
@@ -137,7 +136,15 @@ bool MemoryMap::Block::operator==(const MemoryMap::Block &other) const {
 
 
 MemoryMap::Section::Section(Symbol name, MemoryMap::AccessType access, std::vector<Block> raw_blocks): name(name), access(access) {
+    add_blocks(std::move(raw_blocks));
+}
+
+void MemoryMap::Section::add_blocks(std::vector<Block> raw_blocks) {
+    raw_blocks.insert(raw_blocks.end(), blocks.begin(), blocks.end());
     std::sort(raw_blocks.begin(), raw_blocks.end());
+
+    blocks.clear();
+    size = 0;
     Block* previous = nullptr;
 
     for (const auto& block: raw_blocks) {
@@ -150,8 +157,8 @@ MemoryMap::Section::Section(Symbol name, MemoryMap::AccessType access, std::vect
             previous = &blocks.emplace_back(block);
         }
     }
-}
 
+}
 
 bool MemoryMap::Section::operator<(const MemoryMap::Section &other) const {
     if (size != other.size) {

@@ -65,6 +65,7 @@ public:
 
         bool operator<(const Section& other) const;
 
+        void add_blocks(std::vector<Block> raw_blocks);
         [[nodiscard]] bool empty() const {return blocks.empty();}
         [[nodiscard]] uint64_t maximum_address() const {return empty() ? 0 : blocks.back().range.end();}
         [[nodiscard]] uint64_t minimum_address() const {return empty() ? 0 : blocks.front().range.start;}

@@ -103,6 +103,7 @@ private:
     static const Token token_cpu;
     static const Token token_default;
     static const Token token_default_string_encoding;
+    static const Token token_extend;
     static const Token token_extension;
     static const Token token_macro;
     static const Token token_output;

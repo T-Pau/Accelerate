@@ -47,6 +47,7 @@ const Token Assembler::token_data_end = Token(Token::NAME, ".data_end");
 const Token Assembler::token_data_size = Token(Token::NAME, ".data_size");
 const Token Assembler::token_data_start = Token(Token::NAME, ".data_start");
 const Token Assembler::token_default_string_encoding = Token(Token::DIRECTIVE, "default_string_encoding");
+const Token Assembler::token_extend = Token(Token::DIRECTIVE, "extend");
 const Token Assembler::token_extension = Token(Token::DIRECTIVE, "extension");
 const Token Assembler::token_macro = Token(Token::DIRECTIVE, "macro");
 const Token Assembler::token_output = Token(Token::DIRECTIVE, "output");
@@ -241,39 +242,58 @@ void Assembler::parse_section() {
         throw ParseException(tokenizer.current_location(), "expected newline");
     }
     else {
+        auto extend = false;
+        if (tokenizer.peek() == token_extend) {
+            tokenizer.next();
+            extend = true;
+        }
         auto parse_value = ParsedValue::parse(tokenizer);
         tokenizer.unget(Token{Token::NEWLINE, tokenizer.current_location()});
         auto parameters = parse_value->as_dictionary();
 
-        if (section_names.contains(name)) {
-            throw ParseException(name, "duplicate section definition"); // TODO: attach note
-        }
-        section_names.insert(name);
-
-        auto type = MemoryMap::READ_WRITE;
-
-        auto type_parameter = parameters->get_optional(token_type);
-        if (type_parameter != nullptr) {
-            type = parse_type(type_parameter->as_singular_scalar()->token());
-        }
-        auto blocks = std::vector<MemoryMap::Block>();
-        auto segment = parameters->get_optional(token_segment_name);
-        if (segment) {
-            if (parameters->has_key(token_address_name)) {
-                throw ParseException(name, "segment and address are mutually exclusive");
+        if (extend != section_names.contains(name)) {
+            if (extend) {
+                throw ParseException(name, "extending non-existing section");
             }
+            else {
+                throw ParseException(name, "duplicate section definition"); // TODO: attach note
+            }
+        }
 
+        auto blocks = std::vector<MemoryMap::Block>();
+        if (auto address = parameters->get_optional(token_address_name)) {
+            blocks = parse_address((*parameters)[token_address_name].get());
+        }
+        if (auto segment = parameters->get_optional(token_segment_name)) {
             auto segment_blocks = parsed_target.map.segment(segment->as_singular_scalar()->token().as_symbol());
             if (segment_blocks == nullptr) {
                 throw ParseException(segment->as_singular_scalar()->token(), "unknown segment");
             }
-            blocks.insert(blocks.begin(), segment_blocks->begin(), segment_blocks->end());
-        }
-        else {
-            blocks = parse_address((*parameters)[token_address_name].get());
+            blocks.insert(blocks.end(), segment_blocks->begin(), segment_blocks->end());
         }
 
-        parsed_target.map.add_section(MemoryMap::Section(name.as_symbol(), type, std::move(blocks)));
+        if (extend) {
+            if (parameters->has_key(token_type)) {
+                throw ParseException(name, "can't specify type when extending section");
+            }
+            auto it = parsed_target.map.sections.find(name.as_symbol());
+            if (it == parsed_target.map.sections.end()) {
+                throw ParseException(name, "extending non-existing section");
+            }
+            it->second.add_blocks(blocks);
+        }
+        else {
+            section_names.insert(name);
+
+            auto type = MemoryMap::READ_WRITE;
+
+            auto type_parameter = parameters->get_optional(token_type);
+            if (type_parameter != nullptr) {
+                type = parse_type(type_parameter->as_singular_scalar()->token());
+            }
+
+            parsed_target.map.add_section(MemoryMap::Section(name.as_symbol(), type, std::move(blocks)));
+        }
     }
 }
 
