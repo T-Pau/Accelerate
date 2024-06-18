@@ -34,6 +34,7 @@ SAVE = $ffd8
 SCNKEY = $ff9f
 SCREEN = $ffed
 SECOND = $ff93
+SETBNK = $ff68 ; TODO: C128 only
 SETLFS = $ffba
 SETMSG = $ff90
 SETNAM = $ffbd
