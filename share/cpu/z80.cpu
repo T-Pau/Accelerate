@@ -277,6 +277,11 @@
     notation:
 }
 
+.addressing_mode implied_16 {
+    notation:
+    encoding: >.opcode, <.opcode
+}
+
 .addressing_mode indexed {
     notation: (i+d)
     arguments {
@@ -420,7 +425,7 @@
     arguments {
         i: index_register
     }
-    encoding: .opcode | i << 13
+    encoding: $dd | i << 5, .opcode
 }
 
 .addressing_mode interrupt_mode {
@@ -625,19 +630,19 @@
 }
 
 .instruction cpd {
-    implied: $eda9
+    implied_16: $eda9
 }
 
 .instruction cpdr {
-    implied: $edb9
+    implied_16: $edb9
 }
 
 .instruction cpi {
-    implied: $eda1
+    implied_16: $eda1
 }
 
 .instruction cpir {
-    implied: $edb1
+    implied_16: $edb1
 }
 
 .instruction cpl {
@@ -672,7 +677,7 @@
     af__af_prime: $08
     de__hl: $eb
     indirect_sp__hl: $e3
-    indirect_sp__index_register: $dde3
+    indirect_sp__index_register: $e3
 }
 
 .instruction exx {
@@ -701,19 +706,19 @@
 }
 
 .instruction ind {
-    implied: $edaa
+    implied_16: $edaa
 }
 
 .instruction indr {
-    implied: $edba
+    implied_16: $edba
 }
 
 .instruction ini {
-    implied: $eda2
+    implied_16: $eda2
 }
 
 .instruction inir {
-    implied: $edb2
+    implied_16: $edb2
 }
 
 .instruction jp {
@@ -756,23 +761,23 @@
 }
 
 .instruction ldd {
-    implied: $eda8
+    implied_16: $eda8
 }
 
 .instruction lddr {
-    implied: $edb8
+    implied_16: $edb8
 }
 
 .instruction ldi {
-    implied: $eda0
+    implied_16: $eda0
 }
 
 .instruction ldir {
-    implied: $edb0
+    implied_16: $edb0
 }
 
 .instruction neg {
-    implied: $ed44
+    implied_16: $ed44
 }
 
 .instruction nop {
@@ -792,19 +797,19 @@
 }
 
 .instruction outd {
-    implied: $edab
+    implied_16: $edab
 }
 
 .instruction outdr {
-    implied: $edbb
+    implied_16: $edbb
 }
 
 .instruction outi {
-    implied: $eda3
+    implied_16: $eda3
 }
 
 .instruction outir {
-    implied: $edb3
+    implied_16: $edb3
 }
 
 .instruction pop {
@@ -829,11 +834,11 @@
 }
 
 .instruction reti {
-    implied: $ed4d
+    implied_16: $ed4d
 }
 
 .instruction retn {
-    implied: $ed45
+    implied_16: $ed45
 }
 
 .instruction rl {
@@ -857,7 +862,7 @@
 }
 
 .instruction rld {
-    implied: $ed6f
+    implied_16: $ed6f
 }
 
 .instruction rr {
@@ -881,7 +886,7 @@
 }
 
 .instruction rrd {
-    implied: $ed67
+    implied_16: $ed67
 }
 
 .instruction rst {

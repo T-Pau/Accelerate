@@ -285,6 +285,65 @@ test_122_pop_iy {
 
 ; Exchange, Block Transfer, and Search Group
 
+test_124_ex_dehl {
+    ex de,hl
+}
+
+test_125_ex_afaf {
+    ex af,af'
+}
+
+test_126_exx {
+    exx
+}
+
+test_127_ex_sphl {
+    ex (sp),hl
+}
+
+test_128_ex_spix {
+    ex (sp),ix
+}
+
+test_129_ex_spiy {
+    ex (sp),iy
+}
+
+test_130_ldi {
+    ldi
+}
+
+test_132_ldir {
+    ldir
+}
+
+test_134_ldd {
+    ldd
+}
+
+test_136_lddr {
+    lddr
+}
+
+test_138_cpi {
+    cpi
+}
+
+test_139_cpir {
+    cpir
+}
+
+test_141_cpd {
+    cpd
+}
+
+test_142_cpdr {
+    cpdr
+}
+
+
+; 8-Bit Arithmetic Group
+
 end-of-inline-data
 
 file test.lib {} <inline>
@@ -575,6 +634,104 @@ file test.lib {} <inline>
     section: code
     body <
         .data $fd, $e1
+    >
+}
+.object test_124_ex_dehl {
+    visibility: private
+    section: code
+    body <
+        .data $eb
+    >
+}
+.object test_125_ex_afaf {
+    visibility: private
+    section: code
+    body <
+        .data $08
+    >
+}
+.object test_126_exx {
+    visibility: private
+    section: code
+    body <
+        .data $d9
+    >
+}
+.object test_127_ex_sphl {
+    visibility: private
+    section: code
+    body <
+        .data $e3
+    >
+}
+.object test_128_ex_spix {
+    visibility: private
+    section: code
+    body <
+        .data $dd, $e3
+    >
+}
+.object test_129_ex_spiy {
+    visibility: private
+    section: code
+    body <
+        .data $fd, $e3
+    >
+}
+.object test_130_ldi {
+    visibility: private
+    section: code
+    body <
+        .data $ed, $a0
+    >
+}
+.object test_132_ldir {
+    visibility: private
+    section: code
+    body <
+        .data $ed, $b0
+    >
+}
+.object test_134_ldd {
+    visibility: private
+    section: code
+    body <
+        .data $ed, $a8
+    >
+}
+.object test_136_lddr {
+    visibility: private
+    section: code
+    body <
+        .data $ed, $b8
+    >
+}
+.object test_138_cpi {
+    visibility: private
+    section: code
+    body <
+        .data $ed, $a1
+    >
+}
+.object test_139_cpir {
+    visibility: private
+    section: code
+    body <
+        .data $ed, $b1
+    >
+}
+.object test_141_cpd {
+    visibility: private
+    section: code
+    body <
+        .data $ed, $a9
+    >
+}
+.object test_142_cpdr {
+    visibility: private
+    section: code
+    body <
+        .data $ed, $b9
     >
 }
 end-of-inline-data
