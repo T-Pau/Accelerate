@@ -454,7 +454,7 @@ void Assembler::parse_target() {
 }
 
 void Assembler::parse_use() {
-    auto name = tokenizer.expect(Token::STRING, TokenGroup::newline);
+    auto name = tokenizer.expect(Token::NAME, TokenGroup::newline);
 
     object_file->mark_used(name.as_symbol());
 }
