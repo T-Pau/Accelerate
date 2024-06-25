@@ -270,6 +270,7 @@ test_tya {
     tya
 }
 end-of-inline-data
+
 file 6502.lib {} <inline>
 .format_version 1.0
 .target "6502"

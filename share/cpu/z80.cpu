@@ -29,6 +29,8 @@
 
 .byte_order 12345678
 
+.syntax punctuation: "," "(" ")" "+"
+
 .syntax keywords: "af'"
 
 .argument_type byte range: 0, $ff
@@ -174,7 +176,7 @@
     arguments {
         r: i_or_r
     }
-    encoding: .opcode | r << 3
+    encoding: $ed, .opcode | r << 3
 }
 
 .addressing_mode a__register {
@@ -300,7 +302,7 @@
         d: signed_byte
         n: byte
     }
-    encoding: .opcode | i << 13, d, n
+    encoding: $dd | i << 5, .opcode, d, n
 }
 
 .addressing_mode indexed__register {
@@ -310,7 +312,7 @@
         d: signed_byte
         r: register
     }
-    encoding: .opcode | i << 13 | r << 3, d ; TODO: check if this is correct
+    encoding: $dd | i << 5, .opcode | r, d
 }
 
 .addressing_mode index_register {
@@ -318,7 +320,7 @@
     arguments {
         i: index_register
     }
-    encoding: .opcode | i << 13
+    encoding: $dd | i << 5, .opcode
 }
 
 .addressing_mode index_register__immediate {
@@ -327,7 +329,7 @@
         i: index_register
         nn: word
     }
-    encoding: .opcode | i << 13, nn
+    encoding: $dd | i << 5, .opcode, nn
 }
 
 .addressing_mode index_register__indirect {
@@ -336,7 +338,7 @@
         i: index_register
         nn: word
     }
-    encoding: .opcode | i << 13, nn
+    encoding: $dd | i << 5, .opcode, nn
 }
 
 .addressing_mode indirect__a {
@@ -369,7 +371,7 @@
         nn: word
         i: index_register
     }
-    encoding: .opcode | i << 13, nn
+    encoding: $dd | i << 5, .opcode, nn
 }
 
 .addressing_mode indirect__register_pair_sp {
@@ -378,7 +380,7 @@
         dd: register_pair_sp
         nn: word
     }
-    encoding: .opcode | dd << 4, nn
+    encoding: $ed, .opcode | dd << 4, nn
 }
 
 .addressing_mode indirect_hl {
@@ -434,7 +436,7 @@
     arguments {
         r: i_or_r
     }
-    encoding: .opcode | r << 3
+    encoding: $ed, .opcode | r << 3
 }
 
 .addressing_mode ix__register_pair_ix {
@@ -459,7 +461,7 @@
         r: register
         n: byte
     }
-    encoding: .opcode | r << 3
+    encoding: .opcode | r << 3, n
 }
 
 .addressing_mode register__indexed {
@@ -469,7 +471,7 @@
         i: index_register
         d: signed_byte
     }
-    encoding: .opcode | i << 13 | r << 3, d
+    encoding: $dd | i << 5, .opcode | r << 3, d
 }
 
 .addressing_mode register__indirect_c {
@@ -543,7 +545,7 @@
         dd: register_pair_sp
         nn: word
     }
-    encoding: .opcode | dd << 4, nn
+    encoding: $ed, .opcode | dd << 4, nn
 }
 
 .addressing_mode relative {
@@ -551,7 +553,7 @@
     arguments {
         address: word ; TODO: has to be close enough to .pc
     }
-    encoding: .opcode, address - .pc - 2 :1
+    encoding: .opcode, address - .pc - 2 :-1
 }
 
 .addressing_mode restart_address {
@@ -571,7 +573,7 @@
     arguments { 
         i: index_register
     }
-    encoding: .opcode | i << 13
+    encoding: $dd | i << 5, .opcode
 }
 
 
@@ -648,7 +650,7 @@
 
 .instruction dec {
     indexed: $dd35
-    index_register: $dd2b
+    index_register: $2b
     indirect_hl: $35
     register_high: $05
     register_pair_sp: $0b
@@ -692,7 +694,7 @@
 
 .instruction inc {
     indexed: $dd34
-    index_register: $dd23
+    index_register: $23
     indirect_hl: $34
     register_high: $04
     register_pair_sp: $03
@@ -728,26 +730,27 @@
 
 .instruction ld {
     indirect__a_bc_or_de: $02
-    i_or_r__a: $ed47
+    i_or_r__a: $47
     indirect__hl: $22
     sp__hl: $f9
-    indexed__immediate: $dd36
-    index_register__immediate: $dd21
+    indexed__immediate: $36
+    index_register__immediate: $21
+    indirect__a: $32
     indirect_hl__immediate: $36
     register__immediate: $06
     register_pair_sp__immediate: $01
-    register__indexed: $dd46
-    indirect__index_register: $dd22
-    sp__index_register: $ddf9
+    register__indexed: $46
+    indirect__index_register: $22
+    sp__index_register: $f9
     a__indirect_bc_or_de: $0a
     register__indirect_hl: $46
     a__indirect: $3a
     hl__indirect: $2a
-    index_register__indirect: $dd2a
-    register_pair_sp__indirect: $ed4b
-    a__i_or_r: $ed57
-    indirect__register_pair_sp: $ed43
-    indexed__register: $dd70
+    index_register__indirect: $2a
+    register_pair_sp__indirect: $4b
+    a__i_or_r: $57
+    indirect__register_pair_sp: $43
+    indexed__register: $70
     indirect_hl__register: $70
     register__register: $40
 }
@@ -805,12 +808,12 @@
 }
 
 .instruction pop {
-    index_register: $dde1
+    index_register: $e1
     register_pair_af: $c1
 }
 
 .instruction push {
-    index_register: $dde5
+    index_register: $e5
     register_pair_af: $c5
 }
 

@@ -164,10 +164,10 @@ Token FileTokenizer::next_raw() {
 
         std::string name;
         auto type = matcher.match(*current_source, name);
-        if (type.has_value()) {
+        if (type) {
             current_source->expand_location(location);
             last_was_newline = false;
-            return {type.value(), location, name};
+            return {*type, location, name};
         }
 
         current_source->reset_to(location);

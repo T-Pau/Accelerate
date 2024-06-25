@@ -1,0 +1,580 @@
+description Test Z80 CPU definition
+arguments --create-library --target z80 test.s
+file test.s <inline>
+.section code
+; 8-Bit Load Group
+
+test_071_ld_rr {
+    ld a,a
+    ld a,b
+    ld a,c
+    ld a,d
+    ld a,e
+    ld a,h
+    ld a,l
+
+    ld b,a
+    ld b,b
+    ld b,c
+    ld b,d
+    ld b,e
+    ld b,h
+    ld b,l
+
+    ld c,a
+    ld c,b
+    ld c,c
+    ld c,d
+    ld c,e
+    ld c,h
+    ld c,l
+
+    ld d,a
+    ld d,b
+    ld d,c
+    ld d,d
+    ld d,e
+    ld d,h
+    ld d,l
+
+    ld e,a
+    ld e,b
+    ld e,c
+    ld e,d
+    ld e,e
+    ld e,h
+    ld e,l
+
+    ld h,a
+    ld h,b
+    ld h,c
+    ld h,d
+    ld h,e
+    ld h,h
+    ld h,l
+
+    ld l,a
+    ld l,b
+    ld l,c
+    ld l,d
+    ld l,e
+    ld l,h
+    ld l,l
+}
+
+test_072_ld_rn {
+    ld a,$12
+    ld b,$12
+    ld c,$12
+    ld d,$12
+    ld e,$12
+    ld h,$12
+    ld l,$12
+}
+
+test_074_ld_rhl {
+    ld a,(hl)
+    ld b,(hl)
+    ld c,(hl)
+    ld d,(hl)
+    ld e,(hl)
+    ld h,(hl)
+    ld l,(hl)
+}
+
+test_075_ld_rixd {
+    ld a,(ix+$12)
+    ld b,(ix+$12)
+    ld c,(ix+$12)
+    ld d,(ix+$12)
+    ld e,(ix+$12)
+    ld h,(ix+$12)
+    ld l,(ix+$12)
+}
+
+test_077_ld_riyd {
+    ld a,(iy+$12)
+    ld b,(iy+$12)
+    ld c,(iy+$12)
+    ld d,(iy+$12)
+    ld e,(iy+$12)
+    ld h,(iy+$12)
+    ld l,(iy+$12)
+}
+
+test_079_ld_hlr {
+    ld (hl),a
+    ld (hl),b
+    ld (hl),c
+    ld (hl),d
+    ld (hl),e
+    ld (hl),h
+    ld (hl),l
+}
+
+test_081_ld_ixdr {
+    ld (ix+$12),a
+    ld (ix+$12),b
+    ld (ix+$12),c
+    ld (ix+$12),d
+    ld (ix+$12),e
+    ld (ix+$12),h
+    ld (ix+$12),l
+}
+
+test_083_ld_iydr {
+    ld (iy+$12),a
+    ld (iy+$12),b
+    ld (iy+$12),c
+    ld (iy+$12),d
+    ld (iy+$12),e
+    ld (iy+$12),h
+    ld (iy+$12),l
+}
+
+test_085_ld_hln {
+    ld (hl), $12
+}
+
+test_086_ld_ixdn {
+    ld (ix+$12),$34
+}
+
+test_087_ld_iydn {
+    ld (iy+$12),$34
+}
+
+test_088_ld_abc {
+    ld a,(bc)
+}
+
+test_089_ld_ade {
+    ld a,(de)
+}
+
+test_090_ld_ann {
+    ld a,($1234)
+}
+
+test_091_ld_bca {
+    ld (bc),a
+}
+
+test_092_ld_dea {
+    ld (de),a
+}
+
+test_093_ld_nna {
+    ld ($1234),a
+}
+
+test_094_ld_ai {
+    ld a,i
+}
+
+test_095_ld_ar {
+    ld a,r
+}
+
+test_096_ld_ia {
+    ld i,a
+}
+
+test_097_ld_ra {
+    ld r,a
+}
+
+
+; 16-Bit Load Group
+
+test_099_ld_ddnn {
+    ld bc,$1234
+    ld de,$1234
+    ld hl,$1234
+    ld sp,$1234
+}
+
+test_100_ld_ixnn {
+    ld ix,$1234
+}
+
+test_101_ld_iynn {
+    ld iy,$1234
+}
+
+test_102_ld_hlnn {
+    ld hl,($1234)
+}
+
+test_103_ld_ddnn {
+    ld bc,($1234)
+    ld de,($1234)
+    ; ld hl,($1234) -- this has a shorter variant
+    ld sp,($1234)
+}
+
+test_105_ld_ixnn {
+    ld ix,($1234)
+}
+
+test_106_ld_iynn {
+    ld iy,($1234)
+}
+
+test_107_ld_nnhl {
+    ld ($1234),hl
+}
+
+test_108_ld_nndd {
+    ld ($1234),bc
+    ld ($1234),de
+    ; ld ($1234),hl -- this has a shorter variant
+    ld ($1234),sp
+}
+
+test_110_ld_nnix {
+    ld ($1234),ix
+}
+
+test_111_ld_nniy {
+    ld ($1234),iy
+}
+
+test_112_ld_sphl {
+    ld sp,hl
+}
+
+test_113_ld_spix {
+    ld sp,ix
+}
+
+test_114_ld_spiy {
+    ld sp,iy
+}
+
+test_115_push_qq {
+    push bc
+    push de
+    push hl
+    push af
+}
+
+test_117_push_ix {
+    push ix
+}
+
+test_118_push_iy {
+    push iy
+}
+
+test_119_pop_qq {
+    pop bc
+    pop de
+    pop hl
+    pop af
+}
+
+test_121_pop_ix {
+    pop ix
+}
+
+test_122_pop_iy {
+    pop iy
+}
+
+
+; Exchange, Block Transfer, and Search Group
+
+end-of-inline-data
+
+file test.lib {} <inline>
+.format_version 1.0
+.target "z80"
+.object test_071_ld_rr {
+    visibility: private
+    section: code
+    body <
+        .data $7f, $78, $79, $7a, $7b, $7c, $7d, $47, $40, $41, $42, $43, $44, $45, $4f, $48, $49, $4a, $4b, $4c, $4d, $57, $50, $51, $52, $53, $54, $55, $5f, $58, $59, $5a, $5b, $5c, $5d, $67, $60, $61, $62, $63, $64, $65, $6f, $68, $69, $6a, $6b, $6c, $6d
+    >
+}
+.object test_072_ld_rn {
+    visibility: private
+    section: code
+    body <
+        .data $3e, $12, $06, $12, $0e, $12, $16, $12, $1e, $12, $26, $12, $2e, $12
+    >
+}
+.object test_074_ld_rhl {
+    visibility: private
+    section: code
+    body <
+        .data $7e, $46, $4e, $56, $5e, $66, $6e
+    >
+}
+.object test_075_ld_rixd {
+    visibility: private
+    section: code
+    body <
+        .data $dd, $7e, $12, $dd, $46, $12, $dd, $4e, $12, $dd, $56, $12, $dd, $5e, $12, $dd, $66, $12, $dd, $6e, $12
+    >
+}
+.object test_077_ld_riyd {
+    visibility: private
+    section: code
+    body <
+        .data $fd, $7e, $12, $fd, $46, $12, $fd, $4e, $12, $fd, $56, $12, $fd, $5e, $12, $fd, $66, $12, $fd, $6e, $12
+    >
+}
+.object test_079_ld_hlr {
+    visibility: private
+    section: code
+    body <
+        .data $77, $70, $71, $72, $73, $74, $75
+    >
+}
+.object test_081_ld_ixdr {
+    visibility: private
+    section: code
+    body <
+        .data $dd, $77, $12, $dd, $70, $12, $dd, $71, $12, $dd, $72, $12, $dd, $73, $12, $dd, $74, $12, $dd, $75, $12
+    >
+}
+.object test_083_ld_iydr {
+    visibility: private
+    section: code
+    body <
+        .data $fd, $77, $12, $fd, $70, $12, $fd, $71, $12, $fd, $72, $12, $fd, $73, $12, $fd, $74, $12, $fd, $75, $12
+    >
+}
+.object test_085_ld_hln {
+    visibility: private
+    section: code
+    body <
+        .data $36, $12
+    >
+}
+.object test_086_ld_ixdn {
+    visibility: private
+    section: code
+    body <
+        .data $dd, $36, $12, $34
+    >
+}
+.object test_087_ld_iydn {
+    visibility: private
+    section: code
+    body <
+        .data $fd, $36, $12, $34
+    >
+}
+.object test_088_ld_abc {
+    visibility: private
+    section: code
+    body <
+        .data $0a
+    >
+}
+.object test_089_ld_ade {
+    visibility: private
+    section: code
+    body <
+        .data $1a
+    >
+}
+.object test_090_ld_ann {
+    visibility: private
+    section: code
+    body <
+        .data $3a, $1234
+    >
+}
+.object test_091_ld_bca {
+    visibility: private
+    section: code
+    body <
+        .data $02
+    >
+}
+.object test_092_ld_dea {
+    visibility: private
+    section: code
+    body <
+        .data $12
+    >
+}
+.object test_093_ld_nna {
+    visibility: private
+    section: code
+    body <
+        .data $32, $1234
+    >
+}
+.object test_094_ld_ai {
+    visibility: private
+    section: code
+    body <
+        .data $ed, $57
+    >
+}
+.object test_095_ld_ar {
+    visibility: private
+    section: code
+    body <
+        .data $ed, $5f
+    >
+}
+.object test_096_ld_ia {
+    visibility: private
+    section: code
+    body <
+        .data $ed, $47
+    >
+}
+.object test_097_ld_ra {
+    visibility: private
+    section: code
+    body <
+        .data $ed, $4f
+    >
+}
+.object test_099_ld_ddnn {
+    visibility: private
+    section: code
+    body <
+        .data $01, $1234, $11, $1234, $21, $1234, $31, $1234
+    >
+}
+.object test_100_ld_ixnn {
+    visibility: private
+    section: code
+    body <
+        .data $dd, $21, $1234
+    >
+}
+.object test_101_ld_iynn {
+    visibility: private
+    section: code
+    body <
+        .data $fd, $21, $1234
+    >
+}
+.object test_102_ld_hlnn {
+    visibility: private
+    section: code
+    body <
+        .data $2a, $1234
+    >
+}
+.object test_103_ld_ddnn {
+    visibility: private
+    section: code
+    body <
+        .data $ed, $4b, $1234, $ed, $5b, $1234, $ed, $7b, $1234
+    >
+}
+.object test_105_ld_ixnn {
+    visibility: private
+    section: code
+    body <
+        .data $dd, $2a, $1234
+    >
+}
+.object test_106_ld_iynn {
+    visibility: private
+    section: code
+    body <
+        .data $fd, $2a, $1234
+    >
+}
+.object test_107_ld_nnhl {
+    visibility: private
+    section: code
+    body <
+        .data $22, $1234
+    >
+}
+.object test_108_ld_nndd {
+    visibility: private
+    section: code
+    body <
+        .data $ed, $43, $1234, $ed, $53, $1234, $ed, $73, $1234
+    >
+}
+.object test_110_ld_nnix {
+    visibility: private
+    section: code
+    body <
+        .data $dd, $22, $1234
+    >
+}
+.object test_111_ld_nniy {
+    visibility: private
+    section: code
+    body <
+        .data $fd, $22, $1234
+    >
+}
+.object test_112_ld_sphl {
+    visibility: private
+    section: code
+    body <
+        .data $f9
+    >
+}
+.object test_113_ld_spix {
+    visibility: private
+    section: code
+    body <
+        .data $dd, $f9
+    >
+}
+.object test_114_ld_spiy {
+    visibility: private
+    section: code
+    body <
+        .data $fd, $f9
+    >
+}
+.object test_115_push_qq {
+    visibility: private
+    section: code
+    body <
+        .data $c5, $d5, $e5, $f5
+    >
+}
+.object test_117_push_ix {
+    visibility: private
+    section: code
+    body <
+        .data $dd, $e5
+    >
+}
+.object test_118_push_iy {
+    visibility: private
+    section: code
+    body <
+        .data $fd, $e5
+    >
+}
+.object test_119_pop_qq {
+    visibility: private
+    section: code
+    body <
+        .data $c1, $d1, $e1, $f1
+    >
+}
+.object test_121_pop_ix {
+    visibility: private
+    section: code
+    body <
+        .data $dd, $e1
+    >
+}
+.object test_122_pop_iy {
+    visibility: private
+    section: code
+    body <
+        .data $fd, $e1
+    >
+}
+end-of-inline-data
