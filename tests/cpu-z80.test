@@ -1147,6 +1147,69 @@ test_292_rst_p {
     rst $38
 }
 
+
+; Input and Output Group
+
+test_295_in_an {
+    in a,($12)
+}
+
+test_296_in_rc {
+    in b,(c)
+    in c,(c)
+    in d,(c)
+    in e,(c)
+    in h,(c)
+    in l,(c)
+    in a,(c)
+}
+
+test_298_ini {
+    ini
+}
+
+test_300_inir {
+    inir
+}
+
+test_302_ind {
+    ind
+}
+
+test_304_indr {
+    indr
+}
+
+test_306_out_na {
+    out ($12),a
+}
+
+test_307_out_cr {
+    out (c),b
+    out (c),c
+    out (c),d
+    out (c),e
+    out (c),h
+    out (c),l
+    out (c),a
+}
+
+test_309_outi {
+    outi
+}
+
+test_311_outir {
+    outir
+}
+
+test_313_outd {
+    outd
+}
+
+test_315_outdr {
+    outdr
+}
+
 end-of-inline-data
 
 file test.lib {} <inline>
@@ -2116,6 +2179,90 @@ file test.lib {} <inline>
     section: code
     body <
         .data $c7, $cf, $d7, $df, $e7, $ef, $f7, $ff
+    >
+}
+.object test_295_in_an {
+    visibility: private
+    section: code
+    body <
+        .data $db, $12
+    >
+}
+.object test_296_in_rc {
+    visibility: private
+    section: code
+    body <
+        .data $ed, $40, $ed, $48, $ed, $50, $ed, $58, $ed, $60, $ed, $68, $ed, $78
+    >
+}
+.object test_298_ini {
+    visibility: private
+    section: code
+    body <
+        .data $ed, $a2
+    >
+}
+.object test_300_inir {
+    visibility: private
+    section: code
+    body <
+        .data $ed, $b2
+    >
+}
+.object test_302_ind {
+    visibility: private
+    section: code
+    body <
+        .data $ed, $aa
+    >
+}
+.object test_304_indr {
+    visibility: private
+    section: code
+    body <
+        .data $ed, $ba
+    >
+}
+.object test_306_out_na {
+    visibility: private
+    section: code
+    body <
+        .data $d3, $12
+    >
+}
+.object test_307_out_cr {
+    visibility: private
+    section: code
+    body <
+        .data $ed, $41, $ed, $49, $ed, $51, $ed, $59, $ed, $61, $ed, $69, $ed, $79
+    >
+}
+.object test_309_outi {
+    visibility: private
+    section: code
+    body <
+        .data $ed, $a3
+    >
+}
+.object test_311_outir {
+    visibility: private
+    section: code
+    body <
+        .data $ed, $b3
+    >
+}
+.object test_313_outd {
+    visibility: private
+    section: code
+    body <
+        .data $ed, $ab
+    >
+}
+.object test_315_outdr {
+    visibility: private
+    section: code
+    body <
+        .data $ed, $bb
     >
 }
 end-of-inline-data

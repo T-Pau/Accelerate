@@ -163,6 +163,14 @@
     encoding: .opcode | rr << 4
 }
 
+.addressing_mode a__indirect_byte {
+    notation: a,(n)
+    arguments {
+        n: byte
+    }
+    encoding: .opcode, n
+}
+
 .addressing_mode a__indirect_de {
     notation: a,(de)
 }
@@ -201,7 +209,7 @@
 }
 
 .addressing_mode basic_condition__relative {
-    notation: cc, nn
+    notation: cc,nn
     arguments {
         cc: basic_condition
         nn: word
@@ -228,7 +236,7 @@
 }
 
 .addressing_mode bit_number__register {
-    notation: b, r
+    notation: b,r
     arguments {
         b: bit_number
         r: register
@@ -245,7 +253,7 @@
 }
 
 .addressing_mode condition__address {
-    notation: cc, nn
+    notation: cc,nn
     arguments {
         cc: condition
         nn: word
@@ -284,9 +292,9 @@
     notation:
 }
 
-.addressing_mode implied_16 {
+.addressing_mode implied__extended {
     notation:
-    encoding: >.opcode, <.opcode
+    encoding: $ed, .opcode
 }
 
 .addressing_mode indexed {
@@ -395,6 +403,22 @@
     encoding: $ed, .opcode | dd << 4, nn
 }
 
+.addressing_mode indirect_byte__a {
+    notation: (n),a
+    arguments {
+        n: byte
+    }
+    encoding: .opcode, n
+}
+
+.addressing_mode indirect_c__register {
+    notation: (c),r
+    arguments {
+        r: register
+    }
+    encoding: $ed, .opcode | r << 3
+}
+
 .addressing_mode indirect_hl {
     notation: (hl)
 }
@@ -457,7 +481,7 @@
 }
 
 .addressing_mode ix__register_pair_ix {
-    notation: ix, pp
+    notation: ix,pp
     arguments {
         pp: register_pair_ix
     }
@@ -465,7 +489,7 @@
 }
 
 .addressing_mode iy__register_pair_iy {
-    notation: iy, pp
+    notation: iy,pp
     arguments {
         pp: register_pair_iy
     }
@@ -492,11 +516,11 @@
 }
 
 .addressing_mode register__indirect_c {
-    notation: r, (c)
+    notation: r,(c)
     arguments {
         r: register
     }
-    encoding: .opcode | r << 3
+    encoding: $ed, .opcode | r << 3
 }
 
 .addressing_mode register__indirect_hl {
@@ -548,7 +572,7 @@
 }
 
 .addressing_mode register_pair_sp__immediate {
-    notation: dd, nn
+    notation: dd,nn
     arguments {
         dd: register_pair_sp
         nn: word
@@ -642,19 +666,19 @@
 }
 
 .instruction cpd {
-    implied_16: $eda9
+    implied__extended: $a9
 }
 
 .instruction cpdr {
-    implied_16: $edb9
+    implied__extended: $b9
 }
 
 .instruction cpi {
-    implied_16: $eda1
+    implied__extended: $a1
 }
 
 .instruction cpir {
-    implied_16: $edb1
+    implied__extended: $b1
 }
 
 .instruction cpl {
@@ -705,8 +729,8 @@
 }
 
 .instruction in {
-    a__indirect: $db
-    register__indirect_c: $ed40
+    a__indirect_byte: $db
+    register__indirect_c: $40
 }
 
 .instruction inc {
@@ -718,19 +742,19 @@
 }
 
 .instruction ind {
-    implied_16: $edaa
+    implied__extended: $aa
 }
 
 .instruction indr {
-    implied_16: $edba
+    implied__extended: $ba
 }
 
 .instruction ini {
-    implied_16: $eda2
+    implied__extended: $a2
 }
 
 .instruction inir {
-    implied_16: $edb2
+    implied__extended: $b2
 }
 
 .instruction jp {
@@ -773,23 +797,23 @@
 }
 
 .instruction ldd {
-    implied_16: $eda8
+    implied__extended: $a8
 }
 
 .instruction lddr {
-    implied_16: $edb8
+    implied__extended: $b8
 }
 
 .instruction ldi {
-    implied_16: $eda0
+    implied__extended: $a0
 }
 
 .instruction ldir {
-    implied_16: $edb0
+    implied__extended: $b0
 }
 
 .instruction neg {
-    implied_16: $ed44
+    implied__extended: $44
 }
 
 .instruction nop {
@@ -804,24 +828,24 @@
 }
 
 .instruction out {
-    a__indirect: $d3
-    register__indirect_c: $ed41
+    indirect_byte__a: $d3
+    indirect_c__register: $41
 }
 
 .instruction outd {
-    implied_16: $edab
+    implied__extended: $ab
 }
 
 .instruction outdr {
-    implied_16: $edbb
+    implied__extended: $bb
 }
 
 .instruction outi {
-    implied_16: $eda3
+    implied__extended: $a3
 }
 
 .instruction outir {
-    implied_16: $edb3
+    implied__extended: $b3
 }
 
 .instruction pop {
@@ -846,11 +870,11 @@
 }
 
 .instruction reti {
-    implied_16: $ed4d
+    implied__extended: $4d
 }
 
 .instruction retn {
-    implied_16: $ed45
+    implied__extended: $45
 }
 
 .instruction rl {
@@ -874,7 +898,7 @@
 }
 
 .instruction rld {
-    implied_16: $ed6f
+    implied__extended: $6f
 }
 
 .instruction rr {
@@ -898,7 +922,7 @@
 }
 
 .instruction rrd {
-    implied_16: $ed67
+    implied__extended: $67
 }
 
 .instruction rst {
