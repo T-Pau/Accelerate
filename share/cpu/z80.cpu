@@ -108,16 +108,16 @@
 
 .argument_type register_pair_ix enum {
     bc: 0
-    de: 01
-    ix: 10
-    sp: 11
+    de: 1
+    ix: 2
+    sp: 3
 }
 
 .argument_type register_pair_iy enum {
     bc: 0
-    de: 01
-    iy: 10
-    sp: 11
+    de: 1
+    iy: 2
+    sp: 3
 }
 
 .argument_type register_pair_sp enum {
@@ -144,7 +144,7 @@
         i: index_register
         d: signed_byte
     }
-    encoding: .opcode | i << 13, d
+    encoding: $dd | i << 5, .opcode, d
 }
 
 .addressing_mode a__indirect {
@@ -206,7 +206,7 @@
         cc: basic_condition
         nn: word
     }
-    encoding: .opcode | cc << 3, nn - .pc - 2 ; : 1
+    encoding: .opcode | cc << 3, nn - .pc - 2 :-1
 }
 
 .addressing_mode bit_number__indexed {
@@ -216,7 +216,7 @@
         i: index_register
         d: signed_byte
     }
-    encoding: .opcode | i << 29 | d << 8 | b << 3
+    encoding: $dd | i << 5, $cb, d, .opcode | b << 3
 }
 
 .addressing_mode bit_number__indirect_hl {
@@ -224,7 +224,7 @@
     arguments {
         b: bit_number
     }
-    encoding: .opcode | b << 3
+    encoding: $cb, .opcode | b << 3
 }
 
 .addressing_mode bit_number__register {
@@ -233,7 +233,7 @@
         b: bit_number
         r: register
     }
-    encoding: .opcode | b << 3 | r
+    encoding: $cb, .opcode | b << 3 | r
 }
 
 .addressing_mode condition {
@@ -266,13 +266,20 @@
 }
 
 .addressing_mode hl__register_pair_sp {
-    notation: (hl),dd
+    notation: hl,dd
     arguments {
         dd: register_pair_sp
     }
     encoding: .opcode | dd << 4
 }
 
+.addressing_mode hl__register_pair_sp__extended {
+    notation: hl,dd
+    arguments {
+        dd: register_pair_sp
+    }
+    encoding: $ed, .opcode | dd << 4
+}
 .addressing_mode implied {
     notation:
 }
@@ -288,16 +295,16 @@
         i: index_register
         d: signed_byte
     }
-    encoding: .opcode | i << 13, d
+    encoding: $dd | i << 5, .opcode, d
 }
 
-.addressing_mode indexed_extended {
+.addressing_mode indexed__extended {
     notation: (i+d)
     arguments {
         i: index_register
         d: signed_byte
     }
-    encoding: .opcode | i << 29 | d << 8
+    encoding: $dd | i << 5, $cb, d, .opcode
 }
 
 .addressing_mode indexed__immediate {
@@ -392,6 +399,11 @@
     notation: (hl)
 }
 
+.addressing_mode indirect_hl__extended {
+    notation: (hl)
+    encoding: $cb, .opcode
+}
+
 .addressing_mode indirect_hl__immediate {
     notation: (hl),n
     arguments {
@@ -409,11 +421,11 @@
 }
 
 .addressing_mode indirect_index {
-    notation: i
+    notation: (i)
     arguments {
         i: index_register
     }
-    encoding: .opcode | i << 13
+    encoding: $dd | i << 5, .opcode
 }
 
 .addressing_mode indirect_sp__hl {
@@ -433,7 +445,7 @@
     arguments {
         m: interrupt_mode
     }
-    encoding: .opcode | m << 3
+    encoding: $ed, .opcode | m << 3
 }
 
 .addressing_mode i_or_r__a {
@@ -449,7 +461,7 @@
     arguments {
         pp: register_pair_ix
     }
-    encoding: .opcode | pp << 4
+    encoding: $dd, .opcode | pp << 4
 }
 
 .addressing_mode iy__register_pair_iy {
@@ -457,7 +469,7 @@
     arguments {
         pp: register_pair_iy
     }
-    encoding: .opcode | pp << 4
+    encoding: $fd, .opcode | pp << 4
 }
 
 .addressing_mode register__immediate {
@@ -500,7 +512,7 @@
     arguments {
         r: register
     }
-    encoding: .opcode | r
+    encoding: $cb, .opcode | r
 }
 .addressing_mode register_high {
     notation: r
@@ -566,7 +578,7 @@
     arguments {
         p: restart_address
     }
-    encoding: .opcode | (p / 8) << 3
+    encoding: .opcode | p << 3
 }
 
 .addressing_mode sp__hl {
@@ -584,33 +596,33 @@
 
 .instruction adc {
     a__immediate: $ce
-    a__indexed: $dd8e
+    a__indexed: $8e
     a__indirect_hl: $8e
     a__register: $88
-    hl__register_pair_sp: $ed4a
+    hl__register_pair_sp__extended: $4a
 }
 
 .instruction add {
     a__immediate: $c6
-    a__indexed: $dd86
+    a__indexed: $86
     a__indirect_hl: $86
     a__register: $80
-    ix__register_pair_ix: $dd09
-    iy__register_pair_iy: $fd09
+    ix__register_pair_ix: $09
+    iy__register_pair_iy: $09
     hl__register_pair_sp: $09
 }
 
 .instruction and {
     a__immediate: $e6
-    a__indexed: $dda6
+    a__indexed: $a6
     a__indirect_hl: $a6
     a__register: $a0
 }
 
 .instruction bit {
-    bit_number__indexed: $ddcb0046
-    bit_number__indirect_hl: $cb46
-    bit_number__register: $cb40
+    bit_number__indexed: $46
+    bit_number__indirect_hl: $46
+    bit_number__register: $40
 }
 
 .instruction call {
@@ -624,7 +636,7 @@
 
 .instruction cp {
     a__immediate: $fe
-    a__indexed: $ddbe
+    a__indexed: $be
     a__indirect_hl: $be
     a__register: $b8
 }
@@ -654,7 +666,7 @@
 }
 
 .instruction dec {
-    indexed: $dd35
+    indexed: $35
     index_register: $2b
     indirect_hl: $35
     register_high: $05
@@ -689,7 +701,7 @@
 }
 
 .instruction im {
-    interrupt_mode: $ed46
+    interrupt_mode: $46
 }
 
 .instruction in {
@@ -698,7 +710,7 @@
 }
 
 .instruction inc {
-    indexed: $dd34
+    indexed: $34
     index_register: $23
     indirect_hl: $34
     register_high: $04
@@ -723,14 +735,14 @@
 
 .instruction jp {
     address: $c3
-    condition__address: $42
-    basic_condition__relative: $20
+    condition__address: $c2
     indirect_hl: $e9
-    indirect_index: $dde9
+    indirect_index: $e9
 }
 
 .instruction jr {
     relative: $18
+    basic_condition__relative: $20
 }
 
 .instruction ld {
@@ -786,7 +798,7 @@
 
 .instruction or {
     a__immediate: $f6
-    a__indexed: $ddb6
+    a__indexed: $b6
     a__indirect_hl: $b6
     a__register: $b0
 }
@@ -823,9 +835,9 @@
 }
 
 .instruction res {
-    bit_number__indexed: $ddcb0086
-    bit_number__indirect_hl: $cb86
-    bit_number__register: $cb80
+    bit_number__indexed: $86
+    bit_number__indirect_hl: $86
+    bit_number__register: $80
 }
 
 .instruction ret {
@@ -842,9 +854,9 @@
 }
 
 .instruction rl {
-    register_low: $cb10
-    indexed_extended: $ddcb0016
-    indirect_hl: $cb16
+    register_low: $10
+    indexed__extended: $16
+    indirect_hl__extended: $16
 }
 
 .instruction rla {
@@ -852,9 +864,9 @@
 }
 
 .instruction rlc {
-    register_low: $cb00
-    indexed_extended: $ddcb0016
-    indirect_hl: $cb06
+    register_low: $00
+    indexed__extended: $06
+    indirect_hl__extended: $06
 }
 
 .instruction rlca {
@@ -866,9 +878,9 @@
 }
 
 .instruction rr {
-    register_low: $cb18 ; TODO: user manual has it as $cb08, which is rrc
-    indexed_extended: $ddcb001e
-    indirect_hl: $cb1e
+    register_low: $18 ; TODO: user manual has it as $08, which is rrc
+    indexed__extended: $1e
+    indirect_hl__extended: $1e
 }
 
 .instruction rra {
@@ -876,9 +888,9 @@
 }
 
 .instruction rrc {
-    register_low: $cb08
-    indexed_extended: $ddcb000e
-    indirect_hl: $cb0e
+    register_low: $08
+    indexed__extended: $0e
+    indirect_hl__extended: $0e
 }
 
 .instruction rrca {
@@ -890,15 +902,15 @@
 }
 
 .instruction rst {
-    restart_address: $c3
+    restart_address: $c7
 }
 
 .instruction sbc {
     a__immediate: $de
-    a__indexed: $dd9e
+    a__indexed: $9e
     a__indirect_hl: $9e
     a__register: $98
-    hl__register_pair_sp: $ed42
+    hl__register_pair_sp__extended: $42
 }
 
 .instruction scf {
@@ -906,39 +918,39 @@
 }
 
 .instruction set {
-    bit_number__indexed: $ddcb00c6
-    bit_number__indirect_hl: $cbc6
-    bit_number__register: $cbc0
+    bit_number__indexed: $c6
+    bit_number__indirect_hl: $c6
+    bit_number__register: $c0
 }
 
 .instruction sla {
-    register_low: $cb20
-    indexed_extended: $ddcb0026
-    indirect_hl: $cb26
+    register_low: $20
+    indexed__extended: $26
+    indirect_hl__extended: $26
 }
 
 .instruction sra {
-    register_low: $cb28
-    indexed_extended: $ddcb002e
-    indirect_hl: $cb2e
+    register_low: $28
+    indexed__extended: $2e
+    indirect_hl__extended: $2e
 }
 
 .instruction srl {
-    register_low: $cb38
-    indexed_extended: $ddcb003e
-    indirect_hl: $cb3e
+    register_low: $38
+    indexed__extended: $3e
+    indirect_hl__extended: $3e
 }
 
 .instruction sub {
     a__immediate: $d6
-    a__indexed: $dd96
+    a__indexed: $96
     a__indirect_hl: $96
     a__register: $90
 }
 
 .instruction xor {
     a__immediate: $ee
-    a__indexed: $ddae
+    a__indexed: $ae
     a__indirect_hl: $ae
     a__register: $a8
 }
