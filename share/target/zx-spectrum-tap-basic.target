@@ -1,0 +1,67 @@
+.define ZX_SPECTRUM
+
+.include "zx-spectrum-tap.inc"
+
+.public .default PROGRAM_NAME = "Program"
+.pulbic .default LINE_NUMBER = 10
+
+.public loading_screen_start = $4000
+.public loading_screen_end = loading_screen_start + $17ff
+basic_start = $5ccb
+.public .default program_start = $8000
+.public .default program_end = $ffff
+
+.section loading_screen {
+    address: loading_screen_start - loading_screen_end
+}
+
+.section basic {
+    address: basic_start - program_start
+}
+
+.segment program {
+    address: program_start - program_end
+}
+
+.section code {
+    segment: program
+}
+
+.section data {
+    segment: program
+}
+
+.section: reserved {
+    type: reserve_only
+    segment: program
+}
+
+.section basic
+
+CLEAR = $fb
+LOAD = $ef
+POKE = $f4
+RANOMIZE = f9
+SCREEN = $aa
+USR = $c0
+VAL = $b0
+
+basic .address basic_start .used {
+    .data LINE_NUMBER:big_endian(2), line_end - line_start:2
+line_start:
+    .data CLEAR, VAL, "\"", program_start:string, "\":"
+    .data POKE, VAL, "\"23739\",", VAL, "\"111:\""
+    .if .memory_start == loading_screen {
+        .data LOAD, "\"\"SCREEN$:"
+    }
+    .data LOAD, "\"\"", CODE, ":", RANDOMIZE, USR, VAL, "\"", start, "\"\n"
+line_end:
+}
+
+.output {
+    tap_file_program PROGRAM_NAME, basic_start, basic_start + .sizeof(basic) -  1, LINE_NUMBER
+    .if .memory_start == loading_screen {
+        tap_file_code "screen", loading_screen, loading_screen_end
+    }
+    tap_file_code "code", program_start, .memory_end
+}
