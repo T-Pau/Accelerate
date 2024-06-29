@@ -16,7 +16,7 @@ TAP_FILE_NUMBER_ARRAY = 1
 TAP_FILE_CHARACTER_ARRAY = 1
 TAP_FILE_CODE = 3
 
-.macro tap_file type, name, start, end, parameter_1, paramter_2 = 0 {
+.macro tap_file type, name, start, end, parameter_1, parameter_2 = 0 {
     ; header block
     .data $13:2 ; size
 header_start:
@@ -33,19 +33,6 @@ data_start:
     .data $ff ; block type
     .memory start, end
 .data_end:
-    ; .checksum "xor", data_start, data_end - 1
+    ; .checksum xor, data_start, data_end - 1
     .data $00 ; TODO: checksum
-}
-
-.macro tap_file_program name, start, end, line_number {
-    tap_file TAP_FILE_PROGRAM, name, start, end, line_number, end
-}
-
-.macro tap_file_code name, start, end, address = .none {
-    .if address == .none {
-        tap_file TAP_FILE_CODE, name, start, end, start
-    }
-    .else {
-        tap_file TAP_FILE_CODE, name, start, end, address
-    }
 }

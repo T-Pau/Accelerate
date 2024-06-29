@@ -1,15 +1,18 @@
 .define ZX_SPECTRUM
+.cpu "z80"
 
+.include "zx-spectrum-encoding.inc"
 .include "zx-spectrum-tap.inc"
 
-.public .default PROGRAM_NAME = "Program"
-.pulbic .default LINE_NUMBER = 10
+.default .public PROGRAM_NAME = "Program"
+.default .public LINE_NUMBER = 10
+.default .public INCLUDE_LOADING_SCREEN = .false
 
 .public loading_screen_start = $4000
-.public loading_screen_end = loading_screen_start + $17ff
+.public loading_screen_end = $57ff ; XLR8: loading_screen_start + $17ff
 basic_start = $5ccb
-.public .default program_start = $8000
-.public .default program_end = $ffff
+.default .public program_start = $8000
+.default .public program_end = $ffff
 
 .section loading_screen {
     address: loading_screen_start - loading_screen_end
@@ -31,37 +34,29 @@ basic_start = $5ccb
     segment: program
 }
 
-.section: reserved {
+.section reserved {
     type: reserve_only
     segment: program
 }
 
 .section basic
 
-CLEAR = $fb
-LOAD = $ef
-POKE = $f4
-RANOMIZE = f9
-SCREEN = $aa
-USR = $c0
-VAL = $b0
-
 basic .address basic_start .used {
     .data LINE_NUMBER:big_endian(2), line_end - line_start:2
 line_start:
-    .data CLEAR, VAL, "\"", program_start:string, "\":"
-    .data POKE, VAL, "\"23739\",", VAL, "\"111:\""
-    .if .memory_start == loading_screen {
-        .data LOAD, "\"\"SCREEN$:"
+    .data "{{clear}}{val}}\"", program_start:string, "\":"
+    .data "{{poke}}{{val}}\"23739\",{{val}}\"111:\""
+    .if INCLUDE_LOADING_SCREEN {
+        .data "{{load}}\"\"{{screen$}}:"
     }
-    .data LOAD, "\"\"", CODE, ":", RANDOMIZE, USR, VAL, "\"", start, "\"\n"
+    .data "{{load}}\"\"{{code}}:{{randomize}}{{usr}}{{val}}\"", start:string, "\"{{enter}}"
 line_end:
 }
 
 .output {
     tap_file_program PROGRAM_NAME, basic_start, basic_start + .sizeof(basic) -  1, LINE_NUMBER
-    .if .memory_start == loading_screen {
-        tap_file_code "screen", loading_screen, loading_screen_end
+    .if INCLUDE_LOADING_SCREEN {
+        tap_file_code "screen", loading_screen_start, loading_screen_end
     }
-    tap_file_code "code", program_start, .memory_end
+    tap_file_code "code", program_start, .data_end
 }

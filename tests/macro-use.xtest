@@ -1,0 +1,22 @@
+arguments --target c64-basic --symbol-map a.sym a.s
+file a.s <inline>
+.macro call {
+    store $1000, string
+}
+.macro store address, value {
+    lda #<value
+    sta address
+    lda #>value
+    sta address + 1
+}
+.section data
+string {
+    .data $01, $02, $03
+}
+.section code
+.public start {
+    call
+}
+end-of-inline-data
+file a.sym {} <>
+end-of-inline-data

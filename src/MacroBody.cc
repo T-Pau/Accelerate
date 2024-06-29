@@ -62,6 +62,7 @@ std::optional<Body> MacroBody::evaluated(const EvaluationContext& context) const
                 if (!context.conditional) {
                     auto expanded = new_macro->expand(new_arguments, context.environment);
                     expanded.evaluate(context);
+                    //context.result.used_objects.insert(new_macro->referenced_objects.begin(), new_macro->referenced_objects.end());
                     return expanded;
                 }
             }

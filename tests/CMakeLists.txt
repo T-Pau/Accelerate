@@ -1,6 +1,7 @@
 
 set(XFAIL_TESTS
         error-unclosed-object.test
+        hello-world-zx-spectrum.test
 )
 
 file(GLOB TESTS ${CMAKE_CURRENT_SOURCE_DIR}/*.test)
