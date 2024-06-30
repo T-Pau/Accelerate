@@ -61,8 +61,13 @@ bool StringEncoder::is_natural_encoder(const Value& value) const {
 }
 
 void StringEncoder::serialize(std::ostream& stream) const {
-    stream << *string_encoding;
+    if (string_encoding != Target::current_target->default_string_encoding) {
+        stream << ":" << *string_encoding;
+    }
     if (size) {
+        if (string_encoding == Target::current_target->default_string_encoding) {
+            stream << ":string";
+        }
         stream << "(" << *size << ")";
     }
 }

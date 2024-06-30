@@ -44,8 +44,8 @@ basic_start = $5ccb
 basic .address basic_start .used {
     .data LINE_NUMBER:big_endian(2), line_end - line_start:2
 line_start:
-    .data "{{clear}}{val}}\"", program_start:string, "\":"
-    .data "{{poke}}{{val}}\"23739\",{{val}}\"111:\""
+    .data "{{clear}}{{val}}\"", program_start - 1:string, "\":"
+    .data "{{poke}}{{val}}\"23739\",{{val}}\"111\":"
     .if INCLUDE_LOADING_SCREEN {
         .data "{{load}}\"\"{{screen$}}:"
     }

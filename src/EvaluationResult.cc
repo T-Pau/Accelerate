@@ -30,6 +30,3 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include "EvaluationResult.h"
-
-#include "LabelExpression.h"
-

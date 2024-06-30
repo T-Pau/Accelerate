@@ -1,5 +1,5 @@
 /*
-EvaluationResult.cc --
+ChecksumAlgorithm.cc --
 
 Copyright (C) Dieter Baron
 
@@ -29,33 +29,24 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef EVALUATION_RESULT_H
-#define EVALUATION_RESULT_H
+#include "ChecksumAlgorithm.h"
 
-#include <unordered_set>
+#include "ChecksumAlgorithmXor.h"
 
-#include "ChecksumComputation.h"
-#include "Symbol.h"
-#include "Value.h"
-
-class LabelExpression;
-class Object;
-
-
-class EvaluationResult {
-public:
-    EvaluationResult() = default;
-
-    void add_unresolved_function(Symbol name) {unresolved_functions.insert(name);}
-    void add_unresolved_macro(Symbol name) {unresolved_macros.insert(name);}
-    void add_unresolved_variable(Symbol name) {unresolved_variables.insert(name);}
-
-    uint64_t next_unnamed_label{1};
-    std::unordered_set<Symbol> unresolved_functions;
-    std::unordered_set<Symbol> unresolved_macros;
-    std::unordered_set<Symbol> unresolved_variables;
-    std::unordered_set<Object*> used_objects;
-    std::vector<ChecksumComputation> checksums;
+// clang-format off
+const std::unordered_map<Symbol, std::shared_ptr<ChecksumAlgorithm>(*)(Symbol)> ChecksumAlgorithm::algorithms = {
+    {Symbol{"xor"}, &ChecksumAlgorithmXor::create}
 };
+// clang-format on
 
-#endif // EVALUATION_RESULT_H
+const std::unordered_set<Symbol> ChecksumAlgorithm::no_parameters{};
+
+std::shared_ptr<ChecksumAlgorithm> ChecksumAlgorithm::create(Symbol algorithm_name) {
+    auto it = algorithms.find(algorithm_name);
+
+    if (it != algorithms.end()) {
+        return it->second(algorithm_name);
+    }
+
+    throw Exception("unknown checksum algorithm " + algorithm_name.str());
+}

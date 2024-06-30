@@ -155,6 +155,7 @@ private:
 
     void handle_name(Visibility visibility, const Token& name);
     void parse_binary_file();
+    void parse_checksum();
     void parse_data();
     void parse_error();
     void parse_else();
@@ -166,6 +167,7 @@ private:
 
     static const Symbol symbol_pc;
     static const Token token_binary_file;
+    static const Token token_checksum;
     static const Token token_data;
     static const Token token_end;
     static const Token token_else;

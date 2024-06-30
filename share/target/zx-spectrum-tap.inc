@@ -24,15 +24,13 @@ header_start:
     .data name:string(10) ; file name
     .data end - start + 1:2, parameter_1:2, parameter_2:2 ; length, parameters
 header_end:
-    ; .checksum "xor", header_start, header_end - 1
-    .data $00 ; TODO
+    .checksum xor, header_start, header_end - 1
 
     ; data block
-    .data end - start + 3:2; size
+    .data end - start + 3:2 ; size
 data_start:
     .data $ff ; block type
     .memory start, end
-.data_end:
-    ; .checksum xor, data_start, data_end - 1
-    .data $00 ; TODO: checksum
+data_end:
+    .checksum xor, data_start, data_end - 1
 }

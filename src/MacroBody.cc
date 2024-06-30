@@ -49,7 +49,7 @@ std::optional<Body> MacroBody::evaluated(const EvaluationContext& context) const
         }
     }
 
-    if (context.entity) {
+    if (context.entity || context.type == EvaluationContext::OUTPUT) {
         if (!new_macro) {
             if (auto found_macro = context.environment->get_macro(name.as_symbol())) {
                 new_macro = found_macro;
@@ -57,7 +57,7 @@ std::optional<Body> MacroBody::evaluated(const EvaluationContext& context) const
             }
         }
         if (new_macro) {
-            if (context.entity->is_object()) {
+            if (context.entity->is_object() || context.type == EvaluationContext::OUTPUT) {
                 // Do not expand macros inside macros, since that could pass an unbound argument to the inner macro, which won't resolve.
                 if (!context.conditional) {
                     auto expanded = new_macro->expand(new_arguments, context.environment);

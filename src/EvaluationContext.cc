@@ -78,6 +78,7 @@ bool EvaluationContext::shallow() const {
             return true;
 
         case ENTITY:
+        case OUTPUT:
         case STANDALONE:
             return false;
     }

@@ -1,18 +1,15 @@
 .section code
 
 .public start {
-    ld bc, string
-:   ld a, (bc)
+    call CLS
+    ld hl, string
+:   ld a,(hl)
     cp a, 0
-    jr z, end
+    ret z
     rst $10
-    inc bc
+    inc hl
     jr :-
-
-end:
-  ret
 }
-
 
 .section data
 

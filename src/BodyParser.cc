@@ -31,6 +31,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "BodyParser.h"
 
+#include "ChecksumBody.h"
 #include "ExpressionNode.h"
 #include "ExpressionParser.h"
 #include "FileReader.h"
@@ -42,6 +43,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 const Symbol BodyParser::symbol_pc = Symbol(".pc");
 const Token BodyParser::token_binary_file = Token(Token::DIRECTIVE, "binary_file");
+const Token BodyParser::token_checksum = Token(Token::DIRECTIVE, "checksum");
 const Token BodyParser::token_data = Token(Token::DIRECTIVE, "data");
 const Token BodyParser::token_end = Token(Token::DIRECTIVE, "end");
 const Token BodyParser::token_else = Token(Token::DIRECTIVE, "else");
@@ -54,7 +56,20 @@ const Token BodyParser::token_repeat = Token(Token::DIRECTIVE, "repeat");
 const Token BodyParser::token_scope = Token(Token::DIRECTIVE, "scope");
 const Token BodyParser::token_start = Token(Token::DIRECTIVE, "start");
 
-const std::unordered_map<Symbol, void (BodyParser::*)()> BodyParser::directive_parser_methods = {{token_binary_file.as_symbol(), &BodyParser::parse_binary_file}, {token_data.as_symbol(), &BodyParser::parse_data}, {token_else.as_symbol(), &BodyParser::parse_else}, {token_else_if.as_symbol(), &BodyParser::parse_else_if}, {token_error.as_symbol(), &BodyParser::parse_error}, {token_if.as_symbol(), &BodyParser::parse_if}, {token_memory.as_symbol(), &BodyParser::parse_memory}, {token_repeat.as_symbol(), &BodyParser::parse_repeat}, {token_scope.as_symbol(), &BodyParser::parse_scope}};
+// clang-format off
+const std::unordered_map<Symbol, void (BodyParser::*)()> BodyParser::directive_parser_methods = {
+    {token_binary_file.as_symbol(), &BodyParser::parse_binary_file},
+    {token_checksum.as_symbol(), &BodyParser::parse_checksum},
+    {token_data.as_symbol(), &BodyParser::parse_data},
+    {token_else.as_symbol(), &BodyParser::parse_else},
+    {token_else_if.as_symbol(), &BodyParser::parse_else_if},
+    {token_error.as_symbol(), &BodyParser::parse_error},
+    {token_if.as_symbol(), &BodyParser::parse_if},
+    {token_memory.as_symbol(), &BodyParser::parse_memory},
+    {token_repeat.as_symbol(), &BodyParser::parse_repeat},
+    {token_scope.as_symbol(), &BodyParser::parse_scope}
+};
+// clang-format on
 
 void BodyParser::setup(FileTokenizer& tokenizer) {
     tokenizer.add_literal(Token::colon_minus);
@@ -189,10 +204,14 @@ Expression BodyParser::get_pc(Symbol label) const {
 
 void BodyParser::parse_directive(const Token& directive) {
     auto it = directive_parser_methods.find(directive.as_symbol());
-    if (it == directive_parser_methods.end() || (directive == token_memory && !allow_memory())) {
+    if (it == directive_parser_methods.end() || ((directive == token_memory || directive == token_checksum) && !allow_memory())) {
         throw ParseException(directive, "unknown directive");
     }
     (this->*it->second)();
+}
+
+void BodyParser::parse_checksum() {
+    current_body->append(ChecksumBody::parse(tokenizer));
 }
 
 void BodyParser::parse_data() {

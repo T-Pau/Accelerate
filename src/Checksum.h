@@ -1,5 +1,8 @@
+#ifndef CHECKSUM_H
+#define CHECKSUM_H
+
 /*
-EvaluationResult.cc --
+Checksum.h --
 
 Copyright (C) Dieter Baron
 
@@ -29,33 +32,20 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef EVALUATION_RESULT_H
-#define EVALUATION_RESULT_H
+#include <cstdint>
 
-#include <unordered_set>
-
-#include "ChecksumComputation.h"
 #include "Symbol.h"
 #include "Value.h"
 
-class LabelExpression;
-class Object;
+class Checksum {
+  public:
+    class Invocation {
+        Symbol algorithm{};
+        std::vector<Value> parameters;
+    };
 
 
-class EvaluationResult {
-public:
-    EvaluationResult() = default;
-
-    void add_unresolved_function(Symbol name) {unresolved_functions.insert(name);}
-    void add_unresolved_macro(Symbol name) {unresolved_macros.insert(name);}
-    void add_unresolved_variable(Symbol name) {unresolved_variables.insert(name);}
-
-    uint64_t next_unnamed_label{1};
-    std::unordered_set<Symbol> unresolved_functions;
-    std::unordered_set<Symbol> unresolved_macros;
-    std::unordered_set<Symbol> unresolved_variables;
-    std::unordered_set<Object*> used_objects;
-    std::vector<ChecksumComputation> checksums;
 };
 
-#endif // EVALUATION_RESULT_H
+
+#endif // CHECKSUM_H

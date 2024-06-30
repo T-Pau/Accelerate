@@ -55,7 +55,7 @@ std::optional<Body> LabelBody::evaluated(const EvaluationContext& context) const
         new_name = unnamed_label_name(context.result.next_unnamed_label++);
     }
 
-    if (context.entity) {
+    if (context.entity || context.type == EvaluationContext::OUTPUT) {
         if (!added_to_environment) {
             context.environment->add(name, context.offset - context.label_offset);
             new_added_to_environment = true;

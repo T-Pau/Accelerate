@@ -1,5 +1,8 @@
+#ifndef CHECKSUM_ALGORITHM_XOR_H
+#define CHECKSUM_ALGORITHM_XOR_H
+
 /*
-EvaluationResult.cc --
+ChecksumAlgorithmXor.h --
 
 Copyright (C) Dieter Baron
 
@@ -29,33 +32,15 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef EVALUATION_RESULT_H
-#define EVALUATION_RESULT_H
+#include "ChecksumAlgorithm.h"
 
-#include <unordered_set>
+class ChecksumAlgorithmXor: public ChecksumAlgorithm {
+  public:
+    ChecksumAlgorithmXor(Symbol name): ChecksumAlgorithm(name) {}
+    static std::shared_ptr<ChecksumAlgorithm> create(Symbol algorithm_name){return std::make_shared<ChecksumAlgorithmXor>(algorithm_name);}
 
-#include "ChecksumComputation.h"
-#include "Symbol.h"
-#include "Value.h"
-
-class LabelExpression;
-class Object;
-
-
-class EvaluationResult {
-public:
-    EvaluationResult() = default;
-
-    void add_unresolved_function(Symbol name) {unresolved_functions.insert(name);}
-    void add_unresolved_macro(Symbol name) {unresolved_macros.insert(name);}
-    void add_unresolved_variable(Symbol name) {unresolved_variables.insert(name);}
-
-    uint64_t next_unnamed_label{1};
-    std::unordered_set<Symbol> unresolved_functions;
-    std::unordered_set<Symbol> unresolved_macros;
-    std::unordered_set<Symbol> unresolved_variables;
-    std::unordered_set<Object*> used_objects;
-    std::vector<ChecksumComputation> checksums;
+    uint64_t result_size() override {return 1;}
+    std::string compute(std::string::const_iterator begin, std::string::const_iterator end, const std::unordered_map<Symbol, Value> &parameters) override;
 };
 
-#endif // EVALUATION_RESULT_H
+#endif // CHECKSUM_ALGORITHM_XOR_H

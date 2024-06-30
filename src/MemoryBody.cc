@@ -35,13 +35,13 @@ MemoryBody::MemoryBody(Expression bank_, Expression start_address_, Expression e
     auto minimum_start = start_address.minimum_value().value_or(Value(uint64_t(0)));
     auto maximum_end = end_address.maximum_value();
     if (maximum_end) {
-        size_range_.maximum = maximum_end->unsigned_value() - minimum_start.unsigned_value();
+        size_range_.maximum = maximum_end->unsigned_value() - minimum_start.unsigned_value() + 1;
     }
 
     auto maximum_start = start_address.maximum_value();
     auto minimum_end = end_address.minimum_value();
     if (maximum_start && minimum_end) {
-        size_range_.minimum = minimum_end->unsigned_value() - maximum_start->unsigned_value();
+        size_range_.minimum = minimum_end->unsigned_value() - maximum_start->unsigned_value() + 1;
     }
     else {
         size_range_.maximum = {};

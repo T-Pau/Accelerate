@@ -1,5 +1,8 @@
+#ifndef EXISTS_EXPRESSION_H
+#define EXISTS_EXPRESSION_H
+
 /*
-EvaluationResult.cc --
+ExistsExpression.h --
 
 Copyright (C) Dieter Baron
 
@@ -29,33 +32,23 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef EVALUATION_RESULT_H
-#define EVALUATION_RESULT_H
+#include "BaseExpression.h"
 
-#include <unordered_set>
+class ExistsExpression : public BaseExpression {
+  public:
+    explicit ExistsExpression(Symbol symbol): symbol{symbol} {}
+    
+    static Expression create(const std::vector<Expression>& arguments);
 
-#include "ChecksumComputation.h"
-#include "Symbol.h"
-#include "Value.h"
+    [[nodiscard]] std::optional<Expression> evaluated(const EvaluationContext& context) const override;
+    [[nodiscard]] std::optional<Value::Type> type() const override {return Value::BOOLEAN;}
 
-class LabelExpression;
-class Object;
+  protected:
+    void serialize_sub(std::ostream& stream) const override;
 
-
-class EvaluationResult {
-public:
-    EvaluationResult() = default;
-
-    void add_unresolved_function(Symbol name) {unresolved_functions.insert(name);}
-    void add_unresolved_macro(Symbol name) {unresolved_macros.insert(name);}
-    void add_unresolved_variable(Symbol name) {unresolved_variables.insert(name);}
-
-    uint64_t next_unnamed_label{1};
-    std::unordered_set<Symbol> unresolved_functions;
-    std::unordered_set<Symbol> unresolved_macros;
-    std::unordered_set<Symbol> unresolved_variables;
-    std::unordered_set<Object*> used_objects;
-    std::vector<ChecksumComputation> checksums;
+  private:
+    Symbol symbol;
 };
 
-#endif // EVALUATION_RESULT_H
+
+#endif // EXISTS_EXPRESSION_H

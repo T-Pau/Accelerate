@@ -39,6 +39,9 @@ std::optional<Expression> ObjectNameExpression::evaluated(const EvaluationContex
     if (context.entity && context.entity->is_object()) {
         return Expression(context.entity->as_object());
     }
+    else if (context.type == EvaluationContext::OUTPUT) {
+        return Expression(Value(static_cast<uint64_t>(0)));
+    }
     else {
         return {};
     }

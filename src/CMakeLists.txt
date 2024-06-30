@@ -17,6 +17,11 @@ add_library(xlr8-library STATIC
         CPUGetter.cc
         CPUParser.cc
         Callable.cc
+        Checksum.cc
+        ChecksumBody.cc
+        ChecksumAlgorithm.cc
+        ChecksumAlgorithmXor.cc
+        ChecksumComputation.cc
         Command.cc
         Commandline.cc
         DataBody.cc
@@ -29,6 +34,7 @@ add_library(xlr8-library STATIC
         EvaluationContext.cc
         EvaluationResult.cc
         Exception.cc
+        ExistsExpression.cc
         Expression.cc
         ExpressionNode.cc
         ExpressionParser.cc

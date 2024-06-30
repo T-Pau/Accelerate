@@ -34,6 +34,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <complex>
 
 #include "DefinedExpression.h"
+#include "ExistsExpression.h"
 #include "EvaluationContext.h"
 #include "Expression.h"
 #include "FillExpression.h"
@@ -45,6 +46,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 const std::unordered_map<Symbol, Expression (*)(const std::vector<Expression>&)> FunctionExpression::builtin_functions = {
     {Symbol(".defined"), &DefinedExpression::create},
+    {Symbol{".exists"}, &ExistsExpression::create},
     {Symbol{".fill"}, &FillExpression::create},
     {Symbol(".sizeof"), &SizeofExpression::create}
 };

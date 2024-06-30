@@ -179,13 +179,17 @@ void Linker::output(const std::string &file_name) {
     environment->add_next(program->public_environment);
 
     EvaluationResult result;
-    output_body.evaluate(EvaluationContext(result, EvaluationContext::STANDALONE, environment, target->defines, SizeRange()));
+    output_body.evaluate(EvaluationContext(result, EvaluationContext::OUTPUT, environment, target->defines, SizeRange()));
     // TODO: process result
 
     auto bytes = std::string();
     bytes.reserve(output_body.size_range().minimum);
 
     output_body.encode(bytes, &memory);
+
+    for (const auto& checksum: result.checksums) {
+        checksum.compute(bytes);
+    }
 
     auto stream = std::ofstream(file_name);
     stream << bytes;

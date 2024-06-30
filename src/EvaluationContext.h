@@ -50,6 +50,7 @@ class EvaluationContext {
         LABELS,             // Resolve named and unnamed labels.
         LABELS_2,           // Resolve forward label uses.
         MACRO_EXPANSION,    // Bind arguments and duplicate labels in macro invocation.
+        OUTPUT,             // Evaluate output.
         STANDALONE          // Preprocessor if condition.
     };
 

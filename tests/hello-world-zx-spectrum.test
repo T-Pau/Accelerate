@@ -1,10 +1,10 @@
 description Hello World on C64
-arguments --target zx-spectrum-tap-basic --symbol-map hello-world.sym -o hello-world.tap hello-world.s
+arguments --target zx-spectrum-tap-basic --symbol-map hello-world.sym -o hello-world.tap hello-world.s zx-spectrum.lib
+file zx-spectrum.lib ../share/lib/zx-spectrum.lib
 file hello-world.s ../examples/hello-world-zx-spectrum.s
 file hello-world.tap {} hello-world-zx-spectrum.tap
 file hello-world.sym {} <inline>
-object	$19	$0002	ptr	zero_page	reserve
-object	$801	$000d	basic_program	data	data
-object	$80e	$0015	start	code	data
-object	$823	$000f	message	data	data
+object	$5ccb	$002f	basic	basic	data
+object	$8000	$000e	start	code	data
+object	$800e	$000e	string	data	data
 end-of-inline-data

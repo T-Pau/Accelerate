@@ -1,5 +1,5 @@
 /*
-EvaluationResult.cc --
+ExistsExpression.cc --
 
 Copyright (C) Dieter Baron
 
@@ -29,33 +29,32 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef EVALUATION_RESULT_H
-#define EVALUATION_RESULT_H
+#include "ExistsExpression.h"
 
-#include <unordered_set>
+#include "EvaluationContext.h"
+#include "Expression.h"
+#include "ParseException.h"
+#include "VariableExpression.h"
 
-#include "ChecksumComputation.h"
-#include "Symbol.h"
-#include "Value.h"
+Expression ExistsExpression::create(const std::vector<Expression>& arguments) {
+    if (arguments.size() != 1) {
+        throw ParseException(Location(), "invalid number of arguments");
+    }
+    auto& argument = arguments[0];
 
-class LabelExpression;
-class Object;
+    if (!argument.is_variable()) {
+        throw ParseException(argument.location(), "symbol argument required");
+    }
 
+    return Expression(std::make_shared<ExistsExpression>(argument.as_variable()->variable()));
+}
 
-class EvaluationResult {
-public:
-    EvaluationResult() = default;
+std::optional<Expression> ExistsExpression::evaluated(const EvaluationContext& context) const {
+    // TODO: evaluate in resolve phase.
+    return Expression(false);
+}
 
-    void add_unresolved_function(Symbol name) {unresolved_functions.insert(name);}
-    void add_unresolved_macro(Symbol name) {unresolved_macros.insert(name);}
-    void add_unresolved_variable(Symbol name) {unresolved_variables.insert(name);}
+void ExistsExpression::serialize_sub(std::ostream& stream) const {
+    stream << ".exists(" << symbol << ")";
+}
 
-    uint64_t next_unnamed_label{1};
-    std::unordered_set<Symbol> unresolved_functions;
-    std::unordered_set<Symbol> unresolved_macros;
-    std::unordered_set<Symbol> unresolved_variables;
-    std::unordered_set<Object*> used_objects;
-    std::vector<ChecksumComputation> checksums;
-};
-
-#endif // EVALUATION_RESULT_H

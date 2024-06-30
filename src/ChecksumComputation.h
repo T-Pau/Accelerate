@@ -1,5 +1,8 @@
+#ifndef CHECKSUM_COMPUTATION_H
+#define CHECKSUM_COMPUTATION_H
+
 /*
-EvaluationResult.cc --
+ChecksumComputation.h --
 
 Copyright (C) Dieter Baron
 
@@ -29,33 +32,23 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef EVALUATION_RESULT_H
-#define EVALUATION_RESULT_H
+#include <cstdint>
+#include <memory>
 
-#include <unordered_set>
+#include "ChecksumAlgorithm.h"
 
-#include "ChecksumComputation.h"
-#include "Symbol.h"
-#include "Value.h"
+class ChecksumComputation {
+  public:
+    ChecksumComputation(std::shared_ptr<ChecksumAlgorithm> algorithm, uint64_t result_position, uint64_t start, uint64_t end, std::unordered_map<Symbol, Value> parameters): algorithm{std::move(algorithm)}, result_position{result_position}, start{start}, end{end}, parameters{std::move(parameters)} {}
 
-class LabelExpression;
-class Object;
+    void compute(std::string& data) const;
 
-
-class EvaluationResult {
-public:
-    EvaluationResult() = default;
-
-    void add_unresolved_function(Symbol name) {unresolved_functions.insert(name);}
-    void add_unresolved_macro(Symbol name) {unresolved_macros.insert(name);}
-    void add_unresolved_variable(Symbol name) {unresolved_variables.insert(name);}
-
-    uint64_t next_unnamed_label{1};
-    std::unordered_set<Symbol> unresolved_functions;
-    std::unordered_set<Symbol> unresolved_macros;
-    std::unordered_set<Symbol> unresolved_variables;
-    std::unordered_set<Object*> used_objects;
-    std::vector<ChecksumComputation> checksums;
+  private:
+    std::shared_ptr<ChecksumAlgorithm> algorithm;
+    uint64_t result_position{};
+    uint64_t start{};
+    uint64_t end{};
+    std::unordered_map<Symbol, Value> parameters;
 };
 
-#endif // EVALUATION_RESULT_H
+#endif // CHECKSUM_COMPUTATION_H

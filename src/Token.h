@@ -73,6 +73,7 @@ public:
     [[nodiscard]] bool is_integer() const {return is_value() && std::get<Value>(value).is_integer();}
     [[nodiscard]] bool is_unsigned() const {return is_value() && std::get<Value>(value).is_unsigned();}
     [[nodiscard]] bool is_name() const {return type == NAME;}
+    [[nodiscard]] bool is_name_like() const {return type == NAME || type == INSTRUCTION || type == KEYWORD;}
     [[nodiscard]] bool is_newline() const {return type == NEWLINE;}
     [[nodiscard]] bool is_preprocessor() const {return type == PREPROCESSOR;}
     [[nodiscard]] bool is_punctuation() const {return type == PUNCTUATION;}

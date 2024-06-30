@@ -1,5 +1,8 @@
+#ifndef CHECKSUM_BODY_H
+#define CHECKSUM_BODY_H
+
 /*
-EvaluationResult.cc --
+ChecksumBody.h --
 
 Copyright (C) Dieter Baron
 
@@ -29,33 +32,30 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef EVALUATION_RESULT_H
-#define EVALUATION_RESULT_H
+#include <utility>
 
-#include <unordered_set>
-
-#include "ChecksumComputation.h"
+#include "BodyElement.h"
+#include "ChecksumAlgorithm.h"
 #include "Symbol.h"
-#include "Value.h"
 
-class LabelExpression;
-class Object;
+class ChecksumBody: public BodyElement {
+  public:
+    ChecksumBody(std::shared_ptr<ChecksumAlgorithm> algorithm_, Expression start, Expression end, std::unordered_map<Symbol, Expression> parameters): algorithm{std::move(algorithm_)}, start{std::move(start)}, end{std::move(end)}, parameters{std::move(parameters)} {size_range_ = SizeRange{algorithm->result_size(), algorithm->result_size()};}
 
+    static Body parse(Tokenizer& tokenizer);
 
-class EvaluationResult {
-public:
-    EvaluationResult() = default;
+    std::shared_ptr<BodyElement> clone() const override {throw Exception("can't clone .checksum");}
+    bool empty() const override {return false;}
+    void encode(std::string &bytes, const Memory *memory) const override;
+    std::optional<Body> evaluated(const EvaluationContext &context) const override;
+    void serialize(std::ostream &stream, const std::string &prefix) const override;
 
-    void add_unresolved_function(Symbol name) {unresolved_functions.insert(name);}
-    void add_unresolved_macro(Symbol name) {unresolved_macros.insert(name);}
-    void add_unresolved_variable(Symbol name) {unresolved_variables.insert(name);}
-
-    uint64_t next_unnamed_label{1};
-    std::unordered_set<Symbol> unresolved_functions;
-    std::unordered_set<Symbol> unresolved_macros;
-    std::unordered_set<Symbol> unresolved_variables;
-    std::unordered_set<Object*> used_objects;
-    std::vector<ChecksumComputation> checksums;
+  private:
+    std::shared_ptr<ChecksumAlgorithm> algorithm;
+    Expression start;
+    Expression end;
+    std::unordered_map<Symbol, Expression> parameters;
 };
 
-#endif // EVALUATION_RESULT_H
+
+#endif // CHECKSUM_BODY_H
