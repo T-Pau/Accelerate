@@ -33,6 +33,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define ACCELERATE_RANGE_H
 
 #include <cstdint>
+#include <ostream>
 
 class Range {
 public:
@@ -41,6 +42,7 @@ public:
 
     [[nodiscard]] bool empty() const {return size == 0;}
     [[nodiscard]] uint64_t end() const {return empty() ? start : start - 1 + size;} // last byte included in range
+    [[nodiscard]] bool contains(const Range& other) const {return other.start >= start && other.end() <= end();}
     [[nodiscard]] Range intersect(const Range& other) const;
     [[nodiscard]] Range add(const Range& other) const;
 
@@ -55,9 +57,12 @@ public:
     void set_start(uint64_t new_start);
     void set_end(uint64_t new_end);
 
+    void serialize(std::ostream& stream) const;
+
     uint64_t start = 0;
     uint64_t size = 0;
 };
 
+std::ostream& operator<<(std::ostream& stream, const Range& range);
 
 #endif //ACCELERATE_RANGE_H

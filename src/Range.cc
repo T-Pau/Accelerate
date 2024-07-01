@@ -32,6 +32,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Range.h"
 
 #include <algorithm>
+#include <iomanip>
 
 #include "Exception.h"
 
@@ -103,4 +104,14 @@ bool Range::operator<(const Range &other) const {
         return start < other.start;
     }
     return size < other.size;
+}
+
+void Range::serialize(std::ostream& stream) const {
+    stream << "($" << std::setfill('0') << std::setw(4) << std::hex << start <<  ", $" << std::setw(4) << end() << ")" << std::dec;
+}
+
+
+std::ostream& operator<<(std::ostream& stream, const Range& range) {
+    range.serialize(stream);
+    return stream;
 }

@@ -32,9 +32,10 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Memory.h"
 
 #include <ostream>
+#include <sstream>
 
+#include "Exception.h"
 #include "Int.h"
-#include <iostream>
 
 Memory::Bank::Bank(Range range) : range(range) {
     memory = std::string(range.size, 0);
@@ -42,6 +43,12 @@ Memory::Bank::Bank(Range range) : range(range) {
 }
 
 void Memory::Bank::copy(uint64_t address, const std::string& data) {
+    auto target_range = Range(address, data.size());
+    if (!range.contains(target_range)) {
+        auto str = std::stringstream{};
+        str << "data " << target_range << " out of range " << range;
+        throw Exception(str.str());
+    }
     memory.replace(offset(address), data.size(), data);
 }
 
