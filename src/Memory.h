@@ -56,7 +56,7 @@ public:
 
         [[nodiscard]] Range data_range() const;
 
-        [[nodiscard]] std::string data(const Range& range) const;
+        [[nodiscard]] std::string data(const Range& requested_range) const;
 
         void debug_blocks(std::ostream& stream) const;
 
@@ -68,6 +68,8 @@ public:
             Allocation allocation;
             Range range;
         };
+
+        size_t offset(size_t address) const {return address - range.start;}
 
         std::string memory;
         Range range;

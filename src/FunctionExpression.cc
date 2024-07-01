@@ -41,15 +41,20 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Function.h"
 #include "InRangeExpression.h"
 #include "LabelExpression.h"
+#include "MinMaxExpression.h"
 #include "ObjectFileParser.h"
 #include "SizeofExpression.h"
 
+// clang-format off
 const std::unordered_map<Symbol, Expression (*)(const std::vector<Expression>&)> FunctionExpression::builtin_functions = {
     {Symbol(".defined"), &DefinedExpression::create},
     {Symbol{".exists"}, &ExistsExpression::create},
     {Symbol{".fill"}, &FillExpression::create},
+    {Symbol{".max"}, &MinMaxExpression::create_max},
+    {Symbol{".min"}, &MinMaxExpression::create_min},
     {Symbol(".sizeof"), &SizeofExpression::create}
 };
+// clang-format on
 
 void FunctionExpression::serialize_sub(std::ostream &stream) const {
     stream << name << "(";

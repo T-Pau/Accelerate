@@ -1,3 +1,5 @@
+.extension "tap"
+
 .macro tap_file_program name, start, end, line_number {
     tap_file TAP_FILE_PROGRAM, name, start, end, line_number, end - start + 1
 }

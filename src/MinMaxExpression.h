@@ -1,9 +1,12 @@
+#ifndef MIN_MAX_EXPRESSION_H
+#define MIN_MAX_EXPRESSION_H
+
 /*
-FillExpression.h -- 
+MinMaxExpression.h --
 
 Copyright (C) Dieter Baron
 
-The authors can be contacted at <assembler@tpau.group>
+The authors can be contacted at <accelerate@tpau.group>
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions
@@ -29,27 +32,33 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef FILLEXPRESSION_H
-#define FILLEXPRESSION_H
-
 #include "BaseExpression.h"
 #include "Expression.h"
 
-class FillExpression: public BaseExpression {
-public:
-    explicit FillExpression(Expression count, Expression value): count{std::move(count)}, value{std::move(value)} {}
-
-    static Expression create(const std::vector<Expression>& arguments);
-    static Expression create(const Expression& count, const Expression& value);
+class MinMaxExpression: public BaseExpression {
+  public:
+    explicit MinMaxExpression(Expression a, Expression b, bool minimum): a{std::move(a)}, b{std::move(b)}, minimum{minimum} {}
+    
+    static Expression create_min(const std::vector<Expression>& arguments) {return create(true, arguments);}
+    static Expression create_max(const std::vector<Expression>& arguments) {return create(false, arguments);}
+    static Expression create(const Expression& a, const Expression& b, bool minimum);
 
     [[nodiscard]] std::optional<Expression> evaluated(const EvaluationContext& context) const override;
 
-protected:
+    [[nodiscard]] std::optional<Value> minimum_value() const override;
+    [[nodiscard]] std::optional<Value> maximum_value() const override;
+
+  protected:
     void serialize_sub(std::ostream& stream) const override;
 
-private:
-    Expression count;
-    Expression value;
+  private:
+    static Expression create(bool minimum, const std::vector<Expression>& arguments);
+    static Value min_max(bool minimum, const Value& a, const Value& b);
+
+    Expression a;
+    Expression b;
+    bool minimum;
 };
 
-#endif //FILLEXPRESSION_H
+
+#endif // MIN_MAX_EXPRESSION_H

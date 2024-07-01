@@ -34,10 +34,14 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Encoder.h"
 #include "Exception.h"
 #include "Int.h"
+#include "Target.h"
 
-uint64_t IntegerEncoder::default_byte_order;
 const uint64_t IntegerEncoder::big_endian_byte_order = 87654321;
 const uint64_t IntegerEncoder::little_endian_byte_order = 12345678;
+
+uint64_t IntegerEncoder::default_byte_order() {
+    return Target::current_target && Target::current_target->cpu ? Target::current_target->cpu->byte_order : little_endian_byte_order;
+}
 
 std::ostream& operator<<(std::ostream& stream, const IntegerEncoder& encoding) {
     encoding.serialize(stream);
@@ -83,16 +87,16 @@ bool IntegerEncoder::fits(const Value& value) const { return value.is_integer() 
 bool IntegerEncoder::is_natural_encoder(const Value& value) const {
     switch (type) {
         case SIGNED:
-            return value.is_signed() && value.default_size() == size && byte_order() == default_byte_order;
+            return value.is_signed() && value.default_size() == size && byte_order() == default_byte_order();
 
         case UNSIGNED:
-            return value.is_unsigned() && value.default_size() == size && byte_order() == default_byte_order;
+            return value.is_unsigned() && value.default_size() == size && byte_order() == default_byte_order();
     }
     throw Exception("internal error: invalid integer encoder type %d", type);
 }
 
 void IntegerEncoder::serialize(std::ostream& stream) const {
-    if (byte_order() == default_byte_order && size) {
+    if (byte_order() == default_byte_order() && size) {
         switch (type) {
             case SIGNED:
                 stream << ":-" << *size;

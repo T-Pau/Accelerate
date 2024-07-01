@@ -212,7 +212,6 @@ void Linker::set_target(const Target* new_target) {
     target = new_target;
     program->private_environment->add_next(target->object_file->public_environment);
     memory = target->map.initialize_memory();
-    IntegerEncoder::default_byte_order = target->cpu->byte_order;
 }
 
 void Linker::add_library(std::shared_ptr<ObjectFile> library) {

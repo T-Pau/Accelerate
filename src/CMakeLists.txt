@@ -62,6 +62,7 @@ add_library(xlr8-library STATIC
         Memory.cc
         MemoryBody.cc
         MemoryMap.cc
+        MinMaxExpression.cc
         Node.cc
         Object.cc
         ObjectExpression.cc

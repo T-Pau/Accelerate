@@ -41,7 +41,9 @@ Memory::Bank::Bank(Range range) : range(range) {
     blocks.emplace_back(FREE, range);
 }
 
-void Memory::Bank::copy(uint64_t address, const std::string& data) { memory.replace(address, data.size(), data); }
+void Memory::Bank::copy(uint64_t address, const std::string& data) {
+    memory.replace(offset(address), data.size(), data);
+}
 
 std::optional<uint64_t> Memory::Bank::allocate(const Range& allowed_range, Memory::Allocation allocation, uint64_t alignment, uint64_t size) {
     if (allowed_range.size < size) {
@@ -116,17 +118,13 @@ Range Memory::Bank::data_range() const {
     }
 }
 
-std::string Memory::Bank::data(const Range& range) const {
-    if (range.start >= memory.size()) {
-        return std::string(range.size, 0);
+std::string Memory::Bank::data(const Range& requested_range) const {
+    auto result = std::string(requested_range.size, 0);
+    auto overlap_range = requested_range.intersect(range);
+    if (!overlap_range.empty()) {
+        result.replace(overlap_range.start - requested_range.start, overlap_range.size, memory, offset(overlap_range.start), overlap_range.size);
     }
-    if (range.start + range.size > memory.size()) {
-        auto padding = range.start + range.size - memory.size();
-        return memory.substr(range.start) + std::string(padding, 0);
-    }
-    else {
-        return memory.substr(range.start, range.size);
-    }
+    return result;
 }
 
 void Memory::Bank::debug_blocks(std::ostream& stream) const {

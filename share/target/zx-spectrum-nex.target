@@ -1,0 +1,25 @@
+.define ZX_SPECTRUM_NEXT
+.cpu "z80"
+
+.include "zx-spectrum-encoding.inc"
+.include "zx-spectrum-nex.inc"
+
+.default .public program_start = $8000
+.default .public program_end = $ffff
+
+.segment program {
+    address: program_start - program_end
+}
+
+.section code {
+    segment: program
+}
+
+.section data {
+    segment: program
+}
+
+.section reserved {
+    type: reserve_only
+    segment: program
+}

@@ -61,7 +61,7 @@ public:
     bool operator==(const IntegerEncoder& other) const;
     bool operator!=(const IntegerEncoder& other) const {return !(*this == other);}
 
-    static uint64_t default_byte_order;
+    static uint64_t default_byte_order();
     static const uint64_t little_endian_byte_order;
     static const uint64_t big_endian_byte_order;
 
@@ -70,7 +70,7 @@ private:
     std::optional<size_t> size;
     std::optional<uint64_t> explicit_byte_order;
 
-    [[nodiscard]] uint64_t byte_order() const {return explicit_byte_order.value_or(default_byte_order);}
+    [[nodiscard]] uint64_t byte_order() const {return explicit_byte_order.value_or(default_byte_order());}
 };
 
 std::ostream& operator<<(std::ostream& stream, const IntegerEncoder& encoding);
