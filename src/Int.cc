@@ -30,8 +30,11 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include "Int.h"
+#include "Exception.h"
 
 #include <limits>
+#include <iomanip>
+#include <sstream>
 
 size_t Int::minimum_byte_size(uint64_t value) {
     if (value > std::numeric_limits<uint32_t>::max()) {
@@ -80,15 +83,25 @@ size_t Int::minimum_byte_size(int64_t value) {
 }
 
 void Int::encode(std::string &bytes, uint64_t value, uint64_t size, uint64_t byte_order) {
-    uint64_t mask = 10000000;
-    for (auto index = 0; index < 8; index += 1) {
-        uint64_t byte_index = (byte_order / mask) % 10 - 1;
-        mask /= 10;
-        if (byte_index >= size) {
-            continue;
+    if (size == 1) {
+        bytes += static_cast<char>(value & 0xff);
+    }
+    else {
+        uint64_t mask = 10000000;
+        for (auto index = 0; index < 8; index += 1) {
+            uint64_t byte_index = (byte_order / mask) % 10 - 1;
+            if (byte_index > 8) {
+                std::stringstream str;
+                str << "invalid byte order " << std::setfill('0') << std::setw(8) << byte_order;
+                throw Exception(str.str());
+            }
+            mask /= 10;
+            if (byte_index >= size) {
+                continue;
+            }
+            uint64_t byte = (value >> (byte_index * 8)) & 0xff;
+            bytes += static_cast<char>(byte);
         }
-        uint64_t byte = (value >> (byte_index * 8)) & 0xff;
-        bytes += static_cast<char>(byte);
     }
 }
 

@@ -47,6 +47,7 @@ void Linker::link() {
         program->import(library.get());
     }
 
+    Target::set_current_target(target);
     program->resolve_defaults();
     program->evaluate();
     program->evaluate();

@@ -52,11 +52,14 @@ Expression FillExpression::create(const Expression& count, const Expression& val
         auto actual_count = real_count.unsigned_value();
         const auto real_value = *value.value();
         auto encoding = Encoder(real_value);
-        std::string bytes;
+        auto bytes = std::string{};
+        encoding.encode(bytes, real_value);
+        auto result = std::string{};
+        result.reserve(actual_count * bytes.size());
         for (uint64_t i = 0; i < actual_count; i++) {
-            encoding.encode(bytes, real_value);
+            result += bytes;
         }
-        return Expression(Value(bytes));
+        return Expression(Value(result));
     }
     else {
         return Expression(std::make_shared<FillExpression>(count, value));
