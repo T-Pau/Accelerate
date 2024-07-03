@@ -131,7 +131,10 @@
 
 
 .addressing_mode a__immediate {
-    notation: a,n
+    notation [
+        : a,n
+        : n
+    ]
     arguments {
         n: byte
     }
@@ -139,7 +142,10 @@
 }
 
 .addressing_mode a__indexed {
-    notation: a,(i+d)
+    notation [
+        : a,(i+d)
+        : (i+d)
+    ]
     arguments {
         i: index_register
         d: signed_byte
@@ -176,7 +182,10 @@
 }
 
 .addressing_mode a__indirect_hl {
-    notation: a,(hl)
+    notation [
+        : a,(hl)
+        : (hl)
+    ]
 }
 
 .addressing_mode a__i_or_r {
@@ -188,7 +197,10 @@
 }
 
 .addressing_mode a__register {
-    notation: a,r
+    notation [
+        : a,r
+        : r
+    ]
     arguments {
         r: register
     }
