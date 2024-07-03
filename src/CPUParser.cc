@@ -87,7 +87,7 @@ void CPUParser::initialize() {
 CPUParser::CPUParser(): FileParser(*CPUGetter::global.path) {
     initialize();
 
-    tokenizer.add_punctuations({"-", ","});
+    tokenizer.add_punctuations({"-", ",", "="});
     tokenizer.add_literal(token_opcode);
     tokenizer.add_literal(token_pc);
 }
@@ -143,7 +143,11 @@ void CPUParser::parse_addressing_mode() {
             if (!pair.first.is_name()) {
                 throw ParseException(pair.first, "expected %s, got %s", Token::type_name(Token::NAME), pair.first.type_name());
             }
-            if (!pair.second->is_singular_scalar()) {
+            if (!pair.second->is_scalar()) {
+                throw ParseException(pair.second->location, "invalid argument type");
+            }
+            auto argument_definition = pair.second->as_scalar();
+            if (argument_definition->size() != 1 && (argument_definition->size() != 3 && (*argument_definition)[1] != Token::equals)) {
                 throw ParseException(pair.second->location, "invalid argument type");
             }
             auto argument_type_name = pair.second->as_scalar()->token();
@@ -154,7 +158,15 @@ void CPUParser::parse_addressing_mode() {
             if (argument_type == nullptr) {
                 throw ParseException(argument_type_name, "unknown argument type '%s'", argument_type_name.as_string().c_str());
             }
-            addressing_mode.arguments[argument_symbol(pair.first.as_symbol())] = argument_type;
+            auto default_value = std::optional<Value>{};
+            if (argument_definition->size() > 1) {
+                auto& default_value_token = (*argument_definition)[2];
+                if (!default_value_token.is_integer()) {
+                    throw ParseException(default_value_token, "default value must be integer");
+                }
+                default_value = Value{default_value_token.as_value()};
+            }
+            addressing_mode.arguments[argument_symbol(pair.first.as_symbol())] = std::make_unique<AddressingMode::Argument>(argument_type, default_value);
             auto encoding_argument_type = argument_type->as_encoding();
             if (encoding_argument_type) {
                 auto argument_variable_name = argument_symbol(pair.first.as_symbol());
@@ -210,9 +222,9 @@ void CPUParser::parse_addressing_mode() {
         auto encoding_tokenizer = SequenceTokenizer(encoding_tokens);
         addressing_mode.encoding = ExpressionParser(encoding_tokenizer).parse_list();
         for (auto& datum: addressing_mode.encoding.as_data()->data) {
-            if (datum.expression.is_variable()) {
+            if (datum.expression.is_variable() && datum.expression.as_variable()->variable() != token_opcode.as_symbol()) {
                 auto variable_name = datum.expression.as_variable()->variable();
-                auto encoding_type = addressing_mode.argument(variable_name)->as_encoding();
+                auto encoding_type = addressing_mode.argument(variable_name)->type->as_encoding();
                 if (encoding_type && (!datum.encoding || *datum.encoding == encoding_type->encoding)) {
                     datum.encoding = Encoder{encoding_type->encoding};
                     unencoded_encoding_arguments.erase(variable_name);
@@ -226,12 +238,16 @@ void CPUParser::parse_addressing_mode() {
 
     // TODO: warn unused arguments
 
-    for (const auto& argument: unencoded_encoding_arguments) {
-        auto encoding_type = addressing_mode.argument(argument);
-        if (!encoding_type) {
-            throw Exception("internal error: expected encoding argument type for '%s'", argument.c_str());
+    for (const auto& argument_name: unencoded_encoding_arguments) {
+        auto argument = addressing_mode.argument(argument_name);
+        if (!argument) {
+            throw Exception("internal error: expected encoding argument type for '%s'", argument_name.c_str());
         }
-        addressing_mode.arguments[argument] = cpu.argument_type(Symbol(".range(" + encoding_type->name.str() + ")"));
+        auto encoding_type = argument->type;
+        if (!encoding_type) {
+            throw Exception("internal error: expected encoding argument type for '%s'", argument_name.c_str());
+        }
+        addressing_mode.arguments[argument_name] = std::make_unique<AddressingMode::Argument>(cpu.argument_type(Symbol(".range(" + encoding_type->name.str() + ")")));
     }
 
     cpu.add_addressing_mode(name.as_symbol(), std::move(addressing_mode));

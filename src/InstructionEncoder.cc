@@ -128,7 +128,8 @@ InstructionEncoder::Variant InstructionEncoder::encode(const Instruction* instru
 
     while (it_notation != notation.elements.end()) {
         if (it_notation->is_argument()) {
-            auto argument_type = addressing_mode->argument(it_notation->symbol);
+            auto argument = addressing_mode->argument(it_notation->symbol);
+            auto argument_type = argument->type;
             switch (argument_type->type()) {
                 case ArgumentType::ANY:
                 case ArgumentType::ENCODING: {
@@ -187,6 +188,16 @@ InstructionEncoder::Variant InstructionEncoder::encode(const Instruction* instru
 
         it_notation++;
         it_arguments++;
+    }
+
+    for (auto& pair: addressing_mode->arguments) {
+        if (!environment->get_variable(pair.first)) {
+            const auto& default_value = pair.second->default_value;
+            if (!default_value) {
+                throw Exception("internal error: no default value for missing argument in notation");
+            }
+            environment->add(pair.first, Expression{*pair.second->default_value});
+        }
     }
 
     environment->add(Assembler::symbol_opcode, Expression(instruction->opcode(match.addressing_mode)));

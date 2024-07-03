@@ -32,6 +32,8 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef ADDRESSING_MODE_H
 #define ADDRESSING_MODE_H
 
+#include <utility>
+
 #include "ArgumentType.h"
 #include "DataBody.h"
 #include "BaseExpression.h"
@@ -61,7 +63,16 @@ public:
         std::vector<Element> elements;
     };
 
-    [[nodiscard]] const ArgumentType* argument(Symbol name) const;
+    class Argument {
+      public:
+        explicit Argument(const ArgumentType* type, std::optional<Value> default_value = {}) : type{type}, default_value{std::move(default_value)} {}
+        Argument() = default;
+
+        const ArgumentType* type{};
+        std::optional<Value> default_value;
+    };
+
+    [[nodiscard]] const Argument* argument(Symbol name) const;
     [[nodiscard]] bool has_argument(Symbol name) const {return argument(name) != nullptr;}
 
     bool operator<(const AddressingMode& other) const {return priority < other.priority;}
@@ -69,7 +80,7 @@ public:
     size_t priority = std::numeric_limits<size_t>::max();
     bool uses_pc = false;
     std::vector<Notation> notations;
-    std::unordered_map<Symbol, const ArgumentType*> arguments;
+    std::unordered_map<Symbol, std::unique_ptr<Argument>> arguments;
     Body encoding;
 
     void add_notation(Notation notation) {notations.emplace_back(std::move(notation));}

@@ -56,7 +56,7 @@ public:
     Type type = INTEGER;
     Symbol symbol;
 
-    static std::vector<AddressingModeMatcherElement> elements_for(const AddressingMode::Notation::Element& element, const std::unordered_map<Symbol, const ArgumentType*>& arguments);
+    static std::vector<AddressingModeMatcherElement> elements_for(const AddressingMode::Notation::Element& element, const std::unordered_map<Symbol, std::unique_ptr<AddressingMode::Argument>>& arguments);
 };
 
 
@@ -103,12 +103,12 @@ class AddressingModeMatcher {
 public:
     [[nodiscard]] std::unordered_set<AddressingModeMatcherResult> match(const std::vector<std::shared_ptr<Node>>& nodes) const;
 
-    void add_notation(Symbol addressing_mode, size_t notation_index, const AddressingMode::Notation& notation, const std::unordered_map<Symbol, const ArgumentType*>& arguments);
+    void add_notation(Symbol addressing_mode, size_t notation_index, const AddressingMode::Notation& notation, const std::unordered_map<Symbol, std::unique_ptr<AddressingMode::Argument>>& arguments);
 
 private:
     class MatcherNode {
     public:
-        void add_notation(const AddressingModeMatcherResult& result, std::vector<AddressingMode::Notation::Element>::const_iterator current, std::vector<AddressingMode::Notation::Element>::const_iterator end, const std::unordered_map<Symbol, const ArgumentType*>& arguments);
+        void add_notation(const AddressingModeMatcherResult& result, std::vector<AddressingMode::Notation::Element>::const_iterator current, std::vector<AddressingMode::Notation::Element>::const_iterator end, const std::unordered_map<Symbol, std::unique_ptr<AddressingMode::Argument>>& arguments);
 
         std::unordered_set<AddressingModeMatcherResult> results;
         std::unordered_map<AddressingModeMatcherElement, std::unique_ptr<MatcherNode>> next;

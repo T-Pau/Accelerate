@@ -32,12 +32,12 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "AddressingMode.h"
 
 
-const ArgumentType *AddressingMode::argument(Symbol name) const {
+const AddressingMode::Argument* AddressingMode::argument(Symbol name) const {
     auto it = arguments.find(name);
     if (it == arguments.end()) {
         return nullptr;
     }
     else {
-        return it->second;
+        return it->second.get();
     }
 }

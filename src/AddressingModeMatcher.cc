@@ -33,11 +33,11 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ParseException.h"
 #include "TokenNode.h"
 
-void AddressingModeMatcher::add_notation(Symbol addressing_mode, size_t notation_index, const AddressingMode::Notation &notation, const std::unordered_map<Symbol, const ArgumentType*>& arguments) {
+void AddressingModeMatcher::add_notation(Symbol addressing_mode, size_t notation_index, const AddressingMode::Notation &notation, const std::unordered_map<Symbol, std::unique_ptr<AddressingMode::Argument>>& arguments) {
     start.add_notation(AddressingModeMatcherResult(addressing_mode, notation_index), notation.elements.begin(), notation.elements.end(), arguments);
 }
 
-void AddressingModeMatcher::MatcherNode::add_notation(const AddressingModeMatcherResult& result, std::vector<AddressingMode::Notation::Element>::const_iterator current, std::vector<AddressingMode::Notation::Element>::const_iterator end, const std::unordered_map<Symbol, const ArgumentType*>& arguments) {
+void AddressingModeMatcher::MatcherNode::add_notation(const AddressingModeMatcherResult& result, std::vector<AddressingMode::Notation::Element>::const_iterator current, std::vector<AddressingMode::Notation::Element>::const_iterator end, const std::unordered_map<Symbol, std::unique_ptr<AddressingMode::Argument>>& arguments) {
     if (current == end) {
         results.insert(result);
         return;
@@ -86,7 +86,7 @@ bool AddressingModeMatcherElement::operator==(const AddressingModeMatcherElement
 
 
 std::vector<AddressingModeMatcherElement>
-AddressingModeMatcherElement::elements_for(const AddressingMode::Notation::Element &element, const std::unordered_map<Symbol, const ArgumentType*>& arguments) {
+AddressingModeMatcherElement::elements_for(const AddressingMode::Notation::Element &element, const std::unordered_map<Symbol, std::unique_ptr<AddressingMode::Argument>>& arguments) {
     std::vector<AddressingModeMatcherElement> elements;
 
     switch (element.type) {
@@ -96,8 +96,8 @@ AddressingModeMatcherElement::elements_for(const AddressingMode::Notation::Eleme
                 throw Exception("unknown argument '%s'", element.symbol.c_str());
             }
 
-            auto argument_type = it->second;
-            switch (argument_type->type()) {
+            const auto& argument_type = it->second;
+            switch (argument_type->type->type()) {
                 case ArgumentType::ANY:
                 case ArgumentType::ENCODING:
                 case ArgumentType::RANGE:
@@ -106,7 +106,7 @@ AddressingModeMatcherElement::elements_for(const AddressingMode::Notation::Eleme
                     break;
 
                 case ArgumentType::ENUM:
-                    for (const auto &pair: dynamic_cast<const ArgumentTypeEnum *>(argument_type)->entries) {
+                    for (const auto &pair: dynamic_cast<const ArgumentTypeEnum *>(argument_type->type)->entries) {
                         elements.emplace_back(KEYWORD, pair.first);
                     }
                     break;

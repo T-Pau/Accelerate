@@ -345,28 +345,43 @@ test_142_cpdr {
 
 test_145_add_ar {
     add a,a
+    add a
     add a,b
+    add b
     add a,c
+    add c
     add a,d
+    add d
     add a,e
+    add e
     add a,h
+    add h
     add a,l
+    add l
 }
 
 test_147_add_an {
     add a,$12
+    add $12
 }
 
 test_148_add_ahl {
     add a,(hl)
+    add (hl)
 }
 
 test_149_add_aixd {
     add a,(ix+$12)
+    add (ix+$12)
+    add a,(ix)
+    add (ix)
 }
 
 test_150_add_aiyd {
     add a,(iy+$12)
+    add (iy+$12)
+    add a,(iy)
+    add (iy)
 }
 
 test_151_adc_as {
@@ -1604,35 +1619,35 @@ file test.lib {} <inline>
     visibility: private
     section: code
     body <
-        .data $87, $80, $81, $82, $83, $84, $85
+        .data $87, $87, $80, $80, $81, $81, $82, $82, $83, $83, $84, $84, $85, $85
     >
 }
 .object test_147_add_an {
     visibility: private
     section: code
     body <
-        .data $c6, $12
+        .data $c6, $12, $c6, $12
     >
 }
 .object test_148_add_ahl {
     visibility: private
     section: code
     body <
-        .data $86
+        .data $86, $86
     >
 }
 .object test_149_add_aixd {
     visibility: private
     section: code
     body <
-        .data $dd, $86, $12
+        .data $dd, $86, $12, $dd, $86, $12, $dd, $86, $00, $dd, $86, $00
     >
 }
 .object test_150_add_aiyd {
     visibility: private
     section: code
     body <
-        .data $fd, $86, $12
+        .data $fd, $86, $12, $fd, $86, $12, $fd, $86, $00, $fd, $86, $00
     >
 }
 .object test_151_adc_as {

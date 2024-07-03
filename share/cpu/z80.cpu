@@ -145,10 +145,12 @@
     notation [
         : a,(i+d)
         : (i+d)
+        : a,(i)
+        : (i)
     ]
     arguments {
         i: index_register
-        d: signed_byte
+        d: signed_byte = 0
     }
     encoding: $dd | i << 5, .opcode, d
 }
@@ -230,11 +232,14 @@
 }
 
 .addressing_mode bit_number__indexed {
-    notation: b,(i+d)
+    notation [
+        : b,(i+d)
+        : b,(i)
+    ]
     arguments {
         b: bit_number
         i: index_register
-        d: signed_byte
+        d: signed_byte = 0
     }
     encoding: $dd | i << 5, $cb, d, .opcode | b << 3
 }
@@ -310,38 +315,50 @@
 }
 
 .addressing_mode indexed {
-    notation: (i+d)
+    notation [
+        : (i+d)
+        : (i)
+    ]
     arguments {
         i: index_register
-        d: signed_byte
+        d: signed_byte = 0
     }
     encoding: $dd | i << 5, .opcode, d
 }
 
 .addressing_mode indexed__extended {
-    notation: (i+d)
+    notation [
+        : (i+d)
+        : (i)
+    ]
     arguments {
         i: index_register
-        d: signed_byte
+        d: signed_byte = 0
     }
     encoding: $dd | i << 5, $cb, d, .opcode
 }
 
 .addressing_mode indexed__immediate {
-    notation: (i+d),n
+    notation [
+        : (i+d),n
+        : (i),n
+    ]
     arguments {
         i: index_register
-        d: signed_byte
+        d: signed_byte = 0
         n: byte
     }
     encoding: $dd | i << 5, .opcode, d, n
 }
 
 .addressing_mode indexed__register {
-    notation: (i+d),r
+    notation [
+        : (i+d),r
+        : (i),r
+    ]
     arguments {
         i: index_register
-        d: signed_byte
+        d: signed_byte = 0
         r: register
     }
     encoding: $dd | i << 5, .opcode | r, d
@@ -518,11 +535,14 @@
 }
 
 .addressing_mode register__indexed {
-    notation: r,(i+d)
+    notation [
+        : r,(i+d)
+        : r,(i)
+    ]
     arguments {
         r: register
         i: index_register
-        d: signed_byte
+        d: signed_byte = 0
     }
     encoding: $dd | i << 5, .opcode | r << 3, d
 }
