@@ -1,0 +1,18 @@
+.cpu "z80n"
+
+.segment program {
+    address: $0000 - $ffff
+}
+
+.section code {
+    segment: program
+}
+
+.section data {
+    segment: program
+}
+
+.section reserved {
+    type: reserve_only
+    segment: program
+}

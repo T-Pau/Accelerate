@@ -1,0 +1,2441 @@
+description Test Z80N CPU definition
+arguments --create-library --target z80n test.s
+file test.s <inline>
+.section code
+; 8-Bit Load Group
+
+test_071_ld_rr {
+    ld a,a
+    ld a,b
+    ld a,c
+    ld a,d
+    ld a,e
+    ld a,h
+    ld a,l
+
+    ld b,a
+    ld b,b
+    ld b,c
+    ld b,d
+    ld b,e
+    ld b,h
+    ld b,l
+
+    ld c,a
+    ld c,b
+    ld c,c
+    ld c,d
+    ld c,e
+    ld c,h
+    ld c,l
+
+    ld d,a
+    ld d,b
+    ld d,c
+    ld d,d
+    ld d,e
+    ld d,h
+    ld d,l
+
+    ld e,a
+    ld e,b
+    ld e,c
+    ld e,d
+    ld e,e
+    ld e,h
+    ld e,l
+
+    ld h,a
+    ld h,b
+    ld h,c
+    ld h,d
+    ld h,e
+    ld h,h
+    ld h,l
+
+    ld l,a
+    ld l,b
+    ld l,c
+    ld l,d
+    ld l,e
+    ld l,h
+    ld l,l
+}
+
+test_072_ld_rn {
+    ld a,$12
+    ld b,$12
+    ld c,$12
+    ld d,$12
+    ld e,$12
+    ld h,$12
+    ld l,$12
+}
+
+test_074_ld_rhl {
+    ld a,(hl)
+    ld b,(hl)
+    ld c,(hl)
+    ld d,(hl)
+    ld e,(hl)
+    ld h,(hl)
+    ld l,(hl)
+}
+
+test_075_ld_rixd {
+    ld a,(ix+$12)
+    ld b,(ix+$12)
+    ld c,(ix+$12)
+    ld d,(ix+$12)
+    ld e,(ix+$12)
+    ld h,(ix+$12)
+    ld l,(ix+$12)
+}
+
+test_077_ld_riyd {
+    ld a,(iy+$12)
+    ld b,(iy+$12)
+    ld c,(iy+$12)
+    ld d,(iy+$12)
+    ld e,(iy+$12)
+    ld h,(iy+$12)
+    ld l,(iy+$12)
+}
+
+test_079_ld_hlr {
+    ld (hl),a
+    ld (hl),b
+    ld (hl),c
+    ld (hl),d
+    ld (hl),e
+    ld (hl),h
+    ld (hl),l
+}
+
+test_081_ld_ixdr {
+    ld (ix+$12),a
+    ld (ix+$12),b
+    ld (ix+$12),c
+    ld (ix+$12),d
+    ld (ix+$12),e
+    ld (ix+$12),h
+    ld (ix+$12),l
+}
+
+test_083_ld_iydr {
+    ld (iy+$12),a
+    ld (iy+$12),b
+    ld (iy+$12),c
+    ld (iy+$12),d
+    ld (iy+$12),e
+    ld (iy+$12),h
+    ld (iy+$12),l
+}
+
+test_085_ld_hln {
+    ld (hl), $12
+}
+
+test_086_ld_ixdn {
+    ld (ix+$12),$34
+}
+
+test_087_ld_iydn {
+    ld (iy+$12),$34
+}
+
+test_088_ld_abc {
+    ld a,(bc)
+}
+
+test_089_ld_ade {
+    ld a,(de)
+}
+
+test_090_ld_ann {
+    ld a,($1234)
+}
+
+test_091_ld_bca {
+    ld (bc),a
+}
+
+test_092_ld_dea {
+    ld (de),a
+}
+
+test_093_ld_nna {
+    ld ($1234),a
+}
+
+test_094_ld_ai {
+    ld a,i
+}
+
+test_095_ld_ar {
+    ld a,r
+}
+
+test_096_ld_ia {
+    ld i,a
+}
+
+test_097_ld_ra {
+    ld r,a
+}
+
+
+; 16-Bit Load Group
+
+test_099_ld_ddnn {
+    ld bc,$1234
+    ld de,$1234
+    ld hl,$1234
+    ld sp,$1234
+}
+
+test_100_ld_ixnn {
+    ld ix,$1234
+}
+
+test_101_ld_iynn {
+    ld iy,$1234
+}
+
+test_102_ld_hlnn {
+    ld hl,($1234)
+}
+
+test_103_ld_ddnn {
+    ld bc,($1234)
+    ld de,($1234)
+    ; ld hl,($1234) -- this has a shorter variant
+    ld sp,($1234)
+}
+
+test_105_ld_ixnn {
+    ld ix,($1234)
+}
+
+test_106_ld_iynn {
+    ld iy,($1234)
+}
+
+test_107_ld_nnhl {
+    ld ($1234),hl
+}
+
+test_108_ld_nndd {
+    ld ($1234),bc
+    ld ($1234),de
+    ; ld ($1234),hl -- this has a shorter variant
+    ld ($1234),sp
+}
+
+test_110_ld_nnix {
+    ld ($1234),ix
+}
+
+test_111_ld_nniy {
+    ld ($1234),iy
+}
+
+test_112_ld_sphl {
+    ld sp,hl
+}
+
+test_113_ld_spix {
+    ld sp,ix
+}
+
+test_114_ld_spiy {
+    ld sp,iy
+}
+
+test_115_push_qq {
+    push bc
+    push de
+    push hl
+    push af
+}
+
+test_117_push_ix {
+    push ix
+}
+
+test_118_push_iy {
+    push iy
+}
+
+test_119_pop_qq {
+    pop bc
+    pop de
+    pop hl
+    pop af
+}
+
+test_121_pop_ix {
+    pop ix
+}
+
+test_122_pop_iy {
+    pop iy
+}
+
+
+; Exchange, Block Transfer, and Search Group
+
+test_124_ex_dehl {
+    ex de,hl
+}
+
+test_125_ex_afaf {
+    ex af,af'
+}
+
+test_126_exx {
+    exx
+}
+
+test_127_ex_sphl {
+    ex (sp),hl
+}
+
+test_128_ex_spix {
+    ex (sp),ix
+}
+
+test_129_ex_spiy {
+    ex (sp),iy
+}
+
+test_130_ldi {
+    ldi
+}
+
+test_132_ldir {
+    ldir
+}
+
+test_134_ldd {
+    ldd
+}
+
+test_136_lddr {
+    lddr
+}
+
+test_138_cpi {
+    cpi
+}
+
+test_139_cpir {
+    cpir
+}
+
+test_141_cpd {
+    cpd
+}
+
+test_142_cpdr {
+    cpdr
+}
+
+; 8-Bit Arithmetic Group
+
+test_145_add_ar {
+    add a,a
+    add a
+    add a,b
+    add b
+    add a,c
+    add c
+    add a,d
+    add d
+    add a,e
+    add e
+    add a,h
+    add h
+    add a,l
+    add l
+}
+
+test_147_add_an {
+    add a,$12
+    add $12
+}
+
+test_148_add_ahl {
+    add a,(hl)
+    add (hl)
+}
+
+test_149_add_aixd {
+    add a,(ix+$12)
+    add (ix+$12)
+    add a,(ix)
+    add (ix)
+}
+
+test_150_add_aiyd {
+    add a,(iy+$12)
+    add (iy+$12)
+    add a,(iy)
+    add (iy)
+}
+
+test_151_adc_as {
+    adc a,a
+    adc a,b
+    adc a,c
+    adc a,d
+    adc a,e
+    adc a,h
+    adc a,l
+    adc a,$12
+    adc a,(hl)
+    adc a,(ix+$12)
+    adc a,(iy+$12)
+}
+
+test_153_sub_as {
+    sub a,a
+    sub a,b
+    sub a,c
+    sub a,d
+    sub a,e
+    sub a,h
+    sub a,l
+    sub a,$12
+    sub a,(hl)
+    sub a,(ix+$12)
+    sub a,(iy+$12)
+}
+
+test_155_sbc_as {
+    sbc a,a
+    sbc a,b
+    sbc a,c
+    sbc a,d
+    sbc a,e
+    sbc a,h
+    sbc a,l
+    sbc a,$12
+    sbc a,(hl)
+    sbc a,(ix+$12)
+    sbc a,(iy+$12)
+}
+
+test_157_and_as {
+    and a,a
+    and a,b
+    and a,c
+    and a,d
+    and a,e
+    and a,h
+    and a,l
+    and a,$12
+    and a,(hl)
+    and a,(ix+$12)
+    and a,(iy+$12)
+}
+
+test_159_or_as {
+    or a,a
+    or a,b
+    or a,c
+    or a,d
+    or a,e
+    or a,h
+    or a,l
+    or a,$12
+    or a,(hl)
+    or a,(ix+$12)
+    or a,(iy+$12)
+}
+
+test_161_xor_as {
+    xor a,a
+    xor a,b
+    xor a,c
+    xor a,d
+    xor a,e
+    xor a,h
+    xor a,l
+    xor a,$12
+    xor a,(hl)
+    xor a,(ix+$12)
+    xor a,(iy+$12)
+}
+
+test_163_cp_as {
+    cp a,a
+    cp a,b
+    cp a,c
+    cp a,d
+    cp a,e
+    cp a,h
+    cp a,l
+    cp a,$12
+    cp a,(hl)
+    cp a,(ix+$12)
+    cp a,(iy+$12)
+}
+
+test_165_inc_r {
+    inc a
+    inc b
+    inc c
+    inc d
+    inc e
+    inc h
+    inc l
+}
+
+test_167_inc_hl {
+    inc (hl)
+}
+
+test_168_inc_ixd {
+    inc (ix+$12)
+}
+
+test_169_inc_iyd {
+    inc (iy+$12)
+}
+
+test_170_dec_m {
+    dec a
+    dec b
+    dec c
+    dec d
+    dec e
+    dec h
+    dec l
+    dec (hl)
+    dec (ix+$12)
+    dec (iy+$12)
+}
+
+; General-Purpose Arithmetic and CPU Control Groups
+
+test_173_daa {
+    daa
+}
+
+test_175_cpl {
+    cpl
+}
+
+test_176_neg {
+    neg
+}
+
+test_178_ccf {
+    ccf
+}
+
+test_179_scf {
+    scf
+}
+
+test_180_nop {
+    nop
+}
+
+test_181_halt {
+    halt
+}
+
+test_182_di {
+    di
+}
+
+test_183_ei {
+    ei
+}
+
+test_184_im_0 {
+    im 0
+}
+
+test_185_im_1 {
+    im 1
+}
+
+test_186_im_2 {
+    im 2
+}
+
+
+; 16-Bit Arithmetic Group
+
+test_188_add_hlss {
+    add hl,bc
+    add hl,de
+    add hl,hl
+    add hl,sp
+}
+
+test_190_adc_hlss {
+    adc hl,bc
+    adc hl,de
+    adc hl,hl
+    adc hl,sp
+}
+
+test_192_sbc_hlss {
+    sbc hl,bc
+    sbc hl,de
+    sbc hl,hl
+    sbc hl,sp
+}
+
+test_194_add_ixpp {
+    add ix,bc
+    add ix,de
+    add ix,ix
+    add ix,sp
+}
+
+test_196_add_iyrr {
+    add iy,bc
+    add iy,de
+    add iy,iy
+    add iy,sp
+}
+
+test_198_inc_ss {
+    inc bc
+    inc de
+    inc hl
+    inc sp
+}
+
+test_199_inc_ix {
+    inc ix
+}
+
+test_200_inc_iy {
+    inc iy
+}
+
+test_201_dec_ss {
+    dec bc
+    dec de
+    dec hl
+    dec sp
+}
+
+test_202_dec_ix {
+    dec ix
+}
+
+test_203_dec_iy {
+    dec iy
+}
+
+
+; Rotate and Shift Group
+
+test_205_rlca {
+    rlca
+}
+
+test_207_rla {
+    rla
+}
+
+test_209_rrca {
+    rrca
+}
+
+test_211_rra {
+    rra
+}
+
+test_213_rlc_r {
+    rlc b
+    rlc c
+    rlc d
+    rlc e
+    rlc h
+    rlc l
+    rlc a
+}
+
+test_215_rlc_hl {
+    rlc (hl)
+}
+
+test_217_rlc_ixd {
+    rlc (ix+$12)
+}
+
+test_219_rlc_iyd {
+    rlc (iy+$12)
+}
+
+test_221_rl_m {
+    rl b
+    rl c
+    rl d
+    rl e
+    rl h
+    rl l
+    rl a
+    rl (hl)
+    rl (ix+$12)
+    rl (iy+$12)
+}
+
+test_224_rrc_m {
+    rrc b
+    rrc c
+    rrc d
+    rrc e
+    rrc h
+    rrc l
+    rrc a
+    rrc (hl)
+    rrc (ix+$12)
+    rrc (iy+$12)
+}
+
+test_227_rr_m {
+    rr b
+    rr c
+    rr d
+    rr e
+    rr h
+    rr l
+    rr a
+    rr (hl)
+    rr (ix+$12)
+    rr (iy+$12)
+}
+
+test_230_sla_m {
+    sla b
+    sla c
+    sla d
+    sla e
+    sla h
+    sla l
+    sla a
+    sla (hl)
+    sla (ix+$12)
+    sla (iy+$12)
+}
+
+test_233_sra_m {
+    sra b
+    sra c
+    sra d
+    sra e
+    sra h
+    sra l
+    sra a
+    sra (hl)
+    sra (ix+$12)
+    sra (iy+$12)
+}
+
+test_236_srl_m {
+    srl b
+    srl c
+    srl d
+    srl e
+    srl h
+    srl l
+    srl a
+    srl (hl)
+    srl (ix+$12)
+    srl (iy+$12)
+}
+
+test_238_rld {
+    rld
+}
+
+test_240_rrd {
+    rrd
+}
+
+
+; Bit Set, Reset, and Test Group
+
+test_243_bit_br {
+    bit 0, b
+    bit 0, c
+    bit 0, d
+    bit 0, e
+    bit 0, h
+    bit 0, l
+    bit 0, a
+
+    bit 1, b
+    bit 1, c
+    bit 1, d
+    bit 1, e
+    bit 1, h
+    bit 1, l
+    bit 1, a
+
+    bit 2, b
+    bit 2, c
+    bit 2, d
+    bit 2, e
+    bit 2, h
+    bit 2, l
+    bit 2, a
+
+    bit 3, b
+    bit 3, c
+    bit 3, d
+    bit 3, e
+    bit 3, h
+    bit 3, l
+    bit 3, a
+
+    bit 4, b
+    bit 4, c
+    bit 4, d
+    bit 4, e
+    bit 4, h
+    bit 4, l
+    bit 4, a
+
+    bit 5, b
+    bit 5, c
+    bit 5, d
+    bit 5, e
+    bit 5, h
+    bit 5, l
+    bit 5, a
+
+    bit 6, b
+    bit 6, c
+    bit 6, d
+    bit 6, e
+    bit 6, h
+    bit 6, l
+    bit 6, a
+
+    bit 7, b
+    bit 7, c
+    bit 7, d
+    bit 7, e
+    bit 7, h
+    bit 7, l
+    bit 7, a
+}
+
+test_245_bit_bhl {
+    bit 0, (hl)
+    bit 1, (hl)
+    bit 2, (hl)
+    bit 3, (hl)
+    bit 4, (hl)
+    bit 5, (hl)
+    bit 6, (hl)
+    bit 7, (hl)
+}
+
+test_247_bit_bixd {
+    bit 0, (ix+$12)
+    bit 1, (ix+$12)
+    bit 2, (ix+$12)
+    bit 3, (ix+$12)
+    bit 4, (ix+$12)
+    bit 5, (ix+$12)
+    bit 6, (ix+$12)
+    bit 7, (ix+$12)
+}
+
+test_249_bit_biyd {
+    bit 0, (iy+$12)
+    bit 1, (iy+$12)
+    bit 2, (iy+$12)
+    bit 3, (iy+$12)
+    bit 4, (iy+$12)
+    bit 5, (iy+$12)
+    bit 6, (iy+$12)
+    bit 7, (iy+$12)
+}
+
+test_251_set_br {
+    set 0, b
+    set 0, c
+    set 0, d
+    set 0, e
+    set 0, h
+    set 0, l
+    set 0, a
+
+    set 1, b
+    set 1, c
+    set 1, d
+    set 1, e
+    set 1, h
+    set 1, l
+    set 1, a
+
+    set 2, b
+    set 2, c
+    set 2, d
+    set 2, e
+    set 2, h
+    set 2, l
+    set 2, a
+
+    set 3, b
+    set 3, c
+    set 3, d
+    set 3, e
+    set 3, h
+    set 3, l
+    set 3, a
+
+    set 4, b
+    set 4, c
+    set 4, d
+    set 4, e
+    set 4, h
+    set 4, l
+    set 4, a
+
+    set 5, b
+    set 5, c
+    set 5, d
+    set 5, e
+    set 5, h
+    set 5, l
+    set 5, a
+
+    set 6, b
+    set 6, c
+    set 6, d
+    set 6, e
+    set 6, h
+    set 6, l
+    set 6, a
+
+    set 7, b
+    set 7, c
+    set 7, d
+    set 7, e
+    set 7, h
+    set 7, l
+    set 7, a
+}
+
+test_253_set_bhl {
+    set 0, (hl)
+    set 1, (hl)
+    set 2, (hl)
+    set 3, (hl)
+    set 4, (hl)
+    set 5, (hl)
+    set 6, (hl)
+    set 7, (hl)
+}
+
+test_255_set_bixd {
+    set 0, (ix+$12)
+    set 1, (ix+$12)
+    set 2, (ix+$12)
+    set 3, (ix+$12)
+    set 4, (ix+$12)
+    set 5, (ix+$12)
+    set 6, (ix+$12)
+    set 7, (ix+$12)
+}
+
+test_257_set_biyd {
+    set 0, (iy+$12)
+    set 1, (iy+$12)
+    set 2, (iy+$12)
+    set 3, (iy+$12)
+    set 4, (iy+$12)
+    set 5, (iy+$12)
+    set 6, (iy+$12)
+    set 7, (iy+$12)
+}
+
+test_259_res_bm {
+    res 0, b
+    res 0, c
+    res 0, d
+    res 0, e
+    res 0, h
+    res 0, l
+    res 0, a
+
+    res 1, b
+    res 1, c
+    res 1, d
+    res 1, e
+    res 1, h
+    res 1, l
+    res 1, a
+
+    res 2, b
+    res 2, c
+    res 2, d
+    res 2, e
+    res 2, h
+    res 2, l
+    res 2, a
+
+    res 3, b
+    res 3, c
+    res 3, d
+    res 3, e
+    res 3, h
+    res 3, l
+    res 3, a
+
+    res 4, b
+    res 4, c
+    res 4, d
+    res 4, e
+    res 4, h
+    res 4, l
+    res 4, a
+
+    res 5, b
+    res 5, c
+    res 5, d
+    res 5, e
+    res 5, h
+    res 5, l
+    res 5, a
+
+    res 6, b
+    res 6, c
+    res 6, d
+    res 6, e
+    res 6, h
+    res 6, l
+    res 6, a
+
+    res 7, b
+    res 7, c
+    res 7, d
+    res 7, e
+    res 7, h
+    res 7, l
+    res 7, a
+
+    res 0, (hl)
+    res 1, (hl)
+    res 2, (hl)
+    res 3, (hl)
+    res 4, (hl)
+    res 5, (hl)
+    res 6, (hl)
+    res 7, (hl)
+
+    res 0, (ix+$12)
+    res 1, (ix+$12)
+    res 2, (ix+$12)
+    res 3, (ix+$12)
+    res 4, (ix+$12)
+    res 5, (ix+$12)
+    res 6, (ix+$12)
+    res 7, (ix+$12)
+
+    res 0, (iy+$12)
+    res 1, (iy+$12)
+    res 2, (iy+$12)
+    res 3, (iy+$12)
+    res 4, (iy+$12)
+    res 5, (iy+$12)
+    res 6, (iy+$12)
+    res 7, (iy+$12)
+}
+
+
+; Jump Group
+
+test_262_jp_nn {
+    jp $1234
+}
+
+test_263_jp_ccnn {
+    jp nz,$1234
+    jp z,$1234
+    jp nc,$1234
+    jp c,$1234
+    jp po,$1234
+    jp pe,$1234
+    jp p,$1234
+    jp m,$1234
+}
+
+test_265_jr_e {
+    jr test_265_jr_e
+}
+
+test_267_jr_ce {
+    jr c,test_267_jr_ce
+}
+
+test_269_jr_nce {
+    jr nc,test_269_jr_nce
+}
+
+test_271_jr_ze {
+    jr z,test_271_jr_ze
+}
+
+test_273_jr_nze {
+    jr nz,test_273_jr_nze
+}
+
+test_275_jp_hl {
+    jp (hl)
+}
+
+test_276_jp_ix {
+    jp (ix)
+}
+
+test_277_jp_iy {
+    jp (iy)
+}
+
+test_278_djnz_e {
+    djnz test_278_djnz_e
+}
+
+
+; Call and Return Group
+
+test_281_call_nn {
+    call $1234
+}
+
+test_283_call_ccnn {
+    call nz,$1234
+    call z,$1234
+    call nc,$1234
+    call c,$1234
+    call po,$1234
+    call pe,$1234
+    call p,$1234
+    call m,$1234
+}
+
+test_285_ret {
+    ret
+}
+
+test_286_ret_cc {
+    ret nz
+    ret z
+    ret nc
+    ret c
+    ret po
+    ret pe
+    ret p
+    ret m
+}
+
+test_288_reti {
+    reti
+}
+
+test_290_retn {
+    retn
+}
+
+test_292_rst_p {
+    rst $00
+    rst $08
+    rst $10
+    rst $18
+    rst $20
+    rst $28
+    rst $30
+    rst $38
+}
+
+
+; Input and Output Group
+
+test_295_in_an {
+    in a,($12)
+}
+
+test_296_in_rc {
+    in b,(c)
+    in c,(c)
+    in d,(c)
+    in e,(c)
+    in h,(c)
+    in l,(c)
+    in a,(c)
+}
+
+test_298_ini {
+    ini
+}
+
+test_300_inir {
+    inir
+}
+
+test_302_ind {
+    ind
+}
+
+test_304_indr {
+    indr
+}
+
+test_306_out_na {
+    out ($12),a
+}
+
+test_307_out_cr {
+    out (c),b
+    out (c),c
+    out (c),d
+    out (c),e
+    out (c),h
+    out (c),l
+    out (c),a
+}
+
+test_309_outi {
+    outi
+}
+
+test_311_outir {
+    outir
+}
+
+test_313_outd {
+    outd
+}
+
+test_315_outdr {
+    outdr
+}
+
+test_next_add {
+    add bc,a
+    add de,a
+    add hl,a
+    add bc,$1234
+    add de,$1234
+    add hl,$1234
+}
+
+test_next_bs {
+    brlc de,b
+    bsla de,b
+    bsra de,b
+    bsrf de,b
+    bsrl de,b
+}
+
+test_next_jp {
+    jp (c)
+}
+
+test_next_ld {
+    lddrx
+    lddx
+    ldirx
+    ldix
+    ldpirx
+    ldws
+}
+
+test_next_mirror {
+    mirror a
+}
+
+test_next_mul {
+    mul d,e
+}
+
+test_next_nextreg {
+    nextreg $12,a
+    nextreg $12,$34
+}
+
+test_next_outinb {
+    outinb
+}
+
+test_next_pixel {
+    pixelad
+    pixeldn
+}
+
+test_next_push {
+    push $1234
+}
+
+test_next_setae {
+    setae
+}
+
+test_next_swapnib {
+    swapnib
+}
+
+test_next_test {
+    test $12
+}
+end-of-inline-data
+
+file test.lib {} <inline>
+.format_version 1.0
+.target "z80n"
+.object test_071_ld_rr {
+    visibility: private
+    section: code
+    body <
+        .data $7f, $78, $79, $7a, $7b, $7c, $7d, $47, $40, $41, $42, $43, $44, $45, $4f, $48, $49, $4a, $4b, $4c, $4d, $57, $50, $51, $52, $53, $54, $55, $5f, $58, $59, $5a, $5b, $5c, $5d, $67, $60, $61, $62, $63, $64, $65, $6f, $68, $69, $6a, $6b, $6c, $6d
+    >
+}
+.object test_072_ld_rn {
+    visibility: private
+    section: code
+    body <
+        .data $3e, $12, $06, $12, $0e, $12, $16, $12, $1e, $12, $26, $12, $2e, $12
+    >
+}
+.object test_074_ld_rhl {
+    visibility: private
+    section: code
+    body <
+        .data $7e, $46, $4e, $56, $5e, $66, $6e
+    >
+}
+.object test_075_ld_rixd {
+    visibility: private
+    section: code
+    body <
+        .data $dd, $7e, $12, $dd, $46, $12, $dd, $4e, $12, $dd, $56, $12, $dd, $5e, $12, $dd, $66, $12, $dd, $6e, $12
+    >
+}
+.object test_077_ld_riyd {
+    visibility: private
+    section: code
+    body <
+        .data $fd, $7e, $12, $fd, $46, $12, $fd, $4e, $12, $fd, $56, $12, $fd, $5e, $12, $fd, $66, $12, $fd, $6e, $12
+    >
+}
+.object test_079_ld_hlr {
+    visibility: private
+    section: code
+    body <
+        .data $77, $70, $71, $72, $73, $74, $75
+    >
+}
+.object test_081_ld_ixdr {
+    visibility: private
+    section: code
+    body <
+        .data $dd, $77, $12, $dd, $70, $12, $dd, $71, $12, $dd, $72, $12, $dd, $73, $12, $dd, $74, $12, $dd, $75, $12
+    >
+}
+.object test_083_ld_iydr {
+    visibility: private
+    section: code
+    body <
+        .data $fd, $77, $12, $fd, $70, $12, $fd, $71, $12, $fd, $72, $12, $fd, $73, $12, $fd, $74, $12, $fd, $75, $12
+    >
+}
+.object test_085_ld_hln {
+    visibility: private
+    section: code
+    body <
+        .data $36, $12
+    >
+}
+.object test_086_ld_ixdn {
+    visibility: private
+    section: code
+    body <
+        .data $dd, $36, $12, $34
+    >
+}
+.object test_087_ld_iydn {
+    visibility: private
+    section: code
+    body <
+        .data $fd, $36, $12, $34
+    >
+}
+.object test_088_ld_abc {
+    visibility: private
+    section: code
+    body <
+        .data $0a
+    >
+}
+.object test_089_ld_ade {
+    visibility: private
+    section: code
+    body <
+        .data $1a
+    >
+}
+.object test_090_ld_ann {
+    visibility: private
+    section: code
+    body <
+        .data $3a, $1234
+    >
+}
+.object test_091_ld_bca {
+    visibility: private
+    section: code
+    body <
+        .data $02
+    >
+}
+.object test_092_ld_dea {
+    visibility: private
+    section: code
+    body <
+        .data $12
+    >
+}
+.object test_093_ld_nna {
+    visibility: private
+    section: code
+    body <
+        .data $32, $1234
+    >
+}
+.object test_094_ld_ai {
+    visibility: private
+    section: code
+    body <
+        .data $ed, $57
+    >
+}
+.object test_095_ld_ar {
+    visibility: private
+    section: code
+    body <
+        .data $ed, $5f
+    >
+}
+.object test_096_ld_ia {
+    visibility: private
+    section: code
+    body <
+        .data $ed, $47
+    >
+}
+.object test_097_ld_ra {
+    visibility: private
+    section: code
+    body <
+        .data $ed, $4f
+    >
+}
+.object test_099_ld_ddnn {
+    visibility: private
+    section: code
+    body <
+        .data $01, $1234, $11, $1234, $21, $1234, $31, $1234
+    >
+}
+.object test_100_ld_ixnn {
+    visibility: private
+    section: code
+    body <
+        .data $dd, $21, $1234
+    >
+}
+.object test_101_ld_iynn {
+    visibility: private
+    section: code
+    body <
+        .data $fd, $21, $1234
+    >
+}
+.object test_102_ld_hlnn {
+    visibility: private
+    section: code
+    body <
+        .data $2a, $1234
+    >
+}
+.object test_103_ld_ddnn {
+    visibility: private
+    section: code
+    body <
+        .data $ed, $4b, $1234, $ed, $5b, $1234, $ed, $7b, $1234
+    >
+}
+.object test_105_ld_ixnn {
+    visibility: private
+    section: code
+    body <
+        .data $dd, $2a, $1234
+    >
+}
+.object test_106_ld_iynn {
+    visibility: private
+    section: code
+    body <
+        .data $fd, $2a, $1234
+    >
+}
+.object test_107_ld_nnhl {
+    visibility: private
+    section: code
+    body <
+        .data $22, $1234
+    >
+}
+.object test_108_ld_nndd {
+    visibility: private
+    section: code
+    body <
+        .data $ed, $43, $1234, $ed, $53, $1234, $ed, $73, $1234
+    >
+}
+.object test_110_ld_nnix {
+    visibility: private
+    section: code
+    body <
+        .data $dd, $22, $1234
+    >
+}
+.object test_111_ld_nniy {
+    visibility: private
+    section: code
+    body <
+        .data $fd, $22, $1234
+    >
+}
+.object test_112_ld_sphl {
+    visibility: private
+    section: code
+    body <
+        .data $f9
+    >
+}
+.object test_113_ld_spix {
+    visibility: private
+    section: code
+    body <
+        .data $dd, $f9
+    >
+}
+.object test_114_ld_spiy {
+    visibility: private
+    section: code
+    body <
+        .data $fd, $f9
+    >
+}
+.object test_115_push_qq {
+    visibility: private
+    section: code
+    body <
+        .data $c5, $d5, $e5, $f5
+    >
+}
+.object test_117_push_ix {
+    visibility: private
+    section: code
+    body <
+        .data $dd, $e5
+    >
+}
+.object test_118_push_iy {
+    visibility: private
+    section: code
+    body <
+        .data $fd, $e5
+    >
+}
+.object test_119_pop_qq {
+    visibility: private
+    section: code
+    body <
+        .data $c1, $d1, $e1, $f1
+    >
+}
+.object test_121_pop_ix {
+    visibility: private
+    section: code
+    body <
+        .data $dd, $e1
+    >
+}
+.object test_122_pop_iy {
+    visibility: private
+    section: code
+    body <
+        .data $fd, $e1
+    >
+}
+.object test_124_ex_dehl {
+    visibility: private
+    section: code
+    body <
+        .data $eb
+    >
+}
+.object test_125_ex_afaf {
+    visibility: private
+    section: code
+    body <
+        .data $08
+    >
+}
+.object test_126_exx {
+    visibility: private
+    section: code
+    body <
+        .data $d9
+    >
+}
+.object test_127_ex_sphl {
+    visibility: private
+    section: code
+    body <
+        .data $e3
+    >
+}
+.object test_128_ex_spix {
+    visibility: private
+    section: code
+    body <
+        .data $dd, $e3
+    >
+}
+.object test_129_ex_spiy {
+    visibility: private
+    section: code
+    body <
+        .data $fd, $e3
+    >
+}
+.object test_130_ldi {
+    visibility: private
+    section: code
+    body <
+        .data $ed, $a0
+    >
+}
+.object test_132_ldir {
+    visibility: private
+    section: code
+    body <
+        .data $ed, $b0
+    >
+}
+.object test_134_ldd {
+    visibility: private
+    section: code
+    body <
+        .data $ed, $a8
+    >
+}
+.object test_136_lddr {
+    visibility: private
+    section: code
+    body <
+        .data $ed, $b8
+    >
+}
+.object test_138_cpi {
+    visibility: private
+    section: code
+    body <
+        .data $ed, $a1
+    >
+}
+.object test_139_cpir {
+    visibility: private
+    section: code
+    body <
+        .data $ed, $b1
+    >
+}
+.object test_141_cpd {
+    visibility: private
+    section: code
+    body <
+        .data $ed, $a9
+    >
+}
+.object test_142_cpdr {
+    visibility: private
+    section: code
+    body <
+        .data $ed, $b9
+    >
+}
+.object test_145_add_ar {
+    visibility: private
+    section: code
+    body <
+        .data $87, $87, $80, $80, $81, $81, $82, $82, $83, $83, $84, $84, $85, $85
+    >
+}
+.object test_147_add_an {
+    visibility: private
+    section: code
+    body <
+        .data $c6, $12, $c6, $12
+    >
+}
+.object test_148_add_ahl {
+    visibility: private
+    section: code
+    body <
+        .data $86, $86
+    >
+}
+.object test_149_add_aixd {
+    visibility: private
+    section: code
+    body <
+        .data $dd, $86, $12, $dd, $86, $12, $dd, $86, $00, $dd, $86, $00
+    >
+}
+.object test_150_add_aiyd {
+    visibility: private
+    section: code
+    body <
+        .data $fd, $86, $12, $fd, $86, $12, $fd, $86, $00, $fd, $86, $00
+    >
+}
+.object test_151_adc_as {
+    visibility: private
+    section: code
+    body <
+        .data $8f, $88, $89, $8a, $8b, $8c, $8d, $ce, $12, $8e, $dd, $8e, $12, $fd, $8e, $12
+    >
+}
+.object test_153_sub_as {
+    visibility: private
+    section: code
+    body <
+        .data $97, $90, $91, $92, $93, $94, $95, $d6, $12, $96, $dd, $96, $12, $fd, $96, $12
+    >
+}
+.object test_155_sbc_as {
+    visibility: private
+    section: code
+    body <
+        .data $9f, $98, $99, $9a, $9b, $9c, $9d, $de, $12, $9e, $dd, $9e, $12, $fd, $9e, $12
+    >
+}
+.object test_157_and_as {
+    visibility: private
+    section: code
+    body <
+        .data $a7, $a0, $a1, $a2, $a3, $a4, $a5, $e6, $12, $a6, $dd, $a6, $12, $fd, $a6, $12
+    >
+}
+.object test_159_or_as {
+    visibility: private
+    section: code
+    body <
+        .data $b7, $b0, $b1, $b2, $b3, $b4, $b5, $f6, $12, $b6, $dd, $b6, $12, $fd, $b6, $12
+    >
+}
+.object test_161_xor_as {
+    visibility: private
+    section: code
+    body <
+        .data $af, $a8, $a9, $aa, $ab, $ac, $ad, $ee, $12, $ae, $dd, $ae, $12, $fd, $ae, $12
+    >
+}
+.object test_163_cp_as {
+    visibility: private
+    section: code
+    body <
+        .data $bf, $b8, $b9, $ba, $bb, $bc, $bd, $fe, $12, $be, $dd, $be, $12, $fd, $be, $12
+    >
+}
+.object test_165_inc_r {
+    visibility: private
+    section: code
+    body <
+        .data $3c, $04, $0c, $14, $1c, $24, $2c
+    >
+}
+.object test_167_inc_hl {
+    visibility: private
+    section: code
+    body <
+        .data $34
+    >
+}
+.object test_168_inc_ixd {
+    visibility: private
+    section: code
+    body <
+        .data $dd, $34, $12
+    >
+}
+.object test_169_inc_iyd {
+    visibility: private
+    section: code
+    body <
+        .data $fd, $34, $12
+    >
+}
+.object test_170_dec_m {
+    visibility: private
+    section: code
+    body <
+        .data $3d, $05, $0d, $15, $1d, $25, $2d, $35, $dd, $35, $12, $fd, $35, $12
+    >
+}
+.object test_173_daa {
+    visibility: private
+    section: code
+    body <
+        .data $27
+    >
+}
+.object test_175_cpl {
+    visibility: private
+    section: code
+    body <
+        .data $2f
+    >
+}
+.object test_176_neg {
+    visibility: private
+    section: code
+    body <
+        .data $ed, $44
+    >
+}
+.object test_178_ccf {
+    visibility: private
+    section: code
+    body <
+        .data $3f
+    >
+}
+.object test_179_scf {
+    visibility: private
+    section: code
+    body <
+        .data $37
+    >
+}
+.object test_180_nop {
+    visibility: private
+    section: code
+    body <
+        .data $00
+    >
+}
+.object test_181_halt {
+    visibility: private
+    section: code
+    body <
+        .data $76
+    >
+}
+.object test_182_di {
+    visibility: private
+    section: code
+    body <
+        .data $f3
+    >
+}
+.object test_183_ei {
+    visibility: private
+    section: code
+    body <
+        .data $fb
+    >
+}
+.object test_184_im_0 {
+    visibility: private
+    section: code
+    body <
+        .data $ed, $46
+    >
+}
+.object test_185_im_1 {
+    visibility: private
+    section: code
+    body <
+        .data $ed, $56
+    >
+}
+.object test_186_im_2 {
+    visibility: private
+    section: code
+    body <
+        .data $ed, $5e
+    >
+}
+.object test_188_add_hlss {
+    visibility: private
+    section: code
+    body <
+        .data $09, $19, $29, $39
+    >
+}
+.object test_190_adc_hlss {
+    visibility: private
+    section: code
+    body <
+        .data $ed, $4a, $ed, $5a, $ed, $6a, $ed, $7a
+    >
+}
+.object test_192_sbc_hlss {
+    visibility: private
+    section: code
+    body <
+        .data $ed, $42, $ed, $52, $ed, $62, $ed, $72
+    >
+}
+.object test_194_add_ixpp {
+    visibility: private
+    section: code
+    body <
+        .data $dd, $09, $dd, $19, $dd, $29, $dd, $39
+    >
+}
+.object test_196_add_iyrr {
+    visibility: private
+    section: code
+    body <
+        .data $fd, $09, $fd, $19, $fd, $29, $fd, $39
+    >
+}
+.object test_198_inc_ss {
+    visibility: private
+    section: code
+    body <
+        .data $03, $13, $23, $33
+    >
+}
+.object test_199_inc_ix {
+    visibility: private
+    section: code
+    body <
+        .data $dd, $23
+    >
+}
+.object test_200_inc_iy {
+    visibility: private
+    section: code
+    body <
+        .data $fd, $23
+    >
+}
+.object test_201_dec_ss {
+    visibility: private
+    section: code
+    body <
+        .data $0b, $1b, $2b, $3b
+    >
+}
+.object test_202_dec_ix {
+    visibility: private
+    section: code
+    body <
+        .data $dd, $2b
+    >
+}
+.object test_203_dec_iy {
+    visibility: private
+    section: code
+    body <
+        .data $fd, $2b
+    >
+}
+.object test_205_rlca {
+    visibility: private
+    section: code
+    body <
+        .data $07
+    >
+}
+.object test_207_rla {
+    visibility: private
+    section: code
+    body <
+        .data $17
+    >
+}
+.object test_209_rrca {
+    visibility: private
+    section: code
+    body <
+        .data $0f
+    >
+}
+.object test_211_rra {
+    visibility: private
+    section: code
+    body <
+        .data $1f
+    >
+}
+.object test_213_rlc_r {
+    visibility: private
+    section: code
+    body <
+        .data $cb, $00, $cb, $01, $cb, $02, $cb, $03, $cb, $04, $cb, $05, $cb, $07
+    >
+}
+.object test_215_rlc_hl {
+    visibility: private
+    section: code
+    body <
+        .data $cb, $06
+    >
+}
+.object test_217_rlc_ixd {
+    visibility: private
+    section: code
+    body <
+        .data $dd, $cb, $12, $06
+    >
+}
+.object test_219_rlc_iyd {
+    visibility: private
+    section: code
+    body <
+        .data $fd, $cb, $12, $06
+    >
+}
+.object test_221_rl_m {
+    visibility: private
+    section: code
+    body <
+        .data $cb, $10, $cb, $11, $cb, $12, $cb, $13, $cb, $14, $cb, $15, $cb, $17, $cb, $16, $dd, $cb, $12, $16, $fd, $cb, $12, $16
+    >
+}
+.object test_224_rrc_m {
+    visibility: private
+    section: code
+    body <
+        .data $cb, $08, $cb, $09, $cb, $0a, $cb, $0b, $cb, $0c, $cb, $0d, $cb, $0f, $cb, $0e, $dd, $cb, $12, $0e, $fd, $cb, $12, $0e
+    >
+}
+.object test_227_rr_m {
+    visibility: private
+    section: code
+    body <
+        .data $cb, $18, $cb, $19, $cb, $1a, $cb, $1b, $cb, $1c, $cb, $1d, $cb, $1f, $cb, $1e, $dd, $cb, $12, $1e, $fd, $cb, $12, $1e
+    >
+}
+.object test_230_sla_m {
+    visibility: private
+    section: code
+    body <
+        .data $cb, $20, $cb, $21, $cb, $22, $cb, $23, $cb, $24, $cb, $25, $cb, $27, $cb, $26, $dd, $cb, $12, $26, $fd, $cb, $12, $26
+    >
+}
+.object test_233_sra_m {
+    visibility: private
+    section: code
+    body <
+        .data $cb, $28, $cb, $29, $cb, $2a, $cb, $2b, $cb, $2c, $cb, $2d, $cb, $2f, $cb, $2e, $dd, $cb, $12, $2e, $fd, $cb, $12, $2e
+    >
+}
+.object test_236_srl_m {
+    visibility: private
+    section: code
+    body <
+        .data $cb, $38, $cb, $39, $cb, $3a, $cb, $3b, $cb, $3c, $cb, $3d, $cb, $3f, $cb, $3e, $dd, $cb, $12, $3e, $fd, $cb, $12, $3e
+    >
+}
+.object test_238_rld {
+    visibility: private
+    section: code
+    body <
+        .data $ed, $6f
+    >
+}
+.object test_240_rrd {
+    visibility: private
+    section: code
+    body <
+        .data $ed, $67
+    >
+}
+.object test_243_bit_br {
+    visibility: private
+    section: code
+    body <
+        .data $cb, $40, $cb, $41, $cb, $42, $cb, $43, $cb, $44, $cb, $45, $cb, $47, $cb, $48, $cb, $49, $cb, $4a, $cb, $4b, $cb, $4c, $cb, $4d, $cb, $4f, $cb, $50, $cb, $51, $cb, $52, $cb, $53, $cb, $54, $cb, $55, $cb, $57, $cb, $58, $cb, $59, $cb, $5a, $cb, $5b, $cb, $5c, $cb, $5d, $cb, $5f, $cb, $60, $cb, $61, $cb, $62, $cb, $63, $cb, $64, $cb, $65, $cb, $67, $cb, $68, $cb, $69, $cb, $6a, $cb, $6b, $cb, $6c, $cb, $6d, $cb, $6f, $cb, $70, $cb, $71, $cb, $72, $cb, $73, $cb, $74, $cb, $75, $cb, $77, $cb, $78, $cb, $79, $cb, $7a, $cb, $7b, $cb, $7c, $cb, $7d, $cb, $7f
+    >
+}
+.object test_245_bit_bhl {
+    visibility: private
+    section: code
+    body <
+        .data $cb, $46, $cb, $4e, $cb, $56, $cb, $5e, $cb, $66, $cb, $6e, $cb, $76, $cb, $7e
+    >
+}
+.object test_247_bit_bixd {
+    visibility: private
+    section: code
+    body <
+        .data $dd, $cb, $12, $46, $dd, $cb, $12, $4e, $dd, $cb, $12, $56, $dd, $cb, $12, $5e, $dd, $cb, $12, $66, $dd, $cb, $12, $6e, $dd, $cb, $12, $76, $dd, $cb, $12, $7e
+    >
+}
+.object test_249_bit_biyd {
+    visibility: private
+    section: code
+    body <
+        .data $fd, $cb, $12, $46, $fd, $cb, $12, $4e, $fd, $cb, $12, $56, $fd, $cb, $12, $5e, $fd, $cb, $12, $66, $fd, $cb, $12, $6e, $fd, $cb, $12, $76, $fd, $cb, $12, $7e
+    >
+}
+.object test_251_set_br {
+    visibility: private
+    section: code
+    body <
+        .data $cb, $c0, $cb, $c1, $cb, $c2, $cb, $c3, $cb, $c4, $cb, $c5, $cb, $c7, $cb, $c8, $cb, $c9, $cb, $ca, $cb, $cb, $cb, $cc, $cb, $cd, $cb, $cf, $cb, $d0, $cb, $d1, $cb, $d2, $cb, $d3, $cb, $d4, $cb, $d5, $cb, $d7, $cb, $d8, $cb, $d9, $cb, $da, $cb, $db, $cb, $dc, $cb, $dd, $cb, $df, $cb, $e0, $cb, $e1, $cb, $e2, $cb, $e3, $cb, $e4, $cb, $e5, $cb, $e7, $cb, $e8, $cb, $e9, $cb, $ea, $cb, $eb, $cb, $ec, $cb, $ed, $cb, $ef, $cb, $f0, $cb, $f1, $cb, $f2, $cb, $f3, $cb, $f4, $cb, $f5, $cb, $f7, $cb, $f8, $cb, $f9, $cb, $fa, $cb, $fb, $cb, $fc, $cb, $fd, $cb, $ff
+    >
+}
+.object test_253_set_bhl {
+    visibility: private
+    section: code
+    body <
+        .data $cb, $c6, $cb, $ce, $cb, $d6, $cb, $de, $cb, $e6, $cb, $ee, $cb, $f6, $cb, $fe
+    >
+}
+.object test_255_set_bixd {
+    visibility: private
+    section: code
+    body <
+        .data $dd, $cb, $12, $c6, $dd, $cb, $12, $ce, $dd, $cb, $12, $d6, $dd, $cb, $12, $de, $dd, $cb, $12, $e6, $dd, $cb, $12, $ee, $dd, $cb, $12, $f6, $dd, $cb, $12, $fe
+    >
+}
+.object test_257_set_biyd {
+    visibility: private
+    section: code
+    body <
+        .data $fd, $cb, $12, $c6, $fd, $cb, $12, $ce, $fd, $cb, $12, $d6, $fd, $cb, $12, $de, $fd, $cb, $12, $e6, $fd, $cb, $12, $ee, $fd, $cb, $12, $f6, $fd, $cb, $12, $fe
+    >
+}
+.object test_259_res_bm {
+    visibility: private
+    section: code
+    body <
+        .data $cb, $80, $cb, $81, $cb, $82, $cb, $83, $cb, $84, $cb, $85, $cb, $87, $cb, $88, $cb, $89, $cb, $8a, $cb, $8b, $cb, $8c, $cb, $8d, $cb, $8f, $cb, $90, $cb, $91, $cb, $92, $cb, $93, $cb, $94, $cb, $95, $cb, $97, $cb, $98, $cb, $99, $cb, $9a, $cb, $9b, $cb, $9c, $cb, $9d, $cb, $9f, $cb, $a0, $cb, $a1, $cb, $a2, $cb, $a3, $cb, $a4, $cb, $a5, $cb, $a7, $cb, $a8, $cb, $a9, $cb, $aa, $cb, $ab, $cb, $ac, $cb, $ad, $cb, $af, $cb, $b0, $cb, $b1, $cb, $b2, $cb, $b3, $cb, $b4, $cb, $b5, $cb, $b7, $cb, $b8, $cb, $b9, $cb, $ba, $cb, $bb, $cb, $bc, $cb, $bd, $cb, $bf, $cb, $86, $cb, $8e, $cb, $96, $cb, $9e, $cb, $a6, $cb, $ae, $cb, $b6, $cb, $be, $dd, $cb, $12, $86, $dd, $cb, $12, $8e, $dd, $cb, $12, $96, $dd, $cb, $12, $9e, $dd, $cb, $12, $a6, $dd, $cb, $12, $ae, $dd, $cb, $12, $b6, $dd, $cb, $12, $be, $fd, $cb, $12, $86, $fd, $cb, $12, $8e, $fd, $cb, $12, $96, $fd, $cb, $12, $9e, $fd, $cb, $12, $a6, $fd, $cb, $12, $ae, $fd, $cb, $12, $b6, $fd, $cb, $12, $be
+    >
+}
+.object test_262_jp_nn {
+    visibility: private
+    section: code
+    body <
+        .data $c3, $1234
+    >
+}
+.object test_263_jp_ccnn {
+    visibility: private
+    section: code
+    body <
+        .data $c2, $1234, $ca, $1234, $d2, $1234, $da, $1234, $e2, $1234, $ea, $1234, $f2, $1234, $fa, $1234
+    >
+}
+.object test_265_jr_e {
+    visibility: private
+    section: code
+    body <
+        .data $18, -$02
+    >
+}
+.object test_267_jr_ce {
+    visibility: private
+    section: code
+    body <
+        .data $38, -$02
+    >
+}
+.object test_269_jr_nce {
+    visibility: private
+    section: code
+    body <
+        .data $30, -$02
+    >
+}
+.object test_271_jr_ze {
+    visibility: private
+    section: code
+    body <
+        .data $28, -$02
+    >
+}
+.object test_273_jr_nze {
+    visibility: private
+    section: code
+    body <
+        .data $20, -$02
+    >
+}
+.object test_275_jp_hl {
+    visibility: private
+    section: code
+    body <
+        .data $e9
+    >
+}
+.object test_276_jp_ix {
+    visibility: private
+    section: code
+    body <
+        .data $dd, $e9
+    >
+}
+.object test_277_jp_iy {
+    visibility: private
+    section: code
+    body <
+        .data $fd, $e9
+    >
+}
+.object test_278_djnz_e {
+    visibility: private
+    section: code
+    body <
+        .data $10, -$02
+    >
+}
+.object test_281_call_nn {
+    visibility: private
+    section: code
+    body <
+        .data $cd, $1234
+    >
+}
+.object test_283_call_ccnn {
+    visibility: private
+    section: code
+    body <
+        .data $c4, $1234, $cc, $1234, $d4, $1234, $dc, $1234, $e4, $1234, $ec, $1234, $f4, $1234, $fc, $1234
+    >
+}
+.object test_285_ret {
+    visibility: private
+    section: code
+    body <
+        .data $c9
+    >
+}
+.object test_286_ret_cc {
+    visibility: private
+    section: code
+    body <
+        .data $c0, $c8, $d0, $d8, $e0, $e8, $f0, $f8
+    >
+}
+.object test_288_reti {
+    visibility: private
+    section: code
+    body <
+        .data $ed, $4d
+    >
+}
+.object test_290_retn {
+    visibility: private
+    section: code
+    body <
+        .data $ed, $45
+    >
+}
+.object test_292_rst_p {
+    visibility: private
+    section: code
+    body <
+        .data $c7, $cf, $d7, $df, $e7, $ef, $f7, $ff
+    >
+}
+.object test_295_in_an {
+    visibility: private
+    section: code
+    body <
+        .data $db, $12
+    >
+}
+.object test_296_in_rc {
+    visibility: private
+    section: code
+    body <
+        .data $ed, $40, $ed, $48, $ed, $50, $ed, $58, $ed, $60, $ed, $68, $ed, $78
+    >
+}
+.object test_298_ini {
+    visibility: private
+    section: code
+    body <
+        .data $ed, $a2
+    >
+}
+.object test_300_inir {
+    visibility: private
+    section: code
+    body <
+        .data $ed, $b2
+    >
+}
+.object test_302_ind {
+    visibility: private
+    section: code
+    body <
+        .data $ed, $aa
+    >
+}
+.object test_304_indr {
+    visibility: private
+    section: code
+    body <
+        .data $ed, $ba
+    >
+}
+.object test_306_out_na {
+    visibility: private
+    section: code
+    body <
+        .data $d3, $12
+    >
+}
+.object test_307_out_cr {
+    visibility: private
+    section: code
+    body <
+        .data $ed, $41, $ed, $49, $ed, $51, $ed, $59, $ed, $61, $ed, $69, $ed, $79
+    >
+}
+.object test_309_outi {
+    visibility: private
+    section: code
+    body <
+        .data $ed, $a3
+    >
+}
+.object test_311_outir {
+    visibility: private
+    section: code
+    body <
+        .data $ed, $b3
+    >
+}
+.object test_313_outd {
+    visibility: private
+    section: code
+    body <
+        .data $ed, $ab
+    >
+}
+.object test_315_outdr {
+    visibility: private
+    section: code
+    body <
+        .data $ed, $bb
+    >
+}
+.object test_next_add {
+    visibility: private
+    section: code
+    body <
+        .data $ed, $33, $ed, $32, $ed, $31, $ed, $36, $1234, $ed, $35, $1234, $ed, $34, $1234
+    >
+}
+.object test_next_bs {
+    visibility: private
+    section: code
+    body <
+        .data $ed, $2c, $ed, $28, $ed, $29, $ed, $2b, $ed, $2a
+    >
+}
+.object test_next_jp {
+    visibility: private
+    section: code
+    body <
+        .data $ed, $98
+    >
+}
+.object test_next_ld {
+    visibility: private
+    section: code
+    body <
+        .data $ed, $bc, $ed, $ac, $ed, $b4, $ed, $a4, $ed, $b7, $ed, $a5
+    >
+}
+.object test_next_mirror {
+    visibility: private
+    section: code
+    body <
+        .data $ed, $24
+    >
+}
+.object test_next_mul {
+    visibility: private
+    section: code
+    body <
+        .data $ed, $30
+    >
+}
+.object test_next_nextreg {
+    visibility: private
+    section: code
+    body <
+        .data $ed, $92, $12, $ed, $91, $12, $34
+    >
+}
+.object test_next_outinb {
+    visibility: private
+    section: code
+    body <
+        .data $ed, $90
+    >
+}
+.object test_next_pixel {
+    visibility: private
+    section: code
+    body <
+        .data $ed, $94, $ed, $93
+    >
+}
+.object test_next_push {
+    visibility: private
+    section: code
+    body <
+        .data $ed, $8a, $12, $34
+    >
+}
+.object test_next_setae {
+    visibility: private
+    section: code
+    body <
+        .data $ed, $95
+    >
+}
+.object test_next_swapnib {
+    visibility: private
+    section: code
+    body <
+        .data $ed, $23
+    >
+}
+.object test_next_test {
+    visibility: private
+    section: code
+    body <
+        .data $ed, $27, $12
+    >
+}
+end-of-inline-data

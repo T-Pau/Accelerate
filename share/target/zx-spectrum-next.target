@@ -1,5 +1,5 @@
 .define ZX_SPECTRUM_NEXT
-.cpu "z80"
+.cpu "z80n"
 
 .include "zx-spectrum-encoding.inc"
 .include "zx-spectrum-nex.inc"

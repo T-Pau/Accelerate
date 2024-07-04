@@ -1,0 +1,202 @@
+; z80n.cpu -- CPU definition for the ZX Spectrum Next Z80N
+;
+; Copyright (C) Dieter Baron
+;
+; The authors can be contacted at <accelerate@tpau.group>
+;
+; Redistribution and use in source and binary forms, with or without
+; modification, are permitted provided that the following conditions
+; are met:
+;
+; 1. Redistributions of source code must retain the above copyright
+;    notice, this list of conditions and the following disclaimer.
+;
+; 2. The names of the authors may not be used to endorse or promote
+;   products derived from this software without specific prior
+;   written permission.
+;
+; THIS SOFTWARE IS PROVIDED BY THE AUTHORS "AS IS" AND ANY EXPRESS
+; OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+; WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+; ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHORS BE LIABLE FOR ANY
+; DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+; DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE
+; GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+; INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER
+; IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+; OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
+; IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+.include "z80.cpu"
+
+.argument_type register_pair_hl enum {
+    hl: 0
+    de: 1
+    bc: 2
+}
+
+.addressing_mode a__extended {
+    notation: a
+    encoding: $ed, .opcode
+}
+
+.addressing_mode address__extended {
+    notation: nn
+    arguments {
+       nn: word
+    }
+    encoding: $ed, .opcode, >nn, <nn
+}
+
+.addressing_mode c_indirect {
+    notation: (c)
+    encoding: $ed, .opcode
+}
+
+.addressing_mode d__e {
+    notation: d,e
+    encoding: $ed, .opcode
+}
+
+.addressing_mode de__b {
+    notation: de,b
+    encoding: $ed, .opcode
+}
+
+.addressing_mode immediate__a {
+    notation: r,a
+    arguments {
+        r: byte
+    }
+    encoding: $ed, .opcode, r
+}
+
+.addressing_mode immediate__extended {
+    notation: n
+    arguments {
+        n: byte
+    }
+    encoding: $ed, .opcode, n
+}
+
+.addressing_mode immediate__immediate {
+    notation: r,v
+    arguments {
+        r: byte
+        v: byte
+    }
+    encoding: $ed, .opcode, r, v
+}
+
+.addressing_mode register_pair_hl__a {
+    notation: rr,a
+    arguments {
+        rr: register_pair_hl
+    }
+    encoding: $ed, .opcode + rr
+}
+
+.addressing_mode register_pair_hl__address {
+    notation: rr,nn
+    arguments {
+        rr: register_pair_hl
+        nn: word
+    }
+    encoding: $ed, .opcode + rr, nn
+}
+
+
+.instruction add {
+    register_pair_hl__a: $31
+    register_pair_hl__address: $34
+}
+
+.instruction brlc {
+    de__b: $2c
+}
+
+.instruction bsla {
+    de__b: $28
+}
+
+.instruction bsra {
+    de__b: $29
+}
+
+.instruction bsrf {
+    de__b: $2b
+}
+
+.instruction bsrl {
+    de__b: $2a
+}
+
+.instruction jp {
+    c_indirect: $98
+}
+
+.instruction lddrx {
+    implied__extended: $bc
+}
+
+.instruction lddx {
+    implied__extended: $ac
+}
+
+.instruction ldirx {
+    implied__extended: $b4
+}
+
+.instruction ldix {
+    implied__extended: $a4
+}
+
+.instruction ldpirx {
+    implied__extended: $b7
+}
+
+.instruction ldws {
+    implied__extended: $a5
+}
+
+.instruction mirror {
+    a__extended: $24
+}
+
+.instruction mul {
+    d__e: $30
+}
+
+.instruction nextreg {
+    immediate__a: $92
+    immediate__immediate: $91
+}
+
+.instruction outinb {
+    implied__extended: $90
+}
+
+.instruction pixelad {
+    implied__extended: $94
+}
+
+.instruction pixeldn {
+    implied__extended: $93
+}
+
+.instruction push {
+    address__extended: $8a
+}
+
+.instruction setae {
+    implied__extended: $95
+}
+
+.instruction swapnib {
+    implied__extended: $23
+}
+
+.instruction test {
+    immediate__extended: $27
+}
+
