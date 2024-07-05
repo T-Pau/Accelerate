@@ -43,7 +43,7 @@
 .addressing_mode address__extended {
     notation: nn
     arguments {
-       nn: word
+       nn: any ; TODO: word
     }
     encoding: $ed, .opcode, >nn, <nn
 }

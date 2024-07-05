@@ -33,9 +33,9 @@
 
 .syntax keywords: "af'"
 
-.argument_type byte range: 0, $ff
-
-.argument_type word range: 0, $ffff
+.argument_type byte fits :1
+.argument_type word fits :2
+.argument_type any any
 
 .argument_type bc_or_de enum {
     bc: 0
@@ -226,7 +226,7 @@
     notation: cc,nn
     arguments {
         cc: basic_condition
-        nn: word
+        nn: any
     }
     encoding: .opcode | cc << 3, nn - .pc - 2 :-1
 }
@@ -624,7 +624,7 @@
 .addressing_mode relative {
     notation: address
     arguments {
-        address: word ; TODO: has to be close enough to .pc
+        address: any ; TODO: has to be close enough to .pc
     }
     encoding: .opcode, address - .pc - 2 :-1
 }
