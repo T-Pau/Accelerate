@@ -59,7 +59,7 @@ private:
     };
 
     void parse(Symbol file_name);
-    void parse_assignment(Visibility visibility, const Token& name);
+    void parse_assignment(Visibility visibility, const Token& name, bool default_only = false);
     void parse_cpu();
     void parse_default();
     void parse_default_string_encoding();

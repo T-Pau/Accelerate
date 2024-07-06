@@ -164,9 +164,9 @@ void Assembler::parse(Symbol file_name) {
     Target::clear_current_target();
 }
 
-void Assembler::parse_assignment(Visibility visibility, const Token& name) {
+void Assembler::parse_assignment(Visibility visibility, const Token& name, bool default_only) {
     auto value = ExpressionParser(tokenizer).parse();
-    object_file->add_constant(std::make_unique<ObjectFile::Constant>(object_file.get(), name, visibility, false, value));
+    object_file->add_constant(std::make_unique<ObjectFile::Constant>(object_file.get(), name, visibility, default_only, value));
 }
 
 void Assembler::parse_cpu() {
@@ -483,7 +483,7 @@ void Assembler::set_target(const Target* new_target) {
 void Assembler::parse_name(Visibility visibility, const Token& name, bool default_only) {
     auto token = tokenizer.next();
     if (token == Token::equals) {
-        parse_assignment(visibility, name);
+        parse_assignment(visibility, name, default_only);
         return;
     }
     else if (token == Token::paren_open) {
