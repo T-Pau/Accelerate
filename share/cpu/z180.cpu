@@ -1,0 +1,120 @@
+; z180.cpu -- CPU definition for Zilog Z180
+;
+; Copyright (C) Dieter Baron
+;
+; The authors can be contacted at <accelerate@tpau.group>
+;
+; Redistribution and use in source and binary forms, with or without
+; modification, are permitted provided that the following conditions
+; are met:
+;
+; 1. Redistributions of source code must retain the above copyright
+;    notice, this list of conditions and the following disclaimer.
+;
+; 2. The names of the authors may not be used to endorse or promote
+;   products derived from this software without specific prior
+;   written permission.
+;
+; THIS SOFTWARE IS PROVIDED BY THE AUTHORS "AS IS" AND ANY EXPRESS
+; OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+; WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+; ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHORS BE LIABLE FOR ANY
+; DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+; DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE
+; GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+; INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER
+; IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+; OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
+; IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+.include "z80.cpu"
+
+.addressing_mode immediate {
+    notation: n
+    arguments {
+        n: byte
+    }
+    encoding: $ed, .opcode, n
+}
+
+.addressing_mode indirect_byte__register {
+    notation: (n),r
+    arguments {
+        n: byte
+        r: register
+    }
+    encoding: $ed, .opcode | r << 3, n
+}
+
+.addressing_mode indirect_hl__extended2 {
+    notation: (hl)
+    encoding: $ed, .opcode
+}
+
+.addressing_mode register {
+    notation: r
+    arguments {
+        r: register
+    }
+    encoding: $ed, .opcode | r << 3
+}
+
+.addressing_mode register__indirect_byte {
+    notation: r,(n)
+    arguments {
+        r: register
+        n: byte
+    }
+    encoding: $ed, .opcode | r << 3, n
+}
+
+.addressing_mode register_pair_sp_extended {
+    notation: ss
+    arguments {
+        ss: register_pair_sp
+    }
+    encoding: $ed, .opcode | ss << 4
+}
+
+
+.instruction in0 {
+    register__indirect_byte: $00
+}
+
+.instruction mlt {
+    register_pair_sp_extended: $4c
+}
+
+.instruction out0 {
+    indirect_byte__register: $01
+}
+
+.instruction otdm {
+    implied__extended: $8b
+}
+
+.instruction otdmr {
+    implied__extended: $9b
+}
+
+.instruction otim {
+    implied__extended: $83
+}
+
+.instruction otimr {
+    implied__extended: $93
+}
+
+.instruction slp {
+    implied__extended: $76
+}
+
+.instruction tst {
+    immediate: $64
+    indirect_hl__extended2: $34
+    register: $04
+}
+
+.instruction tstio {
+    immediate: $74
+}
