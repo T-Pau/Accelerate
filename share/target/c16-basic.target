@@ -1,0 +1,5 @@
+.include "c16.inc"
+
+basic_end = $3fff
+
+.include "commodore-264-basic.inc"

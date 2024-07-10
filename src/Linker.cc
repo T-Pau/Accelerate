@@ -133,7 +133,7 @@ void Linker::link() {
                 }
             }
             if (!object->address) {
-                FileReader::global.error({}, "no space left in section '%s'", object->section->name.c_str());
+                FileReader::global.error({}, "no space left for %s in section %s", object->name.as_string().c_str(), object->section->name.c_str());
                 continue;
             }
         }

@@ -32,6 +32,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef ACCELERATE_RANGE_H
 #define ACCELERATE_RANGE_H
 
+#include "Int.h"
 #include <cstdint>
 #include <ostream>
 
@@ -52,6 +53,7 @@ public:
 
     void add_left(uint64_t amount);
     void add_right(uint64_t amount) {size += amount;}
+    void align(uint alignment) {set_start(Int::align(start, alignment));}
     void remove_left(uint64_t amount);
     void remove_right(uint64_t amount);
     void set_start(uint64_t new_start);

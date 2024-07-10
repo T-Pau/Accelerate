@@ -31,6 +31,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "Memory.h"
 
+#include <iomanip>
 #include <ostream>
 #include <sstream>
 
@@ -62,11 +63,12 @@ std::optional<uint64_t> Memory::Bank::allocate(const Range& allowed_range, Memor
             continue;
         }
         auto available_range = it->range.intersect(allowed_range);
-        available_range.start = Int::align(available_range.start, alignment);
+        available_range.align(alignment);
 
         if (available_range.size < size) {
             continue;
         }
+
         if (it->range.size == size) {
             it->allocation = allocation;
         }
@@ -78,19 +80,21 @@ std::optional<uint64_t> Memory::Bank::allocate(const Range& allowed_range, Memor
             auto old_start = it->range.start;
             it->range.set_start(available_range.start + size);
             it = blocks.insert(it, Block(allocation, {available_range.start, size}));
-            blocks.insert(it, Block(FREE, {old_start, available_range.start - old_start}));
+            it = blocks.insert(it, Block(FREE, {old_start, available_range.start - old_start}));
+            it = std::next(it);
         }
 
         if (it != blocks.begin()) {
             auto previous = std::prev(it);
-            if (previous->allocation == it->allocation && previous->range.end() == it->range.start) {
-                it->range.set_start(previous->range.start);
-                blocks.erase(previous);
+            if (previous->allocation == it->allocation && previous->range.end() + 1 == it->range.start) {
+                previous->range.set_end(it->range.end());
+                blocks.erase(it);
+                it = previous;
             }
         }
         if (it != blocks.end()) {
             auto next = std::next(it);
-            if (next->allocation == it->allocation && next->range.start == it->range.end()) {
+            if (next->allocation == it->allocation && next->range.start == it->range.end() + 1) {
                 it->range.set_end(next->range.end());
                 blocks.erase(next);
             }
@@ -137,7 +141,7 @@ std::string Memory::Bank::data(const Range& requested_range) const {
 void Memory::Bank::debug_blocks(std::ostream& stream) const {
     stream << "allocation blocks:" << std::endl;
     for (const auto& block : blocks) {
-        stream << "  " << block.range.start << "-" << block.range.end() << ": ";
+        stream << std::hex << std::setfill('0') << "  " << std::setw(4) << block.range.start << "-" << std::setw(4) << block.range.end() << ": ";
         switch (block.allocation) {
             case DATA:
                 stream << "data";

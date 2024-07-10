@@ -87,5 +87,4 @@ private:
     std::vector<Bank> banks;
 };
 
-
 #endif //ACCELERATE_MEMORY_H

@@ -81,7 +81,7 @@ void Range::set_end(uint64_t new_end) {
     if (new_end < start) {
         throw Exception("out of memory");
     }
-    size = new_end - start;
+    size = new_end - start + 1;
 }
 
 Range Range::add(const Range &other) const {

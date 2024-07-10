@@ -1,6 +1,6 @@
 .cpu "6502"
 
-.define PLUS4
+.define C16
 
 .include "commodore-264.inc"
 

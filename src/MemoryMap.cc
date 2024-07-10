@@ -183,7 +183,6 @@ bool MemoryMap::Section::operator<(const MemoryMap::Section &other) const {
         if (it_other != other.blocks.end()) {
             return true;
         }
-        return name < other.name;
     }
 
     return false;
