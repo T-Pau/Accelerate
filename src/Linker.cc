@@ -31,10 +31,11 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "Linker.h"
 
-#include "Assembler.h"
 #include <algorithm>
 #include <fstream>
+#include <sstream>
 
+#include "Assembler.h"
 #include "Exception.h"
 #include "FileReader.h"
 #include "ObjectExpression.h"
@@ -148,9 +149,17 @@ void Linker::link() {
     for (auto object: objects) {
         try {
             object->evaluate();
-            std::string bytes;
-            object->body.encode(bytes);
-            memory[object->address->bank].copy(object->address->address, bytes);
+            if (!object->is_reservation()) {
+                std::string bytes;
+                bytes.reserve(*object->size_range().size());
+                object->body.encode(bytes);
+                if (bytes.size() != object->size_range().size()) {
+                    std::stringstream str;
+                    str << "internal error: encoded size (" << bytes.size() << ") != expected object size (" << *object->size_range().size() << ")";
+                    throw Exception(str.str());
+                }
+                memory[object->address->bank].copy(object->address->address, bytes);
+            }
         }
         catch (Exception& ex) {
             FileReader::global.error(Location(), "can't encode '%s': %s", object->name.as_string().c_str(), ex.what());
