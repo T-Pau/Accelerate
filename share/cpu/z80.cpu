@@ -34,6 +34,8 @@
 .syntax keywords: "af'"
 
 .argument_type byte fits :1
+.argument_type signed_byte fits :-1
+
 .argument_type word fits :2
 .argument_type any any
 
@@ -126,8 +128,6 @@
     hl: 2
     sp: 3
 }
-
-.argument_type signed_byte range: -128, 127
 
 
 .addressing_mode a__immediate {
