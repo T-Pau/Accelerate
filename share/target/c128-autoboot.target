@@ -1,0 +1,43 @@
+.include "c128.inc"
+
+.default BOOT_MESSAGE = ""
+.default BOOT_FILENAME = ""
+.default BOOT_BLOCKS_ADDRESS = 0
+.default BOOT_BLOCKS_BANK = 0
+.default BOOT_BLOCKS_COUNT = 0
+
+BUFFER_START = $b00
+BUFFER_END = $bff
+
+.segment buffer {
+    address: BUFFER_START - BUFFER_END
+}
+
+.section code {
+    segment: buffer
+}
+
+.section data {
+    segment: buffer
+}
+
+.section data
+
+block .address BUFFER_START .used {
+    .data "CBM"
+    .data BOOT_BLOCKS_ADDRESS:2, BOOT_BLOCKS_BANK:1, BOOT_BLOCKS_COUNT:1
+    .data BOOT_MESSAGE, 0
+    .data BOOT_FILENAME, 0
+}
+
+.section code
+
+.default start {
+    jmp $af99
+}
+
+.pin start BUFFER_START + .sizeof(block)
+
+.output {
+    .memory BUFFER_START, BUFFER_END
+}
