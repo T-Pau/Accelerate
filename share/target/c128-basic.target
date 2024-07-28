@@ -12,6 +12,6 @@
 }
 
 basic_start = $1c01
-basic_end = $7fff
+basic_end = $3fff
 
 .include "commodore-basic.inc"
