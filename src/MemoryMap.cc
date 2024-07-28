@@ -187,3 +187,8 @@ bool MemoryMap::Section::operator<(const MemoryMap::Section &other) const {
 
     return false;
 }
+
+void MemoryMap::Section::clear() {
+    blocks.clear();
+    size = 0;
+}

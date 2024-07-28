@@ -51,6 +51,7 @@ const Token Assembler::token_extend = Token(Token::DIRECTIVE, "extend");
 const Token Assembler::token_extension = Token(Token::DIRECTIVE, "extension");
 const Token Assembler::token_macro = Token(Token::DIRECTIVE, "macro");
 const Token Assembler::token_output = Token(Token::DIRECTIVE, "output");
+const Token Assembler::token_override = Token(Token::DIRECTIVE, "override");
 const Token Assembler::token_pin = Token(Token::DIRECTIVE, "pin");
 const Token Assembler::token_read_only = Token(Token::NAME, "read_only");
 const Token Assembler::token_read_write = Token(Token::NAME, "read_write");
@@ -242,21 +243,30 @@ void Assembler::parse_section() {
         throw ParseException(tokenizer.current_location(), "expected newline");
     }
     else {
-        auto extend = false;
-        if (tokenizer.peek() == token_extend) {
-            tokenizer.next();
-            extend = true;
+        auto definition_type = SECTION_DEFINE;
+        auto token = tokenizer.next();
+        if (token == token_extend) {
+            definition_type = SECTION_EXTEND;
         }
+        else if (token == token_override) {
+            definition_type = SECTION_OVERRIDE;
+        }
+        else {
+            tokenizer.unget(token);
+        }
+
         auto parse_value = ParsedValue::parse(tokenizer);
         tokenizer.unget(Token{Token::NEWLINE, tokenizer.current_location()});
         auto parameters = parse_value->as_dictionary();
 
-        if (extend != section_names.contains(name)) {
-            if (extend) {
-                throw ParseException(name, "extending non-existing section");
-            }
-            else {
-                throw ParseException(name, "duplicate section definition"); // TODO: attach note
+        if ((definition_type != SECTION_DEFINE) != section_names.contains(name)) {
+            switch (definition_type) {
+                case SECTION_DEFINE:
+                    throw ParseException(name, "duplicate section definition"); // TODO: attach note
+                case SECTION_EXTEND:
+                    throw ParseException(name, "extending non-existing section");
+                case SECTION_OVERRIDE:
+                    throw ParseException(name, "overriding non-existing section");
             }
         }
 
@@ -272,13 +282,21 @@ void Assembler::parse_section() {
             blocks.insert(blocks.end(), segment_blocks->begin(), segment_blocks->end());
         }
 
-        if (extend) {
+        if (definition_type != SECTION_DEFINE) {
             if (parameters->has_key(token_type)) {
-                throw ParseException(name, "can't specify type when extending section");
+                if (definition_type == SECTION_EXTEND) {
+                    throw ParseException(name, "can't specify type when extending section");
+                }
+                else {
+                    throw ParseException(name, "can't specify type when overriding section");
+                }
             }
             auto it = parsed_target.map.sections.find(name.as_symbol());
             if (it == parsed_target.map.sections.end()) {
-                throw ParseException(name, "extending non-existing section");
+                throw ParseException(name, "internal error: section not found");
+            }
+            if (definition_type == SECTION_OVERRIDE) {
+                it->second.clear();
             }
             it->second.add_blocks(blocks);
         }

@@ -50,6 +50,11 @@ public:
     static const Token token_data_size;
 
 private:
+    enum SectionDefinitionType {
+        SECTION_DEFINE,
+        SECTION_EXTEND,
+        SECTION_OVERRIDE
+    };
     class Directive {
     public:
         Directive(void (Assembler::*parse)(), bool target_only = false) : parse{parse}, target_only{target_only} {}
@@ -107,6 +112,7 @@ private:
     static const Token token_extension;
     static const Token token_macro;
     static const Token token_output;
+    static const Token token_override;
     static const Token token_pin;
     static const Token token_read_only;
     static const Token token_read_write;
