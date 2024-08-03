@@ -1,3 +1,5 @@
+.define MEGA65
+
 .include "c64.s"
 
 VIC_KEY = VIC + $2F
@@ -41,3 +43,17 @@ VIC_CHARSET_PTR = VIC_CHARSET_POINTER
 
 VIC_KNOCK_IV_1 = $47
 VIC_KNOCK_IV_2 = $53
+
+.macro set_vic_bank {
+}
+
+.macro set_vic_text screen, charset {
+    lda #<screen
+    sta VIC_SCREEN_POINTER
+    lda #>screen
+    sta VIC_SCREEN_POINTER + 1
+    lda #<charset
+    sta VIC_CHARSET_POINTER
+    lda #>charset
+    sta VIC_CHARSET_POINTER + 1
+}

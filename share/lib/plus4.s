@@ -1,6 +1,9 @@
 .target "6502"
+.cpu "6502" ; XLR8
 
 .visibility public
+
+DEVICE_NUMBER = $AE
 
 ACIA = $fd00
 ACIA_DATA = ACIA
@@ -109,3 +112,8 @@ TED_CONTROL_5 = TED + $1f
     TED_CONTROL_5_FLASH(n) = (n << 3) & TED_FLASH_MASK
 TED_PAGE_ROM = TED + $3e
 TED_PAGE_RAM = TED + $3f
+
+.macro set_ted_charset charset {
+	lda #TED_CHARACTER_ADDRESS(charset)
+	sta TED_CONTROL_4
+}

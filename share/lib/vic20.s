@@ -1,6 +1,9 @@
 .target "6502"
+.cpu "6502" ; XLR8
 
 .visibility public
+
+DEVICE_NUMBER = $BA
 
 VIC = $9000
 VIC_CONTROL_1 = VIC
@@ -23,7 +26,7 @@ VIC_CONTROL_3 = VIC + $3
     VIC_RASTER_BIT_8 = $80
 VIC_RASTER = VIC + $4
 VIC_ADDRESS = VIC + $5
-    VIC_ADDRESS(screen, charset) = ((screen & $7800) >> (11 - 4)) | ((charset & $f000) >> 12)
+    VIC_ADDRESS(screen, charset) = (((screen & $8000) ^ $8000) >> 8) | ((screen & $1c00) >> 6) | (((charset & $8000) ^ $8000) >> 12) | ((charset & $1c00) >> 10)
 VIC_LIGHT_PEN_X = VIC + $6
 VIC_LIGHT_PEN_Y = VIC + $7
 VIC_POT_X = VIC + $8
@@ -109,3 +112,8 @@ VIA2_CONTROL_2 = VIA2 + $c
 VIA2_INTERRUPT_REQUEST = VIA2 + $d
 VIA2_INTERRUPT_MASK = VIA2 + $e
 VIA2_PRA_RAW = VIA2 + $f
+
+.macro set_vic_text screen, charset {
+    lda #VIC_ADDRESS(screen, charset)
+    sta VIC_ADDRESS
+}

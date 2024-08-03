@@ -1,6 +1,9 @@
 .target "6502"
+.cpu "6502" ; XLR8
 
 .visibility public
+
+DEVICE_NUMBER = $BA
 
 COLOR_BLACK = 0
 COLOR_WHITE = 1
@@ -39,7 +42,7 @@ VIC_SPRITE_7_Y = VIC + $0f
 VIC_SPRITE_X_MSB = VIC + $10
 VIC_CONTROL_1 = VIC + $11
     VIC_SCROLL_MASK = $7
-    VIC_SCROLL(x) = (x & VIC_SCROLL_MASK)
+    VIC_SCROLL(xx) = (xx & VIC_SCROLL_MASK)
     VIC_SCREEN_HEIGHT = $8
         VIC_SCREEN_HEIGHT_25 = VIC_SCREEN_HEIGHT
         VIC_SCREEN_HEIGHT_24 = $0
@@ -152,3 +155,33 @@ CIA2_SERIAL_DATA = CIA2 + $0c
 CIA2_INTERRUPT = CIA2 + $0d
 CIA2_TIMER_A_CONTROL = CIA2 + $0e
 CIA2_TIMER_B_CONTROL = CIA2 + $0f
+
+.pre_if !.defined(MEGA65)
+.macro set_vic_bank base_address {
+    lda CIA2_PRA ; switch VIC bank
+    .if (base_address >> 14) ^ 3 != 3 {
+        and #$fc
+    }
+    .if (base_address >> 14) ^ 3 != 0 {
+        ora #(base_address >> 14) ^ 3
+    }
+    sta CIA2_PRA
+}
+
+.macro set_vic_text screen, charset {
+    lda #VIC_VIDEO_ADDRESS(screen, charset)
+    sta VIC_VIDEO_ADDRESS
+}
+.pre_end
+
+.macro set_vic_24_lines {
+    lda VIC_CONTROL_1
+    and #$08 ^ $ff
+    sta VIC_CONTROL_1
+}
+
+.macro set_vic_25_lines {
+    lda VIC_CONTROL_1
+    ora #$08
+    sta VIC_CONTROL_1
+}
