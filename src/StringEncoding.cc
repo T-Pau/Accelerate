@@ -351,7 +351,7 @@ void StringEncoding::import_base(const Token& base_token, const std::shared_ptr<
                                 case 5:
                                     if ((*use_range)[1] == Token::minus && (*use_range)[3] == Token::colon) {
                                         end = get_uint8((*use_range)[2]);
-                                        offset = get_uint8((*use_range)[4]);
+                                        offset = get_uint8((*use_range)[4]) - start;
                                     }
                                     else {
                                         throw ParseException(use_range_v->location, "invalid use range");
