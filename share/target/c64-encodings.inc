@@ -219,4 +219,23 @@
     }
 }
 
+.string_encoding petscii_lowercase {
+    base {
+        petscii {
+            use [
+                : $00 - $40: $00
+                : $5b - $60: $5b
+                : $7b - $7d: $7b
+                : $80 - $a8: $80
+                : $aa - $b9: $aa
+                : $bb - $bf: $bb
+            ]
+        }
+    }
+    ranges [
+        : $41 : "a" - "z"
+        : $61 : "A" - "Z"
+    ] ; TODO: add $7e, $7f, $a9, $ba
+}
+
 .default_string_encoding petscii
