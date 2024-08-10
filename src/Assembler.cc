@@ -440,6 +440,7 @@ void Assembler::parse_string_encoding() {
     auto name = tokenizer.expect(Token::NAME, TokenGroup::newline);
     if (tokenizer.peek().is_end_of_line()) {
         // TODO: set current string encoding
+        throw ParseException(name, ".string_encoding is not implemented yet");
     }
     else if (!parsing_target) {
         throw ParseException(tokenizer.current_location(), "expected newline");
