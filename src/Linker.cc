@@ -38,7 +38,6 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Assembler.h"
 #include "Exception.h"
 #include "FileReader.h"
-#include "ObjectExpression.h"
 #include "Unresolved.h"
 #include "ValueExpression.h"
 
@@ -134,7 +133,7 @@ void Linker::link() {
                 }
             }
             if (!object->address) {
-                FileReader::global.error({}, "no space left for %s in section %s", object->name.as_string().c_str(), object->section->name.c_str());
+                FileReader::global.error({}, "no space left for %s ($%llx bytes) in section %s", object->name.as_string().c_str(), *object->size_range().size(), object->section->name.c_str());
                 continue;
             }
         }
