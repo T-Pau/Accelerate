@@ -166,10 +166,10 @@ void CPUParser::parse_addressing_mode() {
                 }
                 default_value = Value{default_value_token.as_value()};
             }
-            addressing_mode.arguments[argument_symbol(pair.first.as_symbol())] = std::make_unique<AddressingMode::Argument>(argument_type, default_value);
+            addressing_mode.arguments[pair.first.as_symbol()] = std::make_unique<AddressingMode::Argument>(argument_type, default_value);
             auto encoding_argument_type = argument_type->as_encoding();
             if (encoding_argument_type) {
-                auto argument_variable_name = argument_symbol(pair.first.as_symbol());
+                auto argument_variable_name = pair.first.as_symbol();
                 unencoded_encoding_arguments.insert(argument_variable_name);
             }
             unused_arguments.insert(pair.first.as_symbol());
@@ -207,7 +207,7 @@ void CPUParser::parse_addressing_mode() {
                 addressing_mode.uses_pc = true;
             }
             if (token.is_name() && !(token == token_opcode || token == token_pc)) {
-                auto argument_name = argument_symbol(token.as_symbol());
+                auto argument_name = token.as_symbol();
                 if (!addressing_mode.has_argument(argument_name)) {
                     throw ParseException(token, "unknown argument in encoding");
                 }
@@ -467,7 +467,7 @@ AddressingMode::Notation CPUParser::parse_addressing_mode_notation(const Address
 
     for (const auto& token: (*parameters)) {
         if (token.is_name()) {
-            auto symbol = argument_symbol(token.as_symbol());
+            auto symbol = token.as_symbol();
             if (addressing_mode.has_argument(symbol)) {
                 notation.elements.emplace_back(AddressingMode::Notation::ARGUMENT, symbol);
             }
@@ -482,17 +482,4 @@ AddressingMode::Notation CPUParser::parse_addressing_mode_notation(const Address
     }
 
     return notation;
-}
-
-
-Symbol CPUParser::argument_symbol(Symbol symbol) {
-#if 0
-    return symbol;
-#else
-    auto name = symbol.str();
-    if (name.front() == '.') {
-        return symbol;
-    }
-    return Symbol("$" + name);
-#endif
 }

@@ -34,6 +34,9 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ValueExpression.h"
 
 std::optional<Expression> ObjectExpression::evaluated(const EvaluationContext& context) const {
+    if (context.type == EvaluationContext::ARGUMENTS) {
+        return {};
+    }
     if (object->has_address()) {
         return Expression(location, object->address->address);
     }

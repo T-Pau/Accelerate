@@ -4,7 +4,6 @@ return 1
 file file.s <inline>
 cycle = cycle + 1
 end-of-inline-data
-# location should be file.s:1:8
 stderr
 file.s:1.8: error: circular definition of cycle
 cycle = cycle + 1

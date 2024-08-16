@@ -35,7 +35,6 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "CPU.h"
 #include "FileReader.h"
 #include "Symbol.h"
-#include "FileTokenizer.h"
 #include "FileParser.h"
 
 class CPUParser: public FileParser {
@@ -53,8 +52,6 @@ private:
     void parse_byte_order();
     void parse_instruction();
     void parse_syntax();
-
-    static Symbol argument_symbol(Symbol name);
 
     AddressingMode::Notation parse_addressing_mode_notation(const AddressingMode& addressing_mode, const ParsedScalar* parameters);
 

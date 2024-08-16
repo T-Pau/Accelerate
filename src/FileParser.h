@@ -32,8 +32,6 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef FILE_PARSER_H
 #define FILE_PARSER_H
 
-#include <unordered_map>
-
 #include "FileTokenizer.h"
 #include "Path.h"
 
@@ -42,6 +40,7 @@ class Target;
 class FileParser {
 public:
     explicit FileParser(const Path& path = Path::empty_path, const Target* target = {});
+    virtual ~FileParser() = default;
 
     const Path& path;
 

@@ -51,6 +51,10 @@ Expression ExistsExpression::create(const Location& location, const std::vector<
 
 
 std::optional<Expression> ExistsExpression::evaluated(const EvaluationContext& context) const {
+    if (context.type == EvaluationContext::ARGUMENTS) {
+        return {};
+    }
+
     // TODO: evaluate in resolve phase.
     return Expression(location, false);
 }

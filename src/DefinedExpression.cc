@@ -51,6 +51,10 @@ Expression DefinedExpression::create(const Location& location, const std::vector
 
 
 std::optional<Expression> DefinedExpression::evaluated(const EvaluationContext& context) const {
+    if (context.type == EvaluationContext::ARGUMENTS) {
+        return{};
+    }
+
     if (context.defines.contains(symbol)) {
         return Expression(location, true);
     }

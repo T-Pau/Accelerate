@@ -36,6 +36,9 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Object.h"
 
 std::optional<Expression> ObjectNameExpression::evaluated(const EvaluationContext& context) const {
+    if (context.type == EvaluationContext::ARGUMENTS) {
+        return {};
+    }
     if (context.entity && context.entity->is_object()) {
         return Expression(location, context.entity->as_object());
     }

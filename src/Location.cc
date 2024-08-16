@@ -1,5 +1,5 @@
 /*
-Location.cc -- 
+Location.cc --
 
 Copyright (C) Dieter Baron
 
@@ -31,17 +31,15 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "Location.h"
 
- Location::Location(const Location& start, const Location& end) : Location(start) {
-     extend(end);
- }
+Location::Location(const Location& start, const Location& end) : Location(start) { extend(end); }
 
-
-void Location::extend(const Location &end) {
-    if (file != end.file || start_line_number != end.start_line_number || end_column >= end.end_column) {
-        return;
+void Location::extend(const Location& end) {
+    if (empty()) {
+        *this = end;
     }
-
-    end_column = end.end_column;
+    else if (file == end.file && start_line_number == end.start_line_number && end_column < end.end_column) {
+        end_column = end.end_column;
+    }
 }
 
 std::string Location::to_string() const {
