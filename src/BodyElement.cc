@@ -32,7 +32,6 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "BodyElement.h"
 
 #include "Body.h"
-#include "BlockBody.h"
 
 std::ostream& operator<<(std::ostream& stream, const BodyElement& element) {
     element.serialize(stream, "");
@@ -45,6 +44,6 @@ std::ostream& operator<<(std::ostream& stream, const std::shared_ptr<BodyElement
     return stream;
 }
 
-std::optional<Body> BodyElement::append_sub(Body body, Body element) {
+std::optional<Body> BodyElement::append_sub(const Body& body, const Body& element) {
     return {};
 }

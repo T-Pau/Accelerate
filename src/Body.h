@@ -75,7 +75,7 @@ public:
     [[nodiscard]] LabelBody* as_label() const;
     [[nodiscard]] ScopeBody* as_scope() const;
     void append(const Body& element);
-    std::optional<Body> append_sub(Body element);
+    std::optional<Body> append_sub(const Body& element);
     [[nodiscard]] std::optional<Body> back() const;
     void collect_objects(std::unordered_set<Object*>& objects) const {element->collect_objects(objects);}
     [[nodiscard]] bool empty() const {return element->empty();}
@@ -88,7 +88,7 @@ public:
     [[nodiscard]] bool is_error() const {return as_error() != nullptr;}
     [[nodiscard]] bool is_label() const {return as_label() != nullptr;}
     [[nodiscard]] bool is_scope() const {return as_scope() != nullptr;}
-    [[nodiscard]] Body scoped(std::shared_ptr<Environment> = {}) const;
+    [[nodiscard]] Body scoped(const std::shared_ptr<Environment>& = {}) const;
     void serialize(std::ostream& stream, const std::string& prefix = "") const {element->serialize(stream, prefix);}
     [[nodiscard]] std::optional<uint64_t> size() const {return element->size();}
     [[nodiscard]] SizeRange size_range() const {return element->size_range();}

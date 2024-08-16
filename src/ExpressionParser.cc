@@ -91,7 +91,7 @@ void ExpressionParser::initialize() {
 }
 
 
-ExpressionParser::Element ExpressionParser::next_element() {
+ExpressionParser::Element ExpressionParser::next_element() const {
     auto token = tokenizer.next();
 
     if (token.is_value() || token.is_string()) {
@@ -403,7 +403,7 @@ Body ExpressionParser::parse_list() {
     return Body(list);
 }
 
-std::optional<Encoder> ExpressionParser::parse_encoding() {
+std::optional<Encoder> ExpressionParser::parse_encoding() const {
     IntegerEncoder::Type type;
     auto name_allowed = false;
 

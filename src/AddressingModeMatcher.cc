@@ -37,13 +37,13 @@ void AddressingModeMatcher::add_notation(Symbol addressing_mode, size_t notation
     start.add_notation(AddressingModeMatcherResult(addressing_mode, notation_index), notation.elements.begin(), notation.elements.end(), arguments);
 }
 
-void AddressingModeMatcher::MatcherNode::add_notation(const AddressingModeMatcherResult& result, std::vector<AddressingMode::Notation::Element>::const_iterator current, std::vector<AddressingMode::Notation::Element>::const_iterator end, const std::unordered_map<Symbol, std::unique_ptr<AddressingMode::Argument>>& arguments) {
+void AddressingModeMatcher::MatcherNode::add_notation(const AddressingModeMatcherResult& result, std::vector<AddressingMode::Notation::Element>::const_iterator current, std::vector<AddressingMode::Notation::Element>::const_iterator end, const std::unordered_map<Symbol, std::unique_ptr<AddressingMode::Argument>>& arguments) { // NOLINT(misc-no-recursion)
     if (current == end) {
         results.insert(result);
         return;
     }
     for (const auto& element: AddressingModeMatcherElement::elements_for(*current, arguments)) {
-        if (next.find(element) == next.end()) {
+        if (!next.contains(element)) {
             next[element] = std::make_unique<MatcherNode>();
         }
         next[element]->add_notation(result, current + 1, end, arguments);
@@ -59,7 +59,7 @@ std::unordered_set<AddressingModeMatcherResult> AddressingModeMatcher::match(con
         if (it == node->next.end()) {
             return {};
         }
-        current++;
+        ++current;
         node = it->second.get();
     }
 

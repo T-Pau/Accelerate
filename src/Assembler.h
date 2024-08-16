@@ -77,19 +77,19 @@ private:
     void parse_section();
     void parse_segment();
     void parse_string_encoding();
-    void parse_symbol(Visibility visibility, const Token& name, bool default_only = false);
+    void parse_symbol(Visibility visibility, const Token& name);
     void parse_target();
     void parse_use();
     void parse_visibility();
     void set_target(const Target* new_target);
 
-    std::vector<MemoryMap::Block> parse_address(const ParsedValue* address);
-    MemoryMap::Block parse_single_address(const ParsedScalar* address);
-    uint64_t parse_address_part(const Token& token);
+    std::vector<MemoryMap::Block> parse_address(const ParsedValue* address) const;
+    MemoryMap::Block parse_single_address(const ParsedScalar* address) const;
+    uint64_t parse_address_part(const Token& token) const;
     static MemoryMap::AccessType parse_type(const Token& type);
 
     const Target* target{};
-    const CPU *cpu;
+    const CPU *cpu{};
 
     Symbol current_section;
     Visibility current_visibility{Visibility::PRIVATE};

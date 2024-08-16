@@ -31,6 +31,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "StringEncoder.h"
 
+#include "Encoder.h"
 #include "StringEncoding.h"
 #include "Target.h"
 

@@ -31,19 +31,32 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "Entity.h"
 
+#include "ExpressionParser.h"
 #include "FileReader.h"
 #include "ObjectFile.h"
 #include "ParseException.h"
+#include "SequenceTokenizer.h"
 
+#define DEFAULT_ONLY "default_only"
 #define VISIBILITY "visibility"
 
+const Token Entity::token_default_only = Token(Token::NAME, DEFAULT_ONLY);
 const Token Entity::token_visibility = Token(Token::NAME, VISIBILITY);
 
 
-Entity::Entity(ObjectFile* owner, const Token& name_, const std::shared_ptr<ParsedValue>& definition): environment(std::make_shared<Environment>(owner->private_environment)), owner(owner) {
+Entity::Entity(ObjectFile* owner, const Token& name_, const std::shared_ptr<ParsedValue>& definition): owner(owner), environment(std::make_shared<Environment>(owner->private_environment)) {
     const auto parameters = definition->as_dictionary();
 
     name = name_;
+
+    if (const auto default_only_definition = parameters->get_optional(token_default_only)) {
+        auto tokenizer = SequenceTokenizer(default_only_definition->as_scalar()->tokens);
+        auto default_only_value = ExpressionParser(tokenizer).parse();
+        if (!default_only_value.has_value() || !default_only_value.value()->is_boolean()) {
+            throw ParseException(default_only_definition->location, "invalid default_only");
+        }
+        default_only = default_only_value.value()->boolean_value();
+    }
 
     const auto visibility_value = (*parameters)[token_visibility]->as_singular_scalar()->token();
     const auto visibility_ = VisibilityHelper::from_token(visibility_value);
@@ -58,6 +71,9 @@ Entity::Entity(ObjectFile* owner, const Token& name, Visibility visibility, bool
 
 void Entity::serialize_entity(std::ostream& stream) const {
     stream << "    " VISIBILITY ": " << visibility << std::endl;
+    if (default_only) {
+        stream << "    " DEFAULT_ONLY ": .true" << std::endl;
+    }
 }
 
 void Entity::set_owner(ObjectFile* new_owner) {

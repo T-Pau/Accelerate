@@ -34,8 +34,6 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <unordered_map>
 
-#include "BaseExpression.h"
-#include "Int.h"
 #include "IntegerEncoder.h"
 #include "Symbol.h"
 #include "Value.h"
@@ -73,7 +71,7 @@ public:
 
 class ArgumentTypeEncoding: public ArgumentType {
 public:
-    explicit ArgumentTypeEncoding(Symbol name, IntegerEncoder encoding): ArgumentType(name), encoding(encoding) {}
+    explicit ArgumentTypeEncoding(Symbol name, const IntegerEncoder& encoding): ArgumentType(name), encoding(encoding) {}
     [[nodiscard]] Type type() const override {return ENCODING;}
 
     [[nodiscard]] std::unique_ptr<ArgumentType> range_type(Symbol range_name) const;
@@ -87,7 +85,7 @@ public:
 
     [[nodiscard]] Type type() const override {return ENUM;}
 
-    [[nodiscard]] bool has_entry(Symbol name) const {return entries.find(name) != entries.end();}
+    [[nodiscard]] bool has_entry(Symbol name) const {return entries.contains(name);}
     [[nodiscard]] Value entry(Symbol name) const;
 
     std::unordered_map<Symbol, Value> entries;
@@ -102,8 +100,8 @@ public:
 
     [[nodiscard]] Type type() const override {return MAP;}
 
-    [[nodiscard]] bool has_entry(Value value) const {return entries.find(value) != entries.end();}
-    [[nodiscard]] Value entry(Value value) const;
+    [[nodiscard]] bool has_entry(const Value& value) const {return entries.contains(value);}
+    [[nodiscard]] Value entry(const Value& value) const;
 
     std::unordered_map<Value, Value> entries;
 };

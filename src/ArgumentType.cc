@@ -45,7 +45,7 @@ Value ArgumentTypeEnum::entry(Symbol name) const {
 }
 
 
-Value ArgumentTypeMap::entry(Value value) const {
+Value ArgumentTypeMap::entry(const Value& value) const {
     auto it = entries.find(value);
 
     if (it == entries.end()) {

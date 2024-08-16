@@ -35,11 +35,8 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <utility>
 
 #include "ArgumentType.h"
-#include "DataBody.h"
-#include "BaseExpression.h"
 #include "ParsedValue.h"
 #include "Symbol.h"
-#include "Token.h"
 
 class AddressingMode {
 public:

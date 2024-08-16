@@ -42,6 +42,8 @@ public:
         PUNCTUATION
     };
 
+    virtual ~Node() = default;
+
     [[nodiscard]] virtual Type type() const = 0;
     [[nodiscard]] virtual const Location& get_location() const = 0;
 };

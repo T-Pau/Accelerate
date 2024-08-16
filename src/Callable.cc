@@ -52,8 +52,7 @@ Callable::Callable(ObjectFile* owner, Token name_, const std::shared_ptr<ParsedV
     initialize();
     auto parameters = definition->as_dictionary();
 
-    auto arguments_value = parameters->get_optional(token_arguments);
-    if (arguments_value) {
+    if (auto arguments_value = parameters->get_optional(token_arguments)) {
         if (!arguments_value->is_scalar()) {
             throw ParseException(arguments_value->location, "invalid arguments");
         }

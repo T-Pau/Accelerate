@@ -58,7 +58,7 @@ public:
     [[nodiscard]] virtual std::optional<Body> evaluated(const EvaluationContext& context) const = 0;
     virtual void serialize(std::ostream& stream, const std::string& prefix) const = 0;
 
-    [[nodiscard]] virtual std::optional<Body> append_sub(Body body, Body element);
+    [[nodiscard]] virtual std::optional<Body> append_sub(const Body& body, const Body& element);
 
     friend class Body;
 

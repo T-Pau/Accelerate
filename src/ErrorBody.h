@@ -34,12 +34,11 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "Body.h"
 
-#include <utility>
 #include "ParseException.h"
 
 class ErrorBody: public BodyElement {
 public:
-    explicit ErrorBody(Location location, std::string message): location(location), message(std::move(message)) {}
+    explicit ErrorBody(const Location& location, std::string message): location(location), message(std::move(message)) {}
 
     [[nodiscard]] std::shared_ptr<BodyElement> clone() const override {return std::make_shared<ErrorBody>(location, message);}
     [[nodiscard]] bool empty() const override {return false;}

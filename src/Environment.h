@@ -32,9 +32,6 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef ENVIRONMENT_H
 #define ENVIRONMENT_H
 
-#include <memory>
-#include <utility>
-
 #include "Expression.h"
 #include "Symbol.h"
 #include "UnnamedLabelList.h"
@@ -50,7 +47,7 @@ public:
 
     void add(Symbol name, Expression value) {variables[name] = std::move(value);} // TODO: check for duplicates
     void add(Symbol name, const Function* function) {functions[name] = function;} // TODO: check for duplicates
-    void add(Symbol name, SizeRange offset) {labels[name] = offset;} // TODO: check for duplicates
+    void add(Symbol name, const SizeRange& offset) {labels[name] = offset;} // TODO: check for duplicates
     void add(Symbol name, const Macro* macro) {macros[name] = macro;} // TODO: check for duplicates
     void add_next(std::shared_ptr<Environment> new_next) {next.emplace_back(std::move(new_next));}
     void clear_next() {next.clear();}
@@ -64,7 +61,7 @@ public:
     [[nodiscard]] const Macro* get_macro(Symbol name) const;
     [[nodiscard]] std::optional<Expression> get_variable(Symbol name) const {return (*this)[name];}
     void remove(Symbol name) {variables.erase(name);}
-    void update(Symbol name, SizeRange offset) {labels[name] = offset;} // TODO: check for existence
+    void update(Symbol name, const SizeRange& offset) {labels[name] = offset;} // TODO: check for existence
 
     std::optional<Expression> operator[](Symbol name) const;
 

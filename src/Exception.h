@@ -36,8 +36,6 @@
 
 #include <exception>
 #include <string>
-#include <system_error>
-#include <utility>
 
 #include "printf_like.h"
 

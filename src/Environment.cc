@@ -31,14 +31,13 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "Environment.h"
 
-std::optional<Expression> Environment::operator[](Symbol name) const {
+std::optional<Expression> Environment::operator[](Symbol name) const { // NOLINT(misc-no-recursion)
     auto it = variables.find(name);
     if (it != variables.end()) {
         return it->second;
     }
     for (auto& environment: next) {
-        auto value = (*environment)[name];
-        if (value) {
+        if (auto value = (*environment)[name]) {
             return value;
         }
     }
@@ -55,7 +54,7 @@ void Environment::replace(const std::shared_ptr<Environment>& old_next, const st
     }
 }
 
-const Function* Environment::get_function(Symbol name) const {
+const Function* Environment::get_function(Symbol name) const { // NOLINT(misc-no-recursion)
     auto it = functions.find(name);
 
     if (it != functions.end()) {
@@ -69,7 +68,7 @@ const Function* Environment::get_function(Symbol name) const {
     return nullptr;
 }
 
-std::optional<SizeRange> Environment::get_label(Symbol name) const {
+std::optional<SizeRange> Environment::get_label(Symbol name) const { // NOLINT(misc-no-recursion)
     auto it = labels.find(name);
 
     if (it != labels.end()) {
@@ -84,7 +83,7 @@ std::optional<SizeRange> Environment::get_label(Symbol name) const {
 }
 
 
-const Macro* Environment::get_macro(Symbol name) const {
+const Macro* Environment::get_macro(Symbol name) const { // NOLINT(misc-no-recursion)
     auto it = macros.find(name);
 
     if (it != macros.end()) {

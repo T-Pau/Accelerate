@@ -42,7 +42,7 @@ public:
     explicit BlockBody(std::vector<Body> block);
     static Body create(const std::vector<Body>& elements);
 
-    [[nodiscard]] std::optional<Body> append_sub(Body body, Body element) override;
+    [[nodiscard]] std::optional<Body> append_sub(const Body& body, const Body& element) override;
     [[nodiscard]] std::shared_ptr<BodyElement> clone() const override {return std::make_shared<BlockBody>(block);}
     [[nodiscard]] bool empty() const override {return block.empty();}
     void encode(std::string &bytes, const Memory* memory) const override;

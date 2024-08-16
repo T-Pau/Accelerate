@@ -36,7 +36,6 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "ChecksumComputation.h"
 #include "Symbol.h"
-#include "Value.h"
 
 class LabelExpression;
 class Object;

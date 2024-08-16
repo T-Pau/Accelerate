@@ -82,7 +82,7 @@ void DataBody::serialize(std::ostream& stream, const std::string& prefix) const 
     stream << std::endl;
 }
 
-std::optional<Body> DataBody::append_sub(Body body, Body element) {
+std::optional<Body> DataBody::append_sub(const Body& body, const Body& element) {
     const auto data_element = element.as_data();
 
     if (!data_element) {

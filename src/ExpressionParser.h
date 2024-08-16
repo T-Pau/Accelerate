@@ -48,7 +48,7 @@ public:
     Expression parse() { top = Element(Location(), START); return do_parse();}
     Expression parse(const Expression& left) { top = Element(left, 0); return do_parse();}
 
-    std::optional<Encoder> parse_encoding();
+    std::optional<Encoder> parse_encoding() const;
     Body parse_list();
 
 private:
@@ -103,7 +103,7 @@ private:
     static void initialize();
 
     Expression do_parse();
-    Element next_element();
+    Element next_element() const;
     void reduce_argument_list();
     void reduce_binary(int up_to_level);
     void reduce_function_call();

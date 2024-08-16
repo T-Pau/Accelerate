@@ -136,8 +136,8 @@ LabelBody* Body::as_label() const { return std::dynamic_pointer_cast<LabelBody>(
 
 ScopeBody* Body::as_scope() const {return std::dynamic_pointer_cast<ScopeBody>(element).get();}
 
-std::optional<Body> Body::append_sub(Body new_element) {
-    return element->append_sub(*this, std::move(new_element));
+std::optional<Body> Body::append_sub(const Body& new_element) {
+    return element->append_sub(*this, new_element);
 }
 
 Body Body::make_unique() const {
@@ -149,7 +149,7 @@ Body Body::make_unique() const {
     }
 }
 
-Body Body::scoped(std::shared_ptr<Environment> inner_environment) const {
+Body Body::scoped(const std::shared_ptr<Environment>& inner_environment) const {
     if (is_scope() && !inner_environment) {
         return *this;
     }

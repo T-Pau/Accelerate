@@ -75,6 +75,7 @@ class Entity {
   private:
     [[nodiscard]] bool check_unresolved(const std::unordered_set<Symbol>& unresolved, Unresolved::Part& part) const;
 
+    static const Token token_default_only;
     static const Token token_visibility;
 
     bool default_only;

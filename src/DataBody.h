@@ -70,7 +70,7 @@ public:
     std::vector<DataBodyElement> data;
 
 protected:
-    [[nodiscard]] std::optional<Body> append_sub(Body body, Body element) override;
+    [[nodiscard]] std::optional<Body> append_sub(const Body& body, const Body& element) override;
 };
 
 

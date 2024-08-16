@@ -55,7 +55,7 @@ class EvaluationContext {
     };
 
     // ARGUMENTS, LABELS, MACRO_EXPANSION, STANDALONE
-    EvaluationContext(EvaluationResult& result, EvaluationType type, std::shared_ptr<Environment> environment, std::unordered_set<Symbol> defines = {}, SizeRange offset = SizeRange(0, {}));
+    EvaluationContext(EvaluationResult& result, EvaluationType type, std::shared_ptr<Environment> environment, std::unordered_set<Symbol> defines = {}, const SizeRange& offset = SizeRange(0, {}));
     // ENTITY
     EvaluationContext(EvaluationResult& result, Entity* entity);
 
@@ -65,11 +65,11 @@ class EvaluationContext {
 
     [[nodiscard]] EvaluationContext evaluating_variable(Symbol variable) const;
     [[nodiscard]] EvaluationContext skipping_variables(const std::vector<Symbol>& variables) const;
-    [[nodiscard]] EvaluationContext adding_offset(SizeRange size) const;
-    [[nodiscard]] EvaluationContext setting_offset(SizeRange offset) const;
+    [[nodiscard]] EvaluationContext adding_offset(const SizeRange& size) const;
+    [[nodiscard]] EvaluationContext setting_offset(const SizeRange& offset) const;
     [[nodiscard]] EvaluationContext keeping_label_offsets() const;
     [[nodiscard]] EvaluationContext making_conditional() const;
-    [[nodiscard]] EvaluationContext adding_scope(std::shared_ptr<Environment> new_environment, SizeRange new_label_offset) const;
+    [[nodiscard]] EvaluationContext adding_scope(std::shared_ptr<Environment> new_environment, const SizeRange& new_label_offset) const;
     [[nodiscard]] bool evaluating(Symbol variable) const {return evaluating_variables.contains(variable);}
     [[nodiscard]] bool skipping(Symbol variable) const {return skip_variables.contains(variable);}
     [[nodiscard]] std::optional<Expression> lookup_variable(Symbol variable) const;

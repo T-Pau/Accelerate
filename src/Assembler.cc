@@ -329,14 +329,14 @@ void Assembler::parse_segment() {
     parsed_target.map.add_segment(name.as_symbol(), parse_address((*parameters)[token_address_name].get()));
 }
 
-void Assembler::parse_symbol(Visibility visibility, const Token& name, bool default_only) {
+void Assembler::parse_symbol(Visibility visibility, const Token& name) {
     if (!target) {
         // TODO: skip until matching curly close
         tokenizer.skip_until(Token::curly_close, true);
         throw ParseException(name, "no target specified");
     }
 
-    auto object = object_file->create_object(current_section, visibility, default_only, name);
+    auto object = object_file->create_object(current_section, visibility, false, name);
 
     while (true) {
         auto token = tokenizer.next();
@@ -532,7 +532,7 @@ void Assembler::parse_macro(Visibility visibility, bool default_only) {
     }
 }
 
-std::vector<MemoryMap::Block> Assembler::parse_address(const ParsedValue* address) {
+std::vector<MemoryMap::Block> Assembler::parse_address(const ParsedValue* address) const {
     auto blocks = std::vector<MemoryMap::Block>();
 
     if (address->is_array()) {
@@ -562,7 +562,7 @@ MemoryMap::AccessType Assembler::parse_type(const Token& type) {
     }
 }
 
-MemoryMap::Block Assembler::parse_single_address(const ParsedScalar* address) {
+MemoryMap::Block Assembler::parse_single_address(const ParsedScalar* address) const {
     size_t index = 0;
     uint64_t bank = 0;
 
@@ -593,7 +593,7 @@ MemoryMap::Block Assembler::parse_single_address(const ParsedScalar* address) {
     return {bank, start, size};
 }
 
-uint64_t Assembler::parse_address_part(const Token& token) {
+uint64_t Assembler::parse_address_part(const Token& token) const {
     if (token.is_name()) {
         auto constant = object_file->constant(token.as_symbol());
         if (!constant->value.has_value()) {

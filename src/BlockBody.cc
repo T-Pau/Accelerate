@@ -33,17 +33,16 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "DataBody.h"
 
-BlockBody::BlockBody(std::vector<Body> block_): block(std::move(block_)) {
-    for (const auto& element: block) {
+BlockBody::BlockBody(std::vector<Body> block_) : block(std::move(block_)) {
+    for (const auto& element : block) {
         size_range_ += element.size_range();
     }
 }
 
-
 Body BlockBody::create(const std::vector<Body>& elements) {
     auto block = std::make_shared<BlockBody>();
 
-    for (auto& element: elements) {
+    for (auto& element : elements) {
         block->append_element(element);
     }
 
@@ -59,7 +58,6 @@ Body BlockBody::create(const std::vector<Body>& elements) {
     }
 }
 
-
 std::ostream& operator<<(std::ostream& stream, const BlockBody& block) {
     block.serialize(stream, "");
     return stream;
@@ -70,15 +68,12 @@ std::optional<Body> BlockBody::evaluated(const EvaluationContext& context) const
     auto changed = false;
     auto current_offset = context.offset;
 
-    for (auto& element: block) {
+    for (auto& element : block) {
         auto new_element = element.evaluated(context.setting_offset(current_offset));
         if (new_element) {
             changed = true;
-            new_elements.emplace_back(*new_element);
         }
-        else {
-            new_elements.emplace_back(element);
-        }
+        new_elements.emplace_back(new_element.value_or(element));
 
         current_offset += new_elements.back().size_range();
     }
@@ -91,14 +86,13 @@ std::optional<Body> BlockBody::evaluated(const EvaluationContext& context) const
     }
 }
 
-void BlockBody::serialize(std::ostream &stream, const std::string& prefix) const {
-    for (auto& element: block) {
+void BlockBody::serialize(std::ostream& stream, const std::string& prefix) const {
+    for (auto& element : block) {
         element.serialize(stream, prefix);
     }
 }
 
-
-std::optional<Body> BlockBody::append_sub(Body body, Body element) {
+std::optional<Body> BlockBody::append_sub(const Body& body, const Body& element) {
     auto new_body = body.make_unique();
 
     new_body.as_block()->append_element(element);
@@ -106,13 +100,13 @@ std::optional<Body> BlockBody::append_sub(Body body, Body element) {
     return new_body;
 }
 
-void BlockBody::encode(std::string &bytes, const Memory* memory) const {
-    for (auto& element: block) {
+void BlockBody::encode(std::string& bytes, const Memory* memory) const {
+    for (auto& element : block) {
         element.encode(bytes, memory);
     }
 }
 
-void BlockBody::append_element(const Body &element) {
+void BlockBody::append_element(const Body& element) {
     if (element.empty()) {
         return;
     }
