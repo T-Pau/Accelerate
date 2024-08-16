@@ -37,13 +37,14 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 class LabelExpression: public BaseExpression {
 public:
-    static Expression create(Location location, const Entity* object, Symbol label_name, SizeRange offset, SizeRange scope_offset = SizeRange(0), bool keep = false);
-    static Expression create(const std::vector<Expression>& arguments);
-    static Expression create(Location location, LabelExpressionType type, size_t unnamed_index = std::numeric_limits<size_t>::max(), SizeRange offset = SizeRange(0, {}));
-    LabelExpression(Location location, Symbol object_name, Symbol label_name): BaseExpression(location), label_type(LabelExpressionType::NAMED), object_name(object_name), label_name(label_name) {}
-    LabelExpression(Location location, Symbol object_name, Symbol label_name, SizeRange offset): BaseExpression(location), label_type(LabelExpressionType::NAMED), object_name(object_name), label_name(label_name), offset(offset) {}
-    LabelExpression(Location location, const Entity* object, Symbol label_name, SizeRange offset);
-    LabelExpression(Location location, LabelExpressionType type, size_t unnamed_index, SizeRange offset): BaseExpression(location), label_type(type), offset(offset), unnamed_index(unnamed_index) {}
+    LabelExpression(const Location& location, Symbol object_name, Symbol label_name): BaseExpression(location), label_type(LabelExpressionType::NAMED), object_name(object_name), label_name(label_name) {}
+    LabelExpression(const Location& location, Symbol object_name, Symbol label_name, SizeRange offset): BaseExpression(location), label_type(LabelExpressionType::NAMED), object_name(object_name), label_name(label_name), offset(offset) {}
+    LabelExpression(const Location& location, const Entity* object, Symbol label_name, SizeRange offset);
+    LabelExpression(const Location& location, LabelExpressionType type, size_t unnamed_index, SizeRange offset): BaseExpression(location), label_type(type), offset(offset), unnamed_index(unnamed_index) {}
+
+    static Expression create(const Location& location, const Entity* object, Symbol label_name, SizeRange offset, SizeRange scope_offset = SizeRange(0), bool keep = false);
+    static Expression create(const Location& location, const std::vector<Expression>& arguments);
+    static Expression create(const Location& location, LabelExpressionType type, size_t unnamed_index = std::numeric_limits<size_t>::max(), SizeRange offset = SizeRange(0, {}));
 
     [[nodiscard]] std::optional<Value> minimum_value() const override {return offset.minimum_value();}
     [[nodiscard]] std::optional<Value> maximum_value() const override {return offset.maximum_value();}

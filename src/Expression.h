@@ -85,27 +85,27 @@ public:
     };
 
     Expression() = default;
-    explicit Expression(const std::shared_ptr<BaseExpression>& expression_) {if (expression_) {expression = expression_;}}
+    explicit Expression(std::shared_ptr<BaseExpression> expression);
     explicit Expression(Tokenizer& tokenizer);
 
     // Binary
-    Expression(const Expression& left, BinaryOperation operation, const Expression& right);
+    Expression(const Location& location, const Expression& left, BinaryOperation operation, const Expression& right);
     // Function
-    Expression(Symbol name, const std::vector<Expression>& arguments);
+    Expression(const Location& location, Symbol name, const std::vector<Expression>& arguments);
     // Label
-    Expression(Location location, Symbol object_name, Symbol label_name, SizeRange offset = SizeRange(0, {}));
-    Expression(Location location, const Entity* object, Symbol label_name, SizeRange offset = SizeRange(0, {}), SizeRange scope_offset = SizeRange(0, {}), bool keep = false);
-    Expression(Location location, LabelExpressionType type, size_t unnamed_index = std::numeric_limits<size_t>::max(), SizeRange offset = SizeRange(0, {}));
+    Expression(const Location& location, Symbol object_name, Symbol label_name, const SizeRange& offset = SizeRange(0, {}));
+    Expression(const Location& location, const Entity* object, Symbol label_name, const SizeRange& offset = SizeRange(0, {}), const SizeRange& scope_offset = SizeRange(0, {}), bool keep = false);
+    Expression(const Location& location, LabelExpressionType type, size_t unnamed_index = std::numeric_limits<size_t>::max(), const SizeRange& offset = SizeRange(0, {}));
     // Object
-    explicit Expression(Object* object);
+    explicit Expression(const Location& location, Object* object);
     // Unary
-    Expression(UnaryOperation operation, const Expression& operand);
+    Expression(const Location& location, UnaryOperation operation, const Expression& operand);
     // Value
-    explicit Expression(bool value): Expression(Value(value)) {}
-    explicit Expression(uint64_t value): Expression(Value(value)) {}
-    explicit Expression(Value value);
+    explicit Expression(const Location& location, bool value): Expression(location, Value(value)) {}
+    explicit Expression(const Location& location, uint64_t value): Expression(location, Value(value)) {}
+    explicit Expression(const Location& location, const Value& value);
     // Variable
-    explicit Expression(Symbol name);
+    explicit Expression(const Location& location, Symbol name);
     // Variable or Value
     explicit Expression(const Token& value);
 
@@ -133,7 +133,7 @@ public:
     [[nodiscard]] std::optional<Expression> evaluated(const EvaluationContext& context) const;
 
 private:
-    std::shared_ptr<BaseExpression> expression = std::make_shared<VoidExpression>();
+    std::shared_ptr<BaseExpression> expression = std::make_shared<VoidExpression>(Location());
 };
 
 std::ostream& operator<<(std::ostream& stream, const Expression& expression);

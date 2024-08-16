@@ -37,58 +37,64 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ObjectFile.h"
 #include "ParseException.h"
 #include "VariableExpression.h"
+#include <complex>
 
-LabelExpression::LabelExpression(Location location, const Entity* object, Symbol label_name, SizeRange offset): BaseExpression(location), label_type(LabelExpressionType::NAMED), object(object), object_name(object ? object->name.as_symbol() : Symbol()), label_name(label_name), offset(offset) {}
+LabelExpression::LabelExpression(const Location& location, const Entity* object, Symbol label_name, SizeRange offset) : BaseExpression(location), label_type(LabelExpressionType::NAMED), object(object), object_name(object ? object->name.as_symbol() : Symbol()), label_name(label_name), offset(offset) {}
 
-Expression LabelExpression::create(const std::vector<Expression>& arguments) {
+Expression LabelExpression::create(const Location& location, const std::vector<Expression>& arguments) {
     if (arguments.size() == 1) {
         if (arguments[0].has_value()) {
             auto& value = arguments[0];
             if (value.value()->is_unsigned()) {
-                return create(arguments[0].location(), nullptr, Symbol(), SizeRange(arguments[0].value()->unsigned_value()));
+                return create(location, nullptr, Symbol(), SizeRange(arguments[0].value()->unsigned_value()));
             }
             else {
-                throw ParseException(arguments[0].location(), "invalid arguments for .label_offset()");
+                throw ParseException(location, "invalid arguments for .label_offset()");
             }
         }
-        auto label_name = arguments[0].as_variable();
-        if (!label_name) {
-            throw ParseException(arguments[0].location(), "invalid arguments for .label_offset()");
-        }
-        else if (label_name->variable() == Token::colon_minus.as_symbol()) {
-            return create(label_name->location, PREVIOUS_UNNAMED);
-
-        }
-        else if (label_name->variable() == Token::colon_plus.as_symbol()) {
-            return create(label_name->location, NEXT_UNNAMED);
+        if (auto label_name = arguments[0].as_variable()) {
+            if (label_name->variable() == Token::colon_minus.as_symbol()) {
+                return create(location, PREVIOUS_UNNAMED);
+            }
+            else if (label_name->variable() == Token::colon_plus.as_symbol()) {
+                return create(location, NEXT_UNNAMED);
+            }
+            else {
+                throw ParseException(location, "invalid arguments for .label_offset()");
+            }
         }
         else {
-            throw ParseException(arguments[0].location(), "invalid arguments for .label_offset()");
+            throw ParseException(location, "invalid arguments for .label_offset()");
         }
     }
-    if (arguments.size() != 2) {
-        throw ParseException(arguments.empty() ? Location() : arguments.front().location(), "invalid number of arguments for .label_offset()");
+    else if (arguments.size() == 2) {
+        auto object_name = arguments[0].as_variable();
+        auto label_name = arguments[1].as_variable();
+        if (object_name || label_name) {
+            return Expression(std::make_shared<LabelExpression>(location, object_name->variable(),                label_name->variable()));
+        }
+        else {
+            throw ParseException(location, "invalid arguments for .label_offset()");
+        }
     }
-    auto object_name = arguments[0].as_variable();
-    auto label_name = arguments[1].as_variable();
-    if (!object_name || !label_name) {
-        throw ParseException(arguments[0].location(), "invalid arguments for .label_offset()");
+    else {
+        throw ParseException(location, "invalid number of arguments for .label_offset()");
     }
-    return Expression(std::make_shared<LabelExpression>(object_name->location, object_name->variable(), label_name->variable()));
+
 }
 
-Expression LabelExpression::create(Location location, const Entity* object, Symbol label_name, SizeRange offset, SizeRange scope_offset, bool keep) {
+Expression LabelExpression::create(const Location& location, const Entity* object, Symbol label_name, SizeRange offset, SizeRange scope_offset, bool keep) {
     if (!keep && offset.has_size() && scope_offset.has_size()) {
-        return {Expression(*offset.size()), Expression::ADD, Expression(*scope_offset.size())};
+        return {location, Expression({}, *offset.size()), Expression::ADD, Expression({}, *scope_offset.size())};
     }
     else {
         return Expression(std::make_shared<LabelExpression>(location, object, label_name, offset));
     }
 }
 
-Expression LabelExpression::create(Location location, LabelExpressionType type, size_t unnamed_index, SizeRange offset) {
+Expression LabelExpression::create(const Location& location, LabelExpressionType type, size_t unnamed_index, SizeRange offset) {
     if (offset.size()) {
-        return Expression(*offset.size());
+        return Expression(location, *offset.size());
     }
     else {
         return Expression(std::make_shared<LabelExpression>(location, type, unnamed_index, offset));
@@ -152,12 +158,12 @@ std::optional<Expression> LabelExpression::evaluated(const EvaluationContext& co
     return {};
 }
 
-void LabelExpression::serialize_sub(std::ostream &stream) const {
+void LabelExpression::serialize_sub(std::ostream& stream) const {
     stream << ".label_offset(";
     if (offset.has_size()) {
         auto value = *offset.size();
 
-        stream << "$" << std::setfill('0') << std::setw(static_cast<int>(Int::minimum_byte_size(value)*2)) << std::hex << value << std::dec;
+        stream << "$" << std::setfill('0') << std::setw(static_cast<int>(Int::minimum_byte_size(value) * 2)) << std::hex << value << std::dec;
     }
     else {
         switch (label_type) {

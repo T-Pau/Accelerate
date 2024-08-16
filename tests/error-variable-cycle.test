@@ -6,5 +6,7 @@ cycle = cycle + 1
 end-of-inline-data
 # location should be file.s:1:8
 stderr
-file.s: error: circular definition of cycle
+file.s:1.8: error: circular definition of cycle
+cycle = cycle + 1
+        ^^^^^^^^^
 end-of-inline-data

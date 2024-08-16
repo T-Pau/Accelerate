@@ -36,9 +36,9 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 class ExistsExpression : public BaseExpression {
   public:
-    explicit ExistsExpression(Symbol symbol): symbol{symbol} {}
+    explicit ExistsExpression(const Location& location, Symbol symbol): BaseExpression(location), symbol{symbol} {}
     
-    static Expression create(const std::vector<Expression>& arguments);
+    static Expression create(const Location& location, const std::vector<Expression>& arguments);
 
     [[nodiscard]] std::optional<Expression> evaluated(const EvaluationContext& context) const override;
     [[nodiscard]] std::optional<Value::Type> type() const override {return Value::BOOLEAN;}

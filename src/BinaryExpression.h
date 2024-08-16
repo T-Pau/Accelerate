@@ -37,7 +37,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 class BinaryExpression: public BaseExpression {
 public:
-    BinaryExpression(Expression left, Expression::BinaryOperation operation, Expression right): left(std::move(left)), operation(operation), right(std::move(right)) {}
+    BinaryExpression(const Location& location, Expression left, Expression::BinaryOperation operation, Expression right): BaseExpression(location), left(std::move(left)), operation(operation), right(std::move(right)) {}
 
     [[nodiscard]] std::optional<Value> minimum_value() const override;
     [[nodiscard]] std::optional<Value> maximum_value() const override;
@@ -48,7 +48,7 @@ public:
         right.collect_objects(objects);}
 
 protected:
-    [[nodiscard]] Expression static create(const Expression& left, Expression::BinaryOperation operation, const Expression& right);
+    [[nodiscard]] Expression static create(const Location& location, const Expression& left, Expression::BinaryOperation operation, const Expression& right);
     [[nodiscard]] std::optional<Expression> evaluated(const EvaluationContext& context) const override;
 
     void serialize_sub(std::ostream& stream) const override;
@@ -56,8 +56,8 @@ protected:
     friend class Expression;
 
 private:
-    Expression::BinaryOperation operation;
     Expression left;
+    Expression::BinaryOperation operation;
     Expression right;
 };
 

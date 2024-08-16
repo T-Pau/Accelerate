@@ -42,7 +42,7 @@ class Environment;
 class BaseExpression {
 public:
     BaseExpression() = default;
-    explicit BaseExpression(Location location): location(location) {}
+    explicit BaseExpression(const Location& location): location(location) {}
     virtual ~BaseExpression() = default;
 
     [[nodiscard]] virtual bool has_value() const {return value().has_value();}

@@ -37,10 +37,10 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 std::optional<Expression> ObjectNameExpression::evaluated(const EvaluationContext& context) const {
     if (context.entity && context.entity->is_object()) {
-        return Expression(context.entity->as_object());
+        return Expression(location, context.entity->as_object());
     }
     else if (context.type == EvaluationContext::OUTPUT) {
-        return Expression(Value(static_cast<uint64_t>(0)));
+        return Expression(location, Value(uint64_t{0}));
     }
     else {
         return {};
@@ -51,11 +51,11 @@ void ObjectNameExpression::serialize_sub(std::ostream& stream) const {
     stream << ".current_object";
 }
 
-Expression ObjectNameExpression::create(Object* object) {
+Expression ObjectNameExpression::create(const Location& location, Object* object) {
     if (object) {
-        return Expression(object);
+        return Expression(location, object);
     }
     else {
-        return Expression(std::make_shared<ObjectNameExpression>());
+        return Expression(std::make_shared<ObjectNameExpression>(location));
     }
 }

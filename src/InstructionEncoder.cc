@@ -32,14 +32,11 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "InstructionEncoder.h"
 
 #include <algorithm>
-#include <utility>
 
 #include "Assembler.h"
 #include "ParseException.h"
 #include "TokenNode.h"
-#include "ValueExpression.h"
 #include "ExpressionNode.h"
-#include "BinaryExpression.h"
 #include "Util.h"
 
 Body InstructionEncoder::encode(const Token& name, const std::vector<std::shared_ptr<Node>>& arguments, const std::shared_ptr<Environment>& environment, const SizeRange& offset, bool& uses_pc) {
@@ -105,13 +102,13 @@ Body InstructionEncoder::encode(const Token& name, const std::vector<std::shared
     for (const auto &variant: variants) {
         auto constraints = variant.argument_constraints;
         if (&variant != &variants.back()) {
-            constraints = Expression(constraints, Expression::BinaryOperation::LOGICAL_AND, variant.encoding_constraints);
+            constraints = Expression({}, constraints, Expression::BinaryOperation::LOGICAL_AND, variant.encoding_constraints);
         }
         uses_pc |= variant.uses_pc;
         clauses.emplace_back(constraints, variant.data);
     }
 
-    clauses.emplace_back(Expression(Value(true)), Body(name.location, "arguments out of range"));
+    clauses.emplace_back(Expression({}, true), Body(name.location, "arguments out of range"));
 
     return Body(clauses);
 }
@@ -151,7 +148,7 @@ InstructionEncoder::Variant InstructionEncoder::encode(const Instruction* instru
                     if (!enum_type->has_entry(value_name)) {
                         throw ParseException((*it_arguments)->get_location(), "invalid enum argument");
                     }
-                    environment->add(it_notation->symbol, Expression(enum_type->entry(value_name)));
+                    environment->add(it_notation->symbol, Expression({}, enum_type->entry(value_name)));
                     break;
                 }
 
@@ -168,7 +165,7 @@ InstructionEncoder::Variant InstructionEncoder::encode(const Instruction* instru
                     if (!map_type->has_entry(value)) {
                         throw ParseException((*it_arguments)->get_location(), "invalid map argument");
                     }
-                    environment->add(it_notation->symbol, Expression(map_type->entry(value)));
+                    environment->add(it_notation->symbol, Expression({}, map_type->entry(value)));
                     break;
                 }
 
@@ -180,14 +177,14 @@ InstructionEncoder::Variant InstructionEncoder::encode(const Instruction* instru
                     }
                     auto expression = std::dynamic_pointer_cast<ExpressionNode>(*it_arguments)->expression;
 
-                    variant.add_argument_constraint(InRangeExpression::create(Expression(range_type->lower_bound), Expression(range_type->upper_bound), expression));
+                    variant.add_argument_constraint(InRangeExpression::create(expression.location(), Expression({}, range_type->lower_bound), Expression({}, range_type->upper_bound), expression));
                     environment->add(it_notation->symbol, expression);
                     break;
             }
         }
 
-        it_notation++;
-        it_arguments++;
+        ++it_notation;
+        ++it_arguments;
     }
 
     for (auto& pair: addressing_mode->arguments) {
@@ -196,11 +193,11 @@ InstructionEncoder::Variant InstructionEncoder::encode(const Instruction* instru
             if (!default_value) {
                 throw Exception("internal error: no default value for missing argument in notation");
             }
-            environment->add(pair.first, Expression{*pair.second->default_value});
+            environment->add(pair.first, Expression{{}, *pair.second->default_value});
         }
     }
 
-    environment->add(Assembler::symbol_opcode, Expression(instruction->opcode(match.addressing_mode)));
+    environment->add(Assembler::symbol_opcode, Expression({}, instruction->opcode(match.addressing_mode)));
 
     variant.uses_pc = addressing_mode->uses_pc;
     variant.data = addressing_mode->encoding;
@@ -213,7 +210,7 @@ InstructionEncoder::Variant InstructionEncoder::encode(const Instruction* instru
             auto lower = datum.encoding->as_integer_encoder()->minimum_value();
             auto upper = datum.encoding->as_integer_encoder()->maximum_value();
             if (lower && upper) {
-                variant.add_encoding_constraint(InRangeExpression::create(Expression(*lower), Expression(*upper), datum.expression));
+                variant.add_encoding_constraint(InRangeExpression::create({}, Expression({}, *lower), Expression({}, *upper), datum.expression));
             }
         }
     }
@@ -222,7 +219,7 @@ InstructionEncoder::Variant InstructionEncoder::encode(const Instruction* instru
 }
 
 void InstructionEncoder::Variant::add_constraint(Expression& constraints, const Expression& sub_constraint) {
-    constraints = Expression(constraints, Expression::BinaryOperation::LOGICAL_AND, sub_constraint);
+    constraints = Expression({constraints.location(), sub_constraint.location()}, constraints, Expression::BinaryOperation::LOGICAL_AND, sub_constraint);
 }
 
 InstructionEncoder::Variant::operator bool() const {

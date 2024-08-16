@@ -39,11 +39,11 @@ class Object;
 
 class SizeofExpression: public BaseExpression {
 public:
-    explicit SizeofExpression(Symbol object_name): object_name{object_name} {}
-    explicit SizeofExpression(const Object* object): object_name{object->name.as_symbol()}, object{object}, size_range{object->size_range()} {}
+    explicit SizeofExpression(const Location& location, Symbol object_name): BaseExpression(location), object_name{object_name} {}
+    explicit SizeofExpression(const Location& location, const Object* object): BaseExpression(location), object_name{object->name.as_symbol()}, object{object}, size_range{object->size_range()} {}
 
-    static Expression create(const std::vector<Expression>& arguments);
-    static Expression create(const Object* object);
+    static Expression create(const Location& location, const std::vector<Expression>& arguments);
+    static Expression create(const Location& location, const Object* object);
 
     [[nodiscard]] std::optional<Expression> evaluated(const EvaluationContext& context) const override;
     [[nodiscard]] std::optional<Value> minimum_value() const override {return Value{size_range.minimum_value()};}

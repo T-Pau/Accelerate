@@ -50,8 +50,8 @@ public:
 private:
     class Variant {
       public:
-        Expression argument_constraints = Expression(Value(true));
-        Expression encoding_constraints = Expression(Value(true));
+        Expression argument_constraints = Expression({}, Value(true));
+        Expression encoding_constraints = Expression({}, Value(true));
 
 
         void add_argument_constraint(const Expression& sub_constraint) {return add_constraint(argument_constraints, sub_constraint);}

@@ -38,8 +38,8 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 class ValueExpression: public BaseExpression {
 public:
     explicit ValueExpression(const Token& token);
-    explicit ValueExpression(Value value): value_(value) {}
-    explicit ValueExpression(uint64_t value): ValueExpression(Value(value)) {}
+    explicit ValueExpression(const Location& location, Value value): BaseExpression(location), value_(value) {}
+    explicit ValueExpression(const Location& location, uint64_t value): ValueExpression(location, Value(value)) {}
 
     [[nodiscard]] bool has_value() const override {return true;}
     [[nodiscard]] std::optional<Value> value() const override {return value_;}

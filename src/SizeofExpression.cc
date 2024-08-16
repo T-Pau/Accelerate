@@ -37,9 +37,9 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ParseException.h"
 #include "VariableExpression.h"
 
-Expression SizeofExpression::create(const std::vector<Expression>& arguments) {
+Expression SizeofExpression::create(const Location& location, const std::vector<Expression>& arguments) {
     if (arguments.size() != 1) {
-        throw ParseException(Location(), "invalid number of arguments");
+        throw ParseException(location, "invalid number of arguments");
     }
     auto& argument = arguments[0];
 
@@ -47,23 +47,25 @@ Expression SizeofExpression::create(const std::vector<Expression>& arguments) {
         throw ParseException(argument.location(), "symbol argument required");
     }
 
-    return Expression(std::make_shared<SizeofExpression>(argument.as_variable()->variable()));
+    return Expression(std::make_shared<SizeofExpression>(location, argument.as_variable()->variable()));
 }
 
-Expression SizeofExpression::create(const Object* object) {
+
+Expression SizeofExpression::create(const Location& location, const Object* object) {
     const auto size_range = object->size_range();
     if (size_range.size()) {
-        return Expression(Value(*size_range.size()));
+        return Expression(location, Value(*size_range.size()));
     }
     else {
-        return Expression(std::make_shared<SizeofExpression>(object));
+        return Expression(std::make_shared<SizeofExpression>(location, object));
     }
 }
+
 
 std::optional<Expression> SizeofExpression::evaluated(const EvaluationContext& context) const {
     if (object) {
         if (size_range != object->size_range()) {
-            return create(object);
+            return create(location, object);
         }
         else {
             return {};
@@ -71,9 +73,9 @@ std::optional<Expression> SizeofExpression::evaluated(const EvaluationContext& c
     }
     else if (const auto new_object = context.environment->get_variable(object_name)) {
         if (!new_object->is_object()) {
-            throw Exception(".sizeof requires object");
+            throw ParseException(location, ".sizeof requires object");
         }
-        return create(new_object->as_object()->object);
+        return create(location, new_object->as_object()->object);
     }
     else {
         return {};

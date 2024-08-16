@@ -39,7 +39,6 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ObjectNameExpression.h"
 #include "ParseException.h"
 #include "TokenNode.h"
-#include <complex>
 
 const Symbol BodyParser::symbol_pc = Symbol(".pc");
 const Token BodyParser::token_binary_file = Token(Token::DIRECTIVE, "binary_file");
@@ -89,8 +88,7 @@ Body BodyParser::parse() {
                     throw ParseException(token, "unclosed symbol body");
 
                 case Token::DIRECTIVE: {
-                    auto visibility = VisibilityHelper::from_token(token);
-                    if (visibility) {
+                    if (auto visibility = VisibilityHelper::from_token(token)) {
                         handle_name(*visibility, tokenizer.expect(Token::NAME, TokenGroup::newline));
                         break;
                     }
@@ -198,8 +196,9 @@ Symbol BodyParser::get_label(bool& is_anonymous) {
 }
 
 Expression BodyParser::get_pc(Symbol label) const {
-    auto label_expression = label ? Expression(Location(), nullptr, label) : Expression({}, LabelExpressionType::PREVIOUS_UNNAMED);
-    return {ObjectNameExpression::create(nullptr), Expression::BinaryOperation::ADD, label_expression};
+    // TODO: location
+    auto label_expression = label ? Expression(tokenizer.current_location(), nullptr, label) : Expression(tokenizer.current_location(), LabelExpressionType::PREVIOUS_UNNAMED);
+    return {tokenizer.current_location(), ObjectNameExpression::create(tokenizer.current_location(), nullptr), Expression::BinaryOperation::ADD, label_expression};
 }
 
 void BodyParser::parse_directive(const Token& directive) {
@@ -225,7 +224,7 @@ void BodyParser::parse_else() {
         throw Exception(".else outside .if");
     }
     pop_body();
-    push_clause(Expression(Value(true)));
+    push_clause(Expression(tokenizer.current_location(), true));
     tokenizer.expect(Token::curly_open);
 }
 
@@ -275,7 +274,7 @@ void BodyParser::parse_label(Visibility visibility, const Token& name) {
 
 void BodyParser::parse_memory() {
     auto expression_parser = ExpressionParser(tokenizer);
-    auto bank = Expression(uint64_t{0});
+    auto bank = Expression({}, uint64_t{0});
     auto start_address = expression_parser.parse();
     tokenizer.expect(Token::comma);
     auto end_address = expression_parser.parse();
@@ -582,7 +581,7 @@ void BodyParser::parse_binary_file() {
         else if (start > 0) {
             data = data.substr(*start);
         }
-        auto elements = std::vector<DataBodyElement>{DataBodyElement{Expression{Value{data}}, {}}};
+        auto elements = std::vector<DataBodyElement>{DataBodyElement{Expression{filename.location, Value(data)}, {}}};
         current_body->append(Body(elements));
     }
     else {

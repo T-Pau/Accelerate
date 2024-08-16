@@ -32,7 +32,6 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "BaseExpression.h"
 
 #include "Expression.h"
-#include "ParseException.h"
 
 
 std::ostream& operator<<(std::ostream& stream, const std::shared_ptr<BaseExpression>& node) {

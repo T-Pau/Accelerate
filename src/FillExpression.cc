@@ -33,21 +33,20 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 #include "Encoder.h"
-#include "Exception.h"
 #include "ParseException.h"
 
-Expression FillExpression::create(const std::vector<Expression>& arguments) {
+Expression FillExpression::create(const Location& location, const std::vector<Expression>& arguments) {
     if (arguments.size() != 2) {
-        throw ParseException(Location(), "invalid number of arguments");
+        throw ParseException(location, "invalid number of arguments");
     }
-    return create(arguments[0], arguments[1]);
+    return create(location, arguments[0], arguments[1]);
 }
 
-Expression FillExpression::create(const Expression& count, const Expression& value) {
+Expression FillExpression::create(const Location& location, const Expression& count, const Expression& value) {
     if (count.has_value() && value.has_value()) {
         const auto real_count = *count.value();
         if (!real_count.is_unsigned()) {
-            throw Exception(".fill count must be unsigned");
+            throw ParseException(count.location(), ".fill count must be unsigned");
         }
         auto actual_count = real_count.unsigned_value();
         const auto real_value = *value.value();
@@ -59,10 +58,10 @@ Expression FillExpression::create(const Expression& count, const Expression& val
         for (uint64_t i = 0; i < actual_count; i++) {
             result += bytes;
         }
-        return Expression(Value(result));
+        return Expression(location, Value(result));
     }
     else {
-        return Expression(std::make_shared<FillExpression>(count, value));
+        return Expression(std::make_shared<FillExpression>(location, count, value));
     }
 }
 
@@ -70,7 +69,7 @@ std::optional<Expression> FillExpression::evaluated(const EvaluationContext& con
     auto new_count = count.evaluated(context);
     auto new_value = value.evaluated(context);
     if (new_count || new_value) {
-        return create(new_count ? *new_count : count, new_value ? *new_value : value);
+        return create(location, new_count.value_or(count), new_value.value_or(value));
     }
     else {
         return {};

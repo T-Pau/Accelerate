@@ -37,11 +37,11 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 class MinMaxExpression: public BaseExpression {
   public:
-    explicit MinMaxExpression(Expression a, Expression b, bool minimum): a{std::move(a)}, b{std::move(b)}, minimum{minimum} {}
+    explicit MinMaxExpression(const Location& location, Expression a, Expression b, bool minimum): BaseExpression(location), a{std::move(a)}, b{std::move(b)}, minimum{minimum} {}
     
-    static Expression create_min(const std::vector<Expression>& arguments) {return create(true, arguments);}
-    static Expression create_max(const std::vector<Expression>& arguments) {return create(false, arguments);}
-    static Expression create(const Expression& a, const Expression& b, bool minimum);
+    static Expression create_min(const Location& location, const std::vector<Expression>& arguments) {return create(location, true, arguments);}
+    static Expression create_max(const Location& location, const std::vector<Expression>& arguments) {return create(location, false, arguments);}
+    static Expression create(const Location& location, const Expression& a, const Expression& b, bool minimum);
 
     [[nodiscard]] std::optional<Expression> evaluated(const EvaluationContext& context) const override;
 
@@ -52,7 +52,7 @@ class MinMaxExpression: public BaseExpression {
     void serialize_sub(std::ostream& stream) const override;
 
   private:
-    static Expression create(bool minimum, const std::vector<Expression>& arguments);
+    static Expression create(const Location& location, bool minimum, const std::vector<Expression>& arguments);
     static Value min_max(bool minimum, const Value& a, const Value& b);
 
     Expression a;

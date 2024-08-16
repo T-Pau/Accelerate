@@ -38,7 +38,7 @@ class Function: public Callable {
   public:
     Function(ObjectFile* owner, Token name, const std::shared_ptr<ParsedValue>& definition);
     Function(ObjectFile* owner, Token name, Visibility visibility, bool default_only, Arguments arguments, Expression definition): Callable(owner, name, visibility, default_only, std::move(arguments)), definition(definition) {}
-    Expression call(const std::vector<Expression>& arguments) const;
+    Expression call(const Location& location, const std::vector<Expression>& arguments) const;
     void serialize(std::ostream& stream) const;
 
     Expression definition;

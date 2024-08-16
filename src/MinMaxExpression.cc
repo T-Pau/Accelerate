@@ -33,28 +33,29 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "ParseException.h"
 
-Expression MinMaxExpression::create(bool minimum, const std::vector<Expression>& arguments) {
+Expression MinMaxExpression::create(const Location& location, bool minimum, const std::vector<Expression>& arguments) {
     if (arguments.size() != 2) {
-        throw ParseException(Location(), "invalid number of arguments");
+        throw ParseException(location, "invalid number of arguments");
     }
-    return create(arguments[0], arguments[1], minimum);
+    return create(location, arguments[0], arguments[1], minimum);
 }
 
-Expression MinMaxExpression::create(const Expression& a, const Expression& b, bool minimum) {
+Expression MinMaxExpression::create(const Location& location, const Expression& a, const Expression& b, bool minimum) {
     // TODO: validate and propagate types.
     if (a.has_value() && b.has_value()) {
-         return Expression(min_max(minimum, *a.value(), *b.value()));
+         return Expression(location, min_max(minimum, *a.value(), *b.value()));
     }
     else {
-        return Expression(std::make_shared<MinMaxExpression>(a, b, minimum));
+        return Expression(std::make_shared<MinMaxExpression>(location, a, b, minimum));
     }
 }
+
 
 std::optional<Expression> MinMaxExpression::evaluated(const EvaluationContext& context) const {
     auto new_a = a.evaluated(context);
     auto new_b = b.evaluated(context);
     if (new_a || new_b) {
-        return create(new_a.value_or(a), new_b.value_or(b), minimum);
+        return create(location, new_a.value_or(a), new_b.value_or(b), minimum);
     }
     else {
         return {};

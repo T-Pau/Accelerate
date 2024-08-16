@@ -37,8 +37,8 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 class ObjectExpression: public BaseExpression {
 public:
-    explicit ObjectExpression(Object* object): object(object) {}
-    [[nodiscard]] static Expression create(Object* object);
+    explicit ObjectExpression(const Location& location, Object* object): BaseExpression(location), object(object) {}
+    [[nodiscard]] static Expression create(const Location& location, Object* object);
 
     [[nodiscard]] bool has_value() const override {return object->has_address();}
     [[nodiscard]] std::optional<Value> value() const override;

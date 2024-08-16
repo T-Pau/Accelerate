@@ -35,13 +35,11 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ArgumentType.h"
 #include "Expression.h"
 
-#include <utility>
-
 class InRangeExpression: public BaseExpression {
 public:
-    InRangeExpression(const Expression& lower_bound, const Expression& upper_bound, const Expression& argument): lower_bound(std::move(lower_bound)), upper_bound(std::move(upper_bound)), argument(std::move(argument)) {}
-    [[nodiscard]] Expression static create(const std::vector<Expression>& arguments);
-    [[nodiscard]] Expression static create(const Expression& lower_bound, const Expression& upper_bound, const Expression& argument);
+    InRangeExpression(const Location& location, const Expression& lower_bound, const Expression& upper_bound, const Expression& argument): BaseExpression(location), lower_bound(std::move(lower_bound)), upper_bound(std::move(upper_bound)), argument(std::move(argument)) {}
+    [[nodiscard]] Expression static create(const Location& location, const std::vector<Expression>& arguments);
+    [[nodiscard]] Expression static create(const Location& location, const Expression& lower_bound, const Expression& upper_bound, const Expression& argument);
 
     [[nodiscard]] std::optional<Value> minimum_value() const override {return {};}
     [[nodiscard]] std::optional<Value> maximum_value() const override {return {};}

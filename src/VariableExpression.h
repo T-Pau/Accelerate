@@ -37,7 +37,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 class VariableExpression: public BaseExpression {
 public:
-    explicit VariableExpression(Symbol symbol): symbol(symbol) {}
+    explicit VariableExpression(const Location& location, Symbol symbol): BaseExpression(location), symbol(symbol) {}
 
     [[nodiscard]] Symbol variable() const {return symbol;}
 

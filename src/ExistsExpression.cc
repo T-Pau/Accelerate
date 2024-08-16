@@ -36,22 +36,23 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ParseException.h"
 #include "VariableExpression.h"
 
-Expression ExistsExpression::create(const std::vector<Expression>& arguments) {
+Expression ExistsExpression::create(const Location& location, const std::vector<Expression>& arguments) {
     if (arguments.size() != 1) {
-        throw ParseException(Location(), "invalid number of arguments");
+        throw ParseException(location, "invalid number of arguments");
     }
     auto& argument = arguments[0];
 
     if (!argument.is_variable()) {
-        throw ParseException(argument.location(), "symbol argument required");
+        throw ParseException(location, "symbol argument required");
     }
 
-    return Expression(std::make_shared<ExistsExpression>(argument.as_variable()->variable()));
+    return Expression(std::make_shared<ExistsExpression>(location, argument.as_variable()->variable()));
 }
+
 
 std::optional<Expression> ExistsExpression::evaluated(const EvaluationContext& context) const {
     // TODO: evaluate in resolve phase.
-    return Expression(false);
+    return Expression(location, false);
 }
 
 void ExistsExpression::serialize_sub(std::ostream& stream) const {

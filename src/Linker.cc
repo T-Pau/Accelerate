@@ -174,16 +174,16 @@ void Linker::output(const std::string &file_name) {
 
     for (const auto& object: objects) {
         if (object->has_address()) {
-            environment->add(object->name.as_symbol(), Expression(object->address->address));
+            environment->add(object->name.as_symbol(), Expression(object->name.location, object->address->address));
         }
     }
 
     // TODO: support for multiple banks
     auto data_range = memory[0].data_range();
 
-    environment->add(Assembler::token_data_end.as_symbol(), Expression(data_range.end()));
-    environment->add(Assembler::token_data_size.as_symbol(), Expression(data_range.size));
-    environment->add(Assembler::token_data_start.as_symbol(), Expression(data_range.start));
+    environment->add(Assembler::token_data_end.as_symbol(), Expression({}, data_range.end()));
+    environment->add(Assembler::token_data_size.as_symbol(), Expression({}, data_range.size));
+    environment->add(Assembler::token_data_start.as_symbol(), Expression({}, data_range.start));
     environment->add_next(target->object_file->private_environment);
     environment->add_next(program->public_environment);
 

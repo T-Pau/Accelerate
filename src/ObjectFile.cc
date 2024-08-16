@@ -363,7 +363,7 @@ ObjectFile::ObjectFile() noexcept {
     private_environment = std::make_shared<Environment>(public_environment);
 }
 
-void ObjectFile::add_to_environment(Object* object) { add_to_environment(object->name.as_symbol(), object->visibility, Expression(object)); }
+void ObjectFile::add_to_environment(Object* object) { add_to_environment(object->name.as_symbol(), object->visibility, Expression(object->name.location, object)); }
 
 void ObjectFile::add_to_environment(Symbol symbol_name, Visibility visibility, Expression value) const {
     if (visibility == Visibility::PUBLIC) {

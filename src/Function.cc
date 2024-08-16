@@ -62,8 +62,9 @@ std::ostream& operator<<(std::ostream& stream, const Function& function) {
 }
 
 
-Expression Function::call(const std::vector<Expression>& arguments) const {
+Expression Function::call(const Location& location, const std::vector<Expression>& arguments) const {
     EvaluationResult result;
+    // TODO: use location
     return definition.evaluated(EvaluationContext(result, EvaluationContext::ARGUMENTS, bind(arguments))).value_or(definition);
 }
 

@@ -37,12 +37,12 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 class UnaryExpression: public BaseExpression {
 public:
-    UnaryExpression(Expression::UnaryOperation operation, Expression operand) : operation(operation), operand(std::move(operand)) {}
+    UnaryExpression(const Location& location, Expression::UnaryOperation operation, Expression operand): BaseExpression(location), operation(operation), operand(std::move(operand)) {}
 
     void collect_objects(std::unordered_set<Object*>& objects) const override { operand.collect_objects(objects);}
 
 protected:
-    [[nodiscard]] static Expression create(Expression::UnaryOperation operation, Expression operand);
+    [[nodiscard]] static Expression create(const Location& location, Expression::UnaryOperation operation, Expression operand);
     [[nodiscard]] std::optional<Expression> evaluated(const EvaluationContext& context) const override;
     [[nodiscard]] std::optional<Value> minimum_value() const override;
     [[nodiscard]] std::optional<Value> maximum_value() const override;

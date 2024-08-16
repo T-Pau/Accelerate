@@ -99,13 +99,13 @@ ExpressionParser::Element ExpressionParser::next_element() {
     }
     else if (token.is_name()) {
         if (token == token_false) {
-            return {Expression{false}};
+            return {Expression{token.location, false}};
         }
         else if (token == token_true) {
-            return {Expression{true}};
+            return {Expression{token.location, true}};
         }
         else if (token == token_none) {
-            return {Expression{Value{}}};
+            return {Expression{token.location, Value{}}};
         }
         auto next_token = tokenizer.next();
         if (next_token == Token::paren_open) {
@@ -344,15 +344,15 @@ Expression ExpressionParser::do_parse() {
 
 void ExpressionParser::reduce_unary(const ExpressionParser::Element& next) {
     if (top.type != UNARY_OPERATOR || !next.is_operand()) {
-        throw Exception("internal error: invalid element types in reduce_unary");
+        throw ParseException({top.location, next.location}, "internal error: invalid element types in reduce_unary");
     }
-    top = Element(Expression(top.operation.unary, next.node), 0);
+    top = Element(Expression({top.location, next.location}, top.operation.unary, next.node), 0);
 }
 
 void ExpressionParser::reduce_binary(int up_to_level) {
     while (top.is_operand() && !stack.empty()) {
         if (stack.back().is_unary_operator()) {
-            top = Element(Expression(stack.back().operation.unary, top.node), 0);
+            top = Element(Expression({stack.back().location, top.location}, stack.back().operation.unary, top.node), 0);
             stack.pop_back();
         }
         if (top.is_operand() && stack.size() < 2) {
@@ -366,7 +366,7 @@ void ExpressionParser::reduce_binary(int up_to_level) {
             break;
         }
 
-        top = Element(Expression(left.node, operation.operation.binary.operation, top.node), operation.level);
+        top = Element(Expression({left.location, top.location}, left.node, operation.operation.binary.operation, top.node), operation.level);
 
         stack.pop_back();
         stack.pop_back();
@@ -486,7 +486,7 @@ void ExpressionParser::reduce_argument_list() {
 
 void ExpressionParser::reduce_function_call() {
     const auto name = top.node.as_variable();
-    top = Element(Expression(name->variable(), top.arguments), 0);
+    top = Element(Expression({top.location, tokenizer.current_location()}, name->variable(), top.arguments), 0);
 }
 
 

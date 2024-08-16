@@ -36,9 +36,9 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ParseException.h"
 #include "VariableExpression.h"
 
-Expression DefinedExpression::create(const std::vector<Expression>& arguments) {
+Expression DefinedExpression::create(const Location& location, const std::vector<Expression>& arguments) {
     if (arguments.size() != 1) {
-        throw ParseException(Location(), "invalid number of arguments");
+        throw ParseException(location, "invalid number of arguments");
     }
     auto& argument = arguments[0];
 
@@ -46,15 +46,16 @@ Expression DefinedExpression::create(const std::vector<Expression>& arguments) {
         throw ParseException(argument.location(), "symbol argument required");
     }
 
-    return Expression(std::make_shared<DefinedExpression>(argument.as_variable()->variable()));
+    return Expression(std::make_shared<DefinedExpression>(location, argument.as_variable()->variable()));
 }
+
 
 std::optional<Expression> DefinedExpression::evaluated(const EvaluationContext& context) const {
     if (context.defines.contains(symbol)) {
-        return Expression(true);
+        return Expression(location, true);
     }
     else {
-        return Expression(false);
+        return Expression(location, false);
     }
 }
 

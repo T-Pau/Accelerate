@@ -36,10 +36,9 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 class ObjectNameExpression: public BaseExpression {
   public:
-    ObjectNameExpression() = default;
-    ObjectNameExpression(Location location): BaseExpression(location) {}
+    ObjectNameExpression(const Location& location): BaseExpression(location) {}
 
-    static Expression create(Object* object);
+    static Expression create(const Location& location, Object* object);
 
     [[nodiscard]] std::optional<Expression> evaluated(const EvaluationContext &context) const override;
     void serialize_sub(std::ostream &stream) const override;

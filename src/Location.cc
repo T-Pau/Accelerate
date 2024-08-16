@@ -31,6 +31,11 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "Location.h"
 
+ Location::Location(const Location& start, const Location& end) : Location(start) {
+     extend(end);
+ }
+
+
 void Location::extend(const Location &end) {
     if (file != end.file || start_line_number != end.start_line_number || end_column >= end.end_column) {
         return;

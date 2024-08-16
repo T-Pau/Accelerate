@@ -33,23 +33,23 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ParseException.h"
 #include "ValueExpression.h"
 
-Expression InRangeExpression::create(const std::vector<Expression>& arguments) {
+Expression InRangeExpression::create(const Location& location, const std::vector<Expression>& arguments) {
     if (arguments.size() != 3) {
-        throw ParseException(Location(), "invalid number of arguments for .in_range()"); // TODO: location
+        throw ParseException(location, "invalid number of arguments for .in_range()");
     }
-    return create(arguments[0], arguments[1], arguments[2]);
+    return create(location, arguments[0], arguments[1], arguments[2]);
 }
 
 
-Expression InRangeExpression::create(const Expression& lower_bound, const Expression& upper_bound, const Expression& argument) {
+Expression InRangeExpression::create(const Location& location, const Expression& lower_bound, const Expression& upper_bound, const Expression& argument) {
     if (lower_bound.maximum_value() <= argument.minimum_value() && upper_bound.minimum_value() >= argument.maximum_value()) {
-        return Expression(Value(true));
+        return Expression(location, true);
     }
     else if (lower_bound.minimum_value() > argument.maximum_value() || upper_bound.maximum_value() < argument.minimum_value()) {
-        return Expression(Value(false));
+        return Expression(location, false);
     }
     else {
-        return Expression(std::make_shared<InRangeExpression>(lower_bound, upper_bound, argument));
+        return Expression(std::make_shared<InRangeExpression>(location, lower_bound, upper_bound, argument));
     }
 }
 
@@ -59,7 +59,7 @@ std::optional<Expression> InRangeExpression::evaluated(const EvaluationContext& 
     auto new_argument = argument.evaluated(context);
 
     if (new_lower || new_upper || new_argument) {
-        return create(new_lower.value_or(lower_bound), new_upper.value_or(upper_bound), new_argument.value_or(argument));
+        return create(location, new_lower.value_or(lower_bound), new_upper.value_or(upper_bound), new_argument.value_or(argument));
     }
     else {
         return {};

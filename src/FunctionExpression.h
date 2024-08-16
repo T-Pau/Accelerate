@@ -36,14 +36,14 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 class FunctionExpression: public BaseExpression {
 public:
-    FunctionExpression(Symbol name, std::vector<Expression> arguments): name(name), arguments(std::move(arguments)) {}
+    FunctionExpression(const Location& location, Symbol name, std::vector<Expression> arguments): BaseExpression(location), name(name), arguments(std::move(arguments)) {}
 
     void collect_objects(std::unordered_set<Object*>& objects) const override;
 
     static void setup(FileTokenizer& tokenizer);
 
 protected:
-    static Expression create(Symbol name, const std::vector<Expression>& arguments);
+    static Expression create(const Location& location, Symbol name, const std::vector<Expression>& arguments);
     [[nodiscard]] std::optional<Expression> evaluated(const EvaluationContext& context) const override;
 
     void serialize_sub(std::ostream& stream) const override;
@@ -54,7 +54,7 @@ private:
     Symbol name;
     std::vector<Expression> arguments;
 
-    static const std::unordered_map<Symbol, Expression (*)(const std::vector<Expression>&)> builtin_functions;
+    static const std::unordered_map<Symbol, Expression (*)(const Location& location, const std::vector<Expression>&)> builtin_functions;
 };
 
 

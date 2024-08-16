@@ -43,35 +43,47 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ValueExpression.h"
 #include "VariableExpression.h"
 
+Expression::Expression(std::shared_ptr<BaseExpression> expression_) {
+    if (expression_) {
+        expression = std::move(expression_);
+    }
+}
+
+
 Expression::Expression(Tokenizer& tokenizer) {
     *this = ExpressionParser(tokenizer).parse();
 }
 
-Expression::Expression(const Expression &left, Expression::BinaryOperation operation, const Expression &right): expression(BinaryExpression::create(left, operation, right).expression) {}
-Expression::Expression(Expression::UnaryOperation operation, const Expression &operand): expression(UnaryExpression::create(operation, operand).expression) {}
+Expression::Expression(const Location& location, const Expression &left, Expression::BinaryOperation operation, const Expression &right): expression(BinaryExpression::create(location, left, operation, right).expression) {}
+
+Expression::Expression(const Location& location, Expression::UnaryOperation operation, const Expression &operand): expression(UnaryExpression::create(location, operation, operand).expression) {}
+
 Expression::Expression(const Token& token) {
     if (token == ObjectFileParser::token_object_name) {
         expression = std::make_shared<ObjectNameExpression>(token.location);
     }
     else if (token.is_name() || token == Token::colon_minus || token == Token::colon_plus) {
-        expression = std::make_shared<VariableExpression>(token.as_symbol());
+        expression = std::make_shared<VariableExpression>(token.location, token.as_symbol());
     }
     else {
         expression = std::make_shared<ValueExpression>(token);
     }
 }
 
-Expression::Expression(Location location, Symbol object_name, Symbol label_name, SizeRange offset): expression(std::make_shared<LabelExpression>(location, object_name, label_name, offset)) {}
-Expression::Expression(Location location, const Entity* object, Symbol label_name, SizeRange offset, SizeRange scope_offset, bool keep) {
-    *this = LabelExpression::create(location, object, label_name, offset, scope_offset, keep);
+Expression::Expression(const Location& location, Symbol object_name, Symbol label_name, const SizeRange& offset): expression(std::make_shared<LabelExpression>(location, object_name, label_name, offset)) {}
+
+Expression::Expression(const Location& location, const Entity* object, Symbol label_name, const SizeRange& offset, const SizeRange& scope_offset, bool keep): expression(LabelExpression::create(location, object, label_name, offset, scope_offset, keep).expression) {
 }
-Expression::Expression(Location location, LabelExpressionType type, size_t unnamed_index, SizeRange offset) {
-    *this = LabelExpression::create(location, type, unnamed_index, offset);
-}
-Expression::Expression(Symbol name): expression(std::make_shared<VariableExpression>(name)) {}
-Expression::Expression(Value value): expression(std::make_shared<ValueExpression>(value)) {}
-Expression::Expression(Symbol name, const std::vector<Expression>& arguments): expression(FunctionExpression::create(name, arguments).expression) {}
-Expression::Expression(Object* object): expression(ObjectExpression::create(object).expression) {}
+
+Expression::Expression(const Location& location, LabelExpressionType type, size_t unnamed_index, const SizeRange& offset): expression(LabelExpression::create(location, type, unnamed_index, offset).expression) {}
+
+Expression::Expression(const Location& location, Symbol name): expression(std::make_shared<VariableExpression>(location, name)) {}
+
+Expression::Expression(const Location& location, const Value& value): expression(std::make_shared<ValueExpression>(location, value)) {}
+
+Expression::Expression(const Location& location, Symbol name, const std::vector<Expression>& arguments): expression(FunctionExpression::create(location, name, arguments).expression) {}
+
+Expression::Expression(const Location& location, Object* object): expression(ObjectExpression::create(location, object).expression) {}
 
 const BinaryExpression *Expression::as_binary() const {
     return std::dynamic_pointer_cast<BinaryExpression>(expression).get();
@@ -109,12 +121,10 @@ void Expression::serialize(std::ostream &stream) const {
 }
 
 Symbol Expression::variable_name() const {
-    auto variable = as_variable();
-    if (variable) {
+    if (auto variable = as_variable()) {
         return variable->symbol;
     }
-    auto object = as_object();
-    if (object) {
+    if (auto object = as_object()) {
         return object->object->name.as_symbol();
     }
     return {};

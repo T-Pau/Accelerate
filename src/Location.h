@@ -42,6 +42,7 @@ public:
 
     explicit Location(const std::string& file_name): file(file_name) {}
     Location(Symbol file, size_t line_number, size_t start_column, size_t end_column) : file(file), start_line_number(line_number), start_column(start_column), end_column(end_column) {}
+    Location(const Location& start, const Location& end);
 
     void extend(const Location& end);
 

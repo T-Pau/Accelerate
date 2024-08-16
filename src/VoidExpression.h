@@ -35,6 +35,10 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "BaseExpression.h"
 
 class VoidExpression: public BaseExpression {
+public:
+    VoidExpression(const Location& location): BaseExpression(location) {}
+
+protected:
     [[nodiscard]] std::optional<Expression> evaluated(const EvaluationContext& context) const override;
     void serialize_sub(std::ostream &stream) const override {}
 };

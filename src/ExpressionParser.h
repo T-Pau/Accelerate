@@ -75,7 +75,7 @@ private:
 
     class Element {
     public:
-        explicit Element(const Token& token, ElementType type = OPERAND): type(type), node(std::make_shared<VariableExpression>(token.as_symbol())), location(token.location) {}
+        explicit Element(const Token& token, ElementType type = OPERAND): type(type), node(std::make_shared<VariableExpression>(token.location, token.as_symbol())), location(token.location) {}
         Element(const Expression& node, int level = 0, ElementType type = OPERAND): type(type), level(level), node(node), location(node.location()) {}
         Element(const Location& location, BinaryOperator binary);
         Element(const Location& location, Expression::UnaryOperation unary);

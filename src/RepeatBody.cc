@@ -41,7 +41,7 @@ Body RepeatBody::create(Symbol variable, const std::optional<Expression>& start,
         auto context = EvaluationContext(result, EvaluationContext::ARGUMENTS, environment);
         for (auto index = start ? *start->value() : Value(static_cast<uint64_t>(0)); index < *end.value(); index += step) {
             if (variable) {
-                environment->add(variable, Expression(index));
+                environment->add(variable, Expression({}, index));
                 auto new_body = scoped_body.evaluated(context);
                 // TODO: handle result
                 expanded_body.append(new_body ? *new_body : body);

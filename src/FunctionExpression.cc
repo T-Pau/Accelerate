@@ -34,8 +34,8 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <complex>
 
 #include "DefinedExpression.h"
-#include "ExistsExpression.h"
 #include "EvaluationContext.h"
+#include "ExistsExpression.h"
 #include "Expression.h"
 #include "FillExpression.h"
 #include "Function.h"
@@ -46,7 +46,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "SizeofExpression.h"
 
 // clang-format off
-const std::unordered_map<Symbol, Expression (*)(const std::vector<Expression>&)> FunctionExpression::builtin_functions = {
+const std::unordered_map<Symbol, Expression (*)(const Location& location, const std::vector<Expression>&)> FunctionExpression::builtin_functions = {
     {Symbol(".defined"), &DefinedExpression::create},
     {Symbol{".exists"}, &ExistsExpression::create},
     {Symbol{".fill"}, &FillExpression::create},
@@ -56,10 +56,10 @@ const std::unordered_map<Symbol, Expression (*)(const std::vector<Expression>&)>
 };
 // clang-format on
 
-void FunctionExpression::serialize_sub(std::ostream &stream) const {
+void FunctionExpression::serialize_sub(std::ostream& stream) const {
     stream << name << "(";
     auto first = true;
-    for (auto& argument: arguments) {
+    for (auto& argument : arguments) {
         if (!first) {
             stream << ", ";
         }
@@ -76,29 +76,29 @@ void FunctionExpression::collect_objects(std::unordered_set<Object*>& objects) c
 }
 
 void FunctionExpression::setup(FileTokenizer& tokenizer) {
-    for (const auto& pair: builtin_functions) {
+    for (const auto& pair : builtin_functions) {
         tokenizer.add_literal(Token{Token::Type::NAME, Location(), pair.first});
     }
 }
 
-Expression FunctionExpression::create(Symbol name, const std::vector<Expression> &arguments) {
+Expression FunctionExpression::create(const Location& location, Symbol name, const std::vector<Expression>& arguments) {
     if (name == ObjectFileParser::token_in_range.as_symbol()) {
-        return InRangeExpression::create(arguments);
+        return InRangeExpression::create(location, arguments);
     }
     else if (name == ObjectFileParser::token_label_offset.as_symbol()) {
-        return LabelExpression::create(arguments);
+        return LabelExpression::create(location, arguments);
     }
     const auto it = builtin_functions.find(name);
     if (it != builtin_functions.end()) {
-        return it->second(arguments);
+        return it->second(location, arguments);
     }
-    return Expression(std::make_shared<FunctionExpression>(name, arguments));
+    return Expression(std::make_shared<FunctionExpression>(location, name, arguments));
 }
 
 std::optional<Expression> FunctionExpression::evaluated(const EvaluationContext& context) const {
     std::vector<Expression> new_arguments;
     auto changed = false;
-    for (auto& argument: arguments) {
+    for (auto& argument : arguments) {
         if (const auto new_argument = argument.evaluated(context)) {
             new_arguments.emplace_back(*new_argument);
             changed = true;
@@ -109,12 +109,12 @@ std::optional<Expression> FunctionExpression::evaluated(const EvaluationContext&
     }
 
     if (const auto function = context.environment->get_function(name)) {
-        return function->call(new_arguments);
+        return function->call(location, new_arguments);
     }
     else {
         context.result.add_unresolved_function(name);
         if (changed) {
-            return Expression(name, new_arguments);
+            return Expression(location, name, new_arguments);
         }
         else {
             return {};

@@ -33,7 +33,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "EvaluationContext.h"
 
-Expression UnaryExpression::create(Expression::UnaryOperation operation, Expression operand) {
+Expression UnaryExpression::create(const Location& location, Expression::UnaryOperation operation, Expression operand) {
     std::shared_ptr<BaseExpression> node;
 
     if (operation == Expression::UnaryOperation::PLUS) {
@@ -70,10 +70,10 @@ Expression UnaryExpression::create(Expression::UnaryOperation operation, Express
                 break;
         }
 
-        return Expression(value);
+        return Expression(location, value);
     }
     else {
-        return Expression(std::make_shared<UnaryExpression>(operation, operand));
+        return Expression(std::make_shared<UnaryExpression>(location, operation, operand));
     }
 }
 
@@ -85,14 +85,14 @@ std::optional<Expression> UnaryExpression::evaluated(const EvaluationContext& co
             return {};
         }
 
-        return Expression(operation, new_operand ? *new_operand : operand);
+        return Expression(location, operation, new_operand ? *new_operand : operand);
     }
-    catch (Exception &ex) {
+    catch (Exception&) {
         if (context.conditional) {
             return {};
         }
         else {
-            throw ex;
+            throw;
         }
     }
 }

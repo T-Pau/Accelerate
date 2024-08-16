@@ -37,10 +37,10 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 class FillExpression: public BaseExpression {
 public:
-    explicit FillExpression(Expression count, Expression value): count{std::move(count)}, value{std::move(value)} {}
+    explicit FillExpression(const Location& location, Expression count, Expression value): BaseExpression(location), count{std::move(count)}, value{std::move(value)} {}
 
-    static Expression create(const std::vector<Expression>& arguments);
-    static Expression create(const Expression& count, const Expression& value);
+    static Expression create(const Location& location, const std::vector<Expression>& arguments);
+    static Expression create(const Location& location, const Expression& count, const Expression& value);
 
     [[nodiscard]] std::optional<Expression> evaluated(const EvaluationContext& context) const override;
 

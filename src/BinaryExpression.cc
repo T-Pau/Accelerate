@@ -41,7 +41,7 @@ std::optional<Expression> BinaryExpression::evaluated(const EvaluationContext& c
         return {};
     }
 
-    return Expression(new_left.value_or(left), operation, new_right.value_or(right));
+    return Expression(location, new_left.value_or(left), operation, new_right.value_or(right));
 }
 
 void BinaryExpression::serialize_sub(std::ostream& stream) const {
@@ -124,7 +124,7 @@ void BinaryExpression::serialize_sub(std::ostream& stream) const {
     stream << right << ')';
 }
 
-Expression BinaryExpression::create(const Expression& left, Expression::BinaryOperation operation, const Expression& right) {
+Expression BinaryExpression::create(const Location& location, const Expression& left, Expression::BinaryOperation operation, const Expression& right) {
     // TODO: check that types are compatible
 
     if (left.has_value() && right.has_value()) {
@@ -205,7 +205,7 @@ Expression BinaryExpression::create(const Expression& left, Expression::BinaryOp
                 break;
         }
 
-        return Expression(value);
+        return Expression(location, value);
     }
     else {
         switch (operation) {
@@ -222,11 +222,11 @@ Expression BinaryExpression::create(const Expression& left, Expression::BinaryOp
                             auto left_right_value = *left_binary->right.value();
                             if (left_binary->operation == Expression::ADD) {
                                 // (N + A) + B -> N + (A+B)
-                                return {left_binary->left, Expression::ADD, Expression(left_right_value + right_value)};
+                                return {location, left_binary->left, Expression::ADD, Expression({left_binary->right.location(), right.location()}, left_right_value + right_value)};
                             }
                             else if (left_binary->operation == Expression::SUBTRACT) {
                                 // (N - A) + B -> N + (-A+B)
-                                return {left_binary->left, Expression::ADD, Expression(-left_right_value + right_value)};
+                                return {location, left_binary->left, Expression::ADD, Expression({left_binary->right.location(), right.location()}, -left_right_value + right_value)};
                             }
                         }
                     }
@@ -243,11 +243,11 @@ Expression BinaryExpression::create(const Expression& left, Expression::BinaryOp
                             auto right_left_value = *right_binary->left.value();
                             if (right_binary->operation == Expression::ADD) {
                                 // A + (B + N) -> N + (A+B)
-                                return {right_binary->right, Expression::ADD, Expression(left_value + right_left_value)};
+                                return {location, right_binary->right, Expression::ADD, Expression({left.location(), right_binary->left.location()}, left_value + right_left_value)};
                             }
                             else if (right_binary->operation == Expression::SUBTRACT) {
                                 // A + (B - N) -> (A+B) - N
-                                return {Expression(left_value + right_left_value), Expression::SUBTRACT, right_binary->right};
+                                return {location, Expression({left.location(), right_binary->left.location()}, left_value + right_left_value), Expression::SUBTRACT, right_binary->right};
                             }
                         }
                     }
@@ -257,43 +257,43 @@ Expression BinaryExpression::create(const Expression& left, Expression::BinaryOp
 
             case Expression::BinaryOperation::EQUAL:
                 if (left.minimum_value() > right.maximum_value() || left.maximum_value() < right.minimum_value()) {
-                    return Expression(false);
+                    return Expression(location, false);
                 }
                 break;
 
             case Expression::BinaryOperation::GREATER:
                 if (left.minimum_value() > right.maximum_value()) {
-                    return Expression(true);
+                    return Expression(location, true);
                 }
                 else if (left.maximum_value() <= right.minimum_value()) {
-                    return Expression(false);
+                    return Expression(location, false);
                 }
                 break;
 
             case Expression::BinaryOperation::GREATER_EQUAL:
                 if (left.minimum_value() >= right.maximum_value()) {
-                    return Expression(true);
+                    return Expression(location, true);
                 }
                 else if (left.maximum_value() < right.minimum_value()) {
-                    return Expression(false);
+                    return Expression(location, false);
                 }
                 break;
 
             case Expression::BinaryOperation::LESS:
                 if (left.minimum_value() >= right.maximum_value()) {
-                    return Expression(false);
+                    return Expression(location, false);
                 }
                 else if (left.maximum_value() < right.minimum_value()) {
-                    return Expression(true);
+                    return Expression(location, true);
                 }
                 break;
 
             case Expression::BinaryOperation::LESS_EQUAL:
                 if (left.minimum_value() > right.maximum_value()) {
-                    return Expression(false);
+                    return Expression(location, false);
                 }
                 else if (left.maximum_value() <= right.minimum_value()) {
-                    return Expression(true);
+                    return Expression(location, true);
                 }
                 break;
 
@@ -319,7 +319,7 @@ Expression BinaryExpression::create(const Expression& left, Expression::BinaryOp
 
             case Expression::BinaryOperation::NOT_EQUAL:
                 if (left.minimum_value() > right.maximum_value() || left.maximum_value() < right.minimum_value()) {
-                    return Expression(true);
+                    return Expression(location, true);
                 }
                 break;
 
@@ -338,7 +338,7 @@ Expression BinaryExpression::create(const Expression& left, Expression::BinaryOp
                 }
                 if (left.has_value() && left.value() == Value(uint64_t{0})) {
                     // 0 - N -> -N
-                    return {Expression::UnaryOperation::MINUS, right};
+                    return {location, Expression::UnaryOperation::MINUS, right};
                 }
                 // This special case is for resolving relative addressing within an object.
                 if (left.is_binary() && right.is_binary()) {
@@ -351,7 +351,7 @@ Expression BinaryExpression::create(const Expression& left, Expression::BinaryOp
                         auto left_variable = left_binary->left.variable_name();
                         auto right_variable = right_binary->left.variable_name();
                         if ((!left_variable.empty() && left_variable == right_variable) || (left_binary->left.is_object_name() && right_binary->left.is_object_name())) {
-                            return {left_binary->right, operation, right_binary->right};
+                            return {location, left_binary->right, operation, right_binary->right};
                         }
 
                     }
@@ -364,7 +364,7 @@ Expression BinaryExpression::create(const Expression& left, Expression::BinaryOp
                     if (!left_variable.empty() && right_binary->operation == Expression::BinaryOperation::ADD) {
                         auto right_variabel = right_binary->left.variable_name();
                         if (left_variable == right_variabel) {
-                            return {Expression::UnaryOperation::MINUS, right_binary->right};
+                            return {location, Expression::UnaryOperation::MINUS, right_binary->right};
                         }
                     }
                 }
@@ -385,7 +385,7 @@ Expression BinaryExpression::create(const Expression& left, Expression::BinaryOp
                     auto left_variable = left.variable_name();
                     auto right_variable = right.variable_name();
                     if (!left_variable.empty() && left_variable == right_variable) {
-                        return Expression(uint64_t{0});
+                        return Expression(location, uint64_t{0});
                     }
                 }
                 break;
@@ -440,7 +440,7 @@ Expression BinaryExpression::create(const Expression& left, Expression::BinaryOp
                 break;
         }
     }
-    return Expression(std::make_shared<BinaryExpression>(left, operation, right));
+    return Expression(std::make_shared<BinaryExpression>(location, left, operation, right));
 }
 
 std::optional<Value> BinaryExpression::minimum_value() const {

@@ -39,7 +39,9 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 std::optional<Expression> VariableExpression::evaluated(const EvaluationContext& context) const {
     if (symbol == Token::colon_minus.as_symbol() || symbol == Token::colon_plus.as_symbol()) {
-        auto new_expression = Expression(ObjectNameExpression::create(dynamic_cast<Object*>(context.entity)), Expression::BinaryOperation::ADD, Expression(location, symbol == Token::colon_minus.as_symbol() ? LabelExpressionType::PREVIOUS_UNNAMED : LabelExpressionType::NEXT_UNNAMED));
+        auto left = ObjectNameExpression::create({}, dynamic_cast<Object*>(context.entity));
+        auto right = Expression({}, symbol == Token::colon_minus.as_symbol() ? LabelExpressionType::PREVIOUS_UNNAMED : LabelExpressionType::NEXT_UNNAMED);
+        auto new_expression = Expression(location, left, Expression::BinaryOperation::ADD, right);
         new_expression.evaluate(context);
         return new_expression;
     }
@@ -50,7 +52,7 @@ std::optional<Expression> VariableExpression::evaluated(const EvaluationContext&
     if (!context.skipping(symbol)) {
         if (context.type == EvaluationContext::LABELS || context.type == EvaluationContext::LABELS_2) {
             if (auto label = context.environment->get_label(symbol)) {
-                auto label_expression = Expression(ObjectNameExpression::create(nullptr), Expression::ADD, Expression(location, nullptr, symbol, *label));
+                auto label_expression = Expression(location, ObjectNameExpression::create({}, nullptr), Expression::ADD, Expression({}, nullptr, symbol, *label));
                 label_expression.evaluate(context);
                 return label_expression;
             }
