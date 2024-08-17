@@ -31,6 +31,8 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "Token.h"
 
+#include "Exception.h"
+
 const std::string Token::empty_string;
 
 const Token Token::ampersand = Token(Token::PUNCTUATION, "&");

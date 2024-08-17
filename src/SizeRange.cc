@@ -66,8 +66,7 @@ std::optional<uint64_t> SizeRange::size() const {
 }
 
 std::optional<Value> SizeRange::value() const {
-    auto s = size();
-    if (s) {
+    if (auto s = size()) {
         return Value(*s);
     }
     else {

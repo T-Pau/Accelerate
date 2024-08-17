@@ -39,8 +39,7 @@ std::optional<Body> MacroBody::evaluated(const EvaluationContext& context) const
     auto new_macro = macro;
     auto changed = false;
     for (auto& argument: arguments) {
-        auto new_argument = argument.evaluated(context);
-        if (new_argument) {
+        if (auto new_argument = argument.evaluated(context)) {
             new_arguments.emplace_back(*new_argument);
             changed = true;
         }

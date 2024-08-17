@@ -35,7 +35,6 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <filesystem>
 #include <fstream>
 #include <iostream>
-#include <utility>
 
 #include "config.h"
 

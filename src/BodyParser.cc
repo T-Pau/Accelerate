@@ -478,6 +478,7 @@ void BodyParser::parse_error() {
     else {
         tokenizer.unget(token);
     }
+    throw ParseException(location, message.as_string());
 }
 
 void BodyParser::parse_unnamed_label() { current_body->append(Body(Symbol(), current_size())); }

@@ -33,7 +33,6 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Body.h"
 #include "ExpressionParser.h"
 #include "ParseException.h"
-#include "VariableExpression.h"
 
 Body ChecksumBody::parse(Tokenizer& tokenizer) {
     auto algorithm_name = tokenizer.next();
@@ -79,8 +78,7 @@ std::optional<Body> ChecksumBody::evaluated(const EvaluationContext& context) co
     auto new_parameters = parameters;
     auto fully_evaluated = new_start.value_or(start).has_value() && new_end.value_or(end).has_value();
     for (auto& [name, expression] : parameters) {
-        auto new_expression = expression.evaluated(context);
-        if (new_expression) {
+        if (auto new_expression = expression.evaluated(context)) {
             new_parameters[name] = *new_expression;
             if (!new_expression->has_value()) {
                 fully_evaluated = false;

@@ -60,7 +60,7 @@ const std::unordered_map<Token, FileTokenizer::PreprocessorDirective> FileTokeni
 };
 // clang-format on
 
-FileTokenizer::FileTokenizer(const Path& path, const Target* target, bool use_preprocessor, const std::unordered_set<Symbol>& defines) : path{path}, use_preprocessor{use_preprocessor}, defines{defines}, target{target} {
+FileTokenizer::FileTokenizer(const Path& path, const Target* target, bool use_preprocessor, const std::unordered_set<Symbol>& defines) : defines{defines}, use_preprocessor{use_preprocessor}, path{path}, target{target} {
     if (use_preprocessor) {
         add_literal(token_define);
         add_literal(token_include);
@@ -616,7 +616,7 @@ void FileTokenizer::Source::reset_to(const Location& new_location) {
     column = new_location.start_column;
 }
 
-std::optional<Token::Type> FileTokenizer::MatcherNode::match(FileTokenizer::Source& source, std::string& name) {
+std::optional<Token::Type> FileTokenizer::MatcherNode::match(FileTokenizer::Source& source, std::string& name) { // NOLINT(misc-no-recursion)
     auto c = source.next();
     if (c == EOF) {
         if (name.empty()) {
@@ -665,7 +665,7 @@ std::optional<Token::Type> FileTokenizer::MatcherNode::match(FileTokenizer::Sour
     return it->second->match(source, name);
 }
 
-void FileTokenizer::MatcherNode::add(const char* string, Token::Type type, const std::unordered_set<char>& new_suffix, bool match_in_word_) {
+void FileTokenizer::MatcherNode::add(const char* string, Token::Type type, const std::unordered_set<char>& new_suffix, bool match_in_word_) { // NOLINT(misc-no-recursion)
     if (string[0] == '\0') {
         if (match_type.has_value() && (match_type.value() != type || match_in_word != match_in_word_)) {
             throw Exception("literal already defined with different type"); // TODO: include more detail

@@ -37,7 +37,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 class Function: public Callable {
   public:
     Function(ObjectFile* owner, const Token& name, const std::shared_ptr<ParsedValue>& definition);
-    Function(ObjectFile* owner, Token name, Visibility visibility, bool default_only, Arguments arguments, Expression definition): Callable(owner, name, visibility, default_only, std::move(arguments)), definition(definition) {}
+    Function(ObjectFile* owner, const Token& name, Visibility visibility, bool default_only, Arguments arguments, const Expression& definition): Callable(owner, name, visibility, default_only, std::move(arguments)), definition(definition) {}
     Expression call(const Location& location, const std::vector<Expression>& arguments) const;
     void serialize(std::ostream& stream) const;
 

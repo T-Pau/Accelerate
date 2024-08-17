@@ -34,12 +34,11 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <string>
 
-#include "BaseExpression.h"
 #include "Symbol.h"
 
 class Instruction {
 public:
-    bool has_addressing_mode(Symbol addressing_mode) const {return opcodes.find(addressing_mode) != opcodes.end();}
+    bool has_addressing_mode(Symbol addressing_mode) const {return opcodes.contains(addressing_mode);}
     uint64_t opcode(Symbol addressing_mode) const;
 
     std::unordered_map<Symbol, uint64_t> opcodes; // keys are addressing modes

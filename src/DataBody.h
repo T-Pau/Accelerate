@@ -41,7 +41,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 class DataBodyElement {
 public:
-    DataBodyElement(Expression expression, std::optional<Encoder> encoding): expression(std::move(expression)), encoding(encoding) {}
+    DataBodyElement(Expression expression, std::optional<Encoder> encoding): expression(std::move(expression)), encoding(std::move(encoding)) {}
 
     [[nodiscard]] std::optional<uint64_t> size() const {return size_range().size();}
     [[nodiscard]] SizeRange size_range() const;

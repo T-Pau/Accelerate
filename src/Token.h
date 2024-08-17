@@ -54,13 +54,13 @@ public:
     };
 
     Token() = default;
-    Token(Type type, Location location): type(type), location(location) {}
+    Token(Type type, const Location& location): location(location), type(type) {}
     Token(Type type, const std::string& name): Token(type, Location()) {value = Symbol(name);}
-    Token(Type type, Location location, Symbol symbol_): Token(type, location) {value = symbol_;}
-    Token(Type type, Location location, const std::string& string): Token(type, location, Symbol(string)) {}
-    Token(Type type, Location location, uint64_t integer, uint64_t default_size = 0): Token(type, location) {value = Value(integer, default_size);}
-    Token(Type type, Location location, double real): Token(type, location) {value = Value(real);}
-    Token(Location location, Value value_): Token(VALUE, location) {value = value_;}
+    Token(Type type, const Location& location, Symbol symbol_): Token(type, location) {value = symbol_;}
+    Token(Type type, const Location& location, const std::string& string): Token(type, location, Symbol(string)) {}
+    Token(Type type, const Location& location, uint64_t integer, uint64_t default_size = 0): Token(type, location) {value = Value(integer, default_size);}
+    Token(Type type, const Location& location, double real): Token(type, location) {value = Value(real);}
+    Token(const Location& location, Value value_): Token(VALUE, location) {value = value_;}
     ~Token() {}
 
     explicit operator bool() const {return type != END;}

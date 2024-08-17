@@ -32,8 +32,6 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef OBJECT_FILE_PARSER_H
 #define OBJECT_FILE_PARSER_H
 
-#include <string>
-
 #include "FileParser.h"
 #include "ObjectFile.h"
 

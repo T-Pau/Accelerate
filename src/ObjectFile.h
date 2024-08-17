@@ -32,8 +32,6 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef OBJECT_FILE_H
 #define OBJECT_FILE_H
 
-#include <map>
-
 #include "Function.h"
 #include "Macro.h"
 #include "Object.h"
@@ -45,7 +43,7 @@ class ObjectFile {
 public:
     class Constant: public Entity {
     public:
-        Constant(ObjectFile* owner, Token name, Visibility visibility, bool default_only, Expression value): Entity(owner, name, visibility, default_only), value(std::move(value)) {}
+        Constant(ObjectFile* owner, const Token& name, Visibility visibility, bool default_only, Expression value): Entity(owner, name, visibility, default_only), value(std::move(value)) {}
         Constant(ObjectFile* owner, const Token& name, const std::shared_ptr<ParsedValue>& definition);
 
         void serialize(std::ostream& stream) const;
@@ -77,7 +75,7 @@ public:
     [[nodiscard]] Macro* macro(Symbol macro_name);
     void mark_used(Object* object) {explicitly_used_objects.insert(object);}
     void mark_used(Symbol name) {explicitly_used_object_names.insert(name);}
-    void pin(Symbol name, Expression address) {pinned_objects[name] = Pinned{name, address};}
+    void pin(Symbol name, const Expression& address) {pinned_objects[name] = Pinned{name, address};}
     void remove_private_constants();
     void resolve_defaults();
     void serialize(std::ostream& stream) const;

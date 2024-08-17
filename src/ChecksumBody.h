@@ -36,6 +36,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "BodyElement.h"
 #include "ChecksumAlgorithm.h"
+#include "Exception.h"
 #include "Symbol.h"
 
 class ChecksumBody: public BodyElement {

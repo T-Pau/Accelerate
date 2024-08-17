@@ -167,8 +167,7 @@ void CPUParser::parse_addressing_mode() {
                 default_value = Value{default_value_token.as_value()};
             }
             addressing_mode.arguments[pair.first.as_symbol()] = std::make_unique<AddressingMode::Argument>(argument_type, default_value);
-            auto encoding_argument_type = argument_type->as_encoding();
-            if (encoding_argument_type) {
+            if (argument_type->is_encoding()) {
                 auto argument_variable_name = pair.first.as_symbol();
                 unencoded_encoding_arguments.insert(argument_variable_name);
             }
@@ -280,8 +279,7 @@ void CPUParser::parse_argument_type() {
             throw ParseException(type, "unknown argument type '%s'", type.as_string().c_str());
         }
         argument_type = (this->*it->second)(name, parameters.get());
-        auto encoding_type = argument_type->as_encoding();
-        if (encoding_type) {
+        if (auto encoding_type = argument_type->as_encoding()) {
             auto range_name = Symbol(".range(" + name.as_string() + ")");
             cpu.add_argument_type(range_name, encoding_type->range_type(range_name));
         }
@@ -321,7 +319,7 @@ void CPUParser::parse_instruction() {
         if (!pair.first.is_name()) {
             throw ParseException(pair.first, "addressing mode must be name");
         }
-        if (addressing_mode_names.find(pair.first) == addressing_mode_names.end()) {
+        if (!addressing_mode_names.contains(pair.first)) {
             throw ParseException(pair.first, "unknown addressing mode");
         }
         auto it = instruction.opcodes.find(pair.first.as_symbol());

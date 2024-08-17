@@ -171,10 +171,10 @@ void Assembler::parse_assignment(Visibility visibility, const Token& name, bool 
 }
 
 void Assembler::parse_cpu() {
-    auto name = tokenizer.expect(Token::STRING, TokenGroup::newline);
+    const auto name = tokenizer.expect(Token::STRING, TokenGroup::newline);
 
     try {
-        auto new_cpu = &CPU::get(name.as_symbol(), tokenizer.current_file());
+        const auto new_cpu = &CPU::get(name.as_symbol(), tokenizer.current_file());
 
         if (target) {
             had_cpu = true;
@@ -489,9 +489,7 @@ void Assembler::parse_visibility() {
 }
 
 void Assembler::set_target(const Target* new_target) {
-    if (target) {
-        // TODO: check that target and new_target are compatible
-    }
+    // TODO: check that target and new_target are compatible
     target = new_target;
     if (target) {
         tokenizer.set_target(target);

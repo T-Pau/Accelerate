@@ -32,6 +32,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "UnaryExpression.h"
 
 #include "EvaluationContext.h"
+#include "Exception.h"
 
 Expression UnaryExpression::create(const Location& location, Expression::UnaryOperation operation, Expression operand) {
     std::shared_ptr<BaseExpression> node;

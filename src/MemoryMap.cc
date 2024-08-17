@@ -108,7 +108,7 @@ bool MemoryMap::is_abstract() const {
 }
 
 bool MemoryMap::is_compatible_with(const MemoryMap &other) const {
-    return std::all_of(other.sections.begin(), other.sections.end(), [this](const auto& pair) {
+    return std::ranges::all_of(other.sections, [this](const auto& pair) {
         auto& other_section = pair.second;
         auto this_section = section(pair.first);
         if (this_section == nullptr) {

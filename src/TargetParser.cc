@@ -148,8 +148,7 @@ void TargetParser::parse_section() {
         type = parse_type(type_parameter->as_singular_scalar()->token());
     }
     auto blocks = std::vector<MemoryMap::Block>();
-    auto segment = parameters->get_optional(token_segment_name);
-    if (segment) {
+    if (auto segment = parameters->get_optional(token_segment_name)) {
         if (parameters->has_key(token_address)) {
             throw ParseException(name, "segment and address are mutually exclusive");
         }
@@ -198,7 +197,7 @@ std::vector<MemoryMap::Block> TargetParser::parse_address(const ParsedValue *add
 }
 
 
-MemoryMap::AccessType TargetParser::parse_type(Token type) {
+MemoryMap::AccessType TargetParser::parse_type(const Token& type) {
     if (type == token_reserve_only) {
         return MemoryMap::RESERVE_ONLY;
     }

@@ -36,8 +36,6 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Target.h"
 #include "IfBody.h"
 #include "DataBody.h"
-#include "InRangeExpression.h"
-#include "ValueExpression.h"
 #include "LabelBody.h"
 
 
@@ -45,7 +43,7 @@ class InstructionEncoder {
 public:
     explicit InstructionEncoder(const CPU* cpu): cpu(cpu) {}
 
-    [[nodiscard]] Body encode(const Token& name, const std::vector<std::shared_ptr<Node>>& arguments, const std::shared_ptr<Environment>& environment, const SizeRange& offset, bool& uses_pc);
+    [[nodiscard]] Body encode(const Token& name, const std::vector<std::shared_ptr<Node>>& arguments, const std::shared_ptr<Environment>& environment, const SizeRange& offset, bool& uses_pc) const;
 
 private:
     class Variant {

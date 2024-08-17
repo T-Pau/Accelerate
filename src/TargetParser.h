@@ -63,7 +63,7 @@ private:
 
     static std::vector<MemoryMap::Block> parse_address(const ParsedValue* address);
     static MemoryMap::Block parse_single_address(const ParsedScalar* address);
-    static MemoryMap::AccessType parse_type(Token type);
+    static MemoryMap::AccessType parse_type(const Token& type);
 
     Target target;
     std::unordered_set<Token> section_names;

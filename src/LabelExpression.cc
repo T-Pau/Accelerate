@@ -39,7 +39,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "VariableExpression.h"
 #include <complex>
 
-LabelExpression::LabelExpression(const Location& location, const Entity* object, Symbol label_name, SizeRange offset) : BaseExpression(location), label_type(LabelExpressionType::NAMED), object(object), object_name(object ? object->name.as_symbol() : Symbol()), label_name(label_name), offset(offset) {}
+LabelExpression::LabelExpression(const Location& location, const Entity* object, Symbol label_name, const SizeRange& offset) : BaseExpression(location), label_type(LabelExpressionType::NAMED), object_name(object ? object->name.as_symbol() : Symbol()), label_name(label_name), object(object), offset(offset) {}
 
 Expression LabelExpression::create(const Location& location, const std::vector<Expression>& arguments) {
     if (arguments.size() == 1) {
@@ -70,7 +70,7 @@ Expression LabelExpression::create(const Location& location, const std::vector<E
     else if (arguments.size() == 2) {
         auto object_name = arguments[0].as_variable();
         auto label_name = arguments[1].as_variable();
-        if (object_name || label_name) {
+        if (object_name && label_name) {
             return Expression(std::make_shared<LabelExpression>(location, object_name->variable(),                label_name->variable()));
         }
         else {
@@ -83,7 +83,7 @@ Expression LabelExpression::create(const Location& location, const std::vector<E
 
 }
 
-Expression LabelExpression::create(const Location& location, const Entity* object, Symbol label_name, SizeRange offset, SizeRange scope_offset, bool keep) {
+Expression LabelExpression::create(const Location& location, const Entity* object, Symbol label_name, const SizeRange& offset, const SizeRange& scope_offset, bool keep) {
     if (!keep && offset.has_size() && scope_offset.has_size()) {
         return {location, Expression({}, *offset.size()), Expression::ADD, Expression({}, *scope_offset.size())};
     }

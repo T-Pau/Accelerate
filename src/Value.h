@@ -32,7 +32,6 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef VALUE_H
 #define VALUE_H
 
-#include "Exception.h"
 #include <cstdint>
 #include <optional>
 #include <ostream>

@@ -38,7 +38,6 @@
 #include <sstream>
 #include <iostream>
 #include <unordered_map>
-#include <utility>
 
 Commandline::Commandline(std::vector<Option> options_, std::string arguments_, std::string header_, std::string footer_, std::string version_) : options(std::move(options_)), arguments(std::move(arguments_)), header(std::move(header_)), footer(std::move(footer_)), version(std::move(version_)), options_sorted(false) {
     add_option(Option("help", 'h', "display this help message"));
@@ -166,7 +165,7 @@ std::optional<std::string> ParsedCommandline::find_first(const std::string &name
 }
 
 [[maybe_unused]] std::optional<std::string> ParsedCommandline::find_last(const std::string &name) const {
-    for (auto it = options.rbegin(); it != options.rend(); it++) {
+    for (auto it = options.rbegin(); it != options.rend(); ++it) {
         const auto &option = *it;
 
         if (option.name == name) {

@@ -33,7 +33,6 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define MEMORY_BODY_H
 
 #include "Body.h"
-#include "Exception.h"
 
 class MemoryBody: public BodyElement {
 public:

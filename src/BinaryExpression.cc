@@ -31,6 +31,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "BinaryExpression.h"
 
+#include "Exception.h"
 #include "VariableExpression.h"
 
 std::optional<Expression> BinaryExpression::evaluated(const EvaluationContext& context) const {

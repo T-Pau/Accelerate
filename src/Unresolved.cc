@@ -80,7 +80,7 @@ void Unresolved::Part::report() const {
     for (auto& it : unresolved) {
         unresolved_symbols.push_back(it.first);
     }
-    std::sort(unresolved_symbols.begin(), unresolved_symbols.end());
+    std::ranges::sort(unresolved_symbols);
 
     for (auto& unresolved_symbol : unresolved_symbols) {
         auto it = unresolved.find(unresolved_symbol);

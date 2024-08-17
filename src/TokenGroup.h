@@ -40,7 +40,7 @@ public:
     explicit TokenGroup(Token::Type type): types({ type }), name (Token::type_name(type)) {}
     TokenGroup(std::unordered_set<Token::Type> types, std::unordered_set<Token> tokens, std::string name): types (std::move(types)), tokens(std::move(tokens)), name(std::move(name)) {}
 
-    [[nodiscard]] bool contains(const Token& token) const {return contains_all || (types.find(token.get_type()) != types.end() || tokens.find(token) != tokens.end());}
+    [[nodiscard]] bool contains(const Token& token) const {return contains_all || types.contains(token.get_type()) || tokens.contains(token);}
 
     static const TokenGroup newline;
     static const TokenGroup all;

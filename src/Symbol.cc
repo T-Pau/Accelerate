@@ -31,8 +31,6 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "Symbol.h"
 
-#include "Exception.h"
-
 Symbol::Table* Symbol::global = nullptr;
 const std::string Symbol::empty_string{};
 
@@ -65,9 +63,8 @@ const std::string* Symbol::Table::intern(const std::string& string) {
     auto it = symbols.find(&string);
     if (it == symbols.end()) {
         auto interned_string = std::make_unique<std::string>(string);
-        auto new_id = interned_string.get();
-        symbols[new_id] = std::move(interned_string);
-        return new_id;
+        auto [new_it, _] = symbols.insert({interned_string.get(), std::move(interned_string)});
+        return new_it->first;
     }
     else {
         return it->second.get();

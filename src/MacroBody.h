@@ -38,7 +38,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 class MacroBody: public BodyElement {
   public:
-    MacroBody(Token name, std::vector<Expression> arguments, const Macro* macro = {}): BodyElement(SizeRange(0,{})), name(name), arguments(std::move(arguments)), macro(macro) {}
+    MacroBody(const Token& name, std::vector<Expression> arguments, const Macro* macro = {}): BodyElement(SizeRange(0,{})), name(name), macro(macro), arguments(std::move(arguments)) {}
 
     [[nodiscard]] std::shared_ptr<BodyElement> clone() const override {throw Exception("can't clone MacroBody");}
     [[nodiscard]] bool empty() const override {return false;}

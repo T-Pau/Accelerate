@@ -40,6 +40,8 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 class Command {
 public:
     Command(const std::vector<Commandline::Option>& options, std::string arguments, const std::string& name);
+    virtual ~Command() = default;
+
     int run(int argc, char * const argv[]);
 
     std::string program_name;

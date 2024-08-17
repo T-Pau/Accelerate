@@ -33,14 +33,13 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define LABEL_BODY_H
 
 #include "Body.h"
-#include "Value.h"
 #include "Exception.h"
 #include "SizeRange.h"
 
 class LabelBody: public BodyElement {
 public:
     explicit LabelBody(Symbol name): name(name) {}
-    LabelBody(Symbol name, SizeRange offset, bool added_to_environment, size_t unnamed_index): name(name), offset(offset), added_to_environment(added_to_environment), unnamed_index(unnamed_index) {}
+    LabelBody(Symbol name, const SizeRange& offset, bool added_to_environment, size_t unnamed_index): name(name), offset(offset), unnamed_index(unnamed_index), added_to_environment(added_to_environment) {}
 
     void encode(std::string &bytes, const Memory* memory) const override {}
     [[nodiscard]] bool empty() const override {return added_to_environment && offset.size();}

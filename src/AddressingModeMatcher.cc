@@ -91,7 +91,7 @@ AddressingModeMatcherElement::elements_for(const AddressingMode::Notation::Eleme
 
     switch (element.type) {
         case AddressingMode::Notation::ARGUMENT: {
-            auto it = arguments.find(element.symbol);
+            const auto it = arguments.find(element.symbol);
             if (it == arguments.end()) {
                 throw Exception("unknown argument '%s'", element.symbol.c_str());
             }

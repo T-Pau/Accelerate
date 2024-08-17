@@ -95,7 +95,6 @@ add_library(xlr8-library STATIC
         Util.cc
         Value.cc
         ValueExpression.cc
-        VariableEntity.cc
         VariableExpression.cc
         Visibility.cc
         VoidExpression.cc)

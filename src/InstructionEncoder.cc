@@ -34,12 +34,13 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <algorithm>
 
 #include "Assembler.h"
+#include "ExpressionNode.h"
+#include "InRangeExpression.h"
 #include "ParseException.h"
 #include "TokenNode.h"
-#include "ExpressionNode.h"
 #include "Util.h"
 
-Body InstructionEncoder::encode(const Token& name, const std::vector<std::shared_ptr<Node>>& arguments, const std::shared_ptr<Environment>& environment, const SizeRange& offset, bool& uses_pc) {
+Body InstructionEncoder::encode(const Token& name, const std::vector<std::shared_ptr<Node>>& arguments, const std::shared_ptr<Environment>& environment, const SizeRange& offset, bool& uses_pc) const {
     const auto instruction = cpu->instruction(name.as_symbol());
     if (instruction == nullptr) {
         throw ParseException(name, "unknown instruction '%s'", name.as_string().c_str());

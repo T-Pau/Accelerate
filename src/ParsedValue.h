@@ -38,7 +38,6 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Token.h"
 #include "FileTokenizer.h"
 #include "TokenGroup.h"
-#include "BodyElement.h"
 #include "Body.h"
 
 class ParsedArray;
@@ -55,6 +54,8 @@ public:
         SCALAR_LIST,
         SCALAR_SINGULAR
     };
+
+    virtual ~ParsedValue() = default;
 
     [[nodiscard]] virtual Type type() const = 0;
 
@@ -120,7 +121,7 @@ public:
 
     std::shared_ptr<ParsedValue> operator[](const Token& token) const;
     [[nodiscard]] std::shared_ptr<ParsedValue> get_optional(const Token& token) const;
-    [[nodiscard]] bool has_key(const Token& token) const {return entries.find(token) != entries.end();}
+    [[nodiscard]] bool has_key(const Token& token) const {return entries.contains(token);}
 
     std::unordered_map<Token, std::shared_ptr<ParsedValue>>::iterator begin() {return entries.begin();}
     std::unordered_map<Token, std::shared_ptr<ParsedValue>>::iterator end() {return entries.end();}

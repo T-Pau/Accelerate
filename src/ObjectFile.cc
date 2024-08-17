@@ -70,7 +70,7 @@ void ObjectFile::serialize(std::ostream& stream) const {
         for (auto& library : imported_libraries) {
             names.emplace_back(library->name);
         }
-        std::sort(names.begin(), names.end());
+        std::ranges::sort(names);
         stream << ".import ";
         auto first = true;
         for (auto name_ : names) {
@@ -101,7 +101,7 @@ void ObjectFile::serialize(std::ostream& stream) const {
     for (const auto& pair : constants) {
         names.emplace_back(pair.first);
     }
-    std::sort(names.begin(), names.end());
+    std::ranges::sort(names);
     for (auto name_ : names) {
         stream << (*constants.find(name_)->second);
     }
@@ -110,7 +110,7 @@ void ObjectFile::serialize(std::ostream& stream) const {
     for (const auto& pair : functions) {
         names.emplace_back(pair.first);
     }
-    std::sort(names.begin(), names.end());
+    std::ranges::sort(names);
     for (auto name_ : names) {
         stream << *(functions.find(name_)->second);
     }
@@ -119,7 +119,7 @@ void ObjectFile::serialize(std::ostream& stream) const {
     for (const auto& pair : macros) {
         names.emplace_back(pair.first);
     }
-    std::sort(names.begin(), names.end());
+    std::ranges::sort(names);
     for (auto name_ : names) {
         stream << (*macros.find(name_)->second);
     }
@@ -128,7 +128,7 @@ void ObjectFile::serialize(std::ostream& stream) const {
     for (const auto& pair : objects) {
         names.emplace_back(pair.first);
     }
-    std::sort(names.begin(), names.end());
+    std::ranges::sort(names);
     for (auto name_ : names) {
         stream << *(objects.find(name_)->second);
     }
@@ -363,7 +363,9 @@ ObjectFile::ObjectFile() noexcept {
     private_environment = std::make_shared<Environment>(public_environment);
 }
 
-void ObjectFile::add_to_environment(Object* object) { add_to_environment(object->name.as_symbol(), object->visibility, Expression(object->name.location, object)); }
+void ObjectFile::add_to_environment(Object* object) {
+    add_to_environment(object->name.as_symbol(), object->visibility, Expression(object->name.location, object));
+}
 
 void ObjectFile::add_to_environment(Symbol symbol_name, Visibility visibility, Expression value) const {
     if (visibility == Visibility::PUBLIC) {
@@ -385,7 +387,7 @@ std::vector<Object*> ObjectFile::all_objects() {
     return v;
 }
 
-void ObjectFile::collect_explicitly_used_objects(std::unordered_set<Object*>& set) const {
+void ObjectFile::collect_explicitly_used_objects(std::unordered_set<Object*>& set) const { // NOLINT(misc-no-recursion)
     for (auto object : explicitly_used_objects) {
         set.insert(object);
     }
@@ -395,20 +397,21 @@ void ObjectFile::collect_explicitly_used_objects(std::unordered_set<Object*>& se
 }
 
 Object* ObjectFile::insert_object(std::unique_ptr<Object> object) {
-    auto own_object = object.get();
-    const auto it = objects.find(own_object->name.as_symbol());
-    if (it != objects.end()) {
+    auto [it, inserted] = objects.insert({object->name.as_symbol(), std::move(object)});
+    if (inserted) {
+        auto own_object = it->second.get();
+        own_object->set_owner(this);
+        add_to_environment(own_object);
+        return own_object;
+    }
+    else {
         if (object->is_default_only()) {
             object->set_owner(this);
-            unused_default_objects.insert(std::move(object));
-            return own_object;
+            auto [defaults_it, _] = unused_default_objects.insert(std::move(object));
+            return defaults_it->get();
         }
         throw ParseException(object->name, "redefinition of object '%s'", object->name.as_string().c_str()).appending(it->second->name.location, "previously defined here");
     }
-    objects[object->name.as_symbol()] = std::move(object);
-    own_object->set_owner(this);
-    add_to_environment(own_object);
-    return own_object;
 }
 
 void ObjectFile::add_function(std::unique_ptr<Function> function) {

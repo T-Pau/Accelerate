@@ -59,9 +59,9 @@ public:
 
     void setup(FileTokenizer& tokenizer) const;
 
-    [[nodiscard]] bool uses_empty_mnemonic() const {return instructions.find(Symbol()) != instructions.end();}
+    [[nodiscard]] bool uses_empty_mnemonic() const {return instructions.contains(Symbol());}
     [[nodiscard]] bool uses_braces() const {return uses_punctuation(Symbol("("));}
-    [[nodiscard]] bool uses_punctuation(Symbol symbol) const {return punctuation.find(symbol) != punctuation.end();}
+    [[nodiscard]] bool uses_punctuation(Symbol symbol) const {return punctuation.contains(symbol);}
 
 private:
     std::unordered_map<Symbol, AddressingMode> addressing_modes;

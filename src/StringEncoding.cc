@@ -325,7 +325,7 @@ void StringEncoding::import_base(const Token& base_token, const std::shared_ptr<
                 if (auto uses = uses_v->as_array()) {
                     for (const auto& use_range_v: (*uses)) {
                         if (auto use_range = use_range_v->as_scalar()) {
-                            if (use_range->size() == 0 || !(*use_range)[0].is_unsigned()) {
+                            if (use_range->empty() || !(*use_range)[0].is_unsigned()) {
                                 throw ParseException(use_range_v->location, "invalid use range");
                             }
 

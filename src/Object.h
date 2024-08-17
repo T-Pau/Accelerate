@@ -33,7 +33,6 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define OBJECT_H
 
 #include <set>
-#include <vector>
 
 #include "Address.h"
 #include "Body.h"

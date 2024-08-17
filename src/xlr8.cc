@@ -40,7 +40,6 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Linker.h"
 #include "ObjectFileParser.h"
 #include "TargetGetter.h"
-#include "Util.h"
 #include "config.h"
 #include "CPUGetter.h"
 #include "ParseException.h"
@@ -48,7 +47,6 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 class xlr8: public Command {
 public:
     xlr8(): Command(options, "file ...", "xlr8") {}
-    virtual ~xlr8() = default;
 
 protected:
     void process() override;

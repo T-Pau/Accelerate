@@ -36,7 +36,6 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <sstream>
 
 #include "Exception.h"
-#include "Int.h"
 
 Memory::Bank::Bank(Range range) : range(range) {
     memory = std::string(range.size, 0);
@@ -58,7 +57,7 @@ std::optional<uint64_t> Memory::Bank::allocate(const Range& allowed_range, Memor
         return {};
     }
 
-    for (auto it = blocks.begin(); it != blocks.end(); it++) {
+    for (auto it = blocks.begin(); it != blocks.end(); ++it) {
         if (it->allocation != FREE) {
             continue;
         }

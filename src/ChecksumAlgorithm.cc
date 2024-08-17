@@ -32,6 +32,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ChecksumAlgorithm.h"
 
 #include "ChecksumAlgorithmXor.h"
+#include "Exception.h"
 
 // clang-format off
 const std::unordered_map<Symbol, std::shared_ptr<ChecksumAlgorithm>(*)(Symbol)> ChecksumAlgorithm::algorithms = {

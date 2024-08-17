@@ -34,7 +34,6 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "Body.h"
 #include "Callable.h"
-#include "Symbol.h"
 
 class Macro: public Callable {
   public:

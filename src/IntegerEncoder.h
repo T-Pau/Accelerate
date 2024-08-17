@@ -33,7 +33,6 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define INTEGER_ENCODER_H
 
 #include "BaseEncoder.h"
-#include "BaseExpression.h"
 #include "Environment.h"
 #include "Value.h"
 

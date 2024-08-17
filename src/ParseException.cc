@@ -31,11 +31,9 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "ParseException.h"
 
-#include <utility>
-
 #include "Util.h"
 
-ParseException::ParseException(Location location, const char *format, ...): location(location) {
+ParseException::ParseException(const Location& location, const char *format, ...): location(location) {
     va_list ap;
     va_start(ap, format);
     message = string_format_v(format, ap);
@@ -49,11 +47,11 @@ ParseException::ParseException(const Token& token, const char *format, ...): loc
     va_end(ap);
 }
 
-ParseException ParseException::appending(Location note_location, const std::string& text) const {
+ParseException ParseException::appending(const Location& note_location, const std::string& text) const {
     return ParseException(location, message, {{note_location, text}});
 }
 
-ParseException::ParseException(Location location_, const Exception& exception): location(location_) {
+ParseException::ParseException(const Location& location_, const Exception& exception): location(location_) {
     if (auto parsed_exception = dynamic_cast<const ParseException*>(&exception)) {
         if (!parsed_exception->location.empty()) {
             location = parsed_exception->location;

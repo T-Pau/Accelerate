@@ -40,7 +40,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 class Tokenizer {
 public:
     Token next();
-    void unget(Token token);
+    void unget(const Token& token);
     Token peek();
     virtual ~Tokenizer() = default;
 
@@ -49,7 +49,7 @@ public:
     Token expect(Token::Type type);
     Token expect(Token::Type type, const TokenGroup& synchronize);
     Token expect(const TokenGroup& types, const TokenGroup& synchronize);
-    void expect(Token token);
+    void expect(const Token& token);
     void expect_litearls(const std::vector<Token::Type>& types, const TokenGroup& synchronize);
     void skip_until(const TokenGroup& types, bool including_terminator = false);
     void skip_until(const Token& token, bool including_terminator = false);

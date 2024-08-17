@@ -38,7 +38,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 class SequenceTokenizer: public Tokenizer {
 public:
-    SequenceTokenizer(Location location, std::vector<Token> tokens): location(location), tokens(std::move(tokens)) { current_position = this->tokens.begin();}
+    SequenceTokenizer(const Location& location, std::vector<Token> tokens): location(location), tokens(std::move(tokens)) { current_position = this->tokens.begin();}
     explicit SequenceTokenizer(std::vector<Token> tokens);
 
     [[nodiscard]] Location current_location() const override {return location;}
@@ -52,7 +52,7 @@ private:
     std::vector<Token> tokens;
     std::vector<Token>::iterator current_position;
 
-    void set_location(Token token);
+    void set_location(const Token& token);
 };
 
 #endif // SEQUENCE_TOKENIZER_H

@@ -31,9 +31,6 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "Macro.h"
 
-#include <utility>
-#include "Exception.h"
-
 bool Macro::initialized = false;
 Token Macro::token_body;
 

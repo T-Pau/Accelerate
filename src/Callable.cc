@@ -48,7 +48,7 @@ void Callable::initialize() {
     }
 }
 
-Callable::Callable(ObjectFile* owner, Token name_, const std::shared_ptr<ParsedValue>& definition): Entity(owner, name_, definition) {
+Callable::Callable(ObjectFile* owner, const Token& name_, const std::shared_ptr<ParsedValue>& definition): Entity(owner, name_, definition) {
     initialize();
     auto parameters = definition->as_dictionary();
 
@@ -88,8 +88,7 @@ void Callable::Arguments::serialize(std::ostream& stream) const {
             stream << ", ";
         }
         stream << name(index);
-        auto value = default_argument(index);
-        if (value) {
+        if (auto value = default_argument(index)) {
             stream << " = " << *value;
         }
     }

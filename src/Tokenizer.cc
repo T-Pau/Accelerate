@@ -45,7 +45,7 @@ Token Tokenizer::next() {
 
 
 
-void Tokenizer::unget(Token token) {
+void Tokenizer::unget(const Token& token) {
     if (ungot_token.has_value()) {
         throw Exception("trying to unget two tokens");
     }
@@ -177,7 +177,7 @@ Token Tokenizer::peek() {
     return token;
 }
 
-void Tokenizer::expect(Token token) {
+void Tokenizer::expect(const Token& token) {
     auto got = next();
     if (got != token) {
         throw ParseException(got, "expected %s", token.as_string().c_str());
