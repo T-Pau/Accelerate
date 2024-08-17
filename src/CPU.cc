@@ -95,9 +95,9 @@ void CPU::setup(FileTokenizer& tokenizer) const {
     for (const auto& item: punctuation) {
         tokenizer.add_literal(Token::PUNCTUATION, item.str());
     }
-    for (const auto& pair: instructions) {
-        if (!pair.first.empty()) {
-            tokenizer.add_literal(Token::INSTRUCTION, pair.first.str());
+    for (const auto& [name, _]: instructions) {
+        if (!name.empty()) {
+            tokenizer.add_literal(Token::INSTRUCTION, name.str());
         }
     }
 }

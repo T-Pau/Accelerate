@@ -166,11 +166,11 @@ ExpressionParser::Element ExpressionParser::next_element() const {
 void ExpressionParser::setup(FileTokenizer &tokenizer) {
     initialize();
     tokenizer.add_punctuations({"(", ")", ":", ","});
-    for (const auto& pair: binary_operators) {
-        tokenizer.add_literal(pair.first);
+    for (const auto& [operator_token, _]: binary_operators) {
+        tokenizer.add_literal(operator_token);
     }
-    for (const auto& pair: unary_operators) {
-        tokenizer.add_literal(pair.first);
+    for (const auto& [operator_token, _]: unary_operators) {
+        tokenizer.add_literal(operator_token);
     }
     tokenizer.add_literal(token_false);
     tokenizer.add_literal(token_none);

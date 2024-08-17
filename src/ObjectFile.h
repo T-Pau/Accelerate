@@ -66,7 +66,7 @@ public:
     void add_object_file(const std::shared_ptr<ObjectFile>& file);
     bool check_unresolved(Unresolved& unresolved) const;
     [[nodiscard]] const Constant* constant(Symbol name) const;
-    [[nodiscard]] std::vector<Object*> all_objects();
+    [[nodiscard]] std::vector<Object*> all_objects() const;
     void collect_explicitly_used_objects(std::unordered_set<Object*>& set) const;
     Object* create_object(Symbol section_name, Visibility visibility, bool default_only, const Token& object_name);
     void evaluate();

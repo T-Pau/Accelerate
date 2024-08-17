@@ -98,8 +98,8 @@ void ObjectFile::serialize(std::ostream& stream) const {
     }
 
     names.clear();
-    for (const auto& pair : constants) {
-        names.emplace_back(pair.first);
+    for (const auto& [name, _] : constants) {
+        names.emplace_back(name);
     }
     std::ranges::sort(names);
     for (auto name_ : names) {
@@ -107,8 +107,8 @@ void ObjectFile::serialize(std::ostream& stream) const {
     }
 
     names.clear();
-    for (const auto& pair : functions) {
-        names.emplace_back(pair.first);
+    for (const auto& [name, _] : functions) {
+        names.emplace_back(name);
     }
     std::ranges::sort(names);
     for (auto name_ : names) {
@@ -116,8 +116,8 @@ void ObjectFile::serialize(std::ostream& stream) const {
     }
 
     names.clear();
-    for (const auto& pair : macros) {
-        names.emplace_back(pair.first);
+    for (const auto& [name, _] : macros) {
+        names.emplace_back(name);
     }
     std::ranges::sort(names);
     for (auto name_ : names) {
@@ -125,8 +125,8 @@ void ObjectFile::serialize(std::ostream& stream) const {
     }
 
     names.clear();
-    for (const auto& pair : objects) {
-        names.emplace_back(pair.first);
+    for (const auto& [name, _] : objects) {
+        names.emplace_back(name);
     }
     std::ranges::sort(names);
     for (auto name_ : names) {
@@ -164,8 +164,7 @@ void ObjectFile::add_object_file(const std::shared_ptr<ObjectFile>& file) {
     for (auto& pair : file->constants) {
         try {
             add_constant(std::move(pair.second));
-        }
-        catch (Exception &ex) {
+        } catch (Exception& ex) {
             FileReader::global.error(ex);
             ok = false;
         }
@@ -175,8 +174,7 @@ void ObjectFile::add_object_file(const std::shared_ptr<ObjectFile>& file) {
     for (auto& pair : file->macros) {
         try {
             add_macro(std::move(pair.second));
-        }
-        catch (Exception &ex) {
+        } catch (Exception& ex) {
             FileReader::global.error(ex);
             ok = false;
         }
@@ -186,8 +184,7 @@ void ObjectFile::add_object_file(const std::shared_ptr<ObjectFile>& file) {
     for (auto& pair : file->functions) {
         try {
             add_function(std::move(pair.second));
-        }
-        catch (Exception &ex) {
+        } catch (Exception& ex) {
             FileReader::global.error(ex);
             ok = false;
         }
@@ -197,8 +194,7 @@ void ObjectFile::add_object_file(const std::shared_ptr<ObjectFile>& file) {
     for (auto& pair : file->objects) {
         try {
             add_object(std::move(pair.second));
-        }
-        catch (Exception &ex) {
+        } catch (Exception& ex) {
             FileReader::global.error(ex);
             ok = false;
         }
@@ -208,8 +204,7 @@ void ObjectFile::add_object_file(const std::shared_ptr<ObjectFile>& file) {
     for (auto& library : file->imported_libraries) {
         try {
             import(library);
-        }
-        catch (Exception &ex) {
+        } catch (Exception& ex) {
             FileReader::global.error(ex);
             ok = false;
         }
@@ -222,8 +217,7 @@ void ObjectFile::add_object_file(const std::shared_ptr<ObjectFile>& file) {
     for (const auto& pair : file->pinned_objects) {
         try {
             pin(pair.first, pair.second.address);
-        }
-        catch (Exception &ex) {
+        } catch (Exception& ex) {
             FileReader::global.error(ex);
             ok = false;
         }
@@ -312,27 +306,27 @@ void ObjectFile::remove_private_constants() {
 }
 
 void ObjectFile::resolve_defaults() {
-    for (auto& pair : constants) {
-        if (pair.second->is_default_only() && !private_environment->get_variable(pair.first)) {
-            add_to_environment(pair.second->name.as_symbol(), pair.second->visibility, pair.second->value);
+    for (const auto& [name, constant] : constants) {
+        if (constant->is_default_only() && !private_environment->get_variable(name)) {
+            add_to_environment(constant->name.as_symbol(), constant->visibility, constant->value);
         }
     }
 
-    for (auto& pair : functions) {
-        if (pair.second->is_default_only() && !private_environment->get_function(pair.first)) {
-            environment(pair.second->visibility)->add(pair.second->name.as_symbol(), pair.second.get());
+    for (const auto& [name, function] : functions) {
+        if (function->is_default_only() && !private_environment->get_function(name)) {
+            environment(function->visibility)->add(function->name.as_symbol(), function.get());
         }
     }
 
-    for (auto& pair: macros) {
-        if (pair.second->is_default_only() && !private_environment->get_macro(pair.first)) {
-            environment(pair.second->visibility)->add(pair.second->name.as_symbol(), pair.second.get());
+    for (const auto& [name, macro] : macros) {
+        if (macro->is_default_only() && !private_environment->get_macro(name)) {
+            environment(macro->visibility)->add(macro->name.as_symbol(), macro.get());
         }
     }
 
-    for (auto& pair: objects) {
-        if (pair.second->is_default_only() && !private_environment->get_variable(pair.first)) {
-            add_to_environment(pair.second.get());
+    for (const auto& [name, object] : objects) {
+        if (object->is_default_only() && !private_environment->get_variable(name)) {
+            add_to_environment(object.get());
         }
     }
 
@@ -363,9 +357,7 @@ ObjectFile::ObjectFile() noexcept {
     private_environment = std::make_shared<Environment>(public_environment);
 }
 
-void ObjectFile::add_to_environment(Object* object) {
-    add_to_environment(object->name.as_symbol(), object->visibility, Expression(object->name.location, object));
-}
+void ObjectFile::add_to_environment(Object* object) { add_to_environment(object->name.as_symbol(), object->visibility, Expression(object->name.location, object)); }
 
 void ObjectFile::add_to_environment(Symbol symbol_name, Visibility visibility, Expression value) const {
     if (visibility == Visibility::PUBLIC) {
@@ -376,12 +368,12 @@ void ObjectFile::add_to_environment(Symbol symbol_name, Visibility visibility, E
     }
 }
 
-std::vector<Object*> ObjectFile::all_objects() {
+std::vector<Object*> ObjectFile::all_objects() const {
     std::vector<Object*> v;
 
     v.reserve(objects.size());
-    for (auto& pair : objects) {
-        v.emplace_back(pair.second.get());
+    for (auto& [_, object] : objects) {
+        v.emplace_back(object.get());
     }
 
     return v;
