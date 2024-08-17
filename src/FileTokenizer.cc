@@ -163,8 +163,7 @@ Token FileTokenizer::next_raw() {
         }
 
         std::string name;
-        auto type = matcher.match(*current_source, name);
-        if (type) {
+        if (auto type = matcher.match(*current_source, name)) {
             current_source->expand_location(location);
             last_was_newline = false;
             return {*type, location, name};
@@ -250,7 +249,7 @@ bool FileTokenizer::pre_is_processing() const {
     if (current_source->pre_states.empty()) {
         return true;
     }
-    return std::all_of(current_source->pre_states.begin(), current_source->pre_states.end(), [](auto state){return state;});
+    return std::ranges::all_of(current_source->pre_states, [](auto state){return state;});
 }
 
 Token FileTokenizer::parse_hex(Location location) {
@@ -413,7 +412,7 @@ Token FileTokenizer::parse_char(Location location) {
         throw ParseException(location, "multi-byte character constant");
     }
     else {
-        return Token(location, Value(static_cast<uint64_t>(static_cast<uint8_t>(bytes[0]))));
+        return {location, Value(static_cast<uint64_t>(static_cast<uint8_t>(bytes[0])))};
     }
 }
 
@@ -436,8 +435,7 @@ std::string FileTokenizer::parse_string_literal(Location location, int terminato
 
             case '\\': {
                 current_source->expand_location(location);
-                auto c2 = current_source->next();
-                switch (c2) {
+                switch (auto c2 = current_source->next()) {
                     case '\\':
                     case '\"':
                     case '\'':
@@ -565,7 +563,7 @@ bool FileTokenizer::is_identifier(const std::string& s) {
     if (s.empty()) {
         return false;
     }
-    if (!std::all_of(s.begin(), s.end(), is_identifier_continuation)) {
+    if (!std::ranges::all_of(s, is_identifier_continuation)) {
         return false;
     }
     if (!is_identifier_start(s.front())) {
@@ -695,7 +693,7 @@ void FileTokenizer::MatcherNode::add(const char* string, Token::Type type, const
 }
 
 bool FileTokenizer::MatcherNode::conflicts(const std::unordered_set<char>& new_suffix) const {
-    return std::any_of(new_suffix.begin(), new_suffix.end(), [this](char c) { return next.contains(c); });
+    return std::ranges::any_of(new_suffix, [this](char c) { return next.contains(c); });
 }
 
 void FileTokenizer::PreprocessorDirective::operator()(FileTokenizer& tokenizer, const Token& directive, const std::vector<Token>& arguments) const {

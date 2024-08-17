@@ -83,7 +83,7 @@ Body InstructionEncoder::encode(const Token& name, const std::vector<std::shared
                 for (const auto &match: matches) {
                     modes.emplace_back(match.addressing_mode);
                 }
-                std::sort(modes.begin(), modes.end());
+                std::ranges::sort(modes);
                 throw ParseException(name, "instruction %s doesn't support any of the addressing modes %s", name.as_string().c_str(), join(modes).c_str());
             }
         }

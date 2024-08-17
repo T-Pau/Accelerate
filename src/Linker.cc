@@ -108,7 +108,7 @@ void Linker::link() {
     }
 
     auto sorted_objects = std::vector<Object*>(objects.begin(), objects.end());
-    std::sort(sorted_objects.begin(), sorted_objects.end(), Object::less_pointers);
+    std::ranges::sort(sorted_objects, Object::less_pointers);
     for (auto object: sorted_objects) {
         if (!object->size_range().size()) {
             FileReader::global.error({}, "object '%s' has unknown size", object->name.as_string().c_str());
@@ -230,7 +230,7 @@ void Linker::add_library(std::shared_ptr<ObjectFile> library) {
 
 void Linker::output_symbol_map(const std::string& file_name) {
     auto sorted_objects = std::vector<Object*>(objects.begin(), objects.end());
-    std::sort(sorted_objects.begin(), sorted_objects.end(), Object::less_pointers);
+    std::ranges::sort(sorted_objects, Object::less_pointers);
 
     auto stream = std::ofstream(file_name);
 

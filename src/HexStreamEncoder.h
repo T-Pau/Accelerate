@@ -45,10 +45,10 @@ public:
 private:
     static char digit(uint8_t value);
 
+    std::ostream& stream;
     size_t line_length{};
     size_t line_position{};
     std::string indent;
-    std::ostream& stream;
 };
 
 #endif //HEXSTREAMENCODER_H

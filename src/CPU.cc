@@ -124,8 +124,7 @@ bool CPU::is_compatible_with(const CPU &other) const {
 std::vector<AddressingModeMatcherResult> CPU::match_addressing_modes(const std::vector<std::shared_ptr<Node>>& arguments) const {
     auto matches = addressing_mode_matcher.match(arguments);
     auto v = std::vector<AddressingModeMatcherResult>(matches.begin(), matches.end());
-    sort(v.begin(), v.end(),
-         [this](const AddressingModeMatcherResult& a, const AddressingModeMatcherResult& b) -> bool {
+    std::ranges::sort(v, [this](const AddressingModeMatcherResult& a, const AddressingModeMatcherResult& b) -> bool {
              return *addressing_mode(a.addressing_mode) < *addressing_mode(b.addressing_mode);
          });
     return v;

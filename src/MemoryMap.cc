@@ -104,7 +104,7 @@ bool MemoryMap::access_type_less(MemoryMap::AccessType a, MemoryMap::AccessType 
 }
 
 bool MemoryMap::is_abstract() const {
-    return std::any_of(sections.begin(), sections.end(), [](const auto& pair){return pair.second.size == 0;});
+    return std::ranges::any_of(sections, [](const auto& pair){return pair.second.size == 0;});
 }
 
 bool MemoryMap::is_compatible_with(const MemoryMap &other) const {
@@ -175,8 +175,8 @@ bool MemoryMap::Section::operator<(const MemoryMap::Section &other) const {
         if (*it != *it_other) {
             return *it < *it_other;
         }
-        it++;
-        it_other++;
+        ++it;
+        ++it_other;
     }
 
     if (it == blocks.end()) {
