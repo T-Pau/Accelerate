@@ -136,18 +136,18 @@ void ObjectFile::serialize(std::ostream& stream) const {
 
 void ObjectFile::add_constant(std::unique_ptr<Constant> constant) {
     auto own_constant = constant.get();
-    auto it = constants.find(constant->name.as_symbol());
+    auto it = constants.find(constant->name);
     if (it != constants.end()) {
         if (constant->is_default_only()) {
             return;
         }
-        throw ParseException(constant->name, "redefinition of constant '%s'", constant->name.as_string().c_str()).appending(it->second->name.location, "previously defined here");
+        throw ParseException(constant->location, "redefinition of constant '%s'", constant->name.c_str()).appending(it->second->location, "previously defined here");
     }
 
     constant->set_owner(this);
-    constants[constant->name.as_symbol()] = std::move(constant);
+    constants[constant->name] = std::move(constant);
     if (!own_constant->is_default_only()) {
-        add_to_environment(own_constant->name.as_symbol(), own_constant->visibility, own_constant->value);
+        add_to_environment(own_constant->name, own_constant->visibility, own_constant->value);
     }
 }
 
@@ -254,7 +254,7 @@ void ObjectFile::evaluate() {
             new_explicitly_used_objects.insert(symbol);
         }
         else {
-            unresolved_used.variables.add(Token(Token::NAME, {}, name), symbol);
+            unresolved_used.variables.add(it->second.get(), symbol);
         }
     }
     explicitly_used_object_names = new_explicitly_used_objects;
@@ -286,12 +286,13 @@ void ObjectFile::evaluate() {
                 }
             }
             else {
-                unresolved_used.variables.add({}, pair.first);
+                unresolved_used.variables.add(name, {}, pair.first);
                 new_pinned_objects[pair.first] = pair.second;
             }
         }
         pinned_objects = new_pinned_objects;
-        unresolved_used.add(Token(Token::NAME, {}, name), result);
+        // TODO: add locations of .pin directives.
+        unresolved_used.add(name, {}, result);
     }
 }
 
@@ -308,19 +309,19 @@ void ObjectFile::remove_private_constants() {
 void ObjectFile::resolve_defaults() {
     for (const auto& [name, constant] : constants) {
         if (constant->is_default_only() && !private_environment->get_variable(name)) {
-            add_to_environment(constant->name.as_symbol(), constant->visibility, constant->value);
+            add_to_environment(constant->name, constant->visibility, constant->value);
         }
     }
 
     for (const auto& [name, function] : functions) {
         if (function->is_default_only() && !private_environment->get_function(name)) {
-            environment(function->visibility)->add(function->name.as_symbol(), function.get());
+            environment(function->visibility)->add(function->name, function.get());
         }
     }
 
     for (const auto& [name, macro] : macros) {
         if (macro->is_default_only() && !private_environment->get_macro(name)) {
-            environment(macro->visibility)->add(macro->name.as_symbol(), macro.get());
+            environment(macro->visibility)->add(macro->name, macro.get());
         }
     }
 
@@ -357,7 +358,7 @@ ObjectFile::ObjectFile() noexcept {
     private_environment = std::make_shared<Environment>(public_environment);
 }
 
-void ObjectFile::add_to_environment(Object* object) { add_to_environment(object->name.as_symbol(), object->visibility, Expression(object->name.location, object)); }
+void ObjectFile::add_to_environment(Object* object) { add_to_environment(object->name, object->visibility, Expression(object->location, object)); }
 
 void ObjectFile::add_to_environment(Symbol symbol_name, Visibility visibility, Expression value) const {
     if (visibility == Visibility::PUBLIC) {
@@ -389,7 +390,7 @@ void ObjectFile::collect_explicitly_used_objects(std::unordered_set<Object*>& se
 }
 
 Object* ObjectFile::insert_object(std::unique_ptr<Object> object) {
-    auto [it, inserted] = objects.insert({object->name.as_symbol(), std::move(object)});
+    auto [it, inserted] = objects.insert({object->name, std::move(object)});
     if (inserted) {
         auto own_object = it->second.get();
         own_object->set_owner(this);
@@ -402,7 +403,7 @@ Object* ObjectFile::insert_object(std::unique_ptr<Object> object) {
             auto [defaults_it, _] = unused_default_objects.insert(std::move(object));
             return defaults_it->get();
         }
-        throw ParseException(object->name, "redefinition of object '%s'", object->name.as_string().c_str()).appending(it->second->name.location, "previously defined here");
+        throw ParseException(object->location, "redefinition of object '%s'", object->name.c_str()).appending(it->second->location, "previously defined here");
     }
 }
 
@@ -412,21 +413,21 @@ void ObjectFile::add_function(std::unique_ptr<Function> function) {
         return;
     }
 
-    auto it = functions.find(function->name.as_symbol());
+    auto it = functions.find(function->name);
     if (it != functions.end()) {
         if (function->is_default_only()) {
             return;
         }
         else {
-            throw ParseException(function->name, "redefinition of function %s", function->name.as_string().c_str());
+            throw ParseException(function->location, "redefinition of function %s", function->name.c_str());
         }
     }
 
     function->set_owner(this);
     if (!function->is_default_only()) {
-        environment(function->visibility)->add(function->name.as_symbol(), function.get());
+        environment(function->visibility)->add(function->name, function.get());
     }
-    functions[function->name.as_symbol()] = std::move(function);
+    functions[function->name] = std::move(function);
 }
 
 void ObjectFile::add_macro(std::unique_ptr<Macro> macro) {
@@ -435,25 +436,25 @@ void ObjectFile::add_macro(std::unique_ptr<Macro> macro) {
         return;
     }
 
-    auto it = macros.find(macro->name.as_symbol());
+    auto it = macros.find(macro->name);
     if (it != macros.end()) {
         if (macro->is_default_only()) {
             return;
         }
         else {
-            throw ParseException(macro->name, "redefinition of macro %s", macro->name.as_string().c_str());
+            throw ParseException(macro->location, "redefinition of macro %s", macro->name.c_str());
         }
     }
 
     macro->set_owner(this);
     if (!macro->is_default_only()) {
-        environment(macro->visibility)->add(macro->name.as_symbol(), macro.get());
+        environment(macro->visibility)->add(macro->name, macro.get());
     }
-    macros[macro->name.as_symbol()] = std::move(macro);
+    macros[macro->name] = std::move(macro);
 }
 
 void ObjectFile::Constant::serialize(std::ostream& stream) const {
-    stream << ".constant " << name.as_symbol() << " {" << std::endl;
+    stream << ".constant " << name << " {" << std::endl;
     serialize_entity(stream);
     stream << "    value: " << value << std::endl;
     stream << "}" << std::endl;

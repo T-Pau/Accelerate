@@ -57,30 +57,30 @@ private:
     };
     class Directive {
     public:
-        Directive(void (Assembler::*parse)(), bool target_only = false) : parse{parse}, target_only{target_only} {}
+        Directive(void (Assembler::*parse)(const Token& directive), bool target_only = false) : parse{parse}, target_only{target_only} {}
 
-        void (Assembler::*parse)();
+        void (Assembler::*parse)(const Token& directive);
         bool target_only;
     };
 
     void parse(Symbol file_name);
     void parse_assignment(Visibility visibility, const Token& name, bool default_only = false);
-    void parse_cpu();
-    void parse_default();
-    void parse_default_string_encoding();
+    void parse_cpu(const Token& directive);
+    void parse_default(const Token& directive);
+    void parse_default_string_encoding(const Token& directive);
     void parse_directive(const Token& directive);
-    void parse_extension();
+    void parse_extension(const Token& directive);
     void parse_macro(Visibility visibility, bool default_only = false);
     void parse_name(Visibility visibility, const Token& name, bool default_only = false);
-    void parse_output();
-    void parse_pin();
-    void parse_section();
-    void parse_segment();
-    void parse_string_encoding();
+    void parse_output(const Token& directive);
+    void parse_pin(const Token& directive);
+    void parse_section(const Token& directive);
+    void parse_segment(const Token& directive);
+    void parse_string_encoding(const Token& directive);
     void parse_symbol(Visibility visibility, const Token& name);
-    void parse_target();
-    void parse_use();
-    void parse_visibility();
+    void parse_target(const Token& directive);
+    void parse_use(const Token& directive);
+    void parse_visibility(const Token& directive);
     void set_target(const Target* new_target);
 
     std::vector<MemoryMap::Block> parse_address(const ParsedValue* address) const;

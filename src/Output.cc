@@ -1,5 +1,5 @@
 /*
-Location.cc --
+Output.cc -- 
 
 Copyright (C) Dieter Baron
 
@@ -29,31 +29,10 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "Location.h"
+#include "Output.h"
 
-Location::Location(const Location& start, const Location& end) : Location(start) { extend(end); }
+#include "Target.h"
 
-void Location::extend(const Location& end) {
-    if (empty()) {
-        *this = end;
-    }
-    else if (file == end.file && start_line_number == end.start_line_number && end_column < end.end_column) {
-        end_column = end.end_column;
-    }
-}
+Token Output::token_output = {Token::NAME, ".output"};
 
-std::string Location::to_string() const {
-    if (!file) {
-        return "";
-    }
-    auto s = file.str();
-    if (start_line_number > 0) {
-        s += ":" + std::to_string(start_line_number) + "." + std::to_string(start_column);
-    }
-    return s;
-}
-
-
-bool Location::operator==(const Location& other) const {
-    return file == other.file && start_line_number == other.start_line_number && start_column == other.start_column && end_column == other.end_column;
-}
+Output::Output(const Target* target, Location location, Body body): Entity(target->object_file.get(), token_output, Visibility::PUBLIC, false), body(std::move(body)) {}

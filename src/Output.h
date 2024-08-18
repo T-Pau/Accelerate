@@ -1,5 +1,8 @@
+#ifndef OUTPUT_H
+#define OUTPUT_H
+
 /*
-Location.cc --
+Output.h --
 
 Copyright (C) Dieter Baron
 
@@ -29,31 +32,19 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "Location.h"
+#include "Entity.h"
 
-Location::Location(const Location& start, const Location& end) : Location(start) { extend(end); }
+class Output: public Entity {
+public:
+    Output(const Target* target, Location location, Body body);
 
-void Location::extend(const Location& end) {
-    if (empty()) {
-        *this = end;
-    }
-    else if (file == end.file && start_line_number == end.start_line_number && end_column < end.end_column) {
-        end_column = end.end_column;
-    }
-}
+    Body body;
 
-std::string Location::to_string() const {
-    if (!file) {
-        return "";
-    }
-    auto s = file.str();
-    if (start_line_number > 0) {
-        s += ":" + std::to_string(start_line_number) + "." + std::to_string(start_column);
-    }
-    return s;
-}
+protected:
+  void evaluate_inner(EvaluationContext& context) override {}; // TODO: implement
 
+private:
+  static Token token_output;
+};
 
-bool Location::operator==(const Location& other) const {
-    return file == other.file && start_line_number == other.start_line_number && start_column == other.start_column && end_column == other.end_column;
-}
+#endif // OUTPUT_H

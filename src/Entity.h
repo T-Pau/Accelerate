@@ -57,7 +57,8 @@ class Entity {
     // TODO: make protected once BodyParser doesn't evaluate body directly.
     void process_result(EvaluationResult& result);
 
-    Token name;
+    Symbol name;
+    Location location;
     Visibility visibility;
     ObjectFile* owner = nullptr;
     std::unordered_set<Object*> referenced_objects;

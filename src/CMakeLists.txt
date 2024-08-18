@@ -83,7 +83,6 @@ add_library(xlr8-library STATIC
         Symbol.cc
         Target.cc
         TargetGetter.cc
-        TargetParser.cc
         Token.cc
         TokenGroup.cc
         TokenNode.cc
@@ -97,7 +96,9 @@ add_library(xlr8-library STATIC
         ValueExpression.cc
         VariableExpression.cc
         Visibility.cc
-        VoidExpression.cc)
+        VoidExpression.cc
+        Output.cc
+        Output.h)
 
 target_include_directories(xlr8-library PRIVATE ${PROJECT_BINARY_DIR})
 

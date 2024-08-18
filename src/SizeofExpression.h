@@ -40,7 +40,7 @@ class Object;
 class SizeofExpression: public BaseExpression {
 public:
     explicit SizeofExpression(const Location& location, Symbol object_name): BaseExpression(location), object_name{object_name} {}
-    explicit SizeofExpression(const Location& location, const Object* object): BaseExpression(location), object_name{object->name.as_symbol()}, object{object}, size_range{object->size_range()} {}
+    explicit SizeofExpression(const Location& location, const Object* object): BaseExpression(location), object_name{object->name}, object{object}, size_range{object->size_range()} {}
 
     static Expression create(const Location& location, const std::vector<Expression>& arguments);
     static Expression create(const Location& location, const Object* object);

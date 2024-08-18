@@ -70,7 +70,7 @@ Expression Function::call(const Location& location, const std::vector<Expression
 
 
 void Function::serialize(std::ostream& stream) const {
-    stream << ".function " << name.as_string() << " {" << std::endl;
+    stream << ".function " << name << " {" << std::endl;
     serialize_callable(stream);
     stream << "    " DEFINITION ": " << definition << std::endl;
     stream << "}" << std::endl;

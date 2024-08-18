@@ -37,22 +37,32 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Symbol.h"
 
 class Location {
-public:
+  public:
     Location() = default;
 
-    explicit Location(const std::string& file_name): file(file_name) {}
+    explicit Location(const std::string& file_name) : file(file_name) {}
+
     Location(Symbol file, size_t line_number, size_t start_column, size_t end_column) : file(file), start_line_number(line_number), start_column(start_column), end_column(end_column) {}
+
     Location(const Location& start, const Location& end);
 
     void extend(const Location& end);
 
-    [[nodiscard]] bool empty() const {return file.empty();}
+    [[nodiscard]] bool empty() const { return file.empty(); }
+    bool operator==(const Location &other) const;
+
     [[nodiscard]] std::string to_string() const;
 
     Symbol file;
     size_t start_line_number = 0;
     size_t start_column = 0;
     size_t end_column = 0;
+};
+
+template <> struct std::hash<Location> {
+    std::size_t operator()(const Location& location) const noexcept {
+        return std::hash<Symbol>()(location.file) ^ (std::hash<size_t>()(location.start_line_number) << 1) ^ (std::hash<size_t>()(location.start_column) << 2) ^ (std::hash<size_t>()(location.end_column) << 3);
+    }
 };
 
 #endif // LOCATION_H

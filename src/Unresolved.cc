@@ -33,24 +33,28 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <algorithm>
 
+#include "Entity.h"
 #include "FileReader.h"
 
-void Unresolved::Part::add(const Token& user, Symbol used) {
+Unresolved::Part::User::User(const Entity* entity): name{entity->name}, location{entity->location} {}
+
+void Unresolved::Part::add(const User& user, Symbol used) {
     const auto it = unresolved.find(used);
 
     if (it == unresolved.end()) {
-        unresolved[used] = std::unordered_set<Token>{user};
+        unresolved[used] = std::unordered_set<User>{user};
     }
     else {
         it->second.insert(user);
     }
 }
 
+
 void Unresolved::Part::add(const Part& other) {
     unresolved.insert(other.unresolved.begin(), other.unresolved.end());
 }
 
-void Unresolved::add(const Token& user, const EvaluationResult& result) {
+void Unresolved::add(const Part::User& user, const EvaluationResult& result) {
     for (auto& name : result.unresolved_functions) {
         functions.add(user, name);
     }
@@ -88,18 +92,18 @@ void Unresolved::Part::report() const {
             throw Exception("internal error: unresolved symbol %s diapperead", unresolved_symbol.c_str());
         }
         auto& users = it->second;
-        auto sorted_users = std::vector<Token>{users.begin(), users.end()};
-        std::sort(sorted_users.begin(), sorted_users.end(), [](const Token& a, const Token& b) {
-            return a.as_symbol() < b.as_symbol();
+        auto sorted_users = std::vector<User>{users.begin(), users.end()};
+        std::ranges::sort(sorted_users, [](const User& a, const User& b) {
+            return a.name < b.name;
         });
         FileReader::global.error({}, "unresolved %s %s, referenced by:", type.c_str(), unresolved_symbol.c_str());
         for (auto& user : sorted_users) {
             auto location = user.location.to_string();
             if (location.empty()) {
-                FileReader::global.error({}, "    %s", user.as_symbol().c_str());
+                FileReader::global.error({}, "    %s", user.name.c_str());
             }
             else {
-                FileReader::global.error({}, "    %s (%s)", user.as_symbol().c_str(), location.c_str());
+                FileReader::global.error({}, "    %s (%s)", user.name.c_str(), location.c_str());
             }
         }
     }

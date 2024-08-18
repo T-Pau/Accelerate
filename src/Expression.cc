@@ -125,7 +125,7 @@ Symbol Expression::variable_name() const {
         return variable->symbol;
     }
     if (auto object = as_object()) {
-        return object->object->name.as_symbol();
+        return object->object->name;
     }
     return {};
 }

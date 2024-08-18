@@ -39,7 +39,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "BodyParser.h"
 
 bool TargetParser::initialized = false;
-std::unordered_map<Symbol, void (TargetParser::*)()> TargetParser::parser_methods;
+std::unordered_map<Symbol, void (TargetParser::*)(const Token& directive)> TargetParser::parser_methods;
 const Token TargetParser::token_address = Token(Token::NAME, "address");
 const Token TargetParser::token_colon = Token(Token::PUNCTUATION, ":");
 const Token TargetParser::token_cpu = Token(Token::DIRECTIVE, "cpu");
@@ -114,11 +114,11 @@ void TargetParser::parse_directive(const Token &directive) {
     if (it == parser_methods.end()) {
         throw ParseException(directive, "unknown directive");
     }
-    (this->*it->second)();
+    (this->*it->second)(directive);
 }
 
 
-void TargetParser::parse_output() {
+void TargetParser::parse_output(const Token& directive) {
     auto token = tokenizer.next();
     if (token != Token::curly_open) {
         tokenizer.skip_until(TokenGroup::newline, true);
@@ -126,12 +126,12 @@ void TargetParser::parse_output() {
     }
 
     Target::set_current_target(&target);
-    target.output = BodyParser(tokenizer, target.cpu, false).parse();
+    target.output = std::make_unique<Output>(directive.location, BodyParser(tokenizer, target.cpu, false).parse());
     Target::clear_current_target();
 }
 
 
-void TargetParser::parse_section() {
+void TargetParser::parse_section(const Token& directive) {
     auto name = tokenizer.expect(Token::NAME, TokenGroup::newline);
     auto parse_value = ParsedValue::parse(tokenizer);
     auto parameters = parse_value->as_dictionary();
@@ -167,7 +167,7 @@ void TargetParser::parse_section() {
 }
 
 
-void TargetParser::parse_segment() {
+void TargetParser::parse_segment(const Token& directive) {
     auto name = tokenizer.expect(Token::NAME, TokenGroup::newline);
     auto parse_value = ParsedValue::parse(tokenizer);
     auto parameters = parse_value->as_dictionary();
@@ -249,7 +249,7 @@ MemoryMap::Block TargetParser::parse_single_address(const ParsedScalar *address)
     return {bank, start, size};
 }
 
-void TargetParser::parse_cpu() {
+void TargetParser::parse_cpu(const Token& directive) {
     auto name = tokenizer.expect(Token::STRING, TokenGroup::newline);
 
     try {
@@ -261,13 +261,13 @@ void TargetParser::parse_cpu() {
     }
 }
 
-void TargetParser::parse_extension() {
+void TargetParser::parse_extension(const Token& directive) {
     auto token = tokenizer.expect(Token::STRING, TokenGroup::newline);
 
     target.extension = token.as_string();
 }
 
-void TargetParser::parse_default_string_encoding() {
+void TargetParser::parse_default_string_encoding(const Token& directive) {
     auto token = tokenizer.expect(Token::STRING, TokenGroup::newline);
     target.default_string_encoding = target.string_encoding(token.as_symbol());
     if (!target.default_string_encoding) {
@@ -275,13 +275,13 @@ void TargetParser::parse_default_string_encoding() {
     }
 }
 
-void TargetParser::parse_define() {
+void TargetParser::parse_define(const Token& directive) {
     auto token = tokenizer.expect(Token::NAME, TokenGroup::newline);
 
     target.defines.insert(token.as_symbol());
 }
 
-void TargetParser::parse_string_encoding() {
+void TargetParser::parse_string_encoding(const Token& directive) {
     auto name = tokenizer.expect(Token::NAME, TokenGroup::newline);
     auto parse_value = ParsedValue::parse(tokenizer);
     if (target.string_encoding(name.as_symbol())) {
@@ -290,7 +290,7 @@ void TargetParser::parse_string_encoding() {
     target.string_encodings[name.as_symbol()] = StringEncoding(name.as_symbol(), parse_value, target);
 }
 
-void TargetParser::parse_undefine() {
+void TargetParser::parse_undefine(const Token& directive) {
     auto token = tokenizer.expect(Token::NAME, TokenGroup::newline);
 
     target.defines.erase(token.as_symbol());

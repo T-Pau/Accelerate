@@ -39,7 +39,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "VariableExpression.h"
 #include <complex>
 
-LabelExpression::LabelExpression(const Location& location, const Entity* object, Symbol label_name, const SizeRange& offset) : BaseExpression(location), label_type(LabelExpressionType::NAMED), object_name(object ? object->name.as_symbol() : Symbol()), label_name(label_name), object(object), offset(offset) {}
+LabelExpression::LabelExpression(const Location& location, const Entity* object, Symbol label_name, const SizeRange& offset) : BaseExpression(location), label_type(LabelExpressionType::NAMED), object_name(object ? object->name : Symbol()), label_name(label_name), object(object), offset(offset) {}
 
 Expression LabelExpression::create(const Location& location, const std::vector<Expression>& arguments) {
     if (arguments.size() == 1) {
@@ -121,7 +121,7 @@ std::optional<Expression> LabelExpression::evaluated(const EvaluationContext& co
         // TODO: review this section for new label resolution
         if (!object) {
             if (context.entity && context.entity->is_object()) {
-                if (object_name.empty() || object_name == context.entity->name.as_symbol()) {
+                if (object_name.empty() || object_name == context.entity->name) {
                     new_object = context.entity;
                 }
                 else {

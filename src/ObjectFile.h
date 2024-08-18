@@ -104,7 +104,7 @@ private:
     };
 
     Object* insert_object(std::unique_ptr<Object> object);
-    void add_to_environment(const Constant& constant) { add_to_environment(constant.name.as_symbol(), constant.visibility, constant.value);}
+    void add_to_environment(const Constant& constant) { add_to_environment(constant.name, constant.visibility, constant.value);}
     void add_to_environment(Object* object);
     void add_to_environment(Symbol symbol_name, Visibility visibility, Expression value) const;
 

@@ -108,7 +108,7 @@ std::ostream& operator<< (std::ostream& stream, const Object& object) {
 
 
 void Object::serialize(std::ostream &stream) const {
-    stream << ".object " << name.as_string() << " {" << std::endl;
+    stream << ".object " << name << " {" << std::endl;
     serialize_entity(stream);
     if (address) {
         stream << "    " ADDRESS ": " << *address << std::endl;
@@ -188,5 +188,5 @@ bool Object::operator<(const Object& other) const {
         return size_range().size() > other.size_range().size();
     }
 
-    return name.as_symbol() < other.name.as_symbol();
+    return name < other.name;
 }

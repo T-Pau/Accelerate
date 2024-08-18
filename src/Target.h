@@ -36,6 +36,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "CPU.h"
 #include "MemoryMap.h"
+#include "Output.h"
 #include "StringEncoding.h"
 
 class ObjectFile;
@@ -63,7 +64,7 @@ public:
     const StringEncoding* default_string_encoding{};
 
     std::shared_ptr<ObjectFile> object_file;
-    Body output;
+    std::unique_ptr<Output> output;
 
     std::string extension = "bin";
 };

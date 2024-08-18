@@ -44,10 +44,8 @@ const Token Entity::token_default_only = Token(Token::NAME, DEFAULT_ONLY);
 const Token Entity::token_visibility = Token(Token::NAME, VISIBILITY);
 
 
-Entity::Entity(ObjectFile* owner, const Token& name_, const std::shared_ptr<ParsedValue>& definition): owner(owner), environment(std::make_shared<Environment>(owner->private_environment)) {
+Entity::Entity(ObjectFile* owner, const Token& name_, const std::shared_ptr<ParsedValue>& definition): name(name_.as_symbol()), location(name_.location), environment(std::make_shared<Environment>(owner->private_environment)) {
     const auto parameters = definition->as_dictionary();
-
-    name = name_;
 
     if (const auto default_only_definition = parameters->get_optional(token_default_only)) {
         auto tokenizer = SequenceTokenizer(default_only_definition->as_scalar()->tokens);
@@ -66,7 +64,7 @@ Entity::Entity(ObjectFile* owner, const Token& name_, const std::shared_ptr<Pars
     visibility = *visibility_;
 }
 
-Entity::Entity(ObjectFile* owner, const Token& name, Visibility visibility, bool default_only): name(name), visibility(visibility), owner(owner), environment(std::make_shared<Environment>(owner->private_environment)), default_only{default_only} {}
+Entity::Entity(ObjectFile* owner, const Token& name, Visibility visibility, bool default_only): name(name.as_symbol()), location(name.location), visibility(visibility), owner(owner), environment(std::make_shared<Environment>(owner->private_environment)), default_only{default_only} {}
 
 
 void Entity::serialize_entity(std::ostream& stream) const {
@@ -113,7 +111,7 @@ bool Entity::check_unresolved(const std::unordered_set<Symbol>& unresolved, Unre
     }
 
     for (auto& unresolved_name: unresolved) {
-        part.add(name, unresolved_name);
+        part.add(this, unresolved_name);
     }
     return false;
 }
@@ -127,7 +125,7 @@ void Entity::evaluate() {
         process_result(result);
     }
     catch (Exception &ex) {
-        FileReader::global.error(ParseException(name.location, ex));
+        FileReader::global.error(ParseException(location, ex));
         // TODO: throw empty expression?
     }
 }
@@ -145,7 +143,7 @@ void Entity::resolve_labels() {
         evaluate_inner(context2);
     }
     catch (Exception &ex) {
-        FileReader::global.error(ParseException(name.location, ex));
+        FileReader::global.error(ParseException(location, ex));
         // TODO: throw empty expression?
     }
 }

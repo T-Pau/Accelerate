@@ -53,7 +53,7 @@ protected:
     [[nodiscard]] std::optional<Value> maximum_value() const override;
     [[nodiscard]] std::optional<Value> minimum_value() const override;
 
-    void serialize_sub(std::ostream& stream) const override {stream << object->name.as_string();}
+    void serialize_sub(std::ostream& stream) const override {stream << object->name;}
 
 private:
 };

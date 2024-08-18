@@ -34,7 +34,6 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "BodyParser.h"
 #include "ExpressionParser.h"
 #include "FileReader.h"
-#include "LabelBody.h"
 #include "ParseException.h"
 
 const Symbol Assembler::symbol_opcode = Symbol(".opcode");
@@ -170,7 +169,7 @@ void Assembler::parse_assignment(Visibility visibility, const Token& name, bool 
     object_file->add_constant(std::make_unique<ObjectFile::Constant>(object_file.get(), name, visibility, default_only, value));
 }
 
-void Assembler::parse_cpu() {
+void Assembler::parse_cpu(const Token& directive) {
     const auto name = tokenizer.expect(Token::STRING, TokenGroup::newline);
 
     try {
@@ -187,7 +186,7 @@ void Assembler::parse_cpu() {
     }
 }
 
-void Assembler::parse_default() {
+void Assembler::parse_default(const Token& directive) {
     auto visibility = std::optional<Visibility>();
 
     while (true) {
@@ -213,7 +212,7 @@ void Assembler::parse_default() {
     }
 }
 
-void Assembler::parse_default_string_encoding() {
+void Assembler::parse_default_string_encoding(const Token& directive) {
     auto token = tokenizer.expect(Token::NAME, TokenGroup::newline);
     parsed_target.default_string_encoding = parsed_target.string_encoding(token.as_symbol());
     if (!parsed_target.default_string_encoding) {
@@ -221,13 +220,13 @@ void Assembler::parse_default_string_encoding() {
     }
 }
 
-void Assembler::parse_pin() {
+void Assembler::parse_pin(const Token& directive) {
     auto name = tokenizer.expect(Token::NAME, TokenGroup::newline);
     auto address = ExpressionParser(tokenizer).parse();
     object_file->pin(name.as_symbol(), address);
 }
 
-void Assembler::parse_section() {
+void Assembler::parse_section(const Token& directive) {
     auto name = tokenizer.expect(Token::NAME, TokenGroup::newline);
 
     if (tokenizer.peek().is_end_of_line()) {
@@ -315,7 +314,7 @@ void Assembler::parse_section() {
     }
 }
 
-void Assembler::parse_segment() {
+void Assembler::parse_segment(const Token& directive) {
     auto name = tokenizer.expect(Token::NAME, TokenGroup::newline);
     auto parse_value = ParsedValue::parse(tokenizer);
     tokenizer.unget(Token{Token::NEWLINE, tokenizer.current_location()});
@@ -411,7 +410,7 @@ void Assembler::parse_directive(const Token& directive) {
     else {
         auto it = directives.find(directive);
         if (it != directives.end() && (parsing_target || !it->second.target_only)) {
-            (this->*it->second.parse)();
+            (this->*it->second.parse)(directive);
         }
         else {
             throw ParseException(directive, "unknown directive");
@@ -420,23 +419,23 @@ void Assembler::parse_directive(const Token& directive) {
     tokenizer.expect(Token::NEWLINE, TokenGroup::newline);
 }
 
-void Assembler::parse_extension() {
+void Assembler::parse_extension(const Token& directive) {
     auto token = tokenizer.expect(Token::STRING, TokenGroup::newline);
 
     parsed_target.extension = token.as_string();
 }
 
-void Assembler::parse_output() {
+void Assembler::parse_output(const Token& directive) {
     auto token = tokenizer.next();
     if (token != Token::curly_open) {
         tokenizer.skip_until(TokenGroup::newline, true);
         throw ParseException(token, "expected '{'");
     }
 
-    parsed_target.output = BodyParser(tokenizer, parsed_target.cpu, false, &tokenizer.defines).parse();
+    parsed_target.output = std::make_unique<Output>(&parsed_target, directive.location, BodyParser(tokenizer, parsed_target.cpu, false, &tokenizer.defines).parse());
 }
 
-void Assembler::parse_string_encoding() {
+void Assembler::parse_string_encoding(const Token& directive) {
     auto name = tokenizer.expect(Token::NAME, TokenGroup::newline);
     if (tokenizer.peek().is_end_of_line()) {
         // TODO: set current string encoding
@@ -455,7 +454,7 @@ void Assembler::parse_string_encoding() {
     }
 }
 
-void Assembler::parse_target() {
+void Assembler::parse_target(const Token& directive) {
     if (parsing_target) {
         throw ParseException(tokenizer.current_location(), "unknown directive");
     }
@@ -472,13 +471,13 @@ void Assembler::parse_target() {
     }
 }
 
-void Assembler::parse_use() {
+void Assembler::parse_use(const Token& directive) {
     auto name = tokenizer.expect(Token::NAME, TokenGroup::newline);
 
     object_file->mark_used(name.as_symbol());
 }
 
-void Assembler::parse_visibility() {
+void Assembler::parse_visibility(const Token& directive) {
     auto name = tokenizer.expect(Token::NAME);
     if (auto visibility = VisibilityHelper::from_token(name)) {
         current_visibility = *visibility;

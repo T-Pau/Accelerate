@@ -75,13 +75,13 @@ void Linker::link() {
     environment->add_next(target->object_file->private_environment);
     environment->add_next(program->public_environment);
     auto context = EvaluationContext{result, EvaluationContext::ENTITY, environment};
-    output_body = target->output;
+    output_body = target->output->body;
     output_body.evaluate(context);
     result.unresolved_variables.erase(Assembler::token_data_end.as_symbol());
     result.unresolved_variables.erase(Assembler::token_data_size.as_symbol());
     result.unresolved_variables.erase(Assembler::token_data_start.as_symbol());
     unresolved.clear();
-    unresolved.add(Token(Token::NAME, ".output"), result);
+    unresolved.add(target->output.get(), result);
     unresolved.report();
 
     if (FileReader::global.had_error()) {
@@ -111,7 +111,7 @@ void Linker::link() {
     std::ranges::sort(sorted_objects, Object::less_pointers);
     for (auto object: sorted_objects) {
         if (!object->size_range().size()) {
-            FileReader::global.error({}, "object '%s' has unknown size", object->name.as_string().c_str());
+            FileReader::global.error({}, "object '%s' has unknown size", object->name.c_str());
             if (FileReader::global.verbose_error_messages) {
                 std::cout << object->body;
             }
@@ -133,7 +133,7 @@ void Linker::link() {
                 }
             }
             if (!object->address) {
-                FileReader::global.error({}, "no space left for %s ($%llx bytes) in section %s", object->name.as_string().c_str(), *object->size_range().size(), object->section->name.c_str());
+                FileReader::global.error({}, "no space left for %s ($%llx bytes) in section %s", object->name.c_str(), *object->size_range().size(), object->section->name.c_str());
                 continue;
             }
         }
@@ -161,7 +161,7 @@ void Linker::link() {
             }
         }
         catch (Exception& ex) {
-            FileReader::global.error(Location(), "can't encode '%s': %s", object->name.as_string().c_str(), ex.what());
+            FileReader::global.error(Location(), "can't encode '%s': %s", object->name.c_str(), ex.what());
             if (FileReader::global.verbose_error_messages) {
                 std::cout << object->body;
             }
@@ -174,7 +174,7 @@ void Linker::output(const std::string &file_name) {
 
     for (const auto& object: objects) {
         if (object->has_address()) {
-            environment->add(object->name.as_symbol(), Expression(object->name.location, object->address->address));
+            environment->add(object->name, Expression(object->location, object->address->address));
         }
     }
 
@@ -237,7 +237,7 @@ void Linker::output_symbol_map(const std::string& file_name) {
     for (const auto& object: sorted_objects) {
         stream << "object\t" << *object->address;
         stream << "\t$" << std::setfill('0') << std::setw(4) << std::hex << *object->size_range().size() << std::dec;
-        stream << "\t" << object->name.as_symbol();
+        stream << "\t" << object->name;
         stream << "\t" << object->section->name << "\t" << (object->is_reservation() ? "reserve" : "data") << "\n";
     }
 }

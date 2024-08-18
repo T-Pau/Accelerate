@@ -51,15 +51,15 @@ protected:
     void parse_directive(const Token& directive) override;
 
 private:
-    void parse_cpu();
-    void parse_default_string_encoding();
-    void parse_define();
-    void parse_extension();
-    void parse_output();
-    void parse_section();
-    void parse_segment();
-    void parse_string_encoding();
-    void parse_undefine();
+    void parse_cpu(const Token& directive);
+    void parse_default_string_encoding(const Token& directive);
+    void parse_define(const Token& directive);
+    void parse_extension(const Token& directive);
+    void parse_output(const Token& directive);
+    void parse_section(const Token& directive);
+    void parse_segment(const Token& directive);
+    void parse_string_encoding(const Token& directive);
+    void parse_undefine(const Token& directive);
 
     static std::vector<MemoryMap::Block> parse_address(const ParsedValue* address);
     static MemoryMap::Block parse_single_address(const ParsedScalar* address);
@@ -72,7 +72,7 @@ private:
 
     static void initialize();
     static bool initialized;
-    static std::unordered_map<Symbol, void (TargetParser::*)()> parser_methods;
+    static std::unordered_map<Symbol, void (TargetParser::*)(const Token& directive)> parser_methods;
     static const Token token_address;
     static const Token token_colon;
     static const Token token_cpu;

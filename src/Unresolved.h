@@ -38,34 +38,68 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "EvaluationResult.h"
 #include "Symbol.h"
-#include "Token.h"
+
+class Entity;
 
 class Unresolved {
-public:
+  public:
     class Part {
-    public:
-        Part(std::string type): type{std::move(type)} {}
+      public:
+        class User {
+          public:
+            User(const Entity* entity);
 
-        void add(const Token& user, Symbol used);
+            User(Symbol name, const Location& location) : name{name}, location{location} {}
+
+            bool operator==(const User &other) const {return name == other.name && location == other.location;}
+
+            Symbol name;
+            Location location;
+        };
+
+        Part(std::string type) : type{std::move(type)} {}
+
+        void add(const Entity* user, Symbol used) { add(User{user}, used); }
+
+        void add(Symbol name, const Location& location, Symbol used) { add(User{name, location}, used); }
+
+        void add(const User& user, Symbol used);
         void add(const Part& other);
-        void clear() {unresolved.clear();}
-        [[nodiscard]] bool empty() const { return unresolved.empty();}
+
+        void clear() { unresolved.clear(); }
+
+        [[nodiscard]] bool empty() const { return unresolved.empty(); }
+
         void report() const;
 
-    private:
+      private:
         std::string type;
-
-        std::unordered_map<Symbol, std::unordered_set<Token>> unresolved;
+        std::unordered_map<Symbol, std::unordered_set<User>> unresolved;
     };
 
-    void add(const Token& user, const EvaluationResult& result);
+    void add(const Entity* user, const EvaluationResult& result) { add(Part::User{user}, result); }
+
+    void add(Symbol name, const Location& location, const EvaluationResult& result) { add(Part::User{name, location}, result); }
+
     void add(const Unresolved& other);
     void clear();
-    [[nodiscard]] bool empty() const {return functions.empty() && macros.empty() && variables.empty();}
+
+    [[nodiscard]] bool empty() const { return functions.empty() && macros.empty() && variables.empty(); }
+
     void report() const;
 
     Part functions{"function"};
     Part macros{"macro"};
     Part variables{"variable"};
+
+  private:
+    void add(const Part::User& user, const EvaluationResult& result);
 };
-#endif //UNRESOLVED_H
+
+template <> struct std::hash<Unresolved::Part::User> {
+    std::size_t operator()(const Unresolved::Part::User& user) const noexcept {
+        return std::hash<Symbol>()(user.name) ^ (std::hash<Location>()(user.location) << 1);
+    }
+};
+
+#endif // UNRESOLVED_H
