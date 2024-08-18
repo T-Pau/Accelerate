@@ -32,6 +32,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ObjectFile.h"
 
 #include <algorithm>
+#include <ranges>
 
 #include "FileReader.h"
 #include "ObjectExpression.h"
@@ -85,8 +86,8 @@ void ObjectFile::serialize(std::ostream& stream) const {
         stream << std::endl;
     }
 
-    for (const auto& pair : pinned_objects) {
-        stream << ".pin " << pair.second.name << " " << pair.second.address;
+    for (const auto& pinned_object : pinned_objects | std::views::values) {
+        stream << ".pin " << pinned_object.name << " " << pinned_object.address;
     }
 
     if (!explicitly_used_object_names.empty()) {
@@ -98,7 +99,7 @@ void ObjectFile::serialize(std::ostream& stream) const {
     }
 
     names.clear();
-    for (const auto& [name, _] : constants) {
+    for (const auto& name: constants | std::views::keys) {
         names.emplace_back(name);
     }
     std::ranges::sort(names);
@@ -107,7 +108,7 @@ void ObjectFile::serialize(std::ostream& stream) const {
     }
 
     names.clear();
-    for (const auto& [name, _] : functions) {
+    for (const auto& name: functions | std::views::keys) {
         names.emplace_back(name);
     }
     std::ranges::sort(names);
@@ -116,7 +117,7 @@ void ObjectFile::serialize(std::ostream& stream) const {
     }
 
     names.clear();
-    for (const auto& [name, _] : macros) {
+    for (const auto& name: macros | std::views::keys) {
         names.emplace_back(name);
     }
     std::ranges::sort(names);
@@ -125,7 +126,7 @@ void ObjectFile::serialize(std::ostream& stream) const {
     }
 
     names.clear();
-    for (const auto& [name, _] : objects) {
+    for (const auto& name: objects | std::views::keys) {
         names.emplace_back(name);
     }
     std::ranges::sort(names);
@@ -161,9 +162,9 @@ void ObjectFile::add_object_file(const std::shared_ptr<ObjectFile>& file) {
         target = file->target;
     }
 
-    for (auto& pair : file->constants) {
+    for (auto& constant : file->constants | std::views::values) {
         try {
-            add_constant(std::move(pair.second));
+            add_constant(std::move(constant));
         } catch (Exception& ex) {
             FileReader::global.error(ex);
             ok = false;
@@ -171,9 +172,9 @@ void ObjectFile::add_object_file(const std::shared_ptr<ObjectFile>& file) {
     }
     file->constants.clear();
 
-    for (auto& pair : file->macros) {
+    for (auto& macro : file->macros | std::views::values) {
         try {
-            add_macro(std::move(pair.second));
+            add_macro(std::move(macro));
         } catch (Exception& ex) {
             FileReader::global.error(ex);
             ok = false;
@@ -181,9 +182,9 @@ void ObjectFile::add_object_file(const std::shared_ptr<ObjectFile>& file) {
     }
     file->macros.clear();
 
-    for (auto& pair : file->functions) {
+    for (auto& function : file->functions | std::views::values) {
         try {
-            add_function(std::move(pair.second));
+            add_function(std::move(function));
         } catch (Exception& ex) {
             FileReader::global.error(ex);
             ok = false;
@@ -191,9 +192,9 @@ void ObjectFile::add_object_file(const std::shared_ptr<ObjectFile>& file) {
     }
     file->functions.clear();
 
-    for (auto& pair : file->objects) {
+    for (auto& object : file->objects | std::views::values) {
         try {
-            add_object(std::move(pair.second));
+            add_object(std::move(object));
         } catch (Exception& ex) {
             FileReader::global.error(ex);
             ok = false;
@@ -230,19 +231,21 @@ void ObjectFile::add_object_file(const std::shared_ptr<ObjectFile>& file) {
 }
 
 void ObjectFile::evaluate() {
-    for (auto& pair : constants) {
+    for (auto& constant : constants | std::views::values) {
+        // TODO: this causes the error for cyclic definition to be printed four times
+        //constant->evaluate();
         EvaluationResult result;
-        pair.second->value.evaluate(EvaluationContext(result, pair.second.get()));
-        pair.second->process_result(result);
+        constant->value.evaluate(EvaluationContext(result, constant.get()));
+        constant->process_result(result);
     }
-    for (auto& pair : objects) {
-        pair.second->evaluate();
+    for (auto& object : objects | std::views::values) {
+        object->evaluate();
     }
-    for (auto& pair : functions) {
-        pair.second->evaluate();
+    for (auto& function : functions | std::views::values) {
+        function->evaluate();
     }
-    for (auto& pair : macros) {
-        pair.second->evaluate();
+    for (auto& macro : macros | std::views::values) {
+        macro->evaluate();
     }
 
     unresolved_used.clear();
@@ -373,7 +376,7 @@ std::vector<Object*> ObjectFile::all_objects() const {
     std::vector<Object*> v;
 
     v.reserve(objects.size());
-    for (auto& [_, object] : objects) {
+    for (auto& object : objects | std::views::values) {
         v.emplace_back(object.get());
     }
 
@@ -499,17 +502,17 @@ std::shared_ptr<Environment> ObjectFile::environment(Visibility visibility) cons
 
 bool ObjectFile::check_unresolved(Unresolved& unresolved) const {
     auto ok = true;
-    for (auto& pair : constants) {
-        ok = pair.second->check_unresolved(unresolved) && ok;
+    for (auto& constant : constants | std::views::values) {
+        ok = constant->check_unresolved(unresolved) && ok;
     }
-    for (auto& pair : functions) {
-        ok = pair.second->check_unresolved(unresolved) && ok;
+    for (auto& function : functions | std::views::values) {
+        ok = function->check_unresolved(unresolved) && ok;
     }
-    for (auto& pair : macros) {
-        ok = pair.second->check_unresolved(unresolved) && ok;
+    for (auto& macro : macros | std::views::values) {
+        ok = macro->check_unresolved(unresolved) && ok;
     }
-    for (auto& pair : objects) {
-        ok = pair.second->check_unresolved(unresolved) && ok;
+    for (auto& object : objects | std::views::values) {
+        ok = object->check_unresolved(unresolved) && ok;
     }
     if (!unresolved_used.empty()) {
         unresolved.add(unresolved_used);
