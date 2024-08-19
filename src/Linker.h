@@ -1,5 +1,5 @@
 /*
-Linker.h -- 
+Linker.h --
 
 Copyright (C) Dieter Baron
 
@@ -35,42 +35,42 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <unordered_set>
 #include <vector>
 
-#include "Target.h"
 #include "ObjectFile.h"
+#include "Target.h"
+
+class LibraryLinker;
+class ProgramLinker;
 
 class Linker {
-public:
-    enum Mode {
-        CREATE_LIBRARY,
-        LINK
-    };
-
+  public:
     Linker() = default;
     explicit Linker(const Target* target_) {set_target(target_);}
+    virtual ~Linker() = default;
+
+    [[nodiscard]] LibraryLinker* as_library_linker();
+    [[nodiscard]] ProgramLinker* as_program_linker();
+    [[nodiscard]] bool is_library_linker() {return as_library_linker();}
+    [[nodiscard]] bool is_program_linker() {return as_program_linker();}
 
     void add_file(const std::shared_ptr<ObjectFile>& file) {program->add_object_file(file);}
+
     void add_library(std::shared_ptr<ObjectFile> library);
     void set_target(const Target* new_target);
 
     void link();
-    void output(const std::string& file_name);
-    void output_symbol_map(const std::string& file_name);
+    virtual void output(const std::string& file_name) = 0;
 
     const Target* target = nullptr;
-    Mode mode = LINK;
-    Body output_body;
-
     std::shared_ptr<ObjectFile> program = std::make_shared<ObjectFile>();
 
-private:
-
-    std::vector<std::shared_ptr<ObjectFile>> libraries;
+  protected:
+    virtual void link_sub() = 0;
+    virtual std::unordered_set<Entity*> roots() = 0;
 
     bool add_object(Object* object);
 
+    std::vector<std::shared_ptr<ObjectFile>> libraries;
     std::unordered_set<Object*> objects;
-
-    Memory memory;
 };
 
 #endif // LINKER_H

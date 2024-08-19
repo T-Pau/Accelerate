@@ -52,6 +52,7 @@ class Entity {
     [[nodiscard]] bool is_default_only() const {return default_only;}
     [[nodiscard]] bool is_macro() {return as_macro();}
     [[nodiscard]] bool is_object() {return as_object();}
+    [[nodiscard]] bool is_public() const {return visibility == Visibility::PUBLIC;}
     void set_owner(ObjectFile* new_owner);
 
     // TODO: make protected once BodyParser doesn't evaluate body directly.

@@ -98,7 +98,11 @@ add_library(xlr8-library STATIC
         Visibility.cc
         VoidExpression.cc
         Output.cc
-        Output.h)
+        Output.h
+        ProgramLinker.cc
+        ProgramLinker.h
+        LibraryLinker.cc
+        LibraryLinker.h)
 
 target_include_directories(xlr8-library PRIVATE ${PROJECT_BINARY_DIR})
 

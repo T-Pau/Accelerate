@@ -1,5 +1,5 @@
 /*
-xlr8.cc -- 
+xlr8.cc --
 
 Copyright (C) Dieter Baron
 
@@ -33,16 +33,16 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <vector>
 
 #include "Assembler.h"
+#include "CPUGetter.h"
 #include "CPUParser.h"
 #include "Command.h"
 #include "Exception.h"
 #include "LibraryGetter.h"
-#include "Linker.h"
-#include "ObjectFileParser.h"
+#include "LibraryLinker.h"
+#include "ParseException.h"
+#include "ProgramLinker.h"
 #include "TargetGetter.h"
 #include "config.h"
-#include "CPUGetter.h"
-#include "ParseException.h"
 
 class xlr8: public Command {
 public:
@@ -95,13 +95,13 @@ int main(int argc, char *argv[]) {
 
 void xlr8::process() {
     std::optional<std::string> target_name;
+    auto create_program = true;
     auto ok = true;
-    linker = std::make_unique<Linker>();
 
     for (const auto& option: arguments.options) {
         try {
             if (option.name == "create-library") {
-                linker->mode = Linker::CREATE_LIBRARY;
+                create_program = false;
             }
             else if (option.name == "define") {
                 defines.insert(Symbol(option.argument));
@@ -143,6 +143,13 @@ void xlr8::process() {
     LibraryGetter::global.path->append_path(system_path, "lib");
     TargetGetter::global.path->append_path(system_path, "target");
     CPUGetter::global.path->append_path(system_path, "cpu");
+
+    if (create_program) {
+        linker = std::make_unique<ProgramLinker>();
+    }
+    else {
+        linker = std::make_unique<LibraryLinker>();
+    }
 
     if (target_name) {
         linker->set_target(&Target::get(*target_name));
@@ -188,25 +195,20 @@ void xlr8::process() {
 
         case 1:
             if (!output_file) {
-                switch (linker->mode) {
-                    case Linker::CREATE_LIBRARY:
-                        set_output_file(files[0].name, "lib");
-                    break;
-
-                    case Linker::LINK:
-                        set_output_file(files[0].name, linker->target->extension);
-                    break;
+                if (create_program) {
+                    set_output_file(files[0].name, linker->target->extension);
+                }
+                else {
+                    set_output_file(files[0].name, "lib");
                 }
             }
-        if (linker->mode == Linker::LINK && !output_file.has_value()) {
-        }
-        break;
+            break;
 
         default:
             if (!output_file.has_value()) {
                 throw Exception("option --output required with multiple source files");
             }
-        break;
+            break;
     }
 
     for (const auto& file: files) {
@@ -222,37 +224,15 @@ void xlr8::process() {
         throw Exception();
     }
 
-    if (linker->mode == Linker::LINK) {
-        linker->link();
-    }
-    else {
-        Target::set_current_target(linker->target);
-        linker->program->evaluate();
-        linker->program->evaluate(); // TODO: shouldn't be necessary
-        linker->program->evaluate(); // TODO: shouldn't be necessary
-        Unresolved unresolved;
-        if (!linker->program->check_unresolved(unresolved)) {
-            unresolved.report();
-            throw Exception();
-        }
-        //linker->program->remove_private_constants();
-    }
+    linker->link();
 }
 
 void xlr8::create_output() {
-    switch (linker->mode) {
-        case Linker::CREATE_LIBRARY: {
-            auto stream = std::ofstream(output_file.value());
-            stream << *(linker->program);
-            break;
-        }
+    linker->output(output_file.value());
 
-        case Linker::LINK: {
-            linker->output(output_file.value());
-            if (auto map_file = arguments.find_last("symbol-map")) {
-                linker->output_symbol_map(*map_file);
-            }
-            break;
+    if (auto program_linker = linker->as_program_linker()) {
+        if (auto map_file = arguments.find_last("symbol-map")) {
+            program_linker->output_symbol_map(*map_file);
         }
     }
 }

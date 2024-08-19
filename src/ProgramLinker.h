@@ -1,9 +1,12 @@
+#ifndef PROGRAM_LINKER_H
+#define PROGRAM_LINKER_H
+
 /*
-Linker.cc -- 
+ProgramLinker.h -- 
 
 Copyright (C) Dieter Baron
 
-The authors can be contacted at <assembler@tpau.group>
+The authors can be contacted at <accelerate@tpau.group>
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions
@@ -31,47 +34,18 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "Linker.h"
 
-#include <fstream>
+class ProgramLinker: public Linker {
+  public:
+    void output(const std::string& file_name) override;
+    void output_symbol_map(const std::string& file_name);
 
-#include "Assembler.h"
-#include "Exception.h"
-#include "FileReader.h"
-#include "LibraryLinker.h"
-#include "ProgramLinker.h"
+  protected:
+    void link_sub() override;
+    std::unordered_set<Entity*> roots() override {return std::unordered_set<Entity*>{target->output.get()};}
 
-LibraryLinker* Linker::as_library_linker() {
-    return dynamic_cast<LibraryLinker*>(this);
-}
-ProgramLinker* Linker::as_program_linker() {
-    return dynamic_cast<ProgramLinker*>(this);
-}
+  private:
+    Body output_body;
+    Memory memory;
+};
 
-
-void Linker::link() {
-    link_sub();
-}
-
-
-
-bool Linker::add_object(Object *object) {
-    return objects.insert(object).second;
-}
-
-void Linker::set_target(const Target* new_target) {
-    if (!new_target) {
-        return;
-    }
-    if (target) {
-        if (new_target != target) {
-            throw Exception("can't link files for different targets");
-        }
-        return;
-    }
-    target = new_target;
-    program->private_environment->add_next(target->object_file->public_environment);
-}
-
-void Linker::add_library(std::shared_ptr<ObjectFile> library) {
-    program->import(library.get());
-    libraries.emplace_back(std::move(library));
-}
+#endif // PROGRAM_LINKER_H

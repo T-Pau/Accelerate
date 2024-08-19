@@ -541,3 +541,36 @@ Macro* ObjectFile::macro(Symbol macro_name) {
         return nullptr;
     }
 }
+
+
+std::unordered_set<Entity*> ObjectFile::public_entities() const {
+    auto entities = std::unordered_set<Entity*>{};
+
+    for (auto& constant: constants | std::views::values) {
+        if (constant->is_public()) {
+            entities.insert(constant.get());
+        }
+    }
+
+    for (auto& function: functions | std::views::values) {
+        if (function->is_public()) {
+            entities.insert(function.get());
+        }
+    }
+
+    for (auto& macro: macros | std::views::values) {
+        if (macro->is_public()) {
+            entities.insert(macro.get());
+        }
+    }
+
+    for (auto& object: objects | std::views::values) {
+        if (object->is_public()) {
+            entities.insert(object.get());
+        }
+    }
+
+    entities.insert(explicitly_used_objects.begin(), explicitly_used_objects.end());
+
+    return entities;
+}

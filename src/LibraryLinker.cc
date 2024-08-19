@@ -1,9 +1,9 @@
 /*
-Linker.cc -- 
+LibraryLinker.cc -- 
 
 Copyright (C) Dieter Baron
 
-The authors can be contacted at <assembler@tpau.group>
+The authors can be contacted at <accelerate@tpau.group>
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions
@@ -29,49 +29,26 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "Linker.h"
+#include "LibraryLinker.h"
 
+#include "Exception.h"
 #include <fstream>
 
-#include "Assembler.h"
-#include "Exception.h"
-#include "FileReader.h"
-#include "LibraryLinker.h"
-#include "ProgramLinker.h"
-
-LibraryLinker* Linker::as_library_linker() {
-    return dynamic_cast<LibraryLinker*>(this);
-}
-ProgramLinker* Linker::as_program_linker() {
-    return dynamic_cast<ProgramLinker*>(this);
-}
-
-
-void Linker::link() {
-    link_sub();
-}
-
-
-
-bool Linker::add_object(Object *object) {
-    return objects.insert(object).second;
-}
-
-void Linker::set_target(const Target* new_target) {
-    if (!new_target) {
-        return;
+void LibraryLinker::link_sub() {
+    Target::set_current_target(target);
+    program->evaluate();
+    program->evaluate(); // TODO: shouldn't be necessary
+    program->evaluate(); // TODO: shouldn't be necessary
+    Unresolved unresolved;
+    if (!program->check_unresolved(unresolved)) {
+        unresolved.report();
+        throw Exception();
     }
-    if (target) {
-        if (new_target != target) {
-            throw Exception("can't link files for different targets");
-        }
-        return;
-    }
-    target = new_target;
-    program->private_environment->add_next(target->object_file->public_environment);
 }
 
-void Linker::add_library(std::shared_ptr<ObjectFile> library) {
-    program->import(library.get());
-    libraries.emplace_back(std::move(library));
+
+void LibraryLinker::output(const std::string& file_name) {
+    // TODO: only output used entities
+    auto stream = std::ofstream(file_name);
+    stream << *(program);
 }
