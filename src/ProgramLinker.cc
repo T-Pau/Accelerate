@@ -31,6 +31,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "ProgramLinker.h"
 
+#include <algorithm>
 #include <fstream>
 #include <sstream>
 
