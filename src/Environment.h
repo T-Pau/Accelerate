@@ -67,6 +67,8 @@ public:
 
     void replace(const std::shared_ptr<Environment>& old_next, const std::shared_ptr<Environment>& new_next);
 
+    void dump(const std::string& indent = "");
+
     UnnamedLabelList unnamed_labels;
 
 private:
