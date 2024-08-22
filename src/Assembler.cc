@@ -380,9 +380,6 @@ void Assembler::parse_symbol(Visibility visibility, const Token& name) {
         }
     }
 
-    if (current_section.empty()) {
-        throw ParseException(name, "symbol outside section");
-    }
     if (object->empty()) {
         throw ParseException(name, "empty symbol");
     }

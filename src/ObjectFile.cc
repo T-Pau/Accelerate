@@ -351,7 +351,12 @@ const Object* ObjectFile::object(Symbol object_name) const {
 Object* ObjectFile::create_object(Symbol section_name, Visibility visibility, bool default_only, const Token& object_name) {
     auto section = target->map.section(section_name);
     if (section == nullptr) {
-        FileReader::global.error(object_name.location, "unknown section '%s'", section_name.c_str());
+        if (section_name.empty()) {
+            FileReader::global.error(object_name.location, "object outside section");
+        }
+        else {
+            FileReader::global.error(object_name.location, "unknown section '%s'", section_name.c_str());
+        }
         // TODO: mark object as faulty
     }
     return insert_object(std::make_unique<Object>(this, section, visibility, default_only, object_name));

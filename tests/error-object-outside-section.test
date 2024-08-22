@@ -1,0 +1,13 @@
+arguments --create-library --target 6502 file.s
+return 1
+file file.s <inline>
+test {
+    lda #$0
+    rts
+}
+end-of-inline-data
+stderr
+file.s:1.0: error: object outside section
+test {
+^^^^
+end-of-inline-data
