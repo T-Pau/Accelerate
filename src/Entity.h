@@ -80,7 +80,7 @@ class Entity {
     static const Token token_default_only;
     static const Token token_visibility;
 
-    bool default_only;
+    bool default_only{false};
 };
 
 
