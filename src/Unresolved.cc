@@ -36,13 +36,13 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Entity.h"
 #include "FileReader.h"
 
-Unresolved::Part::User::User(const Entity* entity): name{entity->name}, location{entity->location} {}
+UnresolvedUser::UnresolvedUser(const Entity* entity): name{entity->name}, location{entity->location} {}
 
-void Unresolved::Part::add(const User& user, Symbol used) {
+void Unresolved::Part::add(const UnresolvedUser& user, Symbol used) {
     const auto it = unresolved.find(used);
 
     if (it == unresolved.end()) {
-        unresolved[used] = std::unordered_set<User>{user};
+        unresolved[used] = std::unordered_set<UnresolvedUser>{user};
     }
     else {
         it->second.insert(user);
@@ -54,7 +54,7 @@ void Unresolved::Part::add(const Part& other) {
     unresolved.insert(other.unresolved.begin(), other.unresolved.end());
 }
 
-void Unresolved::add(const Part::User& user, const EvaluationResult& result) {
+void Unresolved::add(const UnresolvedUser& user, const EvaluationResult& result) {
     for (auto& name : result.unresolved_functions) {
         functions.add(user, name);
     }
@@ -92,8 +92,8 @@ void Unresolved::Part::report() const {
             throw Exception("internal error: unresolved symbol %s diapperead", unresolved_symbol.c_str());
         }
         auto& users = it->second;
-        auto sorted_users = std::vector<User>{users.begin(), users.end()};
-        std::ranges::sort(sorted_users, [](const User& a, const User& b) {
+        auto sorted_users = std::vector<UnresolvedUser>{users.begin(), users.end()};
+        std::ranges::sort(sorted_users, [](const UnresolvedUser& a, const UnresolvedUser& b) {
             return a.name < b.name;
         });
         FileReader::global.error({}, "unresolved %s %s, referenced by:", type.c_str(), unresolved_symbol.c_str());

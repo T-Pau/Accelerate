@@ -39,53 +39,52 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "EvaluationResult.h"
 #include "Symbol.h"
 
+
 class Entity;
+
+class UnresolvedUser {
+public:
+  UnresolvedUser(const Entity* entity);
+
+  UnresolvedUser(Symbol name, const Location& location) : name{name}, location{location} {}
+
+  bool operator==(const UnresolvedUser& other) const { return name == other.name && location == other.location; }
+
+  Symbol name;
+  Location location;
+};
+
+template <> struct std::hash<UnresolvedUser> {
+  std::size_t operator()(const UnresolvedUser& user) const noexcept {
+    return std::hash<Symbol>()(user.name) ^ (std::hash<Location>()(user.location) << 1);
+  }
+};
 
 class Unresolved {
   public:
+
     class Part {
       public:
-        class User {
-          public:
-            User(const Entity* entity);
-
-            User(Symbol name, const Location& location) : name{name}, location{location} {}
-
-            bool operator==(const User &other) const {return name == other.name && location == other.location;}
-
-            Symbol name;
-            Location location;
-        };
-
         Part(std::string type) : type{std::move(type)} {}
 
-        void add(const Entity* user, Symbol used) { add(User{user}, used); }
-
-        void add(Symbol name, const Location& location, Symbol used) { add(User{name, location}, used); }
-
-        void add(const User& user, Symbol used);
+        void add(const Entity* user, Symbol used) { add(UnresolvedUser{user}, used); }
+        void add(Symbol name, const Location& location, Symbol used) { add(UnresolvedUser{name, location}, used); }
+        void add(const UnresolvedUser& user, Symbol used);
         void add(const Part& other);
-
         void clear() { unresolved.clear(); }
-
         [[nodiscard]] bool empty() const { return unresolved.empty(); }
-
         void report() const;
 
       private:
         std::string type;
-        std::unordered_map<Symbol, std::unordered_set<User>> unresolved;
+        std::unordered_map<Symbol, std::unordered_set<UnresolvedUser>> unresolved;
     };
 
-    void add(const Entity* user, const EvaluationResult& result) { add(Part::User{user}, result); }
-
-    void add(Symbol name, const Location& location, const EvaluationResult& result) { add(Part::User{name, location}, result); }
-
+    void add(const Entity* user, const EvaluationResult& result) { add(UnresolvedUser{user}, result); }
+    void add(Symbol name, const Location& location, const EvaluationResult& result) { add(UnresolvedUser{name, location}, result); }
     void add(const Unresolved& other);
     void clear();
-
     [[nodiscard]] bool empty() const { return functions.empty() && macros.empty() && variables.empty(); }
-
     void report() const;
 
     Part functions{"function"};
@@ -93,13 +92,8 @@ class Unresolved {
     Part variables{"variable"};
 
   private:
-    void add(const Part::User& user, const EvaluationResult& result);
+    void add(const UnresolvedUser& user, const EvaluationResult& result);
 };
 
-template <> struct std::hash<Unresolved::Part::User> {
-    std::size_t operator()(const Unresolved::Part::User& user) const noexcept {
-        return std::hash<Symbol>()(user.name) ^ (std::hash<Location>()(user.location) << 1);
-    }
-};
 
 #endif // UNRESOLVED_H
