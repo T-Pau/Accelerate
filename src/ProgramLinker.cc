@@ -200,7 +200,7 @@ void ProgramLinker::output(const std::string &file_name) {
         checksum.compute(bytes);
     }
 
-    auto stream = std::ofstream(file_name);
+    auto stream = std::ofstream(file_name, std::ios::binary);
     stream << bytes;
 }
 
