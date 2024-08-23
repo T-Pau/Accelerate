@@ -140,7 +140,7 @@ SizeRange Object::size_range() const {
     if (is_reservation()) {
         auto minimum_value = reservation_expression->minimum_value();
         auto maximum_value = reservation_expression->maximum_value();
-        if ((minimum_value && !minimum_value->is_unsigned()) || maximum_value && !maximum_value->is_unsigned()) {
+        if ((minimum_value && !minimum_value->is_unsigned()) || (maximum_value && !maximum_value->is_unsigned())) {
             throw ParseException(reservation_expression->location(), "reservation must be unsigned");
         }
         return {minimum_value ? minimum_value->unsigned_value() : 0, maximum_value ? maximum_value->unsigned_value() : std::optional<uint64_t>{}};

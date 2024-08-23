@@ -38,6 +38,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ObjectExpression.h"
 #include "ParseException.h"
 #include "SequenceTokenizer.h"
+#include <cinttypes>
 
 const Token ObjectFile::Constant::token_value{Token::NAME, "value"};
 
@@ -281,7 +282,7 @@ void ObjectFile::evaluate() {
                     FileReader::global.error(pin.address.location(), "pin address for '%s' must be unsigned constant", pair.first.c_str());
                 }
                 else if (pinned_object->address && pinned_object->address->address != pin.address.value()->unsigned_value()) {
-                    FileReader::global.error(pin.address.location(), "object '%s' already has address %llu, pinned to %llu", pair.first.c_str(), pinned_object->address->address, pin.address.value()->unsigned_value());
+                    FileReader::global.error(pin.address.location(), "object '%s' already has address $%" PRIx64 ", pinned to $%" PRIx64, pair.first.c_str(), pinned_object->address->address, pin.address.value()->unsigned_value());
                 }
                 else {
                     pinned_object->address = Address(pin.address.value()->unsigned_value());

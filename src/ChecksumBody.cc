@@ -66,7 +66,7 @@ Body ChecksumBody::parse(Tokenizer& tokenizer) {
 }
 
 void ChecksumBody::encode(std::string& bytes, const Memory* memory) const {
-    for (auto i = 0; i < algorithm->result_size(); i++) {
+    for (size_t i = 0; i < algorithm->result_size(); i++) {
         bytes += '\0';
     }
 }

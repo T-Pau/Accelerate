@@ -307,7 +307,7 @@ Token FileTokenizer::parse_number(unsigned int base, Location location) {
         }
         // TODO: exponent
         int digit = convert_digit(c);
-        if (digit < 0 || digit >= base) {
+        if (digit < 0 || static_cast<unsigned int>(digit) >= base) {
             current_source->unget();
             if (in_fraction) {
                 return {Token::VALUE, location, floating};
@@ -358,7 +358,7 @@ Token FileTokenizer::parse_name(Token::Type type, Location location) {
         current_source->expand_location(location);
         auto c = current_source->next();
 
-        if (is_identifier_start(c) || (!name.empty()) && isdigit(c)) {
+        if (is_identifier_start(c) || (!name.empty() && isdigit(c))) {
             name += static_cast<char>(c);
         }
         else {

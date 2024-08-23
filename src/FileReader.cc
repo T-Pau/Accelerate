@@ -159,10 +159,10 @@ void FileReader::output(FileReader::DiagnosticsSeverity severity, const Location
         if (width < 1) {
             width = 1;
         }
-        for (auto i = 0; i < location.start_column; i++) {
+        for (size_t i = 0; i < location.start_column; i++) {
             diagnostics_file << ' ';
         }
-        for (auto i = 0; i < width; i++) {
+        for (size_t i = 0; i < width; i++) {
             diagnostics_file << '^';
         }
         diagnostics_file << std::endl;

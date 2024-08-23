@@ -32,6 +32,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ProgramLinker.h"
 
 #include <algorithm>
+#include <cinttypes>
 #include <fstream>
 #include <sstream>
 
@@ -121,7 +122,7 @@ void ProgramLinker::link_sub() {
             // TODO: validate that object->address is in object->section
             auto range = Range(object->address->address, *object->size_range().size());
             if (!memory[object->address->bank].allocate(range, object->is_reservation() ? Memory::RESERVED : Memory::DATA, 0, range.size)) {
-                FileReader::global.error({}, "fixed space (%llu, %llu) not free", range.start, range.end());
+                FileReader::global.error({}, "fixed space ($%" PRIx64 ", $%" PRIx64 ") not free", range.start, range.end());
             }
         }
         else {
@@ -133,7 +134,7 @@ void ProgramLinker::link_sub() {
                 }
             }
             if (!object->address) {
-                FileReader::global.error({}, "no space left for %s ($%llx bytes) in section %s", object->name.c_str(), *object->size_range().size(), object->section->name.c_str());
+                FileReader::global.error({}, "no space left for %s ($%" PRIx64 " bytes) in section %s", object->name.c_str(), *object->size_range().size(), object->section->name.c_str());
                 continue;
             }
         }
