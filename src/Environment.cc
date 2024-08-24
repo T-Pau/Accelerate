@@ -31,9 +31,6 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "Environment.h"
 
-#include <iostream>
-#include <ranges>
-
 std::optional<Expression> Environment::operator[](Symbol name) const { // NOLINT(misc-no-recursion)
     auto it = variables.find(name);
     if (it != variables.end()) {
@@ -100,17 +97,3 @@ const Macro* Environment::get_macro(Symbol name) const { // NOLINT(misc-no-recur
     return nullptr;
 }
 
-
-void Environment::dump(const std::string& indent) {
-    std::cout << indent << "variables:" << std::endl;
-    for (const auto& name: variables | std::views::keys) {
-        std::cout << indent << "  " << name << std::endl;
-    }
-
-    if (!next.empty()) {
-        std::cout << indent << "next:" << std::endl;
-        for (const auto& environment: next) {
-            environment->dump(indent + "  ");
-        }
-    }
-}
