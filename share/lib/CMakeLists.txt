@@ -2,19 +2,19 @@
 
 if(CMAKE_GENERATOR STREQUAL "Visual Studio 17 2022")
     message(STATUS "Visual Studio detected")
-    if(CMAKE_BUILD_TYPE STREQUAL "")
+    if(NOT DEFINED CMAKE_INSTALL_CONFIG_NAME OR CMAKE_INSTALL_CONFIG_NAME STREQUAL "")
         message(STATUS "no build type, defaulting to Release")
         set(BIN_SUBDIRECTORY, "/Release")
     else()
-        message(STATUS "using build type ${CMAKE_BUILD_TYPE}")
-        set(BIN_SUBDIRECTORY, "/${CMAKE_BUILD_TYPE}")
+        message(STATUS "using build type ${CMAKE_INSTALL_CONFIG_NAME}")
+        set(BIN_SUBDIRECTORY, "/${CMAKE_INSTALL_CONFIG_NAME}")
     endif()
 else()
     message(STATUS "not using Visual Studio")
     set(BIN_SUBDIRECTORY, "")
 endif()
 set(XLR8 ${CMAKE_BINARY_DIR}/src${BIN_SUBDIRECTORY}/xlr8${CMAKE_EXECUTABLE_SUFFIX})
-message(STATUS "CMAKE_BUILD_TYPE='${CMAKE_BUILD_TYPE}', CMAKE_GENERATOR='${CMAKE_GENERATOR}', BIN_SUBDIRECTORY='${BIN_SUBDIRECTORY}', XLR8='${XLR8}'")
+message(STATUS "CMAKE_INSTALL_CONFIG_NAME='${CMAKE_INSTALL_CONFIG_NAME}', CMAKE_GENERATOR='${CMAKE_GENERATOR}', BIN_SUBDIRECTORY='${BIN_SUBDIRECTORY}', XLR8='${XLR8}'")
 
 file(GLOB SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/*.s)
 
