@@ -550,8 +550,8 @@ Macro* ObjectFile::macro(Symbol macro_name) {
 }
 
 
-std::unordered_set<Entity*> ObjectFile::public_entities() const {
-    auto entities = std::unordered_set<Entity*>{};
+UsedEntities ObjectFile::public_entities() const {
+    auto entities = UsedEntities{};
 
     for (auto& constant: constants | std::views::values) {
         if (constant->is_public()) {
@@ -577,7 +577,9 @@ std::unordered_set<Entity*> ObjectFile::public_entities() const {
         }
     }
 
-    entities.insert(explicitly_used_objects.begin(), explicitly_used_objects.end());
+    for (auto& object: explicitly_used_objects) {
+        entities.insert(object);
+    }
 
     return entities;
 }

@@ -37,9 +37,11 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "ObjectFile.h"
 #include "Target.h"
+#include "UsedEntities.h"
 
 class LibraryLinker;
 class ProgramLinker;
+
 
 class Linker {
   public:
@@ -58,6 +60,7 @@ class Linker {
     void set_target(const Target* new_target);
 
     void link();
+    void link_new();
     virtual void output(const std::string& file_name) = 0;
 
     const Target* target = nullptr;
@@ -65,7 +68,7 @@ class Linker {
 
   protected:
     virtual void link_sub() = 0;
-    virtual std::unordered_set<Entity*> roots() = 0;
+    virtual UsedEntities roots() = 0;
 
     bool add_object(Object* object);
 

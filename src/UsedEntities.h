@@ -1,8 +1,8 @@
-#ifndef LIBRARY_LINKER_H
-#define LIBRARY_LINKER_H
+#ifndef USED_ENTITIES_H
+#define USED_ENTITIES_H
 
 /*
-LibraryLinker.h -- 
+UsedEntities.h --
 
 Copyright (C) Dieter Baron
 
@@ -32,15 +32,23 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "Linker.h"
+#include <unordered_map>
 
-class LibraryLinker: public Linker {
+class Entity;
+
+class UsedEntities {
   public:
-    void output(const std::string& file_name) override;
+    void insert(Entity* entity, bool optional = false);
+    void insert(const UsedEntities& other);
+    [[nodiscard]] auto begin() {return entities.begin();}
+    [[nodiscard]] auto begin() const {return entities.begin();}
+    [[nodiscard]] bool empty() const {return entities.empty();}
+    [[nodiscard]] auto end() {return entities.end();}
+    [[nodiscard]] auto end() const {return entities.end();}
+    void remove_optional();
 
-  protected:
-    void link_sub() override;
-    UsedEntities roots() override {return program->public_entities();}
+  private:
+    std::unordered_map<Entity*, bool> entities;
 };
 
-#endif // LIBRARY_LINKER_H
+#endif //USED_ENTITIES_H

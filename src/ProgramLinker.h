@@ -41,7 +41,7 @@ class ProgramLinker: public Linker {
 
   protected:
     void link_sub() override;
-    std::unordered_set<Entity*> roots() override {return std::unordered_set<Entity*>{target->output.get()};}
+    UsedEntities roots() override;
 
   private:
     Body output_body;

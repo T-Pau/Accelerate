@@ -219,3 +219,10 @@ void ProgramLinker::output_symbol_map(const std::string& file_name) {
         stream << "\t" << object->section->name << "\t" << (object->is_reservation() ? "reserve" : "data") << "\n";
     }
 }
+
+
+UsedEntities ProgramLinker::roots() {
+    auto entities = UsedEntities{};
+    entities.insert(target->output.get());
+    return entities;
+}

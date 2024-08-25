@@ -46,6 +46,9 @@ class EvaluationContext {
   public:
     enum EvaluationType {
         ARGUMENTS,          // Bind arguments in function call or instruction encoding.
+        RESOLVE,            // Resolve names.
+
+        // old
         ENTITY,             // Evaluate object with completed body.
         LABELS,             // Resolve named and unnamed labels.
         LABELS_2,           // Resolve forward label uses.

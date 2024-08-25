@@ -1,8 +1,5 @@
-#ifndef LIBRARY_LINKER_H
-#define LIBRARY_LINKER_H
-
 /*
-LibraryLinker.h -- 
+UsedEntities.cc -- 
 
 Copyright (C) Dieter Baron
 
@@ -32,15 +29,38 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "Linker.h"
+#include "UsedEntities.h"
 
-class LibraryLinker: public Linker {
-  public:
-    void output(const std::string& file_name) override;
+#include <unordered_set>
 
-  protected:
-    void link_sub() override;
-    UsedEntities roots() override {return program->public_entities();}
-};
+void UsedEntities::insert(Entity* entity, bool optional) {
+    auto it = entities.find(entity);
 
-#endif // LIBRARY_LINKER_H
+    if (it != entities.end()) {
+        it->second = it->second && optional;
+    }
+    else {
+        entities[entity] = optional;
+    }
+}
+
+void UsedEntities::insert(const UsedEntities& other) {
+    for (auto& [entity, optional]: other.entities) {
+        insert(entity, optional);
+    }
+}
+
+
+void UsedEntities::remove_optional() {
+    auto optionl_entities = std::unordered_set<Entity*>{};
+
+    for (auto& [entity, optional]: entities) {
+        if (optional) {
+            optionl_entities.insert(entity);
+        }
+    }
+
+    for (const auto& entity: optionl_entities) {
+        entities.erase(entity);
+    }
+}

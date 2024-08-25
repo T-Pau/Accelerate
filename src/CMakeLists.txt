@@ -102,7 +102,9 @@ add_library(xlr8-library STATIC
         ProgramLinker.cc
         ProgramLinker.h
         LibraryLinker.cc
-        LibraryLinker.h)
+        LibraryLinker.h
+        UsedEntities.cc
+        UsedEntities.h)
 
 target_include_directories(xlr8-library PRIVATE ${PROJECT_BINARY_DIR})
 

@@ -47,6 +47,7 @@ class Entity {
     [[nodiscard]] Macro* as_macro();
     [[nodiscard]] Object* as_object();
     void evaluate();
+    [[nodiscard]] EvaluationResult evaluate(EvaluationContext::EvaluationType type);
     void resolve_labels();
     [[nodiscard]] bool check_unresolved(Unresolved& unresolved) const;
     [[nodiscard]] bool is_default_only() const {return default_only;}
@@ -72,6 +73,7 @@ class Entity {
     void serialize_entity(std::ostream& stream) const;
 
     [[nodiscard]] virtual EvaluationContext evaluation_context(EvaluationResult& result) {return EvaluationContext(result, this);}
+    [[nodiscard]] virtual EvaluationContext evaluation_context(EvaluationResult& result, EvaluationContext::EvaluationType type) {return EvaluationContext(result, type, environment);}
     virtual void evaluate_inner(EvaluationContext& context) = 0;
 
   private:

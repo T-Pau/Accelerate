@@ -36,6 +36,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "ChecksumComputation.h"
 #include "Symbol.h"
+#include "UsedEntities.h"
 
 class LabelExpression;
 class Object;
@@ -54,6 +55,7 @@ public:
     std::unordered_set<Symbol> unresolved_macros;
     std::unordered_set<Symbol> unresolved_variables;
     std::unordered_set<Object*> used_objects;
+    UsedEntities used_entites;
     std::vector<ChecksumComputation> checksums;
 };
 

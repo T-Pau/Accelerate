@@ -32,6 +32,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Linker.h"
 
 #include <fstream>
+#include <ranges>
 
 #include "Assembler.h"
 #include "Exception.h"
@@ -49,6 +50,32 @@ ProgramLinker* Linker::as_program_linker() {
 
 void Linker::link() {
     link_sub();
+}
+
+
+void Linker::link_new() {
+    auto entities = UsedEntities{};
+
+    auto new_entities = roots();
+    while (!new_entities.empty()) {
+        entities.insert(new_entities);
+        auto next_entities = UsedEntities{};
+        for (auto& [entity, _]: new_entities) {
+            auto result = entity->evaluate(EvaluationContext::RESOLVE);
+            //next_entities.insert(result.used_entities);
+        }
+        // TODO: Handle unresolved symbols? Or handle them later when all ifs have been resolved?
+        new_entities = std::move(next_entities);
+    }
+
+    // sort constants
+
+    // propagate constants
+    //   all ifs must be resolved
+
+    // if creating program
+    //     place objects
+    //     propagate constants
 }
 
 

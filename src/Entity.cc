@@ -43,8 +43,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 const Token Entity::token_default_only = Token(Token::NAME, DEFAULT_ONLY);
 const Token Entity::token_visibility = Token(Token::NAME, VISIBILITY);
 
-
-Entity::Entity(ObjectFile* owner, const Token& name_, const std::shared_ptr<ParsedValue>& definition): name(name_.as_symbol()), location(name_.location), environment(std::make_shared<Environment>(owner->private_environment)) {
+Entity::Entity(ObjectFile* owner, const Token& name_, const std::shared_ptr<ParsedValue>& definition) : name(name_.as_symbol()), location(name_.location), environment(std::make_shared<Environment>(owner->private_environment)) {
     const auto parameters = definition->as_dictionary();
 
     if (const auto default_only_definition = parameters->get_optional(token_default_only)) {
@@ -64,8 +63,7 @@ Entity::Entity(ObjectFile* owner, const Token& name_, const std::shared_ptr<Pars
     visibility = *visibility_;
 }
 
-Entity::Entity(ObjectFile* owner, const Token& name, Visibility visibility, bool default_only): name(name.as_symbol()), location(name.location), visibility(visibility), owner(owner), environment(std::make_shared<Environment>(owner->private_environment)), default_only{default_only} {}
-
+Entity::Entity(ObjectFile* owner, const Token& name, Visibility visibility, bool default_only) : name(name.as_symbol()), location(name.location), visibility(visibility), owner(owner), environment(std::make_shared<Environment>(owner->private_environment)), default_only{default_only} {}
 
 void Entity::serialize_entity(std::ostream& stream) const {
     stream << "    " VISIBILITY ": " << visibility << std::endl;
@@ -84,13 +82,9 @@ void Entity::set_owner(ObjectFile* new_owner) {
     owner = new_owner;
 }
 
-Macro* Entity::as_macro() {
-    return dynamic_cast<Macro*>(this);
-}
+Macro* Entity::as_macro() { return dynamic_cast<Macro*>(this); }
 
-Object* Entity::as_object() {
-    return dynamic_cast<Object*>(this);
-}
+Object* Entity::as_object() { return dynamic_cast<Object*>(this); }
 
 void Entity::process_result(EvaluationResult& result) {
     referenced_objects.insert(result.used_objects.begin(), result.used_objects.end());
@@ -110,12 +104,11 @@ bool Entity::check_unresolved(const std::unordered_set<Symbol>& unresolved, Unre
         return true;
     }
 
-    for (auto& unresolved_name: unresolved) {
+    for (auto& unresolved_name : unresolved) {
         part.add(this, unresolved_name);
     }
     return false;
 }
-
 
 void Entity::evaluate() {
     auto result = EvaluationResult{};
@@ -123,11 +116,22 @@ void Entity::evaluate() {
     try {
         evaluate_inner(context);
         process_result(result);
-    }
-    catch (Exception &ex) {
+    } catch (Exception& ex) {
         FileReader::global.error(ParseException(location, ex));
         // TODO: throw empty expression?
     }
+}
+
+EvaluationResult Entity::evaluate(EvaluationContext::EvaluationType type) {
+    auto result = EvaluationResult{};
+    try {
+        auto context = evaluation_context(result, type);
+        evaluate_inner(context);
+        process_result(result);
+    } catch (Exception& ex) {
+        FileReader::global.error(ParseException(location, ex));
+    }
+    return result;
 }
 
 void Entity::resolve_labels() {
@@ -141,8 +145,7 @@ void Entity::resolve_labels() {
         auto context2 = evaluation_context(result);
         context2.type = EvaluationContext::LABELS_2;
         evaluate_inner(context2);
-    }
-    catch (Exception &ex) {
+    } catch (Exception& ex) {
         FileReader::global.error(ParseException(location, ex));
         // TODO: throw empty expression?
     }
