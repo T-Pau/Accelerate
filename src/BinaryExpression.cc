@@ -129,8 +129,8 @@ Expression BinaryExpression::create(const Location& location, const Expression& 
     // TODO: check that types are compatible
 
     if (left.has_value() && right.has_value()) {
-        auto left_value = *left.value();
-        auto right_value = *right.value();
+        const auto& left_value = *left.value();
+        const auto& right_value = *right.value();
         Value value;
 
         switch (operation) {
@@ -212,15 +212,15 @@ Expression BinaryExpression::create(const Location& location, const Expression& 
         switch (operation) {
             case Expression::BinaryOperation::ADD: {
                 if (right.has_value()) {
-                    auto right_value = *right.value();
+                    const auto& right_value = *right.value();
                     if (right_value == Value(uint64_t{0})) {
                         // N + 0 -> N
                         return left;
                     }
                     else if (left.is_binary()) {
-                        auto left_binary = left.as_binary();
+                        const auto& left_binary = left.as_binary();
                         if (left_binary->right.has_value()) {
-                            auto left_right_value = *left_binary->right.value();
+                            const auto& left_right_value = *left_binary->right.value();
                             if (left_binary->operation == Expression::ADD) {
                                 // (N + A) + B -> N + (A+B)
                                 return {location, left_binary->left, Expression::ADD, Expression({left_binary->right.location(), right.location()}, left_right_value + right_value)};
@@ -233,15 +233,15 @@ Expression BinaryExpression::create(const Location& location, const Expression& 
                     }
                 }
                 if (left.has_value()) {
-                    auto left_value = *left.value();
+                    const auto& left_value = *left.value();
                     if (left_value == Value(uint64_t{0})) {
                         // 0 + N -> N
                         return right;
                     }
                     else if (right.is_binary()) {
-                        auto right_binary = right.as_binary();
+                        const auto& right_binary = right.as_binary();
                         if (right_binary->left.has_value()) {
-                            auto right_left_value = *right_binary->left.value();
+                            const auto& right_left_value = *right_binary->left.value();
                             if (right_binary->operation == Expression::ADD) {
                                 // A + (B + N) -> N + (A+B)
                                 return {location, right_binary->right, Expression::ADD, Expression({left.location(), right_binary->left.location()}, left_value + right_left_value)};

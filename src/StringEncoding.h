@@ -55,7 +55,7 @@ class StringEncoding {
   private:
     class CharacterRange {
       public:
-        CharacterRange(char32_t source_start, uint8_t target_start, size_t length): source_start(source_start), target_start(target_start), length(length) {}
+        CharacterRange(char32_t source_start, uint8_t target_start, uint8_t length): source_start(source_start), target_start(target_start), length(length) {}
 
         [[nodiscard]] uint8_t target_end() const {return target_start + length - 1;}
         [[nodiscard]] char32_t source_end() const {return source_start + length - 1;}
@@ -67,7 +67,7 @@ class StringEncoding {
 
         char32_t source_start;
         uint8_t target_start;
-        size_t length;
+        uint8_t length;
     };
 
     size_t encode(std::string* bytes, const std::string& string) const;

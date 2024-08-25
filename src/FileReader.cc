@@ -153,7 +153,7 @@ void FileReader::output(FileReader::DiagnosticsSeverity severity, const Location
     diagnostics_file << diagnostics_severity_name(severity) << ": " << message << std::endl;
 
     try {
-        const auto line = get_line(location.file, location.start_line_number);
+        const auto& line = get_line(location.file, location.start_line_number);
         diagnostics_file << line << std::endl;
         auto width = location.end_column - location.start_column;
         if (width < 1) {

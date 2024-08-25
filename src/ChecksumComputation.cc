@@ -32,6 +32,6 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ChecksumComputation.h"
 
 void ChecksumComputation::compute(std::string& data) const {
-    auto result = algorithm->compute(data.cbegin() + static_cast<ssize_t>(start), data.cbegin() + static_cast<ssize_t>(end) + 1, parameters);
+    auto result = algorithm->compute(data.cbegin() + static_cast<std::string::iterator::difference_type>(start), data.cbegin() + static_cast<std::string::iterator::difference_type>(end) + 1, parameters);
     data.replace(result_position, result.length(), result);
 }
