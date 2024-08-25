@@ -1,8 +1,8 @@
 # TODO: add dependencies (c128.s and mega65.s include c64.s)
 
-if(${CMAKE_GENERATOR} EQUAL "Visual Studio 17 2022")
+if(CMAKE_GENERATOR STREQUAL "Visual Studio 17 2022")
     message(STATUS "Visual Studio detected")
-    if(${CMAKE_BUILD_TYPE} EQUAL "")
+    if(CMAKE_BUILD_TYPE STREQUAL "")
         message(STATUS "no build type, defaulting to Release")
         set(BIN_SUBDIRECTORY, "/Release")
     else()
