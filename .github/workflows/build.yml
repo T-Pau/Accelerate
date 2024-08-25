@@ -55,3 +55,10 @@ jobs:
         working-directory: ${{runner.workspace}}/build
         run: |
           ctest --output-on-failure --verbose -C Release
+      - name: Archive production artifacts
+        if: ${{ runner.os == 'Windows' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-directory-${{ matrix.os }}-${{ matrix.name_extra }}
+          path: |
+            ${{runner.workspace}}/build
