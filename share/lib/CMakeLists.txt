@@ -1,20 +1,13 @@
 # TODO: add dependencies (c128.s and mega65.s include c64.s)
 
 if(CMAKE_GENERATOR STREQUAL "Visual Studio 17 2022")
-    message(STATUS "Visual Studio detected")
     if(NOT DEFINED CMAKE_INSTALL_CONFIG_NAME OR CMAKE_INSTALL_CONFIG_NAME STREQUAL "")
-        message(STATUS "no build type, defaulting to Release")
         set(BIN_SUBDIRECTORY "/Release")
-        message(STATUS "BIN_SUBDIRECTORY='${BIN_SUBDIRECTORY}'")
     else()
-        message(STATUS "using build type ${CMAKE_INSTALL_CONFIG_NAME}")
         set(BIN_SUBDIRECTORY "/${CMAKE_INSTALL_CONFIG_NAME}")
-        message(STATUS "BIN_SUBDIRECTORY='${BIN_SUBDIRECTORY}'")
     endif()
 else()
-    message(STATUS "not using Visual Studio")
     set(BIN_SUBDIRECTORY "")
-    message(STATUS "BIN_SUBDIRECTORY='${BIN_SUBDIRECTORY}'")
 endif()
 set(XLR8 "${CMAKE_BINARY_DIR}/src${BIN_SUBDIRECTORY}/xlr8${CMAKE_EXECUTABLE_SUFFIX}")
 message(STATUS "CMAKE_BINARY_DIR='${CMAKE_BINARY_DIR}' CMAKE_INSTALL_CONFIG_NAME='${CMAKE_INSTALL_CONFIG_NAME}', CMAKE_GENERATOR='${CMAKE_GENERATOR}', BIN_SUBDIRECTORY='${BIN_SUBDIRECTORY}', XLR8='${XLR8}'")
@@ -30,7 +23,8 @@ foreach(SOURCE IN LISTS SOURCES)
     add_custom_command(
             OUTPUT ${LIB}
             MAIN_DEPENDENCY ${SOURCE}
-            DEPENDS ${XLR8}
+            #DEPENDS ${XLR8}
+            DEPENDS xlr8
             DEPFILE ${depfile}
             COMMAND ${XLR8} --system-directory ${CMAKE_SOURCE_DIR}/share --depfile ${depfile} --create-library -o ${LIB} ${SOURCE}
     )
