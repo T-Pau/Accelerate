@@ -1,10 +1,10 @@
 # TODO: add dependencies (c128.s and mega65.s include c64.s)
 
 if(CMAKE_GENERATOR EQUAL "Visual Studio 17 2022")
-    if(DEFINED CMAKE_BUILD_TYPE)
-        set(BIN_SUBDIRECTORY, "/${CMAKE_BUILD_TYPE}")
-    else()
+    if(CMAKE_BUILD_TYPE EQUAL "")
         set(BIN_SUBDIRECTORY, "/Release")
+    else()
+        set(BIN_SUBDIRECTORY, "/${CMAKE_BUILD_TYPE}")
     endif()
 else()
     set(BIN_SUBDIRECTORY, "")
