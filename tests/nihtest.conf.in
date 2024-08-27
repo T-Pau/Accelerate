@@ -1,8 +1,12 @@
 [settings]
 features-files = @CMAKE_BINARY_DIR@/config.h
 test-input-directories = @CMAKE_CURRENT_SOURCE_DIR@
-program-directories = @CMAKE_CURRENT_BINARY_DIR@@BIN_SUBDIRECTORY@
-    @CMAKE_BINARY_DIR@/src@BIN_SUBDIRECTORY@
+program-directories = @CMAKE_CURRENT_BINARY_DIR@
+    @CMAKE_CURRENT_BINARY_DIR@/Release
+    @CMAKE_CURRENT_BINARY_DIR@/Debug
+    @CMAKE_BINARY_DIR@/src
+    @CMAKE_BINARY_DIR@/src/Release
+    @CMAKE_BINARY_DIR@/src/Debug
 default-program = xlr8
 
 [environment]

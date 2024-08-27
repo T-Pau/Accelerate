@@ -43,15 +43,6 @@ ADD_CUSTOM_TARGET(distcheck
 ADD_DEPENDENCIES(distcheck dist)
 ENDIF(NOT TARGET dist)
 
-if(CMAKE_GENERATOR STREQUAL "Visual Studio 17 2022")
-    if(NOT DEFINED CMAKE_INSTALL_CONFIG_NAME OR CMAKE_INSTALL_CONFIG_NAME STREQUAL "")
-        set(BIN_SUBDIRECTORY "/Release")
-    else()
-        set(BIN_SUBDIRECTORY "/${CMAKE_INSTALL_CONFIG_NAME}")
-    endif()
-else()
-    set(BIN_SUBDIRECTORY "")
-endif()
 
 # Checks
 
