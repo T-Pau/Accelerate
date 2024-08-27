@@ -212,9 +212,9 @@ void ObjectFile::add_object_file(const std::shared_ptr<ObjectFile>& file) {
         }
     }
 
-    explicitly_used_object_names.insert(file->explicitly_used_object_names.begin(), explicitly_used_object_names.end());
+    explicitly_used_object_names.insert(file->explicitly_used_object_names.begin(),file->explicitly_used_object_names.end());
     file->explicitly_used_object_names.clear();
-    explicitly_used_objects.insert(file->explicitly_used_objects.begin(), explicitly_used_objects.end());
+    explicitly_used_objects.insert(file->explicitly_used_objects.begin(), file->explicitly_used_objects.end());
     file->explicitly_used_objects.clear();
     for (const auto& pair : file->pinned_objects) {
         try {
