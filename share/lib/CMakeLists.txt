@@ -1,14 +1,5 @@
 # TODO: add dependencies (c128.s and mega65.s include c64.s)
 
-if(CMAKE_GENERATOR STREQUAL "Visual Studio 17 2022")
-    if(NOT DEFINED CMAKE_INSTALL_CONFIG_NAME OR CMAKE_INSTALL_CONFIG_NAME STREQUAL "")
-        set(BIN_SUBDIRECTORY "/Release")
-    else()
-        set(BIN_SUBDIRECTORY "/${CMAKE_INSTALL_CONFIG_NAME}")
-    endif()
-else()
-    set(BIN_SUBDIRECTORY "")
-endif()
 set(XLR8 "${CMAKE_BINARY_DIR}/src${BIN_SUBDIRECTORY}/xlr8${CMAKE_EXECUTABLE_SUFFIX}")
 
 file(GLOB SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/*.s)
