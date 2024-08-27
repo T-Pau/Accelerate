@@ -79,7 +79,6 @@ std::vector<Commandline::Option> xlr8::options = {
     Commandline::Option("library-directory", 'L', "directory", "search for libraries in DIRECTORY"),
     Commandline::Option("symbol-map", "file", "write symbol map to FILE"),
     Commandline::Option("system-directory", "directory", "search for system files in DIRECTORY"),
-    Commandline::Option("define", 'D', "name", "define NAME for use in conditional compilation"),
     Commandline::Option("target", "file", "read target definition from FILE"),
     Commandline::Option("undefine", "name", "remove definition of NAME for use in conditional compilation"),
     Commandline::Option("verbose-errors", "include body in error messages")

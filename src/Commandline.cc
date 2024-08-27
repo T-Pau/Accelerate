@@ -33,10 +33,11 @@
 
 #include "Commandline.h"
 
+#include "Exception.h"
 #include <algorithm>
 #include <cctype>
-#include <sstream>
 #include <iostream>
+#include <sstream>
 #include <unordered_map>
 
 Commandline::Commandline(std::vector<Option> options_, std::string arguments_, std::string header_, std::string footer_, std::string version_) : options(std::move(options_)), arguments(std::move(arguments_)), header(std::move(header_)), footer(std::move(footer_)), version(std::move(version_)), options_sorted(false) {
@@ -249,6 +250,14 @@ void Commandline::usage(bool full, FILE *fout) {
 
 
 void Commandline::add_option(Commandline::Option option) {
+    for (const auto& existing_option: options) {
+        if (option.short_name && option.short_name == existing_option.short_name) {
+            throw Exception("duplicate option '-%c'", *option.short_name);
+        }
+        if (!option.name.empty() && option.name == existing_option.name) {
+            throw Exception("duplicate option '--%s'", option.name.c_str());
+        }
+    }
     options.push_back(std::move(option));
 }
 
