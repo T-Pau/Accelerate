@@ -46,10 +46,23 @@ Range Range::intersect(const Range &other) const {
     return {new_start, new_size};
 }
 
+
 void Range::add_left(uint64_t amount) {
     start -= amount;
     size += amount;
 }
+
+
+void Range::align(uint64_t alignment) {
+    auto new_start = Int::align(start, alignment);
+    if (new_start > end()) {
+        size = 0;
+    }
+    else {
+        set_start(new_start);
+    }
+}
+
 
 void Range::remove_left(uint64_t amount) {
     if (amount > size) {

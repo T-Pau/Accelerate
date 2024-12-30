@@ -53,7 +53,7 @@ public:
 
     void add_left(uint64_t amount);
     void add_right(uint64_t amount) {size += amount;}
-    void align(uint64_t alignment) {set_start(Int::align(start, alignment));}
+    void align(uint64_t alignment);
     void remove_left(uint64_t amount);
     void remove_right(uint64_t amount);
     void set_start(uint64_t new_start);
