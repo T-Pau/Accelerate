@@ -36,7 +36,12 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Entity.h"
 #include "FileReader.h"
 
-UnresolvedUser::UnresolvedUser(const Entity* entity): name{entity->name}, location{entity->location} {}
+UnresolvedUser::UnresolvedUser(const Entity* entity) {
+    if (entity) {
+        name = entity->name;
+        location = entity->location;
+    }
+}
 
 void Unresolved::Part::add(const UnresolvedUser& user, Symbol used) {
     const auto it = unresolved.find(used);
