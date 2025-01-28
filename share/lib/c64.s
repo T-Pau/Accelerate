@@ -4,6 +4,10 @@
 .visibility public
 
 DEVICE_NUMBER = $BA
+SCREEN = $0400
+SCREEN_WIDTH = 40
+SCREEN_HEIGHT = 25
+COLOR_RAM = $d800
 
 COLOR_BLACK = 0
 COLOR_WHITE = 1
@@ -172,16 +176,29 @@ CIA2_TIMER_B_CONTROL = CIA2 + $0f
     lda #VIC_VIDEO_ADDRESS(screen, charset)
     sta VIC_VIDEO_ADDRESS
 }
-.pre_end
 
 .macro set_vic_24_lines {
     lda VIC_CONTROL_1
-    and #$08 ^ $ff
+    and #VIC_SCREEN_HEIGHT ^ $ff
     sta VIC_CONTROL_1
 }
 
 .macro set_vic_25_lines {
     lda VIC_CONTROL_1
-    ora #$08
+    ora #VIC_SCREEN_HEIGHT
     sta VIC_CONTROL_1
 }
+
+.macro set_vic_text_mode {
+    lda VIC_CONTROL_1
+    and #$ff - VIC_MODE
+    sta VIC_CONTROL_1
+}
+
+.macro set_vic_bitmap_mode {
+    lda VIC_CONTROL_1
+    ora #VIC_MODE
+    sta VIC_CONTROL_1
+}
+
+.pre_end
