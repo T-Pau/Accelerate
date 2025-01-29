@@ -2,8 +2,8 @@
 
 .visibility public
 
-SCREEN = $4000
-ATTRIBUTES = $5800
+SCREEN_RAM = $4000
+ATTRIBUTES_RAM = $5800
 
 CLS = $0daf
 
