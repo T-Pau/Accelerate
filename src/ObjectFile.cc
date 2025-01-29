@@ -400,8 +400,9 @@ void ObjectFile::collect_explicitly_used_objects(std::unordered_set<Object*>& se
 }
 
 Object* ObjectFile::insert_object(std::unique_ptr<Object> object) {
-    auto [it, inserted] = objects.insert({object->name, std::move(object)});
-    if (inserted) {
+    auto it = objects.find(object->name);
+    if (it == objects.end()) {
+        auto [it, inserted] = objects.insert({object->name, std::move(object)});
         auto own_object = it->second.get();
         own_object->set_owner(this);
         add_to_environment(own_object);
