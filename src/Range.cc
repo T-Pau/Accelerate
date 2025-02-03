@@ -106,7 +106,7 @@ Range Range::add(const Range &other) const {
 
     auto new_start = std::min(start, other.start);
     auto new_end = std::max(end(), other.end());
-    auto new_size = new_end - new_start;
+    auto new_size = new_end - new_start + 1;
 
     return {new_start, new_size};
 }

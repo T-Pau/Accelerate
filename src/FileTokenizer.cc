@@ -32,6 +32,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "FileTokenizer.h"
 
 #include <algorithm>
+#include <ranges>
 
 #include "ExpressionParser.h"
 #include "FileReader.h"
@@ -563,10 +564,10 @@ bool FileTokenizer::is_identifier(const std::string& s) {
     if (s.empty()) {
         return false;
     }
-    if (!std::ranges::all_of(s, is_identifier_continuation)) {
+    if (!std::ranges::all_of(std::views::drop(s, 1), is_identifier_continuation)) {
         return false;
     }
-    if (!is_identifier_start(s.front())) {
+    if (!is_identifier_start(s.front()) && s.front() != '.') {
         return false;
     }
     return true;

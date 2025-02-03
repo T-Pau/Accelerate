@@ -49,7 +49,7 @@ public:
 
     class Bank {
     public:
-        explicit Bank(Range range);
+        explicit Bank(Range range, uint8_t fill_byte = 0);
 
         std::optional<uint64_t> allocate(const Range& allowed_range, Allocation allocation, uint64_t alignment, uint64_t size);
         void copy(uint64_t start, const std::string& data);
@@ -77,7 +77,7 @@ public:
     };
 
     Memory() = default;
-    explicit Memory(const std::vector<Range>& bank_ranges);
+    explicit Memory(const std::vector<Range>& bank_ranges, uint8_t fill_byte = 0);
 
 
     Bank& operator[](uint64_t bank) {return banks[bank];}

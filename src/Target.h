@@ -55,6 +55,7 @@ public:
 
     [[nodiscard]] bool is_compatible_with(const Target& other) const; // this has everything from other
     [[nodiscard]] const StringEncoding* string_encoding(Symbol name) const;
+    void set_fill_byte(uint8_t fill_byte) {map.fill_byte = fill_byte;}
 
     Symbol name;
     const CPU* cpu = &CPU::empty;

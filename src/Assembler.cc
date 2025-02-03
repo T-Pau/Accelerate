@@ -48,6 +48,7 @@ const Token Assembler::token_data_start = Token(Token::NAME, ".data_start");
 const Token Assembler::token_default_string_encoding = Token(Token::DIRECTIVE, "default_string_encoding");
 const Token Assembler::token_extend = Token(Token::DIRECTIVE, "extend");
 const Token Assembler::token_extension = Token(Token::DIRECTIVE, "extension");
+const Token Assembler::token_fill_byte = Token(Token::DIRECTIVE, "fill_byte");
 const Token Assembler::token_macro = Token(Token::DIRECTIVE, "macro");
 const Token Assembler::token_output = Token(Token::DIRECTIVE, "output");
 const Token Assembler::token_override = Token(Token::DIRECTIVE, "override");
@@ -73,6 +74,7 @@ const std::unordered_map<Token, Assembler::Directive> Assembler::directives = {
     {token_default, Directive(&Assembler::parse_default)},
     {token_default_string_encoding, Directive{&Assembler::parse_default_string_encoding, true}},
     {token_extension, Directive{&Assembler::parse_extension, true}},
+    {token_fill_byte, Directive{&Assembler::parse_fill_byte, true}},
     {token_output, Directive{&Assembler::parse_output, true}},
     {token_pin, Directive{&Assembler::parse_pin}},
     {token_section, Directive{&Assembler::parse_section}},
@@ -420,6 +422,16 @@ void Assembler::parse_extension(const Token& directive) {
     auto token = tokenizer.expect(Token::STRING, TokenGroup::newline);
 
     parsed_target.extension = token.as_string();
+}
+
+
+void Assembler::parse_fill_byte(const Token& directive) {
+    auto token = tokenizer.expect(Token::VALUE, TokenGroup::newline);
+
+    if (!token.is_unsigned() || token.as_unsigned() >= 0x100) {
+        throw ParseException(token, "invalid fill byte");
+    }
+    parsed_target.set_fill_byte(token.as_unsigned());
 }
 
 void Assembler::parse_output(const Token& directive) {

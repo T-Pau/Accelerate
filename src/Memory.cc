@@ -36,9 +36,10 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <sstream>
 
 #include "Exception.h"
+#include <iostream>
 
-Memory::Bank::Bank(Range range) : range(range) {
-    memory = std::string(range.size, 0);
+Memory::Bank::Bank(Range range, uint8_t fill_byte) : range(range) {
+    memory = std::string(range.size, static_cast<char>(fill_byte));
     blocks.emplace_back(FREE, range);
 }
 
@@ -156,8 +157,8 @@ void Memory::Bank::debug_blocks(std::ostream& stream) const {
     }
 }
 
-Memory::Memory(const std::vector<Range>& bank_ranges) {
+Memory::Memory(const std::vector<Range>& bank_ranges, uint8_t fill_byte) {
     for (const auto& bank_range : bank_ranges) {
-        banks.emplace_back(bank_range);
+        banks.emplace_back(bank_range, fill_byte);
     }
 }

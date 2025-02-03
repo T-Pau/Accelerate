@@ -92,6 +92,7 @@ public:
 
     std::unordered_map<Symbol, Section> sections;
     std::unordered_map<Symbol, std::vector<Block>> segments;
+    uint8_t fill_byte{0};
 };
 
 

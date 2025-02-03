@@ -70,6 +70,7 @@ private:
     void parse_default_string_encoding(const Token& directive);
     void parse_directive(const Token& directive);
     void parse_extension(const Token& directive);
+    void parse_fill_byte(const Token& directive);
     void parse_macro(Visibility visibility, bool default_only = false);
     void parse_name(Visibility visibility, const Token& name, bool default_only = false);
     void parse_output(const Token& directive);
@@ -110,6 +111,7 @@ private:
     static const Token token_default_string_encoding;
     static const Token token_extend;
     static const Token token_extension;
+    static const Token token_fill_byte;
     static const Token token_macro;
     static const Token token_output;
     static const Token token_override;

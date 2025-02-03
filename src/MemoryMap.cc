@@ -71,7 +71,7 @@ Memory MemoryMap::initialize_memory() const {
         }
     }
 
-    return Memory(bank_ranges);
+    return Memory(bank_ranges, fill_byte);
 }
 
 bool MemoryMap::access_type_less(MemoryMap::AccessType a, MemoryMap::AccessType b) {

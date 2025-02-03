@@ -1,3 +1,5 @@
+.fill_byte $ff
+
 .section code
 
 .default nmi {
