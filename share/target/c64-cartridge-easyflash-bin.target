@@ -1,0 +1,10 @@
+.include "c64-cartridge-easyflash.inc"
+
+.extension "bin"
+
+; TODO: support for multiple banks
+
+.output {
+    .memory $8000, $9fff
+    .memory $e000, $ffff
+}

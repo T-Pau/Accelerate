@@ -1,0 +1,18 @@
+.include "ascii-encoding.inc"
+.include "commodore-crt.inc"
+.include "c64-cartridge-8k.inc"
+
+CARTRIDGE_TYPE = CRT_TYPE_EASYFLASH
+;.default CARTRIDGE_NAME = ""
+
+; TODO: support for multiple banks
+
+.extension "crt"
+
+.output {
+    crt_header CARTRIDGE_TYPE, 0, 1, CARTRIDGE_NAME
+    crt_chip_header CRT_CHIP_TYPE_ROM, 0, $8000, $2000
+    .memory $8000, $9fff
+    crt_chip_header CRT_CHIP_TYPE_ROM, 0, $a000, $2000
+    .memory $e000, $ffff
+}
