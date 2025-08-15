@@ -86,6 +86,37 @@
 .public CRT_TYPE_FREEZE_FRAME_MK2 = 77
 
 CRT_SIGNATURE = "C64 CARTRIDGE"
+
+.pre_else_if .defined(C128)
+.public CRT_TYPE_GENERIC = 0
+.public CRT_TYPE_WARPSPEED = 1
+.public CRT_TYPE_PARTNER = 2
+.public CRT_TYPE_COMAL80 = 3
+.public CRT_TYPE_MAGIC_DESK = 4
+.public CRT_TYPE_GMOD2 = 5
+
+CRT_SIGNATURE = "C128 CARTRIDGE"
+
+.pre_else_if .defined(PLUS4) || .defined(C16)
+.public CRT_TYPE_GENERIC = 0
+.public CRT_TYPE_MAGIC_DESK = 1
+.public CRT_TYPE_MULTI = 2
+.public CRT_TYPE_1MB = 3
+
+CRT_SIGNATURE = "PLUS4 CARTRIDGE"
+
+.pre_else_if .defined(VIC20)
+.public CRT_TYPE_GENERIC = 0
+.public CRT_TYPE_MEGA_CART = 1
+.public CRT_TYPE_BEHR_BONZ = 2
+.public CRT_TYPE_FLASH_PLUGIN = 3
+.public CRT_TYPE_ULTIMEM = 4
+.public CRT_TYPE_FINAL_EXPANSION = 5
+.public CRT_TYPE_RABBIT_TAPE_TURBO = 6
+.public CRT_TYPE_SUPER_EXPANDER = 7
+.public CRT_TYPE_MIKRO_ASSEMBLER = 8
+
+CRT_SIGNATURE = ""VIC20 CARTRIDGE"
 .pre_end
 
 .macro crt_header type, exrom, game, name {

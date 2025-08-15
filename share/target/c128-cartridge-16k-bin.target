@@ -1,0 +1,7 @@
+.include "c128-cartridge-16k.inc"
+
+.extension "bin"
+
+.output {
+    .memory $8000, $bfff
+}
