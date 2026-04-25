@@ -4,6 +4,47 @@ file hello-world.s ../examples/hello-world-cbm.s
 file cbm.lib ../share/lib/cbm.lib
 file hello-world.prg {} hello-world-c64.prg
 file hello-world.sym {} <inline>
+constant	$0314	IRQ_VECTOR
+constant	$0318	NMI_VECTOR
+constant	$ff68	SETBNK
+constant	$ff81	CINT
+constant	$ff87	RAMTAS
+constant	$ff8a	RESTOR
+constant	$ff8d	VECTOR
+constant	$ff90	SETMSG
+constant	$ff93	SECOND
+constant	$ff96	TKSA
+constant	$ff99	MEMTOP
+constant	$ff9c	MEMBOT
+constant	$ff9f	SCNKEY
+constant	$ffa2	SETTMO
+constant	$ffa5	ACPTR
+constant	$ffa8	CIOUT
+constant	$ffab	UNTLK
+constant	$ffae	UNLSN
+constant	$ffb1	LISTEN
+constant	$ffb4	TALK
+constant	$ffb7	READST
+constant	$ffba	SETLFS
+constant	$ffbd	SETNAM
+constant	$ffc0	OPEN
+constant	$ffc3	CLOSE
+constant	$ffc6	CHKIN
+constant	$ffc9	CHKOUT
+constant	$ffcc	CLRCHN
+constant	$ffcf	CHRIN
+constant	$ffd2	CHROUT
+constant	$ffd5	LOAD
+constant	$ffd8	SAVE
+constant	$ffdb	SETTIM
+constant	$ffde	RDTIM
+constant	$ffe1	STOP
+constant	$ffe4	GETIN
+constant	$ffe7	CLAA
+constant	$ffea	UDTIM
+constant	$ffed	SCREEN
+constant	$fff0	PLOT
+constant	$fff3	IOBASE
 object	$19	$0002	ptr	zero_page	reserve
 object	$801	$000d	basic_program	data	data
 object	$80e	$0015	start	code	data

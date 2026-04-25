@@ -231,6 +231,17 @@ void ObjectFile::add_object_file(const std::shared_ptr<ObjectFile>& file) {
     }
 }
 
+void ObjectFile::collect_constants(std::unordered_set<const Constant*>& set, bool public_only) const {
+    for (const auto& constant: constants | std::views::values) {
+        if (!public_only || constant->is_public()) {
+            set.insert(constant.get());
+        }
+    }
+    for (const auto& library: imported_libraries) {
+        library->collect_constants(set, public_only);
+    }
+}
+
 void ObjectFile::evaluate() {
     for (auto& constant : constants | std::views::values) {
         // TODO: this causes the error for cyclic definition to be printed four times

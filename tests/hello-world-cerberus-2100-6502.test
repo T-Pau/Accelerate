@@ -3,6 +3,7 @@ arguments --target cerberus-2100-6502 --symbol-map hello-world.sym -o hello-worl
 file hello-world.s ../examples/hello-world-cerberus-2100-6502.s
 file hello-world.prg {} hello-world-cerberus-2100-6502.prg
 file hello-world.sym {} <inline>
+constant	$f800	SCREEN
 object	$02	$0002	ptr	zero_page	reserve
 object	$205	$0017	start	code	data
 object	$21c	$000d	message	data	data

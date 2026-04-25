@@ -210,7 +210,52 @@ void ProgramLinker::output_symbol_map(const std::string& file_name) {
     auto sorted_objects = std::vector<Object*>(objects.begin(), objects.end());
     std::ranges::sort(sorted_objects, Object::less_pointers);
 
+    std::unordered_set<const ObjectFile::Constant*> constants;
+    std::vector<const ObjectFile::Constant*> sorted_constants;
+
+    program->collect_constants(constants, false);
+    for (const auto& object_file: libraries) {
+        object_file->collect_constants(constants, true);
+
+        for (const auto& object: object_file->all_objects()) {
+            if (object->has_address()) {
+                sorted_objects.push_back(object);
+            }
+        }
+    }
+
+    sorted_constants.insert(sorted_constants.end(), constants.begin(), constants.end());
+    // TODO: sort by address
+    std::ranges::sort(sorted_constants, [](const ObjectFile::Constant* a, const ObjectFile::Constant* b) {
+        auto va = a->value.value();
+        auto vb = b->value.value();
+        if (va && vb) {
+            if (*va != *vb) {
+                return *va < *vb;
+            }
+            else {
+                return a->name < b->name;
+            }
+        }
+        else if (va) {
+            return true;
+        }
+        else if (vb) {
+            return false;
+        }
+        else {
+            return a->name < b->name;
+        }
+    });
+
     auto stream = std::ofstream(file_name);
+
+    for (const auto& constant: sorted_constants) {
+        auto value = constant->value.value();
+        if (value) {
+            stream << "constant\t" << *value << "\t" << constant->name << "\n";
+        }
+    }
 
     for (const auto& object: sorted_objects) {
         stream << "object\t" << *object->address;

@@ -1,0 +1,88 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"type": "shell",
+			"label": "Project: build",
+			"command": "cmake",
+			"args": [
+				"--build",
+				"${workspaceFolder}/build",
+				"--verbose"
+			],
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			},
+			"dependsOn": "Project: configure",
+			"dependsOrder": "sequence",
+			"problemMatcher": [
+				"$gcc"
+			],
+			"detail": "Build project with explicit CMake command",
+			"options": {
+				"cwd": "${workspaceFolder}"
+			},
+			"presentation": {
+				"reveal": "always",
+				"panel": "dedicated",
+				"focus": true,
+				"clear": true,
+				"echo": true,
+				"showReuseMessage": true
+			}
+		},
+		{
+			"type": "shell",
+			"label": "Project: configure",
+			"command": "cmake",
+			"args": [
+				"-S",
+				"${workspaceFolder}",
+				"-B",
+				"${workspaceFolder}/build",
+				"-DCMAKE_EXPORT_COMPILE_COMMANDS=ON"
+			],
+			"problemMatcher": [
+				"$gcc"
+			],
+			"detail": "Configure project with explicit CMake command",
+			"options": {
+				"cwd": "${workspaceFolder}"
+			},
+			"presentation": {
+				"reveal": "always",
+				"panel": "dedicated",
+				"focus": true,
+				"clear": true,
+				"echo": true,
+				"showReuseMessage": true
+			}
+		},
+		{
+			"type": "shell",
+			"label": "Project: test",
+			"command": "ctest",
+			"args": [
+				"--test-dir",
+				"${workspaceFolder}/build",
+				"--output-on-failure"
+			],
+			"dependsOn": "Project: build",
+			"dependsOrder": "sequence",
+			"problemMatcher": [],
+			"detail": "Run CTest and print full failure output",
+			"options": {
+				"cwd": "${workspaceFolder}"
+			},
+			"presentation": {
+				"reveal": "always",
+				"panel": "dedicated",
+				"focus": true,
+				"clear": true,
+				"echo": true,
+				"showReuseMessage": true
+			}
+		}
+	]
+}

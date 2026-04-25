@@ -82,6 +82,7 @@ public:
     void serialize(std::ostream& stream) const;
     void set_target(const Target* new_target);
     std::shared_ptr<Environment> environment(Visibility visibility) const;
+    void collect_constants(std::unordered_set<const Constant*>& set, bool public_only = false) const;
 
     std::shared_ptr<Environment> public_environment;
     std::shared_ptr<Environment> private_environment;

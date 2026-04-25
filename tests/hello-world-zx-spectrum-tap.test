@@ -4,6 +4,28 @@ file zx-spectrum.lib ../share/lib/zx-spectrum.lib
 file hello-world.s ../examples/hello-world-zx-spectrum.s
 file hello-world.tap {} hello-world-zx-spectrum.tap
 file hello-world.sym {} <inline>
+constant	$01	PORT_KEMPSTON_JOYSTICK_RIGHT
+constant	$01	PORT_KEMPSTON_MOUSE_BUTTON_LEFT
+constant	$02	PORT_KEMPSTON_JOYSTICK_LEFT
+constant	$02	PORT_KEMPSTON_MOUSE_BUTTON_MIDDLE
+constant	$04	PORT_KEMPSTON_JOYSTICK_DOWN
+constant	$04	PORT_KEMPSTON_MOUSE_BUTTON_RIGHT
+constant	$08	PORT_KEMPSTON_JOYSTICK_UP
+constant	$10	PORT_KEMPSTON_JOYSTICK_B
+constant	$10	PORT_KEMPSTON_JOYSTICK_FIRE_1
+constant	$1f	PORT_KEMPSTON_JOYSTICK_1
+constant	$20	PORT_KEMPSTON_JOYSTICK_A
+constant	$20	PORT_KEMPSTON_JOYSTICK_FIRE_2
+constant	$37	PORT_KEMPSTON_JOYSTICK_2
+constant	$40	PORT_KEMPSTON_JOYSTICK_C
+constant	$80	PORT_KEMPSTON_JOYSTICK_START
+constant	$f0	PORT_KEMPSTON_MOUSE_BUTTON_SCROLL_WHEEL_MASK
+constant	$0daf	CLS
+constant	$4000	SCREEN_RAM
+constant	$5800	ATTRIBUTES_RAM
+constant	$fadf	PORT_KEMPSTON_MOUSE_BUTTONS
+constant	$fbdf	PORT_KEMPSTON_MOUSE_X
+constant	$ffdf	PORT_KEMPSTON_MOUSE_Y
 object	$5ccb	$002f	basic	basic	data
 object	$8000	$000e	start	code	data
 object	$800e	$000e	string	data	data

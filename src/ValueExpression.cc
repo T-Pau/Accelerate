@@ -48,49 +48,11 @@ ValueExpression::ValueExpression(const Token& token) {
 }
 
 void ValueExpression::serialize_sub(std::ostream& stream) const {
-    switch (value()->type()) {
-        case Value::BINARY: {
-            stream << "{{";
-            auto encoder = HexStreamEncoder(stream, 72);
-            encoder.encode(value()->binary_value());
-            stream << "}}";
-            break;
-        }
-
-        case Value::BOOLEAN:
-            stream << (value()->boolean_value() ? ".true" : ".false");
-            break;
-
-        case Value::FLOAT:
-            stream << value()->float_value();
-            break;
-
-        case Value::SIGNED:
-        case Value::UNSIGNED: {
-            const auto width = static_cast<int>(*value()->default_size()) * 2;
-            uint64_t v;
-            if (value()->is_signed()) {
-                stream << "-";
-                v = -value()->signed_value();
-            }
-            else {
-                v = value()->unsigned_value();
-            }
-            stream << "$" << std::setfill('0') << std::setw(width) << std::hex << v << std::dec;
-            break;
-        }
-
-        case Value::STRING:
-            stream << '"' << value()->string_value() << '"';
-            break;
-
-        case Value::VOID:
-            stream << ".none";
-            break;
-
-        case Value::INTEGER:
-        case Value::NUMBER:
-            throw Exception("internal error: value can't have abstract type %s", value()->type_name().c_str());
+    if (has_value()) {
+        stream << *value();
+    }
+    else {
+        stream << "<invalid value>";
     }
 }
 

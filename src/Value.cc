@@ -31,10 +31,12 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "Value.h"
 
+#include <iomanip>
 #include <limits>
 
 #include "Exception.h"
 #include "Int.h"
+#include "HexStreamEncoder.h"
 
 Value::Value(int64_t value_, uint64_t default_size) : explicit_default_size(default_size) {
     if (value_ < 0) {
@@ -750,4 +752,56 @@ std::string Value::string_value() const {
     }
 
     throw Exception("internal error: invalid value type %d", type());
+}
+
+std::ostream& operator<<(std::ostream& stream, const Value& value) {
+    value.serialize(stream);
+    return stream;
+}
+
+void Value::serialize(std::ostream& stream) const {
+    switch (type()) {
+        case Value::BINARY: {
+            stream << "{{";
+            auto encoder = HexStreamEncoder(stream, 72);
+            encoder.encode(binary_value());
+            stream << "}}";
+            break;
+        }
+
+        case Value::BOOLEAN:
+            stream << (boolean_value() ? ".true" : ".false");
+            break;
+
+        case Value::FLOAT:
+            stream << float_value();
+            break;
+
+        case Value::SIGNED:
+        case Value::UNSIGNED: {
+            const auto width = static_cast<int>(*default_size()) * 2;
+            uint64_t v;
+            if (is_signed()) {
+                stream << "-";
+                v = -signed_value();
+            }
+            else {
+                v = unsigned_value();
+            }
+            stream << "$" << std::setfill('0') << std::setw(width) << std::hex << v << std::dec;
+            break;
+        }
+
+        case Value::STRING:
+            stream << '"' << string_value() << '"';
+            break;
+
+        case Value::VOID:
+            stream << ".none";
+            break;
+
+        case Value::INTEGER:
+        case Value::NUMBER:
+            throw Exception("internal error: value can't have abstract type %s", type_name().c_str());
+    }
 }

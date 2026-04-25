@@ -114,6 +114,8 @@ public:
     Value& operator/=(const Value& other) {*this = *this / other; return *this;}
     Value& operator*=(const Value& other) {*this = *this * other; return *this;}
 
+    void serialize(std::ostream& stream) const;
+
 private:
     std::optional<std::variant<bool, double, int64_t, uint64_t, Symbol, std::string>> value;
     uint64_t explicit_default_size{0};
@@ -134,6 +136,7 @@ private:
     [[nodiscard]] static uint64_t shift_left_unsigned(uint64_t a, uint64_t b);
 };
 
+std::ostream& operator<<(std::ostream& stream, const Value& value);
 template<>
 struct std::hash<Value> {
     std::size_t operator()(Value const &value) const noexcept {
