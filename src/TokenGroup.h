@@ -34,20 +34,55 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "Token.h"
 
+/// @brief A group of tokens specified by specific tokens or token types.
 class TokenGroup {
 public:
+    /**
+     * Create a token group that contains no or all tokens.
+     * 
+     * @param contains_all If `true`, the group contains all tokens, otherwise it contains no tokens.
+     */
     explicit TokenGroup(bool contains_all = false): contains_all{contains_all}, name{contains_all ? "all": "none"} {}
+
+    /**
+     * Create a token group that contains all tokens of the given type.
+     * 
+     * @param type The type of tokens to include in the group.
+     */
     explicit TokenGroup(Token::Type type): types({ type }), name (Token::type_name(type)) {}
+
+    /**
+     * Create a token group that contains the given tokens.
+     * 
+     * @param tokens The tokens to include in the group.
+     * @param name The name of the token group.
+     */
     TokenGroup(std::unordered_set<Token::Type> types, std::unordered_set<Token> tokens, std::string name): types (std::move(types)), tokens(std::move(tokens)), name(std::move(name)) {}
 
+    /**
+     * Check if the group contains a given token.
+     * 
+     * @param token The token to check.
+     * @return `true` if the group contains the token, `false` otherwise.
+     */
     [[nodiscard]] bool contains(const Token& token) const {return contains_all || types.contains(token.get_type()) || tokens.contains(token);}
 
+    /// @brief A token group that contains the newline token.
     static const TokenGroup newline;
+
+    /// @brief A token group that contains all tokens.
     static const TokenGroup all;
 
+    /// @brief The token types contained in the group.
     std::unordered_set<Token::Type> types;
+
+    /// @brief The specific tokens contained in the group.
     std::unordered_set<Token> tokens;
+
+    /// @brief Whether the group contains all tokens.
     bool contains_all{false};
+
+    /// @brief The name of the token group.
     std::string name;
 };
 

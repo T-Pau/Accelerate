@@ -39,30 +39,92 @@ class Expression;
 class EvaluationContext;
 class Environment;
 
+/**
+ * Abstract base class for all expression nodes.
+ */
 class BaseExpression {
 public:
     BaseExpression() = default;
     explicit BaseExpression(const Location& location): location(location) {}
     virtual ~BaseExpression() = default;
 
+    /**
+     * Check if the expression has already been fully evaluated and has a value.
+     * 
+     * @return `true` if the expression has a value, `false` otherwise.
+     */
     [[nodiscard]] virtual bool has_value() const {return value().has_value();}
+
+    /**
+     * Get the value of the expression if it has one.
+     * 
+     * @return The value of the expression.
+     */
     [[nodiscard]] virtual std::optional<Value> value() const {return {};}
+
+    /**
+     * Get the minimum possible value of the expression if it can be determined.
+     * 
+     * @return The minimum possible value of the expression.
+     */
     [[nodiscard]] virtual std::optional<Value> minimum_value() const {return value();}
+
+    /**
+     * Get the maximum possible value of the expression if it can be determined.
+     * 
+     * @return The maximum possible value of the expression.
+     */
     [[nodiscard]] virtual std::optional<Value> maximum_value() const {return value();}
+
+    /**
+     * Get the type of the expression's value if it can be determined.
+     * 
+     * @return The type of the expression's value.
+     */
     [[nodiscard]] virtual std::optional<Value::Type> type() const {return {};}
 
+    /**
+     * Serialize the expression to a stream.
+     * 
+     * @param stream The stream to serialize to.
+     */
     void serialize(std::ostream& stream) const;
 
     [[nodiscard]] virtual std::optional<Expression> evaluated(const EvaluationContext& context) const = 0;
     virtual void collect_objects(std::unordered_set<Object*>& objects) const {}
 
+    /**
+     * The location of the expression in the source code.
+     */
     Location location;
 
 protected:
+    /**
+     * Serialize the expression to a stream.
+     * 
+     * This method must be implemented by derived classes.
+     * 
+     * @param stream The stream to serialize to.
+     */
     virtual void serialize_sub(std::ostream& stream) const = 0;
 };
 
+/**
+ * Output expression to a stream.
+ * 
+ * @param stream The stream to output to.
+ * @param node Pointer to the expression to output.
+ * @return The stream after outputting the expression.
+ */
 std::ostream& operator<<(std::ostream& stream, const std::shared_ptr<BaseExpression>& node);
+
+/**
+ * Output expression to a stream.
+ * 
+ * @param stream The stream to output to.
+ * @param node Expression to output.
+ * @return The stream after outputting the expression.
+ */
 std::ostream& operator<<(std::ostream& stream, const BaseExpression& node);
 
 #endif // BASE_EXPRESSION_H

@@ -39,11 +39,40 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "printf_like.h"
 #include "Symbol.h"
 
+/**
+ * Format a string using `printf`-style formatting.
+ * 
+ * @param format The format string.
+ * @param ... The arguments to format.
+ * @return The formatted string.
+ */
 std::string string_format(const char *format, ...) PRINTF_LIKE(1, 2);
+
+/**
+ * Format a string using `printf`-style formatting with a `va_list`.
+ * 
+ * @param format The format string.
+ * @param ap The arguments to format.
+ * @return The formatted string.
+ */
 std::string string_format_v(const char *format, va_list ap);
 
+/**
+ * Join a vector of symbols into a string with a separator between the symbols.
+ * 
+ * @param symbols The symbols to join.
+ * @param separator The separator to use between the symbols. (default: ", ")
+ * @return The joined string.
+ */
 std::string join(const std::vector<Symbol>& symbols, const std::string& separator = ", ");
 
+/**
+ * Get the default output file name for a given input file name by discarding any directory component and replacing its extension.
+ * 
+ * @param file_name The input file name.
+ * @param extension The extension to use for the output file.
+ * @return The default output file name.
+ */
 std::string default_output_filename(const std::string& file_name, const std::string& extension);
 
 #endif // UTIL_H

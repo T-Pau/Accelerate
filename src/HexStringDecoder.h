@@ -29,27 +29,56 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef HEXSTRING_H
-#define HEXSTRING_H
+#ifndef HEX_STRING_DECODER_H
+#define HEX_STRING_DECODER_H
 
 #include <cstdint>
 #include <optional>
 #include <string>
 
+/// @brief A helper class to decode hexadecimal strings.
 class HexStringDecoder {
 public:
+    /**
+     * Decode a partial hexadecimal string, ignoring whitespace characters.
+     * 
+     * @param string The string to decode.
+     * @throws Exception If the string contains an invalid character.
+     */
     void decode(const std::string& string);
+
+    /**
+     * Decode a single hexadecimal character, ignoring whitespace characters.
+     * 
+     * @param character The character to decode.
+     * @throws Exception If the character is not a valid character.
+     */
     void decode(char character);
 
+    /**
+     * Finish decoding and return the resulting string.
+     * 
+     * @return The decoded string.
+     * @throws Exception If there is a partial hexadecimal left.
+     */
     std::string end();
 
 private:
+    /**
+     * Get the numeric value of a hexadecimal digit.
+     * 
+     * @param digit The hexadecimal digit.
+     * @return The numeric value of the digit.
+     */
     static uint8_t value(char digit);
 
+    /// @brief The decoded string so far.
     std::string string;
+
+    /// @brief The partial value of the last decoded hexadecimal digit, if any.
     std::optional<uint8_t> partial;
 };
 
 
 
-#endif //HEXSTRING_H
+#endif //HEX_STRING_DECODER_H

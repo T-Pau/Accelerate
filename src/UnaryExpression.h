@@ -35,8 +35,16 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "BaseExpression.h"
 #include "Expression.h"
 
+/// @brief Expression node representing a unary operation.
 class UnaryExpression: public BaseExpression {
 public:
+    /**
+     * Create a unary expression.
+     * 
+     * @param location The location of the expression in the source code.
+     * @param operation The unary operation.
+     * @param operand The operand of the unary operation.
+     */
     UnaryExpression(const Location& location, Expression::UnaryOperation operation, Expression operand): BaseExpression(location), operation(operation), operand(std::move(operand)) {}
 
     void collect_objects(std::unordered_set<Object*>& objects) const override { operand.collect_objects(objects);}
@@ -53,7 +61,10 @@ protected:
     friend Expression;
 
 private:
+    /// @brief The unary operation.
     Expression::UnaryOperation operation;
+
+    /// @brief The operand of the unary operation.
     Expression operand;
 };
 

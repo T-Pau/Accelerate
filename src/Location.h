@@ -36,12 +36,27 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "Symbol.h"
 
+/// @brief Represents a location within a file, including the file name, line number, and column range.
 class Location {
   public:
+    /// @brief Empty location.
     Location() = default;
 
+    /**
+     * Create a location with only a file name.
+     * 
+     * @param file_name The name of the file.
+     */
     explicit Location(const std::string& file_name) : file(file_name) {}
 
+    /**
+     * Create a location.
+     * 
+     * @param file_name The name of the file.
+     * @param line_number The line number.
+     * @param start_column The starting column number.
+     * @param end_column The ending column number.
+     */
     Location(Symbol file, size_t line_number, size_t start_column, size_t end_column) : file(file), start_line_number(line_number), start_column(start_column), end_column(end_column) {}
 
     Location(const Location& start, const Location& end);
@@ -53,9 +68,16 @@ class Location {
 
     [[nodiscard]] std::string to_string() const;
 
+    /// @brief The file.
     Symbol file;
+
+    /// @brief The line number where the location starts.
     size_t start_line_number = 0;
+
+    /// @brief The column number where the location starts.
     size_t start_column = 0;
+
+    /// @brief The column number where the location ends.
     size_t end_column = 0;
 };
 

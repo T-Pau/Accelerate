@@ -34,9 +34,14 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "BaseExpression.h"
 
+/// @brief Expression node representing a void value.
 class VoidExpression: public BaseExpression {
 public:
-    VoidExpression(const Location& location): BaseExpression(location) {}
+    /**
+     * Create a void expression.
+     * @param location The location of the expression.
+     */
+    explicit VoidExpression(const Location& location): BaseExpression(location) {}
 
 protected:
     [[nodiscard]] std::optional<Expression> evaluated(const EvaluationContext& context) const override;

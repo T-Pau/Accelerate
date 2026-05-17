@@ -35,8 +35,19 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "BaseExpression.h"
 #include "Expression.h"
 
+/**
+ * Expression representing a binary operation.
+ */
 class BinaryExpression: public BaseExpression {
 public:
+    /**
+     * Create a binary expression.
+     * 
+     * @param location The location of the expression in the source code.
+     * @param left The left operand.
+     * @param operation The binary operation.
+     * @param right The right operand.
+     */
     BinaryExpression(const Location& location, Expression left, Expression::BinaryOperation operation, Expression right): BaseExpression(location), left(std::move(left)), operation(operation), right(std::move(right)) {}
 
     [[nodiscard]] std::optional<Value> minimum_value() const override;
@@ -48,6 +59,17 @@ public:
         right.collect_objects(objects);}
 
 protected:
+    /**
+     * Create an expression from a binary operation.
+     * 
+     * This might not create a BinaryExpression if the operation can be simplified (e.g. if both operands have values).
+     * 
+     * @param location The location of the expression in the source code.
+     * @param left The left operand.
+     * @param operation The binary operation.
+     * @param right The right operand.
+     * @return The created expression.
+     */
     [[nodiscard]] Expression static create(const Location& location, const Expression& left, Expression::BinaryOperation operation, const Expression& right);
     [[nodiscard]] std::optional<Expression> evaluated(const EvaluationContext& context) const override;
 
@@ -56,8 +78,13 @@ protected:
     friend class Expression;
 
 private:
+    /// @brief The left operand of the binary operation.
     Expression left;
+
+    /// @brief The binary operation.
     Expression::BinaryOperation operation;
+
+    /// @brief The right operand of the binary operation.
     Expression right;
 };
 

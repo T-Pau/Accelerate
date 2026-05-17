@@ -29,26 +29,59 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef HEXSTREAMENCODER_H
-#define HEXSTREAMENCODER_H
+#ifndef HEX_STREAM_ENCODER_H
+#define HEX_STREAM_ENCODER_H
 
 #include <cstdint>
 #include <ostream>
 
+/// @brief A helper class to encode data a hexadecimal string.
 class HexStreamEncoder {
 public:
+    /**
+     * Create a new hex stream encoder.
+     * 
+     * @param stream The stream to write the encoded data to.
+     * @param line_length The maximum length of a line. If 0, there is no maximum length.
+     * @param indent The number of spaces to indent each continuation line.
+     */
     HexStreamEncoder(std::ostream& stream, size_t line_length = 0, size_t indent = 0): stream{stream}, line_length{line_length}, indent{std::string(indent, ' ')} {}
 
+    /**
+     * Encode a character as hexadecimal.
+     * 
+     * @param character The character to encode.
+     */
     void encode(char character);
+
+    /**
+     * Encode a string as hexadecimal.
+     * 
+     * @param string The string to encode.
+     */
     void encode(const std::string& string);
 
 private:
+    /**
+     * Convert a value in the range 0-15 to a hexadecimal digit.
+     * 
+     * @param value The value to convert.
+     * @return The hexadecimal digit corresponding to the value.
+     * @throws Exception If the value is not in the range 0-15.
+     */
     static char digit(uint8_t value);
 
+    /// @brief The stream to write the encoded data to.
     std::ostream& stream;
+
+    /// @brief The maximum length of a line. If 0, there is no maximum length.
     size_t line_length{};
+
+    /// @brief The current position in the line.
     size_t line_position{};
+
+    /// @brief The indentation string for continuation lines.
     std::string indent;
 };
 
-#endif //HEXSTREAMENCODER_H
+#endif //HEX_STREAM_ENCODER_H

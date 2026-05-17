@@ -35,12 +35,48 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "BaseExpression.h"
 #include "Expression.h"
 
+/// @brief Expression representing the minimum or maximum of two sub-expressions.
 class MinMaxExpression: public BaseExpression {
   public:
+    /** 
+     * Create a minimum or maximum expression.
+     * 
+     * @param location The location of the expression in the source code.
+     * @param a The first sub-expression.
+     * @param b The second sub-expression.
+     * @param minimum Whether this is a minimum expression (`true`) or a maximum expression (`false`).
+     */
     explicit MinMaxExpression(const Location& location, Expression a, Expression b, bool minimum): BaseExpression(location), a{std::move(a)}, b{std::move(b)}, minimum{minimum} {}
     
+    /**
+     * Create a minimum expression from arguments.
+     * 
+     * @param location The location of the expression in the source code.
+     * @param arguments The arguments of the expression. Must contain exactly two expressions.
+     * @return The created expression.
+     */
     static Expression create_min(const Location& location, const std::vector<Expression>& arguments) {return create(location, true, arguments);}
+
+    /** 
+     * Create a maximum expression from arguments.
+     * 
+     * @param location The location of the expression in the source code.
+     * @param arguments The arguments of the expression. Must contain exactly two expressions.
+     * @return The created expression.
+     */
     static Expression create_max(const Location& location, const std::vector<Expression>& arguments) {return create(location, false, arguments);}
+
+    /**
+     * Create an expression representing the minimum or maximum of two sub-expressions.
+     * 
+     * This might not create a MinMaxExpression if the operation can be simplified (e.g. if both operands have values).
+     * 
+     * @param location The location of the expression in the source code.
+     * @param a The first sub-expression.
+     * @param b The second sub-expression.
+     * @param minimum Whether this is a minimum expression (`true`) or a maximum expression (`false`).
+     * @return The created expression.
+     */
     static Expression create(const Location& location, const Expression& a, const Expression& b, bool minimum);
 
     [[nodiscard]] std::optional<Expression> evaluated(const EvaluationContext& context) const override;
@@ -52,11 +88,33 @@ class MinMaxExpression: public BaseExpression {
     void serialize_sub(std::ostream& stream) const override;
 
   private:
+    /**
+     * Create an expression representing a minimum or maximum expression from arguments.
+     * 
+     * @param location The location of the expression in the source code.
+     * @param minimum Whether this is a minimum expression (`true`) or a maximum expression (`false`).
+     * @param arguments The arguments of the expression. Must contain exactly two expressions.
+     * @return The created expression.
+     */
     static Expression create(const Location& location, bool minimum, const std::vector<Expression>& arguments);
+
+    /**
+     * Get the minimum or maximum of two values.
+     * 
+     * @param minimum Whether to get the minimum (`true`) or maximum (`false`).
+     * @param a The first value.
+     * @param b The second value.
+     * @return The minimum or maximum of the two values.
+     */
     static Value min_max(bool minimum, const Value& a, const Value& b);
 
+    /// @brief The first sub-expression.
     Expression a;
+
+    /// @brief The second sub-expression.
     Expression b;
+
+    /// @brief Whether this is a minimum expression (`true`) or a maximum expression (`false`).
     bool minimum;
 };
 

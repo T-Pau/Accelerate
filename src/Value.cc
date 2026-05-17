@@ -528,6 +528,9 @@ bool Value::operator<=(const Value& other) const {
 
 Value Value::operator%(const Value& other) const {
     if (is_unsigned() && other.is_unsigned()) {
+        if (other.raw_unsigned_value() == 0) {
+            throw Exception("division by zero");
+        }
         return Value(raw_unsigned_value() % other.raw_unsigned_value());
     }
     // TODO: signed

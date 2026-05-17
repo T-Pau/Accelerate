@@ -34,15 +34,38 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "Expression.h"
 
+/**
+ * Expression representing a function call.
+ */
 class FunctionExpression: public BaseExpression {
 public:
+    /**
+     * Create a function expression.
+     * 
+     * @param location The location of the expression in the source code.
+     * @param name The name of the function.
+     * @param arguments The arguments to the function.
+     */
     FunctionExpression(const Location& location, Symbol name, std::vector<Expression> arguments): BaseExpression(location), name(name), arguments(std::move(arguments)) {}
 
     void collect_objects(std::unordered_set<Object*>& objects) const override;
 
+    /**
+     * Set up tokenizer for parsing function expressions.
+     * 
+     * @param tokenizer The tokenizer to set up.
+     */
     static void setup(FileTokenizer& tokenizer);
 
 protected:
+    /**
+     * Create a function expression.
+     * 
+     * @param location The location of the expression in the source code.
+     * @param name The name of the function.
+     * @param arguments The arguments to the function.
+     * @return The created expression.
+     */
     static Expression create(const Location& location, Symbol name, const std::vector<Expression>& arguments);
     [[nodiscard]] std::optional<Expression> evaluated(const EvaluationContext& context) const override;
 
@@ -51,9 +74,13 @@ protected:
     friend class Expression;
 
 private:
+    /// @brief The name of the function being called.
     Symbol name;
+
+    /// @brief The arguments to the function.
     std::vector<Expression> arguments;
 
+    /// @brief The built-in functions implemented in C++.
     static const std::unordered_map<Symbol, Expression (*)(const Location& location, const std::vector<Expression>&)> builtin_functions;
 };
 

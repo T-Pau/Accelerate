@@ -35,10 +35,31 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "BaseExpression.h"
 #include "Expression.h"
 
+/// @brief Expression node representing a Value.
 class ValueExpression: public BaseExpression {
 public:
+    /**
+     * Create a value expression from a token.
+     * 
+     * @param token The token to create the expression from.
+     * @throws Exception if the token is not a value or string token.
+     */
     explicit ValueExpression(const Token& token);
+
+    /**
+     * Create a value expression.
+     * 
+     * @param location The location of the expression.
+     * @param value The value of the expression.
+     */
     explicit ValueExpression(const Location& location, Value value): BaseExpression(location), value_(value) {}
+
+    /**
+     * Create a value expression with an unsigned integer value.
+     * 
+     * @param location The location of the expression.
+     * @param value The unsigned integer value of the expression.
+     */
     explicit ValueExpression(const Location& location, uint64_t value): ValueExpression(location, Value(value)) {}
 
     [[nodiscard]] bool has_value() const override {return true;}
@@ -53,6 +74,7 @@ protected:
     void serialize_sub(std::ostream& stream) const override;
 
 private:
+    /// @brief The value of the expression.
     Value value_;
 };
 

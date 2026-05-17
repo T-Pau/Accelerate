@@ -35,10 +35,39 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ArgumentType.h"
 #include "Expression.h"
 
+/**
+ * Expression representing a check if a value is in a certain range.
+ */
 class InRangeExpression: public BaseExpression {
 public:
+    /**
+     * Create an in-range expression.
+     * 
+     * @param location The location of the expression in the source code.
+     * @param lower_bound The lower bound of the range.
+     * @param upper_bound The upper bound of the range.
+     * @param argument The value to check.
+     */
     InRangeExpression(const Location& location, const Expression& lower_bound, const Expression& upper_bound, const Expression& argument): BaseExpression(location), lower_bound(std::move(lower_bound)), upper_bound(std::move(upper_bound)), argument(std::move(argument)) {}
+
+    /**
+     * Create an in-range expression from a list of arguments.
+     * 
+     * @param location The location of the expression in the source code.
+     * @param arguments The list of arguments.
+     * @return The created expression.
+     */
     [[nodiscard]] Expression static create(const Location& location, const std::vector<Expression>& arguments);
+
+    /**
+     * Create an in-range expression from its components.
+     * 
+     * @param location The location of the expression in the source code.
+     * @param lower_bound The lower bound of the range.
+     * @param upper_bound The upper bound of the range.
+     * @param argument The value to check.
+     * @return The created expression.
+     */
     [[nodiscard]] Expression static create(const Location& location, const Expression& lower_bound, const Expression& upper_bound, const Expression& argument);
 
     [[nodiscard]] std::optional<Value> minimum_value() const override {return {};}
@@ -52,8 +81,13 @@ protected:
     void serialize_sub(std::ostream& stream) const override;
 
 private:
+    /// @brief The lower bound of the range.
     Expression lower_bound;
+
+    /// @brief The upper bound of the range.
     Expression upper_bound;
+
+    /// @brief The value to check.
     Expression argument;
 };
 

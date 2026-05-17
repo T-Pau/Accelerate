@@ -35,11 +35,41 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "BaseExpression.h"
 #include "Expression.h"
 
+/// @brief Expression representing a sequence of repeated values.
 class FillExpression: public BaseExpression {
 public:
+    /**
+     * Create a fill expression.
+     * 
+     * @param location The location of the expression in the source code.
+     * @param count The expression representing the number of repetitions.
+     * @param value The expression representing the value to repeat.
+     */
     explicit FillExpression(const Location& location, Expression count, Expression value): BaseExpression(location), count{std::move(count)}, value{std::move(value)} {}
 
+    /**
+     * Create an expression representing a FillExpression from arguments.
+     * 
+     * This may not create a FillExpression if the expression can be simplified.
+     * 
+     * @param location The location of the expression in the source code.
+     * @param arguments The arguments of the expression. Must contain exactly two expressions: the count and the value.
+     * @return The created expression.
+     * @throws ParseException If the number of arguments is not exactly two or the first argument is not an unsigned integer expression.
+     */
     static Expression create(const Location& location, const std::vector<Expression>& arguments);
+
+    /**
+     * Create an expression representing a FillExpression.
+     * 
+     * This may not create a FillExpression if the expression can be simplified.
+     * 
+     * @param location The location of the expression in the source code.
+     * @param count The expression representing the number of repetitions.
+     * @param value The expression representing the value to repeat.
+     * @return The created expression.
+     * @throws ParseException If the first argument is not an unsigned integer expression.
+     */
     static Expression create(const Location& location, const Expression& count, const Expression& value);
 
     [[nodiscard]] std::optional<Expression> evaluated(const EvaluationContext& context) const override;
@@ -48,7 +78,10 @@ protected:
     void serialize_sub(std::ostream& stream) const override;
 
 private:
+    /// @brief The expression representing the number of repetitions.
     Expression count;
+
+    /// @brief The expression representing the value to repeat.
     Expression value;
 };
 

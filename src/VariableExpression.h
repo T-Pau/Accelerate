@@ -35,10 +35,21 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "BaseExpression.h"
 #include "Expression.h"
 
+/// @brief Expression node representing a variable.
 class VariableExpression: public BaseExpression {
 public:
+    /**
+     * Create a variable expression.
+     * @param location The location of the expression.
+     * @param symbol The name of the variable.
+     */
     explicit VariableExpression(const Location& location, Symbol symbol): BaseExpression(location), symbol(symbol) {}
 
+    /**
+     * Get the name of the variable.
+     * 
+     * @return The name of the variable.
+     */
     [[nodiscard]] Symbol variable() const {return symbol;}
 
 protected:
@@ -49,6 +60,7 @@ protected:
     friend class Expression;
 
 private:
+    /// @brief The name of the variable.
     Symbol symbol;
 };
 
