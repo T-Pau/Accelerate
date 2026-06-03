@@ -5,9 +5,9 @@ This section contains reference documentation for Accelerate. It is meant to be 
 !!! warning
     Accelerate is still in development and may change in breaking ways. 
 
-The concepts and design decisions of Accelerate are explained in the [Explanations](../Explanations/index.md) section. For practical guides and examples, see the [How-To Guides](../Examples/index.md) section. 
+The concepts and design decisions of Accelerate are explained in the [Explanations](../Explanations/index.md) section. 
 
-To get started, please refer to the [Tutorial](../Tutorial/index.md) section. For practical instructions, see the [How-To Guides](../Examples/index.md) section.
+To get started, please refer to the [Tutorials](../Tutorials/index.md) section. For practical instructions, see the [How-To Guides](../How-To-Guides/index.md) section.
 
 
 ## [Assembler Source File](Assembler-Source-File.md)

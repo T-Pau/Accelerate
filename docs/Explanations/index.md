@@ -2,7 +2,7 @@
 
 This section contains explanations of the design and rationale behind Accelerate. It is intended for readers who want to understand the motivation and goals of Accelerate.
 
-For a comprehensive reference manual, see the [Reference](../Reference-Manual/index.md) section. To get started, refer to the [Tutorial](../Tutorial/index.md) section. For examples of using Accelerate and how to approach various programming problems, see the [How-To Guides](../Examples/index.md) section.
+For a comprehensive reference manual, see the [Reference](../Reference/index.md) section. To get started, refer to the [Tutorials](../Tutorials/index.md) section. For examples of using Accelerate and how to approach various programming problems, see the [How-To Guides](../How-To-Guides/index.md) section.
 
 
 ## [Introduction](Introduction.md)
