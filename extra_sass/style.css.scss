@@ -1,0 +1,125 @@
+@import "source";
+
+:root {
+
+    --c64-black: #000000;
+    --c64-white: #FFFFFF;
+    --c64-red: #813338;
+    --c64-cyan: #75CEC8;
+    --c64-purple: #8E3C97;
+    --c64-green: #56AC4D;
+    --c64-blue: #2E2C9B;
+    --c64-yellow: #EDF171;
+    --c64-organe: #8E5029;
+    --c64-brown: #553800;
+    --c64-ligth-red: #C46C71;
+    --c64-grey-1: #4A4A4A;
+    --c64-grey-2: #7B7B7B;
+    --c64-light-green: #A9FF9F;
+    --c64-light-blue: #706DEB;
+    --c64-grey-3: #B2B2B2;
+
+    --tpau-c64-blue: #0A1C91;
+    --tpau-c64-light-blue: #5C52E6;
+    --tpau-c64-grey-1: #393939;
+    --tpau-c64-grey-2: #686868;
+    --md-text-font: "SourceSerif"; 
+    --md-code-font: "SourceCode";
+
+}
+
+.md-typeset h1, .md-typeset h2, .md-typeset h3, .md-typeset h4, .md-typeset h5, .md-typeset h6 {
+    font-family: SourceSans;
+    font-weight: bold;
+    text-transform: none;
+
+    code {
+        background-color: inherit;
+        color: var(--md-typeset-color);
+        padding-left: 0pt;
+    }
+}
+
+.md-typeset h2 {
+    font-size: 1.8em;
+}
+
+.md-typeset h3 {
+    font-size: 1.6em;
+}
+
+.md-typeset h4 {
+    font-size: 1.4em;
+}
+
+.md-typeset h5 {
+    font-size: 1.2em;
+}
+
+.md-typeset h6 {
+    font-size: 1em;
+}
+
+.md-header__sub_topic {
+    font-weight: normal;
+}
+
+:root > * {
+    --md-accent-fg-color: var(--c64-light-blue);
+    --md-primary-fg-color: var(--c64-blue);
+    --md-default-fg-color--light: var(--c64-blue);
+    --md-typeset-color: var(--c64-blue);
+    --md-footer-bg-color: var(--c64-blue);
+    --md-footer-fg-color--light: var(--c64-white);
+}
+
+.md-content {
+    --md-typeset-a-color: var(--c64-light-blue);
+}
+
+.md-nav__button.md-logo {
+    display: inline;
+}
+
+.md-nav__title .md-nav__button.md-logo img {
+    width: 100%;
+    height: 120px;
+}
+
+.md-nav__title .md-nav__button.md-logo img svg {
+    width: 100%;
+    height: 100%;
+}
+
+.md-typeset code {
+    white-space: pre-wrap;
+}
+
+table.code.highlight code {
+    background-color: var(--c64-white);
+}
+
+
+.md-typeset code em {
+    color: var(--c64-grey-1)
+}
+
+.md-typeset code a {
+    color: var(--c64-grey-2)
+}
+
+.md-typeset code a:hover {
+    color: var(--c64-grey-1)
+}
+
+.md-tpau {
+    margin: auto .6rem;
+    height: 36px;
+    padding: .4rem 0;
+    vertical-align: middle;
+}
+
+.md-tpau img {
+    height: 100%;
+    width: auto
+}

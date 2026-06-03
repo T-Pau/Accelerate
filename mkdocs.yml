@@ -1,0 +1,46 @@
+site_name: '&nbsp;'
+site_url: https://accelerate.tpau.group/
+repo_url: https://github.com/T-Pau/Accelerate
+copyright: ©2025 Dieter Baron
+extra:
+  generator: false
+plugins:
+  - extra-sass
+  - privacy
+  - search
+theme:
+  name: material
+  custom_dir: overrides
+  font: false
+  logo: assets/images/logo.svg
+  favicon: assets/images/favicon.ico
+  icon:
+    repo: fontawesome/brands/github   
+  palette:
+    primary: custom
+  features:
+    - navigation.indexes 
+    - toc.integrate 
+nav:
+  - index.md
+  - Tutorials:
+    - Tutorials/index.md
+    - Tutorials/Hello-World-C64.md
+  - How-To Guides:
+    - How-To-Guides/index.md
+  - Reference: 
+    - Reference/index.md
+    - Reference/Assembler-Source-File.md
+    - Reference/Expressions.md
+    - Reference/Structured-Values.md
+    - Reference/Target-Definition.md
+    - Reference/CPU-Definition.md
+  - Explanations:
+    - Explanations/index.md
+    - Explanations/Introduction.md
+    - DoReCo Talk: 'https://youtu.be/Bphj10Orb8U'
+    - Explanations/Rationale.md
+    - Explanations/Design-Goals.md
+  - License.md
+  - Repository: 'https://github.com/T-Pau/Accelerate/'
+V

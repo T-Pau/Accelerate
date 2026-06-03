@@ -1,0 +1,233 @@
+$light: 200;
+$heavy: 900;
+
+@font-face {
+    font-family: 'SourceCodePro';
+    src: url("/assets/fonts/SourceCodePro-Light.otf") format("opentype");
+    font-weight: $light;
+    font-style: normal;
+    font-variant: normal;
+}
+@font-face {
+  font-family: 'SourceCodePro';
+  src: url("/assets/fonts/SourceCodePro-LightIt.otf") format("opentype");
+  font-weight: $light;
+  font-style: italic;
+  font-variant: normal;
+}
+@font-face {
+  font-family: 'SourceCodePro';
+    src: url("/assets/fonts/SourceCodePro-Regular.otf") format("opentype");
+    font-weight: normal;
+    font-style: normal;
+    font-variant: normal;
+}
+@font-face {
+    font-family: 'SourceCodePro';
+    src: url("/assets/fonts/SourceCodePro-It.otf") format("opentype");
+    font-weight: normal;
+    font-style: italic;
+    font-variant: normal;
+}
+@font-face {
+    font-family: 'SourceCodePro';
+    src: url("/assets/fonts/SourceCodePro-Bold.otf") format("opentype");
+    font-weight: bold;
+    font-style: normal;
+    font-variant: normal;
+}
+@font-face {
+    font-family: 'SoureCodePro';
+    src: url("/assets/fonts/SourceCodePro-BoldIt.otf") format("opentype");
+    font-weight: bold;
+    font-style: italic;
+    font-variant: normal;
+}
+@font-face {
+    font-family: 'SourceCodePro';
+    src: url("/assets/fonts/SourceCodePro-Black.otf") format("opentype");
+    font-weight: $heavy;
+    font-style: normal;
+    font-variant: normal;
+}
+@font-face {
+    font-family: 'SoruceCodePro';
+    src: url("/assets/fonts/SourceCodePro-BlackIt.otf") format("opentype");
+    font-weight: $heavy;
+    font-style: italic;
+    font-variant: normal;
+}
+
+
+@font-face {
+    font-family: 'SourceDisplay';
+    src: url("/assets/fonts/SourceSerif4Display-Light.otf") format("opentype");
+    font-weight: $light;
+    font-style: normal;
+    font-variant: normal;
+}
+@font-face {
+    font-family: 'SourceDisplay';
+    src: url("/assets/fonts/SourceSerif4Display-LightIt.otf") format("opentype");
+    font-weight: $light;
+    font-style: italic;
+    font-variant: normal;
+}
+@font-face {
+    font-family: 'SourceDisplay';
+    src: url("/assets/fonts/SourceSerif4Display-Regular.otf") format("opentype");
+    font-weight: normal;
+    font-style: normal;
+    font-variant: normal;
+}
+@font-face {
+    font-family: 'SourceDisplay';
+    src: url("/assets/fonts/SourceSerif4Display-It.otf") format("opentype");
+    font-weight: normal;
+    font-style: italic;
+    font-variant: normal;
+}
+@font-face {
+    font-family: 'SourceDisplay';
+    src: url("/assets/fonts/SourceSerif4Display-Bold.otf") format("opentype");
+    font-weight: bold;
+    font-style: normal;
+    font-variant: normal;
+}
+@font-face {
+    font-family: 'SourceDisplay';
+    src: url("/assets/fonts/SourceSerif4Display-BoldIt.otf") format("opentype");
+    font-weight: bold;
+    font-style: italic;
+    font-variant: normal;
+}
+@font-face {
+    font-family: 'SourceDisplay';
+    src: url("/assets/fonts/SourceSerif4Display-Black.otf") format("opentype");
+    font-weight: $heavy;
+    font-style: normal;
+    font-variant: normal;
+}
+@font-face {
+    font-family: 'SourceDisplay';
+    src: url("/assets/fonts/SourceSerif4Display-BlackIt.otf") format("opentype");
+    font-weight: $heavy;
+    font-style: italic;
+    font-variant: normal;
+}
+    
+
+@font-face {
+  font-family: 'SourceSans';
+  src: url("/assets/fonts/SourceSans3-Light.otf") format("opentype");
+  font-weight: $light;
+  font-style: normal;
+  font-variant: normal;
+}
+@font-face {
+  font-family: 'SourceSans';
+  src: url("/assets/fonts/SourceSans3-LightIt.otf") format("opentype");
+  font-weight: $light;
+  font-style: italic;
+  font-variant: normal;
+}
+@font-face {
+  font-family: 'SourceSans';
+  src: url("/assets/fonts/SourceSans3-Regular.otf") format("opentype");
+  font-weight: normal;
+  font-style: normal;
+  font-variant: normal;
+}
+@font-face {
+  font-family: 'SourceSans';
+  src: url("/assets/fonts/SourceSans3-It.otf") format("opentype");
+  font-weight: normal;
+  font-style: italic;
+  font-variant: normal;
+}
+@font-face {
+  font-family: 'SourceSans';
+  src: url("/assets/fonts/SourceSans3-Bold.otf") format("opentype");
+  font-weight: bold;
+  font-style: normal;
+  font-variant: normal;
+}
+@font-face {
+  font-family: 'SoureSans';
+  src: url("/assets/fonts/SourceSans3-BoldIt.otf") format("opentype");
+  font-weight: bold;
+  font-style: italic;
+  font-variant: normal;
+}
+@font-face {
+  font-family: 'SourceSans';
+  src: url("/assets/fonts/SourceSans3-Black.otf") format("opentype");
+  font-weight: $heavy;
+  font-style: normal;
+  font-variant: normal;
+}
+@font-face {
+  font-family: 'SoruceSans';
+  src: url("/assets/fonts/SourceSans3-BlackIt.otf") format("opentype");
+  font-weight: $heavy;
+  font-style: italic;
+  font-variant: normal;
+}
+
+
+@font-face {
+    font-family: 'SourceSerif';
+    src: url("/assets/fonts/SourceSerif4-Light.otf") format("opentype");
+    font-weight: $light;
+    font-style: normal;
+    font-variant: normal;
+}
+@font-face {
+    font-family: 'SourceSerif';
+    src: url("/assets/fonts/SourceSerif4-LightIt.otf") format("opentype");
+    font-weight: $light;
+    font-style: italic;
+    font-variant: normal;
+}
+@font-face {
+    font-family: 'SourceSerif';
+    src: url("/assets/fonts/SourceSerif4-Regular.otf") format("opentype");
+    font-weight: normal;
+    font-style: normal;
+    font-variant: normal;
+}
+@font-face {
+    font-family: 'SourceSerif';
+    src: url("/assets/fonts/SourceSerif4-It.otf") format("opentype");
+    font-weight: normal;
+    font-style: italic;
+    font-variant: normal;
+}
+@font-face {
+    font-family: 'SourceSerif';
+    src: url("/assets/fonts/SourceSerif4-Bold.otf") format("opentype");
+    font-weight: bold;
+    font-style: normal;
+    font-variant: normal;
+}
+@font-face {
+    font-family: 'SourceSerif';
+    src: url("/assets/fonts/SourceSerif4-BoldIt.otf") format("opentype");
+    font-weight: bold;
+    font-style: italic;
+    font-variant: normal;
+}
+@font-face {
+    font-family: 'SourceSerif';
+    src: url("/assets/fonts/SourceSerif4-Black.otf") format("opentype");
+    font-weight: $heavy;
+    font-style: normal;
+    font-variant: normal;
+}
+@font-face {
+    font-family: 'SourceSerif';
+    src: url("/assets/fonts/SourceSerif4-BlackIt.otf") format("opentype");
+    font-weight: $heavy;
+    font-style: italic;
+    font-variant: normal;
+}
