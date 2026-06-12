@@ -28,12 +28,12 @@ nav = [
    { "Explanations" = [
        { "index.md" =  "Explanations/index.md" },
        { "Introduction" = "Explanations/Introduction.md" },
-       { "DoReCo Talk ↬" = "https://youtu.be/Bphj10Orb8U" },
+       { "DoReCo Talk" = "https://youtu.be/Bphj10Orb8U" },
        { "Rationale" = "Explanations/Rationale.md" },
        { "Design Goals" = "Explanations/Design-Goals.md" }
    ]},
    { "License" = "License.md" },
-   { "Repository ↬" = "https://github.com/T-Pau/Accelerate" }
+   { "Repository" = "https://github.com/T-Pau/Accelerate" }
 ]
 
 extra_css = [
@@ -44,6 +44,7 @@ extra_css = [
 
 [project.extra]
 generator = false
+icons = { "external" = "octicons/link-external-16" }
 
 # plugins = [ "privacy", "search" ]
 

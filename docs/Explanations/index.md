@@ -10,7 +10,7 @@ For a comprehensive reference manual, see the [Reference](../Reference/index.md)
 Introducing the core concepts of Accelerate, how they work together, and how they differ from other assemblers.
 
 
-## [DoReCo Talk ↬](https://youtu.be/Bphj10Orb8U)
+## [DoReCo Talk :octicons-link-external-16:](https://youtu.be/Bphj10Orb8U)
 
 A German talk introducing Accelerate at DoReCo 2023. (Hosted on YouTube.)
 
