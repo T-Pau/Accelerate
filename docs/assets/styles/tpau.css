@@ -488,10 +488,15 @@ a.md-nav__link[href^="http://"],
 a.md-nav__link[href^="https://"] {
 
     span:after {
-        content: var(--md-icon-external);
+        content: "";
         display: inline-block;
         height: 1em;
         width: 1em;
         vertical-align: middle;
+        color: inherit;
+        background-color: currentColor;
+        mask-image: var(--md-icon-external);
+        mask-repeat: no-repeat;
+        mask-size: 100% 100%;
     }
 }
