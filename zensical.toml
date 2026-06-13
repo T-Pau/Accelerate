@@ -80,6 +80,7 @@ features = [
 [project.theme.icon]
 logo = "accelerate"
 repo = "fontawesome/brands/github"
+admonition = { "todo" = "fontawesome/solid/tools" }
 
 [project.theme.palette]
 primary = "custom"
