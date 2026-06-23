@@ -4,7 +4,7 @@
 site_name = "Accelerate"
 site_url = "https://accelerate.tpau.group/"
 repo_url = "https://github.com/T-Pau/Accelerate"
-copyright = "©2026 Dieter Baron"
+copyright = "© 2026 Dieter Baron"
 site_author = "Dieter Baron"
 site_description = "Cross-Assembler for 8- and 16-bit Computers"
 

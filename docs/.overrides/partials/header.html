@@ -57,10 +57,12 @@ cspell: ignore javascripts
     {% include "partials/search.html" %}
     {% endif %}
     {% endif %}
-    <div class="md-header__source">
+    <div class="md-header__source narrow">
       {% if config.repo_url %}
       {% include "partials/source.html" %}
       {% endif %}
+    </div>
+    <div class="md-header__tpau"><a href="https://tpau.group/"><img src="/assets/images/tpau.svg" alt="T'Pau" /></a>
     </div>
   </nav>
   {% if "navigation.tabs.sticky" in features %}

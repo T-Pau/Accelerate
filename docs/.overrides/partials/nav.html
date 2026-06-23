@@ -1,5 +1,5 @@
 {#-
-This file was automatically generated - do not edit
+cspell: ignore scrollfix
 -#}
 {% import "partials/nav-item.html" as item with context %}
 {% set class = "md-nav md-nav--primary" %}
@@ -12,12 +12,15 @@ This file was automatically generated - do not edit
 <nav class="{{ class }}" aria-label="{{ lang.t('nav') }}" data-md-level="0">
   {% if config.theme.logo %}
   <label class="md-nav__title logo" for="__drawer">
-{#-    <a href="{{ config.extra.homepage | d(nav.homepage.url, true) | url }}" title="{{ config.site_name | e }}"
+    {#- <a href="{{ config.extra.homepage | d(nav.homepage.url, true) | url }}" title="{{ config.site_name | e }}"
       class="md-nav__button md-logo" aria-label="{{ config.site_name }}" data-md-component="logo"> -#}
       <img src="{{ config.theme.logo | url }}" alt="{{ config.site_name }}">
-{#-     </a> -#}
+      {#- </a> -#}
   </label>
   {% endif %}
+  <div class="md-nav__tpau">
+    <a href="https://tpau.group/"><img src="/assets/images/tpau.svg" alt="T'Pau" /></a>
+  </div>
   {% if config.repo_url %}
   <div class="md-nav__source">
     {% include "partials/source.html" %}
