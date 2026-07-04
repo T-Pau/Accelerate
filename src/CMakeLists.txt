@@ -92,6 +92,7 @@ add_library(xlr8-library STATIC
 )
 
 target_include_directories(xlr8-library PRIVATE ${PROJECT_BINARY_DIR})
+target_link_libraries(xlr8-library tpau-cpp-kernal::tpau-cpp-kernal)
 
 foreach(PROGRAM xlr8)
     ADD_EXECUTABLE(${PROGRAM} ${PROGRAM}.cc)
