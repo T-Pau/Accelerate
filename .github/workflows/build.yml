@@ -1,57 +1,125 @@
+# This starter workflow is for a CMake project running on multiple platforms. There is a different starter workflow if you just want a single platform.
+# See: https://github.com/actions/starter-workflows/blob/main/ci/cmake-single-platform.yml
+
+# cspell: words DCMAKE MSVC runneradmin
+
 name: build
-on: [push]
-permissions:
-  contents: read
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
 jobs:
-  all:
+  build:
     runs-on: ${{ matrix.os }}
-    name: ${{ matrix.os }}${{ matrix.name_extra }}
+
     strategy:
+      # Set fail-fast to false to ensure that feedback is delivered for all matrix combinations. Consider changing this to true when your workflow is stable.
       fail-fast: false
+
+      # Set up a matrix to run the following 3 configurations:
+      # 1. <Windows, Release, latest MSVC compiler toolchain on the default runner image, default generator>
+      # 2. <Linux, Release, latest GCC compiler toolchain on the default runner image, default generator>
+      # 3. <Linux, Release, latest Clang compiler toolchain on the default runner image, default generator>
+      #
+      # To add more build types (Release, Debug, RelWithDebInfo, etc.) customize the build_type list.
       matrix:
-        os: [macos-latest, ubuntu-latest, windows-latest]
-        cmake_extra: [""]
-        name_extra: [""]
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        build_type: [Release]
+        c_compiler: [gcc, clang, cl]
         include:
           - os: windows-latest
-            cmake_extra: "-T ClangCl"
-            name_extra: " clang-cl"
+            c_compiler: cl
+            cpp_compiler: cl
+          - os: ubuntu-latest
+            c_compiler: gcc
+            cpp_compiler: g++
+          - os: ubuntu-latest
+            c_compiler: clang
+            cpp_compiler: clang++
+          - os: macos-latest
+            c_compiler: clang
+            cpp_compiler: clang++
+        exclude:
+          - os: windows-latest
+            c_compiler: gcc
+          - os: windows-latest
+            c_compiler: clang
+          - os: ubuntu-latest
+            c_compiler: cl
+          - os: macos-latest
+            c_compiler: gcc
+          - os: macos-latest
+            c_compiler: cl
+
     steps:
-      - name: checkout
-        uses: actions/checkout@v4
+      - name: Checkout Repository
+        # Check out the repository under $GITHUB_WORKSPACE, so your job can access it.
+        # The submodules: recursive option ensures that any submodules are also checked out.
+        # See https://github.com/actions/checkout#checkout-submodules
+        uses: actions/checkout@v6
         with:
           submodules: recursive
-      - name: install python and pip
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-      - name: install latest CMake and Ninja for lukka/run-vcpkg (Windows)
-        if: ${{ runner.os == 'Windows' }}
-        uses: lukka/get-cmake@latest
-      - name: install dependencies (Windows)
-        if: ${{ runner.os == 'Windows' }}
-        uses: lukka/run-vcpkg@v11
-        with:
-            vcpkgGitCommitId: 2cf957350da28ad032178a974607f59f961217d9
-      - name: prepare build directory and install nihtest
+
+      - name: Set Reusable Strings
+        # Turn repeated input strings (such as the build output directory) into step outputs. These step outputs can be used throughout the workflow file.
+        id: strings
+        shell: bash
         run: |
-          cmake -E make_directory ${{runner.workspace}}/build
+          packages_dir="$HOME/packages"
+          if [[ "$packages_dir" == /c/* ]]; then
+            # Convert the path to a Windows-style path if it is a Cygwin-style path (e.g., /c/Users/runneradmin/packages -> C:\Users\runneradmin\packages)
+            packages_dir="$(cygpath -w "$packages_dir")"
+          fi
+          echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
+          echo "packages-dir=$packages_dir" >> "$GITHUB_OUTPUT"
+
+      - name: Install Python and pip
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.14"
+
+      - name: Create Build Directory
+        run: |
+          cmake -E make_directory "${{ steps.strings.outputs.build-output-dir }}"
+
+      - name: Install Dependencies
+        # Until we have an official release of tpau-cpp-kernal, we will download binaries built by the CI. The copy on the T'Pau server is manually updated.
+        shell: bash
+        run: |
           pip install nihtest
-      - name: configure (Unix)
-        if: ${{ runner.os != 'Windows' }}
-        working-directory: ${{runner.workspace}}/build
-        run: |
-          cmake ${{ matrix.cmake_extra }} ${{github.workspace}}
-      - name: configure (Windows)
-        if: ${{ runner.os == 'Windows' }}
-        working-directory: ${{runner.workspace}}/build
-        run: |
-          cmake ${{ matrix.cmake_extra }} -DCMAKE_TOOLCHAIN_FILE=${{env.VCPKG_ROOT}}/scripts/buildsystems/vcpkg.cmake ${{github.workspace}}
-      - name: build
-        working-directory: ${{runner.workspace}}/build
-        run: |
-          cmake --build . --config Release
-      - name: test
-        working-directory: ${{runner.workspace}}/build
-        run: |
-          ctest --output-on-failure --verbose -C Release
+          filename="tpau-cpp-kernal-${{ matrix.os }}-${{ matrix.c_compiler }}.zip"
+          curl -s -L https://tpau-cpp-kernal.tpau.group/ci/$filename -o $HOME/$filename && unzip $HOME/$filename -d "${{ steps.strings.outputs.packages-dir }}"
+
+      - name: Configure CMake
+        # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
+        # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
+        # To debug compile errors, show the full command line for compilation:
+        #   -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON
+        working-directory: ${{ steps.strings.outputs.build-output-dir }}
+        run: >
+          cmake
+          -DCMAKE_CXX_COMPILER=${{ matrix.cpp_compiler }}
+          -DCMAKE_C_COMPILER=${{ matrix.c_compiler }}
+          -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
+          -DCMAKE_INSTALL_PREFIX="${{ steps.strings.outputs.packages-dir }}"
+          -S ..
+
+      - name: Build
+        # Build your program with the given configuration. Note that --config is needed because the default Windows generator is a multi-config generator (Visual Studio generator).
+        working-directory: ${{ steps.strings.outputs.build-output-dir }}
+        run: cmake --build . --config ${{ matrix.build_type }}
+
+      - name: Test
+        working-directory: ${{ steps.strings.outputs.build-output-dir }}
+        # Execute tests defined by the CMake configuration. Note that --build-config is needed because the default Windows generator is a multi-config generator (Visual Studio generator).
+        # See https://cmake.org/cmake/help/latest/manual/ctest.1.html for more detail
+        run: ctest --output-on-failure --build-config ${{ matrix.build_type }}
+
+      - name: Install
+        # Install your program with the given configuration. Note that --config is needed because the default Windows generator is a multi-config generator (Visual Studio generator).
+        # See https://cmake.org/cmake/help/latest/manual/cmake.1.html#build-and-test-mode for more detail
+        working-directory: ${{ steps.strings.outputs.build-output-dir }}
+        run: cmake --install . --config ${{ matrix.build_type }}
