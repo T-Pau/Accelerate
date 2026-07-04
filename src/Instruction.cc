@@ -30,7 +30,10 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include "Instruction.h"
-#include "Exception.h"
+
+#include <tpau-cpp-kernal/Exception.h>
+
+using namespace tpau::cpp_kernal;
 
 uint64_t Instruction::opcode(Symbol addressing_mode) const {
     auto it = opcodes.find(addressing_mode);

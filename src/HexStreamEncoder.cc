@@ -32,7 +32,9 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "HexStreamEncoder.h"
 
 
-#include "Exception.h"
+#include <tpau-cpp-kernal/Exception.h>
+
+using namespace tpau::cpp_kernal;
 
 void HexStreamEncoder::encode(const std::string& string) {
     for (const auto character : string) {

@@ -31,8 +31,33 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "BinaryExpression.h"
 
-#include "Exception.h"
+#include <tpau-cpp-kernal/Exception.h>
+
 #include "VariableExpression.h"
+
+using namespace tpau::cpp_kernal;
+
+// Keep in sync with Expression::BinaryOperation
+std::vector<std::string> BinaryExpression::operation_names = {
+    "+",
+    "&",
+    "|",
+    "^",
+    "/",
+    "=",
+    ">",
+    ">=",
+    "<",
+    "<=",
+    "&&",
+    "||",
+    "%",
+    "*",
+    "!=",
+    "<<",
+    ">>",
+    "-"
+};
 
 std::optional<Expression> BinaryExpression::evaluated(const EvaluationContext& context) const {
     const auto new_left = left.evaluated(context);
@@ -46,83 +71,7 @@ std::optional<Expression> BinaryExpression::evaluated(const EvaluationContext& c
 }
 
 void BinaryExpression::serialize_sub(std::ostream& stream) const {
-    stream << '(' << left;
-
-    switch (operation) {
-        case Expression::BinaryOperation::ADD:
-            stream << '+';
-            break;
-
-        case Expression::BinaryOperation::BITWISE_AND:
-            stream << '&';
-            break;
-
-        case Expression::BinaryOperation::BITWISE_OR:
-            stream << '|';
-            break;
-
-        case Expression::BinaryOperation::BITWISE_XOR:
-            stream << '^';
-            break;
-
-        case Expression::BinaryOperation::DIVIDE:
-            stream << '/';
-            break;
-
-        case Expression::BinaryOperation::EQUAL:
-            stream << "=";
-            break;
-
-        case Expression::BinaryOperation::GREATER:
-            stream << ">";
-            break;
-
-        case Expression::BinaryOperation::GREATER_EQUAL:
-            stream << ">=";
-            break;
-
-        case Expression::BinaryOperation::LESS:
-            stream << "<";
-            break;
-
-        case Expression::BinaryOperation::LESS_EQUAL:
-            stream << "<=";
-            break;
-
-        case Expression::BinaryOperation::LOGICAL_AND:
-            stream << "&&";
-            break;
-
-        case Expression::BinaryOperation::LOGICAL_OR:
-            stream << "||";
-            break;
-
-        case Expression::BinaryOperation::MODULO:
-            stream << '%';
-            break;
-
-        case Expression::BinaryOperation::MULTIPLY:
-            stream << '*';
-            break;
-
-        case Expression::BinaryOperation::NOT_EQUAL:
-            stream << "!=";
-            break;
-
-        case Expression::BinaryOperation::SHIFT_LEFT:
-            stream << "<<";
-            break;
-
-        case Expression::BinaryOperation::SHIFT_RIGHT:
-            stream << ">>";
-            break;
-
-        case Expression::BinaryOperation::SUBTRACT:
-            stream << '-';
-            break;
-    }
-
-    stream << right << ')';
+    stream << '(' << left << operation_name() << right << ')';
 }
 
 Expression BinaryExpression::create(const Location& location, const Expression& left, Expression::BinaryOperation operation, const Expression& right) {
@@ -472,7 +421,7 @@ std::optional<Value> BinaryExpression::minimum_value() const {
             return left.minimum_value() - right.maximum_value();
     }
 
-    throw Exception("internal error: invalid binary operation %d", operation);
+    throw Exception("internal error: invalid binary operation {}", static_cast<int>(operation));
 }
 
 std::optional<Value> BinaryExpression::maximum_value() const {
@@ -503,7 +452,8 @@ std::optional<Value> BinaryExpression::maximum_value() const {
             return left.maximum_value() - right.minimum_value();
     }
 
-    throw Exception("internal error: invalid binary operation %d", operation);}
+    throw Exception("internal error: invalid binary operation {}", static_cast<int>(operation));
+}
 
 std::optional<Value::Type> BinaryExpression::type() const {
     const auto left_type = left.type();
@@ -558,4 +508,13 @@ std::optional<Value::Type> BinaryExpression::type() const {
             return Value::BOOLEAN;
     }
 
-    throw Exception("internal error: invalid binary operation %d", operation);}
+    throw Exception("internal error: invalid binary operation {}", static_cast<int>(operation));
+}
+
+
+const std::string& BinaryExpression::operation_name(Expression::BinaryOperation operation) {
+    if (static_cast<size_t>(operation) >= operation_names.size()) {
+        throw Exception("internal error: invalid binary operation {}", static_cast<int>(operation));
+    }
+    return operation_names[static_cast<size_t>(operation)];
+}

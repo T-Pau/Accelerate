@@ -31,11 +31,14 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "VariableExpression.h"
 
+#include <tpau-cpp-kernal/Exception.h>
+
 #include "EvaluationContext.h"
 #include "Object.h"
 #include "ObjectExpression.h"
 #include "ObjectNameExpression.h"
-#include "ParseException.h"
+
+using namespace tpau::cpp_kernal;
 
 std::optional<Expression> VariableExpression::evaluated(const EvaluationContext& context) const {
     if (symbol == Token::colon_minus.as_symbol() || symbol == Token::colon_plus.as_symbol()) {
@@ -46,7 +49,7 @@ std::optional<Expression> VariableExpression::evaluated(const EvaluationContext&
         return new_expression;
     }
     if (context.evaluating(symbol)) {
-        throw Exception("circular definition of %s", symbol.c_str());
+        throw Exception("circular definition of {}", symbol);
     }
 
     if (!context.skipping(symbol)) {

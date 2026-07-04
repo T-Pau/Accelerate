@@ -55,7 +55,7 @@ public:
      * @param location The location of the expression in the source code.
      * @param arguments The arguments of the expression. Must contain exactly two expressions: the count and the value.
      * @return The created expression.
-     * @throws ParseException If the number of arguments is not exactly two or the first argument is not an unsigned integer expression.
+     * @throws LocationException If the number of arguments is not exactly two or the first argument is not an unsigned integer expression.
      */
     static Expression create(const Location& location, const std::vector<Expression>& arguments);
 
@@ -68,7 +68,7 @@ public:
      * @param count The expression representing the number of repetitions.
      * @param value The expression representing the value to repeat.
      * @return The created expression.
-     * @throws ParseException If the first argument is not an unsigned integer expression.
+     * @throws LocationException If the first argument is not an unsigned integer expression.
      */
     static Expression create(const Location& location, const Expression& count, const Expression& value);
 

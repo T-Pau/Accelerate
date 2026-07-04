@@ -31,7 +31,9 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "DataBody.h"
 
-#include "Exception.h"
+#include <tpau-cpp-kernal/Exception.h>
+
+using namespace tpau::cpp_kernal;
 
 DataBody::DataBody(std::vector<DataBodyElement> data_) : data(std::move(data_)) {
     for (const auto& datum : data) {

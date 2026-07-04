@@ -31,8 +31,11 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "ValueExpression.h"
 
+#include <tpau-cpp-kernal/LocationException.h>
+
 #include "HexStreamEncoder.h"
-#include "ParseException.h"
+
+using namespace tpau::cpp_kernal;
 
 ValueExpression::ValueExpression(const Token& token) {
     if (token.is_value()) {
@@ -42,7 +45,7 @@ ValueExpression::ValueExpression(const Token& token) {
         value_ = Value(token.as_symbol());
     }
     else {
-        throw ParseException(token, "internal error: can't create value node from %s", token.type_name());
+        throw LocationException(token.location, "internal error: can't create value node from {}", token.type_name());
     }
     location = token.location;
 }

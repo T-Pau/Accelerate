@@ -34,9 +34,12 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <unordered_set>
 
+#include <tpau-cpp-kernal/Symbol.h>
+
 #include "ChecksumComputation.h"
-#include "Symbol.h"
 #include "UsedEntities.h"
+
+using namespace tpau::cpp_kernal;
 
 class LabelExpression;
 class Object;

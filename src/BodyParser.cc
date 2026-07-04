@@ -31,14 +31,18 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "BodyParser.h"
 
+#include <tpau-cpp-kernal/DiagnosticOutput.h>
+#include <tpau-cpp-kernal/FileReader.h>
+#include <tpau-cpp-kernal/LocationException.h>
+
 #include "ChecksumBody.h"
 #include "ExpressionNode.h"
 #include "ExpressionParser.h"
-#include "FileReader.h"
 #include "InstructionEncoder.h"
 #include "ObjectNameExpression.h"
-#include "ParseException.h"
 #include "TokenNode.h"
+
+using namespace tpau::cpp_kernal;
 
 const Symbol BodyParser::symbol_pc = Symbol(".pc");
 const Token BodyParser::token_binary_file = Token(Token::DIRECTIVE, "binary_file");
@@ -85,7 +89,7 @@ Body BodyParser::parse() {
 
             switch (token.get_type()) {
                 case Token::END:
-                    throw ParseException(token, "unclosed symbol body");
+                    throw LocationException(token.location, "unclosed symbol body");
 
                 case Token::DIRECTIVE: {
                     if (auto visibility = VisibilityHelper::from_token(token)) {
@@ -106,7 +110,7 @@ Body BodyParser::parse() {
                         parse_instruction(token);
                     }
                     else {
-                        throw ParseException(token, "unexpected %s", token.type_name());
+                        throw LocationException(token.location, "unexpected {}", token.type_name());
                     }
                     break;
 
@@ -136,8 +140,11 @@ Body BodyParser::parse() {
                                 auto context = EvaluationContext(result, EvaluationContext::STANDALONE, std::make_shared<Environment>(), file_tokenizer->defines);
                                 body.evaluate(context);
                             }
-                            catch (Exception &ex) {
-                                FileReader::global.error(ex);
+                            catch (LocationException& ex) {
+                                DiagnosticOutput::global.error(ex);
+                            }
+                            catch (Exception& ex) {
+                                DiagnosticOutput::global.error(ex);
                             }
                         }
                         return body;
@@ -151,7 +158,7 @@ Body BodyParser::parse() {
                             parse_instruction(Token(Token::NAME, token.location, Symbol()));
                         }
                         else {
-                            throw ParseException(token, "unexpected %s", token.type_name());
+                            throw LocationException(token.location, "unexpected {}", token.type_name());
                         }
                     }
                     break;
@@ -162,23 +169,23 @@ Body BodyParser::parse() {
                         parse_instruction(Token(Token::NAME, token.location, Symbol()));
                     }
                     else {
-                        throw ParseException(token, "unexpected %s", token.type_name());
+                        throw LocationException(token.location, "unexpected {}", token.type_name());
                     }
                     break;
             }
-        } catch (ParseException& ex) {
-            FileReader::global.error(ex.location, "%s", ex.what());
+        } catch (LocationException& ex) {
+            DiagnosticOutput::global.error(ex);
             tokenizer.skip_until(TokenGroup::newline);
         }
     }
 
-    throw ParseException(Location(), "unclosed body"); // TODO: location
+    throw LocationException(Location(), "unclosed body"); // TODO: location
 }
 
 void BodyParser::add_constant(Visibility visibility, const Token& name, const Expression& value) {
     if (visibility != Visibility::SCOPE) {
         if (!allow_assignment()) {
-            throw ParseException(name, "unsupported visibility");
+            throw LocationException(name.location, "unsupported visibility");
         }
         current_body->append(Body(visibility, name.as_symbol(), value));
     }
@@ -204,7 +211,7 @@ Expression BodyParser::get_pc(Symbol label) const {
 void BodyParser::parse_directive(const Token& directive) {
     auto it = directive_parser_methods.find(directive.as_symbol());
     if (it == directive_parser_methods.end() || ((directive == token_memory || directive == token_checksum) && !allow_memory())) {
-        throw ParseException(directive, "unknown directive");
+        throw LocationException(directive.location, "unknown directive");
     }
     (this->*it->second)();
 }
@@ -257,7 +264,7 @@ std::shared_ptr<Node> BodyParser::parse_instruction_argument(const Token& token)
 
         case Token::DIRECTIVE:
         case Token::INSTRUCTION:
-            throw ParseException(token, "unexpected %s", token.type_name());
+            throw LocationException(token.location, "unexpected {}", token.type_name());
 
         default:
             break;
@@ -320,7 +327,7 @@ void BodyParser::parse_repeat() {
 
 void BodyParser::parse_assignment(Visibility visibility, const Token& name) {
     if (!allow_assignment()) {
-        throw ParseException(name, "assignment only allowed in entities");
+        throw LocationException(name.location, "assignment only allowed in entities");
     }
     current_body->append(Body(visibility, name.as_symbol(), ExpressionParser(tokenizer).parse()));
 }
@@ -460,25 +467,26 @@ void BodyParser::parse_error() {
         location = Location(tokenizer.expect(Token::STRING, TokenGroup::newline).as_string());
         token = tokenizer.next();
         if (token == Token::comma) {
-            location.start_line_number = tokenizer.expect(Token::VALUE, TokenGroup::newline).as_unsigned();
+            location.start.line_number = tokenizer.expect(Token::VALUE, TokenGroup::newline).as_unsigned();
             token = tokenizer.next();
             if (token == Token::comma) {
-                location.start_column = tokenizer.expect(Token::VALUE, TokenGroup::newline).as_unsigned();
+                location.start.column = tokenizer.expect(Token::VALUE, TokenGroup::newline).as_unsigned();
                 token = tokenizer.next();
                 if (token == Token::comma) {
-                    location.end_column = tokenizer.expect(Token::VALUE, TokenGroup::newline).as_unsigned();
+                    location.end.line_number = location.start.line_number;
+                    location.end.column = tokenizer.expect(Token::VALUE, TokenGroup::newline).as_unsigned();
                     token = tokenizer.next();
                 }
             }
         }
         if (token != Token::paren_close) {
-            throw ParseException(token, "expected ')'");
+            throw LocationException(token.location, "expected ')'");
         }
     }
     else {
         tokenizer.unget(token);
     }
-    throw ParseException(location, message.as_string());
+    throw LocationException(location, message.as_string());
 }
 
 void BodyParser::parse_unnamed_label() { current_body->append(Body(Symbol(), current_size())); }
@@ -494,7 +502,7 @@ void BodyParser::handle_name(Visibility visibility, const Token& name) {
     else {
         tokenizer.unget(token);
         if (visibility != Visibility::SCOPE) {
-            throw ParseException(name, "macro call can't have visibility");
+            throw LocationException(name.location, "macro call can't have visibility");
         }
 
         std::vector<Expression> arguments;
@@ -508,7 +516,7 @@ void BodyParser::handle_name(Visibility visibility, const Token& name) {
                 tokenizer.unget(token);
             }
             else if (token != Token::comma) {
-                throw ParseException(token, "expected ','");
+                throw LocationException(token.location, "expected ','");
             }
             arguments.emplace_back(tokenizer);
         }
@@ -521,7 +529,7 @@ void BodyParser::parse_binary_file() {
 
     auto file_tokenizer = dynamic_cast<FileTokenizer*>(&tokenizer);
     if (!file_tokenizer) {
-        throw ParseException(filename.location, "including from non-file source");
+        throw LocationException(filename.location, "including from non-file source");
     }
 
     auto start = std::optional<size_t>{};
@@ -531,41 +539,41 @@ void BodyParser::parse_binary_file() {
     Token directive;
     while (((directive = tokenizer.next())) && !directive.is_end_of_line()) {
         if (directive != token_start && directive != token_length && directive != token_end) {
-            throw ParseException(directive, "expected .start, .length, or .end");
+            throw LocationException(directive.location, "expected .start, .length, or .end");
         }
         auto argument = tokenizer.expect(Token::Type::VALUE);
         if (!argument.is_unsigned()) {
-            throw ParseException(directive, "expected unsigned");
+            throw LocationException(directive.location, "expected unsigned");
         }
         if (directive == token_start) {
             if (start) {
-                throw ParseException(directive, "duplicate .start");
+                throw LocationException(directive.location, "duplicate .start");
             }
             start = argument.as_unsigned();
         }
         else if (directive == token_length) {
-            if (start) {
-                throw ParseException(directive, "duplicate .length");
+            if (length) {
+                throw LocationException(directive.location, "duplicate .length");
             }
             length = argument.as_unsigned();
         }
         else if (directive == token_end) {
-            if (start) {
-                throw ParseException(directive, "duplicate .end");
+            if (end) {
+                throw LocationException(directive.location, "duplicate .end");
             }
             length = argument.as_unsigned();
         }
     }
 
     if (length && end) {
-        throw ParseException(filename, "specified both .end and .length");
+        throw LocationException(filename.location, "specified both .end and .length");
     }
 
     if (!start) {
         start = 0;
     }
     if (end && *end < *start) {
-        throw ParseException(filename, ".end less than .start");
+        throw LocationException(filename.location, ".end less than .start");
     }
     if (length) {
         end = *start + *length - 1;
@@ -574,7 +582,7 @@ void BodyParser::parse_binary_file() {
     if (auto file_name = file_tokenizer->find_file(filename.as_symbol())) {
         auto data = FileReader::global.read_binary(file_name);
         if (start >= data.size() || end >= data.size()) {
-            throw ParseException(filename, "specified range exceeds file data");
+            throw LocationException(filename.location, "specified range exceeds file data");
         }
         if (end) {
             data = data.substr(*start, *end - *start + 1);
@@ -582,10 +590,10 @@ void BodyParser::parse_binary_file() {
         else if (start > 0) {
             data = data.substr(*start);
         }
-        auto elements = std::vector<DataBodyElement>{DataBodyElement{Expression{filename.location, Value(data)}, {}}};
+        auto elements = std::vector<DataBodyElement>{DataBodyElement{Expression{filename.location, Value(data, true)}, {}}};
         current_body->append(Body(elements));
     }
     else {
-        throw ParseException(filename.location, "can't find file '%s'", filename.as_string().c_str());
+        throw LocationException(filename.location, "can't find file '{}'", filename);
     }
 }

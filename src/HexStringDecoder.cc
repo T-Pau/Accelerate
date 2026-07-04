@@ -31,7 +31,9 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "HexStringDecoder.h"
 
-#include "Exception.h"
+#include <tpau-cpp-kernal/Exception.h>
+
+using namespace tpau::cpp_kernal;
 
 void HexStringDecoder::decode(const std::string& string) {
     for (const auto character : string) {

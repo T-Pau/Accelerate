@@ -29,9 +29,12 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+#include <tpau-cpp-kernal/Int.h>
+
 #include "ChecksumAlgorithmXor.h"
-#include "Int.h"
 #include "IntegerEncoder.h"
+
+using namespace tpau::cpp_kernal;
 
 std::string ChecksumAlgorithmXor::compute(std::string::const_iterator begin, std::string::const_iterator end, const std::unordered_map<Symbol, Value>& parameters) {
     uint8_t checksum = 0;

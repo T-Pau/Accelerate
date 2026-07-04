@@ -29,9 +29,11 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+#include <tpau-cpp-kernal/LocationException.h>
+
 #include "Tokenizer.h"
-#include "Exception.h"
-#include "ParseException.h"
+
+using namespace tpau::cpp_kernal;
 
 Token Tokenizer::next() {
     if (ungot_token.has_value()) {
@@ -61,7 +63,7 @@ Token Tokenizer::expect(Token::Type type) {
         return token;
     }
     else {
-        throw ParseException(token.location, "expected %s, got %s", Token::type_name(type), token.type_name());
+        throw LocationException(token.location, "expected {}, got {}", Token::type_name(type), token.type_name());
     }
 }
 
@@ -72,7 +74,7 @@ Token Tokenizer::expect(Token::Type type, const TokenGroup& synchronize) {
     }
     else {
         skip_until(synchronize);
-        throw ParseException(token.location, "expected %s, got %s", Token::type_name(type), token.type_name());
+        throw LocationException(token.location, "expected {}, got {}", Token::type_name(type), token.type_name());
     }
 }
 
@@ -83,7 +85,7 @@ Token Tokenizer::expect(const TokenGroup& types, const TokenGroup& synchronize) 
     }
     else {
         skip_until(synchronize);
-        throw ParseException(token.location, "expected %s, got %s", types.name.c_str(), token.type_name());
+        throw LocationException(token.location, "expected {}, got {}", types.name, token.type_name());
     }
 }
 
@@ -180,6 +182,6 @@ Token Tokenizer::peek() {
 void Tokenizer::expect(const Token& token) {
     auto got = next();
     if (got != token) {
-        throw ParseException(got, "expected %s", token.as_string().c_str());
+        throw LocationException(got.location, "expected {}, got {}", token, got);
     }
 }

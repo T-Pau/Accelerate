@@ -31,8 +31,11 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "ChecksumAlgorithm.h"
 
+#include <tpau-cpp-kernal/Exception.h>
+
 #include "ChecksumAlgorithmXor.h"
-#include "Exception.h"
+
+using namespace tpau::cpp_kernal;
 
 // clang-format off
 const std::unordered_map<Symbol, std::shared_ptr<ChecksumAlgorithm>(*)(Symbol)> ChecksumAlgorithm::algorithms = {

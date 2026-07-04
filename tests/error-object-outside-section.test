@@ -7,7 +7,7 @@ test {
 }
 end-of-inline-data
 stderr
-file.s:1.0: error: object outside section
+file.s:1:1: error: object outside section
 test {
 ^^^^
 end-of-inline-data

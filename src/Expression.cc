@@ -31,6 +31,8 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "Expression.h"
 
+#include <tpau-cpp-kernal/LocationException.h>
+
 #include "BinaryExpression.h"
 #include "ExpressionParser.h"
 #include "FunctionExpression.h"
@@ -38,10 +40,11 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ObjectExpression.h"
 #include "ObjectFileParser.h"
 #include "ObjectNameExpression.h"
-#include "ParseException.h"
 #include "UnaryExpression.h"
 #include "ValueExpression.h"
 #include "VariableExpression.h"
+
+using namespace tpau::cpp_kernal;
 
 Expression::Expression(std::shared_ptr<BaseExpression> expression_) {
     if (expression_) {
@@ -110,7 +113,7 @@ bool Expression::evaluate(const EvaluationContext& context) {
         return new_expression.has_value();
     }
     catch (Exception &ex) {
-        throw ParseException(expression->location, "%s", ex.what());
+        throw LocationException(expression->location, ex);
     }
 }
 

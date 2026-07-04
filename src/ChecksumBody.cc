@@ -29,15 +29,18 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+#include <tpau-cpp-kernal/LocationException.h>
+
 #include "ChecksumBody.h"
 #include "Body.h"
 #include "ExpressionParser.h"
-#include "ParseException.h"
+
+using namespace tpau::cpp_kernal;
 
 Body ChecksumBody::parse(Tokenizer& tokenizer) {
     auto algorithm_name = tokenizer.next();
     if (!algorithm_name.is_name_like()) {
-        throw ParseException(algorithm_name, "expected name, got " + std::string(algorithm_name.type_name()));
+        throw LocationException(algorithm_name.location, "expected name, got {}", algorithm_name.type_name());
     }
     auto algorithm = ChecksumAlgorithm::create(algorithm_name.as_symbol());
     auto expression_parser = ExpressionParser(tokenizer);
@@ -57,7 +60,7 @@ Body ChecksumBody::parse(Tokenizer& tokenizer) {
         auto parameter = expression_parser.parse();
 
         if (!parameter_names.contains(parameter_name.as_symbol())) {
-            throw ParseException(parameter_name, "unknown parameter" + parameter_name.as_string() + " for algorithm " + algorithm_name.as_string());
+            throw LocationException(parameter_name.location, "unknown parameter {} for algorithm {}", parameter_name.as_string(), algorithm_name.as_string());
         }
         parameters[parameter_name.as_symbol()] = parameter;
     }
@@ -102,7 +105,7 @@ std::optional<Body> ChecksumBody::evaluated(const EvaluationContext& context) co
             changed = true;
         }
         else {
-            throw Exception("unknown values in .ckecksum");
+            throw LocationException(start.location(), "unknown values in .checksum");
         }
     }
 

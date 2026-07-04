@@ -31,8 +31,11 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "EvaluationContext.h"
 
+#include <tpau-cpp-kernal/Exception.h>
+
 #include "Entity.h"
-#include "Exception.h"
+
+using namespace tpau::cpp_kernal;
 
 EvaluationContext::EvaluationContext(EvaluationResult& result, EvaluationType type, std::shared_ptr<Environment> environment, std::unordered_set<Symbol> defines, const SizeRange& offset): type(type), environment(std::move(environment)), defines{std::move(defines)}, offset(offset), result(result) {
     if (type == MACRO_EXPANSION) {

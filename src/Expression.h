@@ -54,6 +54,7 @@ class VariableExpression;
 
 class Expression {
 public:
+    // Keep in sync with BinaryExpression::operation_names
     enum BinaryOperation {
         ADD,
         BITWISE_AND,

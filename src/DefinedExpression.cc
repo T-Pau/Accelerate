@@ -31,19 +31,21 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "DefinedExpression.h"
 
+#include <tpau-cpp-kernal/LocationException.h>
 
 #include "EvaluationContext.h"
-#include "ParseException.h"
 #include "VariableExpression.h"
+
+using namespace tpau::cpp_kernal;
 
 Expression DefinedExpression::create(const Location& location, const std::vector<Expression>& arguments) {
     if (arguments.size() != 1) {
-        throw ParseException(location, "invalid number of arguments");
+        throw LocationException(location, "invalid number of arguments");
     }
     auto& argument = arguments[0];
 
     if (!argument.is_variable()) {
-        throw ParseException(argument.location(), "symbol argument required");
+        throw LocationException(argument.location(), "symbol argument required");
     }
 
     return Expression(std::make_shared<DefinedExpression>(location, argument.as_variable()->variable()));

@@ -34,8 +34,11 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <optional>
 
+#include <tpau-cpp-kernal/Value.h>
+
 #include "BaseEncoder.h"
-#include "Value.h"
+
+using namespace tpau::cpp_kernal;
 
 class StringEncoding;
 

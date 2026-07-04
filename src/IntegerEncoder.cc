@@ -31,10 +31,13 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "IntegerEncoder.h"
 
+#include <tpau-cpp-kernal/Exception.h>
+#include <tpau-cpp-kernal/Int.h>
+
 #include "Encoder.h"
-#include "Exception.h"
-#include "Int.h"
 #include "Target.h"
+
+using namespace tpau::cpp_kernal;
 
 const uint64_t IntegerEncoder::big_endian_byte_order = 87654321;
 const uint64_t IntegerEncoder::little_endian_byte_order = 12345678;
@@ -77,7 +80,7 @@ size_t IntegerEncoder::encoded_size(const Value& value) const {
             return *default_size;
         }
         else {
-            throw Exception("can't encode %s", value.type_name().c_str());
+            throw Exception("can't encode {}", value.type_name());
         }
     }
 }
@@ -92,7 +95,7 @@ bool IntegerEncoder::is_natural_encoder(const Value& value) const {
         case UNSIGNED:
             return value.is_unsigned() && value.default_size() == size && byte_order() == default_byte_order();
     }
-    throw Exception("internal error: invalid integer encoder type %d", type);
+    throw Exception("internal error: invalid integer encoder type {}", static_cast<int>(type));
 }
 
 void IntegerEncoder::serialize(std::ostream& stream) const {
@@ -148,7 +151,7 @@ IntegerEncoder::IntegerEncoder(const Value& value) {
         case Value::FLOAT:
         case Value::STRING:
         case Value::VOID:
-            throw Exception("can't encode %s", value.type_name().c_str());
+            throw Exception("can't encode {}", value.type_name());
 
         case Value::SIGNED:
             type = SIGNED;
@@ -161,7 +164,7 @@ IntegerEncoder::IntegerEncoder(const Value& value) {
 
         case Value::NUMBER:
         case Value::INTEGER:
-            throw Exception("internal error: value can't have abstract type %s", value.type_name().c_str());
+            throw Exception("internal error: value can't have abstract type {}", value.type_name());
     }
     size = *value.default_size();
 }
@@ -178,7 +181,7 @@ std::optional<Value> IntegerEncoder::minimum_value() const {
             return Value(uint64_t{0});
     }
 
-    throw Exception("internal error: invalid integer encoder type %d", type);
+    throw Exception("internal error: invalid integer encoder type {}", static_cast<int>(type));
 }
 
 bool IntegerEncoder::operator==(const Encoder& other) const {
@@ -202,5 +205,5 @@ std::optional<Value> IntegerEncoder::maximum_value() const {
             return Value((uint64_t{1} << (*size * 8)) - 1);
     }
 
-    throw Exception("internal error: invalid integer encoder type %d", type);
+    throw Exception("internal error: invalid integer encoder type {}", static_cast<int>(type));
 }

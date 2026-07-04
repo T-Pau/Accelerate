@@ -34,9 +34,11 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <unordered_set>
 
-#include "Location.h"
-#include "Symbol.h"
-#include "Value.h"
+#include <tpau-cpp-kernal/Location.h>
+#include <tpau-cpp-kernal/Symbol.h>
+#include <tpau-cpp-kernal/Value.h>
+
+using namespace tpau::cpp_kernal;
 
 class Token {
 public:
@@ -153,6 +155,14 @@ struct std::hash<Token>
                 break;
         }
         return h1 ^ (h2 << 1);
+    }
+};
+
+template <> struct std::formatter<Token> : std::formatter<std::string_view> {
+    auto format(const Token& token, format_context& ctx) const {
+        // We delegate the actual rendering to the base class.
+        // It will use the options parsed by the inherited parse() method.
+        return std::formatter<std::string_view>::format(token.as_string(), ctx);
     }
 };
 

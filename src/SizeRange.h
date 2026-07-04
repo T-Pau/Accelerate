@@ -36,7 +36,9 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <optional>
 #include <ostream>
 
-#include "Value.h"
+#include <tpau-cpp-kernal/Value.h>
+
+using namespace tpau::cpp_kernal;
 
 class SizeRange {
 public:

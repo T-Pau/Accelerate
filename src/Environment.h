@@ -32,9 +32,12 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef ENVIRONMENT_H
 #define ENVIRONMENT_H
 
+#include <tpau-cpp-kernal/Symbol.h>
+
 #include "Expression.h"
-#include "Symbol.h"
 #include "UnnamedLabelList.h"
+
+using namespace tpau::cpp_kernal;
 
 class Function;
 class Macro;

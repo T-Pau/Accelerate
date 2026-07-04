@@ -34,7 +34,9 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <string>
 
-#include "Symbol.h"
+#include <tpau-cpp-kernal/Symbol.h>
+
+using namespace tpau::cpp_kernal;
 
 class Instruction {
 public:

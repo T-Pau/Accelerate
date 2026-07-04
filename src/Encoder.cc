@@ -31,8 +31,11 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "Encoder.h"
 
-#include "Exception.h"
+#include <tpau-cpp-kernal/Exception.h>
+
 #include "Target.h"
+
+using namespace tpau::cpp_kernal;
 
 Encoder::Encoder(const Value& value) {
     if (value.is_binary()) {
@@ -49,7 +52,7 @@ Encoder::Encoder(const Value& value) {
         encoder = std::make_shared<StringEncoder>(string_encoding);
     }
     else {
-        throw Exception("can't encode %s", value.type_name().c_str());
+        throw Exception("can't encode {}", value.type_name());
     }
 }
 

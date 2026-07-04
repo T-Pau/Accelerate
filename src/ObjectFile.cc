@@ -34,11 +34,15 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <algorithm>
 #include <ranges>
 
-#include "FileReader.h"
+#include <tpau-cpp-kernal/DiagnosticOutput.h>
+#include <tpau-cpp-kernal/FileReader.h>
+#include <tpau-cpp-kernal/LocationException.h>
+
 #include "ObjectExpression.h"
-#include "ParseException.h"
 #include "SequenceTokenizer.h"
 #include <cinttypes>
+
+using namespace tpau::cpp_kernal;
 
 const Token ObjectFile::Constant::token_value{Token::NAME, "value"};
 
@@ -143,7 +147,9 @@ void ObjectFile::add_constant(std::unique_ptr<Constant> constant) {
         if (constant->is_default_only()) {
             return;
         }
-        throw ParseException(constant->location, "redefinition of constant '%s'", constant->name.c_str()).appending(it->second->location, "previously defined here");
+        DiagnosticOutput::global.error(Location(constant->location), "redefinition of constant '{}'", constant->name);
+        DiagnosticOutput::global.note(Location(it->second->location), "previously defined here");
+        throw Exception();
     }
 
     constant->set_owner(this);
@@ -167,7 +173,7 @@ void ObjectFile::add_object_file(const std::shared_ptr<ObjectFile>& file) {
         try {
             add_constant(std::move(constant));
         } catch (Exception& ex) {
-            FileReader::global.error(ex);
+            DiagnosticOutput::global.error(ex);
             ok = false;
         }
     }
@@ -177,7 +183,7 @@ void ObjectFile::add_object_file(const std::shared_ptr<ObjectFile>& file) {
         try {
             add_macro(std::move(macro));
         } catch (Exception& ex) {
-            FileReader::global.error(ex);
+            DiagnosticOutput::global.error(ex);
             ok = false;
         }
     }
@@ -187,7 +193,7 @@ void ObjectFile::add_object_file(const std::shared_ptr<ObjectFile>& file) {
         try {
             add_function(std::move(function));
         } catch (Exception& ex) {
-            FileReader::global.error(ex);
+            DiagnosticOutput::global.error(ex);
             ok = false;
         }
     }
@@ -197,7 +203,7 @@ void ObjectFile::add_object_file(const std::shared_ptr<ObjectFile>& file) {
         try {
             add_object(std::move(object));
         } catch (Exception& ex) {
-            FileReader::global.error(ex);
+            DiagnosticOutput::global.error(ex);
             ok = false;
         }
     }
@@ -207,7 +213,7 @@ void ObjectFile::add_object_file(const std::shared_ptr<ObjectFile>& file) {
         try {
             import(library);
         } catch (Exception& ex) {
-            FileReader::global.error(ex);
+            DiagnosticOutput::global.error(ex);
             ok = false;
         }
     }
@@ -220,7 +226,7 @@ void ObjectFile::add_object_file(const std::shared_ptr<ObjectFile>& file) {
         try {
             pin(pair.first, pair.second.address);
         } catch (Exception& ex) {
-            FileReader::global.error(ex);
+            DiagnosticOutput::global.error(ex);
             ok = false;
         }
     }
@@ -290,10 +296,10 @@ void ObjectFile::evaluate() {
                     new_pinned_objects[pair.first] = pair.second;
                 }
                 else if (!pin.address.value()->is_unsigned()) {
-                    FileReader::global.error(pin.address.location(), "pin address for '%s' must be unsigned constant", pair.first.c_str());
+                    DiagnosticOutput::global.error(pin.address.location(), "pin address for '{}' must be unsigned constant", pair.first);
                 }
                 else if (pinned_object->address && pinned_object->address->address != pin.address.value()->unsigned_value()) {
-                    FileReader::global.error(pin.address.location(), "object '%s' already has address $%" PRIx64 ", pinned to $%" PRIx64, pair.first.c_str(), pinned_object->address->address, pin.address.value()->unsigned_value());
+                    DiagnosticOutput::global.error(pin.address.location(), "object '{}' already has address ${}, pinned to ${}", pair.first, pinned_object->address->address, pin.address.value()->unsigned_value());
                 }
                 else {
                     pinned_object->address = Address(pin.address.value()->unsigned_value());
@@ -364,10 +370,10 @@ Object* ObjectFile::create_object(Symbol section_name, Visibility visibility, bo
     auto section = target->map.section(section_name);
     if (section == nullptr) {
         if (section_name.empty()) {
-            FileReader::global.error(object_name.location, "object outside section");
+            DiagnosticOutput::global.error(object_name.location, "object outside section");
         }
         else {
-            FileReader::global.error(object_name.location, "unknown section '%s'", section_name.c_str());
+            DiagnosticOutput::global.error(object_name.location, "unknown section '{}'", section_name);
         }
         // TODO: mark object as faulty
     }
@@ -425,7 +431,9 @@ Object* ObjectFile::insert_object(std::unique_ptr<Object> object) {
             auto [defaults_it, _] = unused_default_objects.insert(std::move(object));
             return defaults_it->get();
         }
-        throw ParseException(object->location, "redefinition of object '%s'", object->name.c_str()).appending(it->second->location, "previously defined here");
+        DiagnosticOutput::global.error(Location(object->location), "redefinition of object '{}'", object->name);
+        DiagnosticOutput::global.note(Location(it->second->location), "previously defined here");
+        throw Exception();
     }
 }
 
@@ -441,7 +449,9 @@ void ObjectFile::add_function(std::unique_ptr<Function> function) {
             return;
         }
         else {
-            throw ParseException(function->location, "redefinition of function %s", function->name.c_str());
+            DiagnosticOutput::global.error(Location(function->location), "redefinition of function '{}'", function->name);
+            DiagnosticOutput::global.note(Location(it->second->location), "previously defined here");
+            throw Exception();
         }
     }
 
@@ -464,7 +474,9 @@ void ObjectFile::add_macro(std::unique_ptr<Macro> macro) {
             return;
         }
         else {
-            throw ParseException(macro->location, "redefinition of macro %s", macro->name.c_str());
+            DiagnosticOutput::global.error(Location(macro->location), "redefinition of macro '{}'", macro->name);
+            DiagnosticOutput::global.note(Location(it->second->location), "previously defined here");
+            throw Exception();
         }
     }
 
@@ -488,7 +500,7 @@ ObjectFile::Constant::Constant(ObjectFile* owner, const Token& name, const std::
     auto tokenizer = SequenceTokenizer((*parameters)[token_value]->as_scalar()->tokens);
     value = Expression(tokenizer);
     if (!tokenizer.ended()) {
-        throw ParseException(tokenizer.current_location(), "invalid value for constant");
+        throw LocationException(tokenizer.current_location(), "invalid value for constant");
     }
 }
 

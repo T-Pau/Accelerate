@@ -36,8 +36,11 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <unordered_map>
 #include <vector>
 
+#include <tpau-cpp-kernal/Symbol.h>
+
 #include "Memory.h"
-#include "Symbol.h"
+
+using namespace tpau::cpp_kernal;
 
 class MemoryMap {
 public:

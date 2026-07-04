@@ -31,19 +31,22 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "ExistsExpression.h"
 
+#include <tpau-cpp-kernal/LocationException.h>
+
 #include "EvaluationContext.h"
 #include "Expression.h"
-#include "ParseException.h"
 #include "VariableExpression.h"
+
+using namespace tpau::cpp_kernal;
 
 Expression ExistsExpression::create(const Location& location, const std::vector<Expression>& arguments) {
     if (arguments.size() != 1) {
-        throw ParseException(location, "invalid number of arguments");
+        throw LocationException(location, "invalid number of arguments");
     }
     auto& argument = arguments[0];
 
     if (!argument.is_variable()) {
-        throw ParseException(location, "symbol argument required");
+        throw LocationException(location, "symbol argument required");
     }
 
     return Expression(std::make_shared<ExistsExpression>(location, argument.as_variable()->variable()));

@@ -35,8 +35,11 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <string>
 #include <unordered_map>
 
+#include <tpau-cpp-kernal/Symbol.h>
+
 #include "ParsedValue.h"
-#include "Symbol.h"
+
+using namespace tpau::cpp_kernal;
 
 class Target;
 

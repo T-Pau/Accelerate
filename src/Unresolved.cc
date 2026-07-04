@@ -33,8 +33,13 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <algorithm>
 
+#include <tpau-cpp-kernal/Exception.h>
+#include <tpau-cpp-kernal/DiagnosticOutput.h>
+#include <tpau-cpp-kernal/FileReader.h>
+
 #include "Entity.h"
-#include "FileReader.h"
+
+using namespace tpau::cpp_kernal;
 
 UnresolvedUser::UnresolvedUser(const Entity* entity) {
     if (entity) {
@@ -94,21 +99,21 @@ void Unresolved::Part::report() const {
     for (auto& unresolved_symbol : unresolved_symbols) {
         auto it = unresolved.find(unresolved_symbol);
         if (it == unresolved.end()) {
-            throw Exception("internal error: unresolved symbol %s diapperead", unresolved_symbol.c_str());
+            throw Exception("internal error: unresolved symbol {} disappeared", unresolved_symbol);
         }
         auto& users = it->second;
         auto sorted_users = std::vector<UnresolvedUser>{users.begin(), users.end()};
         std::ranges::sort(sorted_users, [](const UnresolvedUser& a, const UnresolvedUser& b) {
             return a.name < b.name;
         });
-        FileReader::global.error({}, "unresolved %s %s, referenced by:", type.c_str(), unresolved_symbol.c_str());
+        DiagnosticOutput::global.error("unresolved {} {}, referenced by:", type, unresolved_symbol);
         for (auto& user : sorted_users) {
             auto location = user.location.to_string();
             if (location.empty()) {
-                FileReader::global.error({}, "    %s", user.name.c_str());
+                DiagnosticOutput::global.error("    {}", user.name);
             }
             else {
-                FileReader::global.error({}, "    %s (%s)", user.name.c_str(), location.c_str());
+                DiagnosticOutput::global.error("    {} ({})", user.name, location);
             }
         }
     }

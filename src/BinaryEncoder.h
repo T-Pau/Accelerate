@@ -32,8 +32,11 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef BINARY_ENCODER_H
 #define BINARY_ENCODER_H
 
+#include <tpau-cpp-kernal/Value.h>
+
 #include "BaseEncoder.h"
-#include "Value.h"
+
+using namespace tpau::cpp_kernal;
 
 class BinaryEncoder: public BaseEncoder {
 public:

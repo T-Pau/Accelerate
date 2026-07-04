@@ -29,9 +29,12 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+#include <tpau-cpp-kernal/LocationException.h>
+
 #include "ParsedValue.h"
-#include "ParseException.h"
 #include "BodyParser.h"
+
+using namespace tpau::cpp_kernal;
 
 bool ParsedValue::initialized = false;
 TokenGroup ParsedValue::start_group;
@@ -66,7 +69,7 @@ std::shared_ptr<ParsedValue> ParsedValue::parse(Tokenizer &tokenizer) {
         object = std::make_shared<ParsedArray>(tokenizer);
     }
     else {
-        throw ParseException(token, "unexpected %s", token.type_name());
+        throw LocationException(token.location, "unexpected {}", token.type_name());
     }
 
     object->location = token.location;
@@ -81,7 +84,7 @@ void ParsedValue::setup(FileTokenizer &tokenizer) {
 
 const ParsedArray *ParsedValue::as_array() const {
     if (!is_array()) {
-        throw ParseException(location, "array expected");
+        throw LocationException(location, "array expected");
     }
 
     return reinterpret_cast<const ParsedArray*>(this);
@@ -90,7 +93,7 @@ const ParsedArray *ParsedValue::as_array() const {
 
 const ParsedBody *ParsedValue::as_body() const {
     if (!is_body()) {
-        throw ParseException(location, "body expected");
+        throw LocationException(location, "body expected");
     }
 
     return reinterpret_cast<const ParsedBody*>(this);
@@ -99,7 +102,7 @@ const ParsedBody *ParsedValue::as_body() const {
 
 const ParsedDictionary *ParsedValue::as_dictionary() const {
     if (!is_dictionary()) {
-        throw ParseException(location, "dictionary expected");
+        throw LocationException(location, "dictionary expected");
     }
 
     return reinterpret_cast<const ParsedDictionary*>(this);
@@ -108,7 +111,7 @@ const ParsedDictionary *ParsedValue::as_dictionary() const {
 
 const ParsedScalar *ParsedValue::as_scalar() const {
     if (!is_scalar()) {
-        throw ParseException(location, "scalar expected");
+        throw LocationException(location, "scalar expected");
     }
 
     return reinterpret_cast<const ParsedScalar*>(this);
@@ -117,7 +120,7 @@ const ParsedScalar *ParsedValue::as_scalar() const {
 
 const ParsedScalar *ParsedValue::as_singular_scalar() const {
     if (!is_singular_scalar()) {
-        throw ParseException(location, "singular scalar expected");
+        throw LocationException(location, "singular scalar expected");
     }
 
     return reinterpret_cast<const ParsedScalar*>(this);
@@ -167,7 +170,7 @@ std::shared_ptr<ParsedValue> ParsedDictionary::get_optional(const Token &token) 
 std::shared_ptr<ParsedValue> ParsedDictionary::operator[](const Token& token) const {
     auto value = get_optional(token);
     if (value == nullptr) {
-            throw ParseException(location, "missing key '%s'", token.as_string().c_str());
+            throw LocationException(location, "missing key '{}'", token);
     }
 
     return value;

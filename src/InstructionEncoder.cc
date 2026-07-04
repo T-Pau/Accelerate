@@ -33,22 +33,25 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <algorithm>
 
+#include <tpau-cpp-kernal/LocationException.h>
+#include <tpau-cpp-kernal/Util.h>
+
 #include "Assembler.h"
 #include "ExpressionNode.h"
 #include "InRangeExpression.h"
-#include "ParseException.h"
 #include "TokenNode.h"
-#include "Util.h"
+
+using namespace tpau::cpp_kernal;
 
 Body InstructionEncoder::encode(const Token& name, const std::vector<std::shared_ptr<Node>>& arguments, const std::shared_ptr<Environment>& environment, const SizeRange& offset, bool& uses_pc) const {
     const auto instruction = cpu->instruction(name.as_symbol());
     if (instruction == nullptr) {
-        throw ParseException(name, "unknown instruction '%s'", name.as_string().c_str());
+        throw LocationException(name.location, "unknown instruction '{}'", name);
     }
 
     auto matches = cpu->match_addressing_modes(arguments);
     if (matches.empty()) {
-        throw ParseException(name, "addressing mode not recognized");
+        throw LocationException(name.location, "addressing mode not recognized");
     }
 
     auto variants = std::vector<Variant>();
@@ -73,11 +76,11 @@ Body InstructionEncoder::encode(const Token& name, const std::vector<std::shared
 
     if (variants.empty()) {
         if (supported) {
-            throw ParseException(name, "arguments out of range");
+            throw LocationException(name.location, "arguments out of range");
         }
         else {
             if (matches.size() == 1) {
-                throw ParseException(name, "instruction %s doesn't support addressing mode %s", name.as_string().c_str(), matches.begin()->addressing_mode.c_str());
+                throw LocationException(name.location, "instruction {} doesn't support addressing mode {}", name, matches.begin()->addressing_mode);
             }
             else {
                 auto modes = std::vector<Symbol>();
@@ -85,7 +88,7 @@ Body InstructionEncoder::encode(const Token& name, const std::vector<std::shared
                     modes.emplace_back(match.addressing_mode);
                 }
                 std::ranges::sort(modes);
-                throw ParseException(name, "instruction %s doesn't support any of the addressing modes %s", name.as_string().c_str(), join(modes).c_str());
+                throw LocationException(name.location, "instruction {} doesn't support any of the addressing modes {}", name, join(modes));
             }
         }
     }
@@ -132,7 +135,7 @@ InstructionEncoder::Variant InstructionEncoder::encode(const Instruction* instru
                 case ArgumentType::ANY:
                 case ArgumentType::ENCODING: {
                     if ((*it_arguments)->type() != Node::EXPRESSION) {
-                        throw ParseException((*it_arguments)->get_location(), "any argument is not an expression");
+                        throw LocationException((*it_arguments)->get_location(), "any argument is not an expression");
                     }
                     auto expression = std::dynamic_pointer_cast<ExpressionNode>(*it_arguments)->expression;
 
@@ -142,12 +145,12 @@ InstructionEncoder::Variant InstructionEncoder::encode(const Instruction* instru
 
                 case ArgumentType::ENUM: {
                     if ((*it_arguments)->type() != Node::KEYWORD) {
-                        throw ParseException((*it_arguments)->get_location(), "enum argument is not a keyword");
+                        throw LocationException((*it_arguments)->get_location(), "enum argument is not a keyword");
                     }
                     auto enum_type = dynamic_cast<const ArgumentTypeEnum *>(argument_type);
                     auto value_name = std::dynamic_pointer_cast<TokenNode>(*it_arguments)->as_symbol();
                     if (!enum_type->has_entry(value_name)) {
-                        throw ParseException((*it_arguments)->get_location(), "invalid enum argument");
+                        throw LocationException((*it_arguments)->get_location(), "invalid enum argument");
                     }
                     environment->add(it_notation->symbol, Expression({}, enum_type->entry(value_name)));
                     break;
@@ -155,16 +158,16 @@ InstructionEncoder::Variant InstructionEncoder::encode(const Instruction* instru
 
                 case ArgumentType::MAP: {
                     if ((*it_arguments)->type() != Node::EXPRESSION) {
-                        throw ParseException((*it_arguments)->get_location(), "map argument is not an expression");
+                        throw LocationException((*it_arguments)->get_location(), "map argument is not an expression");
                     }
                     auto expression = std::dynamic_pointer_cast<ExpressionNode>(*it_arguments)->expression;
                     if (!expression.has_value()) {
-                        throw ParseException((*it_arguments)->get_location(), "map argument is not an integer");
+                        throw LocationException((*it_arguments)->get_location(), "map argument is not an integer");
                     }
                     auto map_type = dynamic_cast<const ArgumentTypeMap*>(argument_type);
                     auto value = expression.value().value();
                     if (!map_type->has_entry(value)) {
-                        throw ParseException((*it_arguments)->get_location(), "invalid map argument");
+                        throw LocationException((*it_arguments)->get_location(), "invalid map argument");
                     }
                     environment->add(it_notation->symbol, Expression({}, map_type->entry(value)));
                     break;
@@ -174,7 +177,7 @@ InstructionEncoder::Variant InstructionEncoder::encode(const Instruction* instru
                     auto range_type = dynamic_cast<const ArgumentTypeRange*>(argument_type);
 
                     if ((*it_arguments)->type() != Node::EXPRESSION) {
-                        throw ParseException((*it_arguments)->get_location(), "range argument is not an expression");
+                        throw LocationException((*it_arguments)->get_location(), "range argument is not an expression");
                     }
                     auto expression = std::dynamic_pointer_cast<ExpressionNode>(*it_arguments)->expression;
 

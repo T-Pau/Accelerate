@@ -36,10 +36,14 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <unordered_map>
 #include <vector>
 
+#include <tpau-cpp-kernal/FileSource.h>
+#include <tpau-cpp-kernal/Location.h>
+#include <tpau-cpp-kernal/Path.h>
+
 #include "Tokenizer.h"
 #include "Token.h"
-#include "Location.h"
-#include "Path.h"
+
+using namespace tpau::cpp_kernal;
 
 class Target;
 
@@ -49,7 +53,7 @@ public:
     void push(Symbol filename);
 
     [[nodiscard]] Location current_location() const override;
-    [[nodiscard]] Symbol current_file() const {return current_source ? current_source->file() : Symbol();}
+    [[nodiscard]] Symbol current_file() const {return current_source ? current_source->filename() : Symbol();}
     Symbol find_file(Symbol file_name);
 
     void define(Symbol name) {defines.insert(name);}
@@ -83,26 +87,12 @@ private:
         bool skip_rest;
         bool else_seen{false};
     };
-    class Source {
+
+    class Source: public FileSource {
     public:
-        Source(Symbol file, const std::vector<std::string>& lines) : file_(file), lines(lines) {}
-
-        int next();
-        void unget();
-
-        [[nodiscard]] Symbol file() const {return file_;}
-        [[nodiscard]] Location location() const { return {file(), line + 1, column, column}; }
-        void expand_location(Location& location) const { location.end_column = column; }
-
-        void reset_to(const Location& new_location);
+        explicit Source(Symbol filename): FileSource(filename) {}
 
         std::vector<PreState> pre_states;
-
-    private:
-        Symbol file_;
-        const std::vector<std::string>& lines;
-        size_t line = 0;
-        size_t column = 0;
     };
 
     class MatcherNode {
@@ -113,7 +103,7 @@ private:
         std::unordered_set<char> suffix_characters;
 
         void add(const char* string, Token::Type type, const std::unordered_set<char>& suffix_characters = {}, bool match_in_word = false);
-        std::optional<Token::Type> match(Source& source, std::string& name);
+        std::optional<Token::Type> match(FileSource& source, std::string& name);
 
       private:
         [[nodiscard]] bool conflicts(const std::unordered_set<char>& new_suffix) const;

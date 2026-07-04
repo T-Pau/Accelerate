@@ -32,9 +32,12 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef ACCELERATE_RANGE_H
 #define ACCELERATE_RANGE_H
 
-#include "Int.h"
 #include <cstdint>
 #include <ostream>
+
+#include <tpau-cpp-kernal/Int.h>
+
+using namespace tpau::cpp_kernal;
 
 /// Class representing an integer range.
 class Range {

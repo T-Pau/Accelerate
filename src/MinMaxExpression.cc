@@ -31,11 +31,13 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "MinMaxExpression.h"
 
-#include "ParseException.h"
+#include <tpau-cpp-kernal/LocationException.h>
+
+using namespace tpau::cpp_kernal;
 
 Expression MinMaxExpression::create(const Location& location, bool minimum, const std::vector<Expression>& arguments) {
     if (arguments.size() != 2) {
-        throw ParseException(location, "invalid number of arguments");
+        throw LocationException(location, "invalid number of arguments");
     }
     return create(location, arguments[0], arguments[1], minimum);
 }

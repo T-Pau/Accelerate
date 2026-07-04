@@ -32,10 +32,13 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef IF_BODY_H
 #define IF_BODY_H
 
+#include <tpau-cpp-kernal/Exception.h>
+
 #include "BodyElement.h"
 #include "Body.h"
 #include "BaseExpression.h"
-#include "Exception.h"
+
+using namespace tpau::cpp_kernal;
 
 class IfBodyClause {
 public:

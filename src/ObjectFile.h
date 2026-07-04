@@ -32,12 +32,15 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef OBJECT_FILE_H
 #define OBJECT_FILE_H
 
+#include <tpau-cpp-kernal/Symbol.h>
+
 #include "Function.h"
 #include "Macro.h"
 #include "Object.h"
-#include "Symbol.h"
 #include "Target.h"
 #include "Unresolved.h"
+
+using namespace tpau::cpp_kernal;
 
 class ObjectFile {
 public:

@@ -32,8 +32,11 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef SCOPE_BODY_H
 #define SCOPE_BODY_H
 
+#include <tpau-cpp-kernal/Exception.h>
+
 #include "Body.h"
-#include "Exception.h"
+
+using namespace tpau::cpp_kernal;
 
 class ScopeBody: public BodyElement {
   public:

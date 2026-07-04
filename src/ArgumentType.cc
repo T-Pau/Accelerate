@@ -31,7 +31,9 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "ArgumentType.h"
 
-#include "Exception.h"
+#include <tpau-cpp-kernal/Exception.h>
+
+using namespace tpau::cpp_kernal;
 
 Value ArgumentTypeEnum::entry(Symbol name) const {
     auto it = entries.find(name);

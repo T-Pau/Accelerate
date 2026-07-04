@@ -32,7 +32,9 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef NODE_H
 #define NODE_H
 
-#include "Location.h"
+#include <tpau-cpp-kernal/Location.h>
+
+using namespace tpau::cpp_kernal;
 
 class Node {
 public:

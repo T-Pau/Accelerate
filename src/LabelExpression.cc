@@ -31,13 +31,16 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "LabelExpression.h"
 
+#include <tpau-cpp-kernal/LocationException.h>
+
 #include "Entity.h"
 #include "Expression.h"
 #include "ObjectExpression.h"
 #include "ObjectFile.h"
-#include "ParseException.h"
 #include "VariableExpression.h"
 #include <complex>
+
+using namespace tpau::cpp_kernal;
 
 LabelExpression::LabelExpression(const Location& location, const Entity* object, Symbol label_name, const SizeRange& offset) : BaseExpression(location), label_type(LabelExpressionType::NAMED), object_name(object ? object->name : Symbol()), label_name(label_name), object(object), offset(offset) {}
 
@@ -49,7 +52,7 @@ Expression LabelExpression::create(const Location& location, const std::vector<E
                 return create(location, nullptr, Symbol(), SizeRange(arguments[0].value()->unsigned_value()));
             }
             else {
-                throw ParseException(location, "invalid arguments for .label_offset()");
+                throw LocationException(location, "invalid arguments for .label_offset()");
             }
         }
         if (auto label_name = arguments[0].as_variable()) {
@@ -60,11 +63,11 @@ Expression LabelExpression::create(const Location& location, const std::vector<E
                 return create(location, NEXT_UNNAMED);
             }
             else {
-                throw ParseException(location, "invalid arguments for .label_offset()");
+                throw LocationException(location, "invalid arguments for .label_offset()");
             }
         }
         else {
-            throw ParseException(location, "invalid arguments for .label_offset()");
+            throw LocationException(location, "invalid arguments for .label_offset()");
         }
     }
     else if (arguments.size() == 2) {
@@ -74,11 +77,11 @@ Expression LabelExpression::create(const Location& location, const std::vector<E
             return Expression(std::make_shared<LabelExpression>(location, object_name->variable(),                label_name->variable()));
         }
         else {
-            throw ParseException(location, "invalid arguments for .label_offset()");
+            throw LocationException(location, "invalid arguments for .label_offset()");
         }
     }
     else {
-        throw ParseException(location, "invalid number of arguments for .label_offset()");
+        throw LocationException(location, "invalid number of arguments for .label_offset()");
     }
 
 }
@@ -110,7 +113,7 @@ std::optional<Expression> LabelExpression::evaluated(const EvaluationContext& co
         auto unnamed_label = context.result.next_unnamed_label;
         if (label_type == PREVIOUS_UNNAMED) {
             if (unnamed_label == 0) {
-                throw ParseException(location, "no previous unnamed label");
+                throw LocationException(location, "no previous unnamed label");
             }
             unnamed_label -= 1;
         }

@@ -29,12 +29,14 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+#include <tpau-cpp-kernal/LocationException.h>
+
 #include "ObjectFileParser.h"
-#include "Exception.h"
 #include "LibraryGetter.h"
 #include "ParsedValue.h"
-#include "ParseException.h"
 #include "ExpressionParser.h"
+
+using namespace tpau::cpp_kernal;
 
 const Token ObjectFileParser::token_constant = Token(Token::DIRECTIVE, "constant");
 const Token ObjectFileParser::token_format_version = Token(Token::DIRECTIVE, "format_version");
@@ -80,7 +82,7 @@ std::shared_ptr<ObjectFile> ObjectFileParser::parse(Symbol filename) {
     file->name = filename;
 
     if (!parse_file(filename)) {
-        throw Exception("can't parse object file '%s'", filename.c_str());
+        throw Exception("can't parse object file '{}'", filename);
     }
     return file;
 }
@@ -97,7 +99,7 @@ void ObjectFileParser::parse_directive(const Token &directive) {
             (this->*it_symbol->second)(name, ParsedValue::parse(tokenizer));
         }
         else {
-            throw ParseException(directive, "unknown directive");
+            throw LocationException(directive.location, "unknown directive");
         }
     }
 }
@@ -139,7 +141,7 @@ void ObjectFileParser::parse_use() {
         auto token = tokenizer.next();
         if (!token.is_name()) {
             if (token && !token.is_newline()) {
-                throw ParseException(token, "expected newline");
+                throw LocationException(token.location, "expected newline");
             }
             break;
         }
@@ -165,12 +167,12 @@ void ObjectFileParser::parse_import() {
         }
         else {
             if (token != Token::comma) {
-                throw ParseException(token, "expected ','");
+                throw LocationException(token.location, "expected ','");
             }
             token = tokenizer.next();
         }
         if (!token.is_string()) {
-            throw ParseException(token, "expected string");
+            throw LocationException(token.location, "expected string");
         }
         file->import(LibraryGetter::global.get(token.as_symbol(), file->name).get());
     }

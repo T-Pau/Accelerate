@@ -31,10 +31,14 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "FileParser.h"
 
+#include <tpau-cpp-kernal/DiagnosticOutput.h>
+#include <tpau-cpp-kernal/FileReader.h>
+#include <tpau-cpp-kernal/LocationException.h>
+
 #include "ExpressionParser.h"
 #include "ParsedValue.h"
-#include "ParseException.h"
-#include "FileReader.h"
+
+using namespace tpau::cpp_kernal;
 
 TokenGroup FileParser::group_directive = TokenGroup({Token::DIRECTIVE,Token::END}, {}, "directive");
 
@@ -59,9 +63,9 @@ bool FileParser::parse_file(Symbol file_name) {
             }
             parse_directive(token);
         }
-        catch (ParseException& ex) {
+        catch (LocationException& ex) {
             ok = false;
-            FileReader::global.error(ex.location, "%s", ex.what());
+            DiagnosticOutput::global.error(ex);
             tokenizer.skip_until(group_directive);
         }
     }

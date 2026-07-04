@@ -31,20 +31,23 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "SizeofExpression.h"
 
+#include <tpau-cpp-kernal/LocationException.h>
+
 #include "EvaluationContext.h"
 #include "Expression.h"
 #include "ObjectExpression.h"
-#include "ParseException.h"
 #include "VariableExpression.h"
+
+using namespace tpau::cpp_kernal;
 
 Expression SizeofExpression::create(const Location& location, const std::vector<Expression>& arguments) {
     if (arguments.size() != 1) {
-        throw ParseException(location, "invalid number of arguments");
+        throw LocationException(location, "invalid number of arguments");
     }
     auto& argument = arguments[0];
 
     if (!argument.is_variable()) {
-        throw ParseException(argument.location(), "symbol argument required");
+        throw LocationException(argument.location(), "symbol argument required");
     }
 
     return Expression(std::make_shared<SizeofExpression>(location, argument.as_variable()->variable()));
@@ -73,7 +76,7 @@ std::optional<Expression> SizeofExpression::evaluated(const EvaluationContext& c
     }
     else if (const auto new_object = context.environment->get_variable(object_name)) {
         if (!new_object->is_object()) {
-            throw ParseException(location, ".sizeof requires object");
+            throw LocationException(location, ".sizeof requires object");
         }
         return create(location, new_object->as_object()->object);
     }

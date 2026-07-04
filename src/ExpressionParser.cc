@@ -31,9 +31,12 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "ExpressionParser.h"
 
+#include <tpau-cpp-kernal/LocationException.h>
+
 #include "FunctionExpression.h"
-#include "ParseException.h"
 #include "Target.h"
+
+using namespace tpau::cpp_kernal;
 
 const Token ExpressionParser::token_big_endian = Token{Token::NAME, "big_endian"};
 const Token ExpressionParser::token_false = Token{Token::NAME, ".false"};
@@ -191,7 +194,7 @@ Expression ExpressionParser::do_parse() {
                     case COMMA:
                     case END:
                     case PARENTHESIS_CLOSED:
-                        throw ParseException(next.location, "unexpected %s", next.description());
+                        throw LocationException(next.location, "unexpected {}", next.description());
 
                     case FUNCTION_CALL:
                     case OPERAND:
@@ -220,7 +223,7 @@ Expression ExpressionParser::do_parse() {
                     case COMMA:
                     case END:
                     case PARENTHESIS_CLOSED:
-                        throw ParseException(next.location, "unexpected %s", next.description());
+                        throw LocationException(next.location, "unexpected {}", next.description());
 
                     case OPERAND:
                     case UNNAMED_LABEL:
@@ -247,7 +250,7 @@ Expression ExpressionParser::do_parse() {
                     case OPERAND:
                     case PARENTHESIS_OPEN:
                     case UNARY_OPERATOR:
-                        throw ParseException(next.location, "unexpected %s", next.description());
+                        throw LocationException(next.location, "unexpected {}", next.description());
 
                     case BINARY_OPERATOR:
                         reduce_binary(next.level);
@@ -261,7 +264,7 @@ Expression ExpressionParser::do_parse() {
                                 reduce_argument_list();
                                 break;
                             }
-                            throw ParseException(stack.back().location, "unmatched '('");
+                            throw LocationException(stack.back().location, "unmatched '('");
                         }
                         auto token = Token::comma;
                         token.location = next.location;
@@ -275,7 +278,7 @@ Expression ExpressionParser::do_parse() {
                     case END:
                         reduce_binary(0);
                         if (!stack.empty()) {
-                            throw ParseException(stack.back().location, "unmatched '('");
+                            throw LocationException(stack.back().location, "unmatched '('");
                         }
                         return top.node;
 
@@ -295,7 +298,7 @@ Expression ExpressionParser::do_parse() {
                             reduce_function_call();
                         }
                         else {
-                            throw ParseException(next.location, "unmatched ')'");
+                            throw LocationException(next.location, "unmatched ')'");
                         }
                         break;
 
@@ -320,9 +323,9 @@ Expression ExpressionParser::do_parse() {
                     case COMMA:
                     case END:
                         if (top.type == START && next.type == END) {
-                            throw ParseException(next.location, "expected expression");
+                            throw LocationException(next.location, "expected expression");
                         }
-                        throw ParseException(next.location, "unexpected %s", next.description());
+                        throw LocationException(next.location, "unexpected {}", next.description());
 
                     case FUNCTION_CALL:
                     case OPERAND:
@@ -344,7 +347,7 @@ Expression ExpressionParser::do_parse() {
 
 void ExpressionParser::reduce_unary(const ExpressionParser::Element& next) {
     if (top.type != UNARY_OPERATOR || !next.is_operand()) {
-        throw ParseException({top.location, next.location}, "internal error: invalid element types in reduce_unary");
+        throw LocationException({top.location, next.location}, "internal error: invalid element types in reduce_unary");
     }
     top = Element(Expression({top.location, next.location}, top.operation.unary, next.node), 0);
 }
@@ -396,7 +399,7 @@ Body ExpressionParser::parse_list() {
             break;
         }
         else if (token != Token::comma) {
-            throw ParseException(token, "expected ':', ',', or newline");
+            throw LocationException(token.location, "expected ':', ',', or newline");
         }
     }
 
@@ -442,14 +445,14 @@ std::optional<Encoder> ExpressionParser::parse_encoding() const {
     }
     else if (token.is_name()) {
         if (!name_allowed) {
-            throw ParseException(token, "expected integer");
+            throw LocationException(token.location, "expected integer");
         }
         auto size = std::optional<size_t>{};
         auto token2 = tokenizer.next();
         if (token2 == Token::paren_open) {
             token2 = tokenizer.expect(Token::VALUE);
             if (!token2.is_unsigned()) {
-                throw ParseException(token2, "encoding size must be unsigned");
+                throw LocationException(token2.location, "encoding size must be unsigned");
             }
             size = token2.as_unsigned();
             tokenizer.expect(Token::paren_close);
@@ -469,12 +472,12 @@ std::optional<Encoder> ExpressionParser::parse_encoding() const {
             string_encoding = Target::current_target->string_encoding(token.as_symbol());
         }
         if (!string_encoding) {
-            throw ParseException(token, "unknown string encoding '%s'", token.as_string().c_str());
+            throw LocationException(token.location, "unknown string encoding '{}'", token);
         }
         return Encoder{string_encoding, size};
     }
 
-    throw ParseException(token, "expected integer or name");
+    throw LocationException(token.location, "expected integer or name");
 }
 
 void ExpressionParser::reduce_argument_list() {
@@ -524,7 +527,7 @@ const char *ExpressionParser::Element::description() const {
 
     }
 
-    throw Exception("invalid element type %d", type);
+    throw Exception("invalid element type {}", static_cast<int>(type));
 }
 
 ExpressionParser::Element::Element(const Location& location, ExpressionParser::BinaryOperator binary): type(BINARY_OPERATOR), level(binary.level), location(location) {

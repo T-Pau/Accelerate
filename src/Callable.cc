@@ -31,10 +31,12 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "Callable.h"
 
+#include <tpau-cpp-kernal/LocationException.h>
+
 #include "EvaluationContext.h"
-#include "Exception.h"
-#include "ParseException.h"
 #include "SequenceTokenizer.h"
+
+using namespace tpau::cpp_kernal;
 
 #define ARGUMENTS "arguments"
 
@@ -54,12 +56,12 @@ Callable::Callable(ObjectFile* owner, const Token& name_, const std::shared_ptr<
 
     if (auto arguments_value = parameters->get_optional(token_arguments)) {
         if (!arguments_value->is_scalar()) {
-            throw ParseException(arguments_value->location, "invalid arguments");
+            throw LocationException(arguments_value->location, "invalid arguments");
         }
         auto tokenizer = SequenceTokenizer(arguments_value->as_scalar()->tokens);
         arguments = Arguments(tokenizer);
         if (!tokenizer.ended()) {
-            throw ParseException(tokenizer.next(), "invalid arguments");
+            throw LocationException(tokenizer.next().location, "invalid arguments");
         }
     }
 }
@@ -96,7 +98,7 @@ void Callable::Arguments::serialize(std::ostream& stream) const {
 
 std::shared_ptr<Environment> Callable::bind(const std::vector<Expression>& actual_arguments) const {
     if (actual_arguments.size() < arguments.minimum_arguments() || actual_arguments.size() > arguments.maximum_arguments()) {
-        throw Exception("invalid number of actual_arguments");
+        throw LocationException(Location(), "invalid number of actual_arguments");
     }
     auto environment = std::make_shared<Environment>();
     for (size_t index = 0; index < arguments.maximum_arguments(); index++) {
@@ -132,7 +134,7 @@ Callable::Arguments::Arguments(Tokenizer& tokenizer) {
         }
 
         if (had_default_argument && !default_argument) {
-            throw ParseException(argument_name, "required argument cannot follow optional argument");
+            throw LocationException(argument_name.location, "required argument cannot follow optional argument");
         }
 
         names.emplace_back(argument_name.as_symbol());

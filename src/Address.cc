@@ -31,9 +31,12 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "Address.h"
 
+#include <tpau-cpp-kernal/Int.h>
+#include <tpau-cpp-kernal/LocationException.h>
+
 #include "ExpressionParser.h"
-#include "Int.h"
-#include "ParseException.h"
+
+using namespace tpau::cpp_kernal;
 
 Address::Address(Tokenizer& tokenizer, std::shared_ptr<Environment> environment) {
     auto expression = ExpressionParser(tokenizer).parse();
@@ -44,7 +47,7 @@ Address::Address(Tokenizer& tokenizer, std::shared_ptr<Environment> environment)
     }
     auto value = expression.value();
     if (!value.has_value() || !value->is_unsigned()) {
-        throw ParseException(expression.location(), "constant unsigned integer expression expected");
+        throw LocationException(expression.location(), "constant unsigned integer expression expected");
     }
 
     auto token = tokenizer.next();
@@ -54,7 +57,7 @@ Address::Address(Tokenizer& tokenizer, std::shared_ptr<Environment> environment)
         expression = ExpressionParser(tokenizer).parse();
         value = expression.value();
         if (!value.has_value() || !value->is_unsigned()) {
-            throw ParseException(expression.location(), "constant unsigned integer expression expected");
+            throw LocationException(expression.location(), "constant unsigned integer expression expected");
         }
     }
     else {

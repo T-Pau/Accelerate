@@ -32,17 +32,19 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef MACRO_BODY_H
 #define MACRO_BODY_H
 
+#include <tpau-cpp-kernal/LocationException.h>
+
 #include "BodyElement.h"
-#include "Exception.h"
-#include "ParseException.h"
+
+using namespace tpau::cpp_kernal;
 
 class MacroBody: public BodyElement {
   public:
     MacroBody(const Token& name, std::vector<Expression> arguments, const Macro* macro = {}): BodyElement(SizeRange(0,{})), name(name), macro(macro), arguments(std::move(arguments)) {}
 
-    [[nodiscard]] std::shared_ptr<BodyElement> clone() const override {throw Exception("can't clone MacroBody");}
+    [[nodiscard]] std::shared_ptr<BodyElement> clone() const override {throw LocationException(name.location, "can't clone MacroBody");}
     [[nodiscard]] bool empty() const override {return false;}
-    void encode(std::string &bytes, const Memory *memory) const override {throw ParseException(name, "can't encode unexpanded macro call");}
+    void encode(std::string &bytes, const Memory *memory) const override {throw LocationException(name.location, "can't encode unexpanded macro call");}
     [[nodiscard]] std::optional<Body> evaluated(const EvaluationContext &context) const override;
     void serialize(std::ostream &stream, const std::string &prefix) const override;
 

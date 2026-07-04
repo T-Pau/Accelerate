@@ -29,8 +29,11 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "ParseException.h"
+#include <tpau-cpp-kernal/LocationException.h>
+
 #include "TokenNode.h"
+
+using namespace tpau::cpp_kernal;
 
 TokenNode::TokenNode(const Token &token): token(token) {
     switch (token.get_type()) {
@@ -43,6 +46,6 @@ TokenNode::TokenNode(const Token &token): token(token) {
             break;
 
         default:
-            throw ParseException(token, "internal error: can't create TokenNode from %s", token.type_name());
+            throw LocationException(token.location, "internal error: can't create TokenNode from {}", token.type_name());
     }
 }

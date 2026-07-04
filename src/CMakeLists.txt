@@ -22,8 +22,6 @@ add_library(xlr8-library STATIC
         ChecksumAlgorithm.cc
         ChecksumAlgorithmXor.cc
         ChecksumComputation.cc
-        Command.cc
-        Commandline.cc
         DataBody.cc
         DefinedExpression.cc
         EmptyBody.cc
@@ -33,13 +31,11 @@ add_library(xlr8-library STATIC
         ErrorBody.cc
         EvaluationContext.cc
         EvaluationResult.cc
-        Exception.cc
         ExistsExpression.cc
         Expression.cc
         ExpressionNode.cc
         ExpressionParser.cc
         FileParser.cc
-        FileReader.cc
         FileTokenizer.cc
         FillExpression.cc
         Function.cc
@@ -50,13 +46,11 @@ add_library(xlr8-library STATIC
         InRangeExpression.cc
         Instruction.cc
         InstructionEncoder.cc
-        Int.cc
         IntegerEncoder.cc
         LabelBody.cc
         LabelExpression.cc
         LibraryGetter.cc
         Linker.cc
-        Location.cc
         Macro.cc
         MacroBody.cc
         Memory.cc
@@ -69,9 +63,7 @@ add_library(xlr8-library STATIC
         ObjectFile.cc
         ObjectFileParser.cc
         ObjectNameExpression.cc
-        ParseException.cc
         ParsedValue.cc
-        Path.cc
         Range.cc
         RepeatBody.cc
         ScopeBody.cc
@@ -80,7 +72,6 @@ add_library(xlr8-library STATIC
         SizeRange.cc
         StringEncoder.cc
         StringEncoding.cc
-        Symbol.cc
         Target.cc
         TargetGetter.cc
         Token.cc
@@ -90,21 +81,15 @@ add_library(xlr8-library STATIC
         UnaryExpression.cc
         UnnamedLabelList.cc
         Unresolved.cc
-        UTF8.cc
-        Util.cc
-        Value.cc
         ValueExpression.cc
         VariableExpression.cc
         Visibility.cc
         VoidExpression.cc
         Output.cc
-        Output.h
         ProgramLinker.cc
-        ProgramLinker.h
         LibraryLinker.cc
-        LibraryLinker.h
         UsedEntities.cc
-        UsedEntities.h)
+)
 
 target_include_directories(xlr8-library PRIVATE ${PROJECT_BINARY_DIR})
 
@@ -112,5 +97,6 @@ foreach(PROGRAM xlr8)
     ADD_EXECUTABLE(${PROGRAM} ${PROGRAM}.cc)
     target_include_directories(${PROGRAM} PRIVATE ${PROJECT_BINARY_DIR})
     target_link_libraries(${PROGRAM} xlr8-library)
+    target_link_libraries(${PROGRAM} tpau-cpp-kernal::tpau-cpp-kernal)
     INSTALL(TARGETS ${PROGRAM} RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 endforeach()

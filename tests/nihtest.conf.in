@@ -8,6 +8,8 @@ program-directories = @CMAKE_CURRENT_BINARY_DIR@
     @CMAKE_BINARY_DIR@/src/Release
     @CMAKE_BINARY_DIR@/src/Debug
 default-program = xlr8
+# Remove directory component from error messages with program name, but not input file names
+default-stderr-replace = "^[^ :]*xlr8: " ""
 
 [environment]
 XLR8_SYSTEM_DIRECTORY = @CMAKE_SOURCE_DIR@/share

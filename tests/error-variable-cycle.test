@@ -5,7 +5,7 @@ file file.s <inline>
 cycle = cycle + 1
 end-of-inline-data
 stderr
-file.s:1.8: error: circular definition of cycle
+file.s:1:9: error: circular definition of cycle
 cycle = cycle + 1
         ^^^^^^^^^
 end-of-inline-data

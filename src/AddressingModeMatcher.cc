@@ -29,9 +29,12 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+#include <tpau-cpp-kernal/Exception.h>
+
 #include "AddressingModeMatcher.h"
-#include "ParseException.h"
 #include "TokenNode.h"
+
+using namespace tpau::cpp_kernal;
 
 void AddressingModeMatcher::add_notation(Symbol addressing_mode, size_t notation_index, const AddressingMode::Notation &notation, const std::unordered_map<Symbol, std::unique_ptr<AddressingMode::Argument>>& arguments) {
     start.add_notation(AddressingModeMatcherResult(addressing_mode, notation_index), notation.elements.begin(), notation.elements.end(), arguments);
@@ -93,7 +96,7 @@ AddressingModeMatcherElement::elements_for(const AddressingMode::Notation::Eleme
         case AddressingMode::Notation::ARGUMENT: {
             const auto it = arguments.find(element.symbol);
             if (it == arguments.end()) {
-                throw Exception("unknown argument '%s'", element.symbol.c_str());
+                throw Exception("unknown argument '{}'", element.symbol);
             }
 
             const auto& argument_type = it->second;

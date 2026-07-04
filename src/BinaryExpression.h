@@ -78,6 +78,24 @@ protected:
     friend class Expression;
 
 private:
+    /**
+     * Get the name of a binary operation.
+     * 
+     * @return The name of the binary operation.
+     */
+    [[nodiscard]] const std::string& operation_name() const {return operation_name(operation);}
+
+    /**
+     * Get the name of a binary operation.
+     * 
+     * @param operation The binary operation.
+     * @return The name of the binary operation.
+     */
+    [[nodiscard]] static const std::string& operation_name(Expression::BinaryOperation operation);
+
+    /// @brief The names of the binary operations.
+    static std::vector<std::string> operation_names;
+
     /// @brief The left operand of the binary operation.
     Expression left;
 

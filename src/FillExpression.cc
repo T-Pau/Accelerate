@@ -31,13 +31,15 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "FillExpression.h"
 
+#include <tpau-cpp-kernal/LocationException.h>
 
 #include "Encoder.h"
-#include "ParseException.h"
+
+using namespace tpau::cpp_kernal;
 
 Expression FillExpression::create(const Location& location, const std::vector<Expression>& arguments) {
     if (arguments.size() != 2) {
-        throw ParseException(location, "invalid number of arguments");
+        throw LocationException(location, "invalid number of arguments");
     }
     return create(location, arguments[0], arguments[1]);
 }
@@ -46,7 +48,7 @@ Expression FillExpression::create(const Location& location, const Expression& co
     if (count.has_value() && value.has_value()) {
         const auto real_count = *count.value();
         if (!real_count.is_unsigned()) {
-            throw ParseException(count.location(), ".fill count must be unsigned");
+            throw LocationException(count.location(), ".fill count must be unsigned");
         }
         auto actual_count = real_count.unsigned_value();
         const auto real_value = *value.value();
@@ -58,7 +60,7 @@ Expression FillExpression::create(const Location& location, const Expression& co
         for (uint64_t i = 0; i < actual_count; i++) {
             result += bytes;
         }
-        return Expression(location, Value(result));
+        return Expression(location, Value(result, true));
     }
     else {
         return Expression(std::make_shared<FillExpression>(location, count, value));

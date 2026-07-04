@@ -29,13 +29,16 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+#include <tpau-cpp-kernal/LocationException.h>
+
 #include "InRangeExpression.h"
-#include "ParseException.h"
 #include "ValueExpression.h"
+
+using namespace tpau::cpp_kernal;
 
 Expression InRangeExpression::create(const Location& location, const std::vector<Expression>& arguments) {
     if (arguments.size() != 3) {
-        throw ParseException(location, "invalid number of arguments for .in_range()");
+        throw LocationException(location, "invalid number of arguments for .in_range()");
     }
     return create(location, arguments[0], arguments[1], arguments[2]);
 }

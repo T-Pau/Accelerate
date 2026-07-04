@@ -31,8 +31,11 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "LibraryLinker.h"
 
-#include "Exception.h"
 #include <fstream>
+
+#include <tpau-cpp-kernal/Exception.h>
+
+using namespace tpau::cpp_kernal;
 
 void LibraryLinker::link_sub() {
     Target::set_current_target(target);

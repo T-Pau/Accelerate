@@ -34,10 +34,13 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <utility>
 
+#include <tpau-cpp-kernal/Exception.h>
+#include <tpau-cpp-kernal/Symbol.h>
+
 #include "BodyElement.h"
 #include "ChecksumAlgorithm.h"
-#include "Exception.h"
-#include "Symbol.h"
+
+using namespace tpau::cpp_kernal;
 
 class ChecksumBody: public BodyElement {
   public:

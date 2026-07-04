@@ -34,9 +34,12 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <unordered_map>
 
+#include <tpau-cpp-kernal/Symbol.h>
+#include <tpau-cpp-kernal/Value.h>
+
 #include "IntegerEncoder.h"
-#include "Symbol.h"
-#include "Value.h"
+
+using namespace tpau::cpp_kernal;
 
 class ArgumentTypeEncoding;
 

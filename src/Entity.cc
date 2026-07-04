@@ -31,11 +31,14 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "Entity.h"
 
+#include <tpau-cpp-kernal/DiagnosticOutput.h>
+#include <tpau-cpp-kernal/LocationException.h>
+
 #include "ExpressionParser.h"
-#include "FileReader.h"
 #include "ObjectFile.h"
-#include "ParseException.h"
 #include "SequenceTokenizer.h"
+
+using namespace tpau::cpp_kernal;
 
 #define DEFAULT_ONLY "default_only"
 #define VISIBILITY "visibility"
@@ -50,7 +53,7 @@ Entity::Entity(ObjectFile* owner, const Token& name_, const std::shared_ptr<Pars
         auto tokenizer = SequenceTokenizer(default_only_definition->as_scalar()->tokens);
         auto default_only_value = ExpressionParser(tokenizer).parse();
         if (!default_only_value.has_value() || !default_only_value.value()->is_boolean()) {
-            throw ParseException(default_only_definition->location, "invalid default_only");
+            throw LocationException(default_only_definition->location, "invalid default_only");
         }
         default_only = default_only_value.value()->boolean_value();
     }
@@ -58,7 +61,7 @@ Entity::Entity(ObjectFile* owner, const Token& name_, const std::shared_ptr<Pars
     const auto visibility_value = (*parameters)[token_visibility]->as_singular_scalar()->token();
     const auto visibility_ = VisibilityHelper::from_token(visibility_value);
     if (!visibility_) {
-        throw ParseException(visibility_value, "invalid visibility '%s'", visibility_value.as_string().c_str());
+        throw LocationException(visibility_value.location, "invalid visibility '{}'", visibility_value);
     }
     visibility = *visibility_;
 }
@@ -117,7 +120,7 @@ void Entity::evaluate() {
         evaluate_inner(context);
         process_result(result);
     } catch (Exception& ex) {
-        FileReader::global.error(ParseException(location, ex));
+        DiagnosticOutput::global.error(location, ex);
         // TODO: throw empty expression?
     }
 }
@@ -129,7 +132,7 @@ EvaluationResult Entity::evaluate(EvaluationContext::EvaluationType type) {
         evaluate_inner(context);
         process_result(result);
     } catch (Exception& ex) {
-        FileReader::global.error(ParseException(location, ex));
+        DiagnosticOutput::global.error(location, ex);
     }
     return result;
 }
@@ -146,7 +149,7 @@ void Entity::resolve_labels() {
         context2.type = EvaluationContext::LABELS_2;
         evaluate_inner(context2);
     } catch (Exception& ex) {
-        FileReader::global.error(ParseException(location, ex));
+        DiagnosticOutput::global.error(location, ex);
         // TODO: throw empty expression?
     }
 }

@@ -31,11 +31,14 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "Object.h"
 
+#include <tpau-cpp-kernal/LocationException.h>
+
 #include "BodyElement.h"
 #include "ExpressionParser.h"
 #include "ObjectFile.h"
-#include "ParseException.h"
 #include "SequenceTokenizer.h"
+
+using namespace tpau::cpp_kernal;
 
 #define ADDRESS "address"
 #define ALIGNMENT "alignment"
@@ -59,14 +62,14 @@ Object::Object(ObjectFile* owner, const Token& name, const std::shared_ptr<Parse
         auto tokenizer = SequenceTokenizer(address_value->location, address_value->as_scalar()->tokens);
         address = Address(tokenizer);
         if (!tokenizer.ended()) {
-            throw ParseException(tokenizer.current_location(), "expected newline");
+            throw LocationException(tokenizer.current_location(), "expected newline");
         }
     }
 
     if (auto alignment_value = parameters->get_optional(token_alignment)) {
         auto alignment_token = alignment_value->as_singular_scalar()->token();
         if (!alignment_token.is_unsigned()) {
-            throw ParseException(alignment_token, "unsigned integer expected");
+            throw LocationException(alignment_token.location, "unsigned integer expected");
         }
         alignment = alignment_token.as_unsigned();
     }
@@ -80,11 +83,11 @@ Object::Object(ObjectFile* owner, const Token& name, const std::shared_ptr<Parse
     auto body_value = parameters->get_optional(token_body);
     auto reserve_value = parameters->get_optional(token_reserve);
     if ((body_value && reserve_value) || (!body_value && !reserve_value)) {
-        throw ParseException(parameters->location, "object must contain exactly one of reserve and body");
+        throw LocationException(parameters->location, "object must contain exactly one of reserve and body");
     }
     if (reserve_value) {
         if (!reserve_value->is_scalar()) {
-            throw ParseException(reserve_value->location, ".reserve must be scalar");
+            throw LocationException(reserve_value->location, ".reserve must be scalar");
         }
         auto tokenizer = SequenceTokenizer{reserve_value->as_scalar()->tokens};
         reservation_expression = ExpressionParser{tokenizer}.parse();
@@ -141,7 +144,7 @@ SizeRange Object::size_range() const {
         auto minimum_value = reservation_expression->minimum_value();
         auto maximum_value = reservation_expression->maximum_value();
         if ((minimum_value && !minimum_value->is_unsigned()) || (maximum_value && !maximum_value->is_unsigned())) {
-            throw ParseException(reservation_expression->location(), "reservation must be unsigned");
+            throw LocationException(reservation_expression->location(), "reservation must be unsigned");
         }
         return {minimum_value ? minimum_value->unsigned_value() : 0, maximum_value ? maximum_value->unsigned_value() : std::optional<uint64_t>{}};
     }

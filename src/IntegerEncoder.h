@@ -32,9 +32,12 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef INTEGER_ENCODER_H
 #define INTEGER_ENCODER_H
 
+#include <tpau-cpp-kernal/Value.h>
+
 #include "BaseEncoder.h"
 #include "Environment.h"
-#include "Value.h"
+
+using namespace tpau::cpp_kernal;
 
 class IntegerEncoder: public BaseEncoder {
 public:

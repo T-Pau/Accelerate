@@ -36,9 +36,11 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <unordered_map>
 #include <unordered_set>
 
-#include "EvaluationResult.h"
-#include "Symbol.h"
+#include <tpau-cpp-kernal/Symbol.h>
 
+#include "EvaluationResult.h"
+
+using namespace tpau::cpp_kernal;
 
 class Entity;
 

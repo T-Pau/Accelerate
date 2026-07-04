@@ -32,11 +32,14 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef BODY_H
 #define BODY_H
 
+#include <tpau-cpp-kernal/Location.h>
+
 #include "BodyElement.h"
 #include "EvaluationContext.h"
-#include "Location.h"
 #include "SizeRange.h"
 #include "Visibility.h"
+
+using namespace tpau::cpp_kernal;
 
 class BlockBody;
 class DataBody;

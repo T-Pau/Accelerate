@@ -33,7 +33,9 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <algorithm>
 
-#include "Exception.h"
+#include <tpau-cpp-kernal/Exception.h>
+
+using namespace tpau::cpp_kernal;
 
 const std::vector<MemoryMap::Block> *MemoryMap::segment(Symbol name) const {
     auto it = segments.find(name);

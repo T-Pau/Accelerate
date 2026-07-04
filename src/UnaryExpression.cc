@@ -31,8 +31,11 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "UnaryExpression.h"
 
+#include <tpau-cpp-kernal/Exception.h>
+
 #include "EvaluationContext.h"
-#include "Exception.h"
+
+using namespace tpau::cpp_kernal;
 
 Expression UnaryExpression::create(const Location& location, Expression::UnaryOperation operation, Expression operand) {
     std::shared_ptr<BaseExpression> node;
@@ -156,7 +159,7 @@ std::optional<Value> UnaryExpression::minimum_value() const {
             return operand.minimum_value();
     }
 
-    throw Exception("internal error: invalid unary operation %d", operation);
+    throw Exception("internal error: invalid unary operation {}", static_cast<int>(operation));
 }
 
 std::optional<Value> UnaryExpression::maximum_value() const {
@@ -184,7 +187,7 @@ std::optional<Value> UnaryExpression::maximum_value() const {
             return operand.maximum_value();
     }
 
-    throw Exception("internal error: invalid unary operation %d", operation);
+    throw Exception("internal error: invalid unary operation {}", static_cast<int>(operation));
 }
 
 std::optional<Value::Type> UnaryExpression::type() const {
@@ -217,6 +220,6 @@ std::optional<Value::Type> UnaryExpression::type() const {
             }
     }
 
-    throw Exception("internal error: invalid unary operation %d", operation);
+    throw Exception("internal error: invalid unary operation {}", static_cast<int>(operation));
 }
 

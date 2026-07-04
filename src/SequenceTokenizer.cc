@@ -53,5 +53,5 @@ Token SequenceTokenizer::sub_next() {
 
 void SequenceTokenizer::set_location(const Token& token) {
     location = token.location;
-    location.end_column = location.start_column;
+    location.end = location.start;
 }

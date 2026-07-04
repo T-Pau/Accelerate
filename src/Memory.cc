@@ -32,11 +32,13 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Memory.h"
 
 #include <iomanip>
+#include <iostream>
 #include <ostream>
 #include <sstream>
 
-#include "Exception.h"
-#include <iostream>
+#include <tpau-cpp-kernal/Exception.h>
+
+using namespace tpau::cpp_kernal;
 
 Memory::Bank::Bank(Range range, uint8_t fill_byte) : range(range) {
     memory = std::string(range.size, static_cast<char>(fill_byte));

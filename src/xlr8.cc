@@ -32,36 +32,43 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <fstream>
 #include <vector>
 
+#include <tpau-cpp-kernal/Command.h>
+#include <tpau-cpp-kernal/DiagnosticOutput.h>
+#include <tpau-cpp-kernal/Util.h>
+
 #include "Assembler.h"
 #include "CPUGetter.h"
 #include "CPUParser.h"
-#include "Command.h"
-#include "Exception.h"
 #include "LibraryGetter.h"
 #include "LibraryLinker.h"
-#include "ParseException.h"
 #include "ProgramLinker.h"
 #include "TargetGetter.h"
 #include "config.h"
 
-class xlr8: public Command {
-public:
-    xlr8(): Command(options, "file ...", "xlr8") {}
+using namespace tpau::cpp_kernal;
 
-protected:
-    void process() override;
-    void create_output() override;
-    size_t minimum_arguments() override {return 1;}
+class xlr8 : public Command {
+  public:
+    xlr8() : Command(options, "file ...", "xlr8", {Command::Feature::OutputFile, Command::Feature::DependencyFile}) {}
 
-private:
+  protected:
+    int process() override;
+    int create_output() override;
+
+    size_t minimum_arguments() override { return 1; }
+
+  private:
     class File {
-    public:
-        File(std::string name, std::shared_ptr<ObjectFile> file): name(std::move(name)), file(std::move(file)) {}
+      public:
+        File(std::string name, std::shared_ptr<ObjectFile> file) : name(std::move(name)), file(std::move(file)) {}
+
         std::string name;
         std::shared_ptr<ObjectFile> file;
     };
 
     static std::vector<Commandline::Option> options;
+
+    void set_output_file(const std::filesystem::path& input_filename, const std::string_view extension) { output_file = default_output_filename(input_filename, extension); }
 
     std::unique_ptr<Linker> linker;
     Path library_path;
@@ -73,31 +80,21 @@ private:
 };
 
 std::vector<Commandline::Option> xlr8::options = {
-    Commandline::Option("create-library", 'a', "create library"),
-    Commandline::Option("define", 'D', "name", "define NAME for use in conditional compilation"),
-    Commandline::Option("include-directory", 'I', "directory", "search for sources in DIRECTORY"),
-    Commandline::Option("library-directory", 'L', "directory", "search for libraries in DIRECTORY"),
-    Commandline::Option("symbol-map", "file", "write symbol map to FILE"),
-    Commandline::Option("system-directory", "directory", "search for system files in DIRECTORY"),
-    Commandline::Option("target", "file", "read target definition from FILE"),
-    Commandline::Option("undefine", "name", "remove definition of NAME for use in conditional compilation"),
-    Commandline::Option("verbose-errors", "include body in error messages")
+    Commandline::Option("create-library", 'a', "create library"), Commandline::Option("define", 'D', "name", "define NAME for use in conditional compilation"), Commandline::Option("include-directory", 'I', "directory", "search for sources in DIRECTORY"), Commandline::Option("library-directory", 'L', "directory", "search for libraries in DIRECTORY"), Commandline::Option("symbol-map", "file", "write symbol map to FILE"), Commandline::Option("system-directory", "directory", "search for system files in DIRECTORY"), Commandline::Option("target", "file", "read target definition from FILE"), Commandline::Option("undefine", "name", "remove definition of NAME for use in conditional compilation"), Commandline::Option("verbose-errors", "include body in error messages"), Commandline::Option("depfile", 'M', "file", "write gcc-style dependency file to FILE"), Commandline::Option("output", 'o', "file", "write output to FILE"),
 };
 
-
-int main(int argc, char *argv[]) {
+int main(int argc, char* argv[]) {
     auto command = xlr8();
 
     return command.run(argc, argv);
 }
 
-
-void xlr8::process() {
+int xlr8::process() {
     std::optional<std::string> target_name;
     auto create_program = true;
     auto ok = true;
 
-    for (const auto& option: arguments.options) {
+    for (const auto& option : arguments.options) {
         try {
             if (option.name == "create-library") {
                 create_program = false;
@@ -121,11 +118,10 @@ void xlr8::process() {
                 defines.erase(Symbol(option.argument));
             }
             else if (option.name == "verbose-errors") {
-                FileReader::global.verbose_error_messages = true;
+                DiagnosticOutput::global.verbose_error_messages = true;
             }
-        }
-        catch (Exception& ex) {
-            FileReader::global.error({}, "%s", ex.what());
+        } catch (Exception& ex) {
+            DiagnosticOutput::global.error(ex);
             ok = false;
         }
     }
@@ -135,7 +131,7 @@ void xlr8::process() {
     system_path.append_directory(system_directory ? system_directory : SYSTEM_DIRECTORY);
 
     if (getenv("XLR8_VERBOSE_ERRORS")) {
-        FileReader::global.verbose_error_messages = true;
+        DiagnosticOutput::global.verbose_error_messages = true;
     }
 
     LibraryGetter::global.path->append_path(library_path);
@@ -154,7 +150,7 @@ void xlr8::process() {
         linker->set_target(&Target::get(*target_name));
     }
 
-    for (const auto &file_name: arguments.arguments) {
+    for (const auto& file_name : arguments.arguments) {
         try {
             auto extension = std::filesystem::path(file_name).extension();
 
@@ -167,11 +163,15 @@ void xlr8::process() {
                 Target::clear_current_target();
             }
             else {
-                throw Exception("unrecognized file type '%s'", extension.c_str());
+                throw Exception("unrecognized file type '{}'", extension.string());
             }
+        } 
+        catch (LocationException& ex) {
+            DiagnosticOutput::global.error(ex);
+            ok = false;
         }
         catch (Exception& ex) {
-            FileReader::global.error(ex, Location(file_name));
+            DiagnosticOutput::global.error(Location(file_name), ex);
             ok = false;
         }
     }
@@ -180,7 +180,7 @@ void xlr8::process() {
         throw Exception();
     }
 
-    for (const auto& file: files) {
+    for (const auto& file : files) {
         linker->set_target(file.file->target);
     }
 
@@ -204,18 +204,22 @@ void xlr8::process() {
             break;
 
         default:
-            if (!output_file.has_value()) {
+            if (!output_file) {
                 throw Exception("option --output required with multiple source files");
             }
             break;
     }
 
-    for (const auto& file: files) {
+    for (const auto& file : files) {
         try {
             linker->add_file(file.file);
         }
+        catch (LocationException& ex) {
+            DiagnosticOutput::global.error(ex);
+            ok = false;
+        }
         catch (Exception& ex) {
-            FileReader::global.error(ex);
+            DiagnosticOutput::global.error(Location(file.name), ex);
             ok = false;
         }
     }
@@ -224,9 +228,11 @@ void xlr8::process() {
     }
 
     linker->link();
+
+    return 0;
 }
 
-void xlr8::create_output() {
+int xlr8::create_output() {
     linker->output(output_file.value());
 
     if (auto program_linker = linker->as_program_linker()) {
@@ -234,4 +240,6 @@ void xlr8::create_output() {
             program_linker->output_symbol_map(*map_file);
         }
     }
+
+    return 0;
 }

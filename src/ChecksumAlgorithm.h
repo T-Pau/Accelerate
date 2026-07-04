@@ -34,9 +34,12 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <cstdint>
 
-#include "Symbol.h"
+#include <tpau-cpp-kernal/Symbol.h>
+#include <tpau-cpp-kernal/Value.h>
+
 #include "Tokenizer.h"
-#include "Value.h"
+
+using namespace tpau::cpp_kernal;
 
 class ChecksumAlgorithm {
   public:

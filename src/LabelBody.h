@@ -32,9 +32,12 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef LABEL_BODY_H
 #define LABEL_BODY_H
 
+#include <tpau-cpp-kernal/Exception.h>
+
 #include "Body.h"
-#include "Exception.h"
 #include "SizeRange.h"
+
+using namespace tpau::cpp_kernal;
 
 class LabelBody: public BodyElement {
 public:

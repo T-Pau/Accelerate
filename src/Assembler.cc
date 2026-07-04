@@ -31,10 +31,14 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "Assembler.h"
 
+#include <tpau-cpp-kernal/DiagnosticOutput.h>
+#include <tpau-cpp-kernal/FileReader.h>
+#include <tpau-cpp-kernal/LocationException.h>
+
 #include "BodyParser.h"
 #include "ExpressionParser.h"
-#include "FileReader.h"
-#include "ParseException.h"
+
+using namespace tpau::cpp_kernal;
 
 const Symbol Assembler::symbol_opcode = Symbol(".opcode");
 const Token Assembler::token_address = Token{Token::DIRECTIVE, "address"};
@@ -146,17 +150,17 @@ void Assembler::parse(Symbol file_name) {
                     break;
 
                 case Token::INSTRUCTION:
-                    throw ParseException(token, "instruction not allowed outside symbol");
+                    throw LocationException(token.location, "instruction not allowed outside symbol");
 
                 case Token::PUNCTUATION:
                 case Token::VALUE:
                 case Token::PREPROCESSOR:
                 case Token::STRING:
                 case Token::KEYWORD:
-                    throw ParseException(token, "unexpected %s", token.type_name());
+                    throw LocationException(token.location, "unexpected {}", token.type_name());
             }
-        } catch (ParseException& ex) {
-            FileReader::global.error(ex.location, "%s", ex.what());
+        } catch (LocationException& ex) {
+            DiagnosticOutput::global.error(ex);
             tokenizer.skip_until(TokenGroup::newline, true);
         }
     }
@@ -184,7 +188,7 @@ void Assembler::parse_cpu(const Token& directive) {
         new_cpu->setup(tokenizer);
         cpu = new_cpu;
     } catch (Exception& ex) {
-        throw ParseException(name, "%s", ex.what());
+        throw LocationException(name.location, ex);
     }
 }
 
@@ -204,11 +208,11 @@ void Assembler::parse_default(const Token& directive) {
         }
         else {
             if (visibility) {
-                throw ParseException(token, "assignment or definition of macro, function or object expected");
+                throw LocationException(token.location, "assignment or definition of macro, function or object expected");
             }
             visibility = VisibilityHelper::from_token(token);
             if (!visibility) {
-                throw ParseException(token, "assignment or definition of macro, function or object expected");
+                throw LocationException(token.location, "assignment or definition of macro, function or object expected");
             }
         }
     }
@@ -218,7 +222,7 @@ void Assembler::parse_default_string_encoding(const Token& directive) {
     auto token = tokenizer.expect(Token::NAME, TokenGroup::newline);
     parsed_target.default_string_encoding = parsed_target.string_encoding(token.as_symbol());
     if (!parsed_target.default_string_encoding) {
-        throw ParseException(token, "unknown string encoding '%s'", token.as_string().c_str());
+        throw LocationException(token.location, "unknown string encoding '{}'", token);
     }
 }
 
@@ -233,15 +237,15 @@ void Assembler::parse_section(const Token& directive) {
 
     if (tokenizer.peek().is_end_of_line()) {
         if (!target) {
-            throw ParseException(name, "no target specified");
+            throw LocationException(name.location, "no target specified");
         }
         if (!target->map.has_section(name.as_symbol())) {
-            throw ParseException(name, "unknown section");
+            throw LocationException(name.location, "unknown section");
         }
         current_section = name.as_symbol();
     }
     else if (!parsing_target) {
-        throw ParseException(tokenizer.current_location(), "expected newline");
+        throw LocationException(tokenizer.current_location(), "expected newline");
     }
     else {
         auto definition_type = SECTION_DEFINE;
@@ -263,11 +267,11 @@ void Assembler::parse_section(const Token& directive) {
         if ((definition_type != SECTION_DEFINE) != section_names.contains(name)) {
             switch (definition_type) {
                 case SECTION_DEFINE:
-                    throw ParseException(name, "duplicate section definition"); // TODO: attach note
+                    throw LocationException(name.location, "duplicate section definition"); // TODO: attach note
                 case SECTION_EXTEND:
-                    throw ParseException(name, "extending non-existing section");
+                    throw LocationException(name.location, "extending non-existing section");
                 case SECTION_OVERRIDE:
-                    throw ParseException(name, "overriding non-existing section");
+                    throw LocationException(name.location, "overriding non-existing section");
             }
         }
 
@@ -278,7 +282,7 @@ void Assembler::parse_section(const Token& directive) {
         if (auto segment = parameters->get_optional(token_segment_name)) {
             auto segment_blocks = parsed_target.map.segment(segment->as_singular_scalar()->token().as_symbol());
             if (segment_blocks == nullptr) {
-                throw ParseException(segment->as_singular_scalar()->token(), "unknown segment");
+                throw LocationException(segment->as_singular_scalar()->token().location, "unknown segment");
             }
             blocks.insert(blocks.end(), segment_blocks->begin(), segment_blocks->end());
         }
@@ -286,15 +290,15 @@ void Assembler::parse_section(const Token& directive) {
         if (definition_type != SECTION_DEFINE) {
             if (parameters->has_key(token_type)) {
                 if (definition_type == SECTION_EXTEND) {
-                    throw ParseException(name, "can't specify type when extending section");
+                    throw LocationException(name.location, "can't specify type when extending section");
                 }
                 else {
-                    throw ParseException(name, "can't specify type when overriding section");
+                    throw LocationException(name.location, "can't specify type when overriding section");
                 }
             }
             auto it = parsed_target.map.sections.find(name.as_symbol());
             if (it == parsed_target.map.sections.end()) {
-                throw ParseException(name, "internal error: section not found");
+                throw LocationException(name.location, "internal error: section not found");
             }
             if (definition_type == SECTION_OVERRIDE) {
                 it->second.clear();
@@ -323,7 +327,7 @@ void Assembler::parse_segment(const Token& directive) {
     auto parameters = parse_value->as_dictionary();
 
     if (segment_names.contains(name)) {
-        throw ParseException(name, "duplicate segment definition"); // TODO: attach note
+        throw LocationException(name.location, "duplicate segment definition"); // TODO: attach note
     }
     segment_names.insert(name);
 
@@ -334,7 +338,7 @@ void Assembler::parse_symbol(Visibility visibility, const Token& name) {
     if (!target) {
         // TODO: skip until matching curly close
         tokenizer.skip_until(Token::curly_close, true);
-        throw ParseException(name, "no target specified");
+        throw LocationException(name.location, "no target specified");
     }
 
     auto object = object_file->create_object(current_section, visibility, false, name);
@@ -362,7 +366,7 @@ void Assembler::parse_symbol(Visibility visibility, const Token& name) {
                 auto value = expression.value();
 
                 if (!value.has_value() || !value->is_unsigned()) {
-                    throw ParseException(expression.location(), "alignment must be constant unsigned integer");
+                    throw LocationException(expression.location(), "alignment must be constant unsigned integer");
                 }
                 object->alignment = value->unsigned_value();
             }
@@ -378,12 +382,12 @@ void Assembler::parse_symbol(Visibility visibility, const Token& name) {
             object_file->mark_used(object);
         }
         else {
-            throw ParseException(token, "unexpected");
+            throw LocationException(token.location, "unexpected");
         }
     }
 
     if (object->empty()) {
-        throw ParseException(name, "empty symbol");
+        throw LocationException(name.location, "empty symbol");
     }
 
     // TODO: warn if reserved in saved section
@@ -397,7 +401,7 @@ void Assembler::parse_directive(const Token& directive) {
             parse_macro(*visibility);
         }
         else if (name.get_type() != Token::NAME) {
-            throw ParseException(name, "name expected");
+            throw LocationException(name.location, "name expected");
         }
         else {
             parse_name(*visibility, name);
@@ -412,7 +416,7 @@ void Assembler::parse_directive(const Token& directive) {
             (this->*it->second.parse)(directive);
         }
         else {
-            throw ParseException(directive, "unknown directive");
+            throw LocationException(directive.location, "unknown directive");
         }
     }
     tokenizer.expect(Token::NEWLINE, TokenGroup::newline);
@@ -429,7 +433,7 @@ void Assembler::parse_fill_byte(const Token& directive) {
     auto token = tokenizer.expect(Token::VALUE, TokenGroup::newline);
 
     if (!token.is_unsigned() || token.as_unsigned() >= 0x100) {
-        throw ParseException(token, "invalid fill byte");
+        throw LocationException(token.location, "invalid fill byte");
     }
     parsed_target.set_fill_byte(token.as_unsigned());
 }
@@ -438,7 +442,7 @@ void Assembler::parse_output(const Token& directive) {
     auto token = tokenizer.next();
     if (token != Token::curly_open) {
         tokenizer.skip_until(TokenGroup::newline, true);
-        throw ParseException(token, "expected '{'");
+        throw LocationException(token.location, "expected '{'");
     }
 
     parsed_target.output = std::make_unique<Output>(&parsed_target, directive.location, BodyParser(tokenizer, parsed_target.cpu, false, &tokenizer.defines).parse());
@@ -448,16 +452,16 @@ void Assembler::parse_string_encoding(const Token& directive) {
     auto name = tokenizer.expect(Token::NAME, TokenGroup::newline);
     if (tokenizer.peek().is_end_of_line()) {
         // TODO: set current string encoding
-        throw ParseException(name, ".string_encoding is not implemented yet");
+        throw LocationException(name.location, ".string_encoding is not implemented yet");
     }
     else if (!parsing_target) {
-        throw ParseException(tokenizer.current_location(), "expected newline");
+        throw LocationException(tokenizer.current_location(), "expected newline");
     }
     else {
         auto parse_value = ParsedValue::parse(tokenizer);
         tokenizer.unget(Token{Token::NEWLINE, tokenizer.current_location()});
         if (parsed_target.string_encoding(name.as_symbol())) {
-            throw ParseException(name, "duplicate string encoding '%s'", name.as_string().c_str());
+            throw LocationException(name.location, "duplicate string encoding '{}'", name.as_string().c_str());
         }
         parsed_target.string_encodings[name.as_symbol()] = StringEncoding(name.as_symbol(), parse_value, parsed_target);
     }
@@ -465,7 +469,7 @@ void Assembler::parse_string_encoding(const Token& directive) {
 
 void Assembler::parse_target(const Token& directive) {
     if (parsing_target) {
-        throw ParseException(tokenizer.current_location(), "unknown directive");
+        throw LocationException(tokenizer.current_location(), "unknown directive");
     }
 
     auto name = tokenizer.expect(Token::STRING, TokenGroup::newline);
@@ -492,7 +496,7 @@ void Assembler::parse_visibility(const Token& directive) {
         current_visibility = *visibility;
     }
     else {
-        throw ParseException(name, "unknown visibility");
+        throw LocationException(name.location, "unknown visibility");
     }
 }
 
@@ -564,7 +568,7 @@ MemoryMap::AccessType Assembler::parse_type(const Token& type) {
         return MemoryMap::READ_WRITE;
     }
     else {
-        throw ParseException(type, "invalid type");
+        throw LocationException(type.location, "invalid type");
     }
 }
 
@@ -576,13 +580,13 @@ MemoryMap::Block Assembler::parse_single_address(const ParsedScalar* address) co
         auto bank_token = (*address)[0];
 
         if (!bank_token.is_unsigned()) {
-            throw ParseException(bank_token, "unsigned integer expected");
+            throw LocationException(bank_token.location, "unsigned integer expected");
         }
         bank = bank_token.as_unsigned();
         index = 2;
     }
     if (address->size() < index + 1) {
-        throw ParseException(address->location, "missing address");
+        throw LocationException(address->location, "missing address");
     }
     auto start_token = (*address)[index];
     uint64_t start = parse_address_part(start_token);
@@ -593,7 +597,7 @@ MemoryMap::Block Assembler::parse_single_address(const ParsedScalar* address) co
         size = parse_address_part(end_token) - start + 1;
     }
     else if (address->size() != index + 1) {
-        throw ParseException(address->location, "invalid address specification");
+        throw LocationException(address->location, "invalid address specification");
     }
 
     return {bank, start, size};
@@ -603,7 +607,7 @@ uint64_t Assembler::parse_address_part(const Token& token) const {
     if (token.is_name()) {
         auto constant = object_file->constant(token.as_symbol());
         if (!constant->value.has_value()) {
-            throw ParseException(token, "unresolved constant");
+            throw LocationException(token.location, "unresolved constant");
         }
         return constant->value.value()->unsigned_value();
     }
@@ -611,6 +615,6 @@ uint64_t Assembler::parse_address_part(const Token& token) const {
         return token.as_unsigned();
     }
     else {
-        throw ParseException(token, "unsigned integer or constant expected");
+        throw LocationException(token.location, "unsigned integer or constant expected");
     }
 }

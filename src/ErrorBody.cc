@@ -31,23 +31,27 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "ErrorBody.h"
 
+#include <tpau-cpp-kernal/LocationException.h>
+
+using namespace tpau::cpp_kernal;
+
 std::optional<Body> ErrorBody::evaluated(const EvaluationContext& context) const {
     if (context.conditional) {
         return {};
     }
     else {
-        throw ParseException(location, message);
+        throw LocationException(location, message);
     }
 }
 
 void ErrorBody::serialize(std::ostream &stream, const std::string &prefix) const {
     stream << prefix << ".error \"" << message << "\" (\"" << location.file.str() << "\"";
-    if (location.start_line_number > 0) {
-        stream << ", " << location.start_line_number;
-        if (location.start_column > 0 || location.end_column > 0) {
-            stream << ", " << location.start_column;
-            if (location.start_column != location.end_column) {
-                stream << ", " << location.end_column;
+    if (location.start.has_line()) {
+        stream << ", " << location.start.line_number;
+        if (location.start.has_column() || location.end.has_column()) {
+            stream << ", " << location.start.column;
+            if (location.start.column != location.end.column) {
+                stream << ", " << location.end.column;
             }
         }
     }

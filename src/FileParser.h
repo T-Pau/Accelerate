@@ -32,8 +32,11 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef FILE_PARSER_H
 #define FILE_PARSER_H
 
+#include <tpau-cpp-kernal/Path.h>
+
 #include "FileTokenizer.h"
-#include "Path.h"
+
+using namespace tpau::cpp_kernal;
 
 class Target;
 

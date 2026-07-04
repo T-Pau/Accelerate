@@ -29,9 +29,12 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+#include <tpau-cpp-kernal/LocationException.h>
+
 #include "Function.h"
-#include "ParseException.h"
 #include "SequenceTokenizer.h"
+
+using namespace tpau::cpp_kernal;
 
 #define DEFINITION "definition"
 
@@ -51,7 +54,7 @@ Function::Function(ObjectFile* owner, const Token& name, const std::shared_ptr<P
     auto tokenizer = SequenceTokenizer((*parameters)[token_definition]->as_scalar()->tokens);
     definition = Expression(tokenizer);
     if (!tokenizer.ended()) {
-        throw ParseException(tokenizer.current_location(), "invalid definition");
+        throw LocationException(tokenizer.current_location(), "invalid definition");
     }
 }
 

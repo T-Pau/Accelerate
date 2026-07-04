@@ -36,9 +36,13 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <fstream>
 #include <sstream>
 
+#include <tpau-cpp-kernal/DiagnosticOutput.h>
+#include <tpau-cpp-kernal/Exception.h>
+#include <tpau-cpp-kernal/FileReader.h>
+
 #include "Assembler.h"
-#include "Exception.h"
-#include "FileReader.h"
+
+using namespace tpau::cpp_kernal;
 
 void ProgramLinker::link_sub() {
     memory = target->map.initialize_memory();
@@ -85,7 +89,7 @@ void ProgramLinker::link_sub() {
     unresolved.add(target->output.get(), result);
     unresolved.report();
 
-    if (FileReader::global.had_error()) {
+    if (DiagnosticOutput::global.failed()) {
         throw Exception();
     }
 
@@ -112,8 +116,8 @@ void ProgramLinker::link_sub() {
     std::ranges::sort(sorted_objects, Object::less_pointers);
     for (auto object: sorted_objects) {
         if (!object->size_range().size()) {
-            FileReader::global.error({}, "object '%s' has unknown size", object->name.c_str());
-            if (FileReader::global.verbose_error_messages) {
+            DiagnosticOutput::global.error("object '{}' has unknown size", object->name);
+            if (DiagnosticOutput::global.verbose_error_messages) {
                 std::cout << object->body;
             }
             continue;
@@ -122,7 +126,7 @@ void ProgramLinker::link_sub() {
             // TODO: validate that object->address is in object->section
             auto range = Range(object->address->address, *object->size_range().size());
             if (!memory[object->address->bank].allocate(range, object->is_reservation() ? Memory::RESERVED : Memory::DATA, 0, range.size)) {
-                FileReader::global.error({}, "fixed space ($%" PRIx64 ", $%" PRIx64 ") not free", range.start, range.end());
+                DiagnosticOutput::global.error("fixed space (${}, ${}) not free", range.start, range.end());
             }
         }
         else {
@@ -134,13 +138,13 @@ void ProgramLinker::link_sub() {
                 }
             }
             if (!object->address) {
-                FileReader::global.error({}, "no space left for %s ($%" PRIx64 " bytes) in section %s", object->name.c_str(), *object->size_range().size(), object->section->name.c_str());
+                DiagnosticOutput::global.error("no space left for '{}' ({} bytes) in section '{}'", object->name, *object->size_range().size(), object->section->name);
                 continue;
             }
         }
     }
 
-    if (FileReader::global.had_error()) {
+    if (DiagnosticOutput::global.failed()) {
         return;
     }
 
@@ -162,8 +166,8 @@ void ProgramLinker::link_sub() {
             }
         }
         catch (Exception& ex) {
-            FileReader::global.error(Location(), "can't encode '%s': %s", object->name.c_str(), ex.what());
-            if (FileReader::global.verbose_error_messages) {
+            DiagnosticOutput::global.error(Location(), "can't encode '{}': {}", object->name, ex.what());
+            if (DiagnosticOutput::global.verbose_error_messages) {
                 std::cout << object->body;
             }
         }

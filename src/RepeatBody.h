@@ -32,8 +32,11 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef REPEATBODY_H
 #define REPEATBODY_H
 
+#include <tpau-cpp-kernal/Exception.h>
+
 #include "Body.h"
-#include "Exception.h"
+
+using namespace tpau::cpp_kernal;
 
 class RepeatBody: public BodyElement {
 public:

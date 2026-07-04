@@ -34,11 +34,14 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <unordered_map>
 
-#include "Symbol.h"
+#include <tpau-cpp-kernal/Symbol.h>
+
 #include "AddressingMode.h"
 #include "ArgumentType.h"
 #include "Instruction.h"
 #include "AddressingModeMatcher.h"
+
+using namespace tpau::cpp_kernal;
 
 class CPUParser;
 

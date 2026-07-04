@@ -32,9 +32,12 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef ERROR_BODY_H
 #define ERROR_BODY_H
 
+#include <tpau-cpp-kernal/LocationException.h>
+
 #include "Body.h"
 
-#include "ParseException.h"
+using namespace tpau::cpp_kernal;
+
 
 class ErrorBody: public BodyElement {
 public:
@@ -42,7 +45,7 @@ public:
 
     [[nodiscard]] std::shared_ptr<BodyElement> clone() const override {return std::make_shared<ErrorBody>(location, message);}
     [[nodiscard]] bool empty() const override {return false;}
-    void encode(std::string &bytes, const Memory *memory) const override {throw ParseException(location, message);}
+    void encode(std::string &bytes, const Memory *memory) const override {throw LocationException(location, message);}
     [[nodiscard]] std::optional<Body> evaluated(const EvaluationContext& context) const override;
     void serialize(std::ostream &stream, const std::string &prefix) const override;
 

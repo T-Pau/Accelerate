@@ -34,11 +34,14 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <fstream>
 #include <ranges>
 
+#include <tpau-cpp-kernal/Exception.h>
+#include <tpau-cpp-kernal/FileReader.h>
+
 #include "Assembler.h"
-#include "Exception.h"
-#include "FileReader.h"
 #include "LibraryLinker.h"
 #include "ProgramLinker.h"
+
+using namespace tpau::cpp_kernal;
 
 LibraryLinker* Linker::as_library_linker() {
     return dynamic_cast<LibraryLinker*>(this);

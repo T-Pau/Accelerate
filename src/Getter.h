@@ -34,9 +34,11 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <string>
 
-#include "Exception.h"
-#include "Path.h"
-#include "Symbol.h"
+#include <tpau-cpp-kernal/Exception.h>
+#include <tpau-cpp-kernal/Path.h>
+#include <tpau-cpp-kernal/Symbol.h>
+
+using namespace tpau::cpp_kernal;
 
 template <typename T>
 class Getter {
@@ -50,7 +52,7 @@ public:
         }
         auto filename = path->find(Symbol(base_filename), base);
         if (filename.empty()) {
-            throw Exception("cannot find %s", base_filename.c_str());
+            throw Exception("cannot find {}", base_filename);
         }
 
         auto it = instances.find(filename);
@@ -59,7 +61,7 @@ public:
         }
         auto pair = instances.insert({filename, parse(name, filename)});
         if (!pair.second) {
-            throw Exception("internal error: can't insert '%s'", name.c_str());
+            throw Exception("internal error: can't insert '{}'", name);
         }
         return pair.first->second;
     }
