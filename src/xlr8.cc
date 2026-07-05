@@ -31,6 +31,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <tpau-cpp-kernal/Command.h>
 #include <tpau-cpp-kernal/DiagnosticOutput.h>
+#include <tpau-cpp-kernal/SystemEnvironment.h>
 #include <tpau-cpp-kernal/Util.h>
 
 #include "Assembler.h"
@@ -123,13 +124,11 @@ int xlr8::process() {
     }
 
     system_path.append_path(include_path);
-    const auto system_directory = getenv("XLR8_SYSTEM_DIRECTORY");
-    system_path.append_directory(system_directory ? system_directory : SYSTEM_DIRECTORY);
+    const auto system_directory = SystemEnvironment::get("XLR8_SYSTEM_DIRECTORY");
+    system_path.append_directory(system_directory ? *system_directory : SYSTEM_DIRECTORY);
 
-    if (getenv("XLR8_VERBOSE_ERRORS")) {
-        DiagnosticOutput::global.verbose_error_messages = true;
-    }
-
+    DiagnosticOutput::global.verbose_error_messages = SystemEnvironment::is_set("XLR8_VERBOSE_ERRORS");
+    
     LibraryGetter::global.path->append_path(library_path);
     LibraryGetter::global.path->append_path(system_path, "lib");
     TargetGetter::global.path->append_path(system_path, "target");
