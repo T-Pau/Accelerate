@@ -1,3 +1,6 @@
+#ifndef HAD_XLR8_EVALUATION_RESULT_H
+#define HAD_XLR8_EVALUATION_RESULT_H
+
 /*
 Copyright (C) Dieter Baron
 
@@ -27,10 +30,8 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef EVALUATION_RESULT_H
-#define EVALUATION_RESULT_H
-
 #include <unordered_set>
+#include <vector>
 
 #include <tpau-cpp-kernal/Symbol.h>
 
