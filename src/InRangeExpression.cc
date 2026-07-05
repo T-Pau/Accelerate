@@ -1,6 +1,4 @@
 /*
-InRangeExpression.cc --
-
 Copyright (C) Dieter Baron
 
 The authors can be contacted at <assembler@tpau.group>
@@ -32,7 +30,6 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <tpau-cpp-kernal/LocationException.h>
 
 #include "InRangeExpression.h"
-#include "ValueExpression.h"
 
 using namespace tpau::cpp_kernal;
 

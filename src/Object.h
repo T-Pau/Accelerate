@@ -1,6 +1,7 @@
-/*
-Object.h --
+#ifndef HAD_XLR8_OBJECT_H
+#define HAD_XLR8_OBJECT_H
 
+/*
 Copyright (C) Dieter Baron
 
 The authors can be contacted at <assembler@tpau.group>
@@ -28,9 +29,6 @@ IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
 OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-
-#ifndef OBJECT_H
-#define OBJECT_H
 
 #include <set>
 
@@ -84,4 +82,4 @@ public:
 
 std::ostream& operator<<(std::ostream& stream, const Object& node);
 
-#endif // OBJECT_H
+#endif // HAD_XLR8_OBJECT_H

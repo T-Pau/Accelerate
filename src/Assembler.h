@@ -1,6 +1,7 @@
-/*
-Assembler.h --
+#ifndef HAD_XLR8_ASSEMBLER_H
+#define HAD_XLR8_ASSEMBLER_H
 
+/*
 Copyright (C) Dieter Baron
 
 The authors can be contacted at <accelerate@tpau.group>
@@ -28,9 +29,6 @@ IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
 OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-
-#ifndef ASSEMBLER_H
-#define ASSEMBLER_H
 
 #include "ObjectFile.h"
 #include "Target.h"
@@ -133,4 +131,4 @@ private:
     static const std::unordered_map<Token, Directive> directives;
 };
 
-#endif // ASSEMBLER_H
+#endif // HAD_XLR8_ASSEMBLER_H

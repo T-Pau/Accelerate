@@ -1,6 +1,7 @@
-/*
-Function.h --
+#ifndef HAD_XLR8_FUNCTION_H
+#define HAD_XLR8_FUNCTION_H
 
+/*
 Copyright (C) Dieter Baron
 
 The authors can be contacted at <accelerate@tpau.group>
@@ -29,9 +30,6 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef FUNCTION_H
-#define FUNCTION_H
-
 #include "Callable.h"
 
 class Function: public Callable {
@@ -55,4 +53,4 @@ class Function: public Callable {
 
 std::ostream& operator<<(std::ostream& stream, const Function& function);
 
-#endif // FUNCTION_H
+#endif // HAD_XLR8_FUNCTION_H

@@ -1,6 +1,7 @@
-/*
-IntegerEncoder.h --
+#ifndef HAD_XLR8_INTEGER_ENCODER_H
+#define HAD_XLR8_INTEGER_ENCODER_H
 
+/*
 Copyright (C) Dieter Baron
 
 The authors can be contacted at <assembler@tpau.group>
@@ -29,13 +30,9 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef INTEGER_ENCODER_H
-#define INTEGER_ENCODER_H
-
 #include <tpau-cpp-kernal/Value.h>
 
 #include "BaseEncoder.h"
-#include "Environment.h"
 
 using namespace tpau::cpp_kernal;
 
@@ -77,4 +74,4 @@ private:
 
 std::ostream& operator<<(std::ostream& stream, const IntegerEncoder& encoding);
 
-#endif // INTEGER_ENCODER_H
+#endif // HAD_XLR8_INTEGER_ENCODER_H

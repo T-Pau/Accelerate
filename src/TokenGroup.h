@@ -1,6 +1,7 @@
-/*
-TokenGroup.h -- 
+#ifndef HAD_XLR8_TOKEN_GROUP_H
+#define HAD_XLR8_TOKEN_GROUP_H
 
+/*
 Copyright (C) Dieter Baron
 
 The authors can be contacted at <accelerate@tpau.group>
@@ -29,8 +30,7 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef TOKEN_GROUP_H
-#define TOKEN_GROUP_H
+#include <unordered_set>
 
 #include "Token.h"
 
@@ -87,4 +87,4 @@ public:
 };
 
 
-#endif // TOKEN_GROUP_H
+#endif // HAD_XLR8_TOKEN_GROUP_H

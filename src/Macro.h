@@ -1,6 +1,7 @@
-/*
-Macro.h --
+#ifndef HAD_XLR8_MACRO_H
+#define HAD_XLR8_MACRO_H
 
+/*
 Copyright (C) Dieter Baron
 
 The authors can be contacted at <accelerate@tpau.group>
@@ -29,9 +30,6 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef MACRO_H
-#define MACRO_H
-
 #include "Body.h"
 #include "Callable.h"
 
@@ -58,4 +56,4 @@ class Macro: public Callable {
 
 std::ostream& operator<<(std::ostream& stream, const Macro& macro);
 
-#endif // MACRO_H
+#endif // HAD_XLR8_MACRO_H

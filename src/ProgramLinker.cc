@@ -1,6 +1,4 @@
 /*
-ProgramLinker.cc -- 
-
 Copyright (C) Dieter Baron
 
 The authors can be contacted at <accelerate@tpau.group>
@@ -32,7 +30,6 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ProgramLinker.h"
 
 #include <algorithm>
-#include <cinttypes>
 #include <fstream>
 #include <sstream>
 
@@ -174,7 +171,7 @@ void ProgramLinker::link_sub() {
     }
 }
 
-void ProgramLinker::output(const std::string &file_name) {
+void ProgramLinker::output(const std::filesystem::path& file_name) {
     auto environment = std::make_shared<Environment>();
 
     for (const auto& object: objects) {
@@ -210,7 +207,7 @@ void ProgramLinker::output(const std::string &file_name) {
 }
 
 
-void ProgramLinker::output_symbol_map(const std::string& file_name) {
+void ProgramLinker::output_symbol_map(const std::filesystem::path& file_name) {
     auto sorted_objects = std::vector<Object*>(objects.begin(), objects.end());
     std::ranges::sort(sorted_objects, Object::less_pointers);
 

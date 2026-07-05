@@ -1,3 +1,5 @@
+# cspell: words BINDIR endforeach
+
 add_library(xlr8-library STATIC
         Address.cc
         AddressingMode.cc

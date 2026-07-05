@@ -1,6 +1,7 @@
-/*
-SizeofExpression.h -- 
+#ifndef HAD_XLR8_SIZEOF_EXPRESSION_H
+#define HAD_XLR8_SIZEOF_EXPRESSION_H
 
+/*
 Copyright (C) Dieter Baron
 
 The authors can be contacted at <assembler@tpau.group>
@@ -28,9 +29,6 @@ IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
 OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-
-#ifndef SIZEOFEXPRESSION_H
-#define SIZEOFEXPRESSION_H
 
 #include "BaseExpression.h"
 #include "Object.h"
@@ -61,4 +59,4 @@ private:
 
 };
 
-#endif //SIZEOFEXPRESSION_H
+#endif // HAD_XLR8_SIZEOF_EXPRESSION_H

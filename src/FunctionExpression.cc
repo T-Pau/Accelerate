@@ -1,6 +1,4 @@
 /*
-FunctionExpression.cc --
-
 Copyright (C) Dieter Baron
 
 The authors can be contacted at <accelerate@tpau.group>
@@ -30,8 +28,6 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include "FunctionExpression.h"
-
-#include <complex>
 
 #include "DefinedExpression.h"
 #include "EvaluationContext.h"

@@ -1,6 +1,7 @@
-/*
-Token.h -- Parsing Token
+#ifndef HAD_XLR8_TOKEN_H
+#define HAD_XLR8_TOKEN_H
 
+/*
 Copyright (C) Dieter Baron
 
 The authors can be contacted at <accelerate@tpau.group>
@@ -28,11 +29,6 @@ IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
 OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-
-#ifndef TOKEN_H
-#define TOKEN_H
-
-#include <unordered_set>
 
 #include <tpau-cpp-kernal/Location.h>
 #include <tpau-cpp-kernal/Symbol.h>
@@ -166,4 +162,4 @@ template <> struct std::formatter<Token> : std::formatter<std::string_view> {
     }
 };
 
-#endif // TOKEN_H
+#endif // HAD_XLR8_TOKEN_H

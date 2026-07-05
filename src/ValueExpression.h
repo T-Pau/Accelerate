@@ -1,6 +1,7 @@
-/*
-ValueExpression.h --
+#ifndef HAD_XLR8_VALUE_EXPRESSION_H
+#define HAD_XLR8_VALUE_EXPRESSION_H
 
+/*
 Copyright (C) Dieter Baron
 
 The authors can be contacted at <assembler@tpau.group>
@@ -28,9 +29,6 @@ IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
 OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-
-#ifndef VALUE_EXPRESSION_H
-#define VALUE_EXPRESSION_H
 
 #include "BaseExpression.h"
 #include "Expression.h"
@@ -78,4 +76,4 @@ private:
     Value value_;
 };
 
-#endif // VALUE_EXPRESSION_H
+#endif // HAD_XLR8_VALUE_EXPRESSION_H

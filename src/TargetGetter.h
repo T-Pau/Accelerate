@@ -1,6 +1,7 @@
-/*
-TargetGetter.h -- 
+#ifndef HAD_XLR8_TARGET_GETTER_H
+#define HAD_XLR8_TARGET_GETTER_H
 
+/*
 Copyright (C) Dieter Baron
 
 The authors can be contacted at <assembler@tpau.group>
@@ -29,9 +30,6 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef TARGET_GETTER_H
-#define TARGET_GETTER_H
-
 #include "Assembler.h"
 #include "Getter.h"
 #include "Target.h"
@@ -45,4 +43,4 @@ protected:
     Target parse(Symbol name, Symbol filename) override {return Assembler(nullptr, *TargetGetter::global.path, {}).parse_target(name, filename);}
 };
 
-#endif // TARGET_GETTER_H
+#endif // HAD_XLR8_TARGET_GETTER_H

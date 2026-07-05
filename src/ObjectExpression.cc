@@ -1,6 +1,4 @@
 /*
-ObjectExpression.cc --
-
 Copyright (C) Dieter Baron
 
 The authors can be contacted at <assembler@tpau.group>
@@ -30,8 +28,6 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include "ObjectExpression.h"
-
-#include "ValueExpression.h"
 
 std::optional<Expression> ObjectExpression::evaluated(const EvaluationContext& context) const {
     if (context.type == EvaluationContext::ARGUMENTS) {

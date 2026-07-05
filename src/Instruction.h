@@ -1,6 +1,7 @@
-/*
-Instruction.h -- Assembly Instruction
+#ifndef HAD_XLR8_INSTRUCTION_H
+#define HAD_XLR8_INSTRUCTION_H
 
+/*
 Copyright (C) Dieter Baron
 
 The authors can be contacted at <accelerate@tpau.group>
@@ -29,11 +30,6 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef INSTRUCTION_H
-#define INSTRUCTION_H
-
-#include <string>
-
 #include <tpau-cpp-kernal/Symbol.h>
 
 using namespace tpau::cpp_kernal;
@@ -47,4 +43,4 @@ public:
 };
 
 
-#endif // INSTRUCTION_H
+#endif // HAD_XLR8_INSTRUCTION_H

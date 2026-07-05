@@ -1,6 +1,4 @@
 /*
-BinaryExpression.cc --
-
 Copyright (C) Dieter Baron
 
 The authors can be contacted at <assembler@tpau.group>
@@ -32,8 +30,6 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "BinaryExpression.h"
 
 #include <tpau-cpp-kernal/Exception.h>
-
-#include "VariableExpression.h"
 
 using namespace tpau::cpp_kernal;
 
@@ -312,8 +308,8 @@ Expression BinaryExpression::create(const Location& location, const Expression& 
                     auto right_binary = right.as_binary();
 
                     if (!left_variable.empty() && right_binary->operation == Expression::BinaryOperation::ADD) {
-                        auto right_variabel = right_binary->left.variable_name();
-                        if (left_variable == right_variabel) {
+                        auto right_variable = right_binary->left.variable_name();
+                        if (left_variable == right_variable) {
                             return {location, Expression::UnaryOperation::MINUS, right_binary->right};
                         }
                     }

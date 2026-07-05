@@ -1,6 +1,7 @@
-/*
-Unresolved.h --
+#ifndef HAD_XLR8_UNRESOLVED_H
+#define HAD_XLR8_UNRESOLVED_H
 
+/*
 Copyright (C) Dieter Baron
 
 The authors can be contacted at <assembler@tpau.group>
@@ -29,14 +30,12 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef UNRESOLVED_H
-#define UNRESOLVED_H
-
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
 
 #include <tpau-cpp-kernal/Symbol.h>
+#include <tpau-cpp-kernal/Location.h>
 
 #include "EvaluationResult.h"
 
@@ -98,4 +97,4 @@ class Unresolved {
 };
 
 
-#endif // UNRESOLVED_H
+#endif // HAD_XLR8_UNRESOLVED_H

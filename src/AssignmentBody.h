@@ -1,6 +1,7 @@
-/*
-AssignmentBody.h --
+#ifndef HAD_XLR8_ASSIGNMENT_BODY_H
+#define HAD_XLR8_ASSIGNMENT_BODY_H
 
+/*
 Copyright (C) Dieter Baron
 
 The authors can be contacted at <accelerate@tpau.group>
@@ -29,11 +30,7 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef ASSIGNMENT_BODY_H
-#define ASSIGNMENT_BODY_H
-
 #include "Body.h"
-#include "Object.h"
 
 class AssignmentBody: public BodyElement {
 public:
@@ -52,4 +49,4 @@ private:
 };
 
 
-#endif // ASSIGNMENT_BODY_H
+#endif // HAD_XLR8_ASSIGNMENT_BODY_H

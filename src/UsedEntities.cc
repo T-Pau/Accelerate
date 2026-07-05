@@ -1,6 +1,4 @@
 /*
-UsedEntities.cc -- 
-
 Copyright (C) Dieter Baron
 
 The authors can be contacted at <accelerate@tpau.group>
@@ -52,15 +50,15 @@ void UsedEntities::insert(const UsedEntities& other) {
 
 
 void UsedEntities::remove_optional() {
-    auto optionl_entities = std::unordered_set<Entity*>{};
+    auto optional_entities = std::unordered_set<Entity*>{};
 
     for (auto& [entity, optional]: entities) {
         if (optional) {
-            optionl_entities.insert(entity);
+            optional_entities.insert(entity);
         }
     }
 
-    for (const auto& entity: optionl_entities) {
+    for (const auto& entity: optional_entities) {
         entities.erase(entity);
     }
 }

@@ -1,6 +1,7 @@
-/*
-EvaluationContext.h --
+#ifndef HAD_XLR8_EVALUATION_CONTEXT_H
+#define HAD_XLR8_EVALUATION_CONTEXT_H
 
+/*
 Copyright (C) Dieter Baron
 
 The authors can be contacted at <accelerate@tpau.group>
@@ -29,14 +30,10 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef EVALUATION_CONTEXT_H
-#define EVALUATION_CONTEXT_H
-
 #include <unordered_set>
 
 #include "Environment.h"
 #include "EvaluationResult.h"
-#include "Memory.h"
 #include "SizeRange.h"
 
 class Entity;
@@ -91,4 +88,4 @@ class EvaluationContext {
     EvaluationResult& result;
 };
 
-#endif // EVALUATION_CONTEXT_H
+#endif // HAD_XLR8_EVALUATION_CONTEXT_H

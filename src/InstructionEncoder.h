@@ -1,6 +1,7 @@
-/*
-InstructionEncoder.h --
+#ifndef HAD_XLR8_INSTRUCTION_ENCODER_H
+#define HAD_XLR8_INSTRUCTION_ENCODER_H
 
+/*
 Copyright (C) Dieter Baron
 
 The authors can be contacted at <assembler@tpau.group>
@@ -29,15 +30,7 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef INSTRUCTION_ENCODER_H
-#define INSTRUCTION_ENCODER_H
-
-
-#include "Target.h"
-#include "IfBody.h"
-#include "DataBody.h"
-#include "LabelBody.h"
-
+#include "CPU.h"
 
 class InstructionEncoder {
 public:
@@ -69,4 +62,4 @@ private:
     const CPU* cpu;
 };
 
-#endif // INSTRUCTION_ENCODER_H
+#endif // HAD_XLR8_INSTRUCTION_ENCODER_H

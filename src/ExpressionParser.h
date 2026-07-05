@@ -1,6 +1,7 @@
-/*
-ExpressionParser.h --
+#ifndef HAD_XLR8_EXPRESSION_PARSER_H
+#define HAD_XLR8_EXPRESSION_PARSER_H
 
+/*
 Copyright (C) Dieter Baron
 
 The authors can be contacted at <accelerate@tpau.group>
@@ -29,14 +30,9 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef EXPRESSION_PARSER_H
-#define EXPRESSION_PARSER_H
-
-
-
-#include "DataBody.h"
+#include "Body.h"
 #include "Encoder.h"
-#include "Tokenizer.h"
+#include "FileTokenizer.h"
 #include "VariableExpression.h"
 
 class ExpressionParser {
@@ -129,4 +125,4 @@ private:
 };
 
 
-#endif // EXPRESSION_PARSER_H
+#endif // HAD_XLR8_EXPRESSION_PARSER_H

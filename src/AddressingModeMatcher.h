@@ -1,6 +1,7 @@
-/*
-AddressingModeMatcher.h -- 
+#ifndef HAD_XLR8_ADDRESSING_MODE_MATCHER_H
+#define HAD_XLR8_ADDRESSING_MODE_MATCHER_H
 
+/*
 Copyright (C) Dieter Baron
 
 The authors can be contacted at <accelerate@tpau.group>
@@ -28,9 +29,6 @@ IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
 OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-
-#ifndef ADDRESSING_MODE_MATCHER_H
-#define ADDRESSING_MODE_MATCHER_H
 
 #include <unordered_map>
 #include <unordered_set>
@@ -121,4 +119,4 @@ private:
 };
 
 
-#endif // ADDRESSING_MODE_MATCHER_H
+#endif // HAD_XLR8_ADDRESSING_MODE_MATCHER_H

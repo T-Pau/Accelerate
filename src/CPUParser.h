@@ -1,6 +1,7 @@
-/*
-CPUParser.h -- Parse CPU Specification
+#ifndef HAD_XLR8_CPU_PARSER_H
+#define HAD_XLR8_CPU_PARSER_H
 
+/*
 Copyright (C) Dieter Baron
 
 The authors can be contacted at <accelerate@tpau.group>
@@ -29,14 +30,12 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef CPU_PARSER_H
-#define CPU_PARSER_H
-
 #include <tpau-cpp-kernal/FileReader.h>
 #include <tpau-cpp-kernal/Symbol.h>
 
 #include "CPU.h"
 #include "FileParser.h"
+#include "ParsedValue.h"
 
 using namespace tpau::cpp_kernal;
 
@@ -86,4 +85,4 @@ private:
 };
 
 
-#endif // CPU_PARSER_H
+#endif // HAD_XLR8_CPU_PARSER_H

@@ -1,6 +1,7 @@
-/*
-BodyElement.h --
+#ifndef HAD_XLR8_BODY_ELEMENT_H
+#define HAD_XLR8_BODY_ELEMENT_H
 
+/*
 Copyright (C) Dieter Baron
 
 The authors can be contacted at <assembler@tpau.group>
@@ -29,12 +30,8 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef BODY_ELEMENT_H
-#define BODY_ELEMENT_H
-
 #include <optional>
 
-#include "Environment.h"
 #include "Memory.h"
 #include "SizeRange.h"
 #include "EvaluationContext.h"
@@ -69,4 +66,4 @@ protected:
 std::ostream& operator<<(std::ostream& stream, const BodyElement& element);
 std::ostream& operator<<(std::ostream& stream, const std::shared_ptr<BodyElement>& element);
 
-#endif // BODY_ELEMENT_H
+#endif // HAD_XLR8_BODY_ELEMENT_H

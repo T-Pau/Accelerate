@@ -1,9 +1,7 @@
-#ifndef STRING_ENCODING_H
-#define STRING_ENCODING_H
+#ifndef HAD_XLR8_STRING_ENCODING_H
+#define HAD_XLR8_STRING_ENCODING_H
 
 /*
-StringEncoding.h --
-
 Copyright (C) Dieter Baron
 
 The authors can be contacted at <accelerate@tpau.group>
@@ -122,4 +120,4 @@ class StringEncoding {
 
 std::ostream& operator<<(std::ostream& stream, const StringEncoding& encoding);
 
-#endif // STRING_ENCODING_H
+#endif // HAD_XLR8_STRING_ENCODING_H

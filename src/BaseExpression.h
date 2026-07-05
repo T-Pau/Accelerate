@@ -1,6 +1,7 @@
-/*
-BaseExpression.h -- Abstract Base Class of BaseExpression Nodes
+#ifndef HAD_XLR8_BASE_EXPRESSION_H
+#define HAD_XLR8_BASE_EXPRESSION_H
 
+/*
 Copyright (C) Dieter Baron
 
 The authors can be contacted at <accelerate@tpau.group>
@@ -29,10 +30,12 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef BASE_EXPRESSION_H
-#define BASE_EXPRESSION_H
+#include <unordered_set>
 
-#include "FileTokenizer.h"
+#include <tpau-cpp-kernal/Location.h>
+#include <tpau-cpp-kernal/Value.h>
+
+using namespace tpau::cpp_kernal;
 
 class Object;
 class Expression;
@@ -127,4 +130,4 @@ std::ostream& operator<<(std::ostream& stream, const std::shared_ptr<BaseExpress
  */
 std::ostream& operator<<(std::ostream& stream, const BaseExpression& node);
 
-#endif // BASE_EXPRESSION_H
+#endif // HAD_XLR8_BASE_EXPRESSION_H

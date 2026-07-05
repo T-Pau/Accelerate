@@ -1,5 +1,5 @@
-#ifndef USED_ENTITIES_H
-#define USED_ENTITIES_H
+#ifndef HAD_XLR8_USED_ENTITIES_H
+#define HAD_XLR8_USED_ENTITIES_H
 
 /*
 UsedEntities.h --
@@ -51,4 +51,4 @@ class UsedEntities {
     std::unordered_map<Entity*, bool> entities;
 };
 
-#endif //USED_ENTITIES_H
+#endif // HAD_XLR8_USED_ENTITIES_H

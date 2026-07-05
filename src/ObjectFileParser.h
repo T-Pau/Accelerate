@@ -1,6 +1,7 @@
-/*
-ObjectFileParser.h -- 
+#ifndef HAD_XLR8_OBJECT_FILE_PARSER_H
+#define HAD_XLR8_OBJECT_FILE_PARSER_H
 
+/*
 Copyright (C) Dieter Baron
 
 The authors can be contacted at <assembler@tpau.group>
@@ -28,9 +29,6 @@ IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
 OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-
-#ifndef OBJECT_FILE_PARSER_H
-#define OBJECT_FILE_PARSER_H
 
 #include "FileParser.h"
 #include "ObjectFile.h"
@@ -75,5 +73,4 @@ private:
     static const Token token_use;
 };
 
-
-#endif // OBJECT_FILE_PARSER_H
+#endif // HAD_XLR8_OBJECT_FILE_PARSER_H

@@ -1,6 +1,4 @@
 /*
-BodyParser.cc --
-
 Copyright (C) Dieter Baron
 
 The authors can be contacted at <accelerate@tpau.group>
@@ -36,9 +34,11 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <tpau-cpp-kernal/LocationException.h>
 
 #include "ChecksumBody.h"
+#include "DataBody.h"
 #include "ExpressionNode.h"
 #include "ExpressionParser.h"
 #include "InstructionEncoder.h"
+#include "LabelBody.h"
 #include "ObjectNameExpression.h"
 #include "TokenNode.h"
 

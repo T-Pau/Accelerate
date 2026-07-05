@@ -1,6 +1,7 @@
-/*
-LabelBody.h --
+#ifndef HAD_XLR8_LABEL_BODY_H
+#define HAD_XLR8_LABEL_BODY_H
 
+/*
 Copyright (C) Dieter Baron
 
 The authors can be contacted at <accelerate@tpau.group>
@@ -28,9 +29,6 @@ IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
 OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-
-#ifndef LABEL_BODY_H
-#define LABEL_BODY_H
 
 #include <tpau-cpp-kernal/Exception.h>
 
@@ -60,4 +58,4 @@ public:
 };
 
 
-#endif // LABEL_BODY_H
+#endif // HAD_XLR8_LABEL_BODY_H

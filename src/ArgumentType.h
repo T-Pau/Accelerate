@@ -1,6 +1,7 @@
-/*
-ArgumentType.h -- 
+#ifndef HAD_XLR8_ARGUMENT_TYPE_H
+#define HAD_XLR8_ARGUMENT_TYPE_H
 
+/*
 Copyright (C) Dieter Baron
 
 The authors can be contacted at <accelerate@tpau.group>
@@ -28,9 +29,6 @@ IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
 OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-
-#ifndef ARGUMENT_TYPE_H
-#define ARGUMENT_TYPE_H
 
 #include <unordered_map>
 
@@ -122,4 +120,4 @@ public:
     Value upper_bound;
 };
 
-#endif // ARGUMENT_TYPE_H
+#endif // HAD_XLR8_ARGUMENT_TYPE_H

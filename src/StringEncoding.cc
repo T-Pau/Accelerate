@@ -1,6 +1,4 @@
 /*
-StringEncoding.cc --
-
 Copyright (C) Dieter Baron
 
 The authors can be contacted at <accelerate@tpau.group>
@@ -432,7 +430,6 @@ void StringEncoding::import_base_range(const StringEncoding* base, uint8_t start
 }
 
 void StringEncoding::add_named_range(const std::u32string& prefix, char32_t source_start, uint8_t target_start, uint8_t length) {
-    //std::cout << "adding named range prefix='" << UTF8::encode(prefix) << ", source_start='" << UTF8::encode(source_start) << "', target_start=" << (int)target_start << ", length=" << (int)length << "\n"; // DEUBG
     for (uint8_t offset = 0; offset < length; offset += 1) {
         add_named(prefix + static_cast<char32_t>(source_start + offset), target_start + offset);
     }

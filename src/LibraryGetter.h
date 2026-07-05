@@ -1,6 +1,7 @@
-/*
-LibraryGetter.h -- 
+#ifndef HAD_XLR8_LIBRARY_GETTER_H
+#define HAD_XLR8_LIBRARY_GETTER_H
 
+/*
 Copyright (C) Dieter Baron
 
 The authors can be contacted at <assembler@tpau.group>
@@ -29,9 +30,6 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef LIBRARY_GETTER_H
-#define LIBRARY_GETTER_H
-
 #include "Getter.h"
 #include "ObjectFile.h"
 #include "ObjectFileParser.h"
@@ -45,4 +43,4 @@ protected:
     std::shared_ptr<ObjectFile> parse(Symbol name, Symbol filename) override {return ObjectFileParser().parse(filename);}
 };
 
-#endif // LIBRARY_GETTER_H
+#endif // HAD_XLR8_LIBRARY_GETTER_H

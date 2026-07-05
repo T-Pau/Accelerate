@@ -1,9 +1,7 @@
-#ifndef CHECKSUM_ALGORITHM_H
-#define CHECKSUM_ALGORITHM_H
+#ifndef HAD_XLR8_CHECKSUM_ALGORITHM_H
+#define HAD_XLR8_CHECKSUM_ALGORITHM_H
 
 /*
-ChecksumAlgorithm.h --
-
 Copyright (C) Dieter Baron
 
 The authors can be contacted at <accelerate@tpau.group>
@@ -33,11 +31,10 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include <cstdint>
+#include <unordered_set>
 
 #include <tpau-cpp-kernal/Symbol.h>
 #include <tpau-cpp-kernal/Value.h>
-
-#include "Tokenizer.h"
 
 using namespace tpau::cpp_kernal;
 
@@ -61,4 +58,4 @@ class ChecksumAlgorithm {
 };
 
 
-#endif // CHECKSUM_ALGORITHM_H
+#endif // HAD_XLR8_CHECKSUM_ALGORITHM_H

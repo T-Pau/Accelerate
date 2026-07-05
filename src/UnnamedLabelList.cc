@@ -1,6 +1,4 @@
 /*
-UnnamedLabelList.cc --
-
 Copyright (C) Dieter Baron
 
 The authors can be contacted at <accelerate@tpau.group>
@@ -29,9 +27,9 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include <tpau-cpp-kernal/Exception.h>
-
 #include "UnnamedLabelList.h"
+
+#include <tpau-cpp-kernal/Exception.h>
 
 using namespace tpau::cpp_kernal;
 

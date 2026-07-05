@@ -1,9 +1,7 @@
-#ifndef LIBRARY_LINKER_H
-#define LIBRARY_LINKER_H
+#ifndef HAD_XLR8_LIBRARY_LINKER_H
+#define HAD_XLR8_LIBRARY_LINKER_H
 
 /*
-LibraryLinker.h -- 
-
 Copyright (C) Dieter Baron
 
 The authors can be contacted at <accelerate@tpau.group>
@@ -36,11 +34,11 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 class LibraryLinker: public Linker {
   public:
-    void output(const std::string& file_name) override;
+    void output(const std::filesystem::path& file_name) override;
 
   protected:
     void link_sub() override;
     UsedEntities roots() override {return program->public_entities();}
 };
 
-#endif // LIBRARY_LINKER_H
+#endif // HAD_XLR8_LIBRARY_LINKER_H

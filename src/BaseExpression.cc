@@ -1,6 +1,4 @@
 /*
-BaseExpression.cc -- Abstract Base Class of BaseExpression Nodes
-
 Copyright (C) Dieter Baron
 
 The authors can be contacted at <accelerate@tpau.group>
@@ -30,9 +28,6 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include "BaseExpression.h"
-
-#include "Expression.h"
-
 
 std::ostream& operator<<(std::ostream& stream, const std::shared_ptr<BaseExpression>& node) {
     node->serialize(stream);

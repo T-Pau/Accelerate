@@ -1,6 +1,4 @@
 /*
-LabelExpression.h --
-
 Copyright (C) Dieter Baron
 
 The authors can be contacted at <accelerate@tpau.group>
@@ -29,15 +27,15 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef LABEL_EXPRESSION_H
-#define LABEL_EXPRESSION_H
+#ifndef HAD_XLR8_LABEL_EXPRESSION_H
+#define HAD_XLR8_LABEL_EXPRESSION_H
 
 #include "BaseExpression.h"
-#include "LabelBody.h"
+#include "EvaluationContext.h"
 
 class LabelExpression: public BaseExpression {
 public:
-    LabelExpression(const Location& location, Symbol object_name, Symbol label_name): BaseExpression(location), label_type(LabelExpressionType::NAMED), object_name(object_name), label_name(label_name) {}
+    LabelExpression(const Location& location, Symbol object_name, Symbol label_name): BaseExpression(location), label_type(::NAMED), object_name(object_name), label_name(label_name) {}
     LabelExpression(const Location& location, Symbol object_name, Symbol label_name, const SizeRange& offset): BaseExpression(location), label_type(LabelExpressionType::NAMED), object_name(object_name), label_name(label_name), offset(offset) {}
     LabelExpression(const Location& location, const Entity* object, Symbol label_name, const SizeRange& offset);
     LabelExpression(const Location& location, LabelExpressionType type, size_t unnamed_index, const SizeRange& offset): BaseExpression(location), label_type(type), offset(offset), unnamed_index(unnamed_index) {}
@@ -66,4 +64,4 @@ private:
     size_t unnamed_index = std::numeric_limits<size_t>::max();
 };
 
-#endif // LABEL_EXPRESSION_H
+#endif // HAD_XLR8_LABEL_EXPRESSION_H

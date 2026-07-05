@@ -1,6 +1,7 @@
-/*
-BodyParser.h --
+#ifndef HAD_XLR8_BODY_PARSER_H
+#define HAD_XLR8_BODY_PARSER_H
 
+/*
 Copyright (C) Dieter Baron
 
 The authors can be contacted at <accelerate@tpau.group>
@@ -29,13 +30,9 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef BODY_PARSER_H
-#define BODY_PARSER_H
-
 #include "Body.h"
 #include "CPU.h"
 #include "IfBody.h"
-#include "ObjectFile.h"
 #include "RepeatBody.h"
 #include "SizeRange.h"
 #include "Token.h"
@@ -52,7 +49,7 @@ public:
     // PARSED_VALUE
     explicit BodyParser(Tokenizer& tokenizer): parsing_type(PARSED_VALUE), end_token(Token::greater), tokenizer(tokenizer) {}
     // ENTITY / OUTPUT
-    BodyParser(Tokenizer& tokenizer, const CPU* cpu, bool allow_assignes, const std::unordered_set<Symbol>* defines = {}): parsing_type(allow_assignes ? ENTITY : OUTPUT), cpu(cpu), tokenizer(tokenizer), defines(defines) {}
+    BodyParser(Tokenizer& tokenizer, const CPU* cpu, bool allow_assigns, const std::unordered_set<Symbol>* defines = {}): parsing_type(allow_assigns ? ENTITY : OUTPUT), cpu(cpu), tokenizer(tokenizer), defines(defines) {}
 
     static void setup(FileTokenizer& tokenizer);
 
@@ -183,4 +180,4 @@ private:
     static const std::unordered_map<Symbol, void (BodyParser::*)()> directive_parser_methods;
 };
 
-#endif // BODY_PARSER_H
+#endif // HAD_XLR8_BODY_PARSER_H

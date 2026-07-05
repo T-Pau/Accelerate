@@ -1,6 +1,7 @@
-/*
-CPUGetter.h -- 
+#ifndef HAD_XLR8_CPU_GETTER_H
+#define HAD_XLR8_CPU_GETTER_H
 
+/*
 Copyright (C) Dieter Baron
 
 The authors can be contacted at <assembler@tpau.group>
@@ -29,9 +30,6 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef CPU_GETTER_H
-#define CPU_GETTER_H
-
 #include "Getter.h"
 #include "CPU.h"
 #include "CPUParser.h"
@@ -46,4 +44,4 @@ protected:
 };
 
 
-#endif // CPU_GETTER_H
+#endif // HAD_XLR8_CPU_GETTER_H

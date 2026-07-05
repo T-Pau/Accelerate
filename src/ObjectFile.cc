@@ -1,6 +1,4 @@
 /*
-ObjectFile.cc --
-
 Copyright (C) Dieter Baron
 
 The authors can be contacted at <accelerate@tpau.group>
@@ -40,7 +38,6 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "ObjectExpression.h"
 #include "SequenceTokenizer.h"
-#include <cinttypes>
 
 using namespace tpau::cpp_kernal;
 

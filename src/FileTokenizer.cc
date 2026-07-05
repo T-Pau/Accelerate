@@ -1,6 +1,4 @@
 /*
-Tokenizer.cc -- Convert File into Stream of Tokens
-
 Copyright (C) Dieter Baron
 
 The authors can be contacted at <accelerate@tpau.group>

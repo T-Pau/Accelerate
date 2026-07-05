@@ -1,6 +1,4 @@
 /*
-LabelBody.cc --
-
 Copyright (C) Dieter Baron
 
 The authors can be contacted at <accelerate@tpau.group>
@@ -34,7 +32,6 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <iostream>
 
 #include "Body.h"
-#include "Object.h"
 
 void LabelBody::serialize(std::ostream &stream, const std::string& prefix) const {
     if (prefix.ends_with("  ")) {

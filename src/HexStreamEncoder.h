@@ -1,6 +1,7 @@
-/*
-HexStreamEncoder.h -- 
+#ifndef HAD_XLR8_HEX_STREAM_ENCODER_H
+#define HAD_XLR8_HEX_STREAM_ENCODER_H
 
+/*
 Copyright (C) Dieter Baron
 
 The authors can be contacted at <assembler@tpau.group>
@@ -28,9 +29,6 @@ IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
 OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-
-#ifndef HEX_STREAM_ENCODER_H
-#define HEX_STREAM_ENCODER_H
 
 #include <cstdint>
 #include <ostream>
@@ -84,4 +82,4 @@ private:
     std::string indent;
 };
 
-#endif //HEX_STREAM_ENCODER_H
+#endif // HAD_XLR8_HEX_STREAM_ENCODER_H

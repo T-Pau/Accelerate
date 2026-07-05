@@ -1,6 +1,7 @@
-/*
-Getter.h -- 
+#ifndef HAD_XLR8_GETTER_H
+#define HAD_XLR8_GETTER_H
 
+/*
 Copyright (C) Dieter Baron
 
 The authors can be contacted at <assembler@tpau.group>
@@ -28,9 +29,6 @@ IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
 OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-
-#ifndef GETTER_H
-#define GETTER_H
 
 #include <string>
 
@@ -78,4 +76,4 @@ private:
     std::unordered_map<Symbol, T> instances;
 };
 
-#endif // GETTER_H
+#endif // HAD_XLR8_GETTER_H

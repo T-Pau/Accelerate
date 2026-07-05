@@ -1,6 +1,4 @@
 /*
-EvaluationResult.cc --
-
 Copyright (C) Dieter Baron
 
 The authors can be contacted at <accelerate@tpau.group>
@@ -58,8 +56,8 @@ public:
     std::unordered_set<Symbol> unresolved_macros;
     std::unordered_set<Symbol> unresolved_variables;
     std::unordered_set<Object*> used_objects;
-    UsedEntities used_entites;
+    UsedEntities used_entities;
     std::vector<ChecksumComputation> checksums;
 };
 
-#endif // EVALUATION_RESULT_H
+#endif // HAD_XLR8_EVALUATION_RESULT_H

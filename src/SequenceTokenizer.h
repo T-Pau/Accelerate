@@ -1,6 +1,7 @@
-/*
-SequenceTokenizer.h --
+#ifndef HAD_XLR8_SEQUENCE_TOKENIZER_H
+#define HAD_XLR8_SEQUENCE_TOKENIZER_H
 
+/*
 Copyright (C) Dieter Baron
 
 The authors can be contacted at <accelerate@tpau.group>
@@ -29,9 +30,6 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef SEQUENCE_TOKENIZER_H
-#define SEQUENCE_TOKENIZER_H
-
 #include <vector>
 
 #include "Tokenizer.h"
@@ -55,4 +53,4 @@ private:
     void set_location(const Token& token);
 };
 
-#endif // SEQUENCE_TOKENIZER_H
+#endif // HAD_XLR8_SEQUENCE_TOKENIZER_H

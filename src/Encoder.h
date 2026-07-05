@@ -1,9 +1,7 @@
-#ifndef ENCODER_H
-#define ENCODER_H
+#ifndef HAD_XLR8_ENCODER_H
+#define HAD_XLR8_ENCODER_H
 
 /*
-Encoder.h --
-
 Copyright (C) Dieter Baron
 
 The authors can be contacted at <accelerate@tpau.group>
@@ -32,13 +30,12 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include <variant>
-
 #include "BaseEncoder.h"
 #include "BinaryEncoder.h"
 #include "IntegerEncoder.h"
 #include "StringEncoder.h"
-\
+#include "Tokenizer.h"
+
 class Encoder {
   public:
     explicit Encoder(const IntegerEncoder& encoder): encoder{std::make_shared<IntegerEncoder>(encoder)} {}
@@ -68,4 +65,4 @@ class Encoder {
 
 std::ostream& operator<<(std::ostream& stream, const Encoder& encoder);
 
-#endif // ENCODER_H
+#endif // HAD_XLR8_ENCODER_H

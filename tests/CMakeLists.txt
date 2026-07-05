@@ -1,3 +1,4 @@
+# cspell: words XFAIL endforeach
 
 set(XFAIL_TESTS
         error-unclosed-object.test

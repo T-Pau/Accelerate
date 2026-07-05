@@ -1,9 +1,7 @@
-#ifndef CHECKSUM_COMPUTATION_H
-#define CHECKSUM_COMPUTATION_H
+#ifndef HAD_XLR8_CHECKSUM_COMPUTATION_H
+#define HAD_XLR8_CHECKSUM_COMPUTATION_H
 
 /*
-ChecksumComputation.h --
-
 Copyright (C) Dieter Baron
 
 The authors can be contacted at <accelerate@tpau.group>
@@ -51,4 +49,4 @@ class ChecksumComputation {
     std::unordered_map<Symbol, Value> parameters;
 };
 
-#endif // CHECKSUM_COMPUTATION_H
+#endif // HAD_XLR8_CHECKSUM_COMPUTATION_H

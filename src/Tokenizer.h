@@ -1,6 +1,7 @@
-/*
-Tokenizer.h -- 
+#ifndef HAD_XLR8_TOKENIZER_H
+#define HAD_XLR8_TOKENIZER_H
 
+/*
 Copyright (C) Dieter Baron
 
 The authors can be contacted at <accelerate@tpau.group>
@@ -29,9 +30,6 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef TOKENIZER_H
-#define TOKENIZER_H
-
 #include <optional>
 
 #include "Token.h"
@@ -50,7 +48,7 @@ public:
     Token expect(Token::Type type, const TokenGroup& synchronize);
     Token expect(const TokenGroup& types, const TokenGroup& synchronize);
     void expect(const Token& token);
-    void expect_litearls(const std::vector<Token::Type>& types, const TokenGroup& synchronize);
+    void expect_literals(const std::vector<Token::Type>& types, const TokenGroup& synchronize);
     void skip_until(const TokenGroup& types, bool including_terminator = false);
     void skip_until(const Token& token, bool including_terminator = false);
     void skip(const TokenGroup& types);
@@ -68,4 +66,4 @@ private:
 
 };
 
-#endif // TOKENIZER_H
+#endif // HAD_XLR8_TOKENIZER_H

@@ -1,6 +1,7 @@
-/*
-Tokenizer.h -- Convert File into Stream of Tokens
+#ifndef HAD_XLR8_FILE_TOKENIZER_H
+#define HAD_XLR8_FILE_TOKENIZER_H
 
+/*
 Copyright (C) Dieter Baron
 
 The authors can be contacted at <accelerate@tpau.group>
@@ -28,9 +29,6 @@ IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
 OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-
-#ifndef FILE_TOKENIZER_H
-#define FILE_TOKENIZER_H
 
 #include <string>
 #include <unordered_map>
@@ -167,4 +165,4 @@ private:
     bool last_was_newline{true};
 };
 
-#endif // FILE_TOKENIZER_H
+#endif // HAD_XLR8_FILE_TOKENIZER_H

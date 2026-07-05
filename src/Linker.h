@@ -1,6 +1,7 @@
-/*
-Linker.h --
+#ifndef HAD_XLR8_LINKER_H
+#define HAD_XLR8_LINKER_H
 
+/*
 Copyright (C) Dieter Baron
 
 The authors can be contacted at <assembler@tpau.group>
@@ -28,9 +29,6 @@ IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
 OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-
-#ifndef LINKER_H
-#define LINKER_H
 
 #include <unordered_set>
 #include <vector>
@@ -61,7 +59,7 @@ class Linker {
 
     void link();
     void link_new();
-    virtual void output(const std::string& file_name) = 0;
+    virtual void output(const std::filesystem::path& file_name) = 0;
 
     const Target* target = nullptr;
     std::shared_ptr<ObjectFile> program = std::make_shared<ObjectFile>();
@@ -76,4 +74,4 @@ class Linker {
     std::unordered_set<Object*> objects;
 };
 
-#endif // LINKER_H
+#endif // HAD_XLR8_LINKER_H

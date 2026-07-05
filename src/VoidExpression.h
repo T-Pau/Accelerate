@@ -1,6 +1,7 @@
-/*
-VoidExpression.h --
+#ifndef HAD_XLR8_VOID_EXPRESSION_H
+#define HAD_XLR8_VOID_EXPRESSION_H
 
+/*
 Copyright (C) Dieter Baron
 
 The authors can be contacted at <accelerate@tpau.group>
@@ -29,9 +30,6 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef VOID_EXPRESSION_H
-#define VOID_EXPRESSION_H
-
 #include "BaseExpression.h"
 
 /// @brief Expression node representing a void value.
@@ -49,4 +47,4 @@ protected:
 };
 
 
-#endif // VOID_EXPRESSION_H
+#endif // HAD_XLR8_VOID_EXPRESSION_H

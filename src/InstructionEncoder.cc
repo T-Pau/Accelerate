@@ -1,6 +1,4 @@
 /*
-InstructionEncoder.cc --
-
 Copyright (C) Dieter Baron
 
 The authors can be contacted at <assembler@tpau.group>
@@ -37,7 +35,9 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <tpau-cpp-kernal/Util.h>
 
 #include "Assembler.h"
+#include "DataBody.h"
 #include "ExpressionNode.h"
+#include "IfBody.h"
 #include "InRangeExpression.h"
 #include "TokenNode.h"
 

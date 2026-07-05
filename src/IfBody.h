@@ -1,6 +1,7 @@
-/*
-IfBody.h --
+#ifndef HAD_XLR8_IF_BODY_H
+#define HAD_XLR8_IF_BODY_H
 
+/*
 Copyright (C) Dieter Baron
 
 The authors can be contacted at <assembler@tpau.group>
@@ -29,9 +30,6 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef IF_BODY_H
-#define IF_BODY_H
-
 #include <tpau-cpp-kernal/Exception.h>
 
 #include "BodyElement.h"
@@ -55,7 +53,7 @@ public:
 class IfBody: public BodyElement {
 public:
     explicit IfBody(std::vector<IfBodyClause> clauses);
-    static Body create(const std::vector<IfBodyClause>& clasues);
+    static Body create(const std::vector<IfBodyClause>& clauses);
 
     [[nodiscard]] std::shared_ptr<BodyElement> clone() const override {return std::make_shared<IfBody>(clauses);} // TODO: this doesn't copy clauses
     void collect_objects(std::unordered_set<Object*> &objects) const override;
@@ -70,4 +68,4 @@ private:
 };
 
 
-#endif // IF_BODY_H
+#endif // HAD_XLR8_IF_BODY_H

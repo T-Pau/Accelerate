@@ -1,6 +1,7 @@
-/*
-AddressingMode.h -- 
+#ifndef HAD_XLR8_ADDRESSING_MODE_H
+#define HAD_XLR8_ADDRESSING_MODE_H
 
+/*
 Copyright (C) Dieter Baron
 
 The authors can be contacted at <accelerate@tpau.group>
@@ -29,15 +30,12 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef ADDRESSING_MODE_H
-#define ADDRESSING_MODE_H
-
 #include <utility>
 
 #include <tpau-cpp-kernal/Symbol.h>
 
 #include "ArgumentType.h"
-#include "ParsedValue.h"
+#include "Body.h"
 
 using namespace tpau::cpp_kernal;
 
@@ -86,4 +84,4 @@ public:
     void add_notation(Notation notation) {notations.emplace_back(std::move(notation));}
 };
 
-#endif // ADDRESSING_MODE_H
+#endif // HAD_XLR8_ADDRESSING_MODE_H

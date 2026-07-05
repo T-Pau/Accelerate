@@ -1,6 +1,4 @@
 /*
-Linker.cc -- 
-
 Copyright (C) Dieter Baron
 
 The authors can be contacted at <assembler@tpau.group>
@@ -31,13 +29,9 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "Linker.h"
 
-#include <fstream>
-#include <ranges>
-
 #include <tpau-cpp-kernal/Exception.h>
 #include <tpau-cpp-kernal/FileReader.h>
 
-#include "Assembler.h"
 #include "LibraryLinker.h"
 #include "ProgramLinker.h"
 

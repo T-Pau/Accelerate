@@ -1,9 +1,7 @@
-#ifndef EXISTS_EXPRESSION_H
-#define EXISTS_EXPRESSION_H
+#ifndef HAD_XLR8_EXISTS_EXPRESSION_H
+#define HAD_XLR8_EXISTS_EXPRESSION_H
 
 /*
-ExistsExpression.h --
-
 Copyright (C) Dieter Baron
 
 The authors can be contacted at <accelerate@tpau.group>
@@ -51,4 +49,4 @@ class ExistsExpression : public BaseExpression {
 };
 
 
-#endif // EXISTS_EXPRESSION_H
+#endif // HAD_XLR8_EXISTS_EXPRESSION_H

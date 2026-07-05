@@ -1,9 +1,7 @@
-#ifndef MIN_MAX_EXPRESSION_H
-#define MIN_MAX_EXPRESSION_H
+#ifndef HAD_XLR8_MIN_MAX_EXPRESSION_H
+#define HAD_XLR8_MIN_MAX_EXPRESSION_H
 
 /*
-MinMaxExpression.h --
-
 Copyright (C) Dieter Baron
 
 The authors can be contacted at <accelerate@tpau.group>
@@ -119,4 +117,4 @@ class MinMaxExpression: public BaseExpression {
 };
 
 
-#endif // MIN_MAX_EXPRESSION_H
+#endif // HAD_XLR8_MIN_MAX_EXPRESSION_H

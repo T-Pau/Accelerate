@@ -1,6 +1,7 @@
-/*
-CPU.h -- Definition of a CPU and Its Instruction Set
+#ifndef HAD_XLR8_CPU_H
+#define HAD_XLR8_CPU_H
 
+/*
 Copyright (C) Dieter Baron
 
 The authors can be contacted at <accelerate@tpau.group>
@@ -29,17 +30,15 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef CPU_H
-#define CPU_H
-
 #include <unordered_map>
 
 #include <tpau-cpp-kernal/Symbol.h>
 
 #include "AddressingMode.h"
+#include "AddressingModeMatcher.h"
 #include "ArgumentType.h"
 #include "Instruction.h"
-#include "AddressingModeMatcher.h"
+#include "FileTokenizer.h"
 
 using namespace tpau::cpp_kernal;
 
@@ -83,4 +82,4 @@ private:
 };
 
 
-#endif // CPU_H
+#endif // HAD_XLR8_CPU_H

@@ -1,6 +1,7 @@
-/*
-ScopeBody.h --
+#ifndef HAD_XLR8_SCOPE_BODY_H
+#define HAD_XLR8_SCOPE_BODY_H
 
+/*
 Copyright (C) Dieter Baron
 
 The authors can be contacted at <accelerate@tpau.group>
@@ -29,9 +30,6 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef SCOPE_BODY_H
-#define SCOPE_BODY_H
-
 #include <tpau-cpp-kernal/Exception.h>
 
 #include "Body.h"
@@ -55,4 +53,4 @@ class ScopeBody: public BodyElement {
 };
 
 
-#endif // SCOPE_BODY_H
+#endif // HAD_XLR8_SCOPE_BODY_H

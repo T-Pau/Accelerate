@@ -1,9 +1,7 @@
-#ifndef PROGRAM_LINKER_H
-#define PROGRAM_LINKER_H
+#ifndef HAD_XLR8_PROGRAM_LINKER_H
+#define HAD_XLR8_PROGRAM_LINKER_H
 
 /*
-ProgramLinker.h -- 
-
 Copyright (C) Dieter Baron
 
 The authors can be contacted at <accelerate@tpau.group>
@@ -36,8 +34,8 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 class ProgramLinker: public Linker {
   public:
-    void output(const std::string& file_name) override;
-    void output_symbol_map(const std::string& file_name);
+    void output(const std::filesystem::path& file_name) override;
+    void output_symbol_map(const std::filesystem::path& file_name);
 
   protected:
     void link_sub() override;
@@ -48,4 +46,4 @@ class ProgramLinker: public Linker {
     Memory memory;
 };
 
-#endif // PROGRAM_LINKER_H
+#endif // HAD_XLR8_PROGRAM_LINKER_H

@@ -1,6 +1,4 @@
 /*
-EvaluationContext.cc --
-
 Copyright (C) Dieter Baron
 
 The authors can be contacted at <accelerate@tpau.group>
@@ -83,6 +81,9 @@ bool EvaluationContext::shallow() const {
         case OUTPUT:
         case STANDALONE:
             return false;
+
+        default:
+            break;
     }
 
     throw Exception("internal error: invalid evaluation type");

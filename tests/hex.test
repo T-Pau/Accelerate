@@ -18,7 +18,7 @@ file test.s <>
 inline {
     .data {{00 01 02 03}}
 }
-inlcuded {
+included {
     .binary_file "test.bin"
 }
 library {
@@ -30,7 +30,7 @@ file test.lib {} <>
 .format_version 1.0
 .target "6502"
 .import "hex.lib"
-.object inlcuded {
+.object included {
     visibility: private
     section: data
     body <

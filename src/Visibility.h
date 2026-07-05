@@ -1,6 +1,7 @@
-/*
-Visibility.h --
+#ifndef HAD_XLR8_VISIBILITY_H
+#define HAD_XLR8_VISIBILITY_H
 
+/*
 Copyright (C) Dieter Baron
 
 The authors can be contacted at <accelerate@tpau.group>
@@ -29,12 +30,8 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef VISIBILITY_H
-#define VISIBILITY_H
-
 #include <iostream>
 
-#include "FileTokenizer.h"
 #include "Token.h"
 
 enum class Visibility {
@@ -55,4 +52,4 @@ class VisibilityHelper {
 
 std::ostream& operator<<(std::ostream& stream, Visibility visibility);
 
-#endif // VISIBILITY_H
+#endif // HAD_XLR8_VISIBILITY_H

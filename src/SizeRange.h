@@ -1,6 +1,7 @@
-/*
-SizeRange.h --
+#ifndef HAD_XLR8_SIZE_RANGE_H
+#define HAD_XLR8_SIZE_RANGE_H
 
+/*
 Copyright (C) Dieter Baron
 
 The authors can be contacted at <accelerate@tpau.group>
@@ -28,9 +29,6 @@ IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
 OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-
-#ifndef SIZE_RANGE_H
-#define SIZE_RANGE_H
 
 #include <cstdint>
 #include <optional>
@@ -64,4 +62,4 @@ public:
 
 std::ostream& operator<<(std::ostream& stream, const SizeRange& size_range);
 
-#endif // SIZE_RANGE_H
+#endif // HAD_XLR8_SIZE_RANGE_H

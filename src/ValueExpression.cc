@@ -1,6 +1,4 @@
 /*
-ValueExpression.cc --
-
 Copyright (C) Dieter Baron
 
 The authors can be contacted at <assembler@tpau.group>
@@ -32,8 +30,6 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ValueExpression.h"
 
 #include <tpau-cpp-kernal/LocationException.h>
-
-#include "HexStreamEncoder.h"
 
 using namespace tpau::cpp_kernal;
 

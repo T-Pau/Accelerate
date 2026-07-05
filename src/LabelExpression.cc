@@ -1,6 +1,4 @@
 /*
-LabelExpression.cc --
-
 Copyright (C) Dieter Baron
 
 The authors can be contacted at <accelerate@tpau.group>
@@ -35,10 +33,10 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "Entity.h"
 #include "Expression.h"
+#include "LabelBody.h"
 #include "ObjectExpression.h"
 #include "ObjectFile.h"
 #include "VariableExpression.h"
-#include <complex>
 
 using namespace tpau::cpp_kernal;
 

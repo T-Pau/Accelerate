@@ -1,6 +1,7 @@
-/*
-RepeatBody.h -- 
+#ifndef HAD_XLR8_REPEAT_BODY_H
+#define HAD_XLR8_REPEAT_BODY_H
 
+/*
 Copyright (C) Dieter Baron
 
 The authors can be contacted at <assembler@tpau.group>
@@ -29,9 +30,6 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef REPEATBODY_H
-#define REPEATBODY_H
-
 #include <tpau-cpp-kernal/Exception.h>
 
 #include "Body.h"
@@ -57,4 +55,4 @@ private:
     Body body;
 };
 
-#endif //REPEATBODY_H
+#endif // HAD_XLR8_REPEAT_BODY_H

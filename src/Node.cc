@@ -1,6 +1,4 @@
 /*
-Node.cc -- Abstract Base Class for Nodes
-
 Copyright (C) Dieter Baron
 
 The authors can be contacted at <accelerate@tpau.group>

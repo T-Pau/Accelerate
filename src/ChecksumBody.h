@@ -1,9 +1,7 @@
-#ifndef CHECKSUM_BODY_H
-#define CHECKSUM_BODY_H
+#ifndef HAD_XLR8_CHECKSUM_BODY_H
+#define HAD_XLR8_CHECKSUM_BODY_H
 
 /*
-ChecksumBody.h --
-
 Copyright (C) Dieter Baron
 
 The authors can be contacted at <accelerate@tpau.group>
@@ -62,4 +60,4 @@ class ChecksumBody: public BodyElement {
 };
 
 
-#endif // CHECKSUM_BODY_H
+#endif // HAD_XLR8_CHECKSUM_BODY_H

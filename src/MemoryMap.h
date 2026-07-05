@@ -1,6 +1,7 @@
-/*
-MemoryMap.h --
+#ifndef HAD_XLR8_MEMORY_MAP_H
+#define HAD_XLR8_MEMORY_MAP_H
 
+/*
 Copyright (C) Dieter Baron
 
 The authors can be contacted at <assembler@tpau.group>
@@ -28,9 +29,6 @@ IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
 OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-
-#ifndef MEMORY_MAP_H
-#define MEMORY_MAP_H
 
 #include <cstdint>
 #include <unordered_map>
@@ -99,4 +97,4 @@ public:
 };
 
 
-#endif // MEMORY_MAP_H
+#endif // HAD_XLR8_MEMORY_MAP_H

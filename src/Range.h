@@ -1,6 +1,7 @@
-/*
-Range.h -- 
+#ifndef HAD_XLR8_RANGE_H
+#define HAD_XLR8_RANGE_H
 
+/*
 Copyright (C) Dieter Baron
 
 The authors can be contacted at <assembler@tpau.group>
@@ -28,9 +29,6 @@ IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
 OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-
-#ifndef ACCELERATE_RANGE_H
-#define ACCELERATE_RANGE_H
 
 #include <cstdint>
 #include <ostream>
@@ -191,4 +189,4 @@ public:
  */
 std::ostream& operator<<(std::ostream& stream, const Range& range);
 
-#endif //ACCELERATE_RANGE_H
+#endif // HAD_XLR8_RANGE_H

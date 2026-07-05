@@ -1,9 +1,7 @@
-#ifndef OUTPUT_H
-#define OUTPUT_H
+#ifndef HAD_XLR8_OUTPUT_H
+#define HAD_XLR8_OUTPUT_H
 
 /*
-Output.h --
-
 Copyright (C) Dieter Baron
 
 The authors can be contacted at <accelerate@tpau.group>
@@ -47,4 +45,4 @@ private:
   static Token token_output;
 };
 
-#endif // OUTPUT_H
+#endif // HAD_XLR8_OUTPUT_H

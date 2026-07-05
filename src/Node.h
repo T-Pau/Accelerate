@@ -1,6 +1,7 @@
-/*
-Node.h -- Abstract Base Class for Nodes
+#ifndef HAD_XLR8_NODE_H
+#define HAD_XLR8_NODE_H
 
+/*
 Copyright (C) Dieter Baron
 
 The authors can be contacted at <accelerate@tpau.group>
@@ -29,9 +30,6 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef NODE_H
-#define NODE_H
-
 #include <tpau-cpp-kernal/Location.h>
 
 using namespace tpau::cpp_kernal;
@@ -50,4 +48,4 @@ public:
     [[nodiscard]] virtual const Location& get_location() const = 0;
 };
 
-#endif // NODE_H
+#endif // HAD_XLR8_NODE_H

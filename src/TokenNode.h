@@ -1,6 +1,7 @@
-/*
-TokenNode.h --
+#ifndef HAD_XLR8_TOKEN_NODE_H
+#define HAD_XLR8_TOKEN_NODE_H
 
+/*
 Copyright (C) Dieter Baron
 
 The authors can be contacted at <assembler@tpau.group>
@@ -29,9 +30,6 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef KEYWORD_NODE_H
-#define KEYWORD_NODE_H
-
 #include "Node.h"
 #include "Token.h"
 
@@ -50,4 +48,4 @@ private:
 };
 
 
-#endif // KEYWORD_NODE_H
+#endif // HAD_XLR8_TOKEN_NODE_H

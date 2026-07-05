@@ -1,6 +1,7 @@
-/*
-ObjectNameExpression.h --
+#ifndef HAD_XLR8_OBJECT_NAME_EXPRESSION_H
+#define HAD_XLR8_OBJECT_NAME_EXPRESSION_H
 
+/*
 Copyright (C) Dieter Baron
 
 The authors can be contacted at <accelerate@tpau.group>
@@ -29,9 +30,6 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef OBJECT_NAME_EXPRESSION_H
-#define OBJECT_NAME_EXPRESSION_H
-
 #include "BaseExpression.h"
 
 class ObjectNameExpression: public BaseExpression {
@@ -46,4 +44,4 @@ class ObjectNameExpression: public BaseExpression {
 };
 
 
-#endif // OBJECT_NAME_EXPRESSION_H
+#endif // HAD_XLR8_OBJECT_NAME_EXPRESSION_H

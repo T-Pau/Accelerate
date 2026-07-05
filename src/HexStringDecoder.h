@@ -1,6 +1,7 @@
-/*
-HexStringDecoder.h --
+#ifndef HAD_XLR8_HEX_STRING_DECODER_H
+#define HAD_XLR8_HEX_STRING_DECODER_H
 
+/*
 Copyright (C) Dieter Baron
 
 The authors can be contacted at <assembler@tpau.group>
@@ -28,9 +29,6 @@ IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
 OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-
-#ifndef HEX_STRING_DECODER_H
-#define HEX_STRING_DECODER_H
 
 #include <cstdint>
 #include <optional>
@@ -79,6 +77,4 @@ private:
     std::optional<uint8_t> partial;
 };
 
-
-
-#endif //HEX_STRING_DECODER_H
+#endif // HAD_XLR8_HEX_STRING_DECODER_H

@@ -1,6 +1,4 @@
 /*
-LibraryLinker.cc -- 
-
 Copyright (C) Dieter Baron
 
 The authors can be contacted at <accelerate@tpau.group>
@@ -50,7 +48,7 @@ void LibraryLinker::link_sub() {
 }
 
 
-void LibraryLinker::output(const std::string& file_name) {
+void LibraryLinker::output(const std::filesystem::path& file_name) {
     // TODO: only output used entities
     auto stream = std::ofstream(file_name);
     stream << *(program);

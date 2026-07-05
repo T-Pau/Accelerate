@@ -1,6 +1,7 @@
-/*
-MacroBody.h --
+#ifndef HAD_XLR8_MACRO_BODY_H
+#define HAD_XLR8_MACRO_BODY_H
 
+/*
 Copyright (C) Dieter Baron
 
 The authors can be contacted at <accelerate@tpau.group>
@@ -29,9 +30,6 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef MACRO_BODY_H
-#define MACRO_BODY_H
-
 #include <tpau-cpp-kernal/LocationException.h>
 
 #include "BodyElement.h"
@@ -53,4 +51,4 @@ class MacroBody: public BodyElement {
     std::vector<Expression> arguments;
 };
 
-#endif // MACRO_BODY_H
+#endif // HAD_XLR8_MACRO_BODY_H

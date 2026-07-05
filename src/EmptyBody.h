@@ -1,6 +1,7 @@
-/*
-EmptyBody.h --
+#ifndef HAD_XLR8_EMPTY_BODY_H
+#define HAD_XLR8_EMPTY_BODY_H
 
+/*
 Copyright (C) Dieter Baron
 
 The authors can be contacted at <accelerate@tpau.group>
@@ -29,9 +30,6 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef EMPTY_BODY_H
-#define EMPTY_BODY_H
-
 #include "Body.h"
 
 class EmptyBody: public BodyElement {
@@ -44,4 +42,4 @@ public:
     void serialize(std::ostream &stream, const std::string &prefix) const override {}
 };
 
-#endif // EMPTY_BODY_H
+#endif // HAD_XLR8_EMPTY_BODY_H

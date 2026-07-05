@@ -1,9 +1,7 @@
-#ifndef UNNAMED_LABEL_LIST_H
-#define UNNAMED_LABEL_LIST_H
+#ifndef HAD_XLR8_UNNAMED_LABEL_LIST_H
+#define HAD_XLR8_UNNAMED_LABEL_LIST_H
 
 /*
-UnnamedLabelList.h --
-
 Copyright (C) Dieter Baron
 
 The authors can be contacted at <accelerate@tpau.group>
@@ -52,4 +50,4 @@ class UnnamedLabelList {
 };
 
 
-#endif // UNNAMED_LABEL_LIST_H
+#endif // HAD_XLR8_UNNAMED_LABEL_LIST_H

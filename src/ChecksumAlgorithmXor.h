@@ -1,9 +1,7 @@
-#ifndef CHECKSUM_ALGORITHM_XOR_H
-#define CHECKSUM_ALGORITHM_XOR_H
+#ifndef HAD_XLR8_CHECKSUM_ALGORITHM_XOR_H
+#define HAD_XLR8_CHECKSUM_ALGORITHM_XOR_H
 
 /*
-ChecksumAlgorithmXor.h --
-
 Copyright (C) Dieter Baron
 
 The authors can be contacted at <accelerate@tpau.group>
@@ -43,4 +41,4 @@ class ChecksumAlgorithmXor: public ChecksumAlgorithm {
     std::string compute(std::string::const_iterator begin, std::string::const_iterator end, const std::unordered_map<Symbol, Value> &parameters) override;
 };
 
-#endif // CHECKSUM_ALGORITHM_XOR_H
+#endif // HAD_XLR8_CHECKSUM_ALGORITHM_XOR_H

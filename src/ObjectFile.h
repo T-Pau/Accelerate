@@ -1,6 +1,7 @@
-/*
-ObjectFile.h --
+#ifndef HAD_XLR8_OBJECT_FILE_H
+#define HAD_XLR8_OBJECT_FILE_H
 
+/*
 Copyright (C) Dieter Baron
 
 The authors can be contacted at <accelerate@tpau.group>
@@ -28,9 +29,6 @@ IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
 OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-
-#ifndef OBJECT_FILE_H
-#define OBJECT_FILE_H
 
 #include <tpau-cpp-kernal/Symbol.h>
 
@@ -130,4 +128,4 @@ private:
 std::ostream& operator<<(std::ostream& stream, const ObjectFile& list);
 std::ostream& operator<<(std::ostream& stream, const std::shared_ptr<ObjectFile>& list);
 
-#endif // OBJECT_FILE_H
+#endif // HAD_XLR8_OBJECT_FILE_H

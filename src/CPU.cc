@@ -1,6 +1,4 @@
 /*
-CPU.h -- Definition of a CPU and Its Instruction Set
-
 Copyright (C) Dieter Baron
 
 The authors can be contacted at <accelerate@tpau.group>

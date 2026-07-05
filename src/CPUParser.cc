@@ -1,6 +1,4 @@
 /*
-CpuParser.cc -- Parse CPU Specification
-
 Copyright (C) Dieter Baron
 
 The authors can be contacted at <accelerate@tpau.group>
@@ -35,10 +33,10 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "AddressingMode.h"
 #include "CPUGetter.h"
+#include "DataBody.h"
 #include "ExpressionParser.h"
 #include "ParsedValue.h"
 #include "SequenceTokenizer.h"
-#include "VariableExpression.h"
 
 using namespace tpau::cpp_kernal;
 

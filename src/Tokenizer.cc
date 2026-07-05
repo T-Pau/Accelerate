@@ -1,6 +1,4 @@
 /*
-Tokenizer.cc -- 
-
 Copyright (C) Dieter Baron
 
 The authors can be contacted at <accelerate@tpau.group>
@@ -115,7 +113,7 @@ void Tokenizer::skip_until(const Token& token, bool including_terminator) {
     }
 }
 
-void Tokenizer::expect_litearls(const std::vector<Token::Type>& types, const TokenGroup &synchronize) {
+void Tokenizer::expect_literals(const std::vector<Token::Type>& types, const TokenGroup &synchronize) {
     for (auto type : types) {
         expect(type, synchronize);
     }

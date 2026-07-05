@@ -1,9 +1,7 @@
-#ifndef CHECKSUM_H
-#define CHECKSUM_H
+#ifndef HAD_XLR8_CHECKSUM_H
+#define HAD_XLR8_CHECKSUM_H
 
 /*
-Checksum.h --
-
 Copyright (C) Dieter Baron
 
 The authors can be contacted at <accelerate@tpau.group>
@@ -48,4 +46,4 @@ class Checksum {
 };
 
 
-#endif // CHECKSUM_H
+#endif // HAD_XLR8_CHECKSUM_H

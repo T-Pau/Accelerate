@@ -1,6 +1,4 @@
 /*
-MemoryMap.cc --
-
 Copyright (C) Dieter Baron
 
 The authors can be contacted at <assembler@tpau.group>

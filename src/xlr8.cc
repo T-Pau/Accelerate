@@ -1,6 +1,4 @@
 /*
-xlr8.cc --
-
 Copyright (C) Dieter Baron
 
 The authors can be contacted at <assembler@tpau.group>
@@ -29,7 +27,6 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include <fstream>
 #include <vector>
 
 #include <tpau-cpp-kernal/Command.h>
@@ -38,7 +35,6 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "Assembler.h"
 #include "CPUGetter.h"
-#include "CPUParser.h"
 #include "LibraryGetter.h"
 #include "LibraryLinker.h"
 #include "ProgramLinker.h"

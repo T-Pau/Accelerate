@@ -1,6 +1,7 @@
-/*
-ExpressionNode.h -- 
+#ifndef HAD_XLR8_EXPRESSION_NODE_H
+#define HAD_XLR8_EXPRESSION_NODE_H
 
+/*
 Copyright (C) Dieter Baron
 
 The authors can be contacted at <assembler@tpau.group>
@@ -29,9 +30,6 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef EXPRESSION_NODE_H
-#define EXPRESSION_NODE_H
-
 #include "Expression.h"
 #include "Node.h"
 
@@ -46,4 +44,4 @@ public:
 };
 
 
-#endif //EXPRESSION_NODE_H
+#endif // HAD_XLR8_EXPRESSION_NODE_H
