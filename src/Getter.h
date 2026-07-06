@@ -33,7 +33,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <string>
 
 #include <tpau-cpp-kernal/Exception.h>
-#include <tpau-cpp-kernal/Path.h>
+#include <tpau-cpp-kernal/SearchPath.h>
 #include <tpau-cpp-kernal/Symbol.h>
 
 using namespace tpau::cpp_kernal;
@@ -48,7 +48,7 @@ public:
         if (!base_filename.ends_with(filename_extension())) {
             base_filename += filename_extension();
         }
-        auto filename = path->find(Symbol(base_filename), base);
+        auto filename = search_path->find(Symbol(base_filename), base);
         if (filename.empty()) {
             throw Exception("cannot find {}", base_filename);
         }
@@ -66,7 +66,7 @@ public:
 
     const T& get(const std::string& name) {return get(Symbol(name));}
 
-    std::shared_ptr<Path> path = std::make_shared<Path>();
+    std::shared_ptr<SearchPath> search_path = std::make_shared<SearchPath>();
 
 protected:
     [[nodiscard]] virtual std::string filename_extension() const = 0;

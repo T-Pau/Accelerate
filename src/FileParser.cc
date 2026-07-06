@@ -41,7 +41,7 @@ using namespace tpau::cpp_kernal;
 TokenGroup FileParser::group_directive = TokenGroup({Token::DIRECTIVE,Token::END}, {}, "directive");
 
 
-FileParser::FileParser(const Path& path, const Target* target): path(path), tokenizer(path, target) {
+FileParser::FileParser(const SearchPath& search_path, const Target* target): search_path(search_path), tokenizer(search_path, target) {
     ParsedValue::setup(tokenizer);
     ExpressionParser::setup(tokenizer);
 }

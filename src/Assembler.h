@@ -37,7 +37,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 class Assembler {
 public:
-    explicit Assembler(const Target* target, const Path& path, const std::unordered_set<Symbol>& defines);
+    explicit Assembler(const Target* target, const SearchPath& search_path, const std::unordered_set<Symbol>& defines);
 
     Target parse_target(Symbol name, Symbol file_name);
     std::shared_ptr<ObjectFile> parse_object_file(Symbol file_name);

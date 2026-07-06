@@ -36,7 +36,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <tpau-cpp-kernal/FileSource.h>
 #include <tpau-cpp-kernal/Location.h>
-#include <tpau-cpp-kernal/Path.h>
+#include <tpau-cpp-kernal/SearchPath.h>
 
 #include "Tokenizer.h"
 #include "Token.h"
@@ -47,7 +47,7 @@ class Target;
 
 class FileTokenizer: public Tokenizer {
 public:
-    explicit FileTokenizer(const Path& path = Path::empty_path, const Target* target = {}, bool use_preprocessor = true, const std::unordered_set<Symbol>& defines = {});
+    explicit FileTokenizer(const SearchPath& search_path = SearchPath::empty_path, const Target* target = {}, bool use_preprocessor = true, const std::unordered_set<Symbol>& defines = {});
     void push(Symbol filename);
 
     [[nodiscard]] Location current_location() const override;
@@ -144,7 +144,7 @@ private:
     static bool is_identifier(const std::string& s);
 
     bool use_preprocessor;
-    const Path& path;
+const SearchPath& search_path;
     const Target* target;
 
     static const Token token_define;

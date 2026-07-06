@@ -30,7 +30,7 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include <tpau-cpp-kernal/Path.h>
+#include <tpau-cpp-kernal/SearchPath.h>
 
 #include "FileTokenizer.h"
 
@@ -40,10 +40,10 @@ class Target;
 
 class FileParser {
 public:
-    explicit FileParser(const Path& path = Path::empty_path, const Target* target = {});
+    explicit FileParser(const SearchPath& path = SearchPath::empty_path, const Target* target = {});
     virtual ~FileParser() = default;
 
-    const Path& path;
+    const SearchPath& search_path;
 
 protected:
     FileTokenizer tokenizer;

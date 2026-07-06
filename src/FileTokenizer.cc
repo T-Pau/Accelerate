@@ -63,7 +63,7 @@ const std::unordered_map<Token, FileTokenizer::PreprocessorDirective> FileTokeni
 };
 // clang-format on
 
-FileTokenizer::FileTokenizer(const Path& path, const Target* target, bool use_preprocessor, const std::unordered_set<Symbol>& defines) : defines{defines}, use_preprocessor{use_preprocessor}, path{path}, target{target} {
+FileTokenizer::FileTokenizer(const SearchPath& search_path, const Target* target, bool use_preprocessor, const std::unordered_set<Symbol>& defines) : defines{defines}, use_preprocessor{use_preprocessor}, search_path{search_path}, target{target} {
     if (use_preprocessor) {
         add_literal(token_define);
         add_literal(token_include);
@@ -571,7 +571,7 @@ bool FileTokenizer::is_identifier(const std::string& s) {
     return true;
 }
 
-Symbol FileTokenizer::find_file(Symbol file_name) { return path.find(file_name, current_source->location().file); }
+Symbol FileTokenizer::find_file(Symbol file_name) { return search_path.find(file_name, current_source->location().file); }
 
 void FileTokenizer::define(const std::unordered_set<Symbol>& defines) {
     for (const auto& name : defines) {

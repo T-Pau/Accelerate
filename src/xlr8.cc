@@ -68,9 +68,9 @@ class xlr8 : public Command {
     void set_output_file(const std::filesystem::path& input_filename, const std::string_view extension) { output_file = default_output_filename(input_filename, extension); }
 
     std::unique_ptr<Linker> linker;
-    Path library_path;
-    Path include_path;
-    Path system_path;
+    SearchPath library_path;
+    SearchPath include_path;
+    SearchPath system_path;
     std::unordered_set<Symbol> defines;
 
     std::vector<File> files;
@@ -139,10 +139,10 @@ int xlr8::process() {
 
     DiagnosticOutput::global.verbose_error_messages = SystemEnvironment::is_set("XLR8_VERBOSE_ERRORS");
     
-    LibraryGetter::global.path->append_path(library_path);
-    LibraryGetter::global.path->append_path(system_path, "lib");
-    TargetGetter::global.path->append_path(system_path, "target");
-    CPUGetter::global.path->append_path(system_path, "cpu");
+    LibraryGetter::global.search_path->append_path(library_path);
+    LibraryGetter::global.search_path->append_path(system_path, "lib");
+    TargetGetter::global.search_path->append_path(system_path, "target");
+    CPUGetter::global.search_path->append_path(system_path, "cpu");
 
     if (create_program) {
         linker = std::make_unique<ProgramLinker>();

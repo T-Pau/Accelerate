@@ -40,7 +40,7 @@ public:
 
 protected:
     [[nodiscard]] std::string filename_extension() const override {return ".target";}
-    Target parse(Symbol name, Symbol filename) override {return Assembler(nullptr, *TargetGetter::global.path, {}).parse_target(name, filename);}
+    Target parse(Symbol name, Symbol filename) override {return Assembler(nullptr, *TargetGetter::global.search_path, {}).parse_target(name, filename);}
 };
 
 #endif // HAD_XLR8_TARGET_GETTER_H

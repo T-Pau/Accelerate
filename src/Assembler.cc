@@ -88,7 +88,7 @@ const std::unordered_map<Token, Assembler::Directive> Assembler::directives = {
 };
 // clang-format on
 
-Assembler::Assembler(const Target* target, const Path& path, const std::unordered_set<Symbol>& defines) : tokenizer{path, target, true, defines} { set_target(target); }
+Assembler::Assembler(const Target* target, const SearchPath& search_path, const std::unordered_set<Symbol>& defines) : tokenizer{search_path, target, true, defines} { set_target(target); }
 
 Target Assembler::parse_target(Symbol name, Symbol file_name) {
     parsing_target = true;
