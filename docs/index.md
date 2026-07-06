@@ -18,7 +18,7 @@ If your program has a complicated memory layout, Accelerate helps fulfilling the
 
 ## Getting Started
 
-First, [build and install](https://github.com/T-Pau/Accelerate/blob/main/INSTALL.md) Accelerate.
+First, [build and install](Tutorials/Building.md) Accelerate.
 
 Then, assemble your program:
 

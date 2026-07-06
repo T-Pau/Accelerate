@@ -12,7 +12,8 @@ nav = [
    { "Accelerate" = "index.md" },
    { "Tutorials" = [
        { "index.md" =  "Tutorials/index.md" },
-       { "Hello-World-C64.md" = "Tutorials/Hello-World-C64.md" }
+       { "Building Accelerate" = "Tutorials/Building.md" },
+       { "Hello World for the Commodore 64" = "Tutorials/Hello-World-C64.md" }
    ]},
    { "How-To Guides" = [
        { "index.md" =  "How-To-Guides/index.md" }
