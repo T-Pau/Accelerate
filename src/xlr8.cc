@@ -76,9 +76,19 @@ class xlr8 : public Command {
     std::vector<File> files;
 };
 
+// clang-format off
 std::vector<Commandline::Option> xlr8::options = {
-    Commandline::Option("create-library", 'a', "create library"), Commandline::Option("define", 'D', "name", "define NAME for use in conditional compilation"), Commandline::Option("include-directory", 'I', "directory", "search for sources in DIRECTORY"), Commandline::Option("library-directory", 'L', "directory", "search for libraries in DIRECTORY"), Commandline::Option("symbol-map", "file", "write symbol map to FILE"), Commandline::Option("system-directory", "directory", "search for system files in DIRECTORY"), Commandline::Option("target", "file", "read target definition from FILE"), Commandline::Option("undefine", "name", "remove definition of NAME for use in conditional compilation"), Commandline::Option("verbose-errors", "include body in error messages"), Commandline::Option("depfile", 'M', "file", "write gcc-style dependency file to FILE"), Commandline::Option("output", 'o', "file", "write output to FILE"),
+    Commandline::Option("create-library", 'a', "create library"),
+    Commandline::Option("define", 'D', "name", "define NAME for use in conditional compilation"), 
+    Commandline::Option("include-directory", 'I', "directory", "search for sources in DIRECTORY"), 
+    Commandline::Option("library-directory", 'L', "directory", "search for libraries in DIRECTORY"), 
+    Commandline::Option("symbol-map", "file", "write symbol map to FILE"), 
+    Commandline::Option("system-directory", "directory", "search for system files in DIRECTORY"), 
+    Commandline::Option("target", "file", "read target definition from FILE"), 
+    Commandline::Option("undefine", "name", "remove definition of NAME for use in conditional compilation"), 
+    Commandline::Option("verbose-errors", "include body in error messages"), 
 };
+// clang-format on
 
 int main(int argc, char* argv[]) {
     auto command = xlr8();

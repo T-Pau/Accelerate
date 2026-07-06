@@ -31,6 +31,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include <optional>
+#include <vector>
 
 #include "Token.h"
 #include "TokenGroup.h"
