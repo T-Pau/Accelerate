@@ -199,7 +199,7 @@ std::optional<uint8_t> StringEncoding::encode(char32_t codepoint) const {
 
 void StringEncoding::add_range(const std::shared_ptr<ParsedValue>& range) {
     if (auto parameters = range->as_scalar()) {
-        auto length = std::optional<size_t>{};
+        auto length = std::optional<uint8_t>{};
 
         // target_start [- target_end] : source_start [- source_end]
 
@@ -232,14 +232,14 @@ void StringEncoding::add_range(const std::shared_ptr<ParsedValue>& range) {
             if (source_end < source_start) {
                 throw LocationException(range->location, "end of source range before start");
             }
-            auto source_length = source_end - source_start + 1;
+            size_t source_length = source_end - source_start + 1;
             if (length) {
                 if (source_length != *length) {
                     throw LocationException(token.location, "source and target ranges differ in length");
                 }
             }
             else {
-                if (target_start + source_length > std::numeric_limits<uint8_t>::max() + 1) {
+                if (source_length > std::numeric_limits<uint8_t>::max() || target_start + source_length > std::numeric_limits<uint8_t>::max() + 1) {
                     throw LocationException(token.location, "target range doesn't fit in one byte");
                 }
                 length = static_cast<uint8_t>(source_length);
