@@ -41,6 +41,9 @@ using namespace tpau::cpp_kernal;
 
 class ArgumentTypeEncoding;
 
+/**
+ * @brief Represents an argument type, which defines the valid values for an instruction's operands.
+ */
 class ArgumentType {
 public:
     enum Type {

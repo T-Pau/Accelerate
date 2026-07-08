@@ -35,12 +35,12 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "CPUGetter.h"
 #include "DataBody.h"
 #include "ExpressionParser.h"
-#include "ParsedValue.h"
+#include "StructuredValue.h"
 #include "SequenceTokenizer.h"
 
 using namespace tpau::cpp_kernal;
 
-std::unordered_map<Symbol, std::unique_ptr<ArgumentType> (CPUParser::*)(const Token& name, const ParsedValue* parameters)> CPUParser::argument_type_parser_methods;
+std::unordered_map<Symbol, std::unique_ptr<ArgumentType> (CPUParser::*)(const Token& name, const StructuredValue* parameters)> CPUParser::argument_type_parser_methods;
 std::unordered_map<Symbol, void (CPUParser::*)()> CPUParser::parser_methods;
 
 bool CPUParser::initialized = false;
@@ -111,7 +111,7 @@ void CPUParser::parse_directive(const Token &directive) {
 
 void CPUParser::parse_addressing_mode() {
     Token name = tokenizer.expect(Token::NAME, group_directive);
-    auto parameters = ParsedValue::parse(tokenizer);
+    auto parameters = StructuredValue::parse(tokenizer);
 
     {
         auto it = addressing_mode_names.find(name);
@@ -262,7 +262,7 @@ void CPUParser::parse_argument_type() {
         argument_type = std::make_unique<ArgumentTypeAny>(name.as_symbol());
     }
     else {
-        auto parameters = ParsedValue::parse(tokenizer);
+        auto parameters = StructuredValue::parse(tokenizer);
 
         {
             auto it = argument_type_names.find(name);
@@ -306,7 +306,7 @@ void CPUParser::parse_instruction() {
     else if (name.get_type() != Token::NAME) {
         throw LocationException(name.location, "expected name or '{'");
     }
-    auto parameters = ParsedValue::parse(tokenizer);
+    auto parameters = StructuredValue::parse(tokenizer);
 
     if (!parameters->is_dictionary()) {
         throw LocationException(parameters->location, "instruction definition must be dictionary");
@@ -335,7 +335,7 @@ void CPUParser::parse_instruction() {
 
 void CPUParser::parse_syntax() {
     auto type = tokenizer.expect(Token::NAME, group_directive);
-    auto values = ParsedValue::parse(tokenizer);
+    auto values = StructuredValue::parse(tokenizer);
 
     if (!values->is_scalar()) {
         throw LocationException(values->location, "expected strings");
@@ -362,7 +362,7 @@ void CPUParser::parse_syntax() {
 }
 
 
-std::unique_ptr<ArgumentType> CPUParser::parse_argument_type_encoding(const Token& name, const ParsedValue *parameters) {
+std::unique_ptr<ArgumentType> CPUParser::parse_argument_type_encoding(const Token& name, const StructuredValue *parameters) {
     if (!parameters->is_scalar()) {
         throw LocationException(parameters->location, "definition of range argument type '{}' must be scalar", name);
     }
@@ -376,7 +376,7 @@ std::unique_ptr<ArgumentType> CPUParser::parse_argument_type_encoding(const Toke
 }
 
 
-std::unique_ptr<ArgumentType> CPUParser::parse_argument_type_enum(const Token& name, const ParsedValue *parameters) {
+std::unique_ptr<ArgumentType> CPUParser::parse_argument_type_enum(const Token& name, const StructuredValue *parameters) {
     auto argument_type = std::make_unique<ArgumentTypeEnum>(name.as_symbol());
 
     if (!parameters->is_dictionary()) {
@@ -403,7 +403,7 @@ std::unique_ptr<ArgumentType> CPUParser::parse_argument_type_enum(const Token& n
     return argument_type;
 }
 
-std::unique_ptr<ArgumentType> CPUParser::parse_argument_type_map(const Token& name, const ParsedValue *parameters) {
+std::unique_ptr<ArgumentType> CPUParser::parse_argument_type_map(const Token& name, const StructuredValue *parameters) {
     auto argument_type = std::make_unique<ArgumentTypeMap>(name.as_symbol());
 
     if (!parameters->is_dictionary()) {
@@ -427,7 +427,7 @@ std::unique_ptr<ArgumentType> CPUParser::parse_argument_type_map(const Token& na
     return argument_type;
 }
 
-std::unique_ptr<ArgumentType> CPUParser::parse_argument_type_range(const Token& name, const ParsedValue *parameters) {
+std::unique_ptr<ArgumentType> CPUParser::parse_argument_type_range(const Token& name, const StructuredValue *parameters) {
     auto argument_type = std::make_unique<ArgumentTypeRange>(name.as_symbol());
 
     if (!parameters->is_scalar()) {
@@ -460,7 +460,7 @@ std::unique_ptr<ArgumentType> CPUParser::parse_argument_type_range(const Token& 
 }
 
 
-AddressingMode::Notation CPUParser::parse_addressing_mode_notation(const AddressingMode& addressing_mode, const ParsedScalar *parameters) {
+AddressingMode::Notation CPUParser::parse_addressing_mode_notation(const AddressingMode& addressing_mode, const StructuredScalar *parameters) {
     AddressingMode::Notation notation;
 
     for (const auto& token: (*parameters)) {

@@ -38,7 +38,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Range.h"
 
 /**
- * Class representing the memory of the target system, including allocated and free blocks and data.
+ * Represents the memory of the target system, including allocated and free blocks and data.
  */
 class Memory {
 public:

@@ -38,6 +38,9 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Token.h"
 #include "Tokenizer.h"
 
+/**
+ * @brief This class parses object and macro bodies.
+ */
 class BodyParser {
 public:
     enum ParsingType {

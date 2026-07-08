@@ -1,5 +1,5 @@
-#ifndef HAD_XLR8_PARSED_VALUE_H
-#define HAD_XLR8_PARSED_VALUE_H
+#ifndef HAD_XLR8_STRUCTURED_VALUE_H
+#define HAD_XLR8_STRUCTURED_VALUE_H
 
 /*
 Copyright (C) Dieter Baron
@@ -38,12 +38,15 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "TokenGroup.h"
 #include "Body.h"
 
-class ParsedArray;
-class ParsedBody;
-class ParsedDictionary;
-class ParsedScalar;
+class StructuredArray;
+class StructuredBody;
+class StructuredDictionary;
+class StructuredScalar;
 
-class ParsedValue {
+/**
+ * @brief Represents a structured value, which can be an scalar, array, dictionary, or body.
+ */
+class StructuredValue {
 public:
     enum Type {
         ARRAY,
@@ -53,18 +56,18 @@ public:
         SCALAR_SINGULAR
     };
 
-    virtual ~ParsedValue() = default;
+    virtual ~StructuredValue() = default;
 
     [[nodiscard]] virtual Type type() const = 0;
 
     static void setup(FileTokenizer& tokenizer);
-    static std::shared_ptr<ParsedValue> parse(Tokenizer& tokenizer);
+    static std::shared_ptr<StructuredValue> parse(Tokenizer& tokenizer);
 
-    [[nodiscard]] const ParsedArray* as_array() const;
-    [[nodiscard]] const ParsedBody* as_body() const;
-    [[nodiscard]] const ParsedDictionary* as_dictionary() const;
-    [[nodiscard]] const ParsedScalar* as_scalar() const;
-    [[nodiscard]] const ParsedScalar* as_singular_scalar() const;
+    [[nodiscard]] const StructuredArray* as_array() const;
+    [[nodiscard]] const StructuredBody* as_body() const;
+    [[nodiscard]] const StructuredDictionary* as_dictionary() const;
+    [[nodiscard]] const StructuredScalar* as_scalar() const;
+    [[nodiscard]] const StructuredScalar* as_singular_scalar() const;
     [[nodiscard]] bool is_array() const {return type() == ARRAY;}
     [[nodiscard]] bool is_body() const {return type() == BODY;}
     [[nodiscard]] bool is_dictionary() const {return type() == DICTIONARY;}
@@ -80,28 +83,34 @@ protected:
 };
 
 
-class ParsedArray: public ParsedValue {
+/**
+ * @brief Represents an array of structured values.
+ */
+class StructuredArray: public StructuredValue {
 public:
-    explicit ParsedArray(Tokenizer& tokenizer);
+    explicit StructuredArray(Tokenizer& tokenizer);
 
-    std::vector<std::shared_ptr<ParsedValue>> entries;
+    std::vector<std::shared_ptr<StructuredValue>> entries;
 
     [[nodiscard]] Type type() const override {return ARRAY;}
 
     [[nodiscard]] bool empty() const {return entries.empty();}
     [[nodiscard]] size_t size() const {return entries.size();}
-    std::shared_ptr<ParsedValue> operator[](size_t index) const {return entries[index];}
+    std::shared_ptr<StructuredValue> operator[](size_t index) const {return entries[index];}
 
-    std::vector<std::shared_ptr<ParsedValue>>::iterator begin() {return entries.begin();}
-    std::vector<std::shared_ptr<ParsedValue>>::iterator end() {return entries.end();}
-    [[nodiscard]] std::vector<std::shared_ptr<ParsedValue>>::const_iterator begin() const {return entries.begin();}
-    [[nodiscard]] std::vector<std::shared_ptr<ParsedValue>>::const_iterator end() const {return entries.end();}
+    std::vector<std::shared_ptr<StructuredValue>>::iterator begin() {return entries.begin();}
+    std::vector<std::shared_ptr<StructuredValue>>::iterator end() {return entries.end();}
+    [[nodiscard]] std::vector<std::shared_ptr<StructuredValue>>::const_iterator begin() const {return entries.begin();}
+    [[nodiscard]] std::vector<std::shared_ptr<StructuredValue>>::const_iterator end() const {return entries.end();}
 };
 
 
-class ParsedBody: public ParsedValue {
+/**
+ * @brief Represents a body as part of a structured value.
+ */
+class StructuredBody: public StructuredValue {
 public:
-    explicit ParsedBody(Tokenizer& tokenizer);
+    explicit StructuredBody(Tokenizer& tokenizer);
 
     Body body;
 
@@ -109,28 +118,34 @@ public:
 };
 
 
-class ParsedDictionary: public ParsedValue {
+/**
+ * @brief Represents a dictionary of structured values. Keys are tokens and values are structured values.
+ */
+class StructuredDictionary: public StructuredValue {
 public:
-    explicit ParsedDictionary(Tokenizer& tokenizer);
+    explicit StructuredDictionary(Tokenizer& tokenizer);
 
-    std::unordered_map<Token, std::shared_ptr<ParsedValue>> entries;
+    std::unordered_map<Token, std::shared_ptr<StructuredValue>> entries;
 
     [[nodiscard]] Type type() const override {return DICTIONARY;}
 
-    std::shared_ptr<ParsedValue> operator[](const Token& token) const;
-    [[nodiscard]] std::shared_ptr<ParsedValue> get_optional(const Token& token) const;
+    std::shared_ptr<StructuredValue> operator[](const Token& token) const;
+    [[nodiscard]] std::shared_ptr<StructuredValue> get_optional(const Token& token) const;
     [[nodiscard]] bool has_key(const Token& token) const {return entries.contains(token);}
 
-    std::unordered_map<Token, std::shared_ptr<ParsedValue>>::iterator begin() {return entries.begin();}
-    std::unordered_map<Token, std::shared_ptr<ParsedValue>>::iterator end() {return entries.end();}
-    [[nodiscard]] std::unordered_map<Token, std::shared_ptr<ParsedValue>>::const_iterator begin() const {return entries.begin();}
-    [[nodiscard]] std::unordered_map<Token, std::shared_ptr<ParsedValue>>::const_iterator end() const {return entries.end();}
+    std::unordered_map<Token, std::shared_ptr<StructuredValue>>::iterator begin() {return entries.begin();}
+    std::unordered_map<Token, std::shared_ptr<StructuredValue>>::iterator end() {return entries.end();}
+    [[nodiscard]] std::unordered_map<Token, std::shared_ptr<StructuredValue>>::const_iterator begin() const {return entries.begin();}
+    [[nodiscard]] std::unordered_map<Token, std::shared_ptr<StructuredValue>>::const_iterator end() const {return entries.end();}
 };
 
 
-class ParsedScalar: public ParsedValue {
+/**
+ * @brief Represents a scalar value, which can be a single token or a list of tokens.
+ */
+class StructuredScalar: public StructuredValue {
 public:
-    explicit ParsedScalar(Tokenizer& tokenizer);
+    explicit StructuredScalar(Tokenizer& tokenizer);
 
     std::vector<Token> tokens;
 
@@ -147,4 +162,4 @@ public:
 };
 
 
-#endif // HAD_XLR8_PARSED_VALUE_H
+#endif // HAD_XLR8_STRUCTURED_VALUE_H

@@ -35,6 +35,9 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "FileTokenizer.h"
 #include "Object.h"
 
+/**
+ * @brief This class parses source files or target definitions into entities.
+ */
 class Assembler {
 public:
     explicit Assembler(const Target* target, const SearchPath& search_path, const std::unordered_set<Symbol>& defines);
@@ -82,8 +85,8 @@ private:
     void parse_visibility(const Token& directive);
     void set_target(const Target* new_target);
 
-    std::vector<MemoryMap::Block> parse_address(const ParsedValue* address) const;
-    MemoryMap::Block parse_single_address(const ParsedScalar* address) const;
+    std::vector<MemoryMap::Block> parse_address(const StructuredValue* address) const;
+    MemoryMap::Block parse_single_address(const StructuredScalar* address) const;
     uint64_t parse_address_part(const Token& token) const;
     static MemoryMap::AccessType parse_type(const Token& type);
 

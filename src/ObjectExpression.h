@@ -33,6 +33,9 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "BaseExpression.h"
 #include "Object.h"
 
+/**
+ * @brief Represents an expression referring to an object.
+ */
 class ObjectExpression: public BaseExpression {
 public:
     explicit ObjectExpression(const Location& location, Object* object): BaseExpression(location), object(object) {}

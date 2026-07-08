@@ -35,10 +35,13 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "CPU.h"
 #include "FileParser.h"
-#include "ParsedValue.h"
+#include "StructuredValue.h"
 
 using namespace tpau::cpp_kernal;
 
+/**
+ * @brief This class parses CPU definitions.
+ */
 class CPUParser: public FileParser {
 public:
     CPUParser();
@@ -55,14 +58,14 @@ private:
     void parse_instruction();
     void parse_syntax();
 
-    AddressingMode::Notation parse_addressing_mode_notation(const AddressingMode& addressing_mode, const ParsedScalar* parameters);
+    AddressingMode::Notation parse_addressing_mode_notation(const AddressingMode& addressing_mode, const StructuredScalar* parameters);
 
-    std::unique_ptr<ArgumentType> parse_argument_type_encoding(const Token& name, const ParsedValue* parameters);
-    std::unique_ptr<ArgumentType> parse_argument_type_enum(const Token& name, const ParsedValue* parameters);
-    std::unique_ptr<ArgumentType> parse_argument_type_map(const Token& name, const ParsedValue* parameters);
-    std::unique_ptr<ArgumentType> parse_argument_type_range(const Token& name, const ParsedValue* parameters);
+    std::unique_ptr<ArgumentType> parse_argument_type_encoding(const Token& name, const StructuredValue* parameters);
+    std::unique_ptr<ArgumentType> parse_argument_type_enum(const Token& name, const StructuredValue* parameters);
+    std::unique_ptr<ArgumentType> parse_argument_type_map(const Token& name, const StructuredValue* parameters);
+    std::unique_ptr<ArgumentType> parse_argument_type_range(const Token& name, const StructuredValue* parameters);
 
-    static std::unordered_map<Symbol, std::unique_ptr<ArgumentType> (CPUParser::*)(const Token& name, const ParsedValue* parameters)> argument_type_parser_methods;
+    static std::unordered_map<Symbol, std::unique_ptr<ArgumentType> (CPUParser::*)(const Token& name, const StructuredValue* parameters)> argument_type_parser_methods;
     static std::unordered_map<Symbol, void (CPUParser::*)()> parser_methods;
 
     CPU cpu;

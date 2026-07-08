@@ -36,6 +36,9 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using namespace tpau::cpp_kernal;
 
+/**
+ * @brief Represents a body that repeats a block of code a specified number of times.
+ */
 class RepeatBody: public BodyElement {
 public:
     RepeatBody(Symbol variable, std::optional<Expression> start, Expression end, Body body): variable{variable}, start{std::move(start)}, end{std::move(end)}, body{std::move(body)} {}

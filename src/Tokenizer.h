@@ -36,6 +36,9 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Token.h"
 #include "TokenGroup.h"
 
+/**
+ * @brief The base class for tokenizers, which convert a source into a sequence of tokens.
+ */
 class Tokenizer {
 public:
     Token next();

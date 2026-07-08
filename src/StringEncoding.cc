@@ -59,7 +59,7 @@ const Token StringEncoding::token_use{Token::NAME, "use"};
 const TokenGroup StringEncoding::group_char32{{Token::VALUE, Token::STRING}, {}, "unicode character"};
 
 
-StringEncoding::StringEncoding(Symbol name, const std::shared_ptr<ParsedValue>& definition, const Target& target) {
+StringEncoding::StringEncoding(Symbol name, const std::shared_ptr<StructuredValue>& definition, const Target& target) {
     auto parameters = definition->as_dictionary();
     if (auto base = parameters->get_optional(token_base)) {
         if (auto base_dictionary = base->as_dictionary()) {
@@ -197,7 +197,7 @@ std::optional<uint8_t> StringEncoding::encode(char32_t codepoint) const {
     return {};
 }
 
-void StringEncoding::add_range(const std::shared_ptr<ParsedValue>& range) {
+void StringEncoding::add_range(const std::shared_ptr<StructuredValue>& range) {
     if (auto parameters = range->as_scalar()) {
         auto length = std::optional<uint8_t>{};
 
@@ -257,7 +257,7 @@ void StringEncoding::add_range(const std::shared_ptr<ParsedValue>& range) {
     }
 }
 
-void StringEncoding::set_name_delimiters(const std::shared_ptr<ParsedValue>& delimiters) {
+void StringEncoding::set_name_delimiters(const std::shared_ptr<StructuredValue>& delimiters) {
     if (auto parameters = delimiters->as_scalar()) {
         if (parameters->size() != 2) {
             throw LocationException(delimiters->location, "exactly two name_delimiters expected");
@@ -273,7 +273,7 @@ void StringEncoding::set_name_delimiters(const std::shared_ptr<ParsedValue>& del
     }
 }
 
-void StringEncoding::add_singleton(const Token& target_token, const std::shared_ptr<ParsedValue>& sources) {
+void StringEncoding::add_singleton(const Token& target_token, const std::shared_ptr<StructuredValue>& sources) {
     if (!target_token.is_unsigned() || target_token.as_unsigned() > std::numeric_limits<uint8_t>::max()) {
         throw LocationException(target_token.location, "invalid target for singleton");
     }
@@ -294,7 +294,7 @@ void StringEncoding::add_singleton(const Token& target_token, const std::shared_
     }
 }
 
-void StringEncoding::add_named(const Token& target_token, const std::shared_ptr<ParsedValue>& sources) {
+void StringEncoding::add_named(const Token& target_token, const std::shared_ptr<StructuredValue>& sources) {
     auto target = get_uint8(target_token);
     if (auto sources_list = sources->as_scalar()) {
         for (const auto& source_token: *sources_list) {
@@ -315,7 +315,7 @@ void StringEncoding::add_named(const Token& target_token, const std::shared_ptr<
     }
 }
 
-void StringEncoding::import_base(const Token& base_token, const std::shared_ptr<ParsedValue>& base_parameters, const Target& target) {
+void StringEncoding::import_base(const Token& base_token, const std::shared_ptr<StructuredValue>& base_parameters, const Target& target) {
     if (auto base_name = base_token.as_symbol()) {
         const StringEncoding* base = target.string_encoding(base_name);
         if (!base) {
@@ -435,7 +435,7 @@ void StringEncoding::add_named_range(const std::u32string& prefix, char32_t sour
     }
 }
 
-void StringEncoding::add_named_ranges(const Token& prefix_token, const std::shared_ptr<ParsedValue>& ranges_value) {
+void StringEncoding::add_named_ranges(const Token& prefix_token, const std::shared_ptr<StructuredValue>& ranges_value) {
     if (!prefix_token.is_string()) {
         throw LocationException(prefix_token.location, "named ranges prefix must be string");
     }

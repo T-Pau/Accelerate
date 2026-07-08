@@ -32,6 +32,9 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "ChecksumAlgorithm.h"
 
+/**
+ * @brief Implements a checksum algorithm that computes the XOR of all bytes.
+ */
 class ChecksumAlgorithmXor: public ChecksumAlgorithm {
   public:
     ChecksumAlgorithmXor(Symbol name): ChecksumAlgorithm(name) {}

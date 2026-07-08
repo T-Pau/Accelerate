@@ -31,7 +31,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "ObjectFileParser.h"
 #include "LibraryGetter.h"
-#include "ParsedValue.h"
+#include "StructuredValue.h"
 #include "ExpressionParser.h"
 
 using namespace tpau::cpp_kernal;
@@ -58,7 +58,7 @@ const std::unordered_map<Symbol, void (ObjectFileParser::*)()> ObjectFileParser:
     {token_use.as_symbol(), &ObjectFileParser::parse_use}
 };
 
-const std::unordered_map<Symbol, void (ObjectFileParser::*)(const Token& name, const std::shared_ptr<ParsedValue>& definition)> ObjectFileParser::symbol_parser_methods = {
+const std::unordered_map<Symbol, void (ObjectFileParser::*)(const Token& name, const std::shared_ptr<StructuredValue>& definition)> ObjectFileParser::symbol_parser_methods = {
     {token_constant.as_symbol(), &ObjectFileParser::parse_constant},
     {token_function.as_symbol(), &ObjectFileParser::parse_function},
     {token_macro.as_symbol(), &ObjectFileParser::parse_macro},
@@ -94,7 +94,7 @@ void ObjectFileParser::parse_directive(const Token &directive) {
         auto it_symbol = symbol_parser_methods.find(directive.as_symbol());
         if (it_symbol != symbol_parser_methods.end()) {
             auto name = tokenizer.expect(Token::NAME, TokenGroup::newline);
-            (this->*it_symbol->second)(name, ParsedValue::parse(tokenizer));
+            (this->*it_symbol->second)(name, StructuredValue::parse(tokenizer));
         }
         else {
             throw LocationException(directive.location, "unknown directive");
@@ -103,12 +103,12 @@ void ObjectFileParser::parse_directive(const Token &directive) {
 }
 
 
-void ObjectFileParser::parse_constant(const Token& name, const std::shared_ptr<ParsedValue>& definition) {
+void ObjectFileParser::parse_constant(const Token& name, const std::shared_ptr<StructuredValue>& definition) {
     file->add_constant(std::make_unique<ObjectFile::Constant>(file.get(), name, definition));
 }
 
 
-void ObjectFileParser::parse_object(const Token& name, const std::shared_ptr<ParsedValue>& definition) { file->add_object(std::make_unique<Object>(file.get(), name, definition)); }
+void ObjectFileParser::parse_object(const Token& name, const std::shared_ptr<StructuredValue>& definition) { file->add_object(std::make_unique<Object>(file.get(), name, definition)); }
 
 void ObjectFileParser::parse_pin() {
     auto name = tokenizer.expect(Token::NAME);
@@ -122,7 +122,7 @@ void ObjectFileParser::parse_format_version() {
     // TODO: implement
 }
 
-void ObjectFileParser::parse_function(const Token& name, const std::shared_ptr<ParsedValue>& definition) {
+void ObjectFileParser::parse_function(const Token& name, const std::shared_ptr<StructuredValue>& definition) {
    file->add_function(std::make_unique<Function>(file.get(), name, definition));
 }
 
@@ -148,7 +148,7 @@ void ObjectFileParser::parse_use() {
     }
 }
 
-void ObjectFileParser::parse_macro(const Token& name, const std::shared_ptr<ParsedValue>& definition) {
+void ObjectFileParser::parse_macro(const Token& name, const std::shared_ptr<StructuredValue>& definition) {
     file->add_macro(std::make_unique<Macro>(file.get(), name, definition));
 }
 

@@ -32,6 +32,9 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "CPU.h"
 
+/**
+ * @brief Encodes instructions for a given CPU, translating them into machine code.
+ */
 class InstructionEncoder {
 public:
     explicit InstructionEncoder(const CPU* cpu): cpu(cpu) {}

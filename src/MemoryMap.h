@@ -40,6 +40,9 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using namespace tpau::cpp_kernal;
 
+/**
+ * @brief Represents the layout of memory for a target system, including sections and segments.
+ */
 class MemoryMap {
 public:
     enum AccessType {

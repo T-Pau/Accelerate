@@ -36,6 +36,9 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using namespace tpau::cpp_kernal;
 
+/**
+  * @brief Implements an encoder that encodes binary values.
+ */
 class BinaryEncoder: public BaseEncoder {
 public:
     void encode(std::string& bytes, const Value& value) const override;

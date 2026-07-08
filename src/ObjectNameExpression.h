@@ -32,6 +32,9 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "BaseExpression.h"
 
+/**
+ * @brief Represents an expression referring to the name of the current object.
+ */
 class ObjectNameExpression: public BaseExpression {
   public:
     ObjectNameExpression(const Location& location): BaseExpression(location) {}

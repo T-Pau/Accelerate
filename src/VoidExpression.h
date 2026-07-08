@@ -37,6 +37,7 @@ class VoidExpression: public BaseExpression {
 public:
     /**
      * Create a void expression.
+     *
      * @param location The location of the expression.
      */
     explicit VoidExpression(const Location& location): BaseExpression(location) {}

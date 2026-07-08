@@ -48,7 +48,7 @@ void Callable::initialize() {
     }
 }
 
-Callable::Callable(ObjectFile* owner, const Token& name_, const std::shared_ptr<ParsedValue>& definition): Entity(owner, name_, definition) {
+Callable::Callable(ObjectFile* owner, const Token& name_, const std::shared_ptr<StructuredValue>& definition): Entity(owner, name_, definition) {
     initialize();
     auto parameters = definition->as_dictionary();
 

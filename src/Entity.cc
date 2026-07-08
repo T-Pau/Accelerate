@@ -44,7 +44,7 @@ using namespace tpau::cpp_kernal;
 const Token Entity::token_default_only = Token(Token::NAME, DEFAULT_ONLY);
 const Token Entity::token_visibility = Token(Token::NAME, VISIBILITY);
 
-Entity::Entity(ObjectFile* owner, const Token& name_, const std::shared_ptr<ParsedValue>& definition) : name(name_.as_symbol()), location(name_.location), environment(std::make_shared<Environment>(owner->private_environment)) {
+Entity::Entity(ObjectFile* owner, const Token& name_, const std::shared_ptr<StructuredValue>& definition) : name(name_.as_symbol()), location(name_.location), environment(std::make_shared<Environment>(owner->private_environment)) {
     const auto parameters = definition->as_dictionary();
 
     if (const auto default_only_definition = parameters->get_optional(token_default_only)) {

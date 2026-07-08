@@ -100,6 +100,9 @@ struct std::hash<AddressingModeMatcherResult>
 };
 
 
+/**
+ * @brief Determines which addressing modes match a given line in the source code.
+ */
 class AddressingModeMatcher {
 public:
     [[nodiscard]] std::unordered_set<AddressingModeMatcherResult> match(const std::vector<std::shared_ptr<Node>>& nodes) const;

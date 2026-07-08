@@ -40,7 +40,7 @@ void Macro::initialize() {
 }
 
 
-Macro::Macro(ObjectFile* owner, const Token& name, const std::shared_ptr<ParsedValue>& definition) : Callable(owner, name, definition) {
+Macro::Macro(ObjectFile* owner, const Token& name, const std::shared_ptr<StructuredValue>& definition) : Callable(owner, name, definition) {
     initialize();
 
     auto parameters = definition->as_dictionary();

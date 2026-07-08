@@ -45,7 +45,7 @@ public:
     class Constant: public Entity {
     public:
         Constant(ObjectFile* owner, const Token& name, Visibility visibility, bool default_only, Expression value): Entity(owner, name, visibility, default_only), value(std::move(value)) {}
-        Constant(ObjectFile* owner, const Token& name, const std::shared_ptr<ParsedValue>& definition);
+        Constant(ObjectFile* owner, const Token& name, const std::shared_ptr<StructuredValue>& definition);
 
         void serialize(std::ostream& stream) const;
 

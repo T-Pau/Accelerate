@@ -36,6 +36,9 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using namespace tpau::cpp_kernal;
 
+/**
+ * @brief This class represents a token, which is a basic syntactic unit.
+ */
 class Token {
 public:
     enum Type {

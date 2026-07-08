@@ -34,7 +34,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <tpau-cpp-kernal/LocationException.h>
 
 #include "ExpressionParser.h"
-#include "ParsedValue.h"
+#include "StructuredValue.h"
 
 using namespace tpau::cpp_kernal;
 
@@ -42,7 +42,7 @@ TokenGroup FileParser::group_directive = TokenGroup({Token::DIRECTIVE,Token::END
 
 
 FileParser::FileParser(const SearchPath& search_path, const Target* target): search_path(search_path), tokenizer(search_path, target) {
-    ParsedValue::setup(tokenizer);
+    StructuredValue::setup(tokenizer);
     ExpressionParser::setup(tokenizer);
 }
 

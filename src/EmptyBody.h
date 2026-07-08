@@ -32,6 +32,9 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "Body.h"
 
+/**
+ * @brief Represents an empty body.
+ */
 class EmptyBody: public BodyElement {
 public:
     EmptyBody() = default;

@@ -34,6 +34,9 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "CPU.h"
 #include "CPUParser.h"
 
+/**
+ * @brief Get the CPU definition by name.
+ */
 class CPUGetter: public Getter<CPU> {
 public:
     static CPUGetter global;

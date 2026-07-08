@@ -32,6 +32,9 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "Body.h"
 
+/**
+  * @brief Represents a body that specifies a memory range: `.memory start, end`. It is used in the `.output` definition in targets.
+ */
 class MemoryBody: public BodyElement {
 public:
     MemoryBody(Expression bank, Expression start_address, Expression end_address);

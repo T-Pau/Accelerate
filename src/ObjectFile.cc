@@ -491,7 +491,7 @@ void ObjectFile::Constant::serialize(std::ostream& stream) const {
     stream << "}" << std::endl;
 }
 
-ObjectFile::Constant::Constant(ObjectFile* owner, const Token& name, const std::shared_ptr<ParsedValue>& definition) : Entity(owner, name, definition) {
+ObjectFile::Constant::Constant(ObjectFile* owner, const Token& name, const std::shared_ptr<StructuredValue>& definition) : Entity(owner, name, definition) {
     auto parameters = definition->as_dictionary();
 
     auto tokenizer = SequenceTokenizer((*parameters)[token_value]->as_scalar()->tokens);

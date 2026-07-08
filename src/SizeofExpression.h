@@ -35,6 +35,9 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 class Object;
 
+/**
+ * @brief Represents an expression that evaluates to the size of an object: `.sizeof(object)`.
+ */
 class SizeofExpression: public BaseExpression {
 public:
     explicit SizeofExpression(const Location& location, Symbol object_name): BaseExpression(location), object_name{object_name} {}

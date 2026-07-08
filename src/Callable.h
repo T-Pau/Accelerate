@@ -34,6 +34,9 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "EvaluationContext.h"
 #include "Expression.h"
 
+/**
+  * @brief Represents a callable entity that can be invoked with arguments: a macro or function.
+ */
 class Callable: public Entity {
   public:
     class Arguments {
@@ -53,7 +56,7 @@ class Callable: public Entity {
         std::vector<Expression> default_arguments;
     };
 
-    Callable(ObjectFile* owner, const Token& name, const std::shared_ptr<ParsedValue>& definition);
+    Callable(ObjectFile* owner, const Token& name, const std::shared_ptr<StructuredValue>& definition);
     Callable(ObjectFile* owner, const Token& name, Visibility visibility, bool default_only, Arguments arguments): Entity(owner, name, visibility, default_only), arguments(std::move(arguments)) {}
     [[nodiscard]] Symbol argument_name(size_t index) const {return arguments.name(index);}
     [[nodiscard]] std::optional<Expression> default_argument(size_t index) const {return arguments.default_argument(index);}

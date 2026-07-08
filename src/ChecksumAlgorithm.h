@@ -38,6 +38,9 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using namespace tpau::cpp_kernal;
 
+/**
+ * @brief The base class for  checksum algorithm implementations.
+ */
 class ChecksumAlgorithm {
   public:
     ChecksumAlgorithm(Symbol name): name{name} {}

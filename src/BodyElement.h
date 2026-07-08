@@ -39,6 +39,9 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 class Body;
 class CPU;
 
+/**
+ * Base class for all Body types.
+ */
 class BodyElement {
 public:
     BodyElement() = default;

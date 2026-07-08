@@ -30,15 +30,18 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "ParsedValue.h"
+#include "StructuredValue.h"
 #include "Unresolved.h"
 
 class Macro;
 class Object;
 
+/**
+  * @brief Represents an entity in the source code, which can be a constant, object, macro, or function.
+ */
 class Entity {
   public:
-    Entity(ObjectFile* owner, const Token& name, const std::shared_ptr<ParsedValue>& definition);
+    Entity(ObjectFile* owner, const Token& name, const std::shared_ptr<StructuredValue>& definition);
     Entity(ObjectFile* owner, const Token& name, Visibility visibility, bool default_only);
     virtual ~Entity() = default;
 

@@ -34,7 +34,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "FileTokenizer.h"
 
 /**
- * Expression representing a function call.
+ * Expression representing a function call: `function_name(arg1, arg2, ...)`.
  */
 class FunctionExpression: public BaseExpression {
 public:

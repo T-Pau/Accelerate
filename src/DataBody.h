@@ -47,6 +47,9 @@ public:
     std::optional<Encoder> encoding;
 };
 
+/**
+ * @brief Represents a body containing data. This is used for `.data` statements and encoded instructions.
+ */
 class DataBody: public BodyElement {
 public:
 

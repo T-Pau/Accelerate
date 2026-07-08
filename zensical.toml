@@ -9,37 +9,139 @@ site_author = "Dieter Baron"
 site_description = "Cross-Assembler for 8- and 16-bit Computers"
 
 nav = [
-   { "Accelerate" = "index.md" },
-   { "Tutorials" = [
-       { "index.md" =  "Tutorials/index.md" },
-       { "Building Accelerate" = "Tutorials/Building.md" },
-       { "Hello World for the Commodore 64" = "Tutorials/Hello-World-C64.md" }
-   ]},
-   { "How-To Guides" = [
-       { "index.md" =  "How-To-Guides/index.md" }
-   ]},
-   { "Reference" = [
-       { "index.md" =  "Reference/index.md" },
-       { "Assembler Source File" = "Reference/Assembler-Source-File.md" },
-       { "Expressions" = "Reference/Expressions.md" },
-       { "Structured Values" = "Reference/Structured-Values.md" },
-       { "Target Definition" = "Reference/Target-Definition.md" },
-       { "CPU Definition" = "Reference/CPU-Definition.md" }
-   ]},
-   { "Explanations" = [
-       { "index.md" =  "Explanations/index.md" },
-       { "Introduction" = "Explanations/Introduction.md" },
-       { "DoReCo Talk" = "https://youtu.be/Bphj10Orb8U" },
-       { "Rationale" = "Explanations/Rationale.md" },
-       { "Design Goals" = "Explanations/Design-Goals.md" }
-   ]},
-   { "License" = "License.md" },
-   { "Repository" = "https://github.com/T-Pau/Accelerate" }
+    { "Accelerate" = "index.md" },
+    { "Tutorials" = [
+        { "index.md" =  "Tutorials/index.md" },
+        { "Building Accelerate" = "Tutorials/Building.md" },
+        { "Hello World for the Commodore 64" = "Tutorials/Hello-World-C64.md" }
+    ]},
+    { "How-To Guides" = [
+        { "index.md" =  "How-To-Guides/index.md" }
+    ]},
+    { "Reference" = [
+        { "index.md" =  "Reference/index.md" },
+        { "Assembler Source File" = "Reference/Assembler-Source-File.md" },
+        { "Expressions" = "Reference/Expressions.md" },
+        { "Structured Values" = "Reference/Structured-Values.md" },
+        { "Target Definition" = "Reference/Target-Definition.md" },
+        { "CPU Definition" = "Reference/CPU-Definition.md" }
+    ]},
+    { "Explanations" = [
+        { "index.md" =  "Explanations/index.md" },
+        { "Introduction" = "Explanations/Introduction.md" },
+        { "DoReCo Talk" = "https://youtu.be/Bphj10Orb8U" },
+        { "Rationale" = "Explanations/Rationale.md" },
+        { "Design Goals" = "Explanations/Design-Goals.md" },
+    ]},
+    { "Internal Documentation" = [
+        { "index.md" =  "Internal/index.md" },
+        { "Explanations" = [
+            { "index.md" =  "Internal/Explanations/index.md" },
+            { "Translating a Program or Library" = "Internal/Explanations/Translation.md" }
+        ]},
+        { "Reference" = [
+            { "index.md" = "Internal/Reference/index.md" },
+            { "Address" = "Internal/Reference/Address.md" },
+            { "AddressingMode" = "Internal/Reference/AddressingMode.md" },
+            { "AddressingModeMatcher" = "Internal/Reference/AddressingModeMatcher.md" },
+            { "ArgumentType" = "Internal/Reference/ArgumentType.md" },
+            { "Assembler" = "Internal/Reference/Assembler.md" },
+            { "AssignmentBody" = "Internal/Reference/AssignmentBody.md" },
+            { "BaseExpression" = "Internal/Reference/BaseExpression.md" },
+            { "BinaryEncoder" = "Internal/Reference/BinaryEncoder.md" },
+            { "BinaryExpression" = "Internal/Reference/BinaryExpression.md" },
+            { "BlockBody" = "Internal/Reference/BlockBody.md" },
+            { "Body" = "Internal/Reference/Body.md" },
+            { "BodyElement" = "Internal/Reference/BodyElement.md" },
+            { "BodyParser" = "Internal/Reference/BodyParser.md" },
+            { "CPU" = "Internal/Reference/CPU.md" },
+            { "CPUGetter" = "Internal/Reference/CPUGetter.md" },
+            { "CPUParser" = "Internal/Reference/CPUParser.md" },
+            { "Callable" = "Internal/Reference/Callable.md" },
+            { "Checksum" = "Internal/Reference/Checksum.md" },
+            { "ChecksumAlgorithm" = "Internal/Reference/ChecksumAlgorithm.md" },
+            { "ChecksumAlgorithmXor" = "Internal/Reference/ChecksumAlgorithmXor.md" },
+            { "ChecksumBody" = "Internal/Reference/ChecksumBody.md" },
+            { "ChecksumComputation" = "Internal/Reference/ChecksumComputation.md" },
+            { "DataBody" = "Internal/Reference/DataBody.md" },
+            { "DefinedExpression" = "Internal/Reference/DefinedExpression.md" },
+            { "EmptyBody" = "Internal/Reference/EmptyBody.md" },
+            { "Encoder" = "Internal/Reference/Encoder.md" },
+            { "Entity" = "Internal/Reference/Entity.md" },
+            { "Environment" = "Internal/Reference/Environment.md" },
+            { "ErrorBody" = "Internal/Reference/ErrorBody.md" },
+            { "EvaluationContext" = "Internal/Reference/EvaluationContext.md" },
+            { "EvaluationResult" = "Internal/Reference/EvaluationResult.md" },
+            { "ExistsExpression" = "Internal/Reference/ExistsExpression.md" },
+            { "Expression" = "Internal/Reference/Expression.md" },
+            { "ExpressionNode" = "Internal/Reference/ExpressionNode.md" },
+            { "ExpressionParser" = "Internal/Reference/ExpressionParser.md" },
+            { "FileParser" = "Internal/Reference/FileParser.md" },
+            { "FileTokenizer" = "Internal/Reference/FileTokenizer.md" },
+            { "FillExpression" = "Internal/Reference/FillExpression.md" },
+            { "Function" = "Internal/Reference/Function.md" },
+            { "FunctionExpression" = "Internal/Reference/FunctionExpression.md" },
+            { "Getter" = "Internal/Reference/Getter.md" },
+            { "HexStreamEncoder" = "Internal/Reference/HexStreamEncoder.md" },
+            { "HexStringDecoder" = "Internal/Reference/HexStringDecoder.md" },
+            { "IfBody" = "Internal/Reference/IfBody.md" },
+            { "InRangeExpression" = "Internal/Reference/InRangeExpression.md" },
+            { "Instruction" = "Internal/Reference/Instruction.md" },
+            { "InstructionEncoder" = "Internal/Reference/InstructionEncoder.md" },
+            { "IntegerEncoder" = "Internal/Reference/IntegerEncoder.md" },
+            { "LabelBody" = "Internal/Reference/LabelBody.md" },
+            { "LabelExpression" = "Internal/Reference/LabelExpression.md" },
+            { "LibraryGetter" = "Internal/Reference/LibraryGetter.md" },
+            { "LibraryLinker" = "Internal/Reference/LibraryLinker.md" },
+            { "Linker" = "Internal/Reference/Linker.md" },
+            { "Macro" = "Internal/Reference/Macro.md" },
+            { "MacroBody" = "Internal/Reference/MacroBody.md" },
+            { "Memory" = "Internal/Reference/Memory.md" },
+            { "MemoryBody" = "Internal/Reference/MemoryBody.md" },
+            { "MemoryMap" = "Internal/Reference/MemoryMap.md" },
+            { "MinMaxExpression" = "Internal/Reference/MinMaxExpression.md" },
+            { "Node" = "Internal/Reference/Node.md" },
+            { "Object" = "Internal/Reference/Object.md" },
+            { "ObjectExpression" = "Internal/Reference/ObjectExpression.md" },
+            { "ObjectFile" = "Internal/Reference/ObjectFile.md" },
+            { "ObjectFileParser" = "Internal/Reference/ObjectFileParser.md" },
+            { "ObjectNameExpression" = "Internal/Reference/ObjectNameExpression.md" },
+            { "Output" = "Internal/Reference/Output.md" },
+            { "ProgramLinker" = "Internal/Reference/ProgramLinker.md" },
+            { "Range" = "Internal/Reference/Range.md" },
+            { "RepeatBody" = "Internal/Reference/RepeatBody.md" },
+            { "ScopeBody" = "Internal/Reference/ScopeBody.md" },
+            { "SequenceTokenizer" = "Internal/Reference/SequenceTokenizer.md" },
+            { "SizeRange" = "Internal/Reference/SizeRange.md" },
+            { "SizeofExpression" = "Internal/Reference/SizeofExpression.md" },
+            { "StringEncoder" = "Internal/Reference/StringEncoder.md" },
+            { "StringEncoding" = "Internal/Reference/StringEncoding.md" },
+            { "StructuredValue" = "Internal/Reference/StructuredValue.md" },
+            { "Target" = "Internal/Reference/Target.md" },
+            { "TargetGetter" = "Internal/Reference/TargetGetter.md" },
+            { "Token" = "Internal/Reference/Token.md" },
+            { "TokenGroup" = "Internal/Reference/TokenGroup.md" },
+            { "TokenNode" = "Internal/Reference/TokenNode.md" },
+            { "Tokenizer" = "Internal/Reference/Tokenizer.md" },
+            { "UnaryExpression" = "Internal/Reference/UnaryExpression.md" },
+            { "UnnamedLabelList" = "Internal/Reference/UnnamedLabelList.md" },
+            { "Unresolved" = "Internal/Reference/Unresolved.md" },
+            { "UsedEntities" = "Internal/Reference/UsedEntities.md" },
+            { "ValueExpression" = "Internal/Reference/ValueExpression.md" },
+            { "VariableExpression" = "Internal/Reference/VariableExpression.md" },
+            { "Visibility" = "Internal/Reference/Visibility.md" },
+            { "VoidExpression" = "Internal/Reference/VoidExpression.md" },
+        ]},
+    ]},
+    { "License" = "License.md" },
+    { "Repository" = "https://github.com/T-Pau/Accelerate" }
 ]
 
 extra_css = [
     "assets/styles/style.css",
     "assets/styles/tpau.css",
+    # This should not be needed, but Zensical's mkdocstrings support is unfinished and does not support custom CSS yet.
+    "assets/styles/mkdocstrings-doxygen.css", 
 ]
 
 
@@ -66,6 +168,15 @@ anchor_linenums = true
 line_spans = "__span"
 pygments_lang_class = true
 [project.markdown_extensions.zensical.extensions.macros]
+
+
+[project.plugins.mkdocstrings]
+default_handler = "doxygen"
+
+[project.plugins.mkdocstrings.handlers.doxygen]
+paths = ["src"]
+include_directories = {"src" = ""}
+options = { show_protected = true, show_parameter_types = false }
 
 
 [project.theme]

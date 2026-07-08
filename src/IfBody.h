@@ -50,6 +50,9 @@ public:
 };
 
 
+/**
+ * @brief Represents a conditional body. Parts of this body will be discarded, based on the evaluation of the conditions.
+ */
 class IfBody: public BodyElement {
 public:
     explicit IfBody(std::vector<IfBodyClause> clauses);

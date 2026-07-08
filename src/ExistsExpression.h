@@ -34,6 +34,9 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "BaseExpression.h"
 
+/**
+  * @brief Represents an exists expression, which checks if a name refers to a constant or object: `.exists(hook_function)`.
+ */
 class ExistsExpression : public BaseExpression {
   public:
     explicit ExistsExpression(const Location& location, Symbol symbol): BaseExpression(location), symbol{symbol} {}

@@ -33,9 +33,12 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Body.h"
 #include "Callable.h"
 
+/**
+  * @brief Represents a macro.
+  */
 class Macro: public Callable {
   public:
-    Macro(ObjectFile* owner, const Token& name, const std::shared_ptr<ParsedValue>& definition);
+    Macro(ObjectFile* owner, const Token& name, const std::shared_ptr<StructuredValue>& definition);
     Macro(ObjectFile* owner, const Token& name, Visibility visibility, bool default_only, Callable::Arguments arguments, Body body);
 
     [[nodiscard]] Body expand(const std::vector<Expression>& arguments, std::shared_ptr<Environment> outer_environment) const;

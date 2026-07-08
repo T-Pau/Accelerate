@@ -1,0 +1,11 @@
+# Internal Explanations
+
+<!-- --8<-- [start:summary] -->
+This section contains explanations of rationale of implementation details of Accelerate, explanations of concepts and complex components, and guidelines for contributing to the project.
+<!-- --8<-- [end:summary] -->
+
+It is intended to developers who want to contribute to the project. It provides explanations of the rationale behind implementation details and explains complex components and how they work together. For detailed documentation of the classes and how to use them, see the [Internal Reference](../Reference/index.md) section.
+
+## [Translating a Program or Library](Translation.md)
+
+--8<-- "docs/Internal/Explanations/Translation.md:summary"

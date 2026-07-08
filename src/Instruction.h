@@ -34,6 +34,9 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using namespace tpau::cpp_kernal;
 
+/**
+ * @brief Represents an instruction, listing the valid addressing modes and their corresponding opcodes.
+ */
 class Instruction {
 public:
     bool has_addressing_mode(Symbol addressing_mode) const {return opcodes.contains(addressing_mode);}

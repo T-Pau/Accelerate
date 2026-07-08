@@ -37,6 +37,9 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using namespace tpau::cpp_kernal;
 
+/**
+ * @brief Represents a label, which is a position in the code: `label:` or `:`.
+ */
 class LabelBody: public BodyElement {
 public:
     explicit LabelBody(Symbol name): name(name) {}

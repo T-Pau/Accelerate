@@ -33,6 +33,9 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "BaseExpression.h"
 #include "EvaluationContext.h"
 
+/**
+ * @brief Represents a label expression, which refers to a label in an object or the next/previous unnamed label: `label_name`, `:+`, `:-`.
+ */
 class LabelExpression: public BaseExpression {
 public:
     LabelExpression(const Location& location, Symbol object_name, Symbol label_name): BaseExpression(location), label_type(::NAMED), object_name(object_name), label_name(label_name) {}

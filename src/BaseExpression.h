@@ -43,7 +43,7 @@ class EvaluationContext;
 class Environment;
 
 /**
- * Abstract base class for all expression nodes.
+ * Abstract base class for all expressions.
  */
 class BaseExpression {
 public:

@@ -65,7 +65,7 @@ add_library(xlr8-library STATIC
         ObjectFile.cc
         ObjectFileParser.cc
         ObjectNameExpression.cc
-        ParsedValue.cc
+        StructuredValue.cc
         Range.cc
         RepeatBody.cc
         ScopeBody.cc

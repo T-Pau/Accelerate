@@ -40,6 +40,9 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using namespace tpau::cpp_kernal;
 
+/**
+ * @brief Represents a body element that computes a checksum over a range of memory: `.checksum algorithm start end [parameters]`.
+ */
 class ChecksumBody: public BodyElement {
   public:
     ChecksumBody(std::shared_ptr<ChecksumAlgorithm> algorithm_, Expression start, Expression end, std::unordered_map<Symbol, Expression> parameters): algorithm{std::move(algorithm_)}, start{std::move(start)}, end{std::move(end)}, parameters{std::move(parameters)} {size_range_ = SizeRange{algorithm->result_size(), algorithm->result_size()};}

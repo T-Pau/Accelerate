@@ -45,6 +45,9 @@ using namespace tpau::cpp_kernal;
 
 class Target;
 
+/**
+ * @brief This class gets tokens from a file.
+ */
 class FileTokenizer: public Tokenizer {
 public:
     explicit FileTokenizer(const SearchPath& search_path = SearchPath::empty_path, const Target* target = {}, bool use_preprocessor = true, const std::unordered_set<Symbol>& defines = {});

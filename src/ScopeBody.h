@@ -36,6 +36,8 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using namespace tpau::cpp_kernal;
 
+/**
+  * @brief Represents a body, that introduces a new scope for its contained body.  */
 class ScopeBody: public BodyElement {
   public:
     static Body create(Body body, const std::shared_ptr<Environment>& inner_environment);

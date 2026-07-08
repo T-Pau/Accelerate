@@ -32,6 +32,9 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "Body.h"
 
+/**
+ * @brief Represents an assignment, which defines a local constant or variable: `name = value`.
+ */
 class AssignmentBody: public BodyElement {
 public:
     AssignmentBody(Visibility visibility, Symbol name, Expression value): visibility(visibility), name(name), value(std::move(value)) {}

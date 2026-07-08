@@ -1,0 +1,39 @@
+table.doc-native-definition {
+    width: auto;
+}
+
+div.doc-native-definition {
+    font-size: .64rem;
+    border: 1px solid rgba(0, 0, 0, 0.12);
+
+    div {
+        padding: .9375em 1.25em;
+    }
+
+    div.title {
+        font-weight: bold;
+        margin-bottom: 0.5em;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+    }
+
+    span.doc-template-parameters {
+        display: block;
+    }
+
+    span.doc-template-requirements {
+        display: block;
+        margin-left: 1.5em;
+    }
+
+    span.name {
+        font-weight: bold;
+    }
+
+    table.doc-native-definition {
+        border-collapse: collapse;
+
+        td {
+            padding: 0;
+        }
+    }
+}

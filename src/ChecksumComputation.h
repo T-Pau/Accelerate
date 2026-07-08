@@ -35,6 +35,9 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "ChecksumAlgorithm.h"
 
+/**
+  * @brief Represents a checksum computation, which computes a checksum over a range of memory and writes the result to a specified position.
+  */
 class ChecksumComputation {
   public:
     ChecksumComputation(std::shared_ptr<ChecksumAlgorithm> algorithm, uint64_t result_position, uint64_t start, uint64_t end, std::unordered_map<Symbol, Value> parameters): algorithm{std::move(algorithm)}, result_position{result_position}, start{start}, end{end}, parameters{std::move(parameters)} {}

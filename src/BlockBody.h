@@ -34,6 +34,9 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "Body.h"
 
+/**
+ * @brief Represents a sequence of body elements.
+ */
 class BlockBody: public BodyElement {
 public:
     BlockBody() = default;

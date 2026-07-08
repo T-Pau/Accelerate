@@ -35,7 +35,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <tpau-cpp-kernal/Symbol.h>
 
-#include "ParsedValue.h"
+#include "StructuredValue.h"
 
 using namespace tpau::cpp_kernal;
 
@@ -44,7 +44,7 @@ class Target;
 class StringEncoding {
   public:
     StringEncoding() = default;
-    StringEncoding(Symbol name, const std::shared_ptr<ParsedValue>& definition, const Target &target);
+    StringEncoding(Symbol name, const std::shared_ptr<StructuredValue>& definition, const Target &target);
 
     [[nodiscard]] size_t encoded_size(const std::string& string) const {return encode(nullptr, string);}
     [[nodiscard]] size_t encoded_size(const Value& value) const;
@@ -74,17 +74,17 @@ class StringEncoding {
     size_t encode(std::string* bytes, const std::string& string) const;
     [[nodiscard]] std::optional<uint8_t> encode(char32_t codepoint) const;
 
-    void add_range(const std::shared_ptr<ParsedValue>& range);
+    void add_range(const std::shared_ptr<StructuredValue>& range);
     void add_range(const CharacterRange& range) {ranges.emplace_back(range);}
-    void add_named(const Token& target_token, const std::shared_ptr<ParsedValue>& sources);
+    void add_named(const Token& target_token, const std::shared_ptr<StructuredValue>& sources);
     void add_named(const std::u32string& source, uint8_t target);
-    void add_named_ranges(const Token& prefix_token, const std::shared_ptr<ParsedValue>& ranges);
+    void add_named_ranges(const Token& prefix_token, const std::shared_ptr<StructuredValue>& ranges);
     void add_named_range(const std::u32string& prefix, char32_t source_start, uint8_t target_start, uint8_t length);
-    void add_singleton(const Token& target_token, const std::shared_ptr<ParsedValue>& sources);
+    void add_singleton(const Token& target_token, const std::shared_ptr<StructuredValue>& sources);
     void add_singleton(uint32_t source, uint8_t target);
-    void import_base(const Token& base_name, const std::shared_ptr<ParsedValue>& base_parameters, const Target& target);
+    void import_base(const Token& base_name, const std::shared_ptr<StructuredValue>& base_parameters, const Target& target);
     void import_base_range(const StringEncoding* base, uint8_t start, uint8_t end, uint8_t offset);
-    void set_name_delimiters(const std::shared_ptr<ParsedValue>& delimiters);
+    void set_name_delimiters(const std::shared_ptr<StructuredValue>& delimiters);
 
     [[nodiscard]] bool has_named() const {return !named_open.empty();}
 

@@ -40,6 +40,9 @@ using namespace tpau::cpp_kernal;
 
 class StringEncoding;
 
+/**
+  * @brief Implements an encoder that encodes string values using a specific StringEncoding.
+  */
 class StringEncoder: public BaseEncoder {
 public:
     StringEncoder() = default;

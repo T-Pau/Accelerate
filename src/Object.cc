@@ -53,7 +53,7 @@ const Token Object::token_section{Token::NAME, SECTION};
 const Token Object::token_uses{Token::NAME, USES};
 
 
-Object::Object(ObjectFile* owner, const Token& name, const std::shared_ptr<ParsedValue>& definition): Entity(owner, name, definition) {
+Object::Object(ObjectFile* owner, const Token& name, const std::shared_ptr<StructuredValue>& definition): Entity(owner, name, definition) {
     auto parameters = definition->as_dictionary();
 
     if (auto address_value = parameters->get_optional(token_address)) {

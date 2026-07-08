@@ -34,6 +34,9 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "Tokenizer.h"
 
+/**
+ * @brief This class gets tokens from a sequence of already parsed tokens.
+ */
 class SequenceTokenizer: public Tokenizer {
 public:
     SequenceTokenizer(const Location& location, std::vector<Token> tokens): location(location), tokens(std::move(tokens)) { current_position = this->tokens.begin();}

@@ -44,6 +44,9 @@ using namespace tpau::cpp_kernal;
 
 class CPUParser;
 
+/**
+ * @brief Represents a CPU, which defines its instruction sets, its syntax and encoding.
+ */
 class CPU {
 public:
     static const CPU& get(Symbol name, Symbol base = {});

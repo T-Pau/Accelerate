@@ -50,18 +50,18 @@ protected:
 private:
     std::shared_ptr<ObjectFile> file;
 
-    void parse_constant(const Token& name, const std::shared_ptr<ParsedValue>& definition);
+    void parse_constant(const Token& name, const std::shared_ptr<StructuredValue>& definition);
     void parse_format_version();
-    void parse_function(const Token& name, const std::shared_ptr<ParsedValue>& definition);
+    void parse_function(const Token& name, const std::shared_ptr<StructuredValue>& definition);
     void parse_import();
-    void parse_macro(const Token& name, const std::shared_ptr<ParsedValue>& definition);
-    void parse_object(const Token& name, const std::shared_ptr<ParsedValue>& definition);
+    void parse_macro(const Token& name, const std::shared_ptr<StructuredValue>& definition);
+    void parse_object(const Token& name, const std::shared_ptr<StructuredValue>& definition);
     void parse_pin();
     void parse_target();
     void parse_use();
 
     static const std::unordered_map<Symbol, void (ObjectFileParser::*)()> parser_methods;
-    static const std::unordered_map<Symbol, void (ObjectFileParser::*)(const Token& name, const std::shared_ptr<ParsedValue>& definition)> symbol_parser_methods;
+    static const std::unordered_map<Symbol, void (ObjectFileParser::*)(const Token& name, const std::shared_ptr<StructuredValue>& definition)> symbol_parser_methods;
     static const Token token_constant;
     static const Token token_format_version;
     static const Token token_function;

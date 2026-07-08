@@ -34,6 +34,9 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 class Encoder;
 
+/**
+ * @brief The base class for encoders, which are responsible for encoding values into bytes.
+ */
 class BaseEncoder {
 public:
     virtual ~BaseEncoder() = default;

@@ -37,6 +37,9 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 using namespace tpau::cpp_kernal;
 
 
+/**
+ * @brief Represents a body that reports an error when encoded. It can be used with conditional compilation to report errors when certain conditions are met: `.error message`.
+ */
 class ErrorBody: public BodyElement {
 public:
     explicit ErrorBody(const Location& location, std::string message): location(location), message(std::move(message)) {}

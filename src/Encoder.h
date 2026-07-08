@@ -36,6 +36,9 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "StringEncoder.h"
 #include "Tokenizer.h"
 
+/**
+ * @brief Represents an encoder, which is responsible for encoding values into bytes. This is the class other parts of the program interact with. This class is a wrapper around the BaseEncoder hierarchy.
+ */
 class Encoder {
   public:
     explicit Encoder(const IntegerEncoder& encoder): encoder{std::make_shared<IntegerEncoder>(encoder)} {}

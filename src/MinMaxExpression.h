@@ -33,7 +33,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "BaseExpression.h"
 #include "Expression.h"
 
-/// @brief Expression representing the minimum or maximum of two sub-expressions.
+/// @brief Expression representing the minimum or maximum of two sub-expressions: `.min(a, b)` or `.max(a, b)`.
 class MinMaxExpression: public BaseExpression {
   public:
     /** 

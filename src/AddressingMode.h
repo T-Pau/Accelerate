@@ -39,6 +39,9 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using namespace tpau::cpp_kernal;
 
+/**
+ * @brief Represents an addressing mode, which defines how an instruction's operands are specified and encoded.
+ */
 class AddressingMode {
 public:
     class Notation {

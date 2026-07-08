@@ -36,6 +36,9 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using namespace tpau::cpp_kernal;
 
+/**
+  * @brief Represents a macro call: `macro_name(arg1, arg2, ...)`.
+  */
 class MacroBody: public BodyElement {
   public:
     MacroBody(const Token& name, std::vector<Expression> arguments, const Macro* macro = {}): BodyElement(SizeRange(0,{})), name(name), macro(macro), arguments(std::move(arguments)) {}

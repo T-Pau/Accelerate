@@ -36,6 +36,9 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using namespace tpau::cpp_kernal;
 
+/**
+  * @brief Implements an encoder that encodes integer values, taking into account the minimum size and byte order.
+  */
 class IntegerEncoder: public BaseEncoder {
 public:
     enum Type {

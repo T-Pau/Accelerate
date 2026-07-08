@@ -29,15 +29,15 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <tpau-cpp-kernal/LocationException.h>
 
-#include "ParsedValue.h"
+#include "StructuredValue.h"
 #include "BodyParser.h"
 
 using namespace tpau::cpp_kernal;
 
-bool ParsedValue::initialized = false;
-TokenGroup ParsedValue::start_group;
+bool StructuredValue::initialized = false;
+TokenGroup StructuredValue::start_group;
 
-void ParsedValue::initialize() {
+void StructuredValue::initialize() {
     if (!initialized) {
 
         start_group = TokenGroup({}, {Token::less, Token::colon, Token::curly_open, Token::square_open}, "object start");
@@ -47,24 +47,24 @@ void ParsedValue::initialize() {
 }
 
 
-std::shared_ptr<ParsedValue> ParsedValue::parse(Tokenizer &tokenizer) {
+std::shared_ptr<StructuredValue> StructuredValue::parse(Tokenizer &tokenizer) {
     initialize();
 
     auto token = tokenizer.expect(start_group, TokenGroup(Token::NEWLINE));
 
-    std::shared_ptr<ParsedValue> object;
+    std::shared_ptr<StructuredValue> object;
 
     if (token == Token::less) {
-        object = std::make_shared<ParsedBody>(tokenizer);
+        object = std::make_shared<StructuredBody>(tokenizer);
     }
     else if (token == Token::colon) {
-        object = std::make_shared<ParsedScalar>(tokenizer);
+        object = std::make_shared<StructuredScalar>(tokenizer);
     }
     else if (token == Token::curly_open) {
-        object = std::make_shared<ParsedDictionary>(tokenizer);
+        object = std::make_shared<StructuredDictionary>(tokenizer);
     }
     else if (token == Token::square_open) {
-        object = std::make_shared<ParsedArray>(tokenizer);
+        object = std::make_shared<StructuredArray>(tokenizer);
     }
     else {
         throw LocationException(token.location, "unexpected {}", token.type_name());
@@ -75,57 +75,57 @@ std::shared_ptr<ParsedValue> ParsedValue::parse(Tokenizer &tokenizer) {
     return object;
 }
 
-void ParsedValue::setup(FileTokenizer &tokenizer) {
+void StructuredValue::setup(FileTokenizer &tokenizer) {
     tokenizer.add_punctuations({"{", "}", "[", "]", ":"});
 }
 
 
-const ParsedArray *ParsedValue::as_array() const {
+const StructuredArray *StructuredValue::as_array() const {
     if (!is_array()) {
         throw LocationException(location, "array expected");
     }
 
-    return reinterpret_cast<const ParsedArray*>(this);
+    return reinterpret_cast<const StructuredArray*>(this);
 }
 
 
-const ParsedBody *ParsedValue::as_body() const {
+const StructuredBody *StructuredValue::as_body() const {
     if (!is_body()) {
         throw LocationException(location, "body expected");
     }
 
-    return reinterpret_cast<const ParsedBody*>(this);
+    return reinterpret_cast<const StructuredBody*>(this);
 }
 
 
-const ParsedDictionary *ParsedValue::as_dictionary() const {
+const StructuredDictionary *StructuredValue::as_dictionary() const {
     if (!is_dictionary()) {
         throw LocationException(location, "dictionary expected");
     }
 
-    return reinterpret_cast<const ParsedDictionary*>(this);
+    return reinterpret_cast<const StructuredDictionary*>(this);
 }
 
 
-const ParsedScalar *ParsedValue::as_scalar() const {
+const StructuredScalar *StructuredValue::as_scalar() const {
     if (!is_scalar()) {
         throw LocationException(location, "scalar expected");
     }
 
-    return reinterpret_cast<const ParsedScalar*>(this);
+    return reinterpret_cast<const StructuredScalar*>(this);
 }
 
 
-const ParsedScalar *ParsedValue::as_singular_scalar() const {
+const StructuredScalar *StructuredValue::as_singular_scalar() const {
     if (!is_singular_scalar()) {
         throw LocationException(location, "singular scalar expected");
     }
 
-    return reinterpret_cast<const ParsedScalar*>(this);
+    return reinterpret_cast<const StructuredScalar*>(this);
 }
 
 
-ParsedArray::ParsedArray(Tokenizer &tokenizer) {
+StructuredArray::StructuredArray(Tokenizer &tokenizer) {
     tokenizer.skip(Token::NEWLINE);
     while (true) {
         auto token = tokenizer.next();
@@ -135,13 +135,13 @@ ParsedArray::ParsedArray(Tokenizer &tokenizer) {
         }
 
         tokenizer.unget(token);
-        entries.emplace_back(ParsedValue::parse(tokenizer));
+        entries.emplace_back(StructuredValue::parse(tokenizer));
     }
     tokenizer.expect(Token::NEWLINE, TokenGroup::newline);
 }
 
 
-ParsedDictionary::ParsedDictionary(Tokenizer &tokenizer) {
+StructuredDictionary::StructuredDictionary(Tokenizer &tokenizer) {
     tokenizer.skip(Token::NEWLINE);
     while (true) {
         auto token = tokenizer.next();
@@ -149,12 +149,12 @@ ParsedDictionary::ParsedDictionary(Tokenizer &tokenizer) {
             break;
         }
 
-        entries[token] = ParsedValue::parse(tokenizer);
+        entries[token] = StructuredValue::parse(tokenizer);
     }
     tokenizer.expect(Token::NEWLINE, TokenGroup::newline);
 }
 
-std::shared_ptr<ParsedValue> ParsedDictionary::get_optional(const Token &token) const {
+std::shared_ptr<StructuredValue> StructuredDictionary::get_optional(const Token &token) const {
     auto it = entries.find(token);
     if (it == entries.end()) {
         return {};
@@ -165,7 +165,7 @@ std::shared_ptr<ParsedValue> ParsedDictionary::get_optional(const Token &token) 
 
 
 
-std::shared_ptr<ParsedValue> ParsedDictionary::operator[](const Token& token) const {
+std::shared_ptr<StructuredValue> StructuredDictionary::operator[](const Token& token) const {
     auto value = get_optional(token);
     if (value == nullptr) {
             throw LocationException(location, "missing key '{}'", token);
@@ -175,13 +175,13 @@ std::shared_ptr<ParsedValue> ParsedDictionary::operator[](const Token& token) co
 }
 
 
-ParsedScalar::ParsedScalar(Tokenizer &tokenizer) {
+StructuredScalar::StructuredScalar(Tokenizer &tokenizer) {
     tokens = tokenizer.collect_until(Token::NEWLINE);
     tokenizer.skip(Token::NEWLINE);
 }
 
 
-ParsedBody::ParsedBody(Tokenizer &tokenizer) {
+StructuredBody::StructuredBody(Tokenizer &tokenizer) {
     auto parser = BodyParser(tokenizer);
 
     body = parser.parse();

@@ -47,6 +47,9 @@ class IfBodyClause;
 class LabelBody;
 class ScopeBody;
 
+/**
+ * @brief Represents a body of an object or macro. This is the class other parts of the program interact with. It is a wrapper around the BodyElement hierarchy.
+ */
 class Body {
 public:
 

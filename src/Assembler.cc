@@ -95,7 +95,7 @@ Target Assembler::parse_target(Symbol name, Symbol file_name) {
     parsed_target.name = name;
     target = &parsed_target;
 
-    ParsedValue::setup(tokenizer);
+    StructuredValue::setup(tokenizer);
     tokenizer.add_literal(token_data_end);
     tokenizer.add_literal(token_data_size);
     tokenizer.add_literal(token_data_start);
@@ -258,7 +258,7 @@ void Assembler::parse_section(const Token& directive) {
             tokenizer.unget(token);
         }
 
-        auto parse_value = ParsedValue::parse(tokenizer);
+        auto parse_value = StructuredValue::parse(tokenizer);
         tokenizer.unget(Token{Token::NEWLINE, tokenizer.current_location()});
         auto parameters = parse_value->as_dictionary();
 
@@ -320,7 +320,7 @@ void Assembler::parse_section(const Token& directive) {
 
 void Assembler::parse_segment(const Token& directive) {
     auto name = tokenizer.expect(Token::NAME, TokenGroup::newline);
-    auto parse_value = ParsedValue::parse(tokenizer);
+    auto parse_value = StructuredValue::parse(tokenizer);
     tokenizer.unget(Token{Token::NEWLINE, tokenizer.current_location()});
     auto parameters = parse_value->as_dictionary();
 
@@ -456,7 +456,7 @@ void Assembler::parse_string_encoding(const Token& directive) {
         throw LocationException(tokenizer.current_location(), "expected newline");
     }
     else {
-        auto parse_value = ParsedValue::parse(tokenizer);
+        auto parse_value = StructuredValue::parse(tokenizer);
         tokenizer.unget(Token{Token::NEWLINE, tokenizer.current_location()});
         if (parsed_target.string_encoding(name.as_symbol())) {
             throw LocationException(name.location, "duplicate string encoding '{}'", name.as_string().c_str());
@@ -540,7 +540,7 @@ void Assembler::parse_macro(Visibility visibility, bool default_only) {
     }
 }
 
-std::vector<MemoryMap::Block> Assembler::parse_address(const ParsedValue* address) const {
+std::vector<MemoryMap::Block> Assembler::parse_address(const StructuredValue* address) const {
     auto blocks = std::vector<MemoryMap::Block>();
 
     if (address->is_array()) {
@@ -570,7 +570,7 @@ MemoryMap::AccessType Assembler::parse_type(const Token& type) {
     }
 }
 
-MemoryMap::Block Assembler::parse_single_address(const ParsedScalar* address) const {
+MemoryMap::Block Assembler::parse_single_address(const StructuredScalar* address) const {
     size_t index = 0;
     uint64_t bank = 0;
 

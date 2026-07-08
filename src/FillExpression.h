@@ -33,7 +33,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "BaseExpression.h"
 #include "Expression.h"
 
-/// @brief Expression representing a sequence of repeated values.
+/// @brief Expression representing a sequence of repeated values: `.fill(count, value)`.
 class FillExpression: public BaseExpression {
 public:
     /**

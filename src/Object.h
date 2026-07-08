@@ -36,15 +36,18 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Body.h"
 #include "Entity.h"
 #include "MemoryMap.h"
-#include "ParsedValue.h"
+#include "StructuredValue.h"
 #include "Token.h"
 #include "Visibility.h"
 
 class ObjectFile;
 
+/**
+  * @brief Represents an object.
+  */
 class Object: public Entity {
 public:
-    Object(ObjectFile* owner, const Token& name, const std::shared_ptr<ParsedValue>& definition);
+    Object(ObjectFile* owner, const Token& name, const std::shared_ptr<StructuredValue>& definition);
     Object(ObjectFile* owner, const MemoryMap::Section* section, Visibility visibility, bool default_only, const Token& name);
 
     bool static less_pointers(const Object* a, const Object* b) {return *a < *b;}

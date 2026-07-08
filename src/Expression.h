@@ -50,6 +50,9 @@ class ObjectExpression;
 class ObjectNameExpression;
 class VariableExpression;
 
+/**
+ * @brief Represents an expression. This is the class other parts of the program interact with. It is a wrapper around the BaseExpression hierarchy.
+ */
 class Expression {
 public:
     // Keep in sync with BinaryExpression::operation_names

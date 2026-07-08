@@ -34,6 +34,9 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "BaseExpression.h"
 
+/**
+ * @brief Represents a defined expression, which checks if a preprocessor constant is defined: `.defined(USE_FEATURE)`.
+ */
 class DefinedExpression: public BaseExpression {
 public:
     explicit DefinedExpression(const Location& location, Symbol symbol): BaseExpression(location), symbol{symbol} {}
