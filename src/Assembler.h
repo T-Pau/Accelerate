@@ -33,7 +33,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ObjectFile.h"
 #include "Target.h"
 #include "FileTokenizer.h"
-#include "Object.h"
+#include "Entity/Object.h"
 
 /**
  * @brief This class parses source files or target definitions into entities.

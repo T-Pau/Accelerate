@@ -35,7 +35,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <tpau-cpp-kernal/Symbol.h>
 
 #include "ArgumentType.h"
-#include "Body.h"
+#include "Body/Body.h"
 
 using namespace tpau::cpp_kernal;
 

@@ -30,10 +30,12 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "Body.h"
+#include "Expression/BinaryExpression.h"
+#include "Body/Body.h"
 #include "Encoder.h"
 #include "FileTokenizer.h"
-#include "VariableExpression.h"
+#include "Expression/UnaryExpression.h"
+#include "Expression/VariableExpression.h"
 
 class ExpressionParser {
 public:
@@ -50,9 +52,9 @@ public:
 private:
     class BinaryOperator {
     public:
-        BinaryOperator(Expression::BinaryOperation operation, int level): operation(operation), level(level) {}
+        BinaryOperator(BinaryExpression::Operation operation, int level): operation(operation), level(level) {}
 
-        Expression::BinaryOperation operation;
+        BinaryExpression::Operation operation;
         int level;
     };
 
@@ -74,7 +76,7 @@ private:
         explicit Element(const Token& token, ElementType type = OPERAND): type(type), node(std::make_shared<VariableExpression>(token.location, token.as_symbol())), location(token.location) {}
         Element(const Expression& node, int level = 0, ElementType type = OPERAND): type(type), level(level), node(node), location(node.location()) {}
         Element(const Location& location, BinaryOperator binary);
-        Element(const Location& location, Expression::UnaryOperation unary);
+        Element(const Location& location, UnaryExpression::Operation unary);
         explicit Element(const Location& location, ElementType type): type(type), location(location) {}
 
         [[nodiscard]] const char* description() const;
@@ -90,7 +92,7 @@ private:
         union {
             int none;
             BinaryOperator binary;
-            Expression::UnaryOperation unary;
+            UnaryExpression::Operation unary;
         } operation = {0};
 
         Location location;
@@ -120,7 +122,7 @@ private:
     static const Token token_true;
 
     static std::unordered_map<Token, BinaryOperator> binary_operators;
-    static std::unordered_map<Token, Expression::UnaryOperation> unary_operators;
+    static std::unordered_map<Token, UnaryExpression::Operation> unary_operators;
     static bool initialized;
 };
 

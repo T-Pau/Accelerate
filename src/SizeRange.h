@@ -38,28 +38,129 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using namespace tpau::cpp_kernal;
 
+/**
+ * @brief Represents a possibly unbounded range of sizes.
+ */
 class SizeRange {
 public:
+    /**
+     * @brief Construct a SizeRange representing unknown size.
+     */
     SizeRange() = default;
+
+    /**
+     * @brief Construct a SizeRange representing a known size.
+     *
+     * @param size The size of the range.
+     */
     explicit SizeRange(uint64_t size): minimum(size), maximum(size) {}
+    /**
+     * @brief Construct a SizeRange with a minimum and optional maximum.
+     *
+     * @param minimum The minimum size.
+     * @param maximum The maximum size. If not set, the range is unbounded.
+     */
     SizeRange(uint64_t minimum, std::optional<uint64_t> maximum): minimum(minimum), maximum(maximum) {}
 
+    /**
+     * @brief Get the maximum value of the size range.
+     *
+     * @return The maximum value, if any.
+     */
     [[nodiscard]] std::optional<Value> maximum_value() const {return maximum ? Value(*maximum) : std::optional<Value>();}
+
+    /**
+     * @brief Get the minimum value of the size range.
+     *
+     * @return The minimum value.
+     */
     [[nodiscard]] Value minimum_value() const {return Value(minimum);}
+
+    /**
+     * @brief If the size range has a known size, return it as a Value.
+     *
+     * @return The size of the range as a Value, {} if it is unknown.
+     */
     [[nodiscard]] std::optional<Value> value() const;
+
+    /**
+     * @brief Get the size of the range, if it is known.
+     *
+     * @return The size of the range, {} if it is unknown.
+     */
     [[nodiscard]] std::optional<uint64_t> size() const;
+
+    /**
+     * @brief Check if the size of the range is known.
+     *
+     * @return `true` if the size is known, `false` otherwise.
+     */
     [[nodiscard]] bool has_size() const {return maximum.has_value() && minimum == *maximum;}
 
+    /**
+     * @brief Get the maximum of this size range and another.
+     *
+     * It takes the maximum of the minimums and maximums of the two ranges.
+     *
+     * @param other The other size range to compare with.
+     * @return A new SizeRange representing the maximum of the two ranges.
+     */
+    SizeRange max(const SizeRange& other);
+
+    /**
+     * @brief Compare two size ranges for equality.
+     *
+     * @param other The size range to compare with.
+     * @return `true` if the size ranges are equal, `false` otherwise.
+     */
     bool operator==(const SizeRange&other) const {return minimum == other.minimum && maximum == other.maximum;}
+
+    /**
+     * @brief Compare two size ranges for inequality.
+     *
+     * @param other The size range to compare with.
+     * @return `true` if the size ranges are not equal, `false` otherwise.
+     */
     bool operator!=(const SizeRange&other) const {return !(*this == other);}
+
+    /**
+     * @brief Subtract another size range from this one.
+     *
+     * @param other The size range to subtract.
+     * @return The resulting size range.
+     */
     SizeRange operator-(const SizeRange& other) const;
+
+    /**
+     * @brief Add another size range to this one.
+     *
+     * @param other The size range to add.
+     * @return The resulting size range.
+     */
     SizeRange operator+(const SizeRange& other) const;
+
+    /**
+     * @brief Add another size range to this one and assign the result to this range.
+     *
+     * @param other The size range to add.
+     * @return The resulting size range.
+     */
     SizeRange operator+=(const SizeRange& other) {*this = *this + other; return *this;}
 
-    uint64_t minimum = 0;
-    std::optional<uint64_t> maximum = 0;
+    /// The minimum size of the range.
+    uint64_t minimum{0};
+
+    /// The maximum size of the range. If not set, the range is unbounded.
+    std::optional<uint64_t> maximum;
 };
 
+/**
+ * @brief Output a SizeRange to a stream.
+ *
+ * @param stream The stream to output to.
+ * @param size_range The SizeRange to output.
+ * @return The stream after outputting the SizeRange.
+ */
 std::ostream& operator<<(std::ostream& stream, const SizeRange& size_range);
 
 #endif // HAD_XLR8_SIZE_RANGE_H

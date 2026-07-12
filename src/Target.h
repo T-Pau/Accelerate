@@ -32,7 +32,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "CPU.h"
 #include "MemoryMap.h"
-#include "Output.h"
+#include "Entity/Output.h"
 #include "StringEncoding.h"
 
 class ObjectFile;

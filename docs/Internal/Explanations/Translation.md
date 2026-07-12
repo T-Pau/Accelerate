@@ -9,8 +9,21 @@ It provides an overview of the translation process, and for each step explains w
 To report as many errors as possible, Accelerate will continue translating after an error is encountered. The part causing the error will be erroneous. Operations on these will propagate the errors as appropriate, but will not cause additional error messages.
 
 !!! warning
-    Translation is currently implemented differently. Bringing the implementation in line with this description is the next major step in the development of Accelerate.
+    Bringing the implementation in line with this description is currently underway.
 
+!!! question
+    Enter names into the environment during parsing, or in a separate pass? They need to be entered before [Step 2: Resolve names](#2-resolve-names).
+
+!!! warning
+    I'm unclear on how to handle if bodies. Should I enter the names even if I'm unsure the part will actually be translated? Otherwise, the resolution won't work. Maybe a good middle ground is to discard parts that are known not to be translated prior to the resolution step. Is that good enough? It won't work for `.exists()`. The other option is to have two resolution passes.
+
+!!! note
+    [Step 2: Resolve names](#2-resolve-names) needs to collect all referenced constants, macros, and functions, so they can be evaluated before evaluating this entity. 
+    
+    Ensuring the right order is done in the ObjectFile evaluation methods, not the Body/Expression evaluation methods. This centralizes the processing, and keeps the Body/Expression evaluation methods simpler.
+
+!!! note
+    Unresolved entities are no longer collected, they are reported during [Step 2: Resolve names](#2-resolve-names).
 
 # 1. Parse all Entities
 
@@ -25,7 +38,7 @@ After this step, all entities are known.
 
 # 2. Resolve Names
 
-This step resolves all names in bodies and expressions in their respective scopes. It is implemented by the `resolved()` methods of entities, body parts, and expressions.
+This step resolves all names in bodies and expressions in their respective scopes. It is implemented by the `resolve()` methods of entities, body parts, and expressions.
 
 Only entities in the program or library being translated are evaluated; names in loaded libraries are already resolved.
 
@@ -55,7 +68,7 @@ Variables will be evaluated before they are used, so all known information will 
 
 # 4. Expand Macro and Function Calls
 
-Macro and function bodies are copied to their call sites, and their arguments are substituted. Then, expressions in their bodies are simplified (like in step 3). This is implemented by the `calls_expanded()` methods of macros and functions.
+Macro and function bodies are copied to their call sites, and their arguments are substituted. Then, expressions in their bodies are simplified (like in step 3). This is implemented by the `expand_calls()` methods of macros and functions.
 
 Calls in macros and functions are evaluated before the macro or function is used, so only simplified bodies are copied. Circular calls will be detected and result in an error.
 

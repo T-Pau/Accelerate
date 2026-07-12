@@ -35,7 +35,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <tpau-cpp-kernal/DiagnosticOutput.h>
 #include <tpau-cpp-kernal/FileReader.h>
 
-#include "Entity.h"
+#include "Entity/Entity.h"
 
 using namespace tpau::cpp_kernal;
 

@@ -81,3 +81,13 @@ std::ostream& operator<<(std::ostream& stream, const SizeRange& size_range) {
 
     return stream;
 }
+
+
+SizeRange SizeRange::max(const SizeRange& other) {
+    uint64_t new_minimum = std::max(minimum, other.minimum);
+    std::optional<uint64_t> new_maximum;
+    if (maximum && other.maximum) {
+        new_maximum = std::max(*maximum, *other.maximum);
+    }
+    return {new_minimum, new_maximum};
+}

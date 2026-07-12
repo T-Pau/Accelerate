@@ -1,0 +1,89 @@
+/*
+Copyright (C) Dieter Baron
+
+The authors can be contacted at <assembler@tpau.group>
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions
+are met:
+
+1. Redistributions of source code must retain the above copyright
+   notice, this list of conditions and the following disclaimer.
+
+2. The names of the authors may not be used to endorse or promote
+  products derived from this software without specific prior
+  written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE AUTHORS "AS IS" AND ANY EXPRESS
+OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHORS BE LIABLE FOR ANY
+DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE
+GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER
+IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
+IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+*/
+
+#include "SizeofExpression.h"
+
+#include <tpau-cpp-kernal/LocationException.h>
+
+#include "EvaluationContext.h"
+#include "Expression/Expression.h"
+#include "Expression/ValueExpression.h"
+#include "Expression/VariableExpression.h"
+
+using namespace tpau::cpp_kernal;
+
+Expression SizeofExpression::create(const Location& location, const std::vector<Expression>& arguments) {
+    if (arguments.size() != 1) {
+        throw LocationException(location, "invalid number of arguments");
+    }
+    auto& argument = arguments[0];
+
+    if (!argument.is<VariableExpression>()) {
+        throw LocationException(argument.location(), "symbol argument required");
+    }
+
+    return Expression(std::make_shared<SizeofExpression>(location, argument.as<VariableExpression>()->variable()));
+}
+
+
+Expression SizeofExpression::create(const Location& location, const Object* object) {
+    const auto size_range = object->size_range();
+    if (size_range.size()) {
+        return ValueExpression::create(location, Value(*size_range.size()));
+    }
+    else {
+        return Expression(std::make_shared<SizeofExpression>(location, object));
+    }
+}
+
+
+std::optional<Expression> SizeofExpression::evaluate(const EvaluationContext& context) {
+    if (object && object->size_range().size()) {
+        return ValueExpression::create(location, Value(*object->size_range().size()));
+    }
+    else {
+        return {};
+    }
+}
+
+
+void SizeofExpression::serialize_sub(std::ostream& stream) const { stream << ".sizeof(" << object_name << ")"; }
+
+
+void SizeofExpression::resolve(Scope* scope, Entity* containing_entity) {
+    if (!object) {
+        if (const auto new_object = scope->get_object(object_name)) {
+            object = new_object;
+        }
+        else {
+            throw LocationException(location, "unknown object {}", object_name);
+        }
+    }
+}
+

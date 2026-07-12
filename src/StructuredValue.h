@@ -36,7 +36,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Token.h"
 #include "FileTokenizer.h"
 #include "TokenGroup.h"
-#include "Body.h"
+#include "Body/Body.h"
 
 class StructuredArray;
 class StructuredBody;

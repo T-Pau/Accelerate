@@ -1,0 +1,90 @@
+#ifndef HAD_XLR8_FUNCTION_EXPRESSION_H
+#define HAD_XLR8_FUNCTION_EXPRESSION_H
+
+/*
+Copyright (C) Dieter Baron
+
+The authors can be contacted at <accelerate@tpau.group>
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions
+are met:
+
+1. Redistributions of source code must retain the above copyright
+   notice, this list of conditions and the following disclaimer.
+
+2. The names of the authors may not be used to endorse or promote
+  products derived from this software without specific prior
+  written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE AUTHORS "AS IS" AND ANY EXPRESS
+OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHORS BE LIABLE FOR ANY
+DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE
+GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER
+IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
+IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+*/
+
+#include "Expression/Expression.h"
+#include "FileTokenizer.h"
+#include "Entity/Function.h"
+
+/**
+ * Expression representing a function call: `function_name(arg1, arg2, ...)`.
+ */
+class FunctionExpression: public BaseExpression {
+public:
+    /**
+     * Create a function expression.
+     * 
+     * @param location The location of the expression in the source code.
+     * @param name The name of the function.
+     * @param arguments The arguments to the function.
+     */
+    FunctionExpression(const Location& location, Symbol name, std::vector<Expression> arguments): BaseExpression(location), name(name), arguments(std::move(arguments)) {}
+
+    /**
+     * Set up tokenizer for parsing function expressions.
+     * 
+     * @param tokenizer The tokenizer to set up.
+     */
+    static void setup(FileTokenizer& tokenizer);
+
+    /**
+     * Create a function expression.
+     * 
+     * @param location The location of the expression in the source code.
+     * @param name The name of the function.
+     * @param arguments The arguments to the function.
+     * @return The created expression.
+     */
+    static Expression create(const Location& location, Symbol name, const std::vector<Expression>& arguments);
+    [[nodiscard]] std::optional<Expression> evaluate(const EvaluationContext& context) override;
+
+protected:
+    void traverse(std::function<void(Expression&)> callable) override;
+    void serialize_sub(std::ostream& stream) const override;
+    void resolve(Scope* scope, Entity* containing_entity) override;
+    void expand_calls() override;
+
+private:
+    /// @brief The name of the function being called.
+    Symbol name;
+
+    /// @brief The arguments to the function.
+    std::vector<Expression> arguments;
+
+    /// @brief The function being called, if it is a user-defined function.
+    const Function* function{};
+
+    /// @brief The built-in functions implemented in C++.
+    static const std::unordered_map<Symbol, Expression (*)(const Location& location, const std::vector<Expression>&)> builtin_functions;
+};
+
+
+#endif // HAD_XLR8_FUNCTION_EXPRESSION_H

@@ -38,11 +38,11 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using namespace tpau::cpp_kernal;
 
-Address::Address(Tokenizer& tokenizer, std::shared_ptr<Environment> environment) {
+Address::Address(Tokenizer& tokenizer, std::shared_ptr<Scope> scope) {
     auto expression = ExpressionParser(tokenizer).parse();
-    if (environment) {
+    if (scope) {
         auto result = EvaluationResult{};
-        auto context = EvaluationContext{result, EvaluationContext::STANDALONE, std::move(environment)};
+        auto context = EvaluationContext{result, EvaluationContext::STANDALONE, std::move(scope)};
         expression.evaluate(context);
     }
     auto value = expression.value();

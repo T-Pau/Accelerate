@@ -1,4 +1,4 @@
-# cspell: ignore fontawesome inlinehilite linenums nbsp pymdownx pygments superfences
+# cspell: ignore fontawesome inlinehilite linenums nbsp pymdownx pygments superfences zensical mkdocstrings twemoji
 
 [project]
 site_name = "Accelerate"
@@ -37,7 +37,9 @@ nav = [
         { "index.md" =  "Internal/index.md" },
         { "Explanations" = [
             { "index.md" =  "Internal/Explanations/index.md" },
-            { "Translating a Program or Library" = "Internal/Explanations/Translation.md" }
+            { "Coding Conventions" = "Internal/Explanations/Coding-Conventions.md" },
+            { "Translating a Program or Library" = "Internal/Explanations/Translation.md" },
+            { "Body Elements and Expressions" = "Internal/Explanations/Body-and-Expressions.md" }
         ]},
         { "Reference" = [
             { "index.md" = "Internal/Reference/index.md" },
@@ -63,12 +65,14 @@ nav = [
             { "ChecksumAlgorithmXor" = "Internal/Reference/ChecksumAlgorithmXor.md" },
             { "ChecksumBody" = "Internal/Reference/ChecksumBody.md" },
             { "ChecksumComputation" = "Internal/Reference/ChecksumComputation.md" },
+            { "Constant" = "Internal/Reference/Constant.md" },
+            { "ConstantExpression" = "Internal/Reference/ConstantExpression.md" },
             { "DataBody" = "Internal/Reference/DataBody.md" },
             { "DefinedExpression" = "Internal/Reference/DefinedExpression.md" },
             { "EmptyBody" = "Internal/Reference/EmptyBody.md" },
             { "Encoder" = "Internal/Reference/Encoder.md" },
             { "Entity" = "Internal/Reference/Entity.md" },
-            { "Environment" = "Internal/Reference/Environment.md" },
+            { "EntityExpression" = "Internal/Reference/EntityExpression.md" },
             { "ErrorBody" = "Internal/Reference/ErrorBody.md" },
             { "EvaluationContext" = "Internal/Reference/EvaluationContext.md" },
             { "EvaluationResult" = "Internal/Reference/EvaluationResult.md" },
@@ -90,7 +94,7 @@ nav = [
             { "InstructionEncoder" = "Internal/Reference/InstructionEncoder.md" },
             { "IntegerEncoder" = "Internal/Reference/IntegerEncoder.md" },
             { "LabelBody" = "Internal/Reference/LabelBody.md" },
-            { "LabelExpression" = "Internal/Reference/LabelExpression.md" },
+            { "LabelOffsetExpression" = "Internal/Reference/LabelOffsetExpression.md" },
             { "LibraryGetter" = "Internal/Reference/LibraryGetter.md" },
             { "LibraryLinker" = "Internal/Reference/LibraryLinker.md" },
             { "Linker" = "Internal/Reference/Linker.md" },
@@ -110,6 +114,7 @@ nav = [
             { "ProgramLinker" = "Internal/Reference/ProgramLinker.md" },
             { "Range" = "Internal/Reference/Range.md" },
             { "RepeatBody" = "Internal/Reference/RepeatBody.md" },
+            { "Scope" = "Internal/Reference/Scope.md" },
             { "ScopeBody" = "Internal/Reference/ScopeBody.md" },
             { "SequenceTokenizer" = "Internal/Reference/SequenceTokenizer.md" },
             { "SizeRange" = "Internal/Reference/SizeRange.md" },
@@ -176,7 +181,7 @@ default_handler = "doxygen"
 [project.plugins.mkdocstrings.handlers.doxygen]
 paths = ["src"]
 include_directories = {"src" = ""}
-options = { show_protected = true, show_parameter_types = false }
+options = { show_protected = true, show_parameter_types = false, private_includes = true }
 
 
 [project.theme]

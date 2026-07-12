@@ -32,21 +32,57 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <vector>
 
-#include "SizeRange.h"
+#include <tpau-cpp-kernal/Location.h>
+
+#include "Expression/Expression.h"
+
+using namespace tpau::cpp_kernal;
 
 class UnnamedLabelList {
   public:
-    size_t add_label(SizeRange offset);
-    size_t add_user();
-
-    [[nodiscard]] SizeRange get_next(size_t index) const;
-    [[nodiscard]] SizeRange get_previous(size_t index) const;
-    void update_label(size_t index, SizeRange offset);
+    void add_label(const Location& location, Expression expression);
+    std::optional<Expression> get_next_label(const Location& location) const;
+    std::optional<Expression> get_previous_label(const Location& location) const;
+    size_t size() const {return labels.size();}
 
   private:
-    [[nodiscard]] size_t current_index() const {return entries.size() - 1;}
+    class Label {
+      public:
+        Label(const Location& location, Expression expression): location(location), expression(std::move(expression)) {}
 
-    std::vector<std::optional<SizeRange>> entries;
+        Location location;
+        Expression expression;
+
+        bool operator<(const Label& other) const {
+            return location < other.location;
+        }
+
+        bool operator==(const Label& other) const {
+            return location == other.location;
+        }
+
+        bool operator>(const Label& other) const {
+            return location > other.location;
+        }
+
+        bool operator>=(const Label& other) const {
+            return location >= other.location;
+        }
+
+        bool operator<(const Location& location) const {
+            return this->location < location;
+        }
+
+        bool operator>(const Location& location) const {
+            return this->location > location;
+        }
+
+        bool operator==(const Location& location) const {
+            return this->location == location;
+        }
+    };
+
+    std::vector<Label> labels;
 };
 
 

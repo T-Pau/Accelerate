@@ -29,46 +29,33 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "UnnamedLabelList.h"
 
-#include <tpau-cpp-kernal/Exception.h>
+#include <tpau-cpp-kernal/LocationException.h>
 
 using namespace tpau::cpp_kernal;
 
-size_t UnnamedLabelList::add_label(SizeRange offset) {
-    entries.emplace_back(offset);
-    return current_index();
-}
-
-size_t UnnamedLabelList::add_user() {
-    entries.emplace_back();
-    return current_index();
-}
-
-SizeRange UnnamedLabelList::get_next(size_t index) const {
-    index += 1;
-    while (index < entries.size()) {
-        if (entries[index]) {
-            return *entries[index];
-        }
-        index += 1;
+void UnnamedLabelList::add_label(const Location& location, Expression expression) {
+    if (!labels.empty() && labels.back().location >= location) {
+        throw LocationException(location, "internal error: unnamed labels must be added in order");
     }
-
-    throw Exception("no next unnamed label");
+    labels.emplace_back(location, std::move(expression));
 }
 
-SizeRange UnnamedLabelList::get_previous(size_t index) const {
-    while (index > 0) {
-        index -= 1;
-        if (entries[index]) {
-            return *entries[index];
-        }
+std::optional<Expression> UnnamedLabelList::get_next_label(const Location& location) const {
+    auto it = std::upper_bound(labels.begin(), labels.end(), Label(location, Expression()));
+    if (it != labels.end()) {
+        return it->expression;
     }
-
-    throw Exception("no previous unnamed label");
+    else {
+        return {};
+    }
 }
 
-void UnnamedLabelList::update_label(size_t index, SizeRange offset) {
-    if (!entries[index]) {
-        throw Exception("internal error: can't update unnamed label use");
+std::optional<Expression> UnnamedLabelList::get_previous_label(const Location& location) const {
+    auto it = std::lower_bound(labels.rbegin(), labels.rend(), Label(location, Expression()));
+    if (it != labels.rend()) {
+        return it->expression;
     }
-    entries[index] = offset;
+    else {
+        return {};
+    }
 }

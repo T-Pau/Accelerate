@@ -33,7 +33,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "AddressingMode.h"
 #include "CPUGetter.h"
-#include "DataBody.h"
+#include "Body/DataBody.h"
 #include "ExpressionParser.h"
 #include "StructuredValue.h"
 #include "SequenceTokenizer.h"
@@ -195,7 +195,7 @@ void CPUParser::parse_addressing_mode() {
 
     auto encoding_definition = definition->get_optional(token_encoding);
     if (encoding_definition == nullptr) {
-        addressing_mode.encoding = Body(std::vector<DataBodyElement>({DataBodyElement(Expression(token_opcode), {})}));
+        addressing_mode.encoding = DataBody::create({{Expression::create(token_opcode), {}}});
     }
     else if (encoding_definition->is_scalar()) {
         auto encoding_tokens = std::vector<Token>();
@@ -219,9 +219,9 @@ void CPUParser::parse_addressing_mode() {
 
         auto encoding_tokenizer = SequenceTokenizer(encoding_tokens);
         addressing_mode.encoding = ExpressionParser(encoding_tokenizer).parse_list();
-        for (auto& datum: addressing_mode.encoding.as_data()->data) {
-            if (datum.expression.is_variable() && datum.expression.as_variable()->variable() != token_opcode.as_symbol()) {
-                auto variable_name = datum.expression.as_variable()->variable();
+        for (auto& datum: addressing_mode.encoding.as<DataBody>()->data) {
+            if (datum.expression.is<VariableExpression>() && datum.expression.as<VariableExpression>()->variable() != token_opcode.as_symbol()) {
+                auto variable_name = datum.expression.as<VariableExpression>()->variable();
                 auto encoding_type = addressing_mode.argument(variable_name)->type->as_encoding();
                 if (encoding_type && (!datum.encoding || *datum.encoding == encoding_type->encoding)) {
                     datum.encoding = Encoder{encoding_type->encoding};

@@ -30,10 +30,10 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "Body.h"
+#include "Body/Body.h"
 #include "CPU.h"
-#include "IfBody.h"
-#include "RepeatBody.h"
+#include "Body/IfBody.h"
+#include "Body/RepeatBody.h"
 #include "SizeRange.h"
 #include "Token.h"
 #include "Tokenizer.h"
@@ -43,19 +43,48 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 class BodyParser {
 public:
+    /**
+     * @brief Type of body being parsed.
+     */
     enum ParsingType {
-        ENTITY,         // Parsing a macro or object from source.
-        OUTPUT,         // Parsing output section from target.
-        PARSED_VALUE    // Parsing body in parsed value from object file.
+        ENTITY,           ///< Parsing a macro or object from source.
+        OUTPUT,           ///< Parsing `.output` section from target.
+        STRUCTURED_VALUE  ///< Parsing body in StructuredValue from object file.
     };
 
-    // PARSED_VALUE
-    explicit BodyParser(Tokenizer& tokenizer): parsing_type(PARSED_VALUE), end_token(Token::greater), tokenizer(tokenizer) {}
-    // ENTITY / OUTPUT
-    BodyParser(Tokenizer& tokenizer, const CPU* cpu, bool allow_assigns, const std::unordered_set<Symbol>* defines = {}): parsing_type(allow_assigns ? ENTITY : OUTPUT), cpu(cpu), tokenizer(tokenizer), defines(defines) {}
+    /**
+     * @brief Constructs a BodyParser for parsing a StructuredValue.
+     *
+     * @param tokenizer The tokenizer to parse the StructuredValue from.
+     * @param environment The environment the body is in.
+     */
+    explicit BodyParser(Tokenizer& tokenizer, std::shared_ptr<Scope> environment): parsing_type(STRUCTURED_VALUE), end_token(Token::greater), tokenizer(tokenizer), environment(environment) {}
 
+    /**
+     * @brief Constructs a BodyParser for parsing an entity or output.
+     * 
+     * If `allow_assigns` is `true`, it will parse an entity (macro or object) and allow assignments. If `false`, it will parse an output section.
+     *
+     * @param tokenizer The tokenizer to parse the entity or output from.
+     * @param cpu The CPU context.
+      * @param environment The environment the body is in.
+     * @param allow_assigns Whether assignments are allowed.
+     * @param defines The set of defined symbols.
+     */
+    BodyParser(Tokenizer& tokenizer, const CPU* cpu, std::shared_ptr<Scope> environment, bool allow_assigns, const std::unordered_set<Symbol>* defines = {}): parsing_type(allow_assigns ? ENTITY : OUTPUT), cpu(cpu), tokenizer(tokenizer), environment(environment), defines(defines) {}
+
+    /**
+     * @brief Sets up the FileTokenizer for parsing bodies.
+     *
+     * @param tokenizer The FileTokenizer to set up.
+     */
     static void setup(FileTokenizer& tokenizer);
 
+    /**
+     * @brief Parses the body from the tokenizer.
+     *
+     * @return The parsed body.
+     */
     Body parse();
 
 private:
@@ -81,7 +110,7 @@ private:
     class IfNesting: public Nesting {
       public:
         Body* operator[](size_t index) override {return &clauses[index].body;}
-        Body body() override {return Body(clauses);}
+        Body body() override {return IfBody::create(clauses);}
 
         void add_clause(Expression condition) {clauses.emplace_back(IfBodyClause(std::move(condition), {}));}
         [[nodiscard]] size_t size() const {return clauses.size();}
@@ -122,7 +151,7 @@ private:
 
     ParsingType parsing_type;
     const CPU* cpu = nullptr;
-    std::shared_ptr<Environment> environment = std::make_shared<Environment>();
+    std::shared_ptr<Scope> environment;
     Token end_token = Token::curly_close;
     Tokenizer& tokenizer;
     const std::unordered_set<Symbol>* defines{};

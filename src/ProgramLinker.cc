@@ -73,7 +73,7 @@ void ProgramLinker::link_sub() {
     }
 
     EvaluationResult result;
-    auto environment = std::make_shared<Environment>();
+    auto environment = std::make_shared<Scope>(Visibility::FILE);
     environment->add_next(target->object_file->private_environment);
     environment->add_next(program->public_environment);
     auto context = EvaluationContext{result, EvaluationContext::ENTITY, environment};
@@ -172,7 +172,7 @@ void ProgramLinker::link_sub() {
 }
 
 void ProgramLinker::output(const std::filesystem::path& file_name) {
-    auto environment = std::make_shared<Environment>();
+    auto environment = std::make_shared<Scope>();
 
     for (const auto& object: objects) {
         if (object->has_address()) {
@@ -190,7 +190,7 @@ void ProgramLinker::output(const std::filesystem::path& file_name) {
     environment->add_next(program->public_environment);
 
     EvaluationResult result;
-    output_body.evaluate(EvaluationContext(result, EvaluationContext::OUTPUT, environment, target->defines, SizeRange()));
+    output_body.evaluate(EvaluationContext(result, EvaluationContext::OUTPUT, environment, target->defines, SizeRange(0)));
     // TODO: process result
 
     auto bytes = std::string();

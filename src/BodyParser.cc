@@ -33,13 +33,15 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <tpau-cpp-kernal/FileReader.h>
 #include <tpau-cpp-kernal/LocationException.h>
 
-#include "ChecksumBody.h"
-#include "DataBody.h"
+#include "Body/AssignmentBody.h"
+#include "Body/ChecksumBody.h"
+#include "Body/DataBody.h"
+#include "Body/LabelBody.h"
+#include "Body/MacroBody.h"
+#include "Body/MemoryBody.h"
 #include "ExpressionNode.h"
 #include "ExpressionParser.h"
 #include "InstructionEncoder.h"
-#include "LabelBody.h"
-#include "ObjectNameExpression.h"
 #include "TokenNode.h"
 
 using namespace tpau::cpp_kernal;
@@ -101,7 +103,7 @@ Body BodyParser::parse() {
                 }
 
                 case Token::NAME: {
-                    handle_name(Visibility::SCOPE, token);
+                    handle_name(Visibility::ENTITY, token);
                     break;
                 }
 
@@ -133,20 +135,7 @@ Body BodyParser::parse() {
                         break;
                     }
                     if (token == end_token) {
-                        if (auto file_tokenizer = dynamic_cast<FileTokenizer*>(&tokenizer)) {
-                            try {
-                                // Resolve defines.
-                                auto result = EvaluationResult{};
-                                auto context = EvaluationContext(result, EvaluationContext::STANDALONE, std::make_shared<Environment>(), file_tokenizer->defines);
-                                body.evaluate(context);
-                            }
-                            catch (LocationException& ex) {
-                                DiagnosticOutput::global.error(ex);
-                            }
-                            catch (Exception& ex) {
-                                DiagnosticOutput::global.error(ex);
-                            }
-                        }
+                        // TODO: call body.enter_names() here?
                         return body;
                     }
                     else if (token == Token::colon) {
@@ -183,19 +172,19 @@ Body BodyParser::parse() {
 }
 
 void BodyParser::add_constant(Visibility visibility, const Token& name, const Expression& value) {
-    if (visibility != Visibility::SCOPE) {
+    if (visibility != Visibility::ENTITY) {
         if (!allow_assignment()) {
-            throw LocationException(name.location, "unsupported visibility");
+            throw LocationException(name.location, "unsupported visibility {}", visibility);
         }
-        current_body->append(Body(visibility, name.as_symbol(), value));
+        current_body->append(AssignmentBody::create(visibility, name.as_symbol(), value));
     }
 }
 
 Symbol BodyParser::get_label(bool& is_anonymous) {
     auto trailing_label = current_body->back();
-    if (trailing_label && trailing_label->is_label()) {
+    if (trailing_label && trailing_label->is<LabelBody>()) {
         is_anonymous = false;
-        return trailing_label->as_label()->name;
+        return trailing_label->as<LabelBody>()->name;
     }
     next_label += 1;
     is_anonymous = true;
@@ -203,9 +192,13 @@ Symbol BodyParser::get_label(bool& is_anonymous) {
 }
 
 Expression BodyParser::get_pc(Symbol label) const {
-    // TODO: location
+    // TODO: implement
+#if 0
     auto label_expression = label ? Expression(tokenizer.current_location(), nullptr, label) : Expression(tokenizer.current_location(), LabelExpressionType::PREVIOUS_UNNAMED);
     return {tokenizer.current_location(), ObjectNameExpression::create(tokenizer.current_location(), nullptr), Expression::BinaryOperation::ADD, label_expression};
+#else
+    return {};
+#endif
 }
 
 void BodyParser::parse_directive(const Token& directive) {
@@ -231,7 +224,7 @@ void BodyParser::parse_else() {
         throw Exception(".else outside .if");
     }
     pop_body();
-    push_clause(Expression(tokenizer.current_location(), true));
+    push_clause(ValueExpression::create(tokenizer.current_location(), Value(true)));
     tokenizer.expect(Token::curly_open);
 }
 
@@ -275,13 +268,13 @@ std::shared_ptr<Node> BodyParser::parse_instruction_argument(const Token& token)
 }
 
 void BodyParser::parse_label(Visibility visibility, const Token& name) {
-    current_body->append(Body(name.as_symbol(), SizeRange(current_body->size_range())));
+    current_body->append(LabelBody::create(name.location, name.as_symbol()));
     add_constant(visibility, name, get_pc(name.as_symbol()));
 }
 
 void BodyParser::parse_memory() {
     auto expression_parser = ExpressionParser(tokenizer);
-    auto bank = Expression({}, uint64_t{0});
+    auto bank = ValueExpression::create({}, Value(uint64_t{0}));
     auto start_address = expression_parser.parse();
     tokenizer.expect(Token::comma);
     auto end_address = expression_parser.parse();
@@ -294,7 +287,8 @@ void BodyParser::parse_memory() {
     else {
         tokenizer.unget(token);
     }
-    current_body->append(Body(bank, start_address, end_address));
+    // TODO: correct location
+    current_body->append(MemoryBody::create({}, bank, start_address, end_address));
 }
 
 void BodyParser::parse_repeat() {
@@ -329,7 +323,7 @@ void BodyParser::parse_assignment(Visibility visibility, const Token& name) {
     if (!allow_assignment()) {
         throw LocationException(name.location, "assignment only allowed in entities");
     }
-    current_body->append(Body(visibility, name.as_symbol(), ExpressionParser(tokenizer).parse()));
+    current_body->append(AssignmentBody::create(visibility, name.as_symbol(), ExpressionParser(tokenizer).parse()));
 }
 
 void BodyParser::parse_instruction(const Token& name) {
@@ -397,9 +391,10 @@ void BodyParser::parse_instruction(const Token& name) {
     auto label_expression = get_pc(label);
     auto instruction = Body();
     auto uses_pc = false;
+#if 0        
     {
-        auto instruction_environment = std::make_shared<Environment>();
-        instruction_environment->add(symbol_pc, label_expression);
+        auto instruction_environment = std::make_shared<Scope>();
+        instruction_environment->add(Constant(symbol_pc, label_expression));
         instruction = encoder.encode(name, arguments, instruction_environment, current_size(), uses_pc);
     }
     if (is_anonymous_label) {
@@ -412,6 +407,7 @@ void BodyParser::parse_instruction(const Token& name) {
             next_label -= 1;
         }
     }
+#endif
 
     current_body->append(instruction);
 }
@@ -489,7 +485,7 @@ void BodyParser::parse_error() {
     throw LocationException(location, message.as_string());
 }
 
-void BodyParser::parse_unnamed_label() { current_body->append(Body(Symbol(), current_size())); }
+void BodyParser::parse_unnamed_label() { current_body->append(LabelBody::create(tokenizer.current_location(), Symbol())); }
 
 void BodyParser::handle_name(Visibility visibility, const Token& name) {
     auto token = tokenizer.next();
@@ -501,7 +497,7 @@ void BodyParser::handle_name(Visibility visibility, const Token& name) {
     }
     else {
         tokenizer.unget(token);
-        if (visibility != Visibility::SCOPE) {
+        if (visibility != Visibility::ENTITY) {
             throw LocationException(name.location, "macro call can't have visibility");
         }
 
@@ -520,7 +516,7 @@ void BodyParser::handle_name(Visibility visibility, const Token& name) {
             }
             arguments.emplace_back(tokenizer);
         }
-        current_body->append(Body(name, arguments));
+        current_body->append(MacroBody::create(name.location, name.as_symbol(), arguments));
     }
 }
 
@@ -590,8 +586,8 @@ void BodyParser::parse_binary_file() {
         else if (start > 0) {
             data = data.substr(*start);
         }
-        auto elements = std::vector<DataBodyElement>{DataBodyElement{Expression{filename.location, Value(data, true)}, {}}};
-        current_body->append(Body(elements));
+        auto elements = std::vector<DataBodyElement>{DataBodyElement{ValueExpression::create(filename.location, Value(data, true)), {}}};
+        current_body->append(DataBody::create(elements));
     }
     else {
         throw LocationException(filename.location, "can't find file '{}'", filename);

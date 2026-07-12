@@ -31,18 +31,18 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <tpau-cpp-kernal/Exception.h>
 
-#include "Entity.h"
+#include "Entity/Entity.h"
 
 using namespace tpau::cpp_kernal;
 
-EvaluationContext::EvaluationContext(EvaluationResult& result, EvaluationType type, std::shared_ptr<Environment> environment, std::unordered_set<Symbol> defines, const SizeRange& offset): type(type), environment(std::move(environment)), defines{std::move(defines)}, offset(offset), result(result) {
+EvaluationContext::EvaluationContext(EvaluationResult& result, EvaluationType type, std::shared_ptr<Scope> environment, std::unordered_set<Symbol> defines, const SizeRange& offset): type(type), environment(std::move(environment)), defines{std::move(defines)}, offset(offset), result(result) {
     if (type == MACRO_EXPANSION) {
         label_offset = SizeRange(0, {});
         labels_are_offset = true;
     }
 }
 
-EvaluationContext::EvaluationContext(EvaluationResult& result, Entity* entity): type(ENTITY), entity(entity), environment(entity->environment), offset(0), result(result) {}
+EvaluationContext::EvaluationContext(EvaluationResult& result, Entity* entity): type(ENTITY), entity(entity), environment(entity->scope), offset(0), result(result) {}
 
 EvaluationContext EvaluationContext::evaluating_variable(Symbol variable) const {
     auto new_context = *this;
@@ -99,10 +99,11 @@ std::optional<Expression> EvaluationContext::lookup_variable(Symbol variable) co
     if (skipping(variable)) {
         return {};
     }
-    return (*environment)[variable];
+    // TODO: return (*environment)[variable];
+    return {};
 }
 
-EvaluationContext EvaluationContext::adding_scope(std::shared_ptr<Environment> new_environment, const SizeRange& new_label_offset) const {
+EvaluationContext EvaluationContext::adding_scope(std::shared_ptr<Scope> new_environment, const SizeRange& new_label_offset) const {
     auto new_context = *this;
     new_context.environment = std::move(new_environment);
     new_context.label_offset = new_label_offset;

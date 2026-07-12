@@ -36,12 +36,10 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <tpau-cpp-kernal/FileReader.h>
 #include <tpau-cpp-kernal/LocationException.h>
 
-#include "ObjectExpression.h"
+#include "Expression/ObjectExpression.h"
 #include "SequenceTokenizer.h"
 
 using namespace tpau::cpp_kernal;
-
-const Token ObjectFile::Constant::token_value{Token::NAME, "value"};
 
 const unsigned int ObjectFile::format_version_major = 1;
 const unsigned int ObjectFile::format_version_minor = 0;
@@ -56,7 +54,7 @@ std::ostream& operator<<(std::ostream& stream, const std::shared_ptr<ObjectFile>
     return stream;
 }
 
-std::ostream& operator<<(std::ostream& stream, const ObjectFile::Constant& file) {
+std::ostream& operator<<(std::ostream& stream, const Constant& file) {
     file.serialize(stream);
     return stream;
 }
@@ -149,7 +147,6 @@ void ObjectFile::add_constant(std::unique_ptr<Constant> constant) {
         throw Exception();
     }
 
-    constant->set_owner(this);
     constants[constant->name] = std::move(constant);
     if (!own_constant->is_default_only()) {
         add_to_environment(own_constant->name, own_constant->visibility, own_constant->value);
@@ -314,15 +311,7 @@ void ObjectFile::evaluate() {
     }
 }
 
-void ObjectFile::remove_private_constants() {
-    std::erase_if(constants, [this](const auto& item) {
-        if (item.second->visibility == Visibility::PRIVATE) {
-            private_environment->remove(item.first);
-            return true;
-        }
-        return false;
-    });
-}
+
 
 void ObjectFile::resolve_defaults() {
     for (const auto& [name, constant] : constants) {
@@ -378,8 +367,8 @@ Object* ObjectFile::create_object(Symbol section_name, Visibility visibility, bo
 }
 
 ObjectFile::ObjectFile() noexcept {
-    public_environment = std::make_shared<Environment>();
-    private_environment = std::make_shared<Environment>(public_environment);
+    public_environment = std::make_shared<Scope>();
+    private_environment = std::make_shared<Scope>(public_environment);
 }
 
 void ObjectFile::add_to_environment(Object* object) { add_to_environment(object->name, object->visibility, Expression(object->location, object)); }
@@ -484,22 +473,6 @@ void ObjectFile::add_macro(std::unique_ptr<Macro> macro) {
     macros[macro->name] = std::move(macro);
 }
 
-void ObjectFile::Constant::serialize(std::ostream& stream) const {
-    stream << ".constant " << name << " {" << std::endl;
-    serialize_entity(stream);
-    stream << "    value: " << value << std::endl;
-    stream << "}" << std::endl;
-}
-
-ObjectFile::Constant::Constant(ObjectFile* owner, const Token& name, const std::shared_ptr<StructuredValue>& definition) : Entity(owner, name, definition) {
-    auto parameters = definition->as_dictionary();
-
-    auto tokenizer = SequenceTokenizer((*parameters)[token_value]->as_scalar()->tokens);
-    value = Expression(tokenizer);
-    if (!tokenizer.ended()) {
-        throw LocationException(tokenizer.current_location(), "invalid value for constant");
-    }
-}
 
 void ObjectFile::import(ObjectFile* library) {
     if (imported_libraries.contains(library)) {
@@ -515,7 +488,7 @@ void ObjectFile::set_target(const Target* new_target) {
     target = new_target;
 }
 
-std::shared_ptr<Environment> ObjectFile::environment(Visibility visibility) const {
+std::shared_ptr<Scope> ObjectFile::environment(Visibility visibility) const {
     switch (visibility) {
         case Visibility::SCOPE:
             return {}; // TODO: throw?

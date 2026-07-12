@@ -30,7 +30,7 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "Environment.h"
+#include "Scope.h"
 #include "Tokenizer.h"
 #include <iostream>
 
@@ -58,9 +58,9 @@ class Address {
      * Constructs an address by parsing an expression from a tokenizer.
      * 
      * @param tokenizer The tokenizer to parse the expression from.
-     * @param environment The environment to evaluate the expression in.
+     * @param scope The scope to evaluate the expression in.
      */
-    explicit Address(Tokenizer& tokenizer, std::shared_ptr<Environment> environment = {});
+    explicit Address(Tokenizer& tokenizer, std::shared_ptr<Scope> scope = {});
 
     /**
      * Serializes the address to a stream. The format is `address` if the bank is 0, and `bank:address` otherwise.

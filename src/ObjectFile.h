@@ -32,9 +32,10 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <tpau-cpp-kernal/Symbol.h>
 
-#include "Function.h"
-#include "Macro.h"
-#include "Object.h"
+#include "Entity/Constant.h"
+#include "Entity/Function.h"
+#include "Entity/Macro.h"
+#include "Entity/Object.h"
 #include "Target.h"
 #include "Unresolved.h"
 
@@ -42,22 +43,6 @@ using namespace tpau::cpp_kernal;
 
 class ObjectFile {
 public:
-    class Constant: public Entity {
-    public:
-        Constant(ObjectFile* owner, const Token& name, Visibility visibility, bool default_only, Expression value): Entity(owner, name, visibility, default_only), value(std::move(value)) {}
-        Constant(ObjectFile* owner, const Token& name, const std::shared_ptr<StructuredValue>& definition);
-
-        void serialize(std::ostream& stream) const;
-
-        Expression value;
-
-      protected:
-        void evaluate_inner(EvaluationContext &context) override {value.evaluate(context);}
-
-      private:
-        static const Token token_value;
-    };
-
     ObjectFile() noexcept;
 
     void add_constant(std::unique_ptr<Constant> constant);
@@ -82,11 +67,12 @@ public:
     void resolve_defaults();
     void serialize(std::ostream& stream) const;
     void set_target(const Target* new_target);
-    std::shared_ptr<Environment> environment(Visibility visibility) const;
+    std::shared_ptr<Scope> environment(Visibility visibility) const;
     void collect_constants(std::unordered_set<const Constant*>& set, bool public_only = false) const;
 
-    std::shared_ptr<Environment> public_environment;
-    std::shared_ptr<Environment> private_environment;
+    std::shared_ptr<Scope> public_environment;
+    std::shared_ptr<Scope> private_environment;
+    std::shared_ptr<Scope> file_scope;
 
     Symbol name;
     const Target* target = &Target::empty;

@@ -29,24 +29,31 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "Visibility.h"
 
-#define PRIVATE_LITERAL "private"
-#define PUBLIC_LITERAL "public"
+const char VisibilityHelper::file_literal[] = "file";
+const char VisibilityHelper::private_literal[] = "private";
+const char VisibilityHelper::public_literal[] = "public";
 
-const Token VisibilityHelper::token_private_directive = Token(Token::DIRECTIVE, PRIVATE_LITERAL);
-const Token VisibilityHelper::token_private_name = Token(Token::NAME, PRIVATE_LITERAL);
-const Token VisibilityHelper::token_public_directive = Token(Token::DIRECTIVE, PUBLIC_LITERAL);
-const Token VisibilityHelper::token_public_name = Token(Token::NAME, PUBLIC_LITERAL);
+const Token VisibilityHelper::token_private_directive = Token(Token::DIRECTIVE, private_literal);
+const Token VisibilityHelper::token_private_name = Token(Token::NAME, private_literal);
+const Token VisibilityHelper::token_public_directive = Token(Token::DIRECTIVE, public_literal);
+const Token VisibilityHelper::token_public_name = Token(Token::NAME, public_literal);
 
 std::ostream& operator<<(std::ostream& stream, Visibility visibility) {
     switch  (visibility) {
         case Visibility::SCOPE:
             stream << "none";
             break;
-        case Visibility::PUBLIC:
-            stream << PUBLIC_LITERAL;
+        case Visibility::ENTITY:
+            stream << "entity";
+            break;
+        case Visibility::FILE:
+            stream << VisibilityHelper::file_literal;
             break;
         case Visibility::PRIVATE:
-            stream << PRIVATE_LITERAL;
+            stream << VisibilityHelper::private_literal;
+            break;
+        case Visibility::PUBLIC:
+            stream << VisibilityHelper::public_literal;
             break;
     }
     return stream;

@@ -170,7 +170,7 @@ void Assembler::parse(Symbol file_name) {
 
 void Assembler::parse_assignment(Visibility visibility, const Token& name, bool default_only) {
     auto value = ExpressionParser(tokenizer).parse();
-    object_file->add_constant(std::make_unique<ObjectFile::Constant>(object_file.get(), name, visibility, default_only, value));
+    object_file->file_scope->add(std::make_unique<Constant>(name.location, name.as_symbol(), visibility, object_file->file_scope, default_only, value));
 }
 
 void Assembler::parse_cpu(const Token& directive) {
@@ -349,7 +349,7 @@ void Assembler::parse_symbol(Visibility visibility, const Token& name) {
         }
         else if (token == Token::curly_open) {
             // TODO: error if .reserved
-            object->body = BodyParser(tokenizer, cpu, true, &tokenizer.defines).parse();
+            object->body = BodyParser(tokenizer, cpu, object_file->file_scope, true, &tokenizer.defines).parse();
             object->resolve_labels();
             break;
         }
@@ -443,7 +443,7 @@ void Assembler::parse_output(const Token& directive) {
         throw LocationException(token.location, "expected '{'");
     }
 
-    parsed_target.output = std::make_unique<Output>(&parsed_target, directive.location, BodyParser(tokenizer, parsed_target.cpu, false, &tokenizer.defines).parse());
+    parsed_target.output = std::make_unique<Output>(&parsed_target, directive.location, BodyParser(tokenizer, parsed_target.cpu, object_file->file_scope, false, &tokenizer.defines).parse());
 }
 
 void Assembler::parse_string_encoding(const Token& directive) {
@@ -519,7 +519,7 @@ void Assembler::parse_name(Visibility visibility, const Token& name, bool defaul
         tokenizer.expect(Token::equals);
 
         auto definition = ExpressionParser(tokenizer).parse();
-        object_file->add_function(std::make_unique<Function>(object_file.get(), name, visibility, default_only, arguments, definition));
+        object_file->file_scope->add(std::make_unique<Function>(name.location, name.as_symbol(), visibility, object_file->file_scope, default_only, arguments, definition));
     }
     else {
         tokenizer.unget(token);
@@ -531,9 +531,9 @@ void Assembler::parse_macro(Visibility visibility, bool default_only) {
     auto name = tokenizer.expect(Token::NAME);
     auto arguments = Callable::Arguments(tokenizer);
     tokenizer.expect(Token::curly_open);
-    auto body = BodyParser(tokenizer, cpu, false, &tokenizer.defines).parse();
+    auto body = BodyParser(tokenizer, cpu, object_file->file_scope, false, &tokenizer.defines).parse();
 
-    object_file->add_macro(std::make_unique<Macro>(object_file.get(), name, visibility, default_only, arguments, body));
+    object_file->file_scope->add(std::make_unique<Macro>(name.location, name.as_symbol(), visibility, object_file->file_scope, default_only, arguments, body));
 
     if (auto macro = object_file->macro(name.as_symbol())) {
         macro->resolve_labels();

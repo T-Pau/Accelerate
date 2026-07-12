@@ -182,7 +182,8 @@ StructuredScalar::StructuredScalar(Tokenizer &tokenizer) {
 
 
 StructuredBody::StructuredBody(Tokenizer &tokenizer) {
-    auto parser = BodyParser(tokenizer);
+    // TODO: this shouldn't need an environment
+    auto parser = BodyParser(tokenizer, std::make_shared<Scope>(Visibility::SCOPE));
 
     body = parser.parse();
     tokenizer.skip(Token::NEWLINE);

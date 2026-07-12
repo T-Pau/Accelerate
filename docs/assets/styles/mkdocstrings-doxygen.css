@@ -2,7 +2,8 @@ table.doc-native-definition {
     width: auto;
 }
 
-div.doc-native-definition {
+div.doc-native-definition,
+div.doc-include-file {
     font-size: .64rem;
     border: 1px solid rgba(0, 0, 0, 0.12);
 

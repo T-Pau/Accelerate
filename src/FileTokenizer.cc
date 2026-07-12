@@ -544,7 +544,8 @@ void FileTokenizer::preprocess_pre_if(const Token& directive, const std::vector<
     auto tokenizer = SequenceTokenizer{arguments};
     auto expression = ExpressionParser{tokenizer}.parse();
     auto result = EvaluationResult{};
-    auto context = EvaluationContext{result, EvaluationContext::STANDALONE, std::make_shared<Environment>(), defines};
+    // TODO: check if this is correct
+    auto context = EvaluationContext{result, EvaluationContext::STANDALONE, std::make_shared<Scope>(Visibility::SCOPE), defines};
     expression.evaluate(context);
     if (!expression.has_value()) {
         throw LocationException(directive.location, "condition in {} must be constant", directive);

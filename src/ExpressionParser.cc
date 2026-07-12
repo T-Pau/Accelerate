@@ -31,8 +31,9 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <tpau-cpp-kernal/LocationException.h>
 
-#include "DataBody.h"
-#include "FunctionExpression.h"
+#include "Body/DataBody.h"
+#include "Expression/FunctionExpression.h"
+#include "Expression/ValueExpression.h"
 #include "Target.h"
 
 using namespace tpau::cpp_kernal;
@@ -46,7 +47,7 @@ const Token ExpressionParser::token_string = Token{Token::NAME, "string"};
 const Token ExpressionParser::token_true = Token{Token::NAME, ".true"};
 
 std::unordered_map<Token, ExpressionParser::BinaryOperator> ExpressionParser::binary_operators;
-std::unordered_map<Token, Expression::UnaryOperation> ExpressionParser::unary_operators;
+std::unordered_map<Token, UnaryExpression::Operation> ExpressionParser::unary_operators;
 bool ExpressionParser::initialized = false;
 
 void ExpressionParser::initialize() {
@@ -54,39 +55,39 @@ void ExpressionParser::initialize() {
         return;
     }
     binary_operators = {
-        {Token::double_pipe, BinaryOperator(Expression::BinaryOperation::LOGICAL_OR, 1)},
+        {Token::double_pipe, BinaryOperator(BinaryExpression::Operation::LOGICAL_OR, 1)},
 
-        {Token::double_ampersand, BinaryOperator(Expression::BinaryOperation::LOGICAL_AND, 2)},
+        {Token::double_ampersand, BinaryOperator(BinaryExpression::Operation::LOGICAL_AND, 2)},
 
-        {Token::double_equals, BinaryOperator(Expression::BinaryOperation::EQUAL, 3)},
-        {Token::greater, BinaryOperator(Expression::BinaryOperation::GREATER, 3)},
-        {Token::greater_equals, BinaryOperator(Expression::BinaryOperation::GREATER_EQUAL, 3)},
-        {Token::less, BinaryOperator(Expression::BinaryOperation::LESS, 3)},
-        {Token::less_equals, BinaryOperator(Expression::BinaryOperation::LESS_EQUAL, 3)},
-        {Token::exclaim_equals, BinaryOperator(Expression::BinaryOperation::NOT_EQUAL, 3)},
+        {Token::double_equals, BinaryOperator(BinaryExpression::Operation::EQUAL, 3)},
+        {Token::greater, BinaryOperator(BinaryExpression::Operation::GREATER, 3)},
+        {Token::greater_equals, BinaryOperator(BinaryExpression::Operation::GREATER_EQUAL, 3)},
+        {Token::less, BinaryOperator(BinaryExpression::Operation::LESS, 3)},
+        {Token::less_equals, BinaryOperator(BinaryExpression::Operation::LESS_EQUAL, 3)},
+        {Token::exclaim_equals, BinaryOperator(BinaryExpression::Operation::NOT_EQUAL, 3)},
 
-        {Token::plus, BinaryOperator(Expression::BinaryOperation::ADD, 4)},
-        {Token::minus, BinaryOperator(Expression::BinaryOperation::SUBTRACT, 4)},
-        {Token::pipe, BinaryOperator(Expression::BinaryOperation::BITWISE_OR, 4)},
-        {Token::caret, BinaryOperator(Expression::BinaryOperation::BITWISE_XOR, 4)},
+        {Token::plus, BinaryOperator(BinaryExpression::Operation::ADD, 4)},
+        {Token::minus, BinaryOperator(BinaryExpression::Operation::SUBTRACT, 4)},
+        {Token::pipe, BinaryOperator(BinaryExpression::Operation::BITWISE_OR, 4)},
+        {Token::caret, BinaryOperator(BinaryExpression::Operation::BITWISE_XOR, 4)},
 
-        {Token::star, BinaryOperator(Expression::BinaryOperation::MULTIPLY, 5)},
-        {Token::slash, BinaryOperator(Expression::BinaryOperation::DIVIDE, 5)},
-        {Token::ampersand, BinaryOperator(Expression::BinaryOperation::BITWISE_AND, 5)},
-        {token_mod, BinaryOperator(Expression::BinaryOperation::MODULO, 5)},
+        {Token::star, BinaryOperator(BinaryExpression::Operation::MULTIPLY, 5)},
+        {Token::slash, BinaryOperator(BinaryExpression::Operation::DIVIDE, 5)},
+        {Token::ampersand, BinaryOperator(BinaryExpression::Operation::BITWISE_AND, 5)},
+        {token_mod, BinaryOperator(BinaryExpression::Operation::MODULO, 5)},
 
-        {Token::double_less, BinaryOperator(Expression::BinaryOperation::SHIFT_LEFT, 6)},
-        {Token::double_greater, BinaryOperator(Expression::BinaryOperation::SHIFT_RIGHT, 6)}
+        {Token::double_less, BinaryOperator(BinaryExpression::Operation::SHIFT_LEFT, 6)},
+        {Token::double_greater, BinaryOperator(BinaryExpression::Operation::SHIFT_RIGHT, 6)}
     };
 
     unary_operators = {
-        {Token::exclaim, Expression::UnaryOperation::NOT},
-        {Token::plus, Expression::UnaryOperation::PLUS},
-        {Token::minus, Expression::UnaryOperation::MINUS},
-        {Token::caret, Expression::UnaryOperation::BANK_BYTE},
-        {Token::less, Expression::UnaryOperation::LOW_BYTE},
-        {Token::greater, Expression::UnaryOperation::HIGH_BYTE},
-        {Token::tilde, Expression::UnaryOperation::BITWISE_NOT}
+        {Token::exclaim, UnaryExpression::Operation::NOT},
+        {Token::plus, UnaryExpression::Operation::PLUS},
+        {Token::minus, UnaryExpression::Operation::MINUS},
+        {Token::caret, UnaryExpression::Operation::BANK_BYTE},
+        {Token::less, UnaryExpression::Operation::LOW_BYTE},
+        {Token::greater, UnaryExpression::Operation::HIGH_BYTE},
+        {Token::tilde, UnaryExpression::Operation::BITWISE_NOT}
     };
 
     initialized = true;
@@ -96,18 +97,21 @@ void ExpressionParser::initialize() {
 ExpressionParser::Element ExpressionParser::next_element() const {
     auto token = tokenizer.next();
 
-    if (token.is_value() || token.is_string()) {
-        return {Expression(token)};
+    if (token.is_value()) {
+        return {ValueExpression::create(token.location, token.as_value())};
+    }
+    else if (token.is_string()) {
+        return {ValueExpression::create(token.location, Value(token.as_symbol()))};
     }
     else if (token.is_name()) {
         if (token == token_false) {
-            return {Expression{token.location, false}};
+            return {ValueExpression::create(token.location, Value(false))};
         }
         else if (token == token_true) {
-            return {Expression{token.location, true}};
+            return {ValueExpression::create(token.location, Value(true))};
         }
         else if (token == token_none) {
-            return {Expression{token.location, Value{}}};
+            return {ValueExpression::create(token.location, Value{})};
         }
         auto next_token = tokenizer.next();
         if (next_token == Token::paren_open) {
@@ -119,7 +123,8 @@ ExpressionParser::Element ExpressionParser::next_element() const {
         }
     }
     else if (token == Token::colon_minus || token == Token::colon_plus) {
-        return {Expression(token), 0, UNNAMED_LABEL};
+        // TODO: correct?
+        return Element(token.location, UNNAMED_LABEL);
     }
     else if (token == Token::comma) {
         return Element(token.location, COMMA);
@@ -272,7 +277,7 @@ Expression ExpressionParser::do_parse() {
                     }
 
                     case UNNAMED_LABEL:
-                        tokenizer.unget(Token(Token::PUNCTUATION, next.location, next.node.as_variable()->variable()));
+                        tokenizer.unget(Token(Token::PUNCTUATION, next.location, next.node.as<VariableExpression>()->variable()));
                         // fallthrough
                     case END:
                         reduce_binary(0);
@@ -348,13 +353,13 @@ void ExpressionParser::reduce_unary(const ExpressionParser::Element& next) {
     if (top.type != UNARY_OPERATOR || !next.is_operand()) {
         throw LocationException({top.location, next.location}, "internal error: invalid element types in reduce_unary");
     }
-    top = Element(Expression({top.location, next.location}, top.operation.unary, next.node), 0);
+    top = Element(UnaryExpression::create({top.location, next.location}, top.operation.unary, next.node), 0);
 }
 
 void ExpressionParser::reduce_binary(int up_to_level) {
     while (top.is_operand() && !stack.empty()) {
         if (stack.back().is_unary_operator()) {
-            top = Element(Expression({stack.back().location, top.location}, stack.back().operation.unary, top.node), 0);
+            top = Element(UnaryExpression::create({stack.back().location, top.location}, stack.back().operation.unary, top.node), 0);
             stack.pop_back();
         }
         if (top.is_operand() && stack.size() < 2) {
@@ -368,7 +373,7 @@ void ExpressionParser::reduce_binary(int up_to_level) {
             break;
         }
 
-        top = Element(Expression({left.location, top.location}, left.node, operation.operation.binary.operation, top.node), operation.level);
+        top = Element(BinaryExpression::create({left.location, top.location}, left.node, operation.operation.binary.operation, top.node), operation.level);
 
         stack.pop_back();
         stack.pop_back();
@@ -402,7 +407,7 @@ Body ExpressionParser::parse_list() {
         }
     }
 
-    return Body(list);
+    return DataBody::create(list);
 }
 
 std::optional<Encoder> ExpressionParser::parse_encoding() const {
@@ -487,8 +492,8 @@ void ExpressionParser::reduce_argument_list() {
 }
 
 void ExpressionParser::reduce_function_call() {
-    const auto name = top.node.as_variable();
-    top = Element(Expression({top.location, tokenizer.current_location()}, name->variable(), top.arguments), 0);
+    const auto name = top.node.as<VariableExpression>();
+    top = Element(FunctionExpression::create({top.location, tokenizer.current_location()}, name->variable(), top.arguments), 0);
 }
 
 
@@ -533,6 +538,6 @@ ExpressionParser::Element::Element(const Location& location, ExpressionParser::B
     operation.binary = binary;
 }
 
-ExpressionParser::Element::Element(const Location& location, Expression::UnaryOperation unary): type(UNARY_OPERATOR), level(0), location(location) {
+ExpressionParser::Element::Element(const Location& location, UnaryExpression::Operation unary): type(UNARY_OPERATOR), level(0), location(location) {
     operation.unary = unary;
 }

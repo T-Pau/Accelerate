@@ -76,6 +76,9 @@ These classes represent expressions, which are used in various places in a progr
 ### [BinaryExpression](BinaryExpression.md)
 ::: BinaryExpression.@brief
 
+### [ConstantExpression](ConstantExpression.md)
+::: ConstantExpression.@brief
+
 ### [DefinedExpression](DefinedExpression.md)
 ::: DefinedExpression.@brief
 
@@ -91,8 +94,8 @@ These classes represent expressions, which are used in various places in a progr
 ### [InRangeExpression](InRangeExpression.md)
 ::: InRangeExpression.@brief
 
-### [LabelExpression](LabelExpression.md)
-::: LabelExpression.@brief
+### [LabelOffsetExpression](LabelOffsetExpression.md)
+::: LabelOffsetExpression.@brief
 
 ### [MinMaxExpression](MinMaxExpression.md)
 ::: MinMaxExpression.@brief
@@ -150,6 +153,9 @@ These classes represent body elements, which are used to define the contents of 
 ### [IfBody](IfBody.md)
 ::: IfBody.@brief
 
+### [LabelBody](LabelBody.md)
+::: LabelBody.@brief
+
 ### [MacroBody](MacroBody.md)
 ::: MacroBody.@brief
 
@@ -161,9 +167,6 @@ These classes represent body elements, which are used to define the contents of 
 
 ### [ScopeBody](ScopeBody.md)
 ::: ScopeBody.@brief
-
-### [LabelBody](LabelBody.md)
-::: LabelBody.@brief
 
 
 ## Memory
@@ -280,8 +283,8 @@ These classes are not yet sorted into the above categories.
 !!! TODO
     Sort the classes into categories, creating new categories as needed.
 
-### [Environment](Environment.md)
-::: Environment.@brief
+### [Constant](Constant.md)
+::: Constant.@brief
 
 ### [EvaluationContext](EvaluationContext.md)
 ::: EvaluationContext.@brief
@@ -312,6 +315,9 @@ These classes are not yet sorted into the above categories.
 
 ### [Range](Range.md)
 ::: Range.@brief
+
+### [Scope](Scope.md)
+::: Scope.@brief
 
 ### [SizeRange](SizeRange.md)
 ::: SizeRange.@brief

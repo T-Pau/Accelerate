@@ -31,25 +31,121 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include <iostream>
+#include <format>
+#include <optional>
 
 #include "Token.h"
 
+/**
+ * @brief Represents the visibility of a declaration.
+ */
 enum class Visibility {
+    /**
+     * This visibility is used for entities that are only visible in the current scoped body.
+     *
+     * It is used for parameters to macros and functions, and for the loop variable in `.repeat`.
+     *
+     * This scope cannot be selected via a visibility directive.
+     */
     SCOPE,
+
+    /**
+     * This visibility is used for entities that are only visible within the current entity.
+     *
+     * It is the default visibility for names defined in an entity.
+     */
+    ENTITY,
+
+    /**
+     * This visibility is used for entities that are only visible within the current file.
+     *
+     * This visibility is selected via the `.local` visibility directive.
+     */
+    FILE,
+
+    /**
+     * This visibility is used for entities that are only visible within the current module.
+     *
+     * This visibility is selected via the `.private` visibility directive.
+     */
     PRIVATE,
-    PUBLIC
+
+    /**
+     * This visibility is used for entities that are visible outside the current module.
+     *
+     * This visibility is selected via the `.public` visibility directive.
+     *
+     * The main entry point of a program (usually `start`) must have this visibility.
+     */
+    PUBLIC,
 };
 
+/**
+ * @brief Helper class for working with Visibility.
+ */
 class VisibilityHelper {
   public:
+    /**
+     * @brief Converts a token to a Visibility value.
+     *
+     * It supports both the visibility directive tokens (e.g., `.public`) and the visibility name tokens (e.g., `public`).
+     *
+     * If the token does not represent a visibility, returns {}.
+     *
+     * @param token The token to convert.
+     * @return The corresponding Visibility value, or {} if the token does not represent a visibility.
+     */
     static std::optional<Visibility> from_token(const Token& token);
 
-    static const Token token_public_directive;
-    static const Token token_public_name;
+    /**
+     * @brief Converts a Visibility value to a token.
+     *
+     * @param visibility The visibility value to convert.
+     * @param directive If true, returns the corresponding directive token (e.g., `.public`).
+     *                  If false, returns the corresponding name token (e.g., `public`).
+     * @return The corresponding token.
+     */
+    static Token to_token(Visibility visibility, bool directive = true);
+
+    static Symbol name(Visibility visibility);
+
+    /// @brief The token for directive for the `FILE` visibility (`.local`).
+    static const Token token_file_directive;
+
+    /// @brief The token for name for the `FILE` visibility (`local`).
+    static const Token token_file_name;
+
+    /// @brief The token for directive for the `PRIVATE` visibility (`.private`).
     static const Token token_private_directive;
+    
+    /// @brief The token for name for the `PRIVATE` visibility (`private`).
     static const Token token_private_name;
+
+    /// @brief The token for directive for the `PUBLIC` visibility (`.public`).
+    static const Token token_public_directive;
+
+    /// @brief The token for name for the `PUBLIC` visibility (`public`).
+    static const Token token_public_name; 
+
+    static const char file_literal[];
+    static const char private_literal[];
+    static const char public_literal[];
 };
 
+/**
+ * @brief Outputs the directive for a Visibility value to a stream.
+ *
+ * @param stream The stream to output to.
+ * @param visibility The Visibility value to output.
+ * @return The stream.
+ */
 std::ostream& operator<<(std::ostream& stream, Visibility visibility);
+
+
+template <> struct std::formatter<Visibility> : std::formatter<Symbol> {
+  auto format(const Visibility& visibility, format_context& ctx) const {
+        return std::formatter<Symbol>::format(VisibilityHelper::name(visibility), ctx);
+    }
+};
 
 #endif // HAD_XLR8_VISIBILITY_H

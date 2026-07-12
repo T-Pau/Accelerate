@@ -32,6 +32,8 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "CPU.h"
 
+#include "Expression/ValueExpression.h"
+
 /**
  * @brief Encodes instructions for a given CPU, translating them into machine code.
  */
@@ -39,13 +41,13 @@ class InstructionEncoder {
 public:
     explicit InstructionEncoder(const CPU* cpu): cpu(cpu) {}
 
-    [[nodiscard]] Body encode(const Token& name, const std::vector<std::shared_ptr<Node>>& arguments, const std::shared_ptr<Environment>& environment, const SizeRange& offset, bool& uses_pc) const;
+    [[nodiscard]] Body encode(const Token& name, const std::vector<std::shared_ptr<Node>>& arguments, const std::shared_ptr<Scope>& environment, const SizeRange& offset, bool& uses_pc) const;
 
 private:
     class Variant {
       public:
-        Expression argument_constraints = Expression({}, Value(true));
-        Expression encoding_constraints = Expression({}, Value(true));
+        Expression argument_constraints = ValueExpression::create({}, Value(true));
+        Expression encoding_constraints = ValueExpression::create({}, Value(true));
 
 
         void add_argument_constraint(const Expression& sub_constraint) {return add_constraint(argument_constraints, sub_constraint);}
@@ -60,7 +62,7 @@ private:
         static void add_constraint(Expression& constraint, const Expression& sub_constraint);
     };
 
-    Variant encode(const Instruction* instruction, const AddressingModeMatcherResult& match, const std::vector<std::shared_ptr<Node>>& arguments, std::shared_ptr<Environment> outer_environment, const SizeRange& offset) const;
+    Variant encode(const Instruction* instruction, const AddressingModeMatcherResult& match, const std::vector<std::shared_ptr<Node>>& arguments, std::shared_ptr<Scope> outer_environment, const SizeRange& offset) const;
 
     const CPU* cpu;
 };
