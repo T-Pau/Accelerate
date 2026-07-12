@@ -1,3 +1,7 @@
+#ifdef IN_XLR8_BODY_ELEMENT_H
+#error "circular include file dependency detected"
+#endif
+#define IN_XLR8_BODY_ELEMENT_H
 #ifndef HAD_XLR8_BODY_ELEMENT_H
 #define HAD_XLR8_BODY_ELEMENT_H
 
@@ -223,3 +227,4 @@ std::ostream& operator<<(std::ostream& stream, const BodyElement& element);
 std::ostream& operator<<(std::ostream& stream, const std::shared_ptr<BodyElement>& element);
 
 #endif // HAD_XLR8_BODY_ELEMENT_H
+#undef IN_XLR8_BODY_ELEMENT_H

@@ -1,3 +1,7 @@
+#ifdef IN_XLR8_FUNCTION_H
+#error "circular include file dependency detected"
+#endif
+#define IN_XLR8_FUNCTION_H
 #ifndef HAD_XLR8_FUNCTION_H
 #define HAD_XLR8_FUNCTION_H
 
@@ -56,3 +60,4 @@ class Function: public Callable {
 std::ostream& operator<<(std::ostream& stream, const Function& function);
 
 #endif // HAD_XLR8_FUNCTION_H
+#undef IN_XLR8_FUNCTION_H

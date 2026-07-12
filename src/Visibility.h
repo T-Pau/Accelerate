@@ -1,3 +1,7 @@
+#ifdef IN_XLR8_VISIBILITY_H
+#error "circular include file dependency detected"
+#endif
+#define IN_XLR8_VISIBILITY_H
 #ifndef HAD_XLR8_VISIBILITY_H
 #define HAD_XLR8_VISIBILITY_H
 
@@ -149,3 +153,4 @@ template <> struct std::formatter<Visibility> : std::formatter<Symbol> {
 };
 
 #endif // HAD_XLR8_VISIBILITY_H
+#undef IN_XLR8_VISIBILITY_H

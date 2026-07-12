@@ -1,3 +1,7 @@
+#ifdef IN_XLR8_BODY_PARSER_H
+#error "circular include file dependency detected"
+#endif
+#define IN_XLR8_BODY_PARSER_H
 #ifndef HAD_XLR8_BODY_PARSER_H
 #define HAD_XLR8_BODY_PARSER_H
 
@@ -213,3 +217,4 @@ private:
 };
 
 #endif // HAD_XLR8_BODY_PARSER_H
+#undef IN_XLR8_BODY_PARSER_H

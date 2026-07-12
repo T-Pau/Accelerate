@@ -1,3 +1,7 @@
+#ifdef IN_XLR8_CONSTANT_H
+#error "circular include file dependency detected"
+#endif
+#define IN_XLR8_CONSTANT_H
 #ifndef HAD_XLR8_CONSTANT_H
 #define HAD_XLR8_CONSTANT_H
 
@@ -51,3 +55,4 @@ class Constant: public Entity {
 };
 
 #endif // HAD_XLR8_CONSTANT_H
+#undef IN_XLR8_CONSTANT_H

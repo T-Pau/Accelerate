@@ -1,3 +1,7 @@
+#ifdef IN_XLR8_ENTITY_H
+#error "circular include file dependency detected"
+#endif
+#define IN_XLR8_ENTITY_H
 #ifndef HAD_XLR8_ENTITY_H
 #define HAD_XLR8_ENTITY_H
 
@@ -116,3 +120,4 @@ class Entity {
 
 
 #endif // HAD_XLR8_ENTITY_H
+#undef IN_XLR8_ENTITY_H

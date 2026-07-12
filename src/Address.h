@@ -1,3 +1,7 @@
+#ifdef IN_XLR8_ADDRESS_H
+#error "circular include file dependency detected"
+#endif
+#define IN_XLR8_ADDRESS_H
 #ifndef HAD_XLR8_ADDRESS_H
 #define HAD_XLR8_ADDRESS_H
 
@@ -104,3 +108,4 @@ class Address {
 std::ostream& operator<<(std::ostream& stream, Address address);
 
 #endif // HAD_XLR8_ADDRESS_H
+#undef IN_XLR8_ADDRESS_H

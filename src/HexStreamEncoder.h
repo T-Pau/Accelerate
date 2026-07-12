@@ -1,3 +1,7 @@
+#ifdef IN_XLR8_HEX_STREAM_ENCODER_H
+#error "circular include file dependency detected"
+#endif
+#define IN_XLR8_HEX_STREAM_ENCODER_H
 #ifndef HAD_XLR8_HEX_STREAM_ENCODER_H
 #define HAD_XLR8_HEX_STREAM_ENCODER_H
 
@@ -83,3 +87,4 @@ private:
 };
 
 #endif // HAD_XLR8_HEX_STREAM_ENCODER_H
+#undef IN_XLR8_HEX_STREAM_ENCODER_H

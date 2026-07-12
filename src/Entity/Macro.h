@@ -1,3 +1,7 @@
+#ifdef IN_XLR8_MACRO_H
+#error "circular include file dependency detected"
+#endif
+#define IN_XLR8_MACRO_H
 #ifndef HAD_XLR8_MACRO_H
 #define HAD_XLR8_MACRO_H
 
@@ -60,3 +64,4 @@ class Macro: public Callable {
 std::ostream& operator<<(std::ostream& stream, const Macro& macro);
 
 #endif // HAD_XLR8_MACRO_H
+#undef IN_XLR8_MACRO_H

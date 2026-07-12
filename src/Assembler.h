@@ -1,3 +1,7 @@
+#ifdef IN_XLR8_ASSEMBLER_H
+#error "circular include file dependency detected"
+#endif
+#define IN_XLR8_ASSEMBLER_H
 #ifndef HAD_XLR8_ASSEMBLER_H
 #define HAD_XLR8_ASSEMBLER_H
 
@@ -135,3 +139,4 @@ private:
 };
 
 #endif // HAD_XLR8_ASSEMBLER_H
+#undef IN_XLR8_ASSEMBLER_H

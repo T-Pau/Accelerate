@@ -1,3 +1,7 @@
+#ifdef IN_XLR8_TOKEN_NODE_H
+#error "circular include file dependency detected"
+#endif
+#define IN_XLR8_TOKEN_NODE_H
 #ifndef HAD_XLR8_TOKEN_NODE_H
 #define HAD_XLR8_TOKEN_NODE_H
 
@@ -49,3 +53,4 @@ private:
 
 
 #endif // HAD_XLR8_TOKEN_NODE_H
+#undef IN_XLR8_TOKEN_NODE_H

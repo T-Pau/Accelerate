@@ -1,3 +1,7 @@
+#ifdef IN_XLR8_STRING_ENCODING_H
+#error "circular include file dependency detected"
+#endif
+#define IN_XLR8_STRING_ENCODING_H
 #ifndef HAD_XLR8_STRING_ENCODING_H
 #define HAD_XLR8_STRING_ENCODING_H
 
@@ -121,3 +125,4 @@ class StringEncoding {
 std::ostream& operator<<(std::ostream& stream, const StringEncoding& encoding);
 
 #endif // HAD_XLR8_STRING_ENCODING_H
+#undef IN_XLR8_STRING_ENCODING_H

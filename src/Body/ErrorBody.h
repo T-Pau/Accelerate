@@ -1,3 +1,7 @@
+#ifdef IN_XLR8_ERROR_BODY_H
+#error "circular include file dependency detected"
+#endif
+#define IN_XLR8_ERROR_BODY_H
 #ifndef HAD_XLR8_ERROR_BODY_H
 #define HAD_XLR8_ERROR_BODY_H
 
@@ -58,3 +62,4 @@ public:
 };
 
 #endif // HAD_XLR8_ERROR_BODY_H
+#undef IN_XLR8_ERROR_BODY_H

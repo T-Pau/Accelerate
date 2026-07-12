@@ -1,3 +1,7 @@
+#ifdef IN_XLR8_OBJECT_H
+#error "circular include file dependency detected"
+#endif
+#define IN_XLR8_OBJECT_H
 #ifndef HAD_XLR8_OBJECT_H
 #define HAD_XLR8_OBJECT_H
 
@@ -86,3 +90,4 @@ public:
 std::ostream& operator<<(std::ostream& stream, const Object& node);
 
 #endif // HAD_XLR8_OBJECT_H
+#undef IN_XLR8_OBJECT_H

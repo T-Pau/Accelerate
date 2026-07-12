@@ -1,3 +1,7 @@
+#ifdef IN_XLR8_OBJECT_FILE_H
+#error "circular include file dependency detected"
+#endif
+#define IN_XLR8_OBJECT_FILE_H
 #ifndef HAD_XLR8_OBJECT_FILE_H
 #define HAD_XLR8_OBJECT_FILE_H
 
@@ -115,3 +119,4 @@ std::ostream& operator<<(std::ostream& stream, const ObjectFile& list);
 std::ostream& operator<<(std::ostream& stream, const std::shared_ptr<ObjectFile>& list);
 
 #endif // HAD_XLR8_OBJECT_FILE_H
+#undef IN_XLR8_OBJECT_FILE_H

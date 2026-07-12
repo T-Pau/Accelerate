@@ -1,3 +1,7 @@
+#ifdef IN_XLR8_UNNAMED_LABEL_LIST_H
+#error "circular include file dependency detected"
+#endif
+#define IN_XLR8_UNNAMED_LABEL_LIST_H
 #ifndef HAD_XLR8_UNNAMED_LABEL_LIST_H
 #define HAD_XLR8_UNNAMED_LABEL_LIST_H
 
@@ -87,3 +91,4 @@ class UnnamedLabelList {
 
 
 #endif // HAD_XLR8_UNNAMED_LABEL_LIST_H
+#undef IN_XLR8_UNNAMED_LABEL_LIST_H

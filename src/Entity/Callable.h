@@ -1,3 +1,7 @@
+#ifdef IN_XLR8_CALLABLE_H
+#error "circular include file dependency detected"
+#endif
+#define IN_XLR8_CALLABLE_H
 #ifndef HAD_XLR8_CALLABLE_H
 #define HAD_XLR8_CALLABLE_H
 
@@ -194,3 +198,4 @@ class Callable: public Entity {
 std::ostream& operator<<(std::ostream& stream, const Callable::Arguments& arguments);
 
 #endif // HAD_XLR8_CALLABLE_H
+#undef IN_XLR8_CALLABLE_H

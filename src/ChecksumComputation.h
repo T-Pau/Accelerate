@@ -1,3 +1,7 @@
+#ifdef IN_XLR8_CHECKSUM_COMPUTATION_H
+#error "circular include file dependency detected"
+#endif
+#define IN_XLR8_CHECKSUM_COMPUTATION_H
 #ifndef HAD_XLR8_CHECKSUM_COMPUTATION_H
 #define HAD_XLR8_CHECKSUM_COMPUTATION_H
 
@@ -53,3 +57,4 @@ class ChecksumComputation {
 };
 
 #endif // HAD_XLR8_CHECKSUM_COMPUTATION_H
+#undef IN_XLR8_CHECKSUM_COMPUTATION_H

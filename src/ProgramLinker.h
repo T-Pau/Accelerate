@@ -1,3 +1,7 @@
+#ifdef IN_XLR8_PROGRAM_LINKER_H
+#error "circular include file dependency detected"
+#endif
+#define IN_XLR8_PROGRAM_LINKER_H
 #ifndef HAD_XLR8_PROGRAM_LINKER_H
 #define HAD_XLR8_PROGRAM_LINKER_H
 
@@ -47,3 +51,4 @@ class ProgramLinker: public Linker {
 };
 
 #endif // HAD_XLR8_PROGRAM_LINKER_H
+#undef IN_XLR8_PROGRAM_LINKER_H

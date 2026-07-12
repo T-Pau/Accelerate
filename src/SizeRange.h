@@ -1,3 +1,7 @@
+#ifdef IN_XLR8_SIZE_RANGE_H
+#error "circular include file dependency detected"
+#endif
+#define IN_XLR8_SIZE_RANGE_H
 #ifndef HAD_XLR8_SIZE_RANGE_H
 #define HAD_XLR8_SIZE_RANGE_H
 
@@ -164,3 +168,4 @@ public:
 std::ostream& operator<<(std::ostream& stream, const SizeRange& size_range);
 
 #endif // HAD_XLR8_SIZE_RANGE_H
+#undef IN_XLR8_SIZE_RANGE_H
