@@ -76,3 +76,4 @@ std::optional<Expression> FillExpression::simplify(const Location& location, Exp
 void FillExpression::serialize_sub(std::ostream& stream) const {
     stream << ".fill(" << count << ", " << value << ")";
 }
+

@@ -40,6 +40,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "Token.h"
 
+// Keep in sync with VisibilityHelper::names.
 /**
  * @brief Represents the visibility of a declaration.
  */
@@ -111,7 +112,13 @@ class VisibilityHelper {
      */
     static Token to_token(Visibility visibility, bool directive = true);
 
-    static Symbol name(Visibility visibility);
+    /**
+     * @brief Get the name of a visibility.
+     *
+     * @param visibility The visibility to convert.
+     * @return The corresponding name.
+     */
+    static Symbol name(Visibility visibility) {return names[static_cast<size_t>(visibility)];}
 
     /// @brief The token for directive for the `FILE` visibility (`.local`).
     static const Token token_file_directive;
@@ -131,9 +138,18 @@ class VisibilityHelper {
     /// @brief The token for name for the `PUBLIC` visibility (`public`).
     static const Token token_public_name; 
 
-    static const char file_literal[];
-    static const char private_literal[];
-    static const char public_literal[];
+    /// @brief The token for the `FILE` visibility (`local`).
+    static Symbol file_literal;
+
+    /// @brief The token for the `PRIVATE` visibility (`private`).
+    static Symbol private_literal;
+
+    /// @brief The token for the `PUBLIC` visibility (`public`).
+    static Symbol public_literal;
+
+  private:
+    /// @brief The names of the visibilities.
+    static Symbol names[];
 };
 
 /**

@@ -288,7 +288,7 @@ public:
      * @param location The location to get the next unnamed label after.
      * @return The next unnamed label after the location if it exists, {} otherwise.
      */
-    [[nodiscard]] std::optional<Expression> get_next_unnamed_label(const Location& location) const;
+    [[nodiscard]] std::optional<Expression> get_next_unnamed_label(const Location& location) const {return unnamed_labels.get_next_label (location);}
 
     /**
      * Get the previous unnamed label before a location.
@@ -296,7 +296,7 @@ public:
      * @param location The location to get the previous unnamed label before.
      * @return The previous unnamed label before the location if it exists, {} otherwise.
      */
-    [[nodiscard]] std::optional<Expression> get_previous_unnamed_label(const Location& location) const;
+    [[nodiscard]] std::optional<Expression> get_previous_unnamed_label(const Location& location) const {return unnamed_labels.get_previous_label(location);}
 
     /**
      * Check if a preprocessor symbol is defined in the scope.

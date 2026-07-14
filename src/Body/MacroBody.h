@@ -46,13 +46,14 @@ using namespace tpau::cpp_kernal;
   */
 class MacroBody: public BodyElement {
   public:
-    static Body create(const Location& location, Symbol name, std::vector<Expression> arguments, const Macro* macro = {});
+    static Body create(const Location& location, Symbol name, std::vector<Expression> arguments, const Macro* macro = {}) {
+        return Body(std::make_shared<MacroBody>(location, name, std::move(arguments), macro));
+    }
 
     MacroBody(Location location, Symbol name, std::vector<Expression> arguments, const Macro* macro = {}): BodyElement(location, SizeRange(0,{})), name(name), macro(macro), arguments(std::move(arguments)) {}
 
     [[nodiscard]] std::shared_ptr<BodyElement> clone() const override {throw LocationException(location, "can't clone MacroBody");}
     void encode(std::string &bytes, const Memory *memory) const override {throw LocationException(location, "can't encode unexpanded macro call");}
-    [[nodiscard]] std::optional<Body> evaluate(const EvaluationContext &context) override;
     void serialize(std::ostream &stream, const std::string &prefix) const override;
     void resolve(Scope* scope, Entity* containing_entity) override;
     void expand_calls() override;

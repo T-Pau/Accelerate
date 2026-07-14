@@ -102,7 +102,6 @@ public:
     static Body create(const std::vector<IfBodyClause>& clauses) {return *simplify(const_cast<std::vector<IfBodyClause>&>(clauses), true);}
 
     [[nodiscard]] std::shared_ptr<BodyElement> clone() const override {return std::make_shared<IfBody>(clauses);} // TODO: this doesn't copy clauses
-    void collect_objects(std::unordered_set<Object*> &objects) const override;
     [[nodiscard]] bool empty() const override {return clauses.empty();}
     void encode(std::string &bytes, const Memory* memory) const override {throw Exception("unresolved if");}
     [[nodiscard]] std::optional<Body> evaluate_process(const EvaluationContext& context) override {return simplify(clauses, false);}

@@ -68,7 +68,6 @@ public:
      * @return The created expression.
      */
     static Expression create(const Location& location, Symbol name, const std::vector<Expression>& arguments);
-    [[nodiscard]] std::optional<Expression> evaluate(const EvaluationContext& context) override;
 
 protected:
     void traverse(std::function<void(Expression&)> callable) override;

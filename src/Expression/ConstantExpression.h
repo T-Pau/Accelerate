@@ -48,7 +48,7 @@ public:
     [[nodiscard]] bool has_value() const override {return constant()->has_value();}
     [[nodiscard]] std::optional<Value> value() const override {return constant()->value.value();}
     [[nodiscard]] std::optional<Value::Type> type() const override {return constant()->value.type();}
-    [[nodiscard]] std::optional<Expression> evaluate(const EvaluationContext& context) override;
+    [[nodiscard]] std::optional<Expression> evaluate(const EvaluationContext& context) override {return simplify(location, constant(), false);}
 
 protected:
     [[nodiscard]] std::optional<Value> maximum_value() const override {return constant()->value.maximum_value();}

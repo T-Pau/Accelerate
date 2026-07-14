@@ -607,6 +607,7 @@ MemoryMap::Block Assembler::parse_single_address(const StructuredScalar* address
 }
 
 uint64_t Assembler::parse_address_part(const Token& token) const {
+#if 0    
     if (token.is_name()) {
         auto constant = object_file->constant(token.as_symbol());
         if (!constant->value.has_value()) {
@@ -620,4 +621,7 @@ uint64_t Assembler::parse_address_part(const Token& token) const {
     else {
         throw LocationException(token.location, "unsigned integer or constant expected");
     }
+#else
+    return 0;
+#endif
 }

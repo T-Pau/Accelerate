@@ -29,38 +29,41 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "Visibility.h"
 
-const char VisibilityHelper::file_literal[] = "file";
-const char VisibilityHelper::private_literal[] = "private";
-const char VisibilityHelper::public_literal[] = "public";
+// Keep in sync with Visibility.
+Symbol VisibilityHelper::names[] = {
+    "scope",
+    "entity",
+    "file",
+    Symbol(VisibilityHelper::private_literal),
+    Symbol(VisibilityHelper::public_literal)
+};
 
-const Token VisibilityHelper::token_private_directive = Token(Token::DIRECTIVE, private_literal);
-const Token VisibilityHelper::token_private_name = Token(Token::NAME, private_literal);
-const Token VisibilityHelper::token_public_directive = Token(Token::DIRECTIVE, public_literal);
-const Token VisibilityHelper::token_public_name = Token(Token::NAME, public_literal);
+Symbol VisibilityHelper::file_literal = "local";
+Symbol VisibilityHelper::private_literal = "private";
+Symbol VisibilityHelper::public_literal = "public";
+
+const Token VisibilityHelper::token_file_directive = Token(Token::DIRECTIVE, {}, VisibilityHelper::file_literal);
+const Token VisibilityHelper::token_file_name = Token(Token::NAME, {}, VisibilityHelper::file_literal);
+const Token VisibilityHelper::token_private_directive = Token(Token::DIRECTIVE, {}, VisibilityHelper::private_literal);
+const Token VisibilityHelper::token_private_name = Token(Token::NAME, {}, VisibilityHelper::private_literal);
+const Token VisibilityHelper::token_public_directive = Token(Token::DIRECTIVE, {}, VisibilityHelper::public_literal);
+const Token VisibilityHelper::token_public_name = Token(Token::NAME, {}, VisibilityHelper::public_literal);
 
 std::ostream& operator<<(std::ostream& stream, Visibility visibility) {
-    switch  (visibility) {
-        case Visibility::SCOPE:
-            stream << "none";
-            break;
-        case Visibility::ENTITY:
-            stream << "entity";
-            break;
-        case Visibility::FILE:
-            stream << VisibilityHelper::file_literal;
-            break;
-        case Visibility::PRIVATE:
-            stream << VisibilityHelper::private_literal;
-            break;
-        case Visibility::PUBLIC:
-            stream << VisibilityHelper::public_literal;
-            break;
+    if (visibility == Visibility::FILE) {
+        stream << VisibilityHelper::file_literal;
+    }
+    else {
+        stream << VisibilityHelper::name(visibility);
     }
     return stream;
 }
 
 std::optional<Visibility> VisibilityHelper::from_token(const Token& token) {
-    if (token == token_private_directive || token == token_private_name) {
+    if (token == token_file_directive || token == token_file_name) {
+        return Visibility::FILE;
+    }
+    else if (token == token_private_directive || token == token_private_name) {
         return Visibility::PRIVATE;
     }
     else if (token == token_public_directive || token == token_public_name) {

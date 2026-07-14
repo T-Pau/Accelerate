@@ -74,11 +74,9 @@ public:
      */
     static Expression create(const Location& location, Expression count, Expression value);
 
-    [[nodiscard]] std::optional<Expression> evaluate(const EvaluationContext& context) override;
-
 protected:
     void traverse(std::function<void(Expression&)> callback) override {callback(count); callback(value);}
-    std::optional<Expression> evaluate_process(const EvaluationContext& context) override;
+    std::optional<Expression> evaluate_process(const EvaluationContext& context) override {return simplify(location, count, value, false);}
     void serialize_sub(std::ostream& stream) const override;
 
 private:

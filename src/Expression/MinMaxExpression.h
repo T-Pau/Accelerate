@@ -79,7 +79,7 @@ class MinMaxExpression: public BaseExpression {
      * @param minimum Whether this is a minimum expression (`true`) or a maximum expression (`false`).
      * @return The created expression.
      */
-    static Expression create(const Location& location, const Expression& a, const Expression& b, bool minimum);
+    static Expression create(const Location& location, const Expression& a, const Expression& b, bool minimum) {return *simplify(location, a, b, minimum, true);}
 
     [[nodiscard]] std::optional<Expression> evaluate_process(const EvaluationContext& context) override;
     void traverse(std::function<void(Expression&)> callable) override {callable(a); callable(b);}

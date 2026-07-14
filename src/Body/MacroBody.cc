@@ -61,3 +61,11 @@ void MacroBody::expand_calls() {
     // TODO: copy macro environment and body here.
     // TODO: replace argument placeholders in macro environment with argument values.
 }
+
+void MacroBody::resolve(Scope* scope, Entity* containing_entity) {
+    for (auto& argument: arguments) {
+        argument.resolve(scope, containing_entity);
+    }
+
+    // TODO: resolve macro body.
+}
