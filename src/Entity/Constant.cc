@@ -27,9 +27,14 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "Entity/Constant.h"
+#include <tpau-cpp-kernal/LocationException.h>
 
+#include "Entity/Constant.h"
+#include "StructuredDictionary.h"
+#include "StructuredScalar.h"
 #include "SequenceTokenizer.h"
+
+using namespace tpau::cpp_kernal;
 
 const Token Constant::token_value{Token::NAME, "value"};
 

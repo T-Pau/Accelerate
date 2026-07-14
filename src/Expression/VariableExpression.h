@@ -42,6 +42,15 @@ class VariableExpression: public BaseExpression {
 public:
     /**
      * Create a variable expression.
+     *
+     * @param location The location of the expression.
+     * @param symbol The name of the variable.
+     */
+    static Expression create(const Location& location, Symbol symbol) {return Expression(std::make_shared<VariableExpression>(location, symbol));}
+
+    /**
+     * Create a variable expression.
+     *
      * @param location The location of the expression.
      * @param symbol The name of the variable.
      */

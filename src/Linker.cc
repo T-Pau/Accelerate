@@ -34,6 +34,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "LibraryLinker.h"
 #include "ProgramLinker.h"
+#include "Scope.h"
 
 using namespace tpau::cpp_kernal;
 

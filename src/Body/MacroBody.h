@@ -36,7 +36,8 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <tpau-cpp-kernal/LocationException.h>
 
-#include "BodyElement.h"
+#include "Body/BodyElement.h"
+#include "Entity/Macro.h"
 
 using namespace tpau::cpp_kernal;
 

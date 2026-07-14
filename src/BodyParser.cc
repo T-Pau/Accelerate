@@ -39,9 +39,9 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Body/LabelBody.h"
 #include "Body/MacroBody.h"
 #include "Body/MemoryBody.h"
+#include "Expression/ValueExpression.h"
 #include "ExpressionNode.h"
 #include "ExpressionParser.h"
-#include "InstructionEncoder.h"
 #include "TokenNode.h"
 
 using namespace tpau::cpp_kernal;
@@ -384,6 +384,7 @@ void BodyParser::parse_instruction(const Token& name) {
         }
     }
 
+#if 0        
     auto encoder = InstructionEncoder(cpu);
 
     auto is_anonymous_label = false;
@@ -391,7 +392,6 @@ void BodyParser::parse_instruction(const Token& name) {
     auto label_expression = get_pc(label);
     auto instruction = Body();
     auto uses_pc = false;
-#if 0        
     {
         auto instruction_environment = std::make_shared<Scope>();
         instruction_environment->add(Constant(symbol_pc, label_expression));
@@ -407,9 +407,9 @@ void BodyParser::parse_instruction(const Token& name) {
             next_label -= 1;
         }
     }
-#endif
 
     current_body->append(instruction);
+#endif
 }
 
 void BodyParser::parse_scope() {

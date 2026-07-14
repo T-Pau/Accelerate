@@ -44,20 +44,57 @@ using namespace tpau::cpp_kernal;
   * @brief Represents a body, that introduces a new scope for its contained body.  */
 class ScopeBody: public BodyElement {
   public:
-    static Body create(Body body, const std::shared_ptr<Scope>& inner_environment);
-    explicit ScopeBody(Body body_, const std::shared_ptr<Scope>& inner_environment): body(std::move(body_)), environment(inner_environment) {size_range_=body.size_range();}
+    /**
+     * @brief Create a new ScopeBody.
+     *
+     * @param containing_scope The containing scope for the new scope.
+     * @param body The body to wrap.
+     * @return The ScopeBody.
+     */
+    static Body create(const std::shared_ptr<Scope>& scope, Body body) {return Body(std::make_shared<ScopeBody>(std::move(scope), std::move(body)));}
 
+    /**
+     * @brief Construct a new ScopeBody.
+     *
+     * @param containing_scope The containing scope for the new scope.
+     * @param body The body to wrap.
+     */
+    explicit ScopeBody(const std::shared_ptr<Scope>& scope, Body body);
+
+    /**
+     * @brief Get the scope of the ScopeBody.
+     *
+     * @return The scope.
+     */
+    [[nodiscard]] std::shared_ptr<Scope> scope() const {return scope_;}
+
+    [[nodiscard]] SizeRange size_range() const override {return body.size_range();}
+    [[nodiscard]] SizeRange offset() const override {return body.offset();}
     [[nodiscard]] std::shared_ptr<BodyElement> clone() const override {throw Exception("can't clone ScopeBody");}
     [[nodiscard]] bool empty() const override {return body.empty();}
     void encode(std::string &bytes, const Memory *memory) const override {body.encode(bytes, memory);}
-    [[nodiscard]] std::optional<Body> evaluate(const EvaluationContext &context) override;
+    void traverse(std::function<void(Body&)> body_callable, std::function<void(Expression&)> expression_callable) override;
+
+    /**
+     * @brief Evaluate the body element after all sub-body-elements and sub-expressions have been evaluated.
+     *
+     * Returns the contained body if it is fully evaluated, {} otherwise. Sub-classes should override this method if the scope cannot be discarded once the contained body is fully evaluated.
+     *
+     * @param context The evaluation context.
+     * @return The Body to replace this BodyElement with, {} if no replacement is needed.
+     */
+    [[nodiscard]] std::optional<Body> evaluate_process(const EvaluationContext &context) override;
+
     void serialize(std::ostream &stream, const std::string &prefix) const override;
+    [[nodiscard]] bool fully_evaluated() override {return body.fully_evaluated();}
 
-  private:
+  protected:
+    /// @brief The scope introduced by the ScopeBody.
+    std::shared_ptr<Scope> scope_;
+
+    /// @brief The body contained within the ScopeBody.
     Body body;
-    std::shared_ptr<Scope> environment = std::make_shared<Scope>();
 };
-
 
 #endif // HAD_XLR8_SCOPE_BODY_H
 #undef IN_XLR8_SCOPE_BODY_H

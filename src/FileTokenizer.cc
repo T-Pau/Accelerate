@@ -39,6 +39,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "ExpressionParser.h"
 #include "HexStringDecoder.h"
+#include "Scope.h"
 #include "SequenceTokenizer.h"
 #include "Target.h"
 

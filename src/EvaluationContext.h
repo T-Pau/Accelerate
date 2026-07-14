@@ -36,12 +36,13 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <unordered_set>
 
-#include "Scope.h"
+#include "Expression/Expression.h"
 #include "EvaluationResult.h"
 #include "SizeRange.h"
 
 class Entity;
 class ObjectFile;
+class Scope;
 
 class EvaluationContext {
   public:

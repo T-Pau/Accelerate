@@ -37,17 +37,33 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Node.h"
 #include "Token.h"
 
+/**
+ * @brief Represents a token corresponding to punctuation or keyword in the instruction notation.
+ */
 class TokenNode: public Node {
 public:
+    /**
+     * @brief Initialize a TokenNode with a specific token.
+     *
+     * @param token The token corresponding to the punctuation or keyword in the instruction notation.
+     */
     explicit TokenNode(const Token& token);
 
     [[nodiscard]] Type type() const override {return node_type;}
     [[nodiscard]] const Location& get_location() const override {return token.location;}
 
+    /**
+     * @brief Get the symbol corresponding to the token.
+     *
+     * @return The symbol corresponding to the token.
+     */
     [[nodiscard]] Symbol as_symbol() const {return token.as_symbol();}
 
 private:
+    /// @brief The type of the node, which can be KEYWORD or PUNCTUATION.
     Type node_type;
+
+    /// @brief The token corresponding to the punctuation or keyword in the instruction notation.
     Token token;
 };
 

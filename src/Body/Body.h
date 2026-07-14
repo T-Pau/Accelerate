@@ -128,10 +128,22 @@ public:
      */
     [[nodiscard]] bool empty() const {return element->empty();}
 
+    /**
+     * @brief Create a deep copy of the body.
+     *
+     * @return A new Body that is a deep copy of this body.
+     */
+    [[nodiscard]] Body clone() const {return Body(element->clone());}
+    /**
+     * @brief Check if all contained body elements and expressions have been fully evaluated.
+     *
+     * @return `true` if the body is fully evaluated, `false` otherwise.
+     */
+    [[nodiscard]] bool fully_evaluated();
+    
     void encode(std::string& bytes, const Memory* memory = nullptr) const {element->encode(bytes, memory);}
     void evaluate(const EvaluationContext& context);
     [[nodiscard]] std::optional<Body> evaluated (const EvaluationContext& context) const;
-    [[nodiscard]] Body scoped(const std::shared_ptr<Scope>& = {}) const;
     void serialize(std::ostream& stream, const std::string& prefix = "") const {element->serialize(stream, prefix);}
     [[nodiscard]] SizeRange offset() const {return element->offset();}
     [[nodiscard]] std::optional<uint64_t> size() const {return element->size();}

@@ -35,7 +35,8 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include "Body.h"
-
+#include "Expression/Expression.h"
+#include "Visibility.h"
 /**
  * @brief Represents an assignment, which defines a local constant or variable: `name = value`.
  */

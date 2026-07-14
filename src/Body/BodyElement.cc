@@ -84,3 +84,22 @@ void BodyElement::enter_names(Scope* scope, Entity* containing_entity) {
         // Expressions can't define names.
     });
 }
+
+
+bool BodyElement::fully_evaluated() {
+    try {
+        traverse([&](Body& sub_body) {
+            if (!sub_body.fully_evaluated()) {
+                throw NotFullyEvaluatedException();
+            }
+        }, [&](Expression& sub_expression) {
+            if (!sub_expression.has_value()) {
+                throw NotFullyEvaluatedException();
+            }
+        });
+        return true;
+    } 
+    catch (const NotFullyEvaluatedException&) {
+        return false;
+    }
+}

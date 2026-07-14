@@ -30,7 +30,6 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ProgramLinker.h"
 
 #include <algorithm>
-#include <fstream>
 #include <sstream>
 
 #include <tpau-cpp-kernal/DiagnosticOutput.h>
@@ -38,6 +37,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <tpau-cpp-kernal/FileReader.h>
 
 #include "Assembler.h"
+#include "Scope.h"
 
 using namespace tpau::cpp_kernal;
 
@@ -172,6 +172,7 @@ void ProgramLinker::link_sub() {
 }
 
 void ProgramLinker::output(const std::filesystem::path& file_name) {
+#if 0
     auto environment = std::make_shared<Scope>();
 
     for (const auto& object: objects) {
@@ -204,10 +205,12 @@ void ProgramLinker::output(const std::filesystem::path& file_name) {
 
     auto stream = std::ofstream(file_name, std::ios::binary);
     stream << bytes;
+#endif
 }
 
 
 void ProgramLinker::output_symbol_map(const std::filesystem::path& file_name) {
+#if 0
     auto sorted_objects = std::vector<Object*>(objects.begin(), objects.end());
     std::ranges::sort(sorted_objects, Object::less_pointers);
 
@@ -264,6 +267,7 @@ void ProgramLinker::output_symbol_map(const std::filesystem::path& file_name) {
         stream << "\t" << object->name;
         stream << "\t" << object->section->name << "\t" << (object->is_reservation() ? "reserve" : "data") << "\n";
     }
+#endif
 }
 
 

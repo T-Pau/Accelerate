@@ -42,19 +42,22 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 class ConstantExpression: public EntityExpression {
 public:
-    explicit ConstantExpression(const Location& location, const Constant* constant): EntityExpression(location, constant) {}
-    [[nodiscard]] static Expression create(const Location& location, const Constant* constant) {return Expression(std::make_shared<ConstantExpression>(location, constant));}
+    explicit ConstantExpression(const Location& location, Constant* constant): EntityExpression(location, constant) {}
+    [[nodiscard]] static Expression create(const Location& location, Constant* constant) {return *simplify(location, constant, true);}
 
     [[nodiscard]] bool has_value() const override {return constant()->has_value();}
     [[nodiscard]] std::optional<Value> value() const override {return constant()->value.value();}
     [[nodiscard]] std::optional<Value::Type> type() const override {return constant()->value.type();}
+    [[nodiscard]] std::optional<Expression> evaluate(const EvaluationContext& context) override;
 
 protected:
     [[nodiscard]] std::optional<Value> maximum_value() const override {return constant()->value.maximum_value();}
     [[nodiscard]] std::optional<Value> minimum_value() const override {return constant()->value.minimum_value();}
 
-  private:
-    const Constant* constant() const {return static_cast<const Constant*>(entity);}
+private:
+    static std::optional<Expression> simplify(const Location& location, Constant* constant, bool always_create);
+
+    Constant* constant() const {return static_cast<Constant*>(entity);}
 };
 
 #endif // HAD_XLR8_CONSTANT_EXPRESSION_H

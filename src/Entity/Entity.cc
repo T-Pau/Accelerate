@@ -32,8 +32,15 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <tpau-cpp-kernal/DiagnosticOutput.h>
 #include <tpau-cpp-kernal/LocationException.h>
 
+#include "Entity/Constant.h"
+#include "Entity/Function.h"
+#include "Entity/Macro.h"
+#include "Entity/Object.h"
 #include "ExpressionParser.h"
+#include "Scope.h"
 #include "SequenceTokenizer.h"
+#include "StructuredDictionary.h"
+#include "StructuredScalar.h"
 
 using namespace tpau::cpp_kernal;
 
@@ -140,5 +147,24 @@ void Entity::resolve_labels() {
     } catch (Exception& ex) {
         DiagnosticOutput::global.error(location, ex);
         // TODO: throw empty expression?
+    }
+}
+
+void Entity::uses(Entity* entity) {
+    if (entity->visibility <= Visibility::ENTITY) {
+        // We don't track references to entity only visible within an entity.
+        return;
+    }
+    if (auto constant = dynamic_cast<Constant*>(entity)) {
+        referenced_constants.insert(constant);
+    }
+    else if (auto function = dynamic_cast<Function*>(entity)) {
+        referenced_functions.insert(function);
+    }
+    else if (auto macro = dynamic_cast<Macro*>(entity)) {
+        referenced_macros.insert(macro);
+    }
+    else if (auto object = dynamic_cast<Object*>(entity)) {
+        referenced_objects.insert(object);
     }
 }

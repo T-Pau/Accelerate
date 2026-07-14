@@ -1,14 +1,15 @@
-#ifdef IN_XLR8_EXPRESSION_NODE_H
+
+#ifdef IN_XLR8_STRUCTURED_ARRAY_H
 #error "circular include file dependency detected"
 #endif
-#define IN_XLR8_EXPRESSION_NODE_H
-#ifndef HAD_XLR8_EXPRESSION_NODE_H
-#define HAD_XLR8_EXPRESSION_NODE_H
+#define IN_XLR8_STRUCTURED_ARRAY_H
+#ifndef HAD_XLR8_STRUCTURED_ARRAY_H
+#define HAD_XLR8_STRUCTURED_ARRAY_H
 
 /*
 Copyright (C) Dieter Baron
 
-The authors can be contacted at <assembler@tpau.group>
+The authors can be contacted at <accelerate@tpau.group>
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions
@@ -34,28 +35,32 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "Expression/Expression.h"
-#include "Node.h"
+#include <vector>
+
+#include "StructuredValue.h"
+
 
 /**
- * @brief Represents an expression corresponding to an argument for the instruction.
+ * @brief Represents an array of structured values.
  */
-class ExpressionNode: public Node {
+class StructuredArray: public StructuredValue {
 public:
-    /**
-     * @brief Initialize an ExpressionNode with a specific expression.
-     *
-     * @param expression The expression corresponding to the argument in the instruction notation.
-     */
-    explicit ExpressionNode(Expression expression): expression(std::move(expression)) {}
+    explicit StructuredArray(Tokenizer& tokenizer);
 
-    [[nodiscard]] Type type() const override {return EXPRESSION;}
-    [[nodiscard]] const Location& get_location() const override {return expression.location();}
+    std::vector<std::shared_ptr<StructuredValue>> entries;
 
-    /// @brief The expression corresponding to the argument.
-    Expression expression;
+    [[nodiscard]] Type type() const override {return ARRAY;}
+
+    [[nodiscard]] bool empty() const {return entries.empty();}
+    [[nodiscard]] size_t size() const {return entries.size();}
+    std::shared_ptr<StructuredValue> operator[](size_t index) const {return entries[index];}
+
+    std::vector<std::shared_ptr<StructuredValue>>::iterator begin() {return entries.begin();}
+    std::vector<std::shared_ptr<StructuredValue>>::iterator end() {return entries.end();}
+    [[nodiscard]] std::vector<std::shared_ptr<StructuredValue>>::const_iterator begin() const {return entries.begin();}
+    [[nodiscard]] std::vector<std::shared_ptr<StructuredValue>>::const_iterator end() const {return entries.end();}
 };
 
 
-#endif // HAD_XLR8_EXPRESSION_NODE_H
-#undef IN_XLR8_EXPRESSION_NODE_H
+#endif // HAD_XLR8_STRUCTURED_ARRAY_H
+#undef IN_XLR8_STRUCTURED_ARRAY_H

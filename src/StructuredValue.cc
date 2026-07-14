@@ -27,10 +27,16 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+#include "StructuredValue.h"
+
 #include <tpau-cpp-kernal/LocationException.h>
 
-#include "StructuredValue.h"
 #include "BodyParser.h"
+#include "Scope.h"
+#include "StructuredArray.h"
+#include "StructuredBody.h"
+#include "StructuredDictionary.h"
+#include "StructuredScalar.h"
 
 using namespace tpau::cpp_kernal;
 

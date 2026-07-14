@@ -31,6 +31,8 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "Entity/Function.h"
 #include "SequenceTokenizer.h"
+#include "StructuredDictionary.h"
+#include "StructuredScalar.h"
 
 using namespace tpau::cpp_kernal;
 

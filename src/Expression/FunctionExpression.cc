@@ -38,6 +38,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "EvaluationContext.h"
 #include "Expression.h"
 #include "ObjectFileParser.h"
+#include "Scope.h"
 
 // clang-format off
 const std::unordered_map<Symbol, Expression (*)(const Location& location, const std::vector<Expression>&)> FunctionExpression::builtin_functions = {

@@ -39,3 +39,12 @@ const AddressingMode::Argument* AddressingMode::argument(Symbol name) const {
         return it->second.get();
     }
 }
+
+void AddressingMode::Notation::compute_argument_names() {
+    argument_names.clear();
+    for (const auto& element: elements) {
+        if (element.is_argument()) {
+            argument_names.push_back(element.symbol);
+        }
+    }
+}

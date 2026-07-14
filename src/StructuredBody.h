@@ -1,7 +1,14 @@
+#ifdef IN_XLR8_STRUCTURED_BODY_H
+#error "circular include file dependency detected"
+#endif
+#define IN_XLR8_STRUCTURED_BODY_H
+#ifndef HAD_XLR8_STRUCTURED_BODY_H
+#define HAD_XLR8_STRUCTURED_BODY_H
+
 /*
 Copyright (C) Dieter Baron
 
-The authors can be contacted at <assembler@tpau.group>
+The authors can be contacted at <accelerate@tpau.group>
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions
@@ -27,46 +34,20 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "Expression/ObjectExpression.h"
+#include "Body/Body.h"
+#include "StructuredValue.h"
 
-#include "Expression/ValueExpression.h"
+/**
+ * @brief Represents a body as part of a structured value.
+ */
+class StructuredBody: public StructuredValue {
+public:
+    explicit StructuredBody(Tokenizer& tokenizer);
 
+    Body body;
 
-std::optional<Value> ObjectExpression::value() const {
-    if (has_value()) {
-        return Value(object()->address->address);
-    }
-    else {
-        return {};
-    }
-}
+    [[nodiscard]] Type type() const override {return BODY;}
+};
 
-std::optional<Expression> ObjectExpression::simplify(const Location& location, Object *object, bool always_create) {
-    if (object->has_address()) {
-        return ValueExpression::create(location, Value(object->address->address));
-    }
-    else if (always_create) {
-        return Expression(std::make_shared<ObjectExpression>(location, object));
-    }
-    else {
-        return {};
-    }
-}
-
-std::optional<Value> ObjectExpression::maximum_value() const {
-    if (has_value()) {
-        return value();
-    }
-    else {
-        return Value(object()->section->maximum_address() - object()->size_range().minimum);
-    }
-}
-
-std::optional<Value> ObjectExpression::minimum_value() const {
-    if (has_value()) {
-        return value();
-    }
-    else {
-        return Value(object()->section->minimum_address());
-    }
-}
+#endif // HAD_XLR8_STRUCTURED_BODY_H
+#undef IN_XLR8_STRUCTURED_BODY_H

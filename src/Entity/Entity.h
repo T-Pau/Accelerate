@@ -34,6 +34,7 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+#include "EvaluationContext.h"
 #include "StructuredValue.h"
 #include "Unresolved.h"
 #include "Visibility.h"
@@ -42,7 +43,7 @@ class Constant;
 class Function;
 class Macro;
 class Object;
-class ObjectFile;
+class Scope;
 
 /**
   * @brief Represents an entity in the source code, which can be a constant, object, macro, or function.
@@ -68,7 +69,7 @@ class Entity {
     [[nodiscard]] bool is_default_only() const {return default_only;}
     [[nodiscard]] bool is_public() const {return visibility == Visibility::PUBLIC;}
 
-    void uses(const Entity* entity);
+    void uses(Entity* entity);
 
     [[nodiscard]] Symbol get_name() const {return name;}
     [[nodiscard]] Location get_location() const {return location;}

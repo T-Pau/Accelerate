@@ -70,14 +70,14 @@ public:
      *
      * @return The size range of the BodyElement.
      */
-    [[nodiscard]] SizeRange size_range() const {return size_range_;}
+    [[nodiscard]] virtual SizeRange size_range() const {return size_range_;}
 
     /**
      * @brief Get the offset of the BodyElement within its entity.
      *
      * @return The offset of the BodyElement.
      */
-    [[nodiscard]] SizeRange offset() const {return offset_;}
+    [[nodiscard]] virtual SizeRange offset() const {return offset_;}
 
     /**
      * @brief Get the size of the BodyElement, if it is known.
@@ -163,7 +163,24 @@ public:
      */
     [[nodiscard]] virtual std::optional<Body> evaluate(const EvaluationContext& context);
 
+    /**
+     * @brief Evaluate the body element after all sub-body-elements and sub-expressions have been evaluated.
+     *
+     * The default implementation does nothing.
+     *
+     * @param context The evaluation context.
+     * @return The Body to replace this BodyElement with, {} if no replacement is needed.
+     */
     [[nodiscard]] virtual std::optional<Body> evaluate_process(const EvaluationContext& context);
+
+    /**
+     * @brief Check if the body and all sub-body-elements and sub-expressions have been fully evaluated.
+     *
+     * The default implementation uses `traverse()` to check all sub-body-elements and sub-expressions and returns `true` if they are all fully evaluated.
+     *
+     * @return `true` if the BodyElement is fully evaluated, `false` otherwise.
+     */
+    [[nodiscard]] virtual bool fully_evaluated();
 
     /**
      * @brief Serialize the BodyElement to a stream.
@@ -206,7 +223,16 @@ protected:
 
     /// The offset of the BodyElement within its entity.
     SizeRange offset_ = SizeRange(0, {});
+
+  private:
+    class NotFullyEvaluatedException: public std::exception {
+    public:
+        const char* what() const noexcept override {
+            return "BodyElement is not fully evaluated";
+        }
+    };
 };
+
 
 /**
  * @brief Print BodyElement to an output stream.

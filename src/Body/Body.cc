@@ -135,15 +135,6 @@ std::optional<Body> Body::append_sub(const Body& new_element) {
 }
 
 
-Body Body::scoped(const std::shared_ptr<Scope>& inner_environment) const {
-    if (is<ScopeBody>() && !inner_environment) {
-        return *this;
-    }
-    else {
-        return ScopeBody::create(*this, inner_environment);
-    }
-}
-
 std::ostream& operator<<(std::ostream& stream, const Body& body) {
     body.serialize(stream, "    ");
     return stream;
@@ -166,5 +157,11 @@ void Body::expand_calls() {
 void Body::enter_names(Scope* scope, Entity* containing_entity) {
     handle_translation_errors(*element, [&] {
         element->enter_names(scope, containing_entity);
+    });
+}
+
+bool Body::fully_evaluated() {
+    return handle_translation_errors(*element, [&] {
+        return element->fully_evaluated();
     });
 }

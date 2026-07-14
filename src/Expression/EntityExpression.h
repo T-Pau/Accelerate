@@ -42,18 +42,17 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 class EntityExpression: public BaseExpression {
 public:
-    explicit EntityExpression(const Location& location, const Entity* entity): BaseExpression(location), entity(entity) {}
+    explicit EntityExpression(const Location& location, Entity* entity): BaseExpression(location), entity(entity) {}
 
 protected:
-    [[nodiscard]] std::optional<Expression> evaluate(const EvaluationContext& context) override;
-    void resolve(Scope* scope, Entity* containing_entity) override;
+    void resolve(Scope* scope, Entity* containing_entity) override {containing_entity->uses(entity);}
 
     void serialize_sub(std::ostream& stream) const override {stream << entity->name;}
 
 protected:
     friend class Expression;
     
-    const Entity* entity;
+    Entity* entity;
 };
 
 #endif // HAD_XLR8_ENTITY_EXPRESSION_H

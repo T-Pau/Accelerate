@@ -38,16 +38,15 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <tpau-cpp-kernal/Exception.h>
 #include <tpau-cpp-kernal/Symbol.h>
 
+#include "Entity/Constant.h"
+#include "Entity/Function.h"
+#include "Entity/Macro.h"
+#include "Entity/Object.h"
 #include "Expression/Expression.h"
 #include "UnnamedLabelList.h"
 #include "Visibility.h"
 
 using namespace tpau::cpp_kernal;
-
-class Constant;
-class Function;
-class Macro;
-class Object;
 
 /**
  * @brief Represents a scope used for name resolution. It can be contained in other scopes.
@@ -56,6 +55,114 @@ class Object;
  */
 class Scope {
 public:
+    /**
+     * @brief Represents an unordered collection of entities in the scope.
+     *
+     * It provides an iterator to iterate over the elements in the collection.
+     */
+    template<typename T>
+    class Collection {
+      public:
+        /**
+         * @brief Initialize the collection with the given unordered map.
+         *
+         * @param collection The unordered map containing the entities.
+         */
+        Collection(const std::unordered_map<Symbol, std::unique_ptr<T>>& collection): collection(collection) {}
+
+        /**
+         * @brief Iterator for the collection.
+         */
+        class Iterator {
+          public:
+            using iterator_category = std::forward_iterator_tag;
+            using value_type = T*;
+            using difference_type = std::ptrdiff_t;
+            using pointer = T**;
+            using reference = T*&;
+
+            /**
+             * @brief Initialize the iterator with the given unordered map iterator.
+             *
+             * @param it The unordered map iterator.
+             */
+            Iterator(std::unordered_map<Symbol, std::unique_ptr<T>>::const_iterator it): it(it) {}
+
+            /**
+             * @brief Dereference the iterator.
+             *
+             * @return The entity pointed to by the iterator.
+             */
+            [[nodiscard]] value_type operator*() const {return it->second.get();}
+
+            /**
+             * @brief Get the pointer to the entity pointed to by the iterator.
+             *
+             * @return The pointer to the entity.
+             */
+            [[nodiscard]] pointer operator->() const {return &(it->second.get());}
+
+            /**
+             * @brief Pre-increment the iterator.
+             *
+             * @return The incremented iterator.
+             */
+            Iterator& operator++() {++it; return *this;}
+
+            /**
+             * @brief Post-increment the iterator.
+             *
+             * @return The iterator before incrementing.
+             */
+            Iterator operator++(int) {Iterator tmp(*this); ++it; return tmp;}
+
+            /**
+             * @brief Check if the iterator is equal to another iterator.
+             *
+             * @param other The other iterator to compare with.
+             * @return `true` if the iterators are equal, `false` otherwise.
+             */
+            bool operator==(const Iterator& other) const {return it == other.it;}
+
+            /**
+             * @brief Check if the iterator is not equal to another iterator.
+             *
+             * @param other The other iterator to compare with.
+             * @return `true` if the iterators are not equal, `false` otherwise.
+             */
+            bool operator!=(const Iterator& other) const {return it != other.it;}
+
+          private:
+            /// @brief The underlying unordered map iterator.
+            std::unordered_map<Symbol, std::unique_ptr<T>>::const_iterator it;
+        };
+
+        /**
+         * @brief Get the beginning iterator of the collection.
+         *
+         * @return The beginning iterator.
+         */
+        [[nodiscard]] Iterator begin() const {return Iterator(collection.begin());}
+
+        /**
+         * @brief Get the end iterator of the collection.
+         *
+         * @return The end iterator.
+         */
+        [[nodiscard]] Iterator end() const {return Iterator(collection.end());}
+
+        /**
+         * @brief Get the size of the collection.
+         *
+         * @return The number of entities in the collection.
+         */
+        [[nodiscard]] size_t size() const {return collection.size();}
+
+      private:
+        /// @brief The underlying unordered map containing the entities.
+        const std::unordered_map<Symbol, std::unique_ptr<T>>& collection;
+    };
+
     /**
      * Constructs a scope not contained in another scope.
      */
@@ -114,7 +221,7 @@ public:
      * @param name The name of the constant.
      * @return The constant if it exists, nullptr otherwise.
      */
-    [[nodiscard]] const Constant* get_constant(Symbol name) const {return get<Constant>(name);}
+    [[nodiscard]] Constant* get_constant(Symbol name) const {return get<Constant>(name);}
 
     /**
      * Get a function from the scope.
@@ -122,7 +229,7 @@ public:
      * @param name The name of the function.
      * @return The function if it exists, nullptr otherwise.
      */
-    [[nodiscard]] const Function* get_function(Symbol name) const {return get<Function>(name);}
+    [[nodiscard]] Function* get_function(Symbol name) const {return get<Function>(name);}
 
     /**
      * Get a macro from the scope.
@@ -130,7 +237,7 @@ public:
      * @param name The name of the macro.
      * @return The macro if it exists, nullptr otherwise.
      */
-    [[nodiscard]] const Macro* get_macro(Symbol name) const {return get<Macro>(name);}
+    [[nodiscard]] Macro* get_macro(Symbol name) const {return get<Macro>(name);}
 
     /**
      * Get an object from the scope.
@@ -138,7 +245,35 @@ public:
      * @param name The name of the object.
      * @return The object if it exists, nullptr otherwise.
      */
-    [[nodiscard]] const Object* get_object(Symbol name) const {return get<Object>(name);}
+    [[nodiscard]] Object* get_object(Symbol name) const {return get<Object>(name);}
+
+    /**
+     * Get the objects defined in this scope. It does not include objects defined in containing scopes.
+     *
+     * @return A collection of all objects.
+     */
+    [[nodiscard]] Collection<Object> get_objects() const {return Collection<Object>(objects);}
+    
+    /**
+     * Get the constants defined in this scope. It does not include constants defined in containing scopes.
+     *
+     * @return A collection of all constants.
+     */
+    [[nodiscard]] Collection<Constant> get_constants() const {return Collection<Constant>(constants);}
+    
+    /**
+     * Get the functions defined in this scope. It does not include functions defined in containing scopes.
+     *
+     * @return A collection of all functions.
+     */
+    [[nodiscard]] Collection<Function> get_functions() const {return Collection<Function>(functions);}
+    
+    /**
+     * Get the macros defined in this scope. It does not include macros defined in containing scopes.
+     *
+     * @return A collection of all macros.
+     */
+    [[nodiscard]] Collection<Macro> get_macros() const {return Collection<Macro>(macros);}
 
     /**
      * Get the number of unnamed labels in the scope.
@@ -294,7 +429,7 @@ private:
      * @return The entity, if found; otherwise, nullptr.
      */
     template<typename T>
-    const T* get(Symbol name) const {
+    T* get(Symbol name) const {
         if (auto entity = get_directly<T>(name)) {
             return entity;
         }
@@ -316,17 +451,17 @@ private:
      * @return The entity, if found; otherwise, nullptr.
      */
     template<typename T>
-    const T* get_directly(Symbol name) const {
+    T* get_directly(Symbol name) const {
         throw Exception("internal error: get() not defined for type {}", typeid(T).name());
     }
     template<>
-    const Constant* get_directly<Constant>(Symbol name) const {return constants.at(name).get();}
+    Constant* get_directly<Constant>(Symbol name) const {return constants.at(name).get();}
     template<>
-    const Function* get_directly<Function>(Symbol name) const {return functions.at(name).get();}
+    Function* get_directly<Function>(Symbol name) const {return functions.at(name).get();}
     template<>
-    const Macro* get_directly<Macro>(Symbol name) const {return macros.at(name).get();}
+    Macro* get_directly<Macro>(Symbol name) const {return macros.at(name).get();}
     template<>
-    const Object* get_directly<Object>(Symbol name) const {return objects.at(name).get();}
+    Object* get_directly<Object>(Symbol name) const {return objects.at(name).get();}
 
     /**
      * @brief Finds the first containing scope of a given visibility.

@@ -41,6 +41,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "SizeRange.h"
 #include "Token.h"
 #include "Tokenizer.h"
+#include "Visibility.h"
 
 /**
  * @brief This class parses object and macro bodies.
@@ -140,7 +141,7 @@ private:
     class ScopeNesting: public Nesting {
       public:
         Body* operator[](size_t index) override {return &inner_body;}
-        Body body() override {return inner_body.scoped();}
+        Body body() override {/* TODO: implement */ /* return inner_body; */ return Body{};}
 
         Body inner_body;
     };

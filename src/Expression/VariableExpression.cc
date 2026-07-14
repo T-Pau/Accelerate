@@ -34,6 +34,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ConstantExpression.h"
 #include "EvaluationContext.h"
 #include "ObjectExpression.h"
+#include "Scope.h"
 #include "ValueExpression.h"
 
 using namespace tpau::cpp_kernal;

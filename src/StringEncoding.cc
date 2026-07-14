@@ -33,6 +33,9 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "StringEncoding.h"
 #include "SequenceTokenizer.h"
+#include "StructuredArray.h"
+#include "StructuredDictionary.h"
+#include "StructuredScalar.h"
 #include "Target.h"
 
 using namespace tpau::cpp_kernal;

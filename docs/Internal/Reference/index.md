@@ -36,8 +36,8 @@ These classes represent the CPU definition, which defines the syntax of the asse
 ### [Instruction](Instruction.md)
 ::: Instruction.@brief
 
-### [InstructionEncoder](InstructionEncoder.md)
-::: InstructionEncoder.@brief
+### [InstructionInvocation](InstructionInvocation.md)
+::: InstructionInvocation.@brief
 
 
 ## Entities
@@ -322,6 +322,18 @@ These classes are not yet sorted into the above categories.
 ### [SizeRange](SizeRange.md)
 ::: SizeRange.@brief
 
+### [StructuredArray](StructuredArray.md)
+::: StructuredArray.@brief
+
+### [StructuredBody](StructuredBody.md)
+::: StructuredBody.@brief
+
+### [StructuredDictionary](StructuredDictionary.md)
+::: StructuredDictionary.@brief
+
+### [StructuredScalar](StructuredScalar.md)
+::: StructuredScalar.@brief
+
 ### [StructuredValue](StructuredValue.md)
 ::: StructuredValue.@brief
 
@@ -335,5 +347,4 @@ These classes are not yet sorted into the above categories.
 ::: Unresolved.@brief
 
 ### [Visibility](Visibility.md)
-
 

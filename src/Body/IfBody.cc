@@ -43,35 +43,6 @@ IfBody::IfBody(std::vector<IfBodyClause> clauses_): clauses(std::move(clauses_))
     }
 }
 
-std::optional<Body> IfBody::evaluate(const EvaluationContext& context) {
-    auto new_clauses = std::vector<IfBodyClause>();
-    auto new_size_range = SizeRange(0, 0);
-    
-    for (auto& clause: clauses) {
-        clause.condition.evaluate(context);
-        if (clause.is_true()) {
-            clause.body.evaluate(context);
-            return clause.body;
-        }
-        else if (clause.is_false()) {
-            continue;
-        }
-        else {
-            clause.body.evaluate(context.making_conditional());
-            new_size_range = new_size_range.max(clause.body.size_range());
-        }
-    }
-
-    if (new_clauses.empty()) {
-        return Body();
-    }
-    else {
-        clauses = std::move(new_clauses);
-        size_range_ = new_size_range;
-        return {};
-    }
-}
-
 void IfBody::serialize(std::ostream &stream, const std::string& prefix) const {
     if (empty()) {
         return;
@@ -95,7 +66,7 @@ void IfBody::serialize(std::ostream &stream, const std::string& prefix) const {
                 stream << prefix << "}" << std::endl;
                 stream << prefix << ".else_if ";
             }
-            stream << clause.condition << " {" << std::endl;
+            stream << *clause.condition << " {" << std::endl;
         }
 
         clause.body.serialize(stream, prefix + "  ");
@@ -106,7 +77,7 @@ void IfBody::serialize(std::ostream &stream, const std::string& prefix) const {
     stream << prefix << "}" << std::endl;
 }
 
-Body IfBody::create(const std::vector<IfBodyClause> &clauses) {
+std::optional<Body> IfBody::simplify(std::vector<IfBodyClause>& clauses, bool always_create) {
     auto filtered_clauses = std::vector<IfBodyClause>();
 
     for (auto& clause: clauses) {
@@ -127,16 +98,23 @@ Body IfBody::create(const std::vector<IfBodyClause> &clauses) {
     }
 
     if (filtered_clauses.empty()) {
-        return {};
+        return Body();
     }
 
-    return Body(std::make_shared<IfBody>(filtered_clauses));
+    if (always_create && filtered_clauses.size() != clauses.size()) {
+        return Body(std::make_shared<IfBody>(filtered_clauses));
+    }
+    else {
+        return {};
+    }
 }
 
 
 void IfBody::traverse(std::function<void(Body&)> body_callable, std::function<void(Expression&)> expression_callable) {
     for (auto& clause: clauses) {
-        expression_callable(clause.condition);
+        if (clause.condition) {
+            expression_callable(*clause.condition);
+        }
         body_callable(clause.body);
     }
 }

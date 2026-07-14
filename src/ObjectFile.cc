@@ -37,6 +37,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <tpau-cpp-kernal/LocationException.h>
 
 #include "Expression/ObjectExpression.h"
+#include "Scope.h"
 #include "SequenceTokenizer.h"
 
 using namespace tpau::cpp_kernal;
@@ -243,6 +244,7 @@ void ObjectFile::collect_constants(std::unordered_set<const Constant*>& set, boo
 }
 
 void ObjectFile::evaluate() {
+#if 0
     for (auto& constant : constants | std::views::values) {
         // TODO: this causes the error for cyclic definition to be printed four times
         //constant->evaluate();
@@ -309,11 +311,13 @@ void ObjectFile::evaluate() {
         // TODO: add locations of .pin directives.
         unresolved_used.add(name, {}, result);
     }
+#endif
 }
 
 
 
 void ObjectFile::resolve_defaults() {
+#if 0
     for (const auto& [name, constant] : constants) {
         if (constant->is_default_only() && !private_environment->get_variable(name)) {
             add_to_environment(constant->name, constant->visibility, constant->value);
@@ -339,6 +343,7 @@ void ObjectFile::resolve_defaults() {
     }
 
     unused_default_objects.clear();
+#endif
 }
 
 const Object* ObjectFile::object(Symbol object_name) const {
@@ -353,6 +358,7 @@ const Object* ObjectFile::object(Symbol object_name) const {
 }
 
 Object* ObjectFile::create_object(Symbol section_name, Visibility visibility, bool default_only, const Token& object_name) {
+#if 0
     auto section = target->map.section(section_name);
     if (section == nullptr) {
         if (section_name.empty()) {
@@ -364,22 +370,33 @@ Object* ObjectFile::create_object(Symbol section_name, Visibility visibility, bo
         // TODO: mark object as faulty
     }
     return insert_object(std::make_unique<Object>(this, section, visibility, default_only, object_name));
+#else
+    return nullptr;
+#endif
 }
 
 ObjectFile::ObjectFile() noexcept {
+#if 0
     public_environment = std::make_shared<Scope>();
     private_environment = std::make_shared<Scope>(public_environment);
+#endif
 }
 
-void ObjectFile::add_to_environment(Object* object) { add_to_environment(object->name, object->visibility, Expression(object->location, object)); }
+void ObjectFile::add_to_environment(Object* object) { 
+#if 0
+    add_to_environment(object->name, object->visibility, Expression(object->location, object));
+#endif
+}
 
 void ObjectFile::add_to_environment(Symbol symbol_name, Visibility visibility, Expression value) const {
+#if 0
     if (visibility == Visibility::PUBLIC) {
         public_environment->add(symbol_name, std::move(value));
     }
     else {
         private_environment->add(symbol_name, std::move(value));
     }
+#endif
 }
 
 std::vector<Object*> ObjectFile::all_objects() const {
@@ -403,6 +420,7 @@ void ObjectFile::collect_explicitly_used_objects(std::unordered_set<Object*>& se
 }
 
 Object* ObjectFile::insert_object(std::unique_ptr<Object> object) {
+#if 0
     auto it = objects.find(object->name);
     if (it == objects.end()) {
         auto [it, inserted] = objects.insert({object->name, std::move(object)});
@@ -421,9 +439,13 @@ Object* ObjectFile::insert_object(std::unique_ptr<Object> object) {
         DiagnosticOutput::global.note(Location(it->second->location), "previously defined here");
         throw Exception();
     }
+#else
+    return nullptr;
+#endif
 }
 
 void ObjectFile::add_function(std::unique_ptr<Function> function) {
+#if 0
     if (function->visibility == Visibility::SCOPE) {
         // TODO: error
         return;
@@ -446,9 +468,11 @@ void ObjectFile::add_function(std::unique_ptr<Function> function) {
         environment(function->visibility)->add(function->name, function.get());
     }
     functions[function->name] = std::move(function);
+#endif 
 }
 
 void ObjectFile::add_macro(std::unique_ptr<Macro> macro) {
+#if 0
     if (macro->visibility == Visibility::SCOPE) {
         // TODO: error
         return;
@@ -471,6 +495,7 @@ void ObjectFile::add_macro(std::unique_ptr<Macro> macro) {
         environment(macro->visibility)->add(macro->name, macro.get());
     }
     macros[macro->name] = std::move(macro);
+#endif
 }
 
 
@@ -489,6 +514,7 @@ void ObjectFile::set_target(const Target* new_target) {
 }
 
 std::shared_ptr<Scope> ObjectFile::environment(Visibility visibility) const {
+#if 0
     switch (visibility) {
         case Visibility::SCOPE:
             return {}; // TODO: throw?
@@ -499,6 +525,9 @@ std::shared_ptr<Scope> ObjectFile::environment(Visibility visibility) const {
     }
 
     throw Exception("internal error: invalid visibility");
+#else
+    return {};
+#endif
 }
 
 bool ObjectFile::check_unresolved(Unresolved& unresolved) const {
@@ -522,16 +551,6 @@ bool ObjectFile::check_unresolved(Unresolved& unresolved) const {
     return ok;
 }
 
-const ObjectFile::Constant* ObjectFile::constant(Symbol name) const {
-    const auto it = constants.find(name);
-
-    if (it != constants.end()) {
-        return it->second.get();
-    }
-    else {
-        return {};
-    }
-}
 
 Macro* ObjectFile::macro(Symbol macro_name) {
     auto it = macros.find(macro_name);

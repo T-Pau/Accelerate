@@ -84,13 +84,29 @@ struct std::hash<AddressingModeMatcherElement>
     }
 };
 
-
+/// @brief Represents a match for the given line.
 class AddressingModeMatcherResult {
 public:
+    /**
+     * @brief Initialize a match result with the given addressing mode and notation index.
+     *
+     * @param addressing_mode The addressing mode that matched.
+     * @param notation_index The index of the addressing mode's notation that matched.
+     */
     AddressingModeMatcherResult(Symbol addressing_mode, size_t notation_index): addressing_mode(addressing_mode), notation_index(notation_index) {}
+
+    /**
+     * @brief Check if two match results are equal.
+     *
+     * @param other The other match result to compare with.
+     * @return `true` if the match results are equal, `false` otherwise.
+     */
     bool operator==(const AddressingModeMatcherResult& other) const {return addressing_mode == other.addressing_mode && notation_index == other.notation_index;}
 
+    /// @brief The addressing mode that matched.
     Symbol addressing_mode;
+
+    /// @brief The index of the addressing mode's notation that matched.
     size_t notation_index;
 };
 
@@ -106,22 +122,57 @@ struct std::hash<AddressingModeMatcherResult>
 
 /**
  * @brief Determines which addressing modes match a given line in the source code.
+ *
+ * It does not take into account the constraints of the argument types, only if the syntax matches.
+ *
+ * It is implemented via a deterministic finite automaton (DFA) that is built from all notations of all addressing modes.
+ *
+ * When matched against a line, it returns all addressing modes that match the line, along with the index of the notation that matched.
  */
 class AddressingModeMatcher {
 public:
+    /**
+     * @brief Match a line in the source code against all known addressing modes.
+     *
+     * @param nodes The nodes representing the line in the source code.
+     * @return A set of match results for the line.
+     */
     [[nodiscard]] std::unordered_set<AddressingModeMatcherResult> match(const std::vector<std::shared_ptr<Node>>& nodes) const;
 
+    /**
+     * @brief Add a notation for an addressing mode to the matcher.
+     *
+     * @param addressing_mode The name of the addressing mode.
+     * @param notation_index The index in the addressing mode's notations.
+     * @param notation The notation to add.
+     * @param arguments The arguments for the addressing mode.
+     */
     void add_notation(Symbol addressing_mode, size_t notation_index, const AddressingMode::Notation& notation, const std::unordered_map<Symbol, std::unique_ptr<AddressingMode::Argument>>& arguments);
 
 private:
+    /// @brief Represents a node in the matcher DFA.
     class MatcherNode {
     public:
+        /**
+         * @brief Add a notation to the matcher.
+         *
+         * This method recursively adds the elements of the notation to the matcher, creating new nodes as necessary.
+         *
+         * @param result The match result associated with the notation.
+         * @param current The current element in the notation being processed.
+         * @param end The end iterator of the notation's elements.
+         * @param arguments The arguments for the addressing mode.
+         */
         void add_notation(const AddressingModeMatcherResult& result, std::vector<AddressingMode::Notation::Element>::const_iterator current, std::vector<AddressingMode::Notation::Element>::const_iterator end, const std::unordered_map<Symbol, std::unique_ptr<AddressingMode::Argument>>& arguments);
 
+        /// @brief The set of match results associated with this node in the matcher DFA.
         std::unordered_set<AddressingModeMatcherResult> results;
+
+        /// @brief The next node in the matcher DFA for each next node from the source code.
         std::unordered_map<AddressingModeMatcherElement, std::unique_ptr<MatcherNode>> next;
     };
 
+    /// @brief The start node of the matcher DFA.
     MatcherNode start;
 };
 

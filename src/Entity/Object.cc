@@ -34,6 +34,9 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Body/BodyElement.h"
 #include "ExpressionParser.h"
 #include "SequenceTokenizer.h"
+#include "StructuredBody.h"
+#include "StructuredDictionary.h"
+#include "StructuredScalar.h"
 
 using namespace tpau::cpp_kernal;
 

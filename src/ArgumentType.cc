@@ -31,6 +31,10 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <tpau-cpp-kernal/Exception.h>
 
+#include "Expression/InRangeExpression.h"
+#include "Expression/ValueExpression.h"
+#include "Expression/VariableExpression.h"
+
 using namespace tpau::cpp_kernal;
 
 Value ArgumentTypeEnum::entry(Symbol name) const {
@@ -56,15 +60,58 @@ Value ArgumentTypeMap::entry(const Value& value) const {
     }
 }
 
-const ArgumentTypeEncoding *ArgumentType::as_encoding() const {
-    return dynamic_cast<const ArgumentTypeEncoding*>(this);
-}
 
 std::unique_ptr<ArgumentType> ArgumentTypeEncoding::range_type(Symbol range_name) const {
     auto range = std::make_unique<ArgumentTypeRange>(range_name);
     // TODO: handle encodings with unknown minimum/maximum value.
     range->lower_bound = *encoding.minimum_value();
-    range->upper_bound = *encoding.minimum_value();
+    range->upper_bound = *encoding.maximum_value();
 
     return range;
+}
+
+std::optional<bool> ArgumentTypeRange::is_valid(const Expression& expression) const {
+    if (expression.minimum_value() > upper_bound || expression.maximum_value() < lower_bound) {
+        return false;
+    }
+    else if (expression.minimum_value() >= lower_bound && expression.maximum_value() <= upper_bound) {
+        return true;
+    }
+    else {
+        return {};
+    }
+}
+
+std::optional<bool> ArgumentTypeMap::is_valid(const Expression& expression) const {
+    if (expression.has_value()) {
+        return entries.contains(*expression.value());
+    }
+    else {
+        return {};
+    }
+}
+
+std::optional<bool> ArgumentTypeEncoding::is_valid(const Expression& expression) const {
+    if (expression.has_value()) {
+        return encoding.fits(*expression.value());
+    }
+    else {
+        if (expression.minimum_value() > *encoding.maximum_value() || expression.maximum_value() < *encoding.minimum_value()) {
+            return false;
+        }
+        else if (expression.minimum_value() >= *encoding.minimum_value() && expression.maximum_value() <= *encoding.maximum_value()) {
+            return true;
+        }
+        else {
+            return {};
+        }
+    }
+}
+
+std::optional<Expression> ArgumentTypeRange::constraint_expression(const Location& location, Symbol name) const {
+    return InRangeExpression::create(location, ValueExpression::create({}, lower_bound), ValueExpression::create(location, upper_bound), VariableExpression::create(location, name));
+}
+
+std::optional<Expression> ArgumentTypeEncoding::constraint_expression(const Location& location, Symbol name) const {
+    return InRangeExpression::create(location, ValueExpression::create({}, *encoding.minimum_value()), ValueExpression::create(location, *encoding.maximum_value()), VariableExpression::create(location, name));
 }

@@ -29,6 +29,9 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "Entity/Macro.h"
 
+#include "StructuredBody.h"
+#include "StructuredDictionary.h"
+
 bool Macro::initialized = false;
 Token Macro::token_body;
 

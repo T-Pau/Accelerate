@@ -18,10 +18,17 @@
     "C_Cpp.formatting": "clangFormat",
     "C_Cpp.clang_format_style": "file",
     "cSpell.words": [
+        "cstdint",
         "ctest",
         "depfile",
+        "ifdef",
+        "ifndef",
         "Kempston",
         "nihtest",
-        "tpau"
+        "RAII",
+        "scanf",
+        "stdint",
+        "tpau",
+        "Zilog"
     ]
 }

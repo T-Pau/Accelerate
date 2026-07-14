@@ -26,7 +26,9 @@ add_library(xlr8-library STATIC
 
         Expression/BaseExpression.cc
         Expression/BinaryExpression.cc
+        Expression/ConstantExpression.cc
         Expression/DefinedExpression.cc
+        Expression/EntityExpression.cc
         Expression/ExistsExpression.cc
         Expression/Expression.cc
         Expression/FillExpression.cc
@@ -67,7 +69,7 @@ add_library(xlr8-library STATIC
         HexStreamEncoder.cc
         HexStringDecoder.cc
         Instruction.cc
-        InstructionEncoder.cc
+        InstructionInvocation.cc
         IntegerEncoder.cc
         LibraryGetter.cc
         LibraryLinker.cc
@@ -102,7 +104,7 @@ target_link_libraries(xlr8-library tpau-cpp-kernal::tpau-cpp-kernal)
 
 foreach(PROGRAM xlr8)
     ADD_EXECUTABLE(${PROGRAM} ${PROGRAM}.cc)
-    target_include_directories(${PROGRAM} PRIVATE ${PROJECT_BINARY_DIR})
+    target_include_directories(${PROGRAM} PRIVATE ${PROJECT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
     target_link_libraries(${PROGRAM} xlr8-library)
     target_link_libraries(${PROGRAM} tpau-cpp-kernal::tpau-cpp-kernal)
     INSTALL(TARGETS ${PROGRAM} RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})

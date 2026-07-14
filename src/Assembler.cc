@@ -35,6 +35,10 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "BodyParser.h"
 #include "ExpressionParser.h"
+#include "Scope.h"
+#include "StructuredArray.h"
+#include "StructuredDictionary.h"
+#include "StructuredScalar.h"
 
 using namespace tpau::cpp_kernal;
 
@@ -443,7 +447,8 @@ void Assembler::parse_output(const Token& directive) {
         throw LocationException(token.location, "expected '{'");
     }
 
-    parsed_target.output = std::make_unique<Output>(&parsed_target, directive.location, BodyParser(tokenizer, parsed_target.cpu, object_file->file_scope, false, &tokenizer.defines).parse());
+    // TODO: implement
+    // parsed_target.output = std::make_unique<Output>(&parsed_target, directive.location, BodyParser(tokenizer, parsed_target.cpu, object_file->file_scope, false, &tokenizer.defines).parse());
 }
 
 void Assembler::parse_string_encoding(const Token& directive) {

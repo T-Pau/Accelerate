@@ -35,6 +35,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Expression/Expression.h"
 #include "Expression/VariableExpression.h"
 #include "Expression/ValueExpression.h"
+#include "Scope.h"
 
 using namespace tpau::cpp_kernal;
 

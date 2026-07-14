@@ -29,6 +29,16 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "ScopeBody.h"
 
+#include "Entity/Constant.h"
+#include "Scope.h"
+
+ScopeBody::ScopeBody(const std::shared_ptr<Scope>& scope, Body body): scope_(std::move(scope)), body(std::move(body)) {
+    if (scope_->type() != Visibility::SCOPE) {
+        throw Exception("ScopeBody must be initialized with a scope of type SCOPE.");
+    }
+}
+
+
 void ScopeBody::serialize(std::ostream& stream, const std::string& prefix) const {
     // TODO: serialize environment
     stream << prefix << ".scope {" << std::endl;
@@ -36,34 +46,16 @@ void ScopeBody::serialize(std::ostream& stream, const std::string& prefix) const
     stream << prefix << "}" << std::endl;
 }
 
-std::optional<Body> ScopeBody::evaluate(const EvaluationContext& context) {
-#if 0    
-    auto new_body = std::optional<Body>{};
-
-    if (environment) {
-        auto inner_context = context.adding_scope(environment, context.offset);
-        new_body = body.evaluate(inner_context);
+void ScopeBody::traverse(std::function<void(Body&)> body_callable, std::function<void(Expression&)> expression_callable) {
+    for (auto constant: scope()->get_constants()) {
+        expression_callable(constant->value);
     }
-    else {
-        new_body = body.evaluate(context);
-    }
-
-    if (new_body) {
-        return new_body->scoped(environment);
-    }
-    else {
-        return {};
-    }
-#else
-    return {};
-#endif
+    body_callable(body);
 }
 
-Body ScopeBody::create(Body body, const std::shared_ptr<Scope>& inner_environment) {
-    if (body.empty()) {
+std::optional<Body> ScopeBody::evaluate_process(const EvaluationContext& context) {
+    if (body.fully_evaluated()) {
         return body;
     }
-    else {
-        return Body(std::make_shared<ScopeBody>(std::move(body), inner_environment));
-    }
+    return {};
 }

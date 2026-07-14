@@ -38,17 +38,43 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using namespace tpau::cpp_kernal;
 
+/**
+ * @brief Represents a node in instruction notation. It can be an expression, keyword, or punctuation.
+ */
 class Node {
 public:
+    /**
+     * @brief The type of the node.
+     */
     enum Type {
+        /// @brief The node is an expression, corresponding to an argument of the instruction.
         EXPRESSION,
+
+        /// @brief The node is a keyword, corresponding to a reserved word in the instruction notation.
         KEYWORD,
+
+        /// @brief The node is a punctuation, corresponding to a punctuation symbol in the instruction notation.
         PUNCTUATION
     };
 
     virtual ~Node() = default;
 
+    /**
+     * @brief Get the type of the node.
+     *
+     * Subclasses must implement this method.
+     *
+     * @return The type of the node.
+     */
     [[nodiscard]] virtual Type type() const = 0;
+
+    /**
+     * @brief Get the location of the node in the source code.
+     *
+     * Subclasses must implement this method.
+     *
+     * @return The location of the node.
+     */
     [[nodiscard]] virtual const Location& get_location() const = 0;
 };
 

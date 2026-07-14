@@ -29,21 +29,3 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "Expression/EntityExpression.h"
 
-#include "Expression/ValueExpression.h"
-
-std::optional<Expression> EntityExpression::evaluate(const EvaluationContext& context) {
-    auto final_value = value();
-
-    if (final_value) {
-        return ValueExpression::create(location, *final_value);
-    }
-    else {
-        return {};
-    }
-}
-
-
-
-void EntityExpression::resolve(Scope* scope, Entity* containing_entity) {
-    containing_entity->uses(entity);
-}

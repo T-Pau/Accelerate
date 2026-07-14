@@ -42,8 +42,8 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 class ObjectExpression: public EntityExpression {
 public:
-    explicit ObjectExpression(const Location& location, const Object* object): EntityExpression(location, object) {}
-    [[nodiscard]] static Expression create(const Location& location, const Object* object);
+    explicit ObjectExpression(const Location& location, Object* object): EntityExpression(location, object) {}
+    [[nodiscard]] static Expression create(const Location& location, Object* object) {return *simplify(location, object, true);}
 
     [[nodiscard]] bool has_value() const override {return object()->has_address();}
     [[nodiscard]] std::optional<Value> value() const override;
@@ -54,9 +54,9 @@ protected:
     [[nodiscard]] std::optional<Value> minimum_value() const override;
 
 private:
-    friend class Expression;
+    static std::optional<Expression> simplify(const Location& location, Object* object, bool always_create);
 
-    const Object* object() const {return static_cast<const Object*>(entity);}
+    Object* object() const {return static_cast<Object*>(entity);}
 };
 
 #endif // HAD_XLR8_OBJECT_EXPRESSION_H

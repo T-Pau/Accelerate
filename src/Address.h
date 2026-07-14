@@ -34,9 +34,10 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "Scope.h"
 #include "Tokenizer.h"
 #include <iostream>
+
+class Scope;
 
 /**
  * Represents an address, consisting of a bank and an address within that bank. The bank defaults to 0.

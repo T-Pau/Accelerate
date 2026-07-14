@@ -34,9 +34,15 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "AddressingMode.h"
 #include "CPUGetter.h"
 #include "Body/DataBody.h"
+#include "Expression/ObjectNameExpression.h"
+#include "Expression/ValueExpression.h"
 #include "ExpressionParser.h"
-#include "StructuredValue.h"
+#include "ObjectFileParser.h"
 #include "SequenceTokenizer.h"
+#include "StructuredArray.h"
+#include "StructuredDictionary.h"
+#include "StructuredScalar.h"
+#include "StructuredValue.h"
 
 using namespace tpau::cpp_kernal;
 
@@ -166,7 +172,7 @@ void CPUParser::parse_addressing_mode() {
                 default_value = Value{default_value_token.as_value()};
             }
             addressing_mode.arguments[pair.first.as_symbol()] = std::make_unique<AddressingMode::Argument>(argument_type, default_value);
-            if (argument_type->is_encoding()) {
+            if (argument_type->is<ArgumentTypeEncoding>()) {
                 auto argument_variable_name = pair.first.as_symbol();
                 unencoded_encoding_arguments.insert(argument_variable_name);
             }
@@ -195,7 +201,18 @@ void CPUParser::parse_addressing_mode() {
 
     auto encoding_definition = definition->get_optional(token_encoding);
     if (encoding_definition == nullptr) {
-        addressing_mode.encoding = DataBody::create({{Expression::create(token_opcode), {}}});
+        auto expression = Expression{};
+        if (token_opcode == ObjectFileParser::token_object_name) {
+            expression = ObjectNameExpression::create(token_opcode.location, {});
+        }
+        else if (token_opcode.is_name() || token_opcode == Token::colon_minus || token_opcode == Token::colon_plus) {
+            expression = VariableExpression::create(token_opcode.location, token_opcode.as_symbol());
+        }
+        else {
+            expression = ValueExpression::create(token_opcode.location, token_opcode.as_value());
+        }
+
+        addressing_mode.encoding = DataBody::create({{expression, {}}});
     }
     else if (encoding_definition->is_scalar()) {
         auto encoding_tokens = std::vector<Token>();
@@ -222,7 +239,7 @@ void CPUParser::parse_addressing_mode() {
         for (auto& datum: addressing_mode.encoding.as<DataBody>()->data) {
             if (datum.expression.is<VariableExpression>() && datum.expression.as<VariableExpression>()->variable() != token_opcode.as_symbol()) {
                 auto variable_name = datum.expression.as<VariableExpression>()->variable();
-                auto encoding_type = addressing_mode.argument(variable_name)->type->as_encoding();
+                auto encoding_type = addressing_mode.argument(variable_name)->type->as<ArgumentTypeEncoding>();
                 if (encoding_type && (!datum.encoding || *datum.encoding == encoding_type->encoding)) {
                     datum.encoding = Encoder{encoding_type->encoding};
                     unencoded_encoding_arguments.erase(variable_name);
@@ -278,7 +295,7 @@ void CPUParser::parse_argument_type() {
             throw LocationException(type.location, "unknown argument type '{}'", type);
         }
         argument_type = (this->*it->second)(name, parameters.get());
-        if (auto encoding_type = argument_type->as_encoding()) {
+        if (auto encoding_type = argument_type->as<ArgumentTypeEncoding>()) {
             auto range_name = Symbol(".range(" + name.as_string() + ")");
             cpu.add_argument_type(range_name, encoding_type->range_type(range_name));
         }

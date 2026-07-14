@@ -1,14 +1,14 @@
-#ifdef IN_XLR8_EXPRESSION_NODE_H
+#ifdef IN_XLR8_STRUCTURED_SCALAR_H
 #error "circular include file dependency detected"
 #endif
-#define IN_XLR8_EXPRESSION_NODE_H
-#ifndef HAD_XLR8_EXPRESSION_NODE_H
-#define HAD_XLR8_EXPRESSION_NODE_H
+#define IN_XLR8_STRUCTURED_SCALAR_H
+#ifndef HAD_XLR8_STRUCTURED_SCALAR_H
+#define HAD_XLR8_STRUCTURED_SCALAR_H
 
 /*
 Copyright (C) Dieter Baron
 
-The authors can be contacted at <assembler@tpau.group>
+The authors can be contacted at <accelerate@tpau.group>
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions
@@ -34,28 +34,29 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "Expression/Expression.h"
-#include "Node.h"
+#include "StructuredValue.h"
 
 /**
- * @brief Represents an expression corresponding to an argument for the instruction.
+ * @brief Represents a scalar value, which can be a single token or a list of tokens.
  */
-class ExpressionNode: public Node {
+class StructuredScalar: public StructuredValue {
 public:
-    /**
-     * @brief Initialize an ExpressionNode with a specific expression.
-     *
-     * @param expression The expression corresponding to the argument in the instruction notation.
-     */
-    explicit ExpressionNode(Expression expression): expression(std::move(expression)) {}
+    explicit StructuredScalar(Tokenizer& tokenizer);
 
-    [[nodiscard]] Type type() const override {return EXPRESSION;}
-    [[nodiscard]] const Location& get_location() const override {return expression.location();}
+    std::vector<Token> tokens;
 
-    /// @brief The expression corresponding to the argument.
-    Expression expression;
+    [[nodiscard]] bool empty() const {return tokens.empty();}
+    [[nodiscard]] size_t size() const {return tokens.size();}
+    const Token& operator[](size_t index) const {return tokens[index];}
+    [[nodiscard]] const Token& token() const {return tokens.front();}
+    [[nodiscard]] std::vector<Token>::iterator begin() {return tokens.begin();}
+    [[nodiscard]] std::vector<Token>::iterator end() {return tokens.end();}
+    [[nodiscard]] std::vector<Token>::const_iterator begin() const {return tokens.begin();}
+    [[nodiscard]] std::vector<Token>::const_iterator end() const {return tokens.end();}
+
+    [[nodiscard]] Type type() const override {return tokens.size() == 1 ? SCALAR_SINGULAR : SCALAR_LIST;}
 };
 
 
-#endif // HAD_XLR8_EXPRESSION_NODE_H
-#undef IN_XLR8_EXPRESSION_NODE_H
+#endif // HAD_XLR8_STRUCTURED_SCALAR_H
+#undef IN_XLR8_STRUCTURED_SCALAR_H
