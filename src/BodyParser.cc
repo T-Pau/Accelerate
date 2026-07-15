@@ -39,9 +39,11 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Body/LabelBody.h"
 #include "Body/MacroBody.h"
 #include "Body/MemoryBody.h"
+#include "Expression/ConstantExpression.h"
 #include "Expression/ValueExpression.h"
 #include "ExpressionNode.h"
 #include "ExpressionParser.h"
+#include "InstructionInvocation.h"
 #include "TokenNode.h"
 
 using namespace tpau::cpp_kernal;
@@ -72,7 +74,7 @@ const std::unordered_map<Symbol, void (BodyParser::*)()> BodyParser::directive_p
     {token_if.as_symbol(), &BodyParser::parse_if},
     {token_memory.as_symbol(), &BodyParser::parse_memory},
     {token_repeat.as_symbol(), &BodyParser::parse_repeat},
-    {token_scope.as_symbol(), &BodyParser::parse_scope}
+    {token_scope.as_symbol(), &BodyParser::parse_scope},
 };
 // clang-format on
 
@@ -171,6 +173,8 @@ Body BodyParser::parse() {
     throw LocationException(Location(), "unclosed body"); // TODO: location
 }
 
+Expression BodyParser::get_label(const Location& location, Symbol name) const { return VariableExpression::create(location, name); }
+
 void BodyParser::add_constant(Visibility visibility, const Token& name, const Expression& value) {
     if (visibility != Visibility::ENTITY) {
         if (!allow_assignment()) {
@@ -180,25 +184,19 @@ void BodyParser::add_constant(Visibility visibility, const Token& name, const Ex
     }
 }
 
-Symbol BodyParser::get_label(bool& is_anonymous) {
+Expression BodyParser::get_pc_label() {
+    auto name = Symbol();
+
     auto trailing_label = current_body->back();
     if (trailing_label && trailing_label->is<LabelBody>()) {
-        is_anonymous = false;
-        return trailing_label->as<LabelBody>()->name;
+        name = trailing_label->as<LabelBody>()->name;
     }
-    next_label += 1;
-    is_anonymous = true;
-    return Symbol(".label_" + std::to_string(next_label));
-}
-
-Expression BodyParser::get_pc(Symbol label) const {
-    // TODO: implement
-#if 0
-    auto label_expression = label ? Expression(tokenizer.current_location(), nullptr, label) : Expression(tokenizer.current_location(), LabelExpressionType::PREVIOUS_UNNAMED);
-    return {tokenizer.current_location(), ObjectNameExpression::create(tokenizer.current_location(), nullptr), Expression::BinaryOperation::ADD, label_expression};
-#else
-    return {};
-#endif
+    else {
+        name = Symbol(std::format(".label_{}", next_label));
+        next_label += 1;
+        current_body->append(LabelBody::create(tokenizer.current_location(), name));
+    }
+    return get_label(tokenizer.current_location(), name);
 }
 
 void BodyParser::parse_directive(const Token& directive) {
@@ -209,12 +207,9 @@ void BodyParser::parse_directive(const Token& directive) {
     (this->*it->second)();
 }
 
-void BodyParser::parse_checksum() {
-    current_body->append(ChecksumBody::parse(tokenizer));
-}
+void BodyParser::parse_checksum() { current_body->append(ChecksumBody::parse(tokenizer)); }
 
 void BodyParser::parse_data() {
-    EvaluationResult result;
     auto data = ExpressionParser(tokenizer).parse_list();
     current_body->append(data);
 }
@@ -269,7 +264,7 @@ std::shared_ptr<Node> BodyParser::parse_instruction_argument(const Token& token)
 
 void BodyParser::parse_label(Visibility visibility, const Token& name) {
     current_body->append(LabelBody::create(name.location, name.as_symbol()));
-    add_constant(visibility, name, get_pc(name.as_symbol()));
+    add_constant(visibility, name, get_label(name.location, name.as_symbol()));
 }
 
 void BodyParser::parse_memory() {
@@ -384,32 +379,12 @@ void BodyParser::parse_instruction(const Token& name) {
         }
     }
 
-#if 0        
-    auto encoder = InstructionEncoder(cpu);
+    auto invocation = InstructionInvocation(cpu, name, arguments, environment);
 
-    auto is_anonymous_label = false;
-    auto label = get_label(is_anonymous_label);
-    auto label_expression = get_pc(label);
-    auto instruction = Body();
-    auto uses_pc = false;
-    {
-        auto instruction_environment = std::make_shared<Scope>();
-        instruction_environment->add(Constant(symbol_pc, label_expression));
-        instruction = encoder.encode(name, arguments, instruction_environment, current_size(), uses_pc);
+    if (invocation.uses_pc()) {
+        invocation.add_pc(get_pc_label());
     }
-    if (is_anonymous_label) {
-        if (uses_pc) {
-            auto combined_body = Body(label);
-            combined_body.append(instruction);
-            instruction = combined_body;
-        }
-        else {
-            next_label -= 1;
-        }
-    }
-
-    current_body->append(instruction);
-#endif
+    current_body->append(invocation.encode());
 }
 
 void BodyParser::parse_scope() {

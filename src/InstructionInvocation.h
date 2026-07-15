@@ -34,8 +34,8 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include <vector>
 #include <functional>
+#include <vector>
 
 #include <tpau-cpp-kernal/Symbol.h>
 
@@ -46,7 +46,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using namespace tpau::cpp_kernal;
 
-/** 
+/**
  * @brief Represents an invocation of an instruction.
  *
  * It can produce the Body encoding the invocation.
@@ -68,14 +68,14 @@ class InstructionInvocation {
      *
      * @return `true` if the instruction invocation uses the PC, `false` otherwise.
      */
-    [[nodiscard]] bool uses_pc();
+    [[nodiscard]] bool uses_pc() { return uses_pc_; }
 
     /**
      * @brief Add the program counter (PC) to the instruction invocation.
      *
      * @param pc The PC constant to add.
      */
-    void add_pc(Expression pc) {this->pc = std::move(pc);}
+    void add_pc(Expression pc) { this->pc = std::move(pc); }
 
     /**
      * @brief Encode the instruction invocation.
@@ -110,7 +110,7 @@ class InstructionInvocation {
          *
          * @return `true` if the variant is valid, `false` otherwise.
          */
-        [[nodiscard]] bool valid() const {return valid_;}
+        [[nodiscard]] bool valid() const { return valid_; }
 
         /**
          * @brief Encode the instruction variant.
@@ -143,7 +143,7 @@ class InstructionInvocation {
          * The key is the original name, and the value is renamed name.
          */
         std::unordered_map<Symbol, Symbol> argument_aliases;
-        
+
         /// @brief If the variant is valid.
         bool valid_{true};
     };
@@ -169,7 +169,7 @@ class InstructionInvocation {
 
     /**
      * @brief The names of the arguments in the instruction invocation.
-     * 
+     *
      * If an argument has a known value, its name in this list is the empty symbol.
      */
     std::vector<Symbol> argument_names;

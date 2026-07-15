@@ -38,6 +38,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "CPUGetter.h"
 #include "LibraryGetter.h"
 #include "LibraryLinker.h"
+#include "Module.h"
 #include "ProgramLinker.h"
 #include "TargetGetter.h"
 #include "config.h"
@@ -99,7 +100,6 @@ int main(int argc, char* argv[]) {
 int xlr8::process() {
     std::optional<std::string> target_name;
     auto create_program = true;
-    auto ok = true;
 
     for (const auto& option : arguments.options) {
         try {
@@ -129,7 +129,6 @@ int xlr8::process() {
             }
         } catch (Exception& ex) {
             DiagnosticOutput::global.error(ex);
-            ok = false;
         }
     }
 
@@ -138,7 +137,7 @@ int xlr8::process() {
     system_path.append_directory(system_directory ? *system_directory : SYSTEM_DIRECTORY);
 
     DiagnosticOutput::global.verbose_error_messages = SystemEnvironment::is_set("XLR8_VERBOSE_ERRORS");
-    
+
     LibraryGetter::global.search_path->append_path(library_path);
     LibraryGetter::global.search_path->append_path(system_path, "lib");
     TargetGetter::global.search_path->append_path(system_path, "target");
@@ -155,56 +154,34 @@ int xlr8::process() {
         linker->set_target(&Target::get(*target_name));
     }
 
+    auto library_files = std::vector<Symbol>();
+    auto source_files = std::vector<Symbol>();
+
     for (const auto& file_name : arguments.arguments) {
-        try {
-            auto extension = std::filesystem::path(file_name).extension();
+        auto extension = std::filesystem::path(file_name).extension();
 
-            if (extension == ".s") {
-                files.emplace_back(file_name, Assembler(linker->target, include_path, defines).parse_object_file(Symbol(file_name)));
-            }
-            else if (extension == ".lib") {
-                Target::clear_current_target();
-                linker->add_library(LibraryGetter::global.get(file_name));
-                Target::clear_current_target();
-            }
-            else {
-                throw Exception("unrecognized file type '{}'", extension.string());
-            }
-        } 
-        catch (LocationException& ex) {
-            DiagnosticOutput::global.error(ex);
-            ok = false;
+        if (extension == ".s") {
+            source_files.emplace_back(file_name);
         }
-        catch (Exception& ex) {
-            DiagnosticOutput::global.error(Location(file_name), ex);
-            ok = false;
+        else if (extension == ".lib") {
+            library_files.emplace_back(file_name);
+        }
+        else {
+            DiagnosticOutput::global.error("unrecognized file type '{}'", extension.string());
         }
     }
 
-    if (!ok) {
-        throw Exception();
-    }
+    DiagnosticOutput::global.exit_if_failed();
 
-    for (const auto& file : files) {
-        linker->set_target(file.file->target);
-    }
+    auto output_name = output_file ? output_file->filename().stem() : std::filesystem::path();
 
-    if (!linker->target) {
-        throw Exception("no target specified");
-    }
-
-    switch (files.size()) {
+    switch (source_files.size()) {
         case 0:
             throw Exception("no sources given");
 
         case 1:
             if (!output_file) {
-                if (create_program) {
-                    set_output_file(files[0].name, linker->target->extension);
-                }
-                else {
-                    set_output_file(files[0].name, "lib");
-                }
+                output_name = std::filesystem::path(source_files[0].str()).filename().stem();
             }
             break;
 
@@ -215,22 +192,54 @@ int xlr8::process() {
             break;
     }
 
+    auto module_name = output_name;
+    // TODO: replace dangerous characters?
+
+    auto main_module = Module(Symbol(module_name));
+
+    for (const auto& file_name : library_files) {
+        try {
+            main_module.import(Visibility::PRIVATE, LibraryGetter::global.get(file_name));
+        } catch (LocationException& ex) {
+            DiagnosticOutput::global.error(ex);
+        } catch (Exception& ex) {
+            DiagnosticOutput::global.error(Location(file_name), ex);
+        }
+    }
+
+    for (const auto& file_name : source_files) {
+        try {
+            Assembler(linker->target, include_path, defines).parse_object_file(Symbol(file_name), &main_module);
+        } catch (LocationException& ex) {
+            DiagnosticOutput::global.error(ex);
+        } catch (Exception& ex) {
+            DiagnosticOutput::global.error(Location(file_name), ex);
+        }
+    }
+
+    DiagnosticOutput::global.exit_if_failed();
+
+    if (!linker->target) {
+        if (main_module.target) {
+            linker->set_target(main_module.target);
+        }
+        else {
+            throw Exception("no target specified");
+        }
+    }
+
+
     for (const auto& file : files) {
         try {
             linker->add_file(file.file);
-        }
-        catch (LocationException& ex) {
+        } catch (LocationException& ex) {
             DiagnosticOutput::global.error(ex);
-            ok = false;
-        }
-        catch (Exception& ex) {
+        } catch (Exception& ex) {
             DiagnosticOutput::global.error(Location(file.name), ex);
-            ok = false;
         }
     }
-    if (!ok) {
-        throw Exception();
-    }
+
+    DiagnosticOutput::global.exit_if_failed();
 
     linker->link();
 
@@ -240,7 +249,7 @@ int xlr8::process() {
 int xlr8::create_output() {
     linker->output(output_file.value());
 
-    if (auto program_linker = linker->as_program_linker()) {
+    if (auto program_linker = linker->as<ProgramLinker>()) {
         if (auto map_file = arguments.find_last("symbol-map")) {
             program_linker->output_symbol_map(*map_file);
         }

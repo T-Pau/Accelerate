@@ -36,17 +36,17 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Entity/Function.h"
 #include "Entity/Macro.h"
 #include "Entity/Object.h"
+#include "Module.h"
 
 using namespace tpau::cpp_kernal;
 
-Scope::Scope(Visibility type): type_(type) {}
+Scope::Scope(Visibility type, Symbol name) : type_(type), name(name) {}
 
-Scope::Scope(Visibility type, std::shared_ptr<Scope> next): type_(type), next({std::move(next)}) {
+Scope::Scope(Visibility type, Symbol name, std::shared_ptr<Scope> next) : type_(type), name(name), next({std::move(next)}) {
     if (!can_contain(type_, next->type())) {
-        throw Exception("cannot add scope of type {} to scope of type {}", type, next->type());
+        throw Exception("cannot add scope of type {} to scope of type {}", type_, next->type());
     }
 }
-
 
 bool Scope::is_defined(Symbol name) const { // NOLINT(misc-no-recursion)
     if (defines.contains(name)) {
@@ -55,7 +55,7 @@ bool Scope::is_defined(Symbol name) const { // NOLINT(misc-no-recursion)
     if (undefine_overrides.contains(name)) {
         return false;
     }
-    for (auto& environment: next) {
+    for (auto& environment : next) {
         if (environment->is_defined(name)) {
             return true;
         }
@@ -78,9 +78,8 @@ bool Scope::can_contain(Visibility container, Visibility contained) {
     }
 }
 
-
 Scope* Scope::find_containing_scope(Visibility visibility) {
-    Scope *scope = this;
+    Scope* scope = this;
 
     while (true) {
         if (scope->type() == visibility) {
@@ -92,7 +91,6 @@ Scope* Scope::find_containing_scope(Visibility visibility) {
         scope = scope->next.front().get();
     }
 }
-
 
 std::optional<Location> Scope::find_conflicting_constant_or_object(Symbol name) {
     if (auto constant = get_constant(name)) {
@@ -118,7 +116,6 @@ std::optional<Location> Scope::find_conflicting_macro(Symbol name) {
     return {};
 }
 
-
 void Scope::add_next(std::shared_ptr<Scope> scope) {
     if (!can_contain(scope->type(), type())) {
         throw Exception("cannot add scope of type {} to scope of type {}", type(), scope->type());
@@ -126,8 +123,7 @@ void Scope::add_next(std::shared_ptr<Scope> scope) {
     next.push_back(std::move(scope));
 }
 
-
-void Scope::add(std::unique_ptr<Object> object)  {
+void Scope::add(std::unique_ptr<Object> object) {
     auto scope = add_precheck<Object>(object->visibility, object->name, object->location);
     scope->objects[object->name] = std::move(object);
 }
@@ -145,4 +141,12 @@ void Scope::add(std::unique_ptr<Function> function) {
 void Scope::add(std::unique_ptr<Macro> macro) {
     auto scope = add_precheck<Macro>(macro->visibility, macro->name, macro->location);
     scope->macros[macro->name] = std::move(macro);
+}
+
+void Scope::import(Visibility visibility, const Module& module) {
+    if (visibility == Visibility::SCOPE) {
+        throw Exception("cannot import module into scope with visibility {}", visibility);
+    }
+    auto scope = find_containing_scope(visibility);
+    scope->add_next(module.public_scope());
 }

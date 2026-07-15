@@ -104,6 +104,7 @@ nav = [
             { "MemoryBody" = "Internal/Reference/MemoryBody.md" },
             { "MemoryMap" = "Internal/Reference/MemoryMap.md" },
             { "MinMaxExpression" = "Internal/Reference/MinMaxExpression.md" },
+            { "Module" = "Internal/Reference/Module.md" },
             { "Node" = "Internal/Reference/Node.md" },
             { "Object" = "Internal/Reference/Object.md" },
             { "ObjectExpression" = "Internal/Reference/ObjectExpression.md" },

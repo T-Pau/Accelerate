@@ -35,9 +35,9 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include "Body/Body.h"
-#include "CPU.h"
 #include "Body/IfBody.h"
 #include "Body/RepeatBody.h"
+#include "CPU.h"
 #include "SizeRange.h"
 #include "Token.h"
 #include "Tokenizer.h"
@@ -47,14 +47,14 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * @brief This class parses object and macro bodies.
  */
 class BodyParser {
-public:
+  public:
     /**
      * @brief Type of body being parsed.
      */
     enum ParsingType {
-        ENTITY,           ///< Parsing a macro or object from source.
-        OUTPUT,           ///< Parsing `.output` section from target.
-        STRUCTURED_VALUE  ///< Parsing body in StructuredValue from object file.
+        ENTITY,          ///< Parsing a macro or object from source.
+        OUTPUT,          ///< Parsing `.output` section from target.
+        STRUCTURED_VALUE ///< Parsing body in StructuredValue from object file.
     };
 
     /**
@@ -63,20 +63,20 @@ public:
      * @param tokenizer The tokenizer to parse the StructuredValue from.
      * @param environment The environment the body is in.
      */
-    explicit BodyParser(Tokenizer& tokenizer, std::shared_ptr<Scope> environment): parsing_type(STRUCTURED_VALUE), end_token(Token::greater), tokenizer(tokenizer), environment(environment) {}
+    explicit BodyParser(Tokenizer& tokenizer, std::shared_ptr<Scope> environment) : parsing_type(STRUCTURED_VALUE), end_token(Token::greater), tokenizer(tokenizer), environment(environment) {}
 
     /**
      * @brief Constructs a BodyParser for parsing an entity or output.
-     * 
+     *
      * If `allow_assigns` is `true`, it will parse an entity (macro or object) and allow assignments. If `false`, it will parse an output section.
      *
      * @param tokenizer The tokenizer to parse the entity or output from.
      * @param cpu The CPU context.
-      * @param environment The environment the body is in.
+     * @param environment The environment the body is in.
      * @param allow_assigns Whether assignments are allowed.
      * @param defines The set of defined symbols.
      */
-    BodyParser(Tokenizer& tokenizer, const CPU* cpu, std::shared_ptr<Scope> environment, bool allow_assigns, const std::unordered_set<Symbol>* defines = {}): parsing_type(allow_assigns ? ENTITY : OUTPUT), cpu(cpu), tokenizer(tokenizer), environment(environment), defines(defines) {}
+    BodyParser(Tokenizer& tokenizer, const CPU* cpu, std::shared_ptr<Scope> environment, bool allow_assigns, const std::unordered_set<Symbol>* defines = {}) : parsing_type(allow_assigns ? ENTITY : OUTPUT), cpu(cpu), tokenizer(tokenizer), environment(environment), defines(defines) {}
 
     /**
      * @brief Sets up the FileTokenizer for parsing bodies.
@@ -92,7 +92,7 @@ public:
      */
     Body parse();
 
-private:
+  private:
     class IfNesting;
     class RepeatNesting;
     class ScopeNesting;
@@ -104,51 +104,60 @@ private:
         virtual Body* operator[](size_t index) = 0;
         virtual Body body() = 0;
 
-        IfNesting* as_if() {return dynamic_cast<IfNesting*>(this);}
-        RepeatNesting* as_repeat() {return dynamic_cast<RepeatNesting*>(this);}
-        ScopeNesting* as_scope() {return dynamic_cast<ScopeNesting*>(this);}
-        bool is_if() {return as_if();}
-        bool is_repeat() {return as_repeat();}
-        bool is_scope() {return as_scope();}
+        IfNesting* as_if() { return dynamic_cast<IfNesting*>(this); }
+
+        RepeatNesting* as_repeat() { return dynamic_cast<RepeatNesting*>(this); }
+
+        ScopeNesting* as_scope() { return dynamic_cast<ScopeNesting*>(this); }
+
+        bool is_if() { return as_if(); }
+
+        bool is_repeat() { return as_repeat(); }
+
+        bool is_scope() { return as_scope(); }
     };
 
-    class IfNesting: public Nesting {
+    class IfNesting : public Nesting {
       public:
-        Body* operator[](size_t index) override {return &clauses[index].body;}
-        Body body() override {return IfBody::create(clauses);}
+        Body* operator[](size_t index) override { return &clauses[index].body; }
 
-        void add_clause(Expression condition) {clauses.emplace_back(IfBodyClause(std::move(condition), {}));}
-        [[nodiscard]] size_t size() const {return clauses.size();}
+        Body body() override { return IfBody::create(clauses); }
+
+        void add_clause(Expression condition) { clauses.emplace_back(IfBodyClause(std::move(condition), {})); }
+
+        [[nodiscard]] size_t size() const { return clauses.size(); }
 
       private:
         std::vector<IfBodyClause> clauses;
     };
 
-    class RepeatNesting: public Nesting {
-    public:
-        RepeatNesting(Symbol variable, std::optional<Expression> start, Expression end): variable{variable}, start{std::move(start)}, end{std::move(end)} {}
+    class RepeatNesting : public Nesting {
+      public:
+        RepeatNesting(Symbol variable, std::optional<Expression> start, Expression end) : variable{variable}, start{std::move(start)}, end{std::move(end)} {}
 
-        Body* operator[](size_t index) override {return &inner_body;}
-        Body body() override {return RepeatBody::create(variable, start, end, inner_body);}
+        Body* operator[](size_t index) override { return &inner_body; }
 
-    private:
+        Body body() override { return RepeatBody::create(variable, start, end, inner_body); }
+
+      private:
         Symbol variable;
         std::optional<Expression> start;
         Expression end;
         Body inner_body;
     };
 
-    class ScopeNesting: public Nesting {
+    class ScopeNesting : public Nesting {
       public:
-        Body* operator[](size_t index) override {return &inner_body;}
-        Body body() override {/* TODO: implement */ /* return inner_body; */ return Body{};}
+        Body* operator[](size_t index) override { return &inner_body; }
+
+        Body body() override { /* TODO: implement */ /* return inner_body; */ return Body{}; }
 
         Body inner_body;
     };
 
     class NestingIndex {
       public:
-        NestingIndex(size_t nesting_index, size_t sub_index): nesting_index(nesting_index), sub_index(sub_index) {}
+        NestingIndex(size_t nesting_index, size_t sub_index) : nesting_index(nesting_index), sub_index(sub_index) {}
 
         size_t nesting_index;
         size_t sub_index;
@@ -165,12 +174,16 @@ private:
     Body body;
     std::vector<std::unique_ptr<Nesting>> nesting;
     std::vector<NestingIndex> nesting_indices;
-    Body *current_body = &body;
+    Body* current_body = &body;
 
-    [[nodiscard]] bool allow_memory() const {return parsing_type == OUTPUT;}
-    [[nodiscard]] bool allow_instructions() const {return cpu != nullptr;}
-    [[nodiscard]] bool allow_assignment() const {return parsing_type == ENTITY;}
-    [[nodiscard]] bool is_defined(Symbol symbol) const {return defines && defines->contains(symbol);}
+    [[nodiscard]] bool allow_memory() const { return parsing_type == OUTPUT; }
+
+    [[nodiscard]] bool allow_instructions() const { return cpu != nullptr; }
+
+    [[nodiscard]] bool allow_assignment() const { return parsing_type == ENTITY; }
+
+    [[nodiscard]] bool is_defined(Symbol symbol) const { return defines && defines->contains(symbol); }
+
     void parse_assignment(Visibility visibility, const Token& name);
     void parse_directive(const Token& directive);
     void parse_instruction(const Token& name);
@@ -180,9 +193,11 @@ private:
 
     void add_constant(Visibility visibility, const Token& name, const Expression& value);
     [[nodiscard]] SizeRange current_size();
-    [[nodiscard]] Body* get_body(const NestingIndex& nesting_index) const {return (*nesting[nesting_index.nesting_index])[nesting_index.sub_index];}
-    [[nodiscard]] Expression get_pc(Symbol label) const;
-    [[nodiscard]] Symbol get_label(bool& is_anonymous);
+
+    [[nodiscard]] Body* get_body(const NestingIndex& nesting_index) const { return (*nesting[nesting_index.nesting_index])[nesting_index.sub_index]; }
+
+    [[nodiscard]] Expression get_pc_label();
+    [[nodiscard]] Expression get_label(const Location& location, Symbol name) const;
     void push_clause(Expression condition);
     void push_body(const NestingIndex& body_index);
     void pop_body();

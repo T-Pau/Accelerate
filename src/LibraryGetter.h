@@ -35,16 +35,16 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include "Getter.h"
-#include "ObjectFile.h"
-#include "ObjectFileParser.h"
+#include "Module.h"
 
-class LibraryGetter: public Getter<std::shared_ptr<ObjectFile>> {
-public:
+class LibraryGetter : public Getter<Module> {
+  public:
     static LibraryGetter global;
 
-protected:
-    std::string filename_extension() const override {return ".lib";}
-    std::shared_ptr<ObjectFile> parse(Symbol name, Symbol filename) override {return ObjectFileParser().parse(filename);}
+  protected:
+    std::string filename_extension() const override { return ".lib"; }
+
+    Module parse(Symbol name, Symbol filename) override;
 };
 
 #endif // HAD_XLR8_LIBRARY_GETTER_H

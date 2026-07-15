@@ -30,10 +30,10 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <tpau-cpp-kernal/LocationException.h>
 
 #include "Entity/Object.h"
-#include "ObjectFileParser.h"
-#include "LibraryGetter.h"
-#include "StructuredValue.h"
 #include "ExpressionParser.h"
+#include "LibraryGetter.h"
+#include "ObjectFileParser.h"
+#include "StructuredValue.h"
 
 using namespace tpau::cpp_kernal;
 
@@ -86,7 +86,7 @@ std::shared_ptr<ObjectFile> ObjectFileParser::parse(Symbol filename) {
     return file;
 }
 
-void ObjectFileParser::parse_directive(const Token &directive) {
+void ObjectFileParser::parse_directive(const Token& directive) {
     auto it = parser_methods.find(directive.as_symbol());
     if (it != parser_methods.end()) {
         (this->*it->second)();
@@ -103,17 +103,15 @@ void ObjectFileParser::parse_directive(const Token &directive) {
     }
 }
 
-
 void ObjectFileParser::parse_constant(const Token& name, const std::shared_ptr<StructuredValue>& definition) {
     // TODO: implement
     // file->add_constant(std::make_unique<ObjectFile::Constant>(file.get(), name, definition));
 }
 
-
 void ObjectFileParser::parse_object(const Token& name, const std::shared_ptr<StructuredValue>& definition) {
     // TODO: implement
-     //file->add_object(std::make_unique<Object>(file.get(), name, definition)); 
-    }
+    // file->add_object(std::make_unique<Object>(file.get(), name, definition));
+}
 
 void ObjectFileParser::parse_pin() {
     auto name = tokenizer.expect(Token::NAME);
@@ -129,7 +127,7 @@ void ObjectFileParser::parse_format_version() {
 
 void ObjectFileParser::parse_function(const Token& name, const std::shared_ptr<StructuredValue>& definition) {
     // TODO: implement
-   // file->add_function(std::make_unique<Function>(file.get(), name, definition));
+    // file->add_function(std::make_unique<Function>(file.get(), name, definition));
 }
 
 void ObjectFileParser::parse_target() {
@@ -179,6 +177,6 @@ void ObjectFileParser::parse_import() {
         if (!token.is_string()) {
             throw LocationException(token.location, "expected string");
         }
-        file->import(LibraryGetter::global.get(token.as_symbol(), file->name).get());
+        // file->import(LibraryGetter::global.get(token.as_symbol(), file->name).get());
     }
 }

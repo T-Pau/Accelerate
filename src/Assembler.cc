@@ -42,7 +42,6 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using namespace tpau::cpp_kernal;
 
-const Symbol Assembler::symbol_opcode = Symbol(".opcode");
 const Token Assembler::token_address = Token{Token::DIRECTIVE, "address"};
 const Token Assembler::token_address_name = Token{Token::NAME, "address"};
 const Token Assembler::token_align = Token(Token::DIRECTIVE, "align");
@@ -104,17 +103,19 @@ Target Assembler::parse_target(Symbol name, Symbol file_name) {
     tokenizer.add_literal(token_data_size);
     tokenizer.add_literal(token_data_start);
 
-    object_file = target->object_file;
+    // TODO:
+    // module = target->module;
     parse(file_name);
     parsed_target.defines = std::move(tokenizer.defines);
     return std::move(parsed_target);
 }
 
-std::shared_ptr<ObjectFile> Assembler::parse_object_file(Symbol file_name) {
+std::shared_ptr<Scope> Assembler::parse_object_file(Symbol file_name, Module* module) {
     parsing_target = false;
-    object_file = std::make_shared<ObjectFile>();
+    this->module = module;
+    file_scope = module->add_file(file_name);
     parse(file_name);
-    return object_file;
+    return file_scope;
 }
 
 void Assembler::parse(Symbol file_name) {
@@ -129,7 +130,8 @@ void Assembler::parse(Symbol file_name) {
     tokenizer.add_punctuations({"{", "}", "=", ":"});
     tokenizer.push(file_name);
 
-    object_file->target = target;
+    // TODO: record target in file_scope?
+    // object_file->target = target;
 
     while (!tokenizer.ended()) {
         try {
@@ -167,14 +169,14 @@ void Assembler::parse(Symbol file_name) {
         }
     }
 
-    object_file->evaluate();
+    // TODO: call file_scope->enter_names() here?
 
     Target::clear_current_target();
 }
 
 void Assembler::parse_assignment(Visibility visibility, const Token& name, bool default_only) {
     auto value = ExpressionParser(tokenizer).parse();
-    object_file->file_scope->add(std::make_unique<Constant>(name.location, name.as_symbol(), visibility, object_file->file_scope, default_only, value));
+    file_scope->add(std::make_unique<Constant>(name.location, name.as_symbol(), visibility, file_scope, default_only, value));
 }
 
 void Assembler::parse_cpu(const Token& directive) {
@@ -231,7 +233,7 @@ void Assembler::parse_default_string_encoding(const Token& directive) {
 void Assembler::parse_pin(const Token& directive) {
     auto name = tokenizer.expect(Token::NAME, TokenGroup::newline);
     auto address = ExpressionParser(tokenizer).parse();
-    object_file->pin(name.as_symbol(), address);
+    module->pin(name.as_symbol(), address);
 }
 
 void Assembler::parse_section(const Token& directive) {
@@ -343,7 +345,10 @@ void Assembler::parse_symbol(Visibility visibility, const Token& name) {
         throw LocationException(name.location, "no target specified");
     }
 
-    auto object = object_file->create_object(current_section, visibility, false, name);
+    auto object_ptr = std::make_unique<Object>(name.location, name.as_symbol(), visibility, file_scope, false, target->map.section(current_section));
+    auto object = object_ptr.get();
+    file_scope->add(std::move(object_ptr));
+    // TODO: maybe delay adding it to file_scope after it has been fully parsed, so we keep ownership while we access it.
 
     while (true) {
         auto token = tokenizer.next();
@@ -353,13 +358,12 @@ void Assembler::parse_symbol(Visibility visibility, const Token& name) {
         }
         else if (token == Token::curly_open) {
             // TODO: error if .reserved
-            object->body = BodyParser(tokenizer, cpu, object_file->file_scope, true, &tokenizer.defines).parse();
-            object->resolve_labels();
+            object->body = BodyParser(tokenizer, cpu, object->scope, true, &tokenizer.defines).parse();
             break;
         }
         // TODO: parameters
         else if (token == token_address) {
-            object->address = Address(tokenizer, object_file->private_environment);
+            object->address = Address(tokenizer, file_scope);
         }
         else if (token == token_align || token == token_reserve) {
             auto expression = ExpressionParser(tokenizer).parse();
@@ -381,7 +385,7 @@ void Assembler::parse_symbol(Visibility visibility, const Token& name) {
             object->uses(object_name.as_symbol());
         }
         else if (token == token_used) {
-            object_file->mark_used(object);
+            module->mark_used(object);
         }
         else {
             throw LocationException(token.location, "unexpected");
@@ -430,7 +434,6 @@ void Assembler::parse_extension(const Token& directive) {
     parsed_target.extension = token.as_string();
 }
 
-
 void Assembler::parse_fill_byte(const Token& directive) {
     auto token = tokenizer.expect(Token::VALUE, TokenGroup::newline);
 
@@ -447,8 +450,7 @@ void Assembler::parse_output(const Token& directive) {
         throw LocationException(token.location, "expected '{'");
     }
 
-    // TODO: implement
-    // parsed_target.output = std::make_unique<Output>(&parsed_target, directive.location, BodyParser(tokenizer, parsed_target.cpu, object_file->file_scope, false, &tokenizer.defines).parse());
+    parsed_target.output = std::make_unique<Output>(directive.location, &parsed_target, BodyParser(tokenizer, parsed_target.cpu, file_scope, false, &tokenizer.defines).parse());
 }
 
 void Assembler::parse_string_encoding(const Token& directive) {
@@ -483,14 +485,14 @@ void Assembler::parse_target(const Token& directive) {
     }
     else {
         target = &new_target;
-        object_file->target = target;
+        module->target = target;
     }
 }
 
 void Assembler::parse_use(const Token& directive) {
     auto name = tokenizer.expect(Token::NAME, TokenGroup::newline);
 
-    object_file->mark_used(name.as_symbol());
+    module->mark_used(name.as_symbol());
 }
 
 void Assembler::parse_visibility(const Token& directive) {
@@ -524,7 +526,7 @@ void Assembler::parse_name(Visibility visibility, const Token& name, bool defaul
         tokenizer.expect(Token::equals);
 
         auto definition = ExpressionParser(tokenizer).parse();
-        object_file->file_scope->add(std::make_unique<Function>(name.location, name.as_symbol(), visibility, object_file->file_scope, default_only, arguments, definition));
+        file_scope->add(std::make_unique<Function>(name.location, name.as_symbol(), visibility, file_scope, default_only, arguments, definition));
     }
     else {
         tokenizer.unget(token);
@@ -536,13 +538,10 @@ void Assembler::parse_macro(Visibility visibility, bool default_only) {
     auto name = tokenizer.expect(Token::NAME);
     auto arguments = Callable::Arguments(tokenizer);
     tokenizer.expect(Token::curly_open);
-    auto body = BodyParser(tokenizer, cpu, object_file->file_scope, false, &tokenizer.defines).parse();
+    auto macro = std::make_unique<Macro>(name.location, name.as_symbol(), visibility, file_scope, default_only, arguments);
+    macro->body = BodyParser(tokenizer, cpu, macro->scope, false, &tokenizer.defines).parse();
 
-    object_file->file_scope->add(std::make_unique<Macro>(name.location, name.as_symbol(), visibility, object_file->file_scope, default_only, arguments, body));
-
-    if (auto macro = object_file->macro(name.as_symbol())) {
-        macro->resolve_labels();
-    }
+    file_scope->add(std::move(macro));
 }
 
 std::vector<MemoryMap::Block> Assembler::parse_address(const StructuredValue* address) const {
@@ -607,9 +606,8 @@ MemoryMap::Block Assembler::parse_single_address(const StructuredScalar* address
 }
 
 uint64_t Assembler::parse_address_part(const Token& token) const {
-#if 0    
     if (token.is_name()) {
-        auto constant = object_file->constant(token.as_symbol());
+        auto constant = file_scope->get_constant(token.as_symbol());
         if (!constant->value.has_value()) {
             throw LocationException(token.location, "unresolved constant");
         }
@@ -621,7 +619,4 @@ uint64_t Assembler::parse_address_part(const Token& token) const {
     else {
         throw LocationException(token.location, "unsigned integer or constant expected");
     }
-#else
-    return 0;
-#endif
 }

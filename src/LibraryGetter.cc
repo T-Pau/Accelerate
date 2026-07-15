@@ -30,3 +30,8 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "LibraryGetter.h"
 
 LibraryGetter LibraryGetter::global;
+
+Module LibraryGetter::parse(Symbol name, Symbol filename) {
+    // TODO: implement loading of library files
+    return Module(name);
+}

@@ -38,18 +38,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using namespace tpau::cpp_kernal;
 
-LibraryLinker* Linker::as_library_linker() {
-    return dynamic_cast<LibraryLinker*>(this);
-}
-ProgramLinker* Linker::as_program_linker() {
-    return dynamic_cast<ProgramLinker*>(this);
-}
-
-
-void Linker::link() {
-    link_sub();
-}
-
+void Linker::link() { link_sub(); }
 
 void Linker::link_new() {
     auto entities = UsedEntities{};
@@ -58,9 +47,9 @@ void Linker::link_new() {
     while (!new_entities.empty()) {
         entities.insert(new_entities);
         auto next_entities = UsedEntities{};
-        for (auto& [entity, _]: new_entities) {
+        for (auto& [entity, _] : new_entities) {
             auto result = entity->evaluate(EvaluationContext::RESOLVE);
-            //next_entities.insert(result.used_entities);
+            // next_entities.insert(result.used_entities);
         }
         // TODO: Handle unresolved symbols? Or handle them later when all ifs have been resolved?
         new_entities = std::move(next_entities);
@@ -76,11 +65,7 @@ void Linker::link_new() {
     //     propagate constants
 }
 
-
-
-bool Linker::add_object(Object *object) {
-    return objects.insert(object).second;
-}
+bool Linker::add_object(Object* object) { return objects.insert(object).second; }
 
 void Linker::set_target(const Target* new_target) {
     if (!new_target) {

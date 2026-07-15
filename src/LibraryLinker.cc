@@ -47,7 +47,6 @@ void LibraryLinker::link_sub() {
     }
 }
 
-
 void LibraryLinker::output(const std::filesystem::path& file_name) {
     // TODO: only output used entities
     auto stream = std::ofstream(file_name);

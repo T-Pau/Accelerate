@@ -41,22 +41,42 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Target.h"
 #include "UsedEntities.h"
 
-class LibraryLinker;
-class ProgramLinker;
-
-
+/**
+ * @brief The base class to translate a program or library.
+ */
 class Linker {
   public:
     Linker() = default;
-    explicit Linker(const Target* target_) {set_target(target_);}
+
+    explicit Linker(const Target* target_) { set_target(target_); }
+
     virtual ~Linker() = default;
 
-    [[nodiscard]] LibraryLinker* as_library_linker();
-    [[nodiscard]] ProgramLinker* as_program_linker();
-    [[nodiscard]] bool is_library_linker() {return as_library_linker();}
-    [[nodiscard]] bool is_program_linker() {return as_program_linker();}
+    /**
+     * @brief Get the linker as a specific type.
+     *
+     * @tparam T The type to cast to.
+     * @return The linker as the specified type, or nullptr if it is not of that type.
+     */
+    template <typename T> [[nodiscard]] T* as() { return dynamic_cast<T*>(this); }
 
-    void add_file(const std::shared_ptr<ObjectFile>& file) {program->add_object_file(file);}
+    /**
+     * @brief Get the linker as a specific type.
+     *
+     * @tparam T The type to cast to.
+     * @return The linker as the specified type, or nullptr if it is not of that type.
+     */
+    template <typename T> [[nodiscard]] const T* as() const { return dynamic_cast<const T*>(this); }
+
+    /**
+     * @brief Check if the linker is of a specific type.
+     *
+     * @tparam T The type to check against.
+     * @return true if the linker is of the specified type, false otherwise.
+     */
+    template <typename T> [[nodiscard]] bool is() const { return as<T>() != nullptr; }
+
+    void add_file(const std::shared_ptr<ObjectFile>& file) { program->add_object_file(file); }
 
     void add_library(std::shared_ptr<ObjectFile> library);
     void set_target(const Target* new_target);

@@ -42,7 +42,6 @@ void Macro::initialize() {
     }
 }
 
-
 Macro::Macro(const Location& location, Symbol name, std::shared_ptr<Scope> parent_scope, const std::shared_ptr<StructuredValue>& definition) : Callable(location, name, parent_scope, definition) {
     initialize();
 
@@ -51,16 +50,10 @@ Macro::Macro(const Location& location, Symbol name, std::shared_ptr<Scope> paren
     body = (*parameters)[token_body]->as_body()->body;
 }
 
-Macro::Macro(const Location& location, Symbol name, Visibility visibility, std::shared_ptr<Scope> parent_scope, bool default_only, Callable::Arguments arguments, Body body_): Callable(location, name, visibility, parent_scope, default_only, std::move(arguments)), body(std::move(body_)) {
-    EvaluationResult result;
-}
-
-
 std::ostream& operator<<(std::ostream& stream, const Macro& macro) {
     macro.serialize(stream);
     return stream;
 }
-
 
 Body Macro::expand(const std::vector<Expression>& arguments, std::shared_ptr<Scope> outer_environment) const {
 #if 0
@@ -74,7 +67,6 @@ Body Macro::expand(const std::vector<Expression>& arguments, std::shared_ptr<Sco
 #endif
 }
 
-
 void Macro::serialize(std::ostream& stream) const {
     stream << ".macro " << name << " {" << std::endl;
     serialize_callable(stream);
@@ -82,9 +74,6 @@ void Macro::serialize(std::ostream& stream) const {
     body.serialize(stream, "        ");
     stream << "    >" << std::endl;
     stream << "}" << std::endl;
-
 }
 
-EvaluationContext Macro::evaluation_context(EvaluationResult& result) {
-    return Callable::evaluation_context(result).keeping_label_offsets();
-}
+EvaluationContext Macro::evaluation_context(EvaluationResult& result) { return Callable::evaluation_context(result).keeping_label_offsets(); }

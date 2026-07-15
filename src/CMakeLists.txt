@@ -76,6 +76,7 @@ add_library(xlr8-library STATIC
         Linker.cc
         Memory.cc
         MemoryMap.cc
+        Module.cc
         Node.cc
         ObjectFile.cc
         ObjectFileParser.cc

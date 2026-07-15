@@ -38,12 +38,13 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Entity/Callable.h"
 
 /**
-  * @brief Represents a macro.
-  */
-class Macro: public Callable {
+ * @brief Represents a macro.
+ */
+class Macro : public Callable {
   public:
     Macro(const Location& location, Symbol name, std::shared_ptr<Scope> parent_scope, const std::shared_ptr<StructuredValue>& definition);
-    Macro(const Location& location, Symbol name, Visibility visibility, std::shared_ptr<Scope> parent_scope, bool default_only, Callable::Arguments arguments, Body body);
+
+    Macro(const Location& location, Symbol name, Visibility visibility, std::shared_ptr<Scope> parent_scope, bool default_only, Callable::Arguments arguments) : Callable(location, name, visibility, parent_scope, default_only, std::move(arguments)) {}
 
     [[nodiscard]] Body expand(const std::vector<Expression>& arguments, std::shared_ptr<Scope> outer_environment) const;
     void serialize(std::ostream& stream) const;
@@ -52,7 +53,8 @@ class Macro: public Callable {
 
   protected:
     [[nodiscard]] EvaluationContext evaluation_context(EvaluationResult& result) override;
-    void evaluate_inner(EvaluationContext &context) override {body.evaluate(context);}
+
+    void evaluate_inner(EvaluationContext& context) override { body.evaluate(context); }
 
   private:
     static void initialize();

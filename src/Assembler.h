@@ -34,34 +34,52 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+#include "Entity/Object.h"
+#include "FileTokenizer.h"
+#include "Module.h"
 #include "ObjectFile.h"
 #include "Target.h"
-#include "FileTokenizer.h"
-#include "Entity/Object.h"
 
 /**
  * @brief This class parses source files or target definitions into entities.
  */
 class Assembler {
-public:
+  public:
+    /**
+     * @brief Construct an Assembler with the given target, search path, and defines.
+     *
+     * @param target The target being used.
+     * @param search_path The search path for source files.
+     * @param defines Preprocessor defines.
+     */
     explicit Assembler(const Target* target, const SearchPath& search_path, const std::unordered_set<Symbol>& defines);
 
+    /**
+     * @brief Parse a target definition from a file.
+     *
+     * @param name The name of the target.
+     * @param file_name The file containing the target definition.
+     * @return The parsed Target.
+     */
     Target parse_target(Symbol name, Symbol file_name);
-    std::shared_ptr<ObjectFile> parse_object_file(Symbol file_name);
 
-    static const Symbol symbol_opcode;
+    /**
+     * @brief Parse an object file.
+     *
+     * @param file_name The file containing the object code.
+     * @return A shared pointer to the parsed ObjectFile.
+     */
+    std::shared_ptr<Scope> parse_object_file(Symbol file_name, Module* module);
+
     static const Token token_data_end;
     static const Token token_data_start;
     static const Token token_data_size;
 
-private:
-    enum SectionDefinitionType {
-        SECTION_DEFINE,
-        SECTION_EXTEND,
-        SECTION_OVERRIDE
-    };
+  private:
+    enum SectionDefinitionType { SECTION_DEFINE, SECTION_EXTEND, SECTION_OVERRIDE };
+
     class Directive {
-    public:
+      public:
         Directive(void (Assembler::*parse)(const Token& directive), bool target_only = false) : parse{parse}, target_only{target_only} {}
 
         void (Assembler::*parse)(const Token& directive);
@@ -95,7 +113,7 @@ private:
     static MemoryMap::AccessType parse_type(const Token& type);
 
     const Target* target{};
-    const CPU *cpu{};
+    const CPU* cpu{};
 
     Symbol current_section;
     Visibility current_visibility{Visibility::PRIVATE};
@@ -106,7 +124,8 @@ private:
     bool parsing_target{};
     FileTokenizer tokenizer;
     Target parsed_target;
-    std::shared_ptr<ObjectFile> object_file;
+    Module* module{};
+    std::shared_ptr<Scope> file_scope;
 
     static const Token token_address;
     static const Token token_address_name;

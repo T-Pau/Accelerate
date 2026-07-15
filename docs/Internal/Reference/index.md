@@ -301,6 +301,9 @@ These classes are not yet sorted into the above categories.
 ### [Linker](Linker.md)
 ::: Linker.@brief
 
+### [Module](Module.md)
+::: Module.@brief
+
 ### [Node](Node.md)
 ::: Node.@brief
 
