@@ -64,7 +64,8 @@ const std::unordered_map<Token, FileTokenizer::PreprocessorDirective> FileTokeni
 };
 // clang-format on
 
-FileTokenizer::FileTokenizer(const SearchPath& search_path, const Target* target, bool use_preprocessor, const std::unordered_set<Symbol>& defines) : defines{defines}, use_preprocessor{use_preprocessor}, search_path{search_path}, target{target} {
+FileTokenizer::FileTokenizer(const SearchPath& search_path, const Target* target, bool use_preprocessor, const std::unordered_set<Symbol>& defines) : preprocessor_scope(std::make_shared<Scope>(Visibility::SCOPE)), use_preprocessor{use_preprocessor}, search_path{search_path}, target{target} {
+    preprocessor_scope->define(defines);
     if (use_preprocessor) {
         add_literal(token_define);
         add_literal(token_include);
@@ -249,7 +250,7 @@ bool FileTokenizer::pre_is_processing() const {
     if (current_source->pre_states.empty()) {
         return true;
     }
-    return std::ranges::all_of(current_source->pre_states, [](auto state){return state;});
+    return std::ranges::all_of(current_source->pre_states, [](auto state) { return state; });
 }
 
 Token FileTokenizer::parse_hex(Location location) {
@@ -268,16 +269,14 @@ Token FileTokenizer::parse_hex(Location location) {
             current_source->expand_location(location);
             try {
                 return {location, Value(decoder.end(), true)};
-            }
-            catch (Exception& ex) {
+            } catch (Exception& ex) {
                 throw LocationException(current_location(), ex);
             }
         }
 
         try {
             decoder.decode(static_cast<char>(c));
-        }
-        catch (Exception& ex) {
+        } catch (Exception& ex) {
             throw LocationException(current_location(), ex);
         }
     }
@@ -371,12 +370,10 @@ Token FileTokenizer::parse_name(Token::Type type, Location location) {
     }
 }
 
-Token FileTokenizer::parse_string(Location location) {
-    return {Token::STRING, location, Symbol(parse_string_literal(location, '"'))};
-}
+Token FileTokenizer::parse_string(Location location) { return {Token::STRING, location, Symbol(parse_string_literal(location, '"'))}; }
 
 Token FileTokenizer::parse_char(Location location) {
-    auto value= parse_string_literal(location, '\'');
+    auto value = parse_string_literal(location, '\'');
 
     auto encoding_name = Symbol{};
     auto c = current_source->get();
@@ -416,7 +413,7 @@ Token FileTokenizer::parse_char(Location location) {
     }
 }
 
-std::string FileTokenizer::parse_string_literal(Location location, int terminator){
+std::string FileTokenizer::parse_string_literal(Location location, int terminator) {
     std::string value;
 
     while (true) {
@@ -544,9 +541,11 @@ void FileTokenizer::preprocess_pre_if(const Token& directive, const std::vector<
 
     auto tokenizer = SequenceTokenizer{arguments};
     auto expression = ExpressionParser{tokenizer}.parse();
+
+    expression.resolve(preprocessor_scope.get(), nullptr);
     auto result = EvaluationResult{};
     // TODO: check if this is correct
-    auto context = EvaluationContext{result, EvaluationContext::STANDALONE, std::make_shared<Scope>(Visibility::SCOPE), defines};
+    auto context = EvaluationContext{result, EvaluationContext::STANDALONE, std::make_shared<Scope>(Visibility::SCOPE)};
     expression.evaluate(context);
     if (!expression.has_value()) {
         throw LocationException(directive.location, "condition in {} must be constant", directive);
@@ -574,13 +573,6 @@ bool FileTokenizer::is_identifier(const std::string& s) {
 }
 
 Symbol FileTokenizer::find_file(Symbol file_name) { return search_path.find(file_name, current_source->location().file); }
-
-void FileTokenizer::define(const std::unordered_set<Symbol>& defines) {
-    for (const auto& name : defines) {
-        define(name);
-    }
-}
-
 
 std::optional<Token::Type> FileTokenizer::MatcherNode::match(FileSource& source, std::string& name) { // NOLINT(misc-no-recursion)
     auto c = source.get();
@@ -686,3 +678,8 @@ void FileTokenizer::add_literal(Token::Type match, const std::string& name, cons
     matcher.add(name.c_str(), match, suffix_set);
 }
 
+void FileTokenizer::define(Symbol name) { preprocessor_scope->define(name); }
+
+void FileTokenizer::define(const std::unordered_set<Symbol>& defines) { preprocessor_scope->define(defines); }
+
+void FileTokenizer::undefine(Symbol name) { preprocessor_scope->undefine(name); }

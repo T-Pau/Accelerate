@@ -63,11 +63,15 @@ void VariableExpression::resolve(Scope* scope, Entity* containing_entity) {
     else {
         if (auto constant = scope->get_constant(symbol)) {
             expression = ConstantExpression::create(location, constant);
-            containing_entity->uses(constant);
+            if (containing_entity) {
+                containing_entity->uses(constant);
+            }
         }
         else if (auto object = scope->get_object(symbol)) {
             expression = ObjectExpression::create(location, object);
-            containing_entity->uses(object);
+            if (containing_entity) {
+                containing_entity->uses(object);
+            }
         }
         else {
             throw LocationException(location, "undefined variable {}", symbol);

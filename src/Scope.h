@@ -373,6 +373,18 @@ class Scope {
     }
 
     /**
+     * Define multiple preprocessor symbols in the scope.
+     *
+     * @param names The names of the symbols.
+     */
+    void define(const std::unordered_set<Symbol>& names) {
+        defines.insert(names.begin(), names.end());
+        for (const auto& name : names) {
+            undefine_overrides.erase(name);
+        }
+    }
+
+    /**
      * Pin an object to a specific address.
      *
      * @param object_name The name of the object.

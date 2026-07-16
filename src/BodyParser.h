@@ -38,6 +38,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Body/IfBody.h"
 #include "Body/RepeatBody.h"
 #include "CPU.h"
+#include "Scope.h"
 #include "SizeRange.h"
 #include "Token.h"
 #include "Tokenizer.h"
@@ -76,7 +77,7 @@ class BodyParser {
      * @param allow_assigns Whether assignments are allowed.
      * @param defines The set of defined symbols.
      */
-    BodyParser(Tokenizer& tokenizer, const CPU* cpu, std::shared_ptr<Scope> environment, bool allow_assigns, const std::unordered_set<Symbol>* defines = {}) : parsing_type(allow_assigns ? ENTITY : OUTPUT), cpu(cpu), tokenizer(tokenizer), environment(environment), defines(defines) {}
+    BodyParser(Tokenizer& tokenizer, const CPU* cpu, std::shared_ptr<Scope> environment, bool allow_assigns) : parsing_type(allow_assigns ? ENTITY : OUTPUT), cpu(cpu), tokenizer(tokenizer), environment(environment) {}
 
     /**
      * @brief Sets up the FileTokenizer for parsing bodies.
@@ -168,7 +169,6 @@ class BodyParser {
     std::shared_ptr<Scope> environment;
     Token end_token = Token::curly_close;
     Tokenizer& tokenizer;
-    const std::unordered_set<Symbol>* defines{};
 
     uint64_t next_label = 0;
     Body body;
@@ -182,7 +182,9 @@ class BodyParser {
 
     [[nodiscard]] bool allow_assignment() const { return parsing_type == ENTITY; }
 
-    [[nodiscard]] bool is_defined(Symbol symbol) const { return defines && defines->contains(symbol); }
+    [[nodiscard]] bool is_defined(Symbol symbol) const { return environment->is_defined(symbol); }
+
+    [[nodiscard]] bool is_defined(const Token& token) const { return is_defined(token.as_symbol()); }
 
     void parse_assignment(Visibility visibility, const Token& name);
     void parse_directive(const Token& directive);

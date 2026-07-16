@@ -42,8 +42,10 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <tpau-cpp-kernal/Location.h>
 #include <tpau-cpp-kernal/SearchPath.h>
 
-#include "Tokenizer.h"
 #include "Token.h"
+#include "Tokenizer.h"
+
+class Scope;
 
 using namespace tpau::cpp_kernal;
 
@@ -52,59 +54,68 @@ class Target;
 /**
  * @brief This class gets tokens from a file.
  */
-class FileTokenizer: public Tokenizer {
-public:
+class FileTokenizer : public Tokenizer {
+  public:
     explicit FileTokenizer(const SearchPath& search_path = SearchPath::empty_path, const Target* target = {}, bool use_preprocessor = true, const std::unordered_set<Symbol>& defines = {});
     void push(Symbol filename);
 
     [[nodiscard]] Location current_location() const override;
-    [[nodiscard]] Symbol current_file() const {return current_source ? current_source->filename() : Symbol();}
+
+    [[nodiscard]] Symbol current_file() const { return current_source ? current_source->filename() : Symbol(); }
+
     Symbol find_file(Symbol file_name);
 
-    void define(Symbol name) {defines.insert(name);}
+    void define(Symbol name);
+
     void define(const std::unordered_set<Symbol>& defines);
-    void undefine(Symbol name) {defines.erase(name);}
-    void set_target(const Target* new_target) {target = new_target;}
+
+    void undefine(Symbol name);
+
+    void set_target(const Target* new_target) { target = new_target; }
 
     void add_punctuations(const std::unordered_set<std::string>& names);
-    void add_literal(const Token& token) { add_literal(token.get_type(), token.as_string());}
+
+    void add_literal(const Token& token) { add_literal(token.get_type(), token.as_string()); }
+
     void add_literal(Token::Type match, const std::string& name, const std::string& suffix_characters = "");
 
-    std::unordered_set<Symbol> defines;
+    // std::unordered_set<Symbol> defines;
 
-protected:
+  protected:
     Token sub_next() override;
-    [[nodiscard]] bool sub_ended() const override {return current_source == nullptr;}
 
-private:
+    [[nodiscard]] bool sub_ended() const override { return current_source == nullptr; }
+
+  private:
     class PreState {
-    public:
-        explicit PreState(bool condition): processing{condition}, skip_rest{condition} {}
+      public:
+        explicit PreState(bool condition) : processing{condition}, skip_rest{condition} {}
 
         void process_else();
         void process_else_if(bool condition);
 
-        [[nodiscard]] bool skipping_rest() const {return skip_rest;}
-        operator bool() const {return processing;}
+        [[nodiscard]] bool skipping_rest() const { return skip_rest; }
 
-    private:
+        operator bool() const { return processing; }
+
+      private:
         bool processing;
         bool skip_rest;
         bool else_seen{false};
     };
 
-    class Source: public FileSource {
-    public:
-        explicit Source(Symbol filename): FileSource(filename) {}
+    class Source : public FileSource {
+      public:
+        explicit Source(Symbol filename) : FileSource(filename) {}
 
         std::vector<PreState> pre_states;
     };
 
     class MatcherNode {
-    public:
+      public:
         std::optional<Token::Type> match_type;
         bool match_in_word = false;
-        std::unordered_map<char,std::unique_ptr<MatcherNode>> next;
+        std::unordered_map<char, std::unique_ptr<MatcherNode>> next;
         std::unordered_set<char> suffix_characters;
 
         void add(const char* string, Token::Type type, const std::unordered_set<char>& suffix_characters = {}, bool match_in_word = false);
@@ -115,12 +126,12 @@ private:
     };
 
     class PreprocessorDirective {
-    public:
-        PreprocessorDirective(std::optional<size_t> min_arguments, std::optional<size_t> max_arguments, std::vector<TokenGroup> argument_type,void (FileTokenizer::*handler)(const Token&, const std::vector<Token>&)): min_arguments{min_arguments}, max_arguments{max_arguments}, argument_type{std::move(argument_type)}, handler{handler} {}
+      public:
+        PreprocessorDirective(std::optional<size_t> min_arguments, std::optional<size_t> max_arguments, std::vector<TokenGroup> argument_type, void (FileTokenizer::*handler)(const Token&, const std::vector<Token>&)) : min_arguments{min_arguments}, max_arguments{max_arguments}, argument_type{std::move(argument_type)}, handler{handler} {}
 
         void operator()(FileTokenizer& tokenizer, const Token& directive, const std::vector<Token>& arguments) const;
 
-    private:
+      private:
         std::optional<size_t> min_arguments;
         std::optional<size_t> max_arguments;
         std::vector<TokenGroup> argument_type;
@@ -146,12 +157,15 @@ private:
     void preprocess_pre_if(const Token& directive, const std::vector<Token>& tokens);
 
     static int convert_digit(int c);
-    static bool is_identifier_continuation(int c) {return is_identifier_start(c) || isdigit(c);}
+
+    static bool is_identifier_continuation(int c) { return is_identifier_start(c) || isdigit(c); }
+
     static bool is_identifier_start(int c) { return islower(c) || isupper(c) || c == '_'; }
+
     static bool is_identifier(const std::string& s);
 
     bool use_preprocessor;
-const SearchPath& search_path;
+    const SearchPath& search_path;
     const Target* target;
 
     static const Token token_define;
@@ -164,6 +178,8 @@ const SearchPath& search_path;
     static const std::unordered_map<Token, PreprocessorDirective> preprocessor_directives;
 
     MatcherNode matcher;
+
+    std::shared_ptr<Scope> preprocessor_scope;
 
     std::vector<Source> sources;
     Source* current_source{};
