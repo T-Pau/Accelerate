@@ -29,25 +29,24 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "Module.h"
 
-Module::Module(Symbol name) : name(name) {
+Module::Module(Symbol name) : name_(name) {
     public_scope_ = std::make_shared<Scope>(Visibility::PUBLIC, name);
     private_scope_ = std::make_shared<Scope>(Visibility::PRIVATE, name, public_scope_);
 }
 
 std::shared_ptr<Scope> Module::add_file(Symbol file_name) {
     if (file_scopes.contains(file_name)) {
-        throw Exception("file {} already part of module {}", file_name, name);
+        throw Exception("file {} already part of module {}", file_name, name());
     }
     auto scope = std::make_shared<Scope>(Visibility::FILE, file_name, private_scope());
     file_scopes[file_name] = scope;
     return scope;
 }
 
-void Module::pin(Symbol object_name, Expression address) {
-    if (pinned_objects.contains(object_name)) {
-        throw Exception("object {} already pinned", object_name);
-    }
-    pinned_objects[object_name] = Pinned(object_name, std::move(address));
+void Module::rename(Symbol new_name) {
+    name_ = new_name;
+    public_scope_->name = new_name;
+    private_scope_->name = new_name;
 }
 
 void Module::import(Visibility visibility, const Module& module) {

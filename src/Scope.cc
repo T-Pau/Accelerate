@@ -42,10 +42,11 @@ using namespace tpau::cpp_kernal;
 
 Scope::Scope(Visibility type, Symbol name) : type_(type), name(name) {}
 
-Scope::Scope(Visibility type, Symbol name, std::shared_ptr<Scope> next) : type_(type), name(name), next({std::move(next)}) {
-    if (!can_contain(type_, next->type())) {
-        throw Exception("cannot add scope of type {} to scope of type {}", type_, next->type());
+Scope::Scope(Visibility type, Symbol name, std::shared_ptr<Scope> next) : type_(type), name(name) {
+    if (!can_contain(next->type(), type_)) {
+        throw Exception("cannot add {} scope to {} scope", type_, next->type());
     }
+    this->next.push_back(std::move(next));
 }
 
 bool Scope::is_defined(Symbol name) const { // NOLINT(misc-no-recursion)
@@ -68,7 +69,7 @@ bool Scope::can_contain(Visibility container, Visibility contained) {
         case Visibility::SCOPE:
             return container == Visibility::SCOPE || container == Visibility::ENTITY;
         case Visibility::ENTITY:
-            return container == Visibility::FILE;
+            return true;
         case Visibility::FILE:
             return container == Visibility::PRIVATE;
         case Visibility::PRIVATE:
@@ -118,7 +119,7 @@ std::optional<Location> Scope::find_conflicting_macro(Symbol name) {
 
 void Scope::add_next(std::shared_ptr<Scope> scope) {
     if (!can_contain(scope->type(), type())) {
-        throw Exception("cannot add scope of type {} to scope of type {}", type(), scope->type());
+        throw Exception("cannot add {} scope to {} scope", scope->type(), type());
     }
     next.push_back(std::move(scope));
 }
@@ -149,4 +150,11 @@ void Scope::import(Visibility visibility, const Module& module) {
     }
     auto scope = find_containing_scope(visibility);
     scope->add_next(module.public_scope());
+}
+
+void Scope::pin(Symbol object_name, Expression address) {
+    if (pinned_object_names.contains(object_name)) {
+        throw Exception("object {} already has an address", object_name);
+    }
+    pinned_object_names[object_name] = std::move(address);
 }

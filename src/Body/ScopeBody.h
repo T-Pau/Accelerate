@@ -41,8 +41,8 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 using namespace tpau::cpp_kernal;
 
 /**
-  * @brief Represents a body, that introduces a new scope for its contained body.  */
-class ScopeBody: public BodyElement {
+ * @brief Represents a body, that introduces a new scope for its contained body.  */
+class ScopeBody : public BodyElement {
   public:
     /**
      * @brief Create a new ScopeBody.
@@ -51,7 +51,7 @@ class ScopeBody: public BodyElement {
      * @param body The body to wrap.
      * @return The ScopeBody.
      */
-    static Body create(const std::shared_ptr<Scope>& scope, Body body) {return Body(std::make_shared<ScopeBody>(std::move(scope), std::move(body)));}
+    static Body create(const std::shared_ptr<Scope>& scope, Body body) { return Body(std::make_shared<ScopeBody>(std::move(scope), std::move(body))); }
 
     /**
      * @brief Construct a new ScopeBody.
@@ -66,13 +66,18 @@ class ScopeBody: public BodyElement {
      *
      * @return The scope.
      */
-    [[nodiscard]] std::shared_ptr<Scope> scope() const {return scope_;}
+    [[nodiscard]] std::shared_ptr<Scope> scope() const { return scope_; }
 
-    [[nodiscard]] SizeRange size_range() const override {return body.size_range();}
-    [[nodiscard]] SizeRange offset() const override {return body.offset();}
-    [[nodiscard]] std::shared_ptr<BodyElement> clone() const override {throw Exception("can't clone ScopeBody");}
-    [[nodiscard]] bool empty() const override {return body.empty();}
-    void encode(std::string &bytes, const Memory *memory) const override {body.encode(bytes, memory);}
+    [[nodiscard]] SizeRange size_range() const override { return body.size_range(); }
+
+    [[nodiscard]] SizeRange offset() const override { return body.offset(); }
+
+    [[nodiscard]] std::shared_ptr<BodyElement> clone() const override { throw Exception("can't clone ScopeBody"); }
+
+    [[nodiscard]] bool empty() const override { return body.empty(); }
+
+    void encode(std::string& bytes, const Memory* memory) const override { body.encode(bytes, memory); }
+
     void traverse(std::function<void(Body&)> body_callable, std::function<void(Expression&)> expression_callable) override;
 
     /**
@@ -83,10 +88,11 @@ class ScopeBody: public BodyElement {
      * @param context The evaluation context.
      * @return The Body to replace this BodyElement with, {} if no replacement is needed.
      */
-    [[nodiscard]] std::optional<Body> evaluate_process(const EvaluationContext &context) override;
+    [[nodiscard]] std::optional<Body> evaluate_process(const EvaluationContext& context) override;
 
-    void serialize(std::ostream &stream, const std::string &prefix) const override;
-    [[nodiscard]] bool fully_evaluated() override {return body.fully_evaluated();}
+    void serialize(std::ostream& stream, const std::string& prefix) const override;
+
+    [[nodiscard]] bool fully_evaluated() override { return body.fully_evaluated(); }
 
   protected:
     /// @brief The scope introduced by the ScopeBody.

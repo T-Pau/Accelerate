@@ -36,53 +36,41 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ScopeBody.h"
 
 #include <type_traits>
-#include <utility>
 
 using namespace tpau::cpp_kernal;
 
 namespace {
 
-template<typename Callable>
-auto handle_translation_errors(BodyElement& element, Callable&& callable) {
+template <typename Callable> auto handle_translation_errors(BodyElement& element, Callable&& callable) -> std::conditional_t<std::is_void_v<std::invoke_result_t<Callable>>, void, std::invoke_result_t<Callable>> {
     using Result = std::invoke_result_t<Callable>;
 
-    try {
-        if constexpr (std::is_void_v<Result>) {
-            if (!element.valid) {
-                return;
-            }
-            std::forward<Callable>(callable)();
+    if constexpr (std::is_void_v<Result>) {
+        if (!element.valid) {
+            return;
         }
-        else {
-            if (!element.valid) {
-                return Result{};
-            }
-            return std::forward<Callable>(callable)();
+        auto result = DiagnosticOutput::global.log_exceptions(callable);
+        if (!result) {
+            element.valid = false;
         }
     }
-    catch (LocationException &ex) {
-        DiagnosticOutput::global.error(ex);
-        element.valid = false;
-    }
-    catch (Exception &ex) {
-        DiagnosticOutput::global.error(element.location, ex);
-        element.valid = false;
-    }
-    catch (std::exception &ex) {
-        DiagnosticOutput::global.error(element.location, "unexpected error: %s", ex.what());
-        element.valid = false;
-    }
-
-    if constexpr (!std::is_void_v<Result>) {
-        return Result{};
+    else {
+        if (!element.valid) {
+            return Result{};
+        }
+        auto result = DiagnosticOutput::global.log_exceptions(callable);
+        if (!result) {
+            element.valid = false;
+            return Result{};
+        }
+        return *result;
     }
 }
 
 } // namespace
 
-Body::Body(): element(std::make_shared<EmptyBody>()) {}
+Body::Body() : element(std::make_shared<EmptyBody>()) {}
 
-Body::Body(const std::shared_ptr<BodyElement> &new_element) {
+Body::Body(const std::shared_ptr<BodyElement>& new_element) {
     if (new_element) {
         element = new_element;
     }
@@ -90,8 +78,6 @@ Body::Body(const std::shared_ptr<BodyElement> &new_element) {
         element = std::make_shared<EmptyBody>();
     }
 }
-
-
 
 void Body::append(const Body& new_element) {
     if (new_element.empty()) {
@@ -130,38 +116,25 @@ std::optional<Body> Body::back() const {
     }
 }
 
-std::optional<Body> Body::append_sub(const Body& new_element) {
-    return element->append_sub(*this, new_element);
-}
-
+std::optional<Body> Body::append_sub(const Body& new_element) { return element->append_sub(*this, new_element); }
 
 std::ostream& operator<<(std::ostream& stream, const Body& body) {
     body.serialize(stream, "    ");
     return stream;
 }
 
-
 void Body::resolve(Scope* scope, Entity* containing_entity) {
-    handle_translation_errors(*element, [&] {
-        element->resolve(scope, containing_entity);
-    });
+    handle_translation_errors(*element, [&] { element->resolve(scope, containing_entity); });
 }
 
-
 void Body::expand_calls() {
-    handle_translation_errors(*element, [&] {
-        element->expand_calls();
-    });
+    handle_translation_errors(*element, [&] { element->expand_calls(); });
 }
 
 void Body::enter_names(Scope* scope, Entity* containing_entity) {
-    handle_translation_errors(*element, [&] {
-        element->enter_names(scope, containing_entity);
-    });
+    handle_translation_errors(*element, [&] { element->enter_names(scope, containing_entity); });
 }
 
 bool Body::fully_evaluated() {
-    return handle_translation_errors(*element, [&] {
-        return element->fully_evaluated();
-    });
+    return handle_translation_errors(*element, [&] { return element->fully_evaluated(); });
 }

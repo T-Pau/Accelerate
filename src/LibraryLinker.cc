@@ -35,7 +35,11 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using namespace tpau::cpp_kernal;
 
+const unsigned int LibraryLinker::format_version_major = 1;
+const unsigned int LibraryLinker::format_version_minor = 0;
+
 void LibraryLinker::link_sub() {
+#if 0
     Target::set_current_target(target);
     program->evaluate();
     program->evaluate(); // TODO: shouldn't be necessary
@@ -45,10 +49,26 @@ void LibraryLinker::link_sub() {
         unresolved.report();
         throw Exception();
     }
+#endif
 }
 
 void LibraryLinker::output(const std::filesystem::path& file_name) {
-    // TODO: only output used entities
     auto stream = std::ofstream(file_name);
-    stream << *(program);
+
+    if (!stream) {
+        throw Exception("cannot open {} for writing", file_name.string());
+    }
+
+    stream << ".format_version " << format_version_major << "." << format_version_minor << std::endl;
+
+    if (target && !target->name.empty()) {
+        stream << ".target \"" << target->name.str() << "\"" << std::endl;
+    }
+
+    // TODO: output imported libraries, pinned and used objects.
+
+    output_entities<Constant>(stream);
+    // output_entities<Function>(stream);
+    // output_entities<Macro>(stream);
+    // output_entities<Object>(stream);
 }

@@ -101,7 +101,7 @@ std::optional<Body> IfBody::simplify(std::vector<IfBodyClause>& clauses, bool al
         return Body();
     }
 
-    if (always_create && filtered_clauses.size() != clauses.size()) {
+    if (always_create || filtered_clauses.size() != clauses.size()) {
         return Body(std::make_shared<IfBody>(filtered_clauses));
     }
     else {

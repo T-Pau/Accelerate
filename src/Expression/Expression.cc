@@ -33,59 +33,44 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <tpau-cpp-kernal/LocationException.h>
 
 #include "Expression/EntityExpression.h"
-#include "Expression/VoidExpression.h"
 #include "Expression/VariableExpression.h"
+#include "Expression/VoidExpression.h"
 #include "ExpressionParser.h"
 
 using namespace tpau::cpp_kernal;
 
 std::shared_ptr<BaseExpression> Expression::void_expression = std::make_shared<VoidExpression>(Location());
 
-
 namespace {
-template<typename Callable>
-auto handle_translation_errors(BaseExpression& expression, Callable&& callable) {
+
+template <typename Callable> auto handle_translation_errors(BaseExpression& expression, Callable&& callable) -> std::conditional_t<std::is_void_v<std::invoke_result_t<Callable>>, void, std::invoke_result_t<Callable>> {
     using Result = std::invoke_result_t<Callable>;
 
-    try {
-        if constexpr (std::is_void_v<Result>) {
-            if (!expression.valid) {
-                return;
-            }
-            std::forward<Callable>(callable)();
+    if constexpr (std::is_void_v<Result>) {
+        if (!expression.valid) {
+            return;
         }
-        else {
-            if (!expression.valid) {
-                return Result{};
-            }
-            return std::forward<Callable>(callable)();
+        auto result = DiagnosticOutput::global.log_exceptions(callable);
+        if (!result) {
+            expression.valid = false;
         }
     }
-    catch (LocationException &ex) {
-        if (!ex.empty()) {
-            DiagnosticOutput::global.error(ex);
+    else {
+        if (!expression.valid) {
+            return Result{};
         }
-        expression.valid = false;
-    }
-    catch (Exception &ex) {
-        if (!ex.empty()) {
-            DiagnosticOutput::global.error(expression.location, ex);
+        auto result = DiagnosticOutput::global.log_exceptions(callable);
+        if (!result) {
+            expression.valid = false;
+            return Result{};
         }
-        expression.valid = false;
-    }
-    catch (std::exception &ex) {
-        DiagnosticOutput::global.error(expression.location, "unexpected error: %s", ex.what());
-        expression.valid = false;
-    }
-
-    if constexpr (!std::is_void_v<Result>) {
-        return Result{};
+        return *result;
     }
 }
 
 } // namespace
 
-Expression::Expression(): expression(void_expression) {}
+Expression::Expression() : expression(void_expression) {}
 
 Expression::Expression(std::shared_ptr<BaseExpression> expression_) {
     if (expression_) {
@@ -96,10 +81,7 @@ Expression::Expression(std::shared_ptr<BaseExpression> expression_) {
     }
 }
 
-
-Expression::Expression(Tokenizer& tokenizer) {
-    *this = ExpressionParser(tokenizer).parse();
-}
+Expression::Expression(Tokenizer& tokenizer) { *this = ExpressionParser(tokenizer).parse(); }
 
 
 #if 0
@@ -118,15 +100,13 @@ Expression::Expression(const Token& token) {
 #endif
 
 void Expression::evaluate(const EvaluationContext& context) {
-    auto new_expression = handle_translation_errors(*expression, [&]() {
-        return expression->evaluate(context);
-    });
+    auto new_expression = handle_translation_errors(*expression, [&]() { return expression->evaluate(context); });
     if (new_expression) {
         *this = *new_expression;
     }
 }
 
-void Expression::serialize(std::ostream &stream) const {
+void Expression::serialize(std::ostream& stream) const {
     if (expression) {
         expression->serialize(stream);
     }
@@ -148,17 +128,12 @@ std::ostream& operator<<(std::ostream& stream, const Expression& expression) {
 }
 
 void Expression::resolve(Scope* scope, Entity* containing_entity) {
-    handle_translation_errors(*expression, [&]() {
-        expression->resolve(scope, containing_entity);
-    });
+    handle_translation_errors(*expression, [&]() { expression->resolve(scope, containing_entity); });
 }
 
 void Expression::expand_calls() {
-    handle_translation_errors(*expression, [&]() {
-        expression->expand_calls();
-    });
+    handle_translation_errors(*expression, [&]() { expression->expand_calls(); });
 }
-
 
 std::optional<bool> Expression::has_type(Value::Type type) const {
     auto expression_type = this->type();

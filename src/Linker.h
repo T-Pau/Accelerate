@@ -34,10 +34,6 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include <unordered_set>
-#include <vector>
-
-#include "ObjectFile.h"
 #include "Target.h"
 #include "UsedEntities.h"
 
@@ -48,7 +44,7 @@ class Linker {
   public:
     Linker() = default;
 
-    explicit Linker(const Target* target_) { set_target(target_); }
+    explicit Linker(Symbol name, const Target* target_) : module_(name) { set_target(target_); }
 
     virtual ~Linker() = default;
 
@@ -76,26 +72,31 @@ class Linker {
      */
     template <typename T> [[nodiscard]] bool is() const { return as<T>() != nullptr; }
 
-    void add_file(const std::shared_ptr<ObjectFile>& file) { program->add_object_file(file); }
+    [[nodiscard]] const Module& module() const { return module_; }
 
-    void add_library(std::shared_ptr<ObjectFile> library);
+    [[nodiscard]] Module& module() { return module_; }
+
     void set_target(const Target* new_target);
+
+    /**
+     * @brief If no target has been set yet, use the target from the module.
+     *
+     * @return `true` if a target is now set, `false` otherwise.
+     */
+    bool set_target_from_module();
 
     void link();
     void link_new();
     virtual void output(const std::filesystem::path& file_name) = 0;
 
     const Target* target = nullptr;
-    std::shared_ptr<ObjectFile> program = std::make_shared<ObjectFile>();
 
   protected:
     virtual void link_sub() = 0;
-    virtual UsedEntities roots() = 0;
+    // TODO
+    // virtual UsedEntities roots() = 0;
 
-    bool add_object(Object* object);
-
-    std::vector<std::shared_ptr<ObjectFile>> libraries;
-    std::unordered_set<Object*> objects;
+    Module module_;
 };
 
 #endif // HAD_XLR8_LINKER_H

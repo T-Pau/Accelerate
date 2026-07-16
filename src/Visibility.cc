@@ -29,25 +29,32 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "Visibility.h"
 
+const char VisibilityHelper::scope_name[] = "scope";
+const char VisibilityHelper::entity_name[] = "entity";
+const char VisibilityHelper::file_name[] = "file";
+
+const char VisibilityHelper::file_literal[] = "local";
+const char VisibilityHelper::private_literal[] = "private";
+const char VisibilityHelper::public_literal[] = "public";
+
 // Keep in sync with Visibility.
+// clang-format off
 Symbol VisibilityHelper::names[] = {
-    "scope",
-    "entity",
-    "file",
-    Symbol(VisibilityHelper::private_literal),
-    Symbol(VisibilityHelper::public_literal)
+    VisibilityHelper::scope_name,
+    VisibilityHelper::entity_name,
+    VisibilityHelper::file_name,
+    VisibilityHelper::private_literal,
+    VisibilityHelper::public_literal,
 };
+// clang-format on
 
-Symbol VisibilityHelper::file_literal = "local";
-Symbol VisibilityHelper::private_literal = "private";
-Symbol VisibilityHelper::public_literal = "public";
 
-const Token VisibilityHelper::token_file_directive = Token(Token::DIRECTIVE, {}, VisibilityHelper::file_literal);
-const Token VisibilityHelper::token_file_name = Token(Token::NAME, {}, VisibilityHelper::file_literal);
-const Token VisibilityHelper::token_private_directive = Token(Token::DIRECTIVE, {}, VisibilityHelper::private_literal);
-const Token VisibilityHelper::token_private_name = Token(Token::NAME, {}, VisibilityHelper::private_literal);
-const Token VisibilityHelper::token_public_directive = Token(Token::DIRECTIVE, {}, VisibilityHelper::public_literal);
-const Token VisibilityHelper::token_public_name = Token(Token::NAME, {}, VisibilityHelper::public_literal);
+const Token VisibilityHelper::token_file_directive = Token(Token::DIRECTIVE, {}, Symbol(VisibilityHelper::file_literal));
+const Token VisibilityHelper::token_file_name = Token(Token::NAME, {}, Symbol(VisibilityHelper::file_literal));
+const Token VisibilityHelper::token_private_directive = Token(Token::DIRECTIVE, {}, Symbol(VisibilityHelper::private_literal));
+const Token VisibilityHelper::token_private_name = Token(Token::NAME, {}, Symbol(VisibilityHelper::private_literal));
+const Token VisibilityHelper::token_public_directive = Token(Token::DIRECTIVE, {}, Symbol(VisibilityHelper::public_literal));
+const Token VisibilityHelper::token_public_name = Token(Token::NAME, {}, Symbol(VisibilityHelper::public_literal));
 
 std::ostream& operator<<(std::ostream& stream, Visibility visibility) {
     if (visibility == Visibility::FILE) {

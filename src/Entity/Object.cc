@@ -54,8 +54,7 @@ const Token Object::token_reserve{Token::NAME, RESERVE};
 const Token Object::token_section{Token::NAME, SECTION};
 const Token Object::token_uses{Token::NAME, USES};
 
-
-Object::Object(const Location& location, Symbol name, std::shared_ptr<Scope> parent_scope, const std::shared_ptr<StructuredValue>& definition): Entity(location, name, parent_scope, definition) {
+Object::Object(const Location& location, Symbol name, std::shared_ptr<Scope> parent_scope, const std::shared_ptr<StructuredValue>& definition) : Entity(location, name, parent_scope, definition) {
     auto parameters = definition->as_dictionary();
 
     if (auto address_value = parameters->get_optional(token_address)) {
@@ -75,7 +74,7 @@ Object::Object(const Location& location, Symbol name, std::shared_ptr<Scope> par
     }
 
     if (auto uses_value = parameters->get_optional(token_uses)) {
-        for (const auto& object_name: uses_value->as_scalar()->tokens) {
+        for (const auto& object_name : uses_value->as_scalar()->tokens) {
             uses(object_name.as_symbol());
         }
     }
@@ -101,17 +100,14 @@ Object::Object(const Location& location, Symbol name, std::shared_ptr<Scope> par
     // section = owner->target->map.section((*parameters)[token_section]->as_singular_scalar()->token().as_symbol());
 }
 
+Object::Object(const Location& location, Symbol name, Visibility visibility, std::shared_ptr<Scope> parent_scope, bool default_only, const MemoryMap::Section* section) : Entity(location, name, visibility, parent_scope, default_only), section(section) {}
 
-Object::Object(const Location& location, Symbol name, Visibility visibility, std::shared_ptr<Scope> parent_scope, bool default_only, const MemoryMap::Section *section): Entity(location, name, visibility, parent_scope, default_only), section(section) {}
-
-
-std::ostream& operator<< (std::ostream& stream, const Object& object) {
+std::ostream& operator<<(std::ostream& stream, const Object& object) {
     object.serialize(stream);
     return stream;
 }
 
-
-void Object::serialize(std::ostream &stream) const {
+void Object::serialize(std::ostream& stream) const {
     stream << ".object " << name << " {" << std::endl;
     serialize_entity(stream);
     if (address) {
@@ -123,7 +119,7 @@ void Object::serialize(std::ostream &stream) const {
     stream << "    " SECTION ": " << section->name << std::endl;
     if (!explicitly_used_objects.empty()) {
         stream << "    " USES ":";
-        for (const auto& name: explicitly_used_objects) {
+        for (const auto& name : explicitly_used_objects) {
             stream << " " << name;
         }
         stream << std::endl;
@@ -139,7 +135,6 @@ void Object::serialize(std::ostream &stream) const {
     stream << "}" << std::endl;
 }
 
-
 SizeRange Object::size_range() const {
     if (is_reservation()) {
         auto minimum_value = reservation_expression->minimum_value();
@@ -154,7 +149,6 @@ SizeRange Object::size_range() const {
     }
 }
 
-
 void Object::evaluate_inner(EvaluationContext& context) {
     if (is_reservation()) {
         reservation_expression->evaluate(context);
@@ -163,7 +157,6 @@ void Object::evaluate_inner(EvaluationContext& context) {
         body.evaluate(context);
     }
 }
-
 
 bool Object::operator<(const Object& other) const {
     if (address) {
@@ -193,4 +186,19 @@ bool Object::operator<(const Object& other) const {
     }
 
     return name < other.name;
+}
+
+void Object::pin(Expression expression) {
+    if (address && address_expression) {
+        throw LocationException(expression.location(), "{} already has an address", name);
+    }
+    if (expression.has_value()) {
+        if (!expression.value()->is_unsigned()) {
+            throw LocationException(expression.location(), "address must be unsigned", name);
+        }
+        this->address = Address(expression.value()->unsigned_value());
+    }
+    else {
+        this->address_expression = expression;
+    }
 }

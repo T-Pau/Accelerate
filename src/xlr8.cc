@@ -143,17 +143,6 @@ int xlr8::process() {
     TargetGetter::global.search_path->append_path(system_path, "target");
     CPUGetter::global.search_path->append_path(system_path, "cpu");
 
-    if (create_program) {
-        linker = std::make_unique<ProgramLinker>();
-    }
-    else {
-        linker = std::make_unique<LibraryLinker>();
-    }
-
-    if (target_name) {
-        linker->set_target(&Target::get(*target_name));
-    }
-
     auto library_files = std::vector<Symbol>();
     auto source_files = std::vector<Symbol>();
 
@@ -192,14 +181,21 @@ int xlr8::process() {
             break;
     }
 
-    auto module_name = output_name;
+    auto module_name = Symbol(output_name.string());
     // TODO: replace dangerous characters?
 
-    auto main_module = Module(Symbol(module_name));
+    auto target = target_name ? &Target::get(*target_name) : nullptr;
+
+    if (create_program) {
+        linker = std::make_unique<ProgramLinker>(module_name, target);
+    }
+    else {
+        linker = std::make_unique<LibraryLinker>(module_name, target);
+    }
 
     for (const auto& file_name : library_files) {
         try {
-            main_module.import(Visibility::PRIVATE, LibraryGetter::global.get(file_name));
+            linker->module().import(Visibility::PRIVATE, LibraryGetter::global.get(file_name));
         } catch (LocationException& ex) {
             DiagnosticOutput::global.error(ex);
         } catch (Exception& ex) {
@@ -209,7 +205,7 @@ int xlr8::process() {
 
     for (const auto& file_name : source_files) {
         try {
-            Assembler(linker->target, include_path, defines).parse_object_file(Symbol(file_name), &main_module);
+            Assembler(linker->target, include_path, defines).parse_object_file(Symbol(file_name), &linker->module());
         } catch (LocationException& ex) {
             DiagnosticOutput::global.error(ex);
         } catch (Exception& ex) {
@@ -219,24 +215,8 @@ int xlr8::process() {
 
     DiagnosticOutput::global.exit_if_failed();
 
-    if (!linker->target) {
-        if (main_module.target) {
-            linker->set_target(main_module.target);
-        }
-        else {
-            throw Exception("no target specified");
-        }
-    }
-
-
-    for (const auto& file : files) {
-        try {
-            linker->add_file(file.file);
-        } catch (LocationException& ex) {
-            DiagnosticOutput::global.error(ex);
-        } catch (Exception& ex) {
-            DiagnosticOutput::global.error(Location(file.name), ex);
-        }
+    if (!linker->set_target_from_module()) {
+        throw Exception("no target specified");
     }
 
     DiagnosticOutput::global.exit_if_failed();

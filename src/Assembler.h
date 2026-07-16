@@ -37,7 +37,6 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Entity/Object.h"
 #include "FileTokenizer.h"
 #include "Module.h"
-#include "ObjectFile.h"
 #include "Target.h"
 
 /**
@@ -67,7 +66,7 @@ class Assembler {
      * @brief Parse an object file.
      *
      * @param file_name The file containing the object code.
-     * @return A shared pointer to the parsed ObjectFile.
+     * @return The file scope.
      */
     std::shared_ptr<Scope> parse_object_file(Symbol file_name, Module* module);
 

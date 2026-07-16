@@ -35,27 +35,46 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include "CPU.h"
-#include "MemoryMap.h"
 #include "Entity/Output.h"
+#include "MemoryMap.h"
+#include "Module.h"
 #include "StringEncoding.h"
 
-class ObjectFile;
-
 class Target {
-public:
-    Target();
-    explicit Target(Symbol name): name(name) {}
+  public:
+    Target() : Target(Symbol()) {}
 
-    static void clear_current_target() {current_target = &empty;};
+    explicit Target(Symbol name);
+
+    static void clear_current_target() { current_target = &empty; };
+
     static const Target& get(Symbol name);
-    static const Target& get(const std::string& name) {return get(Symbol(name));}
-    static void set_current_target(const Target* target) {current_target = target;}
+
+    static const Target& get(const std::string& name) { return get(Symbol(name)); }
+
+    static void set_current_target(const Target* target) { current_target = target; }
+
     static const Target empty;
     static const Target* current_target;
 
     [[nodiscard]] bool is_compatible_with(const Target& other) const; // this has everything from other
     [[nodiscard]] const StringEncoding* string_encoding(Symbol name) const;
-    void set_fill_byte(uint8_t fill_byte) {map.fill_byte = fill_byte;}
+
+    void set_fill_byte(uint8_t fill_byte) { map.fill_byte = fill_byte; }
+
+    /*
+     * Get the file scope for this target.
+     *
+     * @return The file scope.
+     */
+    [[nodiscard]] std::shared_ptr<Scope> file_scope() const { return file_scope_; }
+
+    /*
+     * Get the public scope for the target.
+     *
+     * @return The public scope.
+     */
+    [[nodiscard]] std::shared_ptr<Scope> public_scope() const { return module.public_scope(); }
 
     Symbol name;
     const CPU* cpu = &CPU::empty;
@@ -64,7 +83,8 @@ public:
     std::unordered_set<Symbol> defines;
     const StringEncoding* default_string_encoding{};
 
-    std::shared_ptr<ObjectFile> object_file;
+    Module module;
+    std::shared_ptr<Scope> file_scope_;
     std::unique_ptr<Output> output;
 
     std::string extension = "bin";

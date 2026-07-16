@@ -29,9 +29,6 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "ProgramLinker.h"
 
-#include <algorithm>
-#include <sstream>
-
 #include <tpau-cpp-kernal/DiagnosticOutput.h>
 #include <tpau-cpp-kernal/Exception.h>
 #include <tpau-cpp-kernal/FileReader.h>
@@ -42,6 +39,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 using namespace tpau::cpp_kernal;
 
 void ProgramLinker::link_sub() {
+#if 0
     memory = target->map.initialize_memory();
 
     for (auto& library: libraries) {
@@ -169,6 +167,7 @@ void ProgramLinker::link_sub() {
             }
         }
     }
+#endif
 }
 
 void ProgramLinker::output(const std::filesystem::path& file_name) {
@@ -207,7 +206,6 @@ void ProgramLinker::output(const std::filesystem::path& file_name) {
     stream << bytes;
 #endif
 }
-
 
 void ProgramLinker::output_symbol_map(const std::filesystem::path& file_name) {
 #if 0
@@ -270,9 +268,10 @@ void ProgramLinker::output_symbol_map(const std::filesystem::path& file_name) {
 #endif
 }
 
-
+#if 0
 UsedEntities ProgramLinker::roots() {
     auto entities = UsedEntities{};
     entities.insert(target->output.get());
     return entities;
 }
+#endif

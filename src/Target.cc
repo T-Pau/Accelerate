@@ -29,21 +29,16 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "Target.h"
 
-#include "ObjectFile.h"
 #include "TargetGetter.h"
+
+Target::Target(Symbol name) : name(name), module(name) { file_scope_ = module.add_file(name); }
 
 const Target Target::empty = Target();
 const Target* Target::current_target = &empty;
 
-Target::Target(): object_file{std::make_shared<ObjectFile>()} {}
+const Target& Target::get(Symbol name) { return TargetGetter::global.get(name); }
 
-const Target &Target::get(Symbol name) {
-    return TargetGetter::global.get(name);
-}
-
-bool Target::is_compatible_with(const Target &other) const {
-    return map.is_compatible_with(other.map) && cpu->is_compatible_with(*other.cpu);
-}
+bool Target::is_compatible_with(const Target& other) const { return map.is_compatible_with(other.map) && cpu->is_compatible_with(*other.cpu); }
 
 const StringEncoding* Target::string_encoding(Symbol name) const {
     auto it = string_encodings.find(name);

@@ -47,21 +47,27 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 class ObjectFile;
 
 /**
-  * @brief Represents an object.
-  */
-class Object: public Entity {
-public:
+ * @brief Represents an object.
+ */
+class Object : public Entity {
+  public:
     Object(const Location& location, Symbol name, std::shared_ptr<Scope> parent_scope, const std::shared_ptr<StructuredValue>& definition);
     Object(const Location& location, Symbol name, Visibility visibility, std::shared_ptr<Scope> parent_scope, bool default_only, const MemoryMap::Section* section);
 
-    bool static less_pointers(const Object* a, const Object* b) {return *a < *b;}
+    bool static less_pointers(const Object* a, const Object* b) { return *a < *b; }
 
-    [[nodiscard]] bool is_reservation() const {return reservation_expression.has_value();}
-    [[nodiscard]] bool empty() const {return !is_reservation() && body.empty();}
-    [[nodiscard]] bool has_address() const {return address.has_value();}
+    void pin(Expression expression);
+
+    [[nodiscard]] bool is_reservation() const { return reservation_expression.has_value(); }
+
+    [[nodiscard]] bool empty() const { return !is_reservation() && body.empty(); }
+
+    [[nodiscard]] bool has_address() const { return address.has_value(); }
+
     [[nodiscard]] std::optional<uint64_t> reservation() const;
     [[nodiscard]] SizeRange size_range() const;
-    void uses(Symbol name) {explicitly_used_objects.insert(name);}
+
+    void uses(Symbol name) { explicitly_used_objects.insert(name); }
 
     void serialize(std::ostream& stream) const;
 
@@ -71,12 +77,13 @@ public:
     uint64_t alignment = 0;
     std::optional<Expression> reservation_expression;
     std::optional<Address> address;
+    std::optional<Expression> address_expression;
     std::set<Symbol> explicitly_used_objects;
 
     Body body;
 
   protected:
-    void evaluate_inner(EvaluationContext &context) override;
+    void evaluate_inner(EvaluationContext& context) override;
 
   private:
     static const Token token_address;

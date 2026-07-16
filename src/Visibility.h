@@ -34,8 +34,8 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include <iostream>
 #include <format>
+#include <iostream>
 #include <optional>
 
 #include "Token.h"
@@ -118,7 +118,7 @@ class VisibilityHelper {
      * @param visibility The visibility to convert.
      * @return The corresponding name.
      */
-    static Symbol name(Visibility visibility) {return names[static_cast<size_t>(visibility)];}
+    static Symbol name(Visibility visibility) { return names[static_cast<size_t>(visibility)]; }
 
     /// @brief The token for directive for the `FILE` visibility (`.local`).
     static const Token token_file_directive;
@@ -128,7 +128,7 @@ class VisibilityHelper {
 
     /// @brief The token for directive for the `PRIVATE` visibility (`.private`).
     static const Token token_private_directive;
-    
+
     /// @brief The token for name for the `PRIVATE` visibility (`private`).
     static const Token token_private_name;
 
@@ -136,16 +136,25 @@ class VisibilityHelper {
     static const Token token_public_directive;
 
     /// @brief The token for name for the `PUBLIC` visibility (`public`).
-    static const Token token_public_name; 
+    static const Token token_public_name;
 
-    /// @brief The token for the `FILE` visibility (`local`).
-    static Symbol file_literal;
+    /// @brief The name of the `SCOPE` scope type (`scope`).
+    static const char scope_name[];
 
-    /// @brief The token for the `PRIVATE` visibility (`private`).
-    static Symbol private_literal;
+    /// @brief The name of the `ENTITY` scope type (`entity`).
+    static const char entity_name[];
 
-    /// @brief The token for the `PUBLIC` visibility (`public`).
-    static Symbol public_literal;
+    /// @brief The name of the `FILE` scope type (`file`).
+    static const char file_name[];
+
+    /// @brief The name for the `FILE` visibility and scope type (`local`).
+    static const char file_literal[];
+
+    /// @brief The name for the `PRIVATE` visibility and scope type (`private`).
+    static const char private_literal[];
+
+    /// @brief The name for the `PUBLIC` visibility and scope type (`public`).
+    static const char public_literal[];
 
   private:
     /// @brief The names of the visibilities.
@@ -161,11 +170,8 @@ class VisibilityHelper {
  */
 std::ostream& operator<<(std::ostream& stream, Visibility visibility);
 
-
 template <> struct std::formatter<Visibility> : std::formatter<Symbol> {
-  auto format(const Visibility& visibility, format_context& ctx) const {
-        return std::formatter<Symbol>::format(VisibilityHelper::name(visibility), ctx);
-    }
+    auto format(const Visibility& visibility, format_context& ctx) const { return std::formatter<Symbol>::format(VisibilityHelper::name(visibility), ctx); }
 };
 
 #endif // HAD_XLR8_VISIBILITY_H

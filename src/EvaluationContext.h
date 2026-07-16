@@ -36,27 +36,26 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <unordered_set>
 
-#include "Expression/Expression.h"
 #include "EvaluationResult.h"
+#include "Expression/Expression.h"
 #include "SizeRange.h"
 
 class Entity;
-class ObjectFile;
 class Scope;
 
 class EvaluationContext {
   public:
     enum EvaluationType {
-        ARGUMENTS,          // Bind arguments in function call or instruction encoding.
-        RESOLVE,            // Resolve names.
+        ARGUMENTS, // Bind arguments in function call or instruction encoding.
+        RESOLVE,   // Resolve names.
 
         // old
-        ENTITY,             // Evaluate object with completed body.
-        LABELS,             // Resolve named and unnamed labels.
-        LABELS_2,           // Resolve forward label uses.
-        MACRO_EXPANSION,    // Bind arguments and duplicate labels in macro invocation.
-        OUTPUT,             // Evaluate output.
-        STANDALONE          // Preprocessor if condition.
+        ENTITY,          // Evaluate object with completed body.
+        LABELS,          // Resolve named and unnamed labels.
+        LABELS_2,        // Resolve forward label uses.
+        MACRO_EXPANSION, // Bind arguments and duplicate labels in macro invocation.
+        OUTPUT,          // Evaluate output.
+        STANDALONE       // Preprocessor if condition.
     };
 
     // ARGUMENTS, LABELS, MACRO_EXPANSION, STANDALONE
@@ -75,8 +74,11 @@ class EvaluationContext {
     [[nodiscard]] EvaluationContext keeping_label_offsets() const;
     [[nodiscard]] EvaluationContext making_conditional() const;
     [[nodiscard]] EvaluationContext adding_scope(std::shared_ptr<Scope> new_environment, const SizeRange& new_label_offset) const;
-    [[nodiscard]] bool evaluating(Symbol variable) const {return evaluating_variables.contains(variable);}
-    [[nodiscard]] bool skipping(Symbol variable) const {return skip_variables.contains(variable);}
+
+    [[nodiscard]] bool evaluating(Symbol variable) const { return evaluating_variables.contains(variable); }
+
+    [[nodiscard]] bool skipping(Symbol variable) const { return skip_variables.contains(variable); }
+
     [[nodiscard]] std::optional<Expression> lookup_variable(Symbol variable) const;
 
     EvaluationType type;
@@ -88,7 +90,7 @@ class EvaluationContext {
     bool labels_are_offset = false;
     bool keep_label_offsets = false;
     bool conditional = false;
-    std::unordered_set<Symbol> skip_variables; // For preserving arguments in macro/function bodies.
+    std::unordered_set<Symbol> skip_variables;       // For preserving arguments in macro/function bodies.
     std::unordered_set<Symbol> evaluating_variables; // Variables currently being evaluated (used for circular definition detection).
     EvaluationResult& result;
 };

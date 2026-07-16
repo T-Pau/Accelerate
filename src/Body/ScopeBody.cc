@@ -33,6 +33,9 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Scope.h"
 
 ScopeBody::ScopeBody(const std::shared_ptr<Scope>& scope, Body body): scope_(std::move(scope)), body(std::move(body)) {
+    if (!scope_) {
+        throw Exception("ScopeBody must be initialized with a non-null scope.");
+    }
     if (scope_->type() != Visibility::SCOPE) {
         throw Exception("ScopeBody must be initialized with a scope of type SCOPE.");
     }

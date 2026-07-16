@@ -36,13 +36,25 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "Linker.h"
 
-class LibraryLinker: public Linker {
+class LibraryLinker : public Linker {
   public:
+    LibraryLinker(Symbol name, const Target* target = nullptr) : Linker(name, target) {}
+
     void output(const std::filesystem::path& file_name) override;
 
   protected:
     void link_sub() override;
-    UsedEntities roots() override {return program->public_entities();}
+
+  private:
+    template <typename T> void output_entities(std::ostream& stream) {
+        auto entities = sorted(module().get_entities<T>(), [](const T* a, const T* b) { return a->name < b->name; });
+        for (const auto& entity : entities) {
+            entity->serialize(stream);
+        }
+    }
+
+    static const unsigned int format_version_major;
+    static const unsigned int format_version_minor;
 };
 
 #endif // HAD_XLR8_LIBRARY_LINKER_H

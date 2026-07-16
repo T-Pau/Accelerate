@@ -104,7 +104,8 @@ Target Assembler::parse_target(Symbol name, Symbol file_name) {
     tokenizer.add_literal(token_data_start);
 
     // TODO:
-    // module = target->module;
+    module = &parsed_target.module;
+    file_scope = parsed_target.file_scope();
     parse(file_name);
     parsed_target.defines = std::move(tokenizer.defines);
     return std::move(parsed_target);
@@ -233,7 +234,7 @@ void Assembler::parse_default_string_encoding(const Token& directive) {
 void Assembler::parse_pin(const Token& directive) {
     auto name = tokenizer.expect(Token::NAME, TokenGroup::newline);
     auto address = ExpressionParser(tokenizer).parse();
-    module->pin(name.as_symbol(), address);
+    file_scope->pin(name.as_symbol(), address);
 }
 
 void Assembler::parse_section(const Token& directive) {
@@ -385,7 +386,7 @@ void Assembler::parse_symbol(Visibility visibility, const Token& name) {
             object->uses(object_name.as_symbol());
         }
         else if (token == token_used) {
-            module->mark_used(object);
+            file_scope->mark_used(object);
         }
         else {
             throw LocationException(token.location, "unexpected");
@@ -492,7 +493,7 @@ void Assembler::parse_target(const Token& directive) {
 void Assembler::parse_use(const Token& directive) {
     auto name = tokenizer.expect(Token::NAME, TokenGroup::newline);
 
-    module->mark_used(name.as_symbol());
+    file_scope->mark_used(name.as_symbol());
 }
 
 void Assembler::parse_visibility(const Token& directive) {

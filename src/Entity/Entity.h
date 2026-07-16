@@ -46,7 +46,7 @@ class Object;
 class Scope;
 
 /**
-  * @brief Represents an entity in the source code, which can be a constant, object, macro, or function.
+ * @brief Represents an entity in the source code, which can be a constant, object, macro, or function.
  */
 class Entity {
   public:
@@ -54,27 +54,30 @@ class Entity {
     Entity(const Location& location, Symbol name, Visibility visibility, std::shared_ptr<Scope> parent_scope, bool default_only = false);
     virtual ~Entity() = default;
 
-    template <typename T>
-    [[nodiscard]] T* as() {return dynamic_cast<T*>(this);}
+    template <typename T> [[nodiscard]] T* as() { return dynamic_cast<T*>(this); }
 
-    template <typename T>
-    [[nodiscard]] bool is() const {return as<T>() != nullptr;}
+    template <typename T> [[nodiscard]] bool is() const { return as<T>() != nullptr; }
 
-    [[nodiscard]] bool operator<(const Entity& other) const {return name < other.name;}
+    [[nodiscard]] bool operator<(const Entity& other) const { return name < other.name; }
 
     void evaluate();
     [[nodiscard]] EvaluationResult evaluate(EvaluationContext::EvaluationType type);
     void resolve_labels();
     [[nodiscard]] bool check_unresolved(Unresolved& unresolved) const;
-    [[nodiscard]] bool is_default_only() const {return default_only;}
-    [[nodiscard]] bool is_public() const {return visibility == Visibility::PUBLIC;}
+
+    [[nodiscard]] bool is_default_only() const { return default_only; }
+
+    [[nodiscard]] bool is_public() const { return visibility == Visibility::PUBLIC; }
 
     void uses(Entity* entity);
 
-    [[nodiscard]] Symbol get_name() const {return name;}
-    [[nodiscard]] Location get_location() const {return location;}
-    [[nodiscard]] Visibility get_visibility() const {return visibility;}
-    [[nodiscard]] std::shared_ptr<Scope> get_scope() const {return scope;}
+    [[nodiscard]] Symbol get_name() const { return name; }
+
+    [[nodiscard]] Location get_location() const { return location; }
+
+    [[nodiscard]] Visibility get_visibility() const { return visibility; }
+
+    [[nodiscard]] std::shared_ptr<Scope> get_scope() const { return scope; }
 
     // TODO: make protected once BodyParser doesn't evaluate body directly.
     void process_result(EvaluationResult& result);
@@ -106,8 +109,10 @@ class Entity {
   protected:
     void serialize_entity(std::ostream& stream) const;
 
-    [[nodiscard]] virtual EvaluationContext evaluation_context(EvaluationResult& result) {return EvaluationContext(result, this);}
-    [[nodiscard]] virtual EvaluationContext evaluation_context(EvaluationResult& result, EvaluationContext::EvaluationType type) {return EvaluationContext(result, type, scope);}
+    [[nodiscard]] virtual EvaluationContext evaluation_context(EvaluationResult& result) { return EvaluationContext(result, this); }
+
+    [[nodiscard]] virtual EvaluationContext evaluation_context(EvaluationResult& result, EvaluationContext::EvaluationType type) { return EvaluationContext(result, type, scope); }
+
     virtual void evaluate_inner(EvaluationContext& context) = 0;
 
   private:

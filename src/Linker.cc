@@ -41,6 +41,7 @@ using namespace tpau::cpp_kernal;
 void Linker::link() { link_sub(); }
 
 void Linker::link_new() {
+#if 0
     auto entities = UsedEntities{};
 
     auto new_entities = roots();
@@ -63,9 +64,8 @@ void Linker::link_new() {
     // if creating program
     //     place objects
     //     propagate constants
+#endif
 }
-
-bool Linker::add_object(Object* object) { return objects.insert(object).second; }
 
 void Linker::set_target(const Target* new_target) {
     if (!new_target) {
@@ -78,10 +78,12 @@ void Linker::set_target(const Target* new_target) {
         return;
     }
     target = new_target;
-    program->private_environment->add_next(target->object_file->public_environment);
+    module().private_scope()->add_next(target->public_scope());
 }
 
-void Linker::add_library(std::shared_ptr<ObjectFile> library) {
-    program->import(library.get());
-    libraries.emplace_back(std::move(library));
+bool Linker::set_target_from_module() {
+    if (!target && module().target) {
+        set_target(module_.target);
+    }
+    return target;
 }

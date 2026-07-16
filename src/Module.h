@@ -41,6 +41,8 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 class Module {
   public:
+    Module() : Module(Symbol()) {}
+
     Module(Symbol name);
 
     /**
@@ -81,52 +83,71 @@ class Module {
      */
     void import(Visibility visibility, const Module& module);
 
-    /**
-     * @brief Pin an object to a specific address.
+    /*
+     * Get the name of the module.
      *
-     * @param name The name of the object.
-     * @param address The address to pin the object to.
+     * @return The name of the module.
      */
-    void pin(Symbol object_name, Expression address);
+    Symbol name() const { return name_; }
 
     /**
-     * @brief Explicitly mark an object as used.
+     * @brief Get all constants defined in the module.
      *
-     * This will ensure that the object is included in the final output, even if it is not referenced by any other used entities.
-     *
-     * @param name The name of the object.
+     * @return A map of constant names to their values.
      */
-    void mark_used(Symbol name) { explicitly_used_object_names.insert(name); }
+    [[nodiscard]] std::vector<Constant*> constants() const { return get_entities<Constant>(); }
 
     /**
-     * @brief Explicitly mark an object as used.
+     * @brief Get all functions defined in the module.
      *
-     * This will ensure that the object is included in the final output, even if it is not referenced by any other used entities.
-     *
-     * @param object The object to mark as used.
+     * @return A vector of functions.
      */
-    void mark_used(Object* object) { explicitly_used_objects.insert(object); }
+    [[nodiscard]] std::vector<Function*> functions() const { return get_entities<Function>(); }
 
-    /// @brief The name of the module.
-    Symbol name;
+    /**
+     * @brief Get all macros defined in the module.
+     *
+     * @return A vector of macros.
+     */
+    [[nodiscard]] std::vector<Macro*> macros() const { return get_entities<Macro>(); }
+
+    /**
+     * @brief Get all objects defined in the module.
+     *
+     * @return A vector of objects.
+     */
+    [[nodiscard]] std::vector<Object*> objects() const { return get_entities<Object>(); }
+
+    template <typename T> std::vector<T*> get_entities() const {
+        std::vector<T*> entities;
+        collect_entities_from_scope(entities, public_scope_.get());
+        collect_entities_from_scope(entities, private_scope_.get());
+        for (const auto& [file_name, file_scope] : file_scopes) {
+            collect_entities_from_scope(entities, file_scope.get());
+        }
+        return entities;
+    }
+
+    /*
+     * @brief Rename the module.
+     *
+     * @param new_name The new name of the module.
+     */
+    void rename(Symbol new_name);
 
     // Remove this? It's used to pass the target from a source file via Assembler to Linker.
     /// @brief The target of the module.
     const Target* target{};
 
+
   private:
-    class Pinned {
-      public:
-        Pinned(Symbol object_name, Expression address) : object_name{object_name}, address{std::move(address)} {}
+    template <typename T> void collect_entities_from_scope(std::vector<T*>& entities, const Scope* scope) const {
+        const auto& new_entities = scope->get_all<T>();
+        entities.insert(entities.end(), new_entities.begin(), new_entities.end());
+    }
 
-        Pinned() = default;
-
-        Symbol object_name;
-        Expression address;
-
-        void resolve(Scope& scope);
-        void evaluate(EvaluationContext context);
-    };
+    /// @brief The name of the module.
+    Symbol name_;
 
     // @brief The file scopes of the module's files.
     std::unordered_map<Symbol, std::shared_ptr<Scope>> file_scopes;
@@ -136,19 +157,6 @@ class Module {
 
     /// @brief The private scope of the module.
     std::shared_ptr<Scope> private_scope_;
-
-    /// @brief The objects that have been pinned to specific addresses.
-    std::unordered_map<Symbol, Pinned> pinned_objects;
-
-    /**
-     * @brief The names of the objects that have been explicitly marked as used.
-     *
-     * These will be resolved and added to `explicitly_used_objects` once all names are defined.
-     */
-    std::unordered_set<Symbol> explicitly_used_object_names;
-
-    /// @brief The objects that have been explicitly marked as used.
-    std::unordered_set<Object*> explicitly_used_objects;
 };
 
 

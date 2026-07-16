@@ -36,14 +36,16 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "Linker.h"
 
-class ProgramLinker: public Linker {
+class ProgramLinker : public Linker {
   public:
+    ProgramLinker(Symbol name, const Target* target = nullptr) : Linker(name, target) {}
+
     void output(const std::filesystem::path& file_name) override;
     void output_symbol_map(const std::filesystem::path& file_name);
 
   protected:
     void link_sub() override;
-    UsedEntities roots() override;
+    // UsedEntities roots() override;
 
   private:
     Body output_body;

@@ -37,6 +37,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <tpau-cpp-kernal/DiagnosticOutput.h>
 #include <tpau-cpp-kernal/Exception.h>
 #include <tpau-cpp-kernal/Symbol.h>
+#include <tpau-cpp-kernal/Util.h>
 
 #include "Entity/Constant.h"
 #include "Entity/Function.h"
@@ -248,33 +249,37 @@ class Scope {
      * Get a constant from the scope.
      *
      * @param name The name of the constant.
+     * @param include_containing_scopes If `true`, search in containing scopes as well; if `false`, only search in this scope.
      * @return The constant if it exists, nullptr otherwise.
      */
-    [[nodiscard]] Constant* get_constant(Symbol name) const { return get<Constant>(name); }
+    [[nodiscard]] Constant* get_constant(Symbol name, bool include_containing_scopes = true) const { return get<Constant>(name, include_containing_scopes); }
 
     /**
      * Get a function from the scope.
      *
      * @param name The name of the function.
+     * @param include_containing_scopes If `true`, search in containing scopes as well; if `false`, only search in this scope.
      * @return The function if it exists, nullptr otherwise.
      */
-    [[nodiscard]] Function* get_function(Symbol name) const { return get<Function>(name); }
+    [[nodiscard]] Function* get_function(Symbol name, bool include_containing_scopes = true) const { return get<Function>(name, include_containing_scopes); }
 
     /**
      * Get a macro from the scope.
      *
      * @param name The name of the macro.
+     * @param include_containing_scopes If `true`, search in containing scopes as well; if `false`, only search in this scope.
      * @return The macro if it exists, nullptr otherwise.
      */
-    [[nodiscard]] Macro* get_macro(Symbol name) const { return get<Macro>(name); }
+    [[nodiscard]] Macro* get_macro(Symbol name, bool include_containing_scopes = true) const { return get<Macro>(name, include_containing_scopes); }
 
     /**
      * Get an object from the scope.
      *
      * @param name The name of the object.
+     * @param include_containing_scopes If `true`, search in containing scopes as well; if `false`, only search in this scope.
      * @return The object if it exists, nullptr otherwise.
      */
-    [[nodiscard]] Object* get_object(Symbol name) const { return get<Object>(name); }
+    [[nodiscard]] Object* get_object(Symbol name, bool include_containing_scopes = true) const { return get<Object>(name, include_containing_scopes); }
 
     /**
      * Get the objects defined in this scope. It does not include objects defined in containing scopes.
@@ -303,6 +308,16 @@ class Scope {
      * @return A collection of all macros.
      */
     [[nodiscard]] Collection<Macro> get_macros() const { return Collection<Macro>(macros); }
+
+    template <typename T> [[nodiscard]] Collection<T> get_all() const { throw Exception("internal error: get_all called for unknown type"); }
+
+    template <> [[nodiscard]] Collection<Constant> get_all<Constant>() const { return get_constants(); }
+
+    template <> [[nodiscard]] Collection<Function> get_all<Function>() const { return get_functions(); }
+
+    template <> [[nodiscard]] Collection<Macro> get_all<Macro>() const { return get_macros(); }
+
+    template <> [[nodiscard]] Collection<Object> get_all<Object>() const { return get_objects(); }
 
     /**
      * Get the number of unnamed labels in the scope.
@@ -356,6 +371,32 @@ class Scope {
         defines.insert(name);
         undefine_overrides.erase(name);
     }
+
+    /**
+     * Pin an object to a specific address.
+     *
+     * @param object_name The name of the object.
+     * @param address The address to pin the object to.
+     */
+    void pin(Symbol object_name, Expression address);
+
+    /**
+     * Explicitly mark an object as used.
+     *
+     * This will ensure that the object is included in the final output, even if it is not referenced by any other used entities.
+     *
+     * @param object_name The name of the object to mark as used.
+     */
+    void mark_used(Symbol object_name) { explicitly_used_object_names.insert(object_name); }
+
+    /**
+     * Explicitly mark an object as used.
+     *
+     * This will ensure that the object is included in the final output, even if it is not referenced by any other used entities.
+     *
+     * @param object The object to mark as used.
+     */
+    void mark_used(Object* object) { explicitly_used_objects.insert(object); }
 
     /**
      * Get the type of the scope.
@@ -456,15 +497,18 @@ class Scope {
      *
      * @tparam T The type of the entity.
      * @param name The name of the entity.
+     * @param include_containing_scopes If `true`, search in containing scopes as well; if `false`, only search in this scope.
      * @return The entity, if found; otherwise, nullptr.
      */
-    template <typename T> T* get(Symbol name) const {
+    template <typename T> T* get(Symbol name, bool include_containing_scopes = true) const {
         if (auto entity = get_directly<T>(name)) {
             return entity;
         }
-        for (auto& scope : next) {
-            if (auto entity = scope->get<T>(name)) {
-                return entity;
+        if (include_containing_scopes) {
+            for (auto& scope : next) {
+                if (auto entity = scope->get<T>(name, include_containing_scopes)) {
+                    return entity;
+                }
             }
         }
         return nullptr;
@@ -481,13 +525,31 @@ class Scope {
      */
     template <typename T> T* get_directly(Symbol name) const { throw Exception("internal error: get() not defined for type {}", typeid(T).name()); }
 
-    template <> Constant* get_directly<Constant>(Symbol name) const { return constants.at(name).get(); }
+    template <> Constant* get_directly<Constant>(Symbol name) const { return get(constants, name); }
 
-    template <> Function* get_directly<Function>(Symbol name) const { return functions.at(name).get(); }
+    template <> Function* get_directly<Function>(Symbol name) const { return get(functions, name); }
 
-    template <> Macro* get_directly<Macro>(Symbol name) const { return macros.at(name).get(); }
+    template <> Macro* get_directly<Macro>(Symbol name) const { return get(macros, name); }
 
-    template <> Object* get_directly<Object>(Symbol name) const { return objects.at(name).get(); }
+    template <> Object* get_directly<Object>(Symbol name) const { return get(objects, name); }
+
+    /**
+     * @brief Get an entity from a collection by name.
+     *
+     * @tparam T The type of the entity.
+     * @param collection The collection to search.
+     * @param name The name of the entity.
+     * @return The entity if found, {} otherwise.
+     */
+    template <typename T> T* get(const std::unordered_map<Symbol, std::unique_ptr<T>>& collection, Symbol name) const {
+        auto it = collection.find(name);
+        if (it != collection.end()) {
+            return it->second.get();
+        }
+        else {
+            return nullptr;
+        }
+    }
 
     /**
      * @brief Finds the first containing scope of a given visibility.
@@ -528,6 +590,23 @@ class Scope {
 
     /// @brief List of unnamed labels in the scope. This is only allowed in entity scopes.
     UnnamedLabelList unnamed_labels;
+
+    /**
+     * @brief The objects that have been pinned to specific addresses.
+     *
+     * These will be resolved and the address of the objects set once all names are defined.
+     */
+    std::unordered_map<Symbol, Expression> pinned_object_names;
+
+    /**
+     * @brief The names of the objects that have been explicitly marked as used.
+     *
+     * These will be resolved and added to `explicitly_used_objects` once all names are defined.
+     */
+    std::unordered_set<Symbol> explicitly_used_object_names;
+
+    /// @brief The objects that have been explicitly marked as used.
+    std::unordered_set<Object*> explicitly_used_objects;
 };
 
 
