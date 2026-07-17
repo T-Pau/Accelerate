@@ -60,6 +60,11 @@ class Entity {
 
     [[nodiscard]] bool operator<(const Entity& other) const { return name < other.name; }
 
+    /**
+     * @brief Resolve names in the entity.
+     */
+    void resolve();
+
     void evaluate();
     [[nodiscard]] EvaluationResult evaluate(EvaluationContext::EvaluationType type);
     [[nodiscard]] bool check_unresolved(Unresolved& unresolved) const;
@@ -77,13 +82,6 @@ class Entity {
     [[nodiscard]] Visibility get_visibility() const { return visibility; }
 
     [[nodiscard]] std::shared_ptr<Scope> get_scope() const { return scope; }
-
-    /*
-     * @brief Resolve names in the entity.
-     *
-     * Subclasses must implement this method.
-     */
-    virtual void resolve() = 0;
 
     // TODO: make protected once BodyParser doesn't evaluate body directly.
     void process_result(EvaluationResult& result);
@@ -104,6 +102,13 @@ class Entity {
     std::shared_ptr<Scope> scope;
 
   protected:
+    /*
+     * @brief Resolve names in the entity.
+     *
+     * Subclasses must implement this method.
+     */
+    virtual void resolve_implementation() = 0;
+
     void serialize_entity(std::ostream& stream) const;
 
     [[nodiscard]] virtual EvaluationContext evaluation_context(EvaluationResult& result) { return EvaluationContext(result, this); }
@@ -119,6 +124,9 @@ class Entity {
     static const Token token_visibility;
 
     bool default_only{false};
+
+    // @brief Whether the entity has been resolved.
+    bool resolved{false};
 };
 
 

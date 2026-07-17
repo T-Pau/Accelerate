@@ -78,8 +78,9 @@ EvaluationOrder::Node* EvaluationOrder::node_for(Entity* entity) {
             DiagnosticOutput::global.error("entity {} depends on itself", entity->name);
             continue;
         }
+        entity->resolve();
         if (dependency->as<Object>()) {
-            // Entities don't depend on the evaluation of objects, just their address.
+            // Entities don't depend on the evaluation of objects, just their address. But we still need to add it to the graph to make sure it is processed correctly.
             (void)node_for(dependency);
         }
         else {

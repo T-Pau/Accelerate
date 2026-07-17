@@ -49,7 +49,7 @@ class Macro : public Callable {
     [[nodiscard]] Body expand(const std::vector<Expression>& arguments, std::shared_ptr<Scope> outer_environment) const;
     void serialize(std::ostream& stream) const;
 
-    void resolve() override {} // TODO: implement
+    void resolve_implementation() override {} // TODO: implement
 
     void enter_names() { body.enter_names(scope.get(), this); }
 

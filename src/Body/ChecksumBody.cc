@@ -29,8 +29,8 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <tpau-cpp-kernal/LocationException.h>
 
-#include "ChecksumBody.h"
 #include "Body.h"
+#include "ChecksumBody.h"
 #include "ExpressionParser.h"
 
 using namespace tpau::cpp_kernal;
@@ -73,7 +73,7 @@ void ChecksumBody::encode(std::string& bytes, const Memory* memory) const {
 }
 
 std::optional<Body> ChecksumBody::evaluate_process(const EvaluationContext& context) {
-    auto fully_evaluated = start.has_value() && end.has_value() && std::all_of(parameters.begin(), parameters.end(), [](const auto& pair) {return pair.second.has_value();});
+    auto fully_evaluated = start.has_value() && end.has_value() && std::all_of(parameters.begin(), parameters.end(), [](const auto& pair) { return pair.second.has_value(); });
 
     if (fully_evaluated) {
         if (!context.conditional && context.offset.has_size() && fully_evaluated) {
@@ -81,7 +81,8 @@ std::optional<Body> ChecksumBody::evaluate_process(const EvaluationContext& cont
             for (auto& [name, expression] : parameters) {
                 parameter_values[name] = *expression.value();
             }
-            context.result.checksums.emplace_back(algorithm, *context.offset.size(), start.value()->unsigned_value(), end.value()->unsigned_value(), parameter_values);
+            // TODO:
+            // context.result.checksums.emplace_back(algorithm, *context.offset.size(), start.value()->unsigned_value(), end.value()->unsigned_value(), parameter_values);
         }
         else {
             throw LocationException(start.location(), "unknown values in .checksum");
@@ -91,13 +92,11 @@ std::optional<Body> ChecksumBody::evaluate_process(const EvaluationContext& cont
     return {};
 }
 
-
 void ChecksumBody::serialize(std::ostream& stream, const std::string& prefix) const {
     stream << prefix << ".checksum " << algorithm->name << ", " << start << ", " << end;
     // TODO: parameters
     stream << std::endl;
 }
-
 
 void ChecksumBody::traverse(std::function<void(Body&)> body_callable, std::function<void(Expression&)> expression_callable) {
     expression_callable(start);

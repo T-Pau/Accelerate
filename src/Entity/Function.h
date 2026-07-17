@@ -37,20 +37,22 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Entity/Callable.h"
 
 /**
-  * @brief Represents a function.
-  */
-class Function: public Callable {
+ * @brief Represents a function.
+ */
+class Function : public Callable {
   public:
     Function(const Location& location, Symbol name, std::shared_ptr<Scope> parent_scope, const std::shared_ptr<StructuredValue>& definition);
-    Function(const Location& location, Symbol name, Visibility visibility, std::shared_ptr<Scope> parent_scope, bool default_only, Arguments arguments, const Expression& definition): Callable(location, name, visibility, parent_scope, default_only, std::move(arguments)), definition(definition) {}
+
+    Function(const Location& location, Symbol name, Visibility visibility, std::shared_ptr<Scope> parent_scope, bool default_only, Arguments arguments, const Expression& definition) : Callable(location, name, visibility, parent_scope, default_only, std::move(arguments)), definition(definition) {}
+
     void serialize(std::ostream& stream) const;
 
-    void resolve() override {} // TODO: implement
+    void resolve_implementation() override {} // TODO: implement
 
     Expression definition;
 
   protected:
-    void evaluate_inner(EvaluationContext &context) override {definition.evaluate(context);}
+    void evaluate_inner(EvaluationContext& context) override { definition.evaluate(context); }
 
   private:
     static void initialize();

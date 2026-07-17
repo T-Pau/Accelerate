@@ -66,7 +66,7 @@ class Object : public Entity {
 
     void enter_names() { body.enter_names(scope.get(), this); }
 
-    void resolve() override;
+    void resolve_implementation() override;
 
     [[nodiscard]] std::optional<uint64_t> reservation() const;
     [[nodiscard]] SizeRange size_range() const;

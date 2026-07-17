@@ -45,7 +45,7 @@ class Output : public Entity {
 
     void enter_names() { body.enter_names(scope.get(), this); }
 
-    void resolve() override { body.resolve(scope.get(), this); }
+    void resolve_implementation() override { body.resolve(scope.get(), this); }
 
     Body body;
 

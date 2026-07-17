@@ -203,7 +203,7 @@ void Object::pin(Expression expression) {
     }
 }
 
-void Object::resolve() {
+void Object::resolve_implementation() {
     if (address_expression) {
         address_expression->resolve(scope.get(), this);
     }

@@ -36,8 +36,8 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <tpau-cpp-kernal/Exception.h>
 
-#include "BodyElement.h"
 #include "Body.h"
+#include "BodyElement.h"
 #include "Expression/BaseExpression.h"
 
 using namespace tpau::cpp_kernal;
@@ -48,28 +48,28 @@ using namespace tpau::cpp_kernal;
  * If no condition is provided, the clause is considered the "else" clause and will be executed if all previous conditions are false.
  */
 class IfBodyClause {
-public:
+  public:
     /**
      * @brief Construct a new IfBodyClause.
      *
      * @param condition The condition for the clause. If not provided, this is the "else" clause.
      * @param body The body to execute if the condition is true.
      */
-    IfBodyClause(std::optional<Expression> condition, Body body): condition(std::move(condition)), body(std::move(body)) {}
+    IfBodyClause(std::optional<Expression> condition, Body body) : condition(std::move(condition)), body(std::move(body)) {}
 
     /**
      * @brief Check if the clause's condition evaluates to true.
      *
      * @return `true` if the condition is known to be true, `false` otherwise.
      */
-    [[nodiscard]] bool is_true() const {return !condition || (condition->has_value() && condition->value()->boolean_value());}
+    [[nodiscard]] bool is_true() const { return !condition || (condition->has_value() && condition->value()->boolean_value()); }
 
     /**
      * @brief Check if the clause's condition evaluates to false.
      *
      * @return `true` if the condition is known to be false, `false` otherwise.
      */
-    [[nodiscard]] bool is_false() const {return condition && condition->has_value() && !condition->value()->boolean_value();}
+    [[nodiscard]] bool is_false() const { return condition && condition->has_value() && !condition->value()->boolean_value(); }
 
     /// @brief The condition for the clause. If not provided, this is the "else" clause.
     std::optional<Expression> condition;
@@ -78,12 +78,11 @@ public:
     Body body;
 };
 
-
 /**
  * @brief Represents a conditional body. Parts of this body will be discarded, based on the evaluation of the conditions.
  */
-class IfBody: public BodyElement {
-public:
+class IfBody : public BodyElement {
+  public:
     /**
      * @brief Construct a new IfBody.
      *
@@ -99,18 +98,21 @@ public:
      * @param clauses The clauses for the conditional body.
      * @return The created IfBody.
      */
-    static Body create(const std::vector<IfBodyClause>& clauses) {return *simplify(const_cast<std::vector<IfBodyClause>&>(clauses), true);}
+    static Body create(const std::vector<IfBodyClause>& clauses) { return *simplify(const_cast<std::vector<IfBodyClause>&>(clauses), true); }
 
-    [[nodiscard]] std::shared_ptr<BodyElement> clone() const override {return std::make_shared<IfBody>(clauses);} // TODO: this doesn't copy clauses
-    [[nodiscard]] bool empty() const override {return clauses.empty();}
-    void encode(std::string &bytes, const Memory* memory) const override {throw Exception("unresolved if");}
-    [[nodiscard]] std::optional<Body> evaluate_process(const EvaluationContext& context) override {return simplify(clauses, false);}
+    [[nodiscard]] std::shared_ptr<BodyElement> clone() const override { return std::make_shared<IfBody>(clauses); } // TODO: this doesn't copy clauses
+
+    [[nodiscard]] bool empty() const override { return clauses.empty(); }
+
+    void encode(std::string& bytes, const Memory* memory) const override { throw Exception("unresolved if"); }
+
+    [[nodiscard]] std::optional<Body> evaluate(const EvaluationContext& context) override;
     // TODO: We might need to implement expand_calls and resolve, depending on how we handle conditional bodies.
     void traverse(std::function<void(Body&)> body_callable, std::function<void(Expression&)> expression_callable) override;
 
-    void serialize(std::ostream &stream, const std::string& prefix) const override;
+    void serialize(std::ostream& stream, const std::string& prefix) const override;
 
-private:
+  private:
     /// @brief Simplify the clauses of the IfBody.
     static std::optional<Body> simplify(std::vector<IfBodyClause>& clauses, bool always_create);
 

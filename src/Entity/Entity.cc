@@ -140,3 +140,12 @@ void Entity::uses(Entity* entity) {
     }
     referenced_entities.insert(entity);
 }
+
+void Entity::resolve() {
+    if (resolved) {
+        return;
+    }
+    resolved = true;
+
+    DiagnosticOutput::global.log_exceptions([this]() { resolve_implementation(); });
+}

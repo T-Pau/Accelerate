@@ -35,14 +35,14 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using namespace tpau::cpp_kernal;
 
-EvaluationContext::EvaluationContext(EvaluationResult& result, EvaluationType type, std::shared_ptr<Scope> environment, std::unordered_set<Symbol> defines, const SizeRange& offset): type(type), environment(std::move(environment)), defines{std::move(defines)}, offset(offset), result(result) {
+EvaluationContext::EvaluationContext(EvaluationResult& result, EvaluationType type, std::shared_ptr<Scope> environment, std::unordered_set<Symbol> defines, const SizeRange& offset) : type(type), environment(std::move(environment)), defines{std::move(defines)}, offset(offset) {
     if (type == MACRO_EXPANSION) {
         label_offset = SizeRange(0, {});
         labels_are_offset = true;
     }
 }
 
-EvaluationContext::EvaluationContext(EvaluationResult& result, Entity* entity): type(ENTITY), entity(entity), environment(entity->scope), offset(0), result(result) {}
+EvaluationContext::EvaluationContext(EvaluationResult& result, Entity* entity) : type(ENTITY), entity(entity), environment(entity->scope), offset(0) {}
 
 EvaluationContext EvaluationContext::evaluating_variable(Symbol variable) const {
     auto new_context = *this;
@@ -55,7 +55,6 @@ EvaluationContext EvaluationContext::adding_offset(const SizeRange& size) const 
     new_context.offset += size;
     return new_context;
 }
-
 
 EvaluationContext EvaluationContext::setting_offset(const SizeRange& new_offset) const {
     auto new_context = *this;

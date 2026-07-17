@@ -31,10 +31,10 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "ErrorBody.h"
 
-IfBody::IfBody(std::vector<IfBodyClause> clauses_): clauses(std::move(clauses_)) {
+IfBody::IfBody(std::vector<IfBodyClause> clauses_) : clauses(std::move(clauses_)) {
     if (!clauses.empty()) {
         size_range_ = SizeRange(std::numeric_limits<uint64_t>::max(), 0);
-        for (const auto& clause: clauses) {
+        for (const auto& clause : clauses) {
             if (!clause.body.is<ErrorBody>()) {
                 size_range_.minimum = std::min(size_range_.minimum, clause.body.size_range().minimum);
                 size_range_.maximum = std::max(size_range_.maximum, clause.body.size_range().maximum);
@@ -43,7 +43,7 @@ IfBody::IfBody(std::vector<IfBodyClause> clauses_): clauses(std::move(clauses_))
     }
 }
 
-void IfBody::serialize(std::ostream &stream, const std::string& prefix) const {
+void IfBody::serialize(std::ostream& stream, const std::string& prefix) const {
     if (empty()) {
         return;
     }
@@ -53,7 +53,7 @@ void IfBody::serialize(std::ostream &stream, const std::string& prefix) const {
     }
 
     auto first = true;
-    for (auto& clause: clauses) {
+    for (auto& clause : clauses) {
         if (clause.is_true()) {
             stream << prefix << "}" << std::endl;
             stream << prefix << ".else {" << std::endl;
@@ -80,7 +80,7 @@ void IfBody::serialize(std::ostream &stream, const std::string& prefix) const {
 std::optional<Body> IfBody::simplify(std::vector<IfBodyClause>& clauses, bool always_create) {
     auto filtered_clauses = std::vector<IfBodyClause>();
 
-    for (auto& clause: clauses) {
+    for (auto& clause : clauses) {
         if (clause.is_false()) {
             continue;
         }
@@ -109,12 +109,29 @@ std::optional<Body> IfBody::simplify(std::vector<IfBodyClause>& clauses, bool al
     }
 }
 
-
 void IfBody::traverse(std::function<void(Body&)> body_callable, std::function<void(Expression&)> expression_callable) {
-    for (auto& clause: clauses) {
+    for (auto& clause : clauses) {
         if (clause.condition) {
             expression_callable(*clause.condition);
         }
         body_callable(clause.body);
     }
+}
+
+std::optional<Body> IfBody::evaluate(const EvaluationContext& context) {
+    auto inner_context = context;
+    for (auto& clause : clauses) {
+        if (clause.condition) {
+            clause.condition->evaluate(context);
+        }
+        if (clause.is_true()) {
+            clause.body.evaluate(inner_context);
+            break;
+        }
+        else if (!clause.is_false()) {
+            inner_context = inner_context.making_conditional();
+            clause.body.evaluate(inner_context);
+        }
+    }
+    return simplify(clauses, false);
 }

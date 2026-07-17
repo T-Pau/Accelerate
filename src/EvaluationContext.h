@@ -92,7 +92,6 @@ class EvaluationContext {
     bool conditional = false;
     std::unordered_set<Symbol> skip_variables;       // For preserving arguments in macro/function bodies.
     std::unordered_set<Symbol> evaluating_variables; // Variables currently being evaluated (used for circular definition detection).
-    EvaluationResult& result;
 };
 
 #endif // HAD_XLR8_EVALUATION_CONTEXT_H

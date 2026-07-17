@@ -38,7 +38,7 @@
 			"MIMode": "lldb"
 		},
 		{
-			"name": "xlr8: create cerberus-2100-z80 library",
+			"name": "xlr8: create c64 library",
 			"type": "cppdbg",
 			"request": "launch",
 			"program": "${workspaceFolder}/build/src/xlr8",
@@ -46,11 +46,11 @@
 				"--system-directory",
 				"/Users/dillo/Projects/T-Pau/Development/Accelerate/share",
 				"--depfile",
-				"/Users/dillo/Projects/T-Pau/Development/Accelerate/build/share/lib/cerberus-2100-z80.d",
+				"/Users/dillo/Projects/T-Pau/Development/Accelerate/build/share/lib/c64.d",
 				"--create-library",
 				"-o",
-				"/Users/dillo/Projects/T-Pau/Development/Accelerate/build/share/lib/cerberus-2100-z80.lib",
-				"/Users/dillo/Projects/T-Pau/Development/Accelerate/share/lib/cerberus-2100-z80.s"
+				"/Users/dillo/Projects/T-Pau/Development/Accelerate/build/share/lib/c64.lib",
+				"/Users/dillo/Projects/T-Pau/Development/Accelerate/share/lib/c64.s"
 			],
 			"cwd": "${workspaceFolder}",
 			"stopAtEntry": false,

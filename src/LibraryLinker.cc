@@ -43,10 +43,6 @@ const unsigned int LibraryLinker::format_version_minor = 0;
 void LibraryLinker::link_sub() {
     auto entities = module().entities();
 
-    for (auto* entity : entities) {
-        entity->resolve();
-    }
-
     auto order = EvaluationOrder::order(entities);
 
     for (auto* entity : order) {

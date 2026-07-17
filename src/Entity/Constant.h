@@ -44,7 +44,7 @@ class Constant : public Entity {
 
     [[nodiscard]] bool has_value() const { return value.has_value(); }
 
-    void resolve() override { value.resolve(scope.get(), this); }
+    void resolve_implementation() override { value.resolve(scope.get(), this); }
 
     void serialize(std::ostream& stream) const;
 
