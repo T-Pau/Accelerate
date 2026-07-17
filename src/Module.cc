@@ -65,3 +65,16 @@ void Module::import(Visibility visibility, const Module& module) {
 
     scope->add_next(module.public_scope());
 }
+
+std::vector<Entity*> Module::entities() const {
+    std::vector<Entity*> entities;
+    auto public_entities = public_scope_->get_entities();
+    entities.insert(entities.end(), public_entities.begin(), public_entities.end());
+    auto private_entities = private_scope_->get_entities();
+    entities.insert(entities.end(), private_entities.begin(), private_entities.end());
+    for (const auto& [file_name, file_scope] : file_scopes) {
+        auto file_entities = file_scope->get_entities();
+        entities.insert(entities.end(), file_entities.begin(), file_entities.end());
+    }
+    return entities;
+}

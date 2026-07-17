@@ -75,7 +75,6 @@ class BodyParser {
      * @param cpu The CPU context.
      * @param environment The environment the body is in.
      * @param allow_assigns Whether assignments are allowed.
-     * @param defines The set of defined symbols.
      */
     BodyParser(Tokenizer& tokenizer, const CPU* cpu, std::shared_ptr<Scope> environment, bool allow_assigns) : parsing_type(allow_assigns ? ENTITY : OUTPUT), cpu(cpu), tokenizer(tokenizer), environment(environment) {}
 

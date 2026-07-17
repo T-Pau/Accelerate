@@ -118,6 +118,13 @@ class Module {
      */
     [[nodiscard]] std::vector<Object*> objects() const { return get_entities<Object>(); }
 
+    /**
+     * @brief Get all entities defined in the module.
+     *
+     * @return A vector of entities.
+     */
+    [[nodiscard]] std::vector<Entity*> entities() const;
+
     template <typename T> std::vector<T*> get_entities() const {
         std::vector<T*> entities;
         collect_entities_from_scope(entities, public_scope_.get());

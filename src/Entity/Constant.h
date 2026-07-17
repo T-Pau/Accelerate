@@ -36,19 +36,22 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "Entity/Entity.h"
 
-class Constant: public Entity {
+class Constant : public Entity {
   public:
-    Constant(const Location& location, Symbol name, Visibility visibility, std::shared_ptr<Scope> parent_scope, bool default_only, Expression value): Entity(location, name, visibility, parent_scope, default_only), value(std::move(value)) {}
+    Constant(const Location& location, Symbol name, Visibility visibility, std::shared_ptr<Scope> parent_scope, bool default_only, Expression value) : Entity(location, name, visibility, parent_scope, default_only), value(std::move(value)) {}
+
     Constant(const Location& location, Symbol name, std::shared_ptr<Scope> parent_scope, const std::shared_ptr<StructuredValue>& definition);
 
-    [[nodiscard]] bool has_value() const {return value.has_value();}
+    [[nodiscard]] bool has_value() const { return value.has_value(); }
+
+    void resolve() override { value.resolve(scope.get(), this); }
 
     void serialize(std::ostream& stream) const;
 
     Expression value;
 
   protected:
-    void evaluate_inner(EvaluationContext &context) override {value.evaluate(context);}
+    void evaluate_inner(EvaluationContext& context) override { value.evaluate(context); }
 
   private:
     static const Token token_value;

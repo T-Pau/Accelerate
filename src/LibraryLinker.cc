@@ -33,23 +33,25 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <tpau-cpp-kernal/Exception.h>
 
+#include "EvaluationOrder.h"
+
 using namespace tpau::cpp_kernal;
 
 const unsigned int LibraryLinker::format_version_major = 1;
 const unsigned int LibraryLinker::format_version_minor = 0;
 
 void LibraryLinker::link_sub() {
-#if 0
-    Target::set_current_target(target);
-    program->evaluate();
-    program->evaluate(); // TODO: shouldn't be necessary
-    program->evaluate(); // TODO: shouldn't be necessary
-    Unresolved unresolved;
-    if (!program->check_unresolved(unresolved)) {
-        unresolved.report();
-        throw Exception();
+    auto entities = module().entities();
+
+    for (auto* entity : entities) {
+        entity->resolve();
     }
-#endif
+
+    auto order = EvaluationOrder::order(entities);
+
+    for (auto* entity : order) {
+        entity->evaluate();
+    }
 }
 
 void LibraryLinker::output(const std::filesystem::path& file_name) {
@@ -68,7 +70,7 @@ void LibraryLinker::output(const std::filesystem::path& file_name) {
     // TODO: output imported libraries, pinned and used objects.
 
     output_entities<Constant>(stream);
-    // output_entities<Function>(stream);
-    // output_entities<Macro>(stream);
-    // output_entities<Object>(stream);
+    output_entities<Function>(stream);
+    output_entities<Macro>(stream);
+    output_entities<Object>(stream);
 }

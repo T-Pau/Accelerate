@@ -71,7 +71,7 @@ Entity::Entity(const Location& location, Symbol name, std::shared_ptr<Scope> par
 }
 
 Entity::Entity(const Location& location, Symbol name, Visibility visibility, std::shared_ptr<Scope> parent_scope, bool default_only) : name(name), location(location), visibility(visibility), scope(std::make_shared<Scope>(Visibility::ENTITY, parent_scope)), default_only{default_only} {}
-    
+
 void Entity::serialize_entity(std::ostream& stream) const {
     stream << "    " VISIBILITY ": " << visibility << std::endl;
     if (default_only) {
@@ -133,38 +133,10 @@ EvaluationResult Entity::evaluate(EvaluationContext::EvaluationType type) {
     return result;
 }
 
-void Entity::resolve_labels() {
-    try {
-        auto result = EvaluationResult{};
-        auto context = evaluation_context(result);
-        context.type = EvaluationContext::LABELS;
-        evaluate_inner(context);
-
-        result = EvaluationResult{};
-        auto context2 = evaluation_context(result);
-        context2.type = EvaluationContext::LABELS_2;
-        evaluate_inner(context2);
-    } catch (Exception& ex) {
-        DiagnosticOutput::global.error(location, ex);
-        // TODO: throw empty expression?
-    }
-}
-
 void Entity::uses(Entity* entity) {
     if (entity->visibility <= Visibility::ENTITY) {
         // We don't track references to entity only visible within an entity.
         return;
     }
-    if (auto constant = dynamic_cast<Constant*>(entity)) {
-        referenced_constants.insert(constant);
-    }
-    else if (auto function = dynamic_cast<Function*>(entity)) {
-        referenced_functions.insert(function);
-    }
-    else if (auto macro = dynamic_cast<Macro*>(entity)) {
-        referenced_macros.insert(macro);
-    }
-    else if (auto object = dynamic_cast<Object*>(entity)) {
-        referenced_objects.insert(object);
-    }
+    referenced_entities.insert(entity);
 }

@@ -37,19 +37,23 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Body/Body.h"
 #include "Entity/Entity.h"
 
-class Output: public Entity {
-public:
+class Output : public Entity {
+  public:
     Output(const Location& location, const Target* target, Body body);
 
-    [[nodiscard]] const Body& get_body() const {return body;}
+    [[nodiscard]] const Body& get_body() const { return body; }
+
+    void enter_names() { body.enter_names(scope.get(), this); }
+
+    void resolve() override { body.resolve(scope.get(), this); }
 
     Body body;
 
-protected:
-  void evaluate_inner(EvaluationContext& context) override {}; // TODO: implement
+  protected:
+    void evaluate_inner(EvaluationContext& context) override {}; // TODO: implement
 
-private:
-  static Token token_output;
+  private:
+    static Token token_output;
 };
 
 #endif // HAD_XLR8_OUTPUT_H

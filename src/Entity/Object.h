@@ -64,6 +64,10 @@ class Object : public Entity {
 
     [[nodiscard]] bool has_address() const { return address.has_value(); }
 
+    void enter_names() { body.enter_names(scope.get(), this); }
+
+    void resolve() override;
+
     [[nodiscard]] std::optional<uint64_t> reservation() const;
     [[nodiscard]] SizeRange size_range() const;
 

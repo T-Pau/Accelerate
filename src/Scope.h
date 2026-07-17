@@ -58,6 +58,80 @@ class Module;
  */
 class Scope {
   public:
+    class AllCollections {
+      public:
+        AllCollections(const Scope* scope) : scope(scope) {}
+
+        class Iterator {
+          public:
+            using iterator_category = std::forward_iterator_tag;
+            using value_type = Entity*;
+            using difference_type = std::ptrdiff_t;
+            using pointer = Entity**;
+            using reference = Entity*&;
+
+            Iterator(const Scope* scope, std::unordered_map<Symbol, std::unique_ptr<Constant>>::const_iterator constant_it, std::unordered_map<Symbol, std::unique_ptr<Function>>::const_iterator function_it, std::unordered_map<Symbol, std::unique_ptr<Macro>>::const_iterator macro_it, std::unordered_map<Symbol, std::unique_ptr<Object>>::const_iterator object_it) : scope(scope), constant_it(constant_it), function_it(function_it), macro_it(macro_it), object_it(object_it) {}
+
+            [[nodiscard]] value_type operator*() const {
+                if (constant_it != scope->constants.end()) {
+                    return constant_it->second.get();
+                }
+                else if (function_it != scope->functions.end()) {
+                    return function_it->second.get();
+                }
+                else if (macro_it != scope->macros.end()) {
+                    return macro_it->second.get();
+                }
+                else if (object_it != scope->objects.end()) {
+                    return object_it->second.get();
+                }
+                else {
+                    throw Exception("iterator out of range");
+                }
+            }
+
+            Iterator& operator++() {
+                if (constant_it != scope->constants.end()) {
+                    ++constant_it;
+                }
+                else if (function_it != scope->functions.end()) {
+                    ++function_it;
+                }
+                else if (macro_it != scope->macros.end()) {
+                    ++macro_it;
+                }
+                else if (object_it != scope->objects.end()) {
+                    ++object_it;
+                }
+                return *this;
+            }
+
+            Iterator operator++(int) {
+                Iterator tmp(*this);
+                ++(*this);
+                return tmp;
+            }
+
+            bool operator==(const Iterator& other) const { return constant_it == other.constant_it && function_it == other.function_it && macro_it == other.macro_it && object_it == other.object_it && scope == other.scope; }
+
+            bool operator!=(const Iterator& other) const { return !(*this == other); }
+
+          private:
+            const Scope* scope;
+            std::unordered_map<Symbol, std::unique_ptr<Constant>>::const_iterator constant_it;
+            std::unordered_map<Symbol, std::unique_ptr<Function>>::const_iterator function_it;
+            std::unordered_map<Symbol, std::unique_ptr<Macro>>::const_iterator macro_it;
+            std::unordered_map<Symbol, std::unique_ptr<Object>>::const_iterator object_it;
+        };
+
+        [[nodiscard]] Iterator begin() const { return Iterator(scope, scope->constants.begin(), scope->functions.begin(), scope->macros.begin(), scope->objects.begin()); }
+
+        [[nodiscard]] Iterator end() const { return Iterator(scope, scope->constants.end(), scope->functions.end(), scope->macros.end(), scope->objects.end()); }
+
+      private:
+        const Scope* scope;
+    };
+
     /**
      * @brief Represents an unordered collection of entities in the scope.
      *
@@ -280,6 +354,8 @@ class Scope {
      * @return The object if it exists, nullptr otherwise.
      */
     [[nodiscard]] Object* get_object(Symbol name, bool include_containing_scopes = true) const { return get<Object>(name, include_containing_scopes); }
+
+    [[nodiscard]] AllCollections get_entities() const { return AllCollections(this); }
 
     /**
      * Get the objects defined in this scope. It does not include objects defined in containing scopes.

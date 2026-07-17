@@ -62,7 +62,6 @@ class Entity {
 
     void evaluate();
     [[nodiscard]] EvaluationResult evaluate(EvaluationContext::EvaluationType type);
-    void resolve_labels();
     [[nodiscard]] bool check_unresolved(Unresolved& unresolved) const;
 
     [[nodiscard]] bool is_default_only() const { return default_only; }
@@ -79,6 +78,13 @@ class Entity {
 
     [[nodiscard]] std::shared_ptr<Scope> get_scope() const { return scope; }
 
+    /*
+     * @brief Resolve names in the entity.
+     *
+     * Subclasses must implement this method.
+     */
+    virtual void resolve() = 0;
+
     // TODO: make protected once BodyParser doesn't evaluate body directly.
     void process_result(EvaluationResult& result);
 
@@ -91,17 +97,8 @@ class Entity {
     /// @brief The visibility of the entity, i. e. in which scope it can be used.
     Visibility visibility;
 
-    /// @brief All constants referenced by the entity.
-    std::unordered_set<Constant*> referenced_constants;
-
-    /// @brief All functions referenced by the entity.
-    std::unordered_set<Function*> referenced_functions;
-
-    /// @brief All macros referenced by the entity.
-    std::unordered_set<Macro*> referenced_macros;
-
-    /// @brief All objects referenced by the entity.
-    std::unordered_set<Object*> referenced_objects;
+    /// @brief All entities referenced by the entity.
+    std::unordered_set<Entity*> referenced_entities;
 
     /// @brief The entity's scope.
     std::shared_ptr<Scope> scope;

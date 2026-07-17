@@ -61,6 +61,7 @@ add_library(xlr8-library STATIC
         CPUParser.cc
         Encoder.cc
         EvaluationContext.cc
+        EvaluationOrder.cc
         EvaluationResult.cc
         ExpressionNode.cc
         ExpressionParser.cc

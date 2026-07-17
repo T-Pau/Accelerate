@@ -359,6 +359,7 @@ void Assembler::parse_symbol(Visibility visibility, const Token& name) {
         else if (token == Token::curly_open) {
             // TODO: error if .reserved
             object->body = BodyParser(tokenizer, cpu, object->scope, true).parse();
+            object->enter_names();
             break;
         }
         // TODO: parameters
@@ -451,6 +452,7 @@ void Assembler::parse_output(const Token& directive) {
     }
 
     parsed_target.output = std::make_unique<Output>(directive.location, &parsed_target, BodyParser(tokenizer, parsed_target.cpu, file_scope, false).parse());
+    parsed_target.output->enter_names();
 }
 
 void Assembler::parse_string_encoding(const Token& directive) {
@@ -540,6 +542,7 @@ void Assembler::parse_macro(Visibility visibility, bool default_only) {
     tokenizer.expect(Token::curly_open);
     auto macro = std::make_unique<Macro>(name.location, name.as_symbol(), visibility, file_scope, default_only, arguments);
     macro->body = BodyParser(tokenizer, cpu, macro->scope, false).parse();
+    macro->enter_names();
 
     file_scope->add(std::move(macro));
 }

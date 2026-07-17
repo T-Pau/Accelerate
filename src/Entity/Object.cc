@@ -202,3 +202,13 @@ void Object::pin(Expression expression) {
         this->address_expression = expression;
     }
 }
+
+void Object::resolve() {
+    if (address_expression) {
+        address_expression->resolve(scope.get(), this);
+    }
+    if (reservation_expression) {
+        reservation_expression->resolve(scope.get(), this);
+    }
+    body.resolve(scope.get(), this);
+}

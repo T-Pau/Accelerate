@@ -137,7 +137,6 @@ Body BodyParser::parse() {
                         break;
                     }
                     if (token == end_token) {
-                        // TODO: call body.enter_names() here?
                         return body;
                     }
                     else if (token == Token::colon) {
