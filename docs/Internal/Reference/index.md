@@ -67,11 +67,11 @@ These classes represent expressions, which are used in various places in a progr
 ### [Expression](Expression.md)
 ::: Expression.@brief
 
-### [ExpressionNode](ExpressionNode.md)
-::: ExpressionNode.@brief
-
 ### [BaseExpression](BaseExpression.md)
 ::: BaseExpression.@brief
+
+### [ArgumentExpression](ArgumentExpression.md)
+::: ArgumentExpression.@brief
 
 ### [BinaryExpression](BinaryExpression.md)
 ::: BinaryExpression.@brief
@@ -291,6 +291,9 @@ These classes are not yet sorted into the above categories.
 
 ### [EvaluationResult](EvaluationResult.md)
 ::: EvaluationResult.@brief
+
+### [ExpressionNode](ExpressionNode.md)
+::: ExpressionNode.@brief
 
 ### [ExpressionParser](ExpressionParser.md)
 ::: ExpressionParser.@brief

@@ -40,11 +40,18 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 using namespace tpau::cpp_kernal;
 
 std::optional<Expression> VariableExpression::evaluate(const EvaluationContext& context) {
-    if (expression && expression->has_value()) {
+    if (!expression) {
+        // throw LocationException(location, "internal error: expression not set for variable {}", symbol);
+        return {};
+    }
+
+    expression->evaluate(context);
+
+    if (expression->has_value()) {
         return ValueExpression::create(location, *expression->value());
     }
     else {
-        return {};
+        return expression;
     }
 }
 
@@ -54,7 +61,8 @@ void VariableExpression::resolve(Scope* scope, Entity* containing_entity) {
         if (!expression) {
             throw LocationException(location, "no previous unnamed label");
         }
-    } else if (symbol == Token::colon_plus.as_symbol()) {
+    }
+    else if (symbol == Token::colon_plus.as_symbol()) {
         expression = scope->get_next_unnamed_label(location);
         if (!expression) {
             throw LocationException(location, "no next unnamed label");
@@ -77,5 +85,8 @@ void VariableExpression::resolve(Scope* scope, Entity* containing_entity) {
             throw LocationException(location, "undefined variable {}", symbol);
         }
     }
-}
 
+    if (!expression) {
+        throw LocationException(location, "internal error: expression not set after resolving {}", symbol);
+    }
+}

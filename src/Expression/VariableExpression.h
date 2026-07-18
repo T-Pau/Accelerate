@@ -38,15 +38,15 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Expression.h"
 
 /// @brief Expression node representing a variable.
-class VariableExpression: public BaseExpression {
-public:
+class VariableExpression : public BaseExpression {
+  public:
     /**
      * Create a variable expression.
      *
      * @param location The location of the expression.
      * @param symbol The name of the variable.
      */
-    static Expression create(const Location& location, Symbol symbol) {return Expression(std::make_shared<VariableExpression>(location, symbol));}
+    static Expression create(const Location& location, Symbol symbol) { return Expression(std::make_shared<VariableExpression>(location, symbol)); }
 
     /**
      * Create a variable expression.
@@ -54,24 +54,28 @@ public:
      * @param location The location of the expression.
      * @param symbol The name of the variable.
      */
-    explicit VariableExpression(const Location& location, Symbol symbol): BaseExpression(location), symbol(symbol) {}
+    explicit VariableExpression(const Location& location, Symbol symbol, std::optional<Expression> expression = {}) : BaseExpression(location), symbol(symbol), expression(std::move(expression)) {}
 
     /**
      * Get the name of the variable.
-     * 
+     *
      * @return The name of the variable.
      */
-    [[nodiscard]] Symbol variable() const {return symbol;}
+    [[nodiscard]] Symbol variable() const { return symbol; }
 
-protected:
-    [[nodiscard]] std::optional<Expression> evaluate(const EvaluationContext& context) override;
+    std::shared_ptr<BaseExpression> clone() const override { return std::make_shared<VariableExpression>(location, symbol, expression ? std::make_optional(expression->clone()) : std::nullopt); }
 
-    void serialize_sub(std::ostream& stream) const override {stream << symbol.str();}
-    void resolve(Scope* scope, Entity* containing_entity) override;
-
+  protected:
+    // needed for Expression::variable_name()
     friend class Expression;
 
-private:
+    [[nodiscard]] std::optional<Expression> evaluate(const EvaluationContext& context) override;
+
+    void serialize_sub(std::ostream& stream) const override { stream << symbol.str(); }
+
+    void resolve(Scope* scope, Entity* containing_entity) override;
+
+  private:
     /// @brief The name of the variable.
     Symbol symbol;
 

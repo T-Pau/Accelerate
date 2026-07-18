@@ -46,7 +46,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using namespace tpau::cpp_kernal;
 
-InstructionInvocation::InstructionInvocation(const CPU* cpu, Token name, const std::vector<std::shared_ptr<Node>>& nodes, const std::shared_ptr<Scope>& containing_scope): nodes(nodes), containing_scope(containing_scope) {
+InstructionInvocation::InstructionInvocation(const CPU* cpu, Token name, const std::vector<std::shared_ptr<Node>>& nodes, const std::shared_ptr<Scope>& containing_scope) : nodes(nodes), containing_scope(containing_scope) {
     auto instruction = cpu->instruction(name.as_symbol());
     if (!instruction) {
         throw LocationException(name.location, "Unknown instruction: " + name.as_string());
@@ -62,11 +62,11 @@ InstructionInvocation::InstructionInvocation(const CPU* cpu, Token name, const s
         throw LocationException(location, "addressing mode not recognized");
     }
 
-    for (const auto &match: matches) {
+    for (const auto& match : matches) {
         if (instruction->has_addressing_mode(match.addressing_mode)) {
             auto addressing_mode = cpu->addressing_mode(match.addressing_mode);
             auto notation = addressing_mode->notations[match.notation_index];
-            variants.emplace_back(Variant{*addressing_mode, notation, nodes});
+            variants.emplace_back(Variant{instruction->opcode(match.addressing_mode), *addressing_mode, notation, nodes});
         }
     }
 
@@ -76,7 +76,7 @@ InstructionInvocation::InstructionInvocation(const CPU* cpu, Token name, const s
         }
         else {
             auto modes = std::vector<Symbol>();
-            for (const auto &match: matches) {
+            for (const auto& match : matches) {
                 modes.emplace_back(match.addressing_mode);
             }
             std::ranges::sort(modes);
@@ -91,7 +91,6 @@ InstructionInvocation::InstructionInvocation(const CPU* cpu, Token name, const s
     }
 
     uses_pc_ = std::any_of(variants.begin(), variants.end(), [](const Variant& variant) { return variant.addressing_mode.get().uses_pc; });
-
 }
 
 Body InstructionInvocation::encode() {
@@ -121,7 +120,7 @@ Body InstructionInvocation::encode() {
     std::vector<IfBodyClause> clauses;
     bool have_else = false;
 
-    for (const auto& variant: variants) {
+    for (const auto& variant : variants) {
         auto [constraint, body] = variant.encode(scope);
 
         clauses.emplace_back(constraint, body);
@@ -135,7 +134,7 @@ Body InstructionInvocation::encode() {
         clauses.emplace_back(std::optional<Expression>{}, ErrorBody::create(location, "arguments out of range"));
     }
 
-    auto body = IfBody::create(clauses); 
+    auto body = IfBody::create(clauses);
     if (scope != containing_scope) {
         body = ScopeBody::create(scope, body);
     }
@@ -146,16 +145,16 @@ void InstructionInvocation::compute_argument_names() {
     argument_names.clear();
 
     size_t argument_index = 0;
-    for (const auto& node: nodes) {
+    for (const auto& node : nodes) {
         if (node->type() != Node::EXPRESSION) {
             continue;
-        }            
+        }
 
         Symbol common_name;
         bool needs_renaming = false;
         bool is_unknown = false;
 
-        for (const auto& variant: variants) {
+        for (const auto& variant : variants) {
             auto it = variant.unknown_argument_names.find(argument_index);
             if (it == variant.unknown_argument_names.end()) {
                 continue;
@@ -186,7 +185,7 @@ void InstructionInvocation::compute_argument_names() {
         }
         arguments.emplace_back(std::dynamic_pointer_cast<ExpressionNode>(node)->expression);
 
-        for (auto& variant: variants) {
+        for (auto& variant : variants) {
             auto it = variant.unknown_argument_names.find(argument_index);
             if (it == variant.unknown_argument_names.end()) {
                 continue;
@@ -203,7 +202,7 @@ void InstructionInvocation::compute_argument_names() {
     }
 }
 
-InstructionInvocation::Variant::Variant(const AddressingMode& addressing_mode, const AddressingMode::Notation& notation, const std::vector<std::shared_ptr<Node>>& nodes): addressing_mode(addressing_mode), notation(notation), nodes(nodes) {
+InstructionInvocation::Variant::Variant(uint64_t opcode, const AddressingMode& addressing_mode, const AddressingMode::Notation& notation, const std::vector<std::shared_ptr<Node>>& nodes) : opcode(opcode), addressing_mode(addressing_mode), notation(notation), nodes(nodes) {
     std::unordered_set<Symbol> seen_arguments;
 
     size_t argument_index = 0;
@@ -235,7 +234,7 @@ InstructionInvocation::Variant::Variant(const AddressingMode& addressing_mode, c
         }
     }
 
-    for (const auto& [name, argument_definition]: addressing_mode.arguments) {
+    for (const auto& [name, argument_definition] : addressing_mode.arguments) {
         if (!seen_arguments.contains(name)) {
             if (argument_definition->default_value) {
                 arguments.emplace(name, Argument(argument_definition.get()));
@@ -250,9 +249,11 @@ InstructionInvocation::Variant::Variant(const AddressingMode& addressing_mode, c
 
 std::pair<std::optional<Expression>, Body> InstructionInvocation::Variant::encode(const std::shared_ptr<Scope>& containing_scope) const {
     std::optional<Expression> constraint_expression;
-    std::shared_ptr<Scope> scope;
+    std::shared_ptr<Scope> scope = std::make_shared<Scope>(Visibility::SCOPE, containing_scope);
 
-    for (const auto& [name, argument]: arguments) {
+    scope->add(std::make_unique<Constant>(Location{}, Symbol(".opcode"), Visibility::SCOPE, containing_scope, false, ValueExpression::create({}, Value(opcode))));
+
+    for (const auto& [name, argument] : arguments) {
         auto renamed_name = get_with_fallback(argument_aliases, name, name);
         if (!argument.known_value) {
             auto constraint = argument.constraint_expression(Location{}, renamed_name);
@@ -266,9 +267,6 @@ std::pair<std::optional<Expression>, Body> InstructionInvocation::Variant::encod
             }
         }
         else {
-            if (!scope) {
-                scope = std::make_shared<Scope>(Visibility::SCOPE, containing_scope);
-            }
             scope->add(std::make_unique<Constant>(Location{}, name, Visibility::SCOPE, containing_scope, false, ValueExpression::create({}, *argument.known_value)));
         }
     }
@@ -276,10 +274,7 @@ std::pair<std::optional<Expression>, Body> InstructionInvocation::Variant::encod
     auto body = addressing_mode.get().encoding.clone();
 
     if (!argument_aliases.empty()) {
-        if (!scope) {
-            scope = std::make_shared<Scope>(Visibility::SCOPE, containing_scope);
-        }
-        for (const auto& [original_name, renamed_name]: argument_aliases) {
+        for (const auto& [original_name, renamed_name] : argument_aliases) {
             scope->add(std::make_unique<Constant>(Location{}, original_name, Visibility::SCOPE, scope, false, VariableExpression::create(Location(), renamed_name)));
         }
     }
@@ -291,7 +286,7 @@ std::pair<std::optional<Expression>, Body> InstructionInvocation::Variant::encod
     return {constraint_expression, body};
 }
 
-InstructionInvocation::Argument::Argument(const AddressingMode::Argument* definition, Node* node): definition(definition) {
+InstructionInvocation::Argument::Argument(const AddressingMode::Argument* definition, Node* node) : definition(definition) {
     if (node == nullptr) {
         known_value = definition->default_value;
         valid = true;

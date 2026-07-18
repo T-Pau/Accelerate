@@ -32,33 +32,51 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Entity/Constant.h"
 #include "Scope.h"
 
-ScopeBody::ScopeBody(const std::shared_ptr<Scope>& scope, Body body): scope_(std::move(scope)), body(std::move(body)) {
-    if (!scope_) {
+ScopeBody::ScopeBody(const std::shared_ptr<Scope>& scope, Body body) : inner_scope_(std::move(scope)), body(std::move(body)) {
+    if (!inner_scope_) {
         throw Exception("ScopeBody must be initialized with a non-null scope.");
     }
-    if (scope_->type() != Visibility::SCOPE) {
+    if (inner_scope_->type() != Visibility::SCOPE) {
         throw Exception("ScopeBody must be initialized with a scope of type SCOPE.");
     }
 }
 
-
 void ScopeBody::serialize(std::ostream& stream, const std::string& prefix) const {
-    // TODO: serialize environment
     stream << prefix << ".scope {" << std::endl;
-    body.serialize(stream, prefix + "  ");
+    auto inner_prefix = prefix + "  ";
+    for (auto constant : inner_scope()->get_constants()) {
+        stream << inner_prefix << constant->name << " = " << constant->value << std::endl;
+    }
+    body.serialize(stream, inner_prefix);
     stream << prefix << "}" << std::endl;
 }
 
 void ScopeBody::traverse(std::function<void(Body&)> body_callable, std::function<void(Expression&)> expression_callable) {
-    for (auto constant: scope()->get_constants()) {
+    for (auto constant : inner_scope()->get_constants()) {
         expression_callable(constant->value);
     }
     body_callable(body);
 }
 
 std::optional<Body> ScopeBody::evaluate_process(const EvaluationContext& context) {
-    if (body.fully_evaluated()) {
+    // TODO: if all constants are fully evaluated, we can return the inner body.
+    if (scope_fully_evaluated()) {
         return body;
     }
     return {};
+}
+
+void ScopeBody::resolve(Scope* scope, Entity* containing_entity) {
+    // Resolve the constants in the outer scope
+    for (auto constant : inner_scope()->get_constants()) {
+        constant->value.resolve(scope, containing_entity);
+    }
+
+    // Resolve the body in the inner scope
+    body.resolve(inner_scope().get(), containing_entity);
+}
+
+bool ScopeBody::scope_fully_evaluated() {
+    auto constants = inner_scope()->get_constants();
+    return std::all_of(constants.begin(), constants.end(), [](const auto& constant) { return constant->value.has_value(); });
 }

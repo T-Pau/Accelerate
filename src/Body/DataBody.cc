@@ -39,7 +39,6 @@ DataBody::DataBody(std::vector<DataBodyElement> data_) : data(std::move(data_)) 
     }
 }
 
-
 void DataBody::serialize(std::ostream& stream, const std::string& prefix) const {
     stream << prefix << ".data ";
     auto first = true;
@@ -90,7 +89,6 @@ void DataBody::encode(std::string& bytes, const Memory* memory) const {
         }
     }
 }
-
 
 Body DataBody::appending(const std::vector<DataBodyElement>& elements) const {
     auto new_data = data;
@@ -150,4 +148,13 @@ void DataBody::traverse(std::function<void(Body&)> body_callable, std::function<
     for (auto& datum : data) {
         expression_callable(datum.expression);
     }
+}
+
+std::shared_ptr<BodyElement> DataBody::clone() const {
+    auto new_data = std::vector<DataBodyElement>{};
+    new_data.reserve(data.size());
+    for (const auto& datum : data) {
+        new_data.emplace_back(datum.expression.clone(), datum.encoding);
+    }
+    return std::make_shared<DataBody>(new_data);
 }

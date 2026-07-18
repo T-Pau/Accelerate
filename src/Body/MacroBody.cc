@@ -31,11 +31,10 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "Body.h"
 
-
 void MacroBody::serialize(std::ostream& stream, const std::string& prefix) const {
     stream << prefix << name;
     auto first = true;
-    for (auto& argument: arguments) {
+    for (auto& argument : arguments) {
         if (first) {
             first = false;
         }
@@ -48,13 +47,13 @@ void MacroBody::serialize(std::ostream& stream, const std::string& prefix) const
 }
 
 void MacroBody::traverse(std::function<void(Body&)> body_callback, std::function<void(Expression&)> expression_callback) {
-    for (auto& argument: arguments) {
+    for (auto& argument : arguments) {
         expression_callback(argument);
     }
 }
 
 void MacroBody::expand_calls() {
-    for (auto& argument: arguments) {
+    for (auto& argument : arguments) {
         argument.expand_calls();
     }
     // TODO: expand calls macro if not already done.
@@ -63,7 +62,7 @@ void MacroBody::expand_calls() {
 }
 
 void MacroBody::resolve(Scope* scope, Entity* containing_entity) {
-    for (auto& argument: arguments) {
+    for (auto& argument : arguments) {
         argument.resolve(scope, containing_entity);
     }
 

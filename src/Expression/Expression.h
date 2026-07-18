@@ -45,9 +45,9 @@ class Object;
  * @brief Represents an expression. This is the class other parts of the program interact with. It is a wrapper around the BaseExpression hierarchy.
  */
 class Expression {
-public:
+  public:
     static Expression create(const Token& token);
-    
+
     /// @brief Construct a void Expression.
     Expression();
 
@@ -71,8 +71,7 @@ public:
      * @tparam T The type to check against.
      * @return `true` if the expression is of type T, `false` otherwise.
      */
-    template<typename T>
-    [[nodiscard]] bool is() const {return as<T>() != nullptr;}
+    template <typename T> [[nodiscard]] bool is() const { return as<T>() != nullptr; }
 
     /**
      * Get the expression as a specific type.
@@ -80,8 +79,7 @@ public:
      * @tparam T The type to cast to.
      * @return A pointer to the expression as type T, or nullptr if it is not of that type.
      */
-    template<typename T>
-    [[nodiscard]] const T* as() const {return dynamic_cast<const T*>(expression.get());}
+    template <typename T> [[nodiscard]] const T* as() const { return dynamic_cast<const T*>(expression.get()); }
 
     /**
      * @brief Evaluate the expression in a given context.
@@ -95,46 +93,46 @@ public:
      *
      * @return `true` if the value is known, `false` otherwise.
      */
-    [[nodiscard]] bool has_value() const {return value().has_value();}
+    [[nodiscard]] bool has_value() const { return value().has_value(); }
 
     /**
      * @brief Get the location in the source code where the expression was defined.
      */
-    [[nodiscard]] const Location& location() const {return expression->location;}
+    [[nodiscard]] const Location& location() const { return expression->location; }
 
     /**
      * @brief Get the maximum possible value of the expression.
      *
      * @return The maximum possible value of the expression if it can be determined, {} otherwise.
      */
-    [[nodiscard]] std::optional<Value> maximum_value() const {return expression->maximum_value();}
+    [[nodiscard]] std::optional<Value> maximum_value() const { return expression->maximum_value(); }
 
     /**
      * @brief Get the minimum possible value of the expression.
      *
      * @return The minimum possible value of the expression. if it can be determined, {} otherwise.
      */
-    [[nodiscard]] std::optional<Value> minimum_value() const {return expression->minimum_value();}
-    
+    [[nodiscard]] std::optional<Value> minimum_value() const { return expression->minimum_value(); }
+
     /**
      * @brief Serialize the expression to a stream.
      *
      * @param stream The output stream to serialize the expression to.
      */
     void serialize(std::ostream& stream) const;
-    
+
     /**
      * @brief Get the type of the expression's value.
      *
      * @return The type of the expression's value if it can be determined, {} otherwise.
      */
-    [[nodiscard]] std::optional<Value::Type> type() const {return expression->type();}
-    
+    [[nodiscard]] std::optional<Value::Type> type() const { return expression->type(); }
+
     /**
      * @brief Check if the expression has a specific type.
      *
      * If `type` is an aggregate type (like `Value::INTEGER`), this method will return `true` if the expression's type is a subtype of it.
-     * 
+     *
      * @param type The type to check against.
      * @return `true` if the expression has the specified type, `false` if it has a different type, and {} if the type cannot be determined.
      */
@@ -145,14 +143,16 @@ public:
      *
      * @return The value of the expression if it is known, {} otherwise.
      */
-    [[nodiscard]] std::optional<Value> value() const {return expression->value();}
-    
+    [[nodiscard]] std::optional<Value> value() const { return expression->value(); }
+
     /**
      * @brief If it is a variable expression, return the variable name.
      *
      * @return The variable name, or the empty Symbol if it isn't a variable expression.
      */
     [[nodiscard]] Symbol variable_name() const;
+
+    [[nodiscard]] Expression clone() const { return Expression{expression->clone()}; }
 
     /**
      * @brief Resolve all names in the expression.
@@ -176,7 +176,7 @@ public:
      *
      * @return True if the expression is valid, false otherwise.
      */
-    [[nodiscard]] bool valid() const {return expression->valid;}
+    [[nodiscard]] bool valid() const { return expression->valid; }
 
   private:
     /// @brief A shared pointer to the BaseExpression that this Expression wraps.

@@ -35,6 +35,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include <tpau-cpp-kernal/Location.h>
+#include <tpau-cpp-kernal/LocationException.h>
 #include <tpau-cpp-kernal/Value.h>
 
 using namespace tpau::cpp_kernal;
@@ -49,16 +50,16 @@ class Scope;
  * Abstract base class for all expressions.
  */
 class BaseExpression {
-public:
+  public:
     /// @brief Initialize a BaseExpression with default values.
     BaseExpression() = default;
 
     /**
      * @brief Initialize a BaseExpression with a specific location.
-     * 
+     *
      * @param location The location of the expression.
      */
-    explicit BaseExpression(const Location& location): location(location) {}
+    explicit BaseExpression(const Location& location) : location(location) {}
 
     /**
      * @brief Destroy the BaseExpression object.
@@ -72,16 +73,16 @@ public:
      *
      * @return `true` if the value is known, `false` otherwise.
      */
-    [[nodiscard]] virtual bool has_value() const {return value().has_value();}
+    [[nodiscard]] virtual bool has_value() const { return value().has_value(); }
 
     /**
      * Get the value of the expression if it is known.
      *
      * Subclasses should override this method. The default implementation returns {}.
-     * 
+     *
      * @return The value of the expression, if it is known.
      */
-    [[nodiscard]] virtual std::optional<Value> value() const {return {};}
+    [[nodiscard]] virtual std::optional<Value> value() const { return {}; }
 
     /**
      * @brief Get the maximum possible value of the expression.
@@ -90,7 +91,7 @@ public:
      *
      * @return The maximum possible value of the expression if it can be determined, {} otherwise.
      */
-    [[nodiscard]] virtual std::optional<Value> minimum_value() const {return value();}
+    [[nodiscard]] virtual std::optional<Value> minimum_value() const { return value(); }
 
     /**
      * @brief Get the minimum possible value of the expression.
@@ -99,7 +100,7 @@ public:
      *
      * @return The minimum possible value of the expression. if it can be determined, {} otherwise.
      */
-    [[nodiscard]] virtual std::optional<Value> maximum_value() const {return value();}
+    [[nodiscard]] virtual std::optional<Value> maximum_value() const { return value(); }
 
     /**
      * @brief Get the type of the expression's value.
@@ -108,11 +109,11 @@ public:
      *
      * @return The type of the expression's value if it can be determined, {} otherwise.
      */
-    [[nodiscard]] virtual std::optional<Value::Type> type() const {return value() ? value()->type() : std::optional<Value::Type>{};}
+    [[nodiscard]] virtual std::optional<Value::Type> type() const { return value() ? value()->type() : std::optional<Value::Type>{}; }
 
     /**
      * Serialize the expression to a stream.
-     * 
+     *
      * @param stream The stream to serialize to.
      */
     void serialize(std::ostream& stream) const;
@@ -151,18 +152,27 @@ public:
     virtual void expand_calls();
 
     /**
+     * Create a deep copy of the expression.
+     *
+     * Subclasses should override this method to return a copy of the expression.
+     *
+     * @return A shared pointer to a new expression.
+     */
+    [[nodiscard]] virtual std::shared_ptr<BaseExpression> clone() const { throw LocationException(location, "clone() not implemented for this expression type"); }
+
+    /**
      * The location of the expression in the source code.
      */
     Location location;
 
     /**
      * Indicates whether the expression is valid.
-     * 
+     *
      * If an error occurs during evaluation, this flag should be set to `false`. This allows the expression to be used in further evaluations without causing additional errors.
      */
     bool valid{true};
 
-protected:
+  protected:
     /**
      * Call a method on all sub-expressions of this expression.
      *
@@ -184,9 +194,9 @@ protected:
 
     /**
      * Serialize the expression to a stream.
-     * 
+     *
      * This method must be implemented by derived classes.
-     * 
+     *
      * @param stream The stream to serialize to.
      */
     virtual void serialize_sub(std::ostream& stream) const = 0;
@@ -194,7 +204,7 @@ protected:
 
 /**
  * Output expression to a stream.
- * 
+ *
  * @param stream The stream to output to.
  * @param node Pointer to the expression to output.
  * @return The stream after outputting the expression.
@@ -203,7 +213,7 @@ std::ostream& operator<<(std::ostream& stream, const std::shared_ptr<BaseExpress
 
 /**
  * Output expression to a stream.
- * 
+ *
  * @param stream The stream to output to.
  * @param node Expression to output.
  * @return The stream after outputting the expression.

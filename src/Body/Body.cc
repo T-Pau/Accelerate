@@ -33,6 +33,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "BlockBody.h"
 #include "EmptyBody.h"
+#include "Entity/Entity.h"
 #include "ScopeBody.h"
 
 #include <type_traits>
@@ -41,7 +42,7 @@ using namespace tpau::cpp_kernal;
 
 namespace {
 
-template <typename Callable> auto handle_translation_errors(BodyElement& element, Callable&& callable) -> std::conditional_t<std::is_void_v<std::invoke_result_t<Callable>>, void, std::invoke_result_t<Callable>> {
+template <typename Callable> auto handle_translation_errors(BodyElement& element, Callable&& callable, Entity* containing_entity = nullptr) -> std::conditional_t<std::is_void_v<std::invoke_result_t<Callable>>, void, std::invoke_result_t<Callable>> {
     using Result = std::invoke_result_t<Callable>;
 
     if constexpr (std::is_void_v<Result>) {
@@ -50,11 +51,17 @@ template <typename Callable> auto handle_translation_errors(BodyElement& element
         }
         auto result = DiagnosticOutput::global.log_exceptions(callable);
         if (!result) {
+            if (containing_entity && DiagnosticOutput::global.verbose_error_messages) {
+                std::cerr << *containing_entity << std::endl;
+            }
             element.valid = false;
         }
     }
     else {
         if (!element.valid) {
+            if (DiagnosticOutput::global.verbose_error_messages) {
+                std::cerr << element << std::endl;
+            }
             return Result{};
         }
         auto result = DiagnosticOutput::global.log_exceptions(callable);
@@ -97,11 +104,14 @@ void Body::append(const Body& new_element) {
 }
 
 void Body::evaluate(const EvaluationContext& context) {
-    handle_translation_errors(*element, [&] {
-        if (const auto new_body = element->evaluate(context)) {
-            *this = *new_body;
-        }
-    });
+    handle_translation_errors(
+        *element,
+        [&] {
+            if (const auto new_body = element->evaluate(context)) {
+                *this = *new_body;
+            }
+        },
+        context.entity);
 }
 
 std::optional<Body> Body::back() const {
@@ -124,14 +134,16 @@ std::ostream& operator<<(std::ostream& stream, const Body& body) {
 }
 
 void Body::resolve(Scope* scope, Entity* containing_entity) {
-    handle_translation_errors(*element, [&] { element->resolve(scope, containing_entity); });
+    handle_translation_errors(*element, [&] { element->resolve(scope, containing_entity); }, containing_entity);
 }
 
 void Body::expand_calls() {
+    // TODO: pass containing_entity to handle_translation_errors
     handle_translation_errors(*element, [&] { element->expand_calls(); });
 }
 
 void Body::enter_names(Scope* scope, Entity* containing_entity) {
+    // TODO: pass containing_entity to handle_translation_errors
     handle_translation_errors(*element, [&] { element->enter_names(scope, containing_entity); });
 }
 

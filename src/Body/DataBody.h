@@ -41,10 +41,11 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Expression/Expression.h"
 
 class DataBodyElement {
-public:
-    DataBodyElement(Expression expression, std::optional<Encoder> encoding): expression(std::move(expression)), encoding(std::move(encoding)) {}
+  public:
+    DataBodyElement(Expression expression, std::optional<Encoder> encoding) : expression(std::move(expression)), encoding(std::move(encoding)) {}
 
-    [[nodiscard]] std::optional<uint64_t> size() const {return size_range().size();}
+    [[nodiscard]] std::optional<uint64_t> size() const { return size_range().size(); }
+
     [[nodiscard]] SizeRange size_range() const;
 
     Expression expression;
@@ -54,25 +55,28 @@ public:
 /**
  * @brief Represents a body containing data. This is used for `.data` statements and encoded instructions.
  */
-class DataBody: public BodyElement {
-public:
-    static Body create(std::vector<DataBodyElement> data) {return Body(std::make_shared<DataBody>(std::move(data)));}
+class DataBody : public BodyElement {
+  public:
+    static Body create(std::vector<DataBodyElement> data) { return Body(std::make_shared<DataBody>(std::move(data))); }
 
     DataBody() = default;
     explicit DataBody(std::vector<DataBodyElement> data);
 
-    Body appending(const DataBody* body) {return appending(body->data);}
+    Body appending(const DataBody* body) { return appending(body->data); }
+
     Body appending(const std::vector<DataBodyElement>& elements) const;
-//    void append(Expression expression, std::optional<IntegerEncoder> encoding = {}) {data.emplace_back(std::move(expression), encoding);}
-    [[nodiscard]] std::shared_ptr<BodyElement> clone() const override {return std::make_shared<DataBody>(data);}
-    [[nodiscard]] bool empty() const override {return data.empty();}
-    void encode(std::string &bytes, const Memory* memory) const override;
-    void serialize(std::ostream &stream, const std::string& prefix) const override;
+    //    void append(Expression expression, std::optional<IntegerEncoder> encoding = {}) {data.emplace_back(std::move(expression), encoding);}
+    [[nodiscard]] std::shared_ptr<BodyElement> clone() const override;
+
+    [[nodiscard]] bool empty() const override { return data.empty(); }
+
+    void encode(std::string& bytes, const Memory* memory) const override;
+    void serialize(std::ostream& stream, const std::string& prefix) const override;
     void traverse(std::function<void(Body&)> body_callable, std::function<void(Expression&)> expression_callable) override;
 
     std::vector<DataBodyElement> data;
 
-protected:
+  protected:
     [[nodiscard]] std::optional<Body> append_sub(const Body& body, const Body& element) override;
 };
 

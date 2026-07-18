@@ -83,6 +83,8 @@ class Entity {
 
     [[nodiscard]] std::shared_ptr<Scope> get_scope() const { return scope; }
 
+    void virtual serialize(std::ostream& stream) const { serialize_entity(stream); }
+
     // TODO: make protected once BodyParser doesn't evaluate body directly.
     void process_result(EvaluationResult& result);
 
@@ -109,6 +111,7 @@ class Entity {
      */
     virtual void resolve_implementation() = 0;
 
+
     void serialize_entity(std::ostream& stream) const;
 
     [[nodiscard]] virtual EvaluationContext evaluation_context(EvaluationResult& result) { return EvaluationContext(result, this); }
@@ -129,6 +132,7 @@ class Entity {
     bool resolved{false};
 };
 
+std::ostream& operator<<(std::ostream& stream, const Entity& entity);
 
 #endif // HAD_XLR8_ENTITY_H
 #undef IN_XLR8_ENTITY_H

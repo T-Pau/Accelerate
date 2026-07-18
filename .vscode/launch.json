@@ -53,7 +53,48 @@
 				"/Users/dillo/Projects/T-Pau/Development/Accelerate/share/lib/c64.s"
 			],
 			"cwd": "${workspaceFolder}",
+			"stopAtEntry": true,
+			"externalConsole": false,
+			"MIMode": "lldb"
+		},
+		{
+			"name": "xlr8: no stop",
+			"type": "cppdbg",
+			"request": "launch",
+			"program": "${workspaceFolder}/build/src/xlr8",
+			"args": [
+				"--system-directory",
+				"/Users/dillo/Projects/T-Pau/Development/Accelerate/share",
+				"--depfile",
+				"/Users/dillo/Projects/T-Pau/Development/Accelerate/build/share/lib/c64.d",
+				"--create-library",
+				"-o",
+				"/Users/dillo/Projects/T-Pau/Development/Accelerate/build/share/lib/c64.lib",
+				"/Users/dillo/Projects/T-Pau/Development/Accelerate/share/lib/c64.s"
+			],
+			"cwd": "${workspaceFolder}",
 			"stopAtEntry": false,
+			"externalConsole": false,
+			"MIMode": "lldb"
+		},
+		{
+			"name": "xlr8: a.s",
+			"type": "cppdbg",
+			"request": "launch",
+			"program": "${workspaceFolder}/build/src/xlr8",
+			"args": [
+				"--system-directory",
+				"/Users/dillo/Projects/T-Pau/Development/Accelerate/share",
+				"--create-library",
+				"--verbose-errors",
+				"--target",
+				"6502",
+				"-o",
+				"a.lib",
+				"a.s"
+			],
+			"cwd": "${workspaceFolder}",
+			"stopAtEntry": true,
 			"externalConsole": false,
 			"MIMode": "lldb"
 		}

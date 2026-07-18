@@ -1,14 +1,14 @@
-#ifdef IN_XLR8_CONSTANT_H
+#ifdef IN_XLR8_ARGUMENT_EXPRESSION_H
 #error "circular include file dependency detected"
 #endif
-#define IN_XLR8_CONSTANT_H
-#ifndef HAD_XLR8_CONSTANT_H
-#define HAD_XLR8_CONSTANT_H
+#define IN_XLR8_ARGUMENT_EXPRESSION_H
+#ifndef HAD_XLR8_ARGUMENT_EXPRESSION_H
+#define HAD_XLR8_ARGUMENT_EXPRESSION_H
 
 /*
 Copyright (C) Dieter Baron
 
-The authors can be contacted at <assembler@tpau.group>
+The authors can be contacted at <accelerate@tpau.group>
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions
@@ -34,28 +34,28 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "Entity/Entity.h"
+#include "BaseExpression.h"
+#include "Expression.h"
 
-class Constant : public Entity {
+/**
+ * @brief This is a placeholder for arguments, so they can be resolved in macro and function bodies.
+ *
+ * It is replaced with the actual argument expression during call expansion.
+ */
+class ArgumentExpression : public BaseExpression {
   public:
-    Constant(const Location& location, Symbol name, Visibility visibility, std::shared_ptr<Scope> parent_scope, bool default_only, Expression value) : Entity(location, name, visibility, parent_scope, default_only), value(std::move(value)) {}
+    explicit ArgumentExpression(const Location& location, Symbol symbol) : BaseExpression(location), symbol{symbol} {}
 
-    Constant(const Location& location, Symbol name, std::shared_ptr<Scope> parent_scope, const std::shared_ptr<StructuredValue>& definition);
+    static Expression create(const Location& location, Symbol symbol) { return Expression(std::make_shared<ArgumentExpression>(location, symbol)); }
 
-    [[nodiscard]] bool has_value() const { return value.has_value(); }
-
-    void resolve_implementation() override { value.resolve(scope.get(), this); }
-
-    void serialize(std::ostream& stream) const override;
-
-    Expression value;
 
   protected:
-    void evaluate_inner(EvaluationContext& context) override { value.evaluate(context); }
+    void serialize_sub(std::ostream& stream) const override;
 
   private:
-    static const Token token_value;
+    Symbol symbol;
 };
 
-#endif // HAD_XLR8_CONSTANT_H
-#undef IN_XLR8_CONSTANT_H
+
+#endif // HAD_XLR8_ARGUMENT_EXPRESSION_H
+#undef IN_XLR8_ARGUMENT_EXPRESSION_H

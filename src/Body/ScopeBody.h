@@ -47,7 +47,7 @@ class ScopeBody : public BodyElement {
     /**
      * @brief Create a new ScopeBody.
      *
-     * @param containing_scope The containing scope for the new scope.
+     * @param scope The containing scope for the new scope.
      * @param body The body to wrap.
      * @return The ScopeBody.
      */
@@ -56,7 +56,7 @@ class ScopeBody : public BodyElement {
     /**
      * @brief Construct a new ScopeBody.
      *
-     * @param containing_scope The containing scope for the new scope.
+     * @param scope The containing scope for the new scope.
      * @param body The body to wrap.
      */
     explicit ScopeBody(const std::shared_ptr<Scope>& scope, Body body);
@@ -66,7 +66,7 @@ class ScopeBody : public BodyElement {
      *
      * @return The scope.
      */
-    [[nodiscard]] std::shared_ptr<Scope> scope() const { return scope_; }
+    [[nodiscard]] std::shared_ptr<Scope> inner_scope() const { return inner_scope_; }
 
     [[nodiscard]] SizeRange size_range() const override { return body.size_range(); }
 
@@ -79,6 +79,7 @@ class ScopeBody : public BodyElement {
     void encode(std::string& bytes, const Memory* memory) const override { body.encode(bytes, memory); }
 
     void traverse(std::function<void(Body&)> body_callable, std::function<void(Expression&)> expression_callable) override;
+    void resolve(Scope* scope, Entity* containing_entity) override;
 
     /**
      * @brief Evaluate the body element after all sub-body-elements and sub-expressions have been evaluated.
@@ -92,11 +93,13 @@ class ScopeBody : public BodyElement {
 
     void serialize(std::ostream& stream, const std::string& prefix) const override;
 
+    [[nodiscard]] bool scope_fully_evaluated();
+
     [[nodiscard]] bool fully_evaluated() override { return body.fully_evaluated(); }
 
   protected:
     /// @brief The scope introduced by the ScopeBody.
-    std::shared_ptr<Scope> scope_;
+    std::shared_ptr<Scope> inner_scope_;
 
     /// @brief The body contained within the ScopeBody.
     Body body;

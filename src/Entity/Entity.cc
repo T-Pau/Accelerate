@@ -149,3 +149,8 @@ void Entity::resolve() {
 
     DiagnosticOutput::global.log_exceptions([this]() { resolve_implementation(); });
 }
+
+std::ostream& operator<<(std::ostream& stream, const Entity& entity) {
+    entity.serialize(stream);
+    return stream;
+}

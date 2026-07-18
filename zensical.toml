@@ -46,6 +46,7 @@ nav = [
             { "Address" = "Internal/Reference/Address.md" },
             { "AddressingMode" = "Internal/Reference/AddressingMode.md" },
             { "AddressingModeMatcher" = "Internal/Reference/AddressingModeMatcher.md" },
+            { "ArgumentExpression" = "Internal/Reference/ArgumentExpression.md" },
             { "ArgumentType" = "Internal/Reference/ArgumentType.md" },
             { "Assembler" = "Internal/Reference/Assembler.md" },
             { "AssignmentBody" = "Internal/Reference/AssignmentBody.md" },

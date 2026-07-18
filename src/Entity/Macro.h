@@ -47,9 +47,9 @@ class Macro : public Callable {
     Macro(const Location& location, Symbol name, Visibility visibility, std::shared_ptr<Scope> parent_scope, bool default_only, Callable::Arguments arguments) : Callable(location, name, visibility, parent_scope, default_only, std::move(arguments)) {}
 
     [[nodiscard]] Body expand(const std::vector<Expression>& arguments, std::shared_ptr<Scope> outer_environment) const;
-    void serialize(std::ostream& stream) const;
+    void serialize(std::ostream& stream) const override;
 
-    void resolve_implementation() override {} // TODO: implement
+    void resolve_implementation() override {}
 
     void enter_names() { body.enter_names(scope.get(), this); }
 

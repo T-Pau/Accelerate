@@ -136,7 +136,9 @@ int xlr8::process() {
     const auto system_directory = SystemEnvironment::get("XLR8_SYSTEM_DIRECTORY");
     system_path.append_directory(system_directory ? *system_directory : SYSTEM_DIRECTORY);
 
-    DiagnosticOutput::global.verbose_error_messages = SystemEnvironment::is_set("XLR8_VERBOSE_ERRORS");
+    if (SystemEnvironment::is_set("XLR8_VERBOSE_ERRORS")) {
+        DiagnosticOutput::global.verbose_error_messages = true;
+    }
 
     LibraryGetter::global.search_path->append_path(library_path);
     LibraryGetter::global.search_path->append_path(system_path, "lib");

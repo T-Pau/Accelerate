@@ -43,7 +43,7 @@ std::shared_ptr<BaseExpression> Expression::void_expression = std::make_shared<V
 
 namespace {
 
-template <typename Callable> auto handle_translation_errors(BaseExpression& expression, Callable&& callable) -> std::conditional_t<std::is_void_v<std::invoke_result_t<Callable>>, void, std::invoke_result_t<Callable>> {
+template <typename Callable> auto handle_translation_errors(BaseExpression& expression, Callable&& callable, Entity* containing_entity = nullptr) -> std::conditional_t<std::is_void_v<std::invoke_result_t<Callable>>, void, std::invoke_result_t<Callable>> {
     using Result = std::invoke_result_t<Callable>;
 
     if constexpr (std::is_void_v<Result>) {
@@ -53,6 +53,9 @@ template <typename Callable> auto handle_translation_errors(BaseExpression& expr
         auto result = DiagnosticOutput::global.log_exceptions(callable);
         if (!result) {
             expression.valid = false;
+            if (containing_entity && DiagnosticOutput::global.verbose_error_messages) {
+                std::cerr << *containing_entity << std::endl;
+            }
         }
     }
     else {
@@ -62,6 +65,9 @@ template <typename Callable> auto handle_translation_errors(BaseExpression& expr
         auto result = DiagnosticOutput::global.log_exceptions(callable);
         if (!result) {
             expression.valid = false;
+            if (containing_entity && DiagnosticOutput::global.verbose_error_messages) {
+                std::cerr << *containing_entity << std::endl;
+            }
             return Result{};
         }
         return *result;
@@ -100,10 +106,15 @@ Expression::Expression(const Token& token) {
 #endif
 
 void Expression::evaluate(const EvaluationContext& context) {
-    auto new_expression = handle_translation_errors(*expression, [&]() { return expression->evaluate(context); });
-    if (new_expression) {
-        *this = *new_expression;
-    }
+    handle_translation_errors(
+        *expression,
+        [&]() {
+            auto new_expression = handle_translation_errors(*expression, [&]() { return expression->evaluate(context); });
+            if (new_expression) {
+                *this = *new_expression;
+            }
+        },
+        context.entity);
 }
 
 void Expression::serialize(std::ostream& stream) const {
@@ -128,10 +139,11 @@ std::ostream& operator<<(std::ostream& stream, const Expression& expression) {
 }
 
 void Expression::resolve(Scope* scope, Entity* containing_entity) {
-    handle_translation_errors(*expression, [&]() { expression->resolve(scope, containing_entity); });
+    handle_translation_errors(*expression, [&]() { expression->resolve(scope, containing_entity); }, containing_entity);
 }
 
 void Expression::expand_calls() {
+    // TODO: pass containing_entity to handle_translation_errors
     handle_translation_errors(*expression, [&]() { expression->expand_calls(); });
 }
 

@@ -45,7 +45,7 @@ class Function : public Callable {
 
     Function(const Location& location, Symbol name, Visibility visibility, std::shared_ptr<Scope> parent_scope, bool default_only, Arguments arguments, const Expression& definition) : Callable(location, name, visibility, parent_scope, default_only, std::move(arguments)), definition(definition) {}
 
-    void serialize(std::ostream& stream) const;
+    void serialize(std::ostream& stream) const override;
 
     void resolve_implementation() override {} // TODO: implement
 

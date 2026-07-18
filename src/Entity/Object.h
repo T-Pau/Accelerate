@@ -73,7 +73,7 @@ class Object : public Entity {
 
     void uses(Symbol name) { explicitly_used_objects.insert(name); }
 
-    void serialize(std::ostream& stream) const;
+    void serialize(std::ostream& stream) const override;
 
     bool operator<(const Object& other) const;
 

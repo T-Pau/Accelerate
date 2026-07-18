@@ -42,19 +42,19 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 using namespace tpau::cpp_kernal;
 
 /**
-  * @brief Represents a macro call: `macro_name(arg1, arg2, ...)`.
-  */
-class MacroBody: public BodyElement {
+ * @brief Represents a macro call: `macro_name(arg1, arg2, ...)`.
+ */
+class MacroBody : public BodyElement {
   public:
-    static Body create(const Location& location, Symbol name, std::vector<Expression> arguments, const Macro* macro = {}) {
-        return Body(std::make_shared<MacroBody>(location, name, std::move(arguments), macro));
-    }
+    static Body create(const Location& location, Symbol name, std::vector<Expression> arguments, const Macro* macro = {}) { return Body(std::make_shared<MacroBody>(location, name, std::move(arguments), macro)); }
 
-    MacroBody(Location location, Symbol name, std::vector<Expression> arguments, const Macro* macro = {}): BodyElement(location, SizeRange(0,{})), name(name), macro(macro), arguments(std::move(arguments)) {}
+    MacroBody(Location location, Symbol name, std::vector<Expression> arguments, const Macro* macro = {}) : BodyElement(location, SizeRange(0, {})), name(name), macro(macro), arguments(std::move(arguments)) {}
 
-    [[nodiscard]] std::shared_ptr<BodyElement> clone() const override {throw LocationException(location, "can't clone MacroBody");}
-    void encode(std::string &bytes, const Memory *memory) const override {throw LocationException(location, "can't encode unexpanded macro call");}
-    void serialize(std::ostream &stream, const std::string &prefix) const override;
+    [[nodiscard]] std::shared_ptr<BodyElement> clone() const override { throw LocationException(location, "can't clone MacroBody"); }
+
+    void encode(std::string& bytes, const Memory* memory) const override { throw LocationException(location, "can't encode unexpanded macro call"); }
+
+    void serialize(std::ostream& stream, const std::string& prefix) const override;
     void resolve(Scope* scope, Entity* containing_entity) override;
     void expand_calls() override;
     void traverse(std::function<void(Body&)> body_callback, std::function<void(Expression&)> expression_callback) override;

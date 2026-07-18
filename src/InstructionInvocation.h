@@ -101,7 +101,7 @@ class InstructionInvocation {
 
     class Variant {
       public:
-        Variant(const AddressingMode& addressing_mode, const AddressingMode::Notation& notation, const std::vector<std::shared_ptr<Node>>& nodes);
+        Variant(uint64_t opcode, const AddressingMode& addressing_mode, const AddressingMode::Notation& notation, const std::vector<std::shared_ptr<Node>>& nodes);
 
         /**
          * @brief Check if the instruction variant is valid.
@@ -119,6 +119,9 @@ class InstructionInvocation {
          * @return A pair containing an optional constraint expression and the encoded body.
          */
         [[nodiscard]] std::pair<std::optional<Expression>, Body> encode(const std::shared_ptr<Scope>& containing_scope) const;
+
+        /// @brief The opcode of the instruction variant.
+        uint64_t opcode;
 
         /// @brief The addressing mode of the instruction variant.
         std::reference_wrapper<const AddressingMode> addressing_mode;

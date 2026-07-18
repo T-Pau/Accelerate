@@ -47,6 +47,9 @@ class Output : public Entity {
 
     void resolve_implementation() override { body.resolve(scope.get(), this); }
 
+    // TODO: implement
+    // void serialize(std::ostream& stream) const override;
+
     Body body;
 
   protected:
