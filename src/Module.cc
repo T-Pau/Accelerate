@@ -44,9 +44,15 @@ std::shared_ptr<Scope> Module::add_file(Symbol file_name) {
 }
 
 void Module::rename(Symbol new_name) {
+    if (name_ == new_name) {
+        return;
+    }
+    if (!public_scope_->can_rename(new_name) || !private_scope_->can_rename(new_name)) {
+        throw Exception("can't rename module {} to {}: one of its scopes already contains a module with the new name", name(), new_name);
+    }
+    public_scope_->rename(new_name);
+    private_scope_->rename(new_name);
     name_ = new_name;
-    public_scope_->name = new_name;
-    private_scope_->name = new_name;
 }
 
 void Module::import(Visibility visibility, const Module& module) {

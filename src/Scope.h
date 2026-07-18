@@ -271,6 +271,8 @@ class Scope {
      */
     explicit Scope(Visibility type, Symbol name, std::shared_ptr<Scope> next);
 
+    ~Scope();
+
     /**
      * Add a constant to the scope.
      *
@@ -493,7 +495,22 @@ class Scope {
      */
     [[nodiscard]] Visibility type() const { return type_; }
 
-    Symbol name; ///< The name of the scope.
+    /**
+     * Get the name of the scope.
+     *
+     * @return The name of the scope.
+     */
+    [[nodiscard]] Symbol name() const { return name_; }
+
+    [[nodiscard]] bool can_rename(Symbol new_name) const;
+
+    /**
+     * Rename the scope.
+     *
+     * @param new_name The new name of the scope.
+     */
+    void rename(Symbol new_name);
+
 
   private:
     /**
@@ -648,6 +665,9 @@ class Scope {
      */
     [[nodiscard]] Scope* find_containing_scope(Visibility visibility);
 
+    /// @brief The name of the scope.
+    Symbol name_;
+
     /// @brief The type of the scope.
     Visibility type_{Visibility::ENTITY};
 
@@ -665,6 +685,9 @@ class Scope {
 
     /// @brief The scopes to search for symbols not found in this scope.
     std::vector<std::shared_ptr<Scope>> next;
+
+    /// @brief The named scopes contained in this scope.
+    std::unordered_map<Symbol, Scope*> contained;
 
     /// @brief The preprocessor defines in the scope.
     std::unordered_set<Symbol> defines;

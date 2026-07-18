@@ -40,13 +40,16 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using namespace tpau::cpp_kernal;
 
-Scope::Scope(Visibility type, Symbol name) : type_(type), name(name) {}
+Scope::Scope(Visibility type, Symbol name) : type_(type), name_(name) {}
 
-Scope::Scope(Visibility type, Symbol name, std::shared_ptr<Scope> next) : type_(type), name(name) {
-    if (!can_contain(next->type(), type_)) {
-        throw Exception("cannot add {} scope to {} scope", type_, next->type());
+Scope::Scope(Visibility type, Symbol name, std::shared_ptr<Scope> next) : type_(type), name_(name) { add_next(std::move(next)); }
+
+Scope::~Scope() {
+    if (name()) {
+        for (auto& scope : next) {
+            scope->contained.erase(name());
+        }
     }
-    this->next.push_back(std::move(next));
 }
 
 bool Scope::is_defined(Symbol name) const { // NOLINT(misc-no-recursion)
@@ -121,6 +124,12 @@ void Scope::add_next(std::shared_ptr<Scope> scope) {
     if (!can_contain(scope->type(), type())) {
         throw Exception("cannot add {} scope to {} scope", scope->type(), type());
     }
+    if (name()) {
+        if (scope->contained.contains(name())) {
+            throw Exception("scope {} already contains a scope named {}", scope->name(), name());
+        }
+        scope->contained[name()] = this;
+    }
     next.push_back(std::move(scope));
 }
 
@@ -157,4 +166,31 @@ void Scope::pin(Symbol object_name, Expression address) {
         throw Exception("object {} already has an address", object_name);
     }
     pinned_object_names[object_name] = std::move(address);
+}
+
+void Scope::rename(Symbol new_name) {
+    if (name_ == new_name) {
+        return;
+    }
+
+    if (!can_rename(new_name)) {
+        // TODO: better error message for unnamed scopes
+        throw Exception("can't rename scope {} to {}: one of its parents already contains a scope with the new name", name(), new_name);
+    }
+    for (auto& scope : next) {
+        if (name()) {
+            scope->contained.erase(name_);
+        }
+        if (new_name) {
+            scope->contained[new_name] = this;
+        }
+    }
+    name_ = new_name;
+}
+
+bool Scope::can_rename(Symbol new_name) const {
+    if (name_ == new_name || !new_name) {
+        return true;
+    }
+    return !std::any_of(next.begin(), next.end(), [&](auto parent) { return parent->contained.contains(new_name); });
 }
