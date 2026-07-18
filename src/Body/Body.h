@@ -42,13 +42,11 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using namespace tpau::cpp_kernal;
 
-
 /**
  * @brief Represents a body of an object or macro. This is the class other parts of the program interact with. It is a wrapper around the BodyElement hierarchy.
  */
 class Body {
-public:
-
+  public:
     /**
      * @brief Constructs an empty body.
      */
@@ -63,14 +61,11 @@ public:
 
     /**
      * Get the body element as a specific type.
-     * 
+     *
      * @tparam T The type to cast to.
      * @return The body element as type T, or nullptr if it is not of that type.
      */
-    template <typename T>
-    [[nodiscard]] T* as() const {
-        return dynamic_cast<T*>(element.get());
-    }
+    template <typename T> [[nodiscard]] T* as() const { return dynamic_cast<T*>(element.get()); }
 
     /**
      * @brief Check if the body element is of a specific type.
@@ -78,17 +73,14 @@ public:
      * @tparam T The type to check against.
      * @return `true` if the body element is of type T, `false` otherwise.
      */
-    template<typename T>
-    [[nodiscard]] bool is() const {
-        return as<T>() != nullptr;
-    }
+    template <typename T> [[nodiscard]] bool is() const { return as<T>() != nullptr; }
 
     /**
      * @brief Get the body element.
      *
      * @return The body element as a shared pointer.
      */
-    [[nodiscard]] std::shared_ptr<BodyElement> get_element() const {return element;}
+    [[nodiscard]] std::shared_ptr<BodyElement> get_element() const { return element; }
 
     /**
      * @brief Appends a new element to the body.
@@ -116,7 +108,7 @@ public:
      */
     void expand_calls();
 
-    [[nodiscard]] std::optional<Body> append_sub(const Body& element);
+    [[nodiscard]] std::pair<bool, std::optional<Body>> append_sub(const Body& element);
     [[nodiscard]] std::optional<Body> back() const;
 
     /**
@@ -126,32 +118,38 @@ public:
      *
      * @return `true` if the BodyElement is empty, `false` otherwise.
      */
-    [[nodiscard]] bool empty() const {return element->empty();}
+    [[nodiscard]] bool empty() const { return element->empty(); }
 
     /**
      * @brief Create a deep copy of the body.
      *
      * @return A new Body that is a deep copy of this body.
      */
-    [[nodiscard]] Body clone() const {return Body(element->clone());}
+    [[nodiscard]] Body clone() const { return Body(element->clone()); }
+
     /**
      * @brief Check if all contained body elements and expressions have been fully evaluated.
      *
      * @return `true` if the body is fully evaluated, `false` otherwise.
      */
     [[nodiscard]] bool fully_evaluated();
-    
-    void encode(std::string& bytes, const Memory* memory = nullptr) const {element->encode(bytes, memory);}
+
+    void encode(std::string& bytes, const Memory* memory = nullptr) const { element->encode(bytes, memory); }
+
     void evaluate(const EvaluationContext& context);
-    [[nodiscard]] std::optional<Body> evaluated (const EvaluationContext& context) const;
-    void serialize(std::ostream& stream, const std::string& prefix = "") const {element->serialize(stream, prefix);}
-    [[nodiscard]] SizeRange offset() const {return element->offset();}
-    [[nodiscard]] std::optional<uint64_t> size() const {return element->size();}
-    [[nodiscard]] SizeRange size_range() const {return element->size_range();}
+    [[nodiscard]] std::optional<Body> evaluated(const EvaluationContext& context) const;
 
-    [[nodiscard]] bool valid() const {return element->valid;}
+    void serialize(std::ostream& stream, const std::string& prefix = "") const { element->serialize(stream, prefix); }
 
-private:
+    [[nodiscard]] SizeRange offset() const { return element->offset(); }
+
+    [[nodiscard]] std::optional<uint64_t> size() const { return element->size(); }
+
+    [[nodiscard]] SizeRange size_range() const { return element->size_range(); }
+
+    [[nodiscard]] bool valid() const { return element->valid; }
+
+  private:
     std::shared_ptr<BodyElement> element;
 };
 

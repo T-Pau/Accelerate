@@ -71,7 +71,7 @@ std::optional<Body> BlockBody::evaluate(const EvaluationContext& context) {
         new_size_range += element.size_range();
     }
 
-    block.erase(std::remove_if(block.begin(), block.end(), [](const Body& element) {return element.empty();}), block.end());
+    block.erase(std::remove_if(block.begin(), block.end(), [](const Body& element) { return element.empty(); }), block.end());
 
     if (block.empty()) {
         return Body();
@@ -85,16 +85,15 @@ std::optional<Body> BlockBody::evaluate(const EvaluationContext& context) {
     }
 }
 
-
 void BlockBody::serialize(std::ostream& stream, const std::string& prefix) const {
     for (auto& element : block) {
         element.serialize(stream, prefix);
     }
 }
 
-std::optional<Body> BlockBody::append_sub(const Body& body, const Body& element) {
+std::pair<bool, std::optional<Body>> BlockBody::append_sub(const Body& body, const Body& element) {
     append_element(element);
-    return {};
+    return {true, {}};
 }
 
 void BlockBody::encode(std::string& bytes, const Memory* memory) const {

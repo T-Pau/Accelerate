@@ -36,9 +36,9 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <optional>
 
+#include "EvaluationContext.h"
 #include "Memory.h"
 #include "SizeRange.h"
-#include "EvaluationContext.h"
 
 class Body;
 class CPU;
@@ -47,8 +47,8 @@ class CPU;
  * Abstract base class for all Body types.
  */
 class BodyElement {
-public:
-    /** 
+  public:
+    /**
      * @brief Construct a BodyElement with unknown location and size.
      */
     BodyElement() = default;
@@ -58,7 +58,7 @@ public:
      *
      * @param size_range The size range of the BodyElement.
      */
-    explicit BodyElement(const Location& location, const SizeRange& size_range = {}): location(location), size_range_(size_range) {}
+    explicit BodyElement(const Location& location, const SizeRange& size_range = {}) : location(location), size_range_(size_range) {}
 
     /**
      * @brief Destroy the BodyElement.
@@ -70,23 +70,24 @@ public:
      *
      * @return The size range of the BodyElement.
      */
-    [[nodiscard]] virtual SizeRange size_range() const {return size_range_;}
+    [[nodiscard]] virtual SizeRange size_range() const { return size_range_; }
 
     /**
      * @brief Get the offset of the BodyElement within its entity.
      *
      * @return The offset of the BodyElement.
      */
-    [[nodiscard]] virtual SizeRange offset() const {return offset_;}
+    [[nodiscard]] virtual SizeRange offset() const { return offset_; }
 
     /**
      * @brief Get the size of the BodyElement, if it is known.
      *
      * @return The size of the BodyElement, {} if it is unknown.
      */
-    [[nodiscard]] std::optional<uint64_t> size() const {return size_range().size();}
+    [[nodiscard]] std::optional<uint64_t> size() const { return size_range().size(); }
 
     virtual void collect_objects(std::unordered_set<Object*>& objects) const {}
+
     [[nodiscard]] virtual std::shared_ptr<BodyElement> clone() const = 0;
 
     /**
@@ -96,7 +97,7 @@ public:
      *
      * @return `true` if the BodyElement is empty, `false` otherwise.
      */
-    [[nodiscard]] virtual bool empty() const {return false;}
+    [[nodiscard]] virtual bool empty() const { return false; }
 
     /**
      * @brief Encode the BodyElement into a byte string.
@@ -203,7 +204,7 @@ public:
      * @param element The element to append.
      * @return The resulting body, or {} if not supported.
      */
-    [[nodiscard]] virtual std::optional<Body> append_sub(const Body& body, const Body& element);
+    [[nodiscard]] virtual std::pair<bool, std::optional<Body>> append_sub(const Body& body, const Body& element);
 
     friend class Body;
 
@@ -217,7 +218,7 @@ public:
      */
     bool valid{true};
 
-protected:
+  protected:
     /// The size range of the BodyElement.
     SizeRange size_range_ = SizeRange(0);
 
@@ -225,14 +226,11 @@ protected:
     SizeRange offset_ = SizeRange(0, {});
 
   private:
-    class NotFullyEvaluatedException: public std::exception {
-    public:
-        const char* what() const noexcept override {
-            return "BodyElement is not fully evaluated";
-        }
+    class NotFullyEvaluatedException : public std::exception {
+      public:
+        const char* what() const noexcept override { return "BodyElement is not fully evaluated"; }
     };
 };
-
 
 /**
  * @brief Print BodyElement to an output stream.

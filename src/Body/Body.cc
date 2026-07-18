@@ -94,8 +94,11 @@ void Body::append(const Body& new_element) {
         element = new_element.element;
     }
     else {
-        if (const auto new_body = append_sub(new_element)) {
-            element = new_body->element;
+        const auto [success, new_body] = append_sub(new_element);
+        if (success) {
+            if (new_body) {
+                element = new_body->element;
+            }
         }
         else {
             element = std::make_shared<BlockBody>(std::vector<Body>({*this, new_element}));
@@ -126,7 +129,7 @@ std::optional<Body> Body::back() const {
     }
 }
 
-std::optional<Body> Body::append_sub(const Body& new_element) { return element->append_sub(*this, new_element); }
+std::pair<bool, std::optional<Body>> Body::append_sub(const Body& new_element) { return element->append_sub(*this, new_element); }
 
 std::ostream& operator<<(std::ostream& stream, const Body& body) {
     body.serialize(stream, "    ");

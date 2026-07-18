@@ -61,17 +61,15 @@ void DataBody::serialize(std::ostream& stream, const std::string& prefix) const 
     stream << std::endl;
 }
 
-std::optional<Body> DataBody::append_sub(const Body& body, const Body& element) {
-    const auto data_element = element.as<DataBody>();
-
-    if (!data_element) {
-        return {};
+std::pair<bool, std::optional<Body>> DataBody::append_sub(const Body& body, const Body& element) {
+    if (const auto data_element = element.as<DataBody>()) {
+        data.insert(data.end(), data_element->data.begin(), data_element->data.end());
+        size_range_ += element.size_range();
+        return {true, {}};
     }
-
-    data.insert(data.end(), data_element->data.begin(), data_element->data.end());
-    size_range_ += element.size_range();
-    // TODO: Is this really how we say we succeeded but didn't change the body?
-    return body;
+    else {
+        return {false, {}};
+    }
 }
 
 void DataBody::encode(std::string& bytes, const Memory* memory) const {

@@ -77,7 +77,7 @@ class DataBody : public BodyElement {
     std::vector<DataBodyElement> data;
 
   protected:
-    [[nodiscard]] std::optional<Body> append_sub(const Body& body, const Body& element) override;
+    [[nodiscard]] std::pair<bool, std::optional<Body>> append_sub(const Body& body, const Body& element) override;
 };
 
 

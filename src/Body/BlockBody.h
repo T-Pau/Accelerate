@@ -41,24 +41,34 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /**
  * @brief Represents a sequence of body elements.
  */
-class BlockBody: public BodyElement {
-public:
+class BlockBody : public BodyElement {
+  public:
     BlockBody() = default;
     explicit BlockBody(std::vector<Body> block);
     static Body create(const std::vector<Body>& elements);
 
-    [[nodiscard]] std::optional<Body> append_sub(const Body& body, const Body& element) override;
-    [[nodiscard]] std::shared_ptr<BodyElement> clone() const override {return std::make_shared<BlockBody>(block);}
-    [[nodiscard]] bool empty() const override {return block.empty();}
-    void encode(std::string &bytes, const Memory* memory) const override;
+    [[nodiscard]] std::pair<bool, std::optional<Body>> append_sub(const Body& body, const Body& element) override;
+
+    [[nodiscard]] std::shared_ptr<BodyElement> clone() const override { return std::make_shared<BlockBody>(block); }
+
+    [[nodiscard]] bool empty() const override { return block.empty(); }
+
+    void encode(std::string& bytes, const Memory* memory) const override;
     [[nodiscard]] std::optional<Body> evaluate(const EvaluationContext& context) override;
     void traverse(std::function<void(Body&)> body_callable, std::function<void(Expression&)> expression_callable) override;
 
-    [[nodiscard]] std::optional<Body> back() const {if (block.empty()) {return {};} else {return block.back();}}
+    [[nodiscard]] std::optional<Body> back() const {
+        if (block.empty()) {
+            return {};
+        }
+        else {
+            return block.back();
+        }
+    }
 
     void serialize(std::ostream& stream, const std::string& prefix) const override;
 
-private:
+  private:
     std::vector<Body> block;
 
     void append_element(const Body& element);

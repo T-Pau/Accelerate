@@ -36,70 +36,52 @@ std::ostream& operator<<(std::ostream& stream, const BodyElement& element) {
     return stream;
 }
 
-
 std::ostream& operator<<(std::ostream& stream, const std::shared_ptr<BodyElement>& element) {
     stream << *element;
     return stream;
 }
 
-std::optional<Body> BodyElement::append_sub(const Body& body, const Body& element) {
-    return {};
-}
+std::pair<bool, std::optional<Body>> BodyElement::append_sub(const Body& body, const Body& element) { return {false, {}}; }
 
 void BodyElement::resolve(Scope* scope, Entity* containing_entity) {
-    traverse([&](Body& sub_body) {
-        sub_body.resolve(scope, containing_entity);
-    }, [&](Expression& sub_expression) {
-        sub_expression.resolve(scope, containing_entity);
-    });
+    traverse([&](Body& sub_body) { sub_body.resolve(scope, containing_entity); }, [&](Expression& sub_expression) { sub_expression.resolve(scope, containing_entity); });
 }
 
 void BodyElement::expand_calls() {
-    traverse([&](Body& sub_body) {
-        sub_body.expand_calls();
-    }, [&](Expression& sub_expression) {
-        sub_expression.expand_calls();
-    });
+    traverse([&](Body& sub_body) { sub_body.expand_calls(); }, [&](Expression& sub_expression) { sub_expression.expand_calls(); });
 }
 
 std::optional<Body> BodyElement::evaluate(const EvaluationContext& context) {
-    traverse([&](Body& sub_body) {
-        sub_body.evaluate(context);
-    }, [&](Expression& sub_expression) {
-        sub_expression.evaluate(context);
-    });
+    traverse([&](Body& sub_body) { sub_body.evaluate(context); }, [&](Expression& sub_expression) { sub_expression.evaluate(context); });
 
     return evaluate_process(context);
 }
 
 // This can't be in the header file because it needs the full definition of Body.
-std::optional<Body> BodyElement::evaluate_process(const EvaluationContext& context) {
-    return {};
-}
+std::optional<Body> BodyElement::evaluate_process(const EvaluationContext& context) { return {}; }
 
 void BodyElement::enter_names(Scope* scope, Entity* containing_entity) {
-    traverse([&](Body& sub_body) {
-        sub_body.enter_names(scope, containing_entity);
-    }, [&](Expression& sub_expression) {
-        // Expressions can't define names.
-    });
+    traverse([&](Body& sub_body) { sub_body.enter_names(scope, containing_entity); },
+             [&](Expression& sub_expression) {
+                 // Expressions can't define names.
+             });
 }
-
 
 bool BodyElement::fully_evaluated() {
     try {
-        traverse([&](Body& sub_body) {
-            if (!sub_body.fully_evaluated()) {
-                throw NotFullyEvaluatedException();
-            }
-        }, [&](Expression& sub_expression) {
-            if (!sub_expression.has_value()) {
-                throw NotFullyEvaluatedException();
-            }
-        });
+        traverse(
+            [&](Body& sub_body) {
+                if (!sub_body.fully_evaluated()) {
+                    throw NotFullyEvaluatedException();
+                }
+            },
+            [&](Expression& sub_expression) {
+                if (!sub_expression.has_value()) {
+                    throw NotFullyEvaluatedException();
+                }
+            });
         return true;
-    } 
-    catch (const NotFullyEvaluatedException&) {
+    } catch (const NotFullyEvaluatedException&) {
         return false;
     }
 }
