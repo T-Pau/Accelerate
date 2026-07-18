@@ -39,9 +39,9 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Expression/Expression.h"
 
 /**
-  * @brief Represents a callable entity that can be invoked with arguments: a macro or function.
+ * @brief Represents a callable entity that can be invoked with arguments: a macro or function.
  */
-class Callable: public Entity {
+class Callable : public Entity {
   public:
     /**
      * @brief Represents the argument definitions of a callable entity.
@@ -54,7 +54,7 @@ class Callable: public Entity {
         Arguments() = default;
 
         /// @brief Construct an Arguments object from a tokenizer.
-        explicit Arguments(Tokenizer &tokenizer);
+        explicit Arguments(Tokenizer& tokenizer);
 
         /**
          * @brief Add an argument to the Arguments object.
@@ -69,22 +69,22 @@ class Callable: public Entity {
          *
          * @return `true` if the callable takes no arguments, `false` otherwise.
          */
-        [[nodiscard]] bool empty() const {return names.empty();}
-        
+        [[nodiscard]] bool empty() const { return names.empty(); }
+
         /**
          * @brief Get the name of the argument at a given index.
          *
          * @param index The index of the argument.
          * @return The name of the argument.
          */
-        [[nodiscard]] Symbol name(size_t index) const {return names[index];}
+        [[nodiscard]] Symbol name(size_t index) const { return names[index]; }
 
         /**
          * @brief Get the list of argument names.
          *
          * @return The list of argument names.
          */
-        [[nodiscard]] const std::vector<Symbol>& argument_names() const {return names;}
+        [[nodiscard]] const std::vector<Symbol>& argument_names() const { return names; }
 
         /**
          * @brief Get the default value of the argument at a given index.
@@ -99,15 +99,15 @@ class Callable: public Entity {
          *
          * @return The maximum number of arguments.
          */
-        [[nodiscard]] size_t maximum_arguments() const {return names.size();}
+        [[nodiscard]] size_t maximum_arguments() const { return names.size(); }
 
         /**
          * @brief Get the minimum number of arguments the callable requires.
          *
          * @return The minimum number of arguments.
          */
-        [[nodiscard]] size_t minimum_arguments() const {return names.size() - default_arguments.size();}
-        
+        [[nodiscard]] size_t minimum_arguments() const { return names.size() - default_arguments.size(); }
+
         /**
          * @brief Print the Arguments object to a stream.
          *
@@ -144,7 +144,7 @@ class Callable: public Entity {
      * @param default_only Whether this definition can be overridden by a subsequent definition.
      * @param arguments The argument definitions of the callable.
      */
-    Callable(const Location& location, Symbol name, Visibility visibility, std::shared_ptr<Scope> parent_scope, bool default_only, Arguments arguments): Entity(location, name, visibility, parent_scope, default_only), arguments(std::move(arguments)) {}
+    Callable(const Location& location, Symbol name, Visibility visibility, std::shared_ptr<Scope> parent_scope, bool default_only, Arguments arguments);
 
     /**
      * @brief Get the name of the argument at a given index.
@@ -152,7 +152,7 @@ class Callable: public Entity {
      * @param index The index of the argument.
      * @return The name of the argument.
      */
-    [[nodiscard]] Symbol argument_name(size_t index) const {return arguments.name(index);}
+    [[nodiscard]] Symbol argument_name(size_t index) const { return arguments.name(index); }
 
     /**
      * @brief Get the default value of the argument at a given index.
@@ -160,18 +160,19 @@ class Callable: public Entity {
      * @param index The index of the argument.
      * @return The default value of the argument, if any.
      */
-    [[nodiscard]] std::optional<Expression> default_argument(size_t index) const {return arguments.default_argument(index);}
+    [[nodiscard]] std::optional<Expression> default_argument(size_t index) const { return arguments.default_argument(index); }
 
     /**
      * @brief Get the list of argument names.
      *
      * @return The list of argument names.
      */
-    [[nodiscard]] const std::vector<Symbol>& argument_names() const {return arguments.argument_names();}
+    [[nodiscard]] const std::vector<Symbol>& argument_names() const { return arguments.argument_names(); }
 
   protected:
     /// @brief The argument definitions.
     Arguments arguments;
+
 
     [[nodiscard]] EvaluationContext evaluation_context(EvaluationResult& result) override;
 
@@ -180,6 +181,9 @@ class Callable: public Entity {
   private:
     /// @brief Initialize static members.
     static void initialize();
+
+    /// @brief Enter arguments into the callable's scope.
+    void enter_arguments();
 
     /// @brief Whether static members have been initialized.
     static bool initialized;

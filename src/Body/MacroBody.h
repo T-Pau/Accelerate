@@ -59,8 +59,13 @@ class MacroBody : public BodyElement {
     void expand_calls() override;
     void traverse(std::function<void(Body&)> body_callback, std::function<void(Expression&)> expression_callback) override;
 
+    /// @brief The name of the macro being called.
     Symbol name;
+
+    /// @brief The macro being called.
     const Macro* macro{};
+
+    /// @brief The arguments passed to the macro.
     std::vector<Expression> arguments;
 };
 

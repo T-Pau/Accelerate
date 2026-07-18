@@ -39,7 +39,8 @@ nav = [
             { "index.md" =  "Internal/Explanations/index.md" },
             { "Coding Conventions" = "Internal/Explanations/Coding-Conventions.md" },
             { "Translating a Program or Library" = "Internal/Explanations/Translation.md" },
-            { "Body Elements and Expressions" = "Internal/Explanations/Body-and-Expressions.md" }
+            { "Body Elements and Expressions" = "Internal/Explanations/Body-and-Expressions.md" },
+            { "Ideas for Later" = "Internal/Explanations/Ideas-Later.md" }
         ]},
         { "Reference" = [
             { "index.md" = "Internal/Reference/index.md" },

@@ -1,10 +1,3 @@
-#ifdef IN_XLR8_FUNCTION_H
-#error "circular include file dependency detected"
-#endif
-#define IN_XLR8_FUNCTION_H
-#ifndef HAD_XLR8_FUNCTION_H
-#define HAD_XLR8_FUNCTION_H
-
 /*
 Copyright (C) Dieter Baron
 
@@ -34,34 +27,6 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "Entity/Callable.h"
+#include "Expression/ArgumentExpression.h"
 
-/**
- * @brief Represents a function.
- */
-class Function : public Callable {
-  public:
-    Function(const Location& location, Symbol name, std::shared_ptr<Scope> parent_scope, const std::shared_ptr<StructuredValue>& definition);
-
-    Function(const Location& location, Symbol name, Visibility visibility, std::shared_ptr<Scope> parent_scope, bool default_only, Arguments arguments, const Expression& definition) : Callable(location, name, visibility, parent_scope, default_only, std::move(arguments)), definition(definition) {}
-
-    void serialize(std::ostream& stream) const override;
-
-    void resolve_implementation() override;
-
-    Expression definition;
-
-  protected:
-    void evaluate_inner(EvaluationContext& context) override { definition.evaluate(context); }
-
-  private:
-    static void initialize();
-
-    static bool initialized;
-    static Token token_definition;
-};
-
-std::ostream& operator<<(std::ostream& stream, const Function& function);
-
-#endif // HAD_XLR8_FUNCTION_H
-#undef IN_XLR8_FUNCTION_H
+void ArgumentExpression::serialize_sub(std::ostream& stream) const { stream << symbol; }

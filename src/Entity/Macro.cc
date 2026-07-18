@@ -77,3 +77,5 @@ void Macro::serialize(std::ostream& stream) const {
 }
 
 EvaluationContext Macro::evaluation_context(EvaluationResult& result) { return Callable::evaluation_context(result).keeping_label_offsets(); }
+
+void Macro::resolve_implementation() { body.resolve(scope.get(), this); }

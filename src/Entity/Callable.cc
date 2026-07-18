@@ -32,6 +32,8 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <tpau-cpp-kernal/LocationException.h>
 
 #include "EvaluationContext.h"
+#include "Expression/ArgumentExpression.h"
+#include "Scope.h"
 #include "SequenceTokenizer.h"
 #include "StructuredDictionary.h"
 #include "StructuredScalar.h"
@@ -50,7 +52,7 @@ void Callable::initialize() {
     }
 }
 
-Callable::Callable(const Location& location, Symbol name, std::shared_ptr<Scope> parent_scope, const std::shared_ptr<StructuredValue>& definition): Entity(location, name, parent_scope, definition) {
+Callable::Callable(const Location& location, Symbol name, std::shared_ptr<Scope> parent_scope, const std::shared_ptr<StructuredValue>& definition) : Entity(location, name, parent_scope, definition) {
     initialize();
     auto parameters = definition->as_dictionary();
 
@@ -64,8 +66,11 @@ Callable::Callable(const Location& location, Symbol name, std::shared_ptr<Scope>
             throw LocationException(tokenizer.next().location, "invalid arguments");
         }
     }
+
+    enter_arguments();
 }
 
+Callable::Callable(const Location& location, Symbol name, Visibility visibility, std::shared_ptr<Scope> parent_scope, bool default_only, Arguments arguments) : Entity(location, name, visibility, parent_scope, default_only), arguments(std::move(arguments)) { enter_arguments(); }
 
 std::optional<Expression> Callable::Arguments::default_argument(size_t index) const {
     if (index >= minimum_arguments()) {
@@ -75,7 +80,6 @@ std::optional<Expression> Callable::Arguments::default_argument(size_t index) co
         return {};
     }
 }
-
 
 void Callable::serialize_callable(std::ostream& stream) const {
     serialize_entity(stream);
@@ -96,9 +100,7 @@ void Callable::Arguments::serialize(std::ostream& stream) const {
     }
 }
 
-EvaluationContext Callable::evaluation_context(EvaluationResult& result) {
-    return Entity::evaluation_context(result).skipping_variables(arguments.names);
-}
+EvaluationContext Callable::evaluation_context(EvaluationResult& result) { return Entity::evaluation_context(result).skipping_variables(arguments.names); }
 
 Callable::Arguments::Arguments(Tokenizer& tokenizer) {
     auto had_default_argument = false;
@@ -136,4 +138,10 @@ Callable::Arguments::Arguments(Tokenizer& tokenizer) {
 std::ostream& operator<<(std::ostream& stream, const Callable::Arguments& arguments) {
     arguments.serialize(stream);
     return stream;
+}
+
+void Callable::enter_arguments() {
+    for (const auto& argument_name : arguments.argument_names()) {
+        scope->add(std::make_unique<Constant>(location, argument_name, Visibility::ENTITY, scope,false, ArgumentExpression::create(location, argument_name)));
+    }
 }

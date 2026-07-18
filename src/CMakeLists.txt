@@ -24,6 +24,7 @@ add_library(xlr8-library STATIC
         Entity/Object.cc
         Entity/Output.cc
 
+        Expression/ArgumentExpression.cc
         Expression/BaseExpression.cc
         Expression/BinaryExpression.cc
         Expression/ConstantExpression.cc

@@ -58,12 +58,10 @@ Function::Function(const Location& location, Symbol name, std::shared_ptr<Scope>
     }
 }
 
-
 std::ostream& operator<<(std::ostream& stream, const Function& function) {
     function.serialize(stream);
     return stream;
 }
-
 
 void Function::serialize(std::ostream& stream) const {
     stream << ".function " << name << " {" << std::endl;
@@ -71,3 +69,5 @@ void Function::serialize(std::ostream& stream) const {
     stream << "    " DEFINITION ": " << definition << std::endl;
     stream << "}" << std::endl;
 }
+
+void Function::resolve_implementation() { definition.resolve(scope.get(), this); }
