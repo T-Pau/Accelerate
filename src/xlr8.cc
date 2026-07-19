@@ -225,6 +225,10 @@ int xlr8::process() {
 
     linker->link();
 
+    if (!output_file) {
+        output_file = output_name.string() + "." + linker->output_extension();
+    }
+
     return 0;
 }
 

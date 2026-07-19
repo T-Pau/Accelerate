@@ -38,19 +38,19 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Expression.h"
 
 /// @brief Expression node representing a Value.
-class ValueExpression: public BaseExpression {
-public:
+class ValueExpression : public BaseExpression {
+  public:
     /**
      * Create a value expression.
-     * 
+     *
      * @param location The location of the expression.
      * @param value The value of the expression.
      */
-    static Expression create(const Location& location, Value value) {return Expression(std::make_shared<ValueExpression>(location, value));}
+    static Expression create(const Location& location, Value value) { return Expression(std::make_shared<ValueExpression>(location, value)); }
 
     /**
      * Create a value expression from a token.
-     * 
+     *
      * @param token The token to create the expression from.
      * @throws Exception if the token is not a value or string token.
      */
@@ -58,30 +58,36 @@ public:
 
     /**
      * Create a value expression.
-     * 
+     *
      * @param location The location of the expression.
      * @param value The value of the expression.
      */
-    explicit ValueExpression(const Location& location, Value value): BaseExpression(location), value_(value) {}
+    explicit ValueExpression(const Location& location, Value value) : BaseExpression(location), value_(value) {}
 
     /**
      * Create a value expression with an unsigned integer value.
-     * 
+     *
      * @param location The location of the expression.
      * @param value The unsigned integer value of the expression.
      */
-    explicit ValueExpression(const Location& location, uint64_t value): ValueExpression(location, Value(value)) {}
+    explicit ValueExpression(const Location& location, uint64_t value) : ValueExpression(location, Value(value)) {}
 
-    [[nodiscard]] bool has_value() const override {return true;}
-    [[nodiscard]] std::optional<Value> value() const override {return value_;}
+    [[nodiscard]] bool has_value() const override { return true; }
+
+    [[nodiscard]] std::optional<Value> value() const override { return value_; }
+
     [[nodiscard]] std::optional<Value> maximum_value() const override;
-    [[nodiscard]] std::optional<Value> minimum_value() const override {return maximum_value();}
-    [[nodiscard]] std::optional<Value::Type> type() const override {return value_.type();}
 
-protected:
+    [[nodiscard]] std::optional<Value> minimum_value() const override { return maximum_value(); }
+
+    [[nodiscard]] std::optional<Value::Type> type() const override { return value_.type(); }
+
+    [[nodiscard]] std::shared_ptr<BaseExpression> clone() const override { return std::make_shared<ValueExpression>(location, value_); }
+
+  protected:
     void serialize_sub(std::ostream& stream) const override;
 
-private:
+  private:
     /// @brief The value of the expression.
     Value value_;
 };

@@ -34,8 +34,10 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "Tokenizer.h"
 #include <iostream>
+
+#include "Expression/Expression.h"
+#include "Tokenizer.h"
 
 class Scope;
 
@@ -46,26 +48,41 @@ class Address {
   public:
     /**
      * Constructs an address with the given bank and address.
-     * 
+     *
      * @param bank The bank of the address.
      * @param address The address within the bank.
      */
-    Address(uint64_t bank, uint64_t address): bank(bank), address(address) {}
+    Address(uint64_t bank, uint64_t address) : bank_component(bank_name, bank), address_component(address_name, address) {}
 
     /**
      * Constructs an address with the given address and a default bank of 0.
-     * 
+     *
      * @param address The address within the bank.
      */
-    explicit Address(uint64_t address): address(address) {}
+    explicit Address(uint64_t address) : bank_component(bank_name, 0), address_component(address_name, address) {}
+
+    /**
+     * Constructs an address with the given address.
+     *
+     * @param address The expression representing the address within the bank.
+     */
+    explicit Address(Expression address) : bank_component(bank_name, 0), address_component(address_name, std::move(address)) { evaluate_process(); }
+
+    /**
+     * Constructs an address with the given bank and address.
+     *
+     * @param bank The expression representing the bank of the address.
+     * @param address The expression representing the address within the bank.
+     */
+    Address(Expression bank, Expression address) : bank_component(bank_name, std::move(bank)), address_component(address_name, std::move(address)) { evaluate_process(); }
 
     /**
      * Constructs an address by parsing an expression from a tokenizer.
-     * 
+     *
      * @param tokenizer The tokenizer to parse the expression from.
      * @param scope The scope to evaluate the expression in.
      */
-    explicit Address(Tokenizer& tokenizer, std::shared_ptr<Scope> scope = {});
+    explicit Address(Tokenizer& tokenizer);
 
     /**
      * Serializes the address to a stream. The format is `address` if the bank is 0, and `bank:address` otherwise.
@@ -73,40 +90,133 @@ class Address {
     void serialize(std::ostream& stream) const;
 
     /**
-     * Compares two addresses for equality.
-     * 
-     * @param other The address to compare with.
-     * @return `true` if the addresses are equal, `false` otherwise.
+     * Check if the bank is known.
+     *
+     * @return `true` if the bank is known, `false` otherwise.
      */
-    bool operator==(const Address& other) const {return bank == other.bank && address == other.address;}
+    [[nodiscard]] bool has_bank() const { return bank_component.has_value(); }
 
     /**
-     * Compares two addresses for inequality.
-     * 
-     * @param other The address to compare with.
-     * @return `true` if the addresses are not equal, `false` otherwise.
+     * Check if the address within the bank is known.
+     *
+     * @return `true` if the address within the bank is known, `false` otherwise.
      */
-    bool operator!=(const Address& other) const {return !(*this == other);}
+    [[nodiscard]] bool has_address() const { return address_component.has_value(); }
 
     /**
-     * Compares two addresses. Addresses are ordered by bank first, then by address within the bank.
-     * 
-     * @param other The address to compare with.
-     * @return `true` if the address is less than the other, `false` otherwise.
+     * @brief Get the bank of the address.
+     *
+     * @return The bank of the address, if known.
      */
-    bool operator<(const Address& other) const {return bank < other.bank || (bank == other.bank && address < other.address);}
+    [[nodiscard]] std::optional<uint64_t> bank() const { return bank_component.value(); }
+
+    /**
+     * @brief Get the minimum possible value of the address within the bank.
+     *
+     * @return The minimum possible value of the address within the bank, if known.
+     */
+    [[nodiscard]] std::optional<uint64_t> address_minimum() const { return address_component.minimum(); }
+
+    /**
+     * @brief Get the maximum possible value of the address within the bank.
+     *
+     * @return The maximum possible value of the address within the bank, if known.
+     */
+    [[nodiscard]] std::optional<uint64_t> address_maximum() const { return address_component.maximum(); }
+
+    /**
+     * @brief Get the minimum possible value of the bank.
+     *
+     * @return The minimum possible value of the bank, if known.
+     */
+    [[nodiscard]] std::optional<uint64_t> bank_minimum() const { return bank_component.minimum(); }
+
+    /**
+     * @brief Get the maximum possible value of the bank.
+     *
+     * @return The maximum possible value of the bank, if known.
+     */
+    [[nodiscard]] std::optional<uint64_t> bank_maximum() const { return bank_component.maximum(); }
+
+    /**
+     * @brief Get the address within the bank.
+     *
+     * @return The address within the bank, if known.
+     */
+    [[nodiscard]] std::optional<uint64_t> address() const { return address_component.value(); }
+
+    /**
+     * @brief Resolve names in the expressions.
+     *
+     * @param scope The scope to resolve names in.
+     * @param containing_entity The entity containing the address.
+     */
+    void resolve(Scope* scope, Entity* containing_entity);
+
+    /**
+     * @brief Evaluate the expressions.
+     *
+     * @param context The evaluation context.
+     */
+    void evaluate(const EvaluationContext& context);
+
+    bool operator==(const Address& other) const;
+    bool operator<(const Address& other) const;
+
+  private:
+    class Component {
+      public:
+        explicit Component(Symbol name, Expression expression) : name(std::move(name)), component_value(std::move(expression)) {}
+
+        explicit Component(Symbol name, uint64_t value) : name(std::move(name)), component_value(value) {}
+
+        [[nodiscard]] bool has_value() const;
+        [[nodiscard]] std::optional<uint64_t> value() const;
+
+        void resolve(Scope* scope, Entity* containing_entity);
+        void evaluate(const EvaluationContext& context);
+        void evaluate_process();
+
+        [[nodiscard]] std::optional<bool> is_equal(const Component& other) const;
+        [[nodiscard]] std::optional<bool> is_not_equal(const Component& other) const;
+        [[nodiscard]] std::optional<bool> is_less_than(const Component& other) const;
+
+        [[nodiscard]] std::optional<uint64_t> minimum() const;
+        [[nodiscard]] std::optional<uint64_t> maximum() const;
+
+        void serialize(std::ostream& stream, bool output_if_zero = true) const;
+
+      private:
+        Symbol name;
+        std::variant<Expression, uint64_t> component_value;
+    };
+
+    /**
+     * Writes an address component to a stream.
+     */
+    friend std::ostream& operator<<(std::ostream& stream, Component component);
+
+    /**
+     * @brief Set values from expressions.
+     */
+    void evaluate_process();
 
     /// The bank of the address.
-    uint64_t bank = 0;
+    Component bank_component;
 
     /// The address within the bank.
-    uint64_t address = 0;
+    Component address_component;
+
+    static Symbol bank_name;
+    static Symbol address_name;
 };
 
 /**
  * Writes an address to a stream. The format is `address` if the bank is 0, and `bank:address` otherwise.
  */
 std::ostream& operator<<(std::ostream& stream, Address address);
+
+bool operator<(const std::optional<Address>& a, const std::optional<Address>& b);
 
 #endif // HAD_XLR8_ADDRESS_H
 #undef IN_XLR8_ADDRESS_H

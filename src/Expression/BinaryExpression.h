@@ -40,8 +40,9 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /**
  * Expression representing a binary operation.
  */
-class BinaryExpression: public BaseExpression {
-public:
+class BinaryExpression : public BaseExpression {
+  public:
+    // clang-format off
     // Keep in sync with operation_names
     /// @brief The operations supported by the BinaryExpression class.
     enum class Operation {
@@ -64,43 +65,50 @@ public:
         SHIFT_RIGHT,
         SUBTRACT
     };
+    // clang-format on
 
     /**
      * Create an expression from a binary operation.
-     * 
+     *
      * This might not create a BinaryExpression if the operation can be simplified (e. g. if both operands have values).
-     * 
+     *
      * @param location The location of the expression in the source code.
      * @param left The left operand.
      * @param operation The binary operation.
      * @param right The right operand.
      * @return The created expression.
      */
-    [[nodiscard]] Expression static create(const Location& location, const Expression& left, Operation operation, const Expression& right) {return *simplify(location, left, operation, right, true);}
-    
+    [[nodiscard]] Expression static create(const Location& location, const Expression& left, Operation operation, const Expression& right) { return *simplify(location, left, operation, right, true); }
+
     /**
      * Construct a binary expression.
-     * 
+     *
      * @param location The location of the expression in the source code.
      * @param left The left operand.
      * @param operation The binary operation.
      * @param right The right operand.
      */
-    BinaryExpression(const Location& location, Expression left, Operation operation, Expression right): BaseExpression(location), left(std::move(left)), operation(operation), right(std::move(right)) {}
+    BinaryExpression(const Location& location, Expression left, Operation operation, Expression right) : BaseExpression(location), left(std::move(left)), operation(operation), right(std::move(right)) {}
 
     [[nodiscard]] std::optional<Value> minimum_value() const override;
     [[nodiscard]] std::optional<Value> maximum_value() const override;
     [[nodiscard]] std::optional<Value::Type> type() const override;
 
-protected:
+    [[nodiscard]] std::shared_ptr<BaseExpression> clone() const override { return std::make_shared<BinaryExpression>(location, left.clone(), operation, right.clone()); }
+
+  protected:
     [[nodiscard]] std::optional<Expression> evaluate_process(const EvaluationContext& context) override;
     void serialize_sub(std::ostream& stream) const override;
-    void traverse(std::function<void(Expression&)> callable) override {callable(left); callable(right);}
 
-private:
+    void traverse(std::function<void(Expression&)> callable) override {
+        callable(left);
+        callable(right);
+    }
+
+  private:
     /**
      * Simplify a binary expression if possible.
-     * 
+     *
      * @param location The location of the expression in the source code.
      * @param left The left operand.
      * @param operation The binary operation.
@@ -112,14 +120,14 @@ private:
 
     /**
      * Get the name of a binary operation.
-     * 
+     *
      * @return The name of the binary operation.
      */
-    [[nodiscard]] const std::string& operation_name() const {return operation_name(operation);}
+    [[nodiscard]] const std::string& operation_name() const { return operation_name(operation); }
 
     /**
      * Get the name of a binary operation.
-     * 
+     *
      * @param operation The binary operation.
      * @return The name of the binary operation.
      */

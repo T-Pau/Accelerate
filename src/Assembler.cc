@@ -364,7 +364,7 @@ void Assembler::parse_symbol(Visibility visibility, const Token& name) {
         }
         // TODO: parameters
         else if (token == token_address) {
-            object->address = Address(tokenizer, file_scope);
+            object->address = Address(tokenizer);
         }
         else if (token == token_align || token == token_reserve) {
             auto expression = ExpressionParser(tokenizer).parse();

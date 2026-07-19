@@ -34,29 +34,32 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "Expression/EntityExpression.h"
 #include "Entity/Object.h"
+#include "Expression/EntityExpression.h"
 
 /**
  * @brief Represents an expression referring to an object.
  */
-class ObjectExpression: public EntityExpression {
-public:
-    explicit ObjectExpression(const Location& location, Object* object): EntityExpression(location, object) {}
-    [[nodiscard]] static Expression create(const Location& location, Object* object) {return *simplify(location, object, true);}
+class ObjectExpression : public EntityExpression {
+  public:
+    explicit ObjectExpression(const Location& location, Object* object) : EntityExpression(location, object) {}
 
-    [[nodiscard]] bool has_value() const override {return object()->has_address();}
+    [[nodiscard]] static Expression create(const Location& location, Object* object) { return *simplify(location, object, true); }
+
+    [[nodiscard]] bool has_value() const override { return object()->has_address() && object()->address->has_address(); }
+
     [[nodiscard]] std::optional<Value> value() const override;
-    [[nodiscard]] std::optional<Value::Type> type() const override {return Value::UNSIGNED;}
 
-protected:
+    [[nodiscard]] std::optional<Value::Type> type() const override { return Value::UNSIGNED; }
+
+  protected:
     [[nodiscard]] std::optional<Value> maximum_value() const override;
     [[nodiscard]] std::optional<Value> minimum_value() const override;
 
-private:
+  private:
     static std::optional<Expression> simplify(const Location& location, Object* object, bool always_create);
 
-    Object* object() const {return static_cast<Object*>(entity);}
+    Object* object() const { return static_cast<Object*>(entity); }
 };
 
 #endif // HAD_XLR8_OBJECT_EXPRESSION_H

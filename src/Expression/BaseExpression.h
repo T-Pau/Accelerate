@@ -158,7 +158,7 @@ class BaseExpression {
      *
      * @return A shared pointer to a new expression.
      */
-    [[nodiscard]] virtual std::shared_ptr<BaseExpression> clone() const { throw LocationException(location, "clone() not implemented for this expression type"); }
+    [[nodiscard]] virtual std::shared_ptr<BaseExpression> clone() const { throw LocationException(location, "clone() not implemented for {}", typeid(*this).name()); }
 
     /**
      * The location of the expression in the source code.

@@ -62,11 +62,14 @@ class Object : public Entity {
 
     [[nodiscard]] bool empty() const { return !is_reservation() && body.empty(); }
 
-    [[nodiscard]] bool has_address() const { return address.has_value(); }
+    [[nodiscard]] bool has_address() const { return address && address->has_address(); }
 
     void enter_names() { body.enter_names(scope.get(), this); }
 
     void resolve_implementation() override;
+
+    std::optional<uint64_t> maximum_address() const;
+    std::optional<uint64_t> minimum_address() const;
 
     [[nodiscard]] std::optional<uint64_t> reservation() const;
     [[nodiscard]] SizeRange size_range() const;
@@ -81,7 +84,6 @@ class Object : public Entity {
     uint64_t alignment = 0;
     std::optional<Expression> reservation_expression;
     std::optional<Address> address;
-    std::optional<Expression> address_expression;
     std::set<Symbol> explicitly_used_objects;
 
     Body body;

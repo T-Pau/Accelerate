@@ -40,6 +40,8 @@ using namespace tpau::cpp_kernal;
 const unsigned int LibraryLinker::format_version_major = 1;
 const unsigned int LibraryLinker::format_version_minor = 0;
 
+const std::string& LibraryLinker::library_extension = "lib";
+
 void LibraryLinker::link_sub() {
     auto entities = module().entities();
 

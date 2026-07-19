@@ -150,6 +150,9 @@ SizeRange Object::size_range() const {
 }
 
 void Object::evaluate_inner(EvaluationContext& context) {
+    if (address) {
+        address->evaluate(context);
+    }
     if (is_reservation()) {
         reservation_expression->evaluate(context);
     }
@@ -159,26 +162,23 @@ void Object::evaluate_inner(EvaluationContext& context) {
 }
 
 bool Object::operator<(const Object& other) const {
-    if (address) {
-        if (other.address) {
-            if (*address != *other.address) {
-                return *address < *other.address;
-            }
-        }
-        else {
-            return true;
+    if (address && other.address) {
+        if (*address != *other.address) {
+            return *address < *other.address;
         }
     }
-    else {
-        if (other.address) {
-            return false;
-        }
-        if (*section < *other.section) {
-            return true;
-        }
-        else if (*other.section < *section) {
-            return false;
-        }
+    else if (address) {
+        return true;
+    }
+    else if (other.address) {
+        return false;
+    }
+
+    if (*section < *other.section) {
+        return true;
+    }
+    else if (*other.section < *section) {
+        return false;
     }
 
     if (size_range().size() && other.size_range().size() && size_range().size() != other.size_range().size()) {
@@ -189,26 +189,41 @@ bool Object::operator<(const Object& other) const {
 }
 
 void Object::pin(Expression expression) {
-    if (address && address_expression) {
+    if (address) {
         throw LocationException(expression.location(), "{} already has an address", name);
     }
-    if (expression.has_value()) {
-        if (!expression.value()->is_unsigned()) {
-            throw LocationException(expression.location(), "address must be unsigned", name);
-        }
-        this->address = Address(expression.value()->unsigned_value());
-    }
-    else {
-        this->address_expression = expression;
-    }
+    address = Address(expression);
 }
 
 void Object::resolve_implementation() {
-    if (address_expression) {
-        address_expression->resolve(scope.get(), this);
+    if (address) {
+        address->resolve(scope.get(), this);
     }
     if (reservation_expression) {
         reservation_expression->resolve(scope.get(), this);
     }
     body.resolve(scope.get(), this);
+}
+
+std::optional<uint64_t> Object::maximum_address() const {
+    auto maximum_size = size_range().maximum;
+    auto maximum = section->maximum_address() - (maximum_size ? *maximum_size : 0);
+    if (address) {
+        auto address_maximum = address->address_maximum();
+        if (address_maximum) {
+            maximum = std::min(maximum, *address_maximum);
+        }
+    }
+    return maximum;
+}
+
+std::optional<uint64_t> Object::minimum_address() const {
+    auto minimum = section->minimum_address();
+    if (address) {
+        auto address_minimum = address->address_minimum();
+        if (address_minimum) {
+            minimum = std::max(minimum, *address_minimum);
+        }
+    }
+    return minimum;
 }

@@ -31,19 +31,18 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "Expression/ValueExpression.h"
 
-
 std::optional<Value> ObjectExpression::value() const {
     if (has_value()) {
-        return Value(object()->address->address);
+        return Value(*object()->address->address());
     }
     else {
         return {};
     }
 }
 
-std::optional<Expression> ObjectExpression::simplify(const Location& location, Object *object, bool always_create) {
+std::optional<Expression> ObjectExpression::simplify(const Location& location, Object* object, bool always_create) {
     if (object->has_address()) {
-        return ValueExpression::create(location, Value(object->address->address));
+        return ValueExpression::create(location, Value(*object->address->address()));
     }
     else if (always_create) {
         return Expression(std::make_shared<ObjectExpression>(location, object));
@@ -57,16 +56,20 @@ std::optional<Value> ObjectExpression::maximum_value() const {
     if (has_value()) {
         return value();
     }
-    else {
-        return Value(object()->section->maximum_address() - object()->size_range().minimum);
+    auto maximum_address = object()->maximum_address();
+    if (maximum_address) {
+        return Value(*maximum_address);
     }
+    return {};
 }
 
 std::optional<Value> ObjectExpression::minimum_value() const {
     if (has_value()) {
         return value();
     }
-    else {
-        return Value(object()->section->minimum_address());
+    auto minimum_address = object()->minimum_address();
+    if (minimum_address) {
+        return Value(*minimum_address);
     }
+    return {};
 }

@@ -42,6 +42,8 @@ class LibraryLinker : public Linker {
 
     void output(const std::filesystem::path& file_name) override;
 
+    const std::string& output_extension() const override { return library_extension; }
+
   protected:
     void link_sub() override;
 
@@ -55,6 +57,7 @@ class LibraryLinker : public Linker {
 
     static const unsigned int format_version_major;
     static const unsigned int format_version_minor;
+    static const std::string& library_extension;
 };
 
 #endif // HAD_XLR8_LIBRARY_LINKER_H

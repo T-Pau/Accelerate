@@ -43,6 +43,8 @@ class ProgramLinker : public Linker {
     void output(const std::filesystem::path& file_name) override;
     void output_symbol_map(const std::filesystem::path& file_name);
 
+    const std::string& output_extension() const override { return target->extension; }
+
   protected:
     void link_sub() override;
     // UsedEntities roots() override;

@@ -88,6 +88,7 @@ class Linker {
     void link();
     void link_new();
     virtual void output(const std::filesystem::path& file_name) = 0;
+    virtual const std::string& output_extension() const = 0;
 
     const Target* target = nullptr;
 
