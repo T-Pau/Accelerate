@@ -64,14 +64,30 @@ std::ostream& operator<<(std::ostream& stream, const BlockBody& block) {
 std::optional<Body> BlockBody::evaluate(const EvaluationContext& context) {
     auto current_offset = context.offset;
     auto new_size_range = SizeRange(0, 0);
+    auto new_block = std::vector<Body>();
+
+    std::optional<Body> previous_element;
 
     for (auto& element : block) {
         element.evaluate(context.setting_offset(current_offset));
         current_offset += element.size_range();
         new_size_range += element.size_range();
+        if (!element.empty()) {
+            if (previous_element) {
+                auto [success, new_body] = previous_element->append_sub(element);
+                if (success) {
+                    if (new_body) {
+                        new_block.back() = *new_body;
+                    }
+                    continue;
+                }
+            }
+            new_block.emplace_back(element);
+            previous_element = element;
+        }
     }
 
-    block.erase(std::remove_if(block.begin(), block.end(), [](const Body& element) { return element.empty(); }), block.end());
+    block = std::move(new_block);
 
     if (block.empty()) {
         return Body();
