@@ -43,30 +43,33 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  * This is the Expression entered into the environment for a label definition. It refers back to the defining BodyElement, which is used to compute the label's value.
  */
-class LabelOffsetExpression: public BaseExpression {
-public:
-    static Expression create(const Location& location, Symbol entity_name, Symbol label_name, Body body) {return Expression(std::make_shared<LabelOffsetExpression>(location, entity_name, label_name, 0, std::move(body)));}
+class LabelOffsetExpression : public BaseExpression {
+  public:
+    static Expression create(const Location& location, Symbol entity_name, Symbol label_name, BodyElement* body) { return Expression(std::make_shared<LabelOffsetExpression>(location, entity_name, label_name, 0, body)); }
 
-    static Expression create(const Location& location, Symbol entity_name, size_t unnamed_label_index, Body body) {return Expression(std::make_shared<LabelOffsetExpression>(location, entity_name, Symbol(), unnamed_label_index, std::move(body)));}
+    static Expression create(const Location& location, Symbol entity_name, size_t unnamed_label_index, BodyElement* body) { return Expression(std::make_shared<LabelOffsetExpression>(location, entity_name, Symbol(), unnamed_label_index, body)); }
 
-    LabelOffsetExpression(const Location& location, Symbol entity_name, Symbol label_name, size_t unnamed_label_index, Body body): BaseExpression(location), entity_name(entity_name), label_name(label_name), unnamed_label_index(unnamed_label_index), body(std::move(body)) {}
+    LabelOffsetExpression(const Location& location, Symbol entity_name, Symbol label_name, size_t unnamed_label_index, BodyElement* body) : BaseExpression(location), entity_name(entity_name), label_name(label_name), unnamed_label_index(unnamed_label_index), body(body) {}
 
+    [[nodiscard]] std::optional<Value> minimum_value() const override { return body->offset().minimum_value(); }
 
-    [[nodiscard]] std::optional<Value> minimum_value() const override {return body.offset().minimum_value();}
-    [[nodiscard]] std::optional<Value> maximum_value() const override {return body.offset().maximum_value();}
-    [[nodiscard]] std::optional<Value> value() const override {return body.offset().value();}
-    [[nodiscard]] std::optional<Value::Type> type() const override {return Value::UNSIGNED;}
-    [[nodiscard]] bool has_value() const override {return body.offset().has_size();}
+    [[nodiscard]] std::optional<Value> maximum_value() const override { return body->offset().maximum_value(); }
 
-protected:
+    [[nodiscard]] std::optional<Value> value() const override { return body->offset().value(); }
+
+    [[nodiscard]] std::optional<Value::Type> type() const override { return Value::UNSIGNED; }
+
+    [[nodiscard]] bool has_value() const override { return body->offset().has_size(); }
+
+  protected:
     [[nodiscard]] std::optional<Expression> evaluate(const EvaluationContext& context) override;
     void serialize_sub(std::ostream& stream) const override;
 
-private:
+  private:
     Symbol entity_name;
     Symbol label_name;
     size_t unnamed_label_index{0};
-    Body body;
+    BodyElement* body;
 };
 
 #endif // HAD_XLR8_LABEL_OFFSET_EXPRESSION_H

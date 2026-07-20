@@ -84,3 +84,13 @@ std::vector<Entity*> Module::entities() const {
     }
     return entities;
 }
+
+std::vector<Entity*> Module::explicitly_used_entities() const {
+    std::vector<Entity*> entities;
+    for (const auto& file_scope : file_scopes | std::views::values) {
+        entities.insert(entities.end(), file_scope->get_explicitly_used_objects().begin(), file_scope->get_explicitly_used_objects().end());
+        auto file_entities = file_scope->get_entities();
+        entities.insert(entities.end(), file_entities.begin(), file_entities.end());
+    }
+    return entities;
+}

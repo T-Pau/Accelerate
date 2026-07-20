@@ -33,6 +33,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "Body/BodyElement.h"
 #include "ExpressionParser.h"
+#include "Scope.h"
 #include "SequenceTokenizer.h"
 #include "StructuredBody.h"
 #include "StructuredDictionary.h"
@@ -129,6 +130,13 @@ void Object::serialize(std::ostream& stream) const {
     }
     else {
         stream << "    " BODY " <" << std::endl;
+        // TODO: avoid code duplication with ScopedBody
+        auto constants = scope->get_constants();
+        auto sorted_constants = sorted(constants.begin(), constants.end(), [](const auto& a, const auto& b) { return a->get_name() < b->get_name(); });
+        for (const auto& constant : sorted_constants) {
+            stream << "        " << constant->get_name() << " = " << constant->value << std::endl;
+        }
+
         body.serialize(stream, "        ");
         stream << "    >" << std::endl;
     }

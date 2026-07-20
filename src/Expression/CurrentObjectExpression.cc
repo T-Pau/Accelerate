@@ -1,10 +1,3 @@
-#ifdef IN_XLR8_LIBRARY_LINKER_H
-#error "circular include file dependency detected"
-#endif
-#define IN_XLR8_LIBRARY_LINKER_H
-#ifndef HAD_XLR8_LIBRARY_LINKER_H
-#define HAD_XLR8_LIBRARY_LINKER_H
-
 /*
 Copyright (C) Dieter Baron
 
@@ -34,31 +27,20 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "Linker.h"
+#include "Expression/CurrentObjectExpression.h"
+#include "Expression/VariableExpression.h"
+#include "Scope.h"
 
-class LibraryLinker : public Linker {
-  public:
-    LibraryLinker(Symbol name, const Target* target = nullptr) : Linker(name, target) {}
+Symbol CurrentObjectExpression::current_object_symbol(".current_object");
 
-    void output(const std::filesystem::path& file_name) override;
+void CurrentObjectExpression::serialize_sub(std::ostream& stream) const { stream << current_object_symbol; }
 
-    const std::string& output_extension() const override { return library_extension; }
+void CurrentObjectExpression::resolve(Scope* scope, Entity* containing_entity) {
+    variable_expression = VariableExpression::create(location, containing_entity->name);
+    variable_expression.resolve(scope, containing_entity);
+}
 
-  protected:
-    [[nodiscard]] virtual std::vector<Entity*> root_entities() override { return module().entities(); }
-
-  private:
-    template <typename T> void output_entities(std::ostream& stream) {
-        auto entities = sorted(module().get_entities<T>(), [](const T* a, const T* b) { return a->name < b->name; });
-        for (const auto& entity : entities) {
-            entity->serialize(stream);
-        }
-    }
-
-    static const unsigned int format_version_major;
-    static const unsigned int format_version_minor;
-    static const std::string& library_extension;
-};
-
-#endif // HAD_XLR8_LIBRARY_LINKER_H
-#undef IN_XLR8_LIBRARY_LINKER_H
+std::optional<Expression> CurrentObjectExpression::evaluate(const EvaluationContext& context) {
+    variable_expression.evaluate(context);
+    return variable_expression;
+}

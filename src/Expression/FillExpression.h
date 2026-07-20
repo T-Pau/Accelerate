@@ -38,22 +38,22 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Expression/Expression.h"
 
 /// @brief Expression representing a sequence of repeated values: `.fill(count, value)`.
-class FillExpression: public BaseExpression {
-public:
+class FillExpression : public BaseExpression {
+  public:
     /**
      * Create a fill expression.
-     * 
+     *
      * @param location The location of the expression in the source code.
      * @param count The expression representing the number of repetitions.
      * @param value The expression representing the value to repeat.
      */
-    explicit FillExpression(const Location& location, Expression count, Expression value): BaseExpression(location), count{std::move(count)}, value{std::move(value)} {}
+    explicit FillExpression(const Location& location, Expression count, Expression value) : BaseExpression(location), count{std::move(count)}, value{std::move(value)} {}
 
     /**
      * Create an expression representing a FillExpression from arguments.
-     * 
+     *
      * This may not create a FillExpression if the expression can be simplified.
-     * 
+     *
      * @param location The location of the expression in the source code.
      * @param arguments The arguments of the expression. Must contain exactly two expressions: the count and the value.
      * @return The created expression.
@@ -63,9 +63,9 @@ public:
 
     /**
      * Create an expression representing a FillExpression.
-     * 
+     *
      * This may not create a FillExpression if the expression can be simplified.
-     * 
+     *
      * @param location The location of the expression in the source code.
      * @param count The expression representing the number of repetitions.
      * @param value The expression representing the value to repeat.
@@ -74,12 +74,23 @@ public:
      */
     static Expression create(const Location& location, Expression count, Expression value);
 
-protected:
-    void traverse(std::function<void(Expression&)> callback) override {callback(count); callback(value);}
-    std::optional<Expression> evaluate_process(const EvaluationContext& context) override {return simplify(location, count, value, false);}
+    [[nodiscard]] bool needs_cloning() override { return false; }
+
+    [[nodiscard]] std::optional<Expression> evaluate(const EvaluationContext& context) override { return Expression(std::make_shared<FillExpression>(location, count.clone(), value.clone())); }
+
+    [[nodiscard]] std::optional<Value::Type> type() const override { return Value::BINARY; }
+
+  protected:
+    void traverse(std::function<void(Expression&)> callback) override {
+        callback(count);
+        callback(value);
+    }
+
+    std::optional<Expression> evaluate_process(const EvaluationContext& context) override { return simplify(location, count, value, false); }
+
     void serialize_sub(std::ostream& stream) const override;
 
-private:
+  private:
     static std::optional<Expression> simplify(const Location& location, Expression count, Expression value, bool always_create);
 
     /// @brief The expression representing the number of repetitions.

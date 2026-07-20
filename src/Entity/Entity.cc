@@ -134,8 +134,9 @@ EvaluationResult Entity::evaluate(EvaluationContext::EvaluationType type) {
 }
 
 void Entity::uses(Entity* entity) {
-    if (entity->visibility <= Visibility::ENTITY) {
+    if (entity->visibility <= Visibility::ENTITY || entity == this) {
         // We don't track references to entity only visible within an entity.
+        // Objects or macros refer to themselves via label expressions.
         return;
     }
     referenced_entities.insert(entity);

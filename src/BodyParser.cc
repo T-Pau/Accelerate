@@ -36,10 +36,12 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Body/AssignmentBody.h"
 #include "Body/ChecksumBody.h"
 #include "Body/DataBody.h"
+#include "Body/EmptyBody.h"
 #include "Body/LabelBody.h"
 #include "Body/MacroBody.h"
 #include "Body/MemoryBody.h"
 #include "Expression/ConstantExpression.h"
+#include "Expression/CurrentObjectExpression.h"
 #include "Expression/ValueExpression.h"
 #include "ExpressionNode.h"
 #include "ExpressionParser.h"
@@ -186,6 +188,21 @@ void BodyParser::add_constant(Visibility visibility, const Token& name, const Ex
 Expression BodyParser::get_pc_label() {
     auto name = Symbol();
 
+    if (current_body->is<EmptyBody>()) {
+        return CurrentObjectExpression::create(tokenizer.current_location());
+    }
+    else {
+        auto trailing_label = current_body->back();
+        if (trailing_label && trailing_label->is<LabelBody>()) {
+            name = trailing_label->as<LabelBody>()->name;
+        }
+        else {
+            name = Symbol(std::format(".label_{}", next_label));
+            next_label += 1;
+            current_body->append(LabelBody::create(tokenizer.current_location(), name));
+        }
+    }
+
     auto trailing_label = current_body->back();
     if (trailing_label && trailing_label->is<LabelBody>()) {
         name = trailing_label->as<LabelBody>()->name;
@@ -261,10 +278,7 @@ std::shared_ptr<Node> BodyParser::parse_instruction_argument(const Token& token)
     return std::make_shared<ExpressionNode>(ExpressionParser(tokenizer).parse());
 }
 
-void BodyParser::parse_label(Visibility visibility, const Token& name) {
-    current_body->append(LabelBody::create(name.location, name.as_symbol()));
-    add_constant(visibility, name, get_label(name.location, name.as_symbol()));
-}
+void BodyParser::parse_label(Visibility visibility, const Token& name) { current_body->append(LabelBody::create(name.location, name.as_symbol(), visibility)); }
 
 void BodyParser::parse_memory() {
     auto expression_parser = ExpressionParser(tokenizer);
@@ -459,7 +473,7 @@ void BodyParser::parse_error() {
     throw LocationException(location, message.as_string());
 }
 
-void BodyParser::parse_unnamed_label() { current_body->append(LabelBody::create(tokenizer.current_location(), Symbol())); }
+void BodyParser::parse_unnamed_label() { current_body->append(LabelBody::create(tokenizer.current_location())); }
 
 void BodyParser::handle_name(Visibility visibility, const Token& name) {
     auto token = tokenizer.next();

@@ -34,94 +34,48 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <tpau-cpp-kernal/FileReader.h>
 
 #include "Assembler.h"
+#include "EvaluationOrder.h"
 #include "Scope.h"
 
 using namespace tpau::cpp_kernal;
 
-void ProgramLinker::link_sub() {
-#if 0
+std::vector<Entity*> ProgramLinker::root_entities() {
     memory = target->map.initialize_memory();
 
-    for (auto& library: libraries) {
-        library->evaluate();
-        program->import(library.get());
-    }
+    auto entities = module().explicitly_used_entities();
 
-    Target::set_current_target(target);
-    program->resolve_defaults();
-    program->evaluate();
-    program->evaluate();
-    program->evaluate();
+    // output can't be evaluated until objects have been copied to memory, so just collect its dependencies here
+    target->output->resolve();
+    entities.insert(entities.end(), target->output->referenced_entities.begin(), target->output->referenced_entities.end());
 
-    Unresolved unresolved;
-    if (!program->check_unresolved(unresolved)) {
-        unresolved.report();
-        throw Exception();
-    }
+    // TODO: add explicitly used objects from libraries?
 
-    Target::set_current_target(target);
-    target->object_file->import(program.get());
-    target->object_file->resolve_defaults();
-    target->object_file->evaluate();
-    target->object_file->evaluate();
+    return entities;
+}
 
-    if (!target->object_file->check_unresolved(unresolved)) {
-        unresolved.report();
-        throw Exception();
-    }
+void ProgramLinker::link_sub() {
+    auto unsorted_objects = entities | std::views::filter([](Entity* entity) { return entity->is<Object>(); }) | std::views::transform([](Entity* entity) { return static_cast<Object*>(entity); });
+    auto objects = sorted(unsorted_objects.begin(), unsorted_objects.end());
 
-    EvaluationResult result;
-    auto environment = std::make_shared<Scope>(Visibility::FILE);
-    environment->add_next(target->object_file->private_environment);
-    environment->add_next(program->public_environment);
-    auto context = EvaluationContext{result, EvaluationContext::ENTITY, environment};
-    output_body = target->output->body;
-    output_body.evaluate(context);
-    result.unresolved_variables.erase(Assembler::token_data_end.as_symbol());
-    result.unresolved_variables.erase(Assembler::token_data_size.as_symbol());
-    result.unresolved_variables.erase(Assembler::token_data_start.as_symbol());
-    unresolved.clear();
-    unresolved.add(target->output.get(), result);
-    unresolved.report();
-
-    if (DiagnosticOutput::global.failed()) {
-        throw Exception();
-    }
-
-    std::unordered_set<Object*> new_objects = result.used_objects;
-    target->object_file->collect_explicitly_used_objects(new_objects);
-    // TODO: warn/error if no used objects?
-    objects = new_objects;
-
-    // Collect all referenced objects.
-    while (!new_objects.empty()) {
-        auto current_objects = new_objects;
-        new_objects.clear();
-        for (auto object: current_objects) {
-            auto used_objects = std::unordered_set<Object*>();
-            for (const auto& used_object: object->referenced_objects) {
-                if (add_object(used_object)) {
-                    new_objects.insert(used_object);
-                }
-            }
-        }
-    }
-
-    auto sorted_objects = std::vector<Object*>(objects.begin(), objects.end());
-    std::ranges::sort(sorted_objects, Object::less_pointers);
-    for (auto object: sorted_objects) {
+    for (auto object : objects) {
         if (!object->size_range().size()) {
-            DiagnosticOutput::global.error("object '{}' has unknown size", object->name);
+            DiagnosticOutput::global.error(object->location, "object '{}' has unknown size", object->name);
             if (DiagnosticOutput::global.verbose_error_messages) {
                 std::cout << object->body;
             }
             continue;
         }
-        if (object->address) {
+
+        if (object->address && object->address.has_value()) {
+            auto size = *object->size_range().size();
+            auto bank = *object->address->bank();
+            auto address = *object->address->address();
+
             // TODO: validate that object->address is in object->section
-            auto range = Range(object->address->address, *object->size_range().size());
-            if (!memory[object->address->bank].allocate(range, object->is_reservation() ? Memory::RESERVED : Memory::DATA, 0, range.size)) {
-                DiagnosticOutput::global.error("fixed space (${}, ${}) not free", range.start, range.end());
+
+            auto range = Range(address, size);
+            if (!memory[bank].allocate(range, object->is_reservation() ? Memory::RESERVED : Memory::DATA, 0, range.size)) {
+                DiagnosticOutput::global.error(object->location, "fixed space for '{}' (${}, ${}) not free", object->name, range.start, range.end());
             }
         }
         else {
@@ -133,41 +87,38 @@ void ProgramLinker::link_sub() {
                 }
             }
             if (!object->address) {
-                DiagnosticOutput::global.error("no space left for '{}' ({} bytes) in section '{}'", object->name, *object->size_range().size(), object->section->name);
+                DiagnosticOutput::global.error(object->location, "no space left for '{}' ({} bytes) in section '{}'", object->name, *object->size_range().size(), object->section->name);
                 continue;
             }
         }
     }
 
-    if (DiagnosticOutput::global.failed()) {
-        return;
+    DiagnosticOutput::global.exit_if_failed();
+
+    for (auto entity : entities) {
+        entity->evaluate();
     }
 
-    Target::set_current_target(target);
+    DiagnosticOutput::global.exit_if_failed();
 
-    for (auto object: objects) {
-        try {
-            object->evaluate();
-            if (!object->is_reservation()) {
-                std::string bytes;
-                bytes.reserve(*object->size_range().size());
-                object->body.encode(bytes);
-                if (bytes.size() != object->size_range().size()) {
-                    std::stringstream str;
-                    str << "internal error: encoded size (" << bytes.size() << ") != expected object size (" << *object->size_range().size() << ")";
-                    throw Exception(str.str());
-                }
-                memory[object->address->bank].copy(object->address->address, bytes);
-            }
-        }
-        catch (Exception& ex) {
-            DiagnosticOutput::global.error(Location(), "can't encode '{}': {}", object->name, ex.what());
+    for (auto object : objects) {
+        if (!object->address || object->address.has_value()) {
+            DiagnosticOutput::global.error(object->location, "object '{}' has no address", object->name);
             if (DiagnosticOutput::global.verbose_error_messages) {
                 std::cout << object->body;
             }
+            continue;
+        }
+        if (!object->is_reservation()) {
+            std::string bytes;
+            bytes.reserve(*object->size_range().size());
+            object->body.encode(bytes);
+            if (bytes.size() != object->size_range().size()) {
+                throw LocationException(object->location, "internal error: encoded size ({}) != expected object size ({})", bytes.size(), *object->size_range().size());
+            }
+            memory[object->address->bank().value()].copy(object->address->address().value(), bytes);
         }
     }
-#endif
 }
 
 void ProgramLinker::output(const std::filesystem::path& file_name) {

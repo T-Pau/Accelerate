@@ -313,6 +313,8 @@ class Scope {
      */
     void add_next(std::shared_ptr<Scope> new_next);
 
+    void add_unnamed_label(const Location& location, Expression label_expression) { unnamed_labels.add_label(location, label_expression); }
+
     /**
      * Import a module.
      *
@@ -510,6 +512,13 @@ class Scope {
      * @param new_name The new name of the scope.
      */
     void rename(Symbol new_name);
+
+    /**
+     * @brief Get the set of objects explicitly marked as used.
+     *
+     * @return The set of explicitly used objects.
+     */
+    [[nodiscard]] const std::unordered_set<Object*>& get_explicitly_used_objects() const { return explicitly_used_objects; }
 
 
   private:

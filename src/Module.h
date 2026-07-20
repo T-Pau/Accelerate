@@ -125,6 +125,8 @@ class Module {
      */
     [[nodiscard]] std::vector<Entity*> entities() const;
 
+    [[nodiscard]] std::vector<Entity*> explicitly_used_entities() const;
+
     template <typename T> std::vector<T*> get_entities() const {
         std::vector<T*> entities;
         collect_entities_from_scope(entities, public_scope_.get());

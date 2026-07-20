@@ -44,6 +44,7 @@ nav = [
         ]},
         { "Reference" = [
             { "index.md" = "Internal/Reference/index.md" },
+            { "AbortTraversalException" = "Internal/Reference/AbortTraversalException.md" },
             { "Address" = "Internal/Reference/Address.md" },
             { "AddressingMode" = "Internal/Reference/AddressingMode.md" },
             { "AddressingModeMatcher" = "Internal/Reference/AddressingModeMatcher.md" },
@@ -69,6 +70,7 @@ nav = [
             { "ChecksumComputation" = "Internal/Reference/ChecksumComputation.md" },
             { "Constant" = "Internal/Reference/Constant.md" },
             { "ConstantExpression" = "Internal/Reference/ConstantExpression.md" },
+            { "CurrentObjectExpression" = "Internal/Reference/CurrentObjectExpression.md" },
             { "DataBody" = "Internal/Reference/DataBody.md" },
             { "DefinedExpression" = "Internal/Reference/DefinedExpression.md" },
             { "EmptyBody" = "Internal/Reference/EmptyBody.md" },

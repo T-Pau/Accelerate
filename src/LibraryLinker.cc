@@ -42,16 +42,6 @@ const unsigned int LibraryLinker::format_version_minor = 0;
 
 const std::string& LibraryLinker::library_extension = "lib";
 
-void LibraryLinker::link_sub() {
-    auto entities = module().entities();
-
-    auto order = EvaluationOrder::order(entities);
-
-    for (auto* entity : order) {
-        entity->evaluate();
-    }
-}
-
 void LibraryLinker::output(const std::filesystem::path& file_name) {
     auto stream = std::ofstream(file_name);
 

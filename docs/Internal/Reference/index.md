@@ -79,6 +79,9 @@ These classes represent expressions, which are used in various places in a progr
 ### [ConstantExpression](ConstantExpression.md)
 ::: ConstantExpression.@brief
 
+### [CurrentObjectExpression](CurrentObjectExpression.md)
+::: CurrentObjectExpression.@brief
+
 ### [DefinedExpression](DefinedExpression.md)
 ::: DefinedExpression.@brief
 
@@ -282,6 +285,9 @@ These classes are not yet sorted into the above categories.
 
 !!! TODO
     Sort the classes into categories, creating new categories as needed.
+
+### [AbortTraversalException](AbortTraversalException.md)
+::: AbortTraversalException.@brief
 
 ### [Constant](Constant.md)
 ::: Constant.@brief

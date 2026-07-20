@@ -38,25 +38,31 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "Body.h"
 #include "SizeRange.h"
+#include "Visibility.h"
 
 using namespace tpau::cpp_kernal;
 
 /**
  * @brief Represents a label, which is a position in the code: `label:` or `:`.
  */
-class LabelBody: public BodyElement {
-public:
-    static Body create(const Location& location, Symbol name) {return Body(std::make_shared<LabelBody>(location, name));}
+class LabelBody : public BodyElement {
+  public:
+    static Body create(const Location& location, Symbol name = {}, Visibility visibility = Visibility::ENTITY) { return Body(std::make_shared<LabelBody>(location, visibility, name)); }
 
-    explicit LabelBody(const Location& location, Symbol name): BodyElement(location, SizeRange(0)), name(name) {}
+    explicit LabelBody(const Location& location, Visibility visibility, Symbol name) : BodyElement(location, SizeRange(0)), visibility(visibility), name(name) {}
 
-    void encode(std::string &bytes, const Memory* memory) const override {}
-    [[nodiscard]] std::shared_ptr<BodyElement> clone() const override {throw Exception("can't clone label");}
+    void enter_names(Scope* scope, Entity* containing_entity) override;
+
+    void encode(std::string& bytes, const Memory* memory) const override {}
+
+    [[nodiscard]] std::shared_ptr<BodyElement> clone() const override { throw Exception("can't clone label"); }
+
     [[nodiscard]] std::optional<Body> evaluate(const EvaluationContext& context) override;
     void resolve(Scope* scope, Entity* containing_entity) override;
 
-    void serialize(std::ostream &stream, const std::string& prefix) const override;
+    void serialize(std::ostream& stream, const std::string& prefix) const override;
 
+    Visibility visibility;
     Symbol name;
 };
 

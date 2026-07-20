@@ -28,6 +28,7 @@ add_library(xlr8-library STATIC
         Expression/BaseExpression.cc
         Expression/BinaryExpression.cc
         Expression/ConstantExpression.cc
+        Expression/CurrentObjectExpression.cc
         Expression/DefinedExpression.cc
         Expression/EntityExpression.cc
         Expression/ExistsExpression.cc

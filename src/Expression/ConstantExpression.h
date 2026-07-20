@@ -34,30 +34,37 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "Expression/EntityExpression.h"
 #include "Entity/Constant.h"
+#include "Expression/EntityExpression.h"
 
 /**
  * @brief Represents an expression referring to a constant.
  */
-class ConstantExpression: public EntityExpression {
-public:
-    explicit ConstantExpression(const Location& location, Constant* constant): EntityExpression(location, constant) {}
-    [[nodiscard]] static Expression create(const Location& location, Constant* constant) {return *simplify(location, constant, true);}
+class ConstantExpression : public EntityExpression {
+  public:
+    explicit ConstantExpression(const Location& location, Constant* constant) : EntityExpression(location, constant) {}
 
-    [[nodiscard]] bool has_value() const override {return constant()->has_value();}
-    [[nodiscard]] std::optional<Value> value() const override {return constant()->value.value();}
-    [[nodiscard]] std::optional<Value::Type> type() const override {return constant()->value.type();}
-    [[nodiscard]] std::optional<Expression> evaluate(const EvaluationContext& context) override {return simplify(location, constant(), false);}
+    [[nodiscard]] static Expression create(const Location& location, Constant* constant) { return *simplify(location, constant, true); }
 
-protected:
-    [[nodiscard]] std::optional<Value> maximum_value() const override {return constant()->value.maximum_value();}
-    [[nodiscard]] std::optional<Value> minimum_value() const override {return constant()->value.minimum_value();}
+    [[nodiscard]] bool has_value() const override { return constant()->has_value(); }
 
-private:
+    [[nodiscard]] std::optional<Value> value() const override { return constant()->value.value(); }
+
+    [[nodiscard]] std::optional<Value::Type> type() const override { return constant()->value.type(); }
+
+    [[nodiscard]] std::optional<Expression> evaluate(const EvaluationContext& context) override { return simplify(location, constant(), false); }
+
+    [[nodiscard]] bool needs_cloning() override { return false; }
+
+    Constant* constant() const { return static_cast<Constant*>(entity); }
+
+  protected:
+    [[nodiscard]] std::optional<Value> maximum_value() const override { return constant()->value.maximum_value(); }
+
+    [[nodiscard]] std::optional<Value> minimum_value() const override { return constant()->value.minimum_value(); }
+
+  private:
     static std::optional<Expression> simplify(const Location& location, Constant* constant, bool always_create);
-
-    Constant* constant() const {return static_cast<Constant*>(entity);}
 };
 
 #endif // HAD_XLR8_CONSTANT_EXPRESSION_H

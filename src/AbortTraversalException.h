@@ -1,9 +1,9 @@
-#ifdef IN_XLR8_LIBRARY_LINKER_H
+#ifdef IN_XLR8_ABORT_TRAVERSAL_EXCEPTION_H
 #error "circular include file dependency detected"
 #endif
-#define IN_XLR8_LIBRARY_LINKER_H
-#ifndef HAD_XLR8_LIBRARY_LINKER_H
-#define HAD_XLR8_LIBRARY_LINKER_H
+#define IN_XLR8_ABORT_TRAVERSAL_EXCEPTION_H
+#ifndef HAD_XLR8_ABORT_TRAVERSAL_EXCEPTION_H
+#define HAD_XLR8_ABORT_TRAVERSAL_EXCEPTION_H
 
 /*
 Copyright (C) Dieter Baron
@@ -34,31 +34,13 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "Linker.h"
+#include <exception>
 
-class LibraryLinker : public Linker {
+/// @brief Exception used to abort traversal.
+class AbortTraversalException : public std::exception {
   public:
-    LibraryLinker(Symbol name, const Target* target = nullptr) : Linker(name, target) {}
-
-    void output(const std::filesystem::path& file_name) override;
-
-    const std::string& output_extension() const override { return library_extension; }
-
-  protected:
-    [[nodiscard]] virtual std::vector<Entity*> root_entities() override { return module().entities(); }
-
-  private:
-    template <typename T> void output_entities(std::ostream& stream) {
-        auto entities = sorted(module().get_entities<T>(), [](const T* a, const T* b) { return a->name < b->name; });
-        for (const auto& entity : entities) {
-            entity->serialize(stream);
-        }
-    }
-
-    static const unsigned int format_version_major;
-    static const unsigned int format_version_minor;
-    static const std::string& library_extension;
+    const char* what() const noexcept override { return ""; }
 };
 
-#endif // HAD_XLR8_LIBRARY_LINKER_H
-#undef IN_XLR8_LIBRARY_LINKER_H
+#endif // HAD_XLR8_ABORT_TRAVERSAL_EXCEPTION_H
+#undef IN_XLR8_ABORT_TRAVERSAL_EXCEPTION_H

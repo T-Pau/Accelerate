@@ -41,7 +41,7 @@ using namespace tpau::cpp_kernal;
 
 std::optional<Expression> VariableExpression::evaluate(const EvaluationContext& context) {
     if (!expression) {
-        // throw LocationException(location, "internal error: expression not set for variable {}", symbol);
+        throw LocationException(location, "internal error: expression not set for variable {}", symbol);
         return {};
     }
 

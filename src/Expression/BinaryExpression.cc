@@ -27,22 +27,24 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "BinaryExpression.h"
+#include "Expression/BinaryExpression.h"
 
-#include "ObjectNameExpression.h"
 #include <tpau-cpp-kernal/Exception.h>
 
-#include "UnaryExpression.h"
-#include "ValueExpression.h"
+#include "Expression/ConstantExpression.h"
+#include "Expression/ObjectExpression.h"
+#include "Expression/UnaryExpression.h"
+#include "Expression/ValueExpression.h"
 
 using namespace tpau::cpp_kernal;
 
 // Keep in sync with Expression::BinaryOperation
+// clang-format off
 std::vector<std::string> BinaryExpression::operation_names = {
     "+",
     "&",
-    "|",
-    "^",
+    "|", 
+    "^", 
     "/",
     "=",
     ">",
@@ -50,7 +52,7 @@ std::vector<std::string> BinaryExpression::operation_names = {
     "<",
     "<=",
     "&&",
-    "||",
+    "||", 
     "%",
     "*",
     "!=",
@@ -58,14 +60,11 @@ std::vector<std::string> BinaryExpression::operation_names = {
     ">>",
     "-"
 };
+// clang-format on
 
-std::optional<Expression> BinaryExpression::evaluate_process(const EvaluationContext& context) {
-    return simplify(location, left, operation, right, false);
-}
+std::optional<Expression> BinaryExpression::evaluate_process(const EvaluationContext& context) { return simplify(location, left, operation, right, false); }
 
-void BinaryExpression::serialize_sub(std::ostream& stream) const {
-    stream << '(' << left << operation_name() << right << ')';
-}
+void BinaryExpression::serialize_sub(std::ostream& stream) const { stream << '(' << left << operation_name() << right << ')'; }
 
 std::optional<Expression> BinaryExpression::simplify(const Location& location, const Expression& left, Operation operation, const Expression& right, bool always_create) {
     // TODO: check that types are compatible
@@ -170,7 +169,7 @@ std::optional<Expression> BinaryExpression::simplify(const Location& location, c
                             }
                             else if (left_binary->operation == Operation::SUBTRACT) {
                                 // (N - A) + B -> N + (B-A)
-                                auto new_right = ValueExpression::create({left_binary->right.location(), right.location()}, right_value -left_right_value);
+                                auto new_right = ValueExpression::create({left_binary->right.location(), right.location()}, right_value - left_right_value);
                                 return BinaryExpression::create(location, left_binary->left, Operation::ADD, new_right);
                             }
                         }
@@ -287,6 +286,27 @@ std::optional<Expression> BinaryExpression::simplify(const Location& location, c
                     // 0 - N -> -N
                     return UnaryExpression::create(location, UnaryExpression::Operation::MINUS, right);
                 }
+
+                // These special cases are for resolving relative addressing within an object.
+
+                /*
+                  .pc label at start of object:
+                    address = object
+                    .pc = object
+                    (address-.pc)
+                */
+                if (left.is<ConstantExpression>() && right.is<ConstantExpression>()) {
+                    auto left_constant = left.as<ConstantExpression>()->constant();
+                    auto right_constant = right.as<ConstantExpression>()->constant();
+
+                    auto left_object = left_constant->value.as<ObjectExpression>();
+                    auto right_object = right_constant->value.as<ObjectExpression>();
+                    if (left_object && right_object) {
+                        return ValueExpression::create(location, Value(uint64_t{0}));
+                    }
+                }
+
+#if 0
                 // This special case is for resolving relative addressing within an object.
                 if (left.is<BinaryExpression>() && right.is<BinaryExpression>()) {
                     // (object_name + N) - (object_name + M) -> N - M
@@ -300,7 +320,6 @@ std::optional<Expression> BinaryExpression::simplify(const Location& location, c
                         if ((!left_variable.empty() && left_variable == right_variable) || (left_binary->left.is<ObjectNameExpression>() && right_binary->left.is<ObjectNameExpression>())) {
                             return BinaryExpression::create(location, left_binary->right, operation, right_binary->right);
                         }
-
                     }
                 }
                 else if (right.is<BinaryExpression>()) {
@@ -335,6 +354,7 @@ std::optional<Expression> BinaryExpression::simplify(const Location& location, c
                         return ValueExpression::create(location, Value(uint64_t{0}));
                     }
                 }
+#endif
                 break;
             }
 
@@ -512,7 +532,6 @@ std::optional<Value::Type> BinaryExpression::type() const {
 
     throw Exception("internal error: invalid binary operation {}", static_cast<int>(operation));
 }
-
 
 const std::string& BinaryExpression::operation_name(Operation operation) {
     if (static_cast<size_t>(operation) >= operation_names.size()) {

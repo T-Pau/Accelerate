@@ -29,6 +29,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "BaseExpression.h"
 
+#include "AbortTraversalException.h"
 #include "Expression.h"
 
 std::ostream& operator<<(std::ostream& stream, const std::shared_ptr<BaseExpression>& node) {
@@ -36,38 +37,37 @@ std::ostream& operator<<(std::ostream& stream, const std::shared_ptr<BaseExpress
     return stream;
 }
 
-
-std::ostream& operator<< (std::ostream& stream, const BaseExpression& node) {
+std::ostream& operator<<(std::ostream& stream, const BaseExpression& node) {
     node.serialize(stream);
     return stream;
 }
 
-
-void BaseExpression::serialize(std::ostream &stream) const {
-    serialize_sub(stream);
-}
-
+void BaseExpression::serialize(std::ostream& stream) const { serialize_sub(stream); }
 
 std::optional<Expression> BaseExpression::evaluate(const EvaluationContext& context) {
-    traverse([&](Expression& sub_expression) {
-        sub_expression.evaluate(context);
-    });
+    traverse([&](Expression& sub_expression) { sub_expression.evaluate(context); });
     return evaluate_process(context);
 }
 
 void BaseExpression::resolve(Scope* scope, Entity* containing_entity) {
-    traverse([&](Expression& sub_expression) {
-        sub_expression.resolve(scope, containing_entity);
-    });
+    traverse([&](Expression& sub_expression) { sub_expression.resolve(scope, containing_entity); });
 }
 
 void BaseExpression::expand_calls() {
-    traverse([&](Expression& sub_expression) {
-        sub_expression.expand_calls();
-    });
+    traverse([&](Expression& sub_expression) { sub_expression.expand_calls(); });
 }
 
+std::optional<Expression> BaseExpression::evaluate_process(const EvaluationContext& context) { return {}; }
 
-std::optional<Expression> BaseExpression::evaluate_process(const EvaluationContext& context) {
-    return {};
+bool BaseExpression::children_need_cloning() {
+    try {
+        traverse([&](Expression& child) {
+            if (child.needs_cloning()) {
+                throw AbortTraversalException();
+            }
+        });
+    } catch (const AbortTraversalException&) {
+        return true;
+    }
+    return false;
 }

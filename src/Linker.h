@@ -85,6 +85,7 @@ class Linker {
      */
     bool set_target_from_module();
 
+
     void link();
     void link_new();
     virtual void output(const std::filesystem::path& file_name) = 0;
@@ -93,9 +94,11 @@ class Linker {
     const Target* target = nullptr;
 
   protected:
-    virtual void link_sub() = 0;
-    // TODO
-    // virtual UsedEntities roots() = 0;
+    [[nodiscard]] virtual std::vector<Entity*> root_entities() = 0;
+
+    virtual void link_sub() {}
+
+    std::vector<Entity*> entities;
 
     Module module_;
 };

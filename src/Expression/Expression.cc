@@ -155,3 +155,12 @@ std::optional<bool> Expression::has_type(Value::Type type) const {
     }
     return Value::is_subtype(*expression_type, type);
 }
+
+Expression Expression::clone() const {
+    if (expression->needs_cloning()) {
+        return Expression{expression->clone()};
+    }
+    else {
+        return *this;
+    }
+}

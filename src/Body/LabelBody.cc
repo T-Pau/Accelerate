@@ -31,9 +31,14 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <iostream>
 
-#include "Body.h"
+#include "Body/Body.h"
+#include "Entity/Constant.h"
+#include "Expression/BinaryExpression.h"
+#include "Expression/LabelOffsetExpression.h"
+#include "Expression/VariableExpression.h"
+#include "Scope.h"
 
-void LabelBody::serialize(std::ostream &stream, const std::string& prefix) const {
+void LabelBody::serialize(std::ostream& stream, const std::string& prefix) const {
     if (prefix.ends_with("  ")) {
         stream << prefix.substr(0, prefix.size() - 2);
     }
@@ -74,7 +79,18 @@ std::optional<Body> LabelBody::evaluate(const EvaluationContext& context) {
 #endif
 }
 
-
 void LabelBody::resolve(Scope* scope, Entity* containing_entity) {
     // TODO: resolve unnamed label
+}
+
+void LabelBody::enter_names(Scope* scope, Entity* containing_entity) {
+    auto offset_expression = LabelOffsetExpression::create(location, containing_entity->name, name, this);
+    auto label_expression = BinaryExpression::create(location, VariableExpression::create(location, containing_entity->name), BinaryExpression::Operation::ADD, offset_expression);
+
+    if (!name.empty()) {
+        scope->add(std::make_unique<Constant>(location, name, visibility, containing_entity->get_scope(), false, label_expression));
+    }
+    else {
+        scope->add_unnamed_label(location, label_expression);
+    }
 }

@@ -41,20 +41,23 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /**
  * @brief Represents a defined expression, which checks if a preprocessor constant is defined: `.defined(USE_FEATURE)`.
  */
-class DefinedExpression: public BaseExpression {
-public:
-    explicit DefinedExpression(const Location& location, Symbol symbol): BaseExpression(location), symbol{symbol} {}
+class DefinedExpression : public BaseExpression {
+  public:
+    explicit DefinedExpression(const Location& location, Symbol symbol, std::optional<bool> defined = {}) : BaseExpression(location), symbol{symbol}, defined{defined} {}
 
     static Expression create(const Location& location, const std::vector<Expression>& arguments);
 
     [[nodiscard]] std::optional<Expression> evaluate(const EvaluationContext& context) override;
-    [[nodiscard]] std::optional<Value::Type> type() const override {return Value::BOOLEAN;}
 
-protected:
+    [[nodiscard]] std::optional<Value::Type> type() const override { return Value::BOOLEAN; }
+
+    [[nodiscard]] bool needs_cloning() override { return false; }
+
+  protected:
     void serialize_sub(std::ostream& stream) const override;
     void resolve(Scope* scope, Entity* containing_entity) override;
 
-private:
+  private:
     Symbol symbol;
     std::optional<bool> defined;
 };

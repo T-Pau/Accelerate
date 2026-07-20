@@ -34,34 +34,34 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+#include "Entity/Function.h"
 #include "Expression/Expression.h"
 #include "FileTokenizer.h"
-#include "Entity/Function.h"
 
 /**
  * Expression representing a function call: `function_name(arg1, arg2, ...)`.
  */
-class FunctionExpression: public BaseExpression {
-public:
+class FunctionExpression : public BaseExpression {
+  public:
     /**
      * Create a function expression.
-     * 
+     *
      * @param location The location of the expression in the source code.
      * @param name The name of the function.
      * @param arguments The arguments to the function.
      */
-    FunctionExpression(const Location& location, Symbol name, std::vector<Expression> arguments): BaseExpression(location), name(name), arguments(std::move(arguments)) {}
+    FunctionExpression(const Location& location, Symbol name, std::vector<Expression> arguments) : BaseExpression(location), name(name), arguments(std::move(arguments)) {}
 
     /**
      * Set up tokenizer for parsing function expressions.
-     * 
+     *
      * @param tokenizer The tokenizer to set up.
      */
     static void setup(FileTokenizer& tokenizer);
 
     /**
      * Create a function expression.
-     * 
+     *
      * @param location The location of the expression in the source code.
      * @param name The name of the function.
      * @param arguments The arguments to the function.
@@ -69,13 +69,15 @@ public:
      */
     static Expression create(const Location& location, Symbol name, const std::vector<Expression>& arguments);
 
-protected:
+    [[nodiscard]] std::shared_ptr<BaseExpression> clone() const override;
+
+  protected:
     void traverse(std::function<void(Expression&)> callable) override;
     void serialize_sub(std::ostream& stream) const override;
     void resolve(Scope* scope, Entity* containing_entity) override;
     void expand_calls() override;
 
-private:
+  private:
     /// @brief The name of the function being called.
     Symbol name;
 

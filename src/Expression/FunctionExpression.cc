@@ -29,14 +29,14 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "Expression/FunctionExpression.h"
 
+#include "EvaluationContext.h"
+#include "Expression.h"
 #include "Expression/DefinedExpression.h"
 #include "Expression/ExistsExpression.h"
 #include "Expression/FillExpression.h"
 #include "Expression/InRangeExpression.h"
 #include "Expression/MinMaxExpression.h"
 #include "Expression/SizeofExpression.h"
-#include "EvaluationContext.h"
-#include "Expression.h"
 #include "ObjectFileParser.h"
 #include "Scope.h"
 
@@ -85,8 +85,10 @@ Expression FunctionExpression::create(const Location& location, Symbol name, con
     return Expression(std::make_shared<FunctionExpression>(location, name, arguments));
 }
 
-    
-
+std::shared_ptr<BaseExpression> FunctionExpression::clone() const {
+    auto new_arguments = arguments | std::views::transform([](const Expression& argument) { return argument.clone(); });
+    return std::make_shared<FunctionExpression>(location, name, std::vector<Expression>(new_arguments.begin(), new_arguments.end()));
+}
 
 void FunctionExpression::resolve(Scope* scope, Entity* containing_entity) {
     BaseExpression::resolve(scope, containing_entity);

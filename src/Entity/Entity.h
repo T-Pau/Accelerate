@@ -56,6 +56,8 @@ class Entity {
 
     template <typename T> [[nodiscard]] T* as() { return dynamic_cast<T*>(this); }
 
+    template <typename T> [[nodiscard]] const T* as() const { return dynamic_cast<const T*>(this); }
+
     template <typename T> [[nodiscard]] bool is() const { return as<T>() != nullptr; }
 
     [[nodiscard]] bool operator<(const Entity& other) const { return name < other.name; }
@@ -64,6 +66,8 @@ class Entity {
      * @brief Resolve names in the entity.
      */
     void resolve();
+
+    virtual void expand_calls() {}
 
     void evaluate();
     [[nodiscard]] EvaluationResult evaluate(EvaluationContext::EvaluationType type);

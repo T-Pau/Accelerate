@@ -48,6 +48,7 @@ class ArgumentExpression : public BaseExpression {
 
     static Expression create(const Location& location, Symbol symbol) { return Expression(std::make_shared<ArgumentExpression>(location, symbol)); }
 
+    [[nodiscard]] bool needs_cloning() override { return false; }
 
   protected:
     void serialize_sub(std::ostream& stream) const override;

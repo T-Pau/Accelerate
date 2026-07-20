@@ -32,39 +32,27 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <tpau-cpp-kernal/Exception.h>
 #include <tpau-cpp-kernal/FileReader.h>
 
+#include "EvaluationOrder.h"
 #include "LibraryLinker.h"
 #include "ProgramLinker.h"
 #include "Scope.h"
 
 using namespace tpau::cpp_kernal;
 
-void Linker::link() { link_sub(); }
+void Linker::link() {
+    auto roots = root_entities();
+    entities = EvaluationOrder::order(roots);
 
-void Linker::link_new() {
-#if 0
-    auto entities = UsedEntities{};
+    DiagnosticOutput::global.exit_if_failed();
 
-    auto new_entities = roots();
-    while (!new_entities.empty()) {
-        entities.insert(new_entities);
-        auto next_entities = UsedEntities{};
-        for (auto& [entity, _] : new_entities) {
-            auto result = entity->evaluate(EvaluationContext::RESOLVE);
-            // next_entities.insert(result.used_entities);
-        }
-        // TODO: Handle unresolved symbols? Or handle them later when all ifs have been resolved?
-        new_entities = std::move(next_entities);
+    for (auto* entity : entities) {
+        entity->expand_calls();
+        entity->evaluate();
     }
 
-    // sort constants
+    DiagnosticOutput::global.exit_if_failed();
 
-    // propagate constants
-    //   all ifs must be resolved
-
-    // if creating program
-    //     place objects
-    //     propagate constants
-#endif
+    link_sub();
 }
 
 void Linker::set_target(const Target* new_target) {

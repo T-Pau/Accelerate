@@ -1,9 +1,9 @@
-#ifdef IN_XLR8_EXISTS_EXPRESSION_H
+#ifdef IN_XLR8_CURRENT_OBJECT_EXPRESSION_H
 #error "circular include file dependency detected"
 #endif
-#define IN_XLR8_EXISTS_EXPRESSION_H
-#ifndef HAD_XLR8_EXISTS_EXPRESSION_H
-#define HAD_XLR8_EXISTS_EXPRESSION_H
+#define IN_XLR8_CURRENT_OBJECT_EXPRESSION_H
+#ifndef HAD_XLR8_CURRENT_OBJECT_EXPRESSION_H
+#define HAD_XLR8_CURRENT_OBJECT_EXPRESSION_H
 
 /*
 Copyright (C) Dieter Baron
@@ -34,34 +34,44 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include <vector>
-
 #include "BaseExpression.h"
 
+#include "Expression/Expression.h"
+
 /**
- * @brief Represents an exists expression, which checks if a name refers to a constant or object: `.exists(hook_function)`.
+ * @brief Represents an expression referring to the current object.
  */
-class ExistsExpression : public BaseExpression {
+class CurrentObjectExpression : public BaseExpression {
   public:
-    explicit ExistsExpression(const Location& location, Symbol symbol) : BaseExpression(location), symbol{symbol} {}
+    /**
+     * @brief Creates a new CurrentObjectExpression.
+     *
+     * @param location The location of the expression in the source code.
+     * @return A new CurrentObjectExpression.
+     */
+    static Expression create(const Location& location) { return Expression(std::make_shared<CurrentObjectExpression>(location)); }
 
-    static Expression create(const Location& location, const std::vector<Expression>& arguments);
+    /**
+     * @brief Constructs a CurrentObjectExpression.
+     *
+     * @param location The location of the expression in the source code.
+     */
+    CurrentObjectExpression(const Location& location) : BaseExpression(location) {}
 
-    [[nodiscard]] std::optional<Expression> evaluate(const EvaluationContext& context) override;
-
-    [[nodiscard]] std::optional<Value::Type> type() const override { return Value::BOOLEAN; }
-
-    [[nodiscard]] bool needs_cloning() override { return false; }
-
-  protected:
-    void serialize_sub(std::ostream& stream) const override;
     void resolve(Scope* scope, Entity* containing_entity) override;
 
+    bool needs_cloning() override { return false; }
+
+    [[nodiscard]] std::optional<Expression> evaluate(const EvaluationContext& context) override;
+    void serialize_sub(std::ostream& stream) const override;
+
+    [[nodiscard]] std::optional<Value::Type> type() const override { return Value::UNSIGNED; }
+
   private:
-    Symbol symbol;
-    std::optional<bool> exists;
+    Expression variable_expression;
+
+    static Symbol current_object_symbol;
 };
 
-
-#endif // HAD_XLR8_EXISTS_EXPRESSION_H
-#undef IN_XLR8_EXISTS_EXPRESSION_H
+#endif // HAD_XLR8_CURRENT_OBJECT_EXPRESSION_H
+#undef IN_XLR8_CURRENT_OBJECT_EXPRESSION_H

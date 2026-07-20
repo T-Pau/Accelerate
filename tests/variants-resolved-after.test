@@ -21,7 +21,10 @@ file file.lib {} <inline>
     visibility: public
     section: code
     body <
-        .data $85, ptr:1
+        .scope {
+            address = ptr
+            .data $85, address:1
+        }
     >
 }
 end-of-inline-data

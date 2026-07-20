@@ -47,7 +47,7 @@ class ProgramLinker : public Linker {
 
   protected:
     void link_sub() override;
-    // UsedEntities roots() override;
+    [[nodiscard]] virtual std::vector<Entity*> root_entities() override;
 
   private:
     Body output_body;

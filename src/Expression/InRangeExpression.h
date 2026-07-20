@@ -39,21 +39,21 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /**
  * Expression representing a check if a value is in a certain range.
  */
-class InRangeExpression: public BaseExpression {
-public:
+class InRangeExpression : public BaseExpression {
+  public:
     /**
      * Create an in-range expression.
-     * 
+     *
      * @param location The location of the expression in the source code.
      * @param lower_bound The lower bound of the range.
      * @param upper_bound The upper bound of the range.
      * @param argument The value to check.
      */
-    InRangeExpression(const Location& location, const Expression& lower_bound, const Expression& upper_bound, const Expression& argument): BaseExpression(location), lower_bound(std::move(lower_bound)), upper_bound(std::move(upper_bound)), argument(std::move(argument)) {}
+    InRangeExpression(const Location& location, const Expression& lower_bound, const Expression& upper_bound, const Expression& argument) : BaseExpression(location), lower_bound(std::move(lower_bound)), upper_bound(std::move(upper_bound)), argument(std::move(argument)) {}
 
     /**
      * Create an in-range expression from a list of arguments.
-     * 
+     *
      * @param location The location of the expression in the source code.
      * @param arguments The list of arguments.
      * @return The created expression.
@@ -62,26 +62,36 @@ public:
 
     /**
      * Create an in-range expression from its components.
-     * 
+     *
      * @param location The location of the expression in the source code.
      * @param lower_bound The lower bound of the range.
      * @param upper_bound The upper bound of the range.
      * @param argument The value to check.
      * @return The created expression.
      */
-    [[nodiscard]] Expression static create(const Location& location, const Expression& lower_bound, const Expression& upper_bound, const Expression& argument) {return *simplify(location, lower_bound, upper_bound, argument, true);}
+    [[nodiscard]] Expression static create(const Location& location, const Expression& lower_bound, const Expression& upper_bound, const Expression& argument) { return *simplify(location, lower_bound, upper_bound, argument, true); }
 
-    [[nodiscard]] std::optional<Value> minimum_value() const override {return {};}
-    [[nodiscard]] std::optional<Value> maximum_value() const override {return {};}
-    [[nodiscard]] std::optional<Value::Type> type() const override {return Value::BOOLEAN;}
+    [[nodiscard]] std::optional<Value> minimum_value() const override { return {}; }
 
-protected:
-    void traverse(std::function<void(Expression&)> callable) override {callable(lower_bound); callable(upper_bound); callable(argument);}
+    [[nodiscard]] std::optional<Value> maximum_value() const override { return {}; }
+
+    [[nodiscard]] std::optional<Value::Type> type() const override { return Value::BOOLEAN; }
+
+    [[nodiscard]] bool needs_cloning() override { return false; }
+
+    [[nodiscard]] std::shared_ptr<BaseExpression> clone() const override { return std::make_shared<InRangeExpression>(location, lower_bound.clone(), upper_bound.clone(), argument.clone()); }
+
+  protected:
+    void traverse(std::function<void(Expression&)> callable) override {
+        callable(lower_bound);
+        callable(upper_bound);
+        callable(argument);
+    }
 
     [[nodiscard]] std::optional<Expression> evaluate_process(const EvaluationContext& context) override;
     void serialize_sub(std::ostream& stream) const override;
 
-private:
+  private:
     static std::optional<Expression> simplify(const Location& location, const Expression& lower_bound, const Expression& upper_bound, const Expression& argument, bool always_create);
 
     /// @brief The lower bound of the range.

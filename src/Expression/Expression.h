@@ -152,7 +152,23 @@ class Expression {
      */
     [[nodiscard]] Symbol variable_name() const;
 
-    [[nodiscard]] Expression clone() const { return Expression{expression->clone()}; }
+    /**
+     * @brief Create a deep copy of the expression.
+     *
+     * If the expression does not change during evaluation, it may be reused instead of cloned.
+     *
+     * @return A new Expression that is a deep copy of this one.
+     */
+    [[nodiscard]] Expression clone() const;
+
+    /**
+     * @brief Check if the expression needs cloning.
+     *
+     * If calling `evaluate()` never changes any members of the expression, and none of its children need cloning, it can be reused instead of cloned.
+     *
+     * @return `true` if the expression needs cloning, `false` if it can be reused.
+     */
+    [[nodiscard]] bool needs_cloning() { return expression->needs_cloning() || expression->children_need_cloning(); }
 
     /**
      * @brief Resolve all names in the expression.
