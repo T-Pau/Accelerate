@@ -34,6 +34,7 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+#include "Base.h"
 #include "EvaluationContext.h"
 #include "StructuredValue.h"
 #include "Unresolved.h"
@@ -48,7 +49,7 @@ class Scope;
 /**
  * @brief Represents an entity in the source code, which can be a constant, object, macro, or function.
  */
-class Entity {
+class Entity : public Base {
   public:
     Entity(const Location& location, Symbol name, std::shared_ptr<Scope> parent_scope, const std::shared_ptr<StructuredValue>& definition);
     Entity(const Location& location, Symbol name, Visibility visibility, std::shared_ptr<Scope> parent_scope, bool default_only = false);

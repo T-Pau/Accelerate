@@ -37,6 +37,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Expression/VoidExpression.h"
 #include "ExpressionParser.h"
 
+
 using namespace tpau::cpp_kernal;
 
 std::shared_ptr<BaseExpression> Expression::void_expression = std::make_shared<VoidExpression>(Location());
@@ -106,6 +107,7 @@ Expression::Expression(const Token& token) {
 #endif
 
 void Expression::evaluate(const EvaluationContext& context) {
+    TRACE_BEGIN_INSTANCE_PRINT(expression, "evaluating", "");
     handle_translation_errors(
         *expression,
         [&]() {
@@ -115,6 +117,7 @@ void Expression::evaluate(const EvaluationContext& context) {
             }
         },
         context.entity);
+    TRACE_END_INSTANCE_PRINT(expression, "evaluating", "");
 }
 
 void Expression::serialize(std::ostream& stream) const {
@@ -139,7 +142,9 @@ std::ostream& operator<<(std::ostream& stream, const Expression& expression) {
 }
 
 void Expression::resolve(Scope* scope, Entity* containing_entity) {
+    TRACE_BEGIN_INSTANCE_PRINT(expression, "resolving", "");
     handle_translation_errors(*expression, [&]() { expression->resolve(scope, containing_entity); }, containing_entity);
+    TRACE_END_INSTANCE_PRINT(expression, "resolving", "");
 }
 
 void Expression::expand_calls() {

@@ -110,6 +110,7 @@ bool Entity::check_unresolved(const std::unordered_set<Symbol>& unresolved, Unre
 }
 
 void Entity::evaluate() {
+    TRACE_BEGIN("evaluating", "{}", name);
     auto result = EvaluationResult{};
     auto context = evaluation_context(result);
     try {
@@ -119,6 +120,7 @@ void Entity::evaluate() {
         DiagnosticOutput::global.error(location, ex);
         // TODO: throw empty expression?
     }
+    TRACE_END("evaluating", "{}", name);
 }
 
 EvaluationResult Entity::evaluate(EvaluationContext::EvaluationType type) {
@@ -148,7 +150,9 @@ void Entity::resolve() {
     }
     resolved = true;
 
+    TRACE_BEGIN("resolving", "{}", name);
     DiagnosticOutput::global.log_exceptions([this]() { resolve_implementation(); });
+    TRACE_END("resolving", "{}", name);
 }
 
 std::ostream& operator<<(std::ostream& stream, const Entity& entity) {

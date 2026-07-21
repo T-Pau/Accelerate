@@ -107,6 +107,7 @@ void Body::append(const Body& new_element) {
 }
 
 void Body::evaluate(const EvaluationContext& context) {
+    TRACE_BEGIN_INSTANCE(element, "evaluating", "");
     handle_translation_errors(
         *element,
         [&] {
@@ -115,6 +116,7 @@ void Body::evaluate(const EvaluationContext& context) {
             }
         },
         context.entity);
+    TRACE_END_INSTANCE(element, "evaluating", "");
 }
 
 std::optional<Body> Body::back() const {
@@ -146,8 +148,10 @@ void Body::expand_calls() {
 }
 
 void Body::enter_names(Scope* scope, Entity* containing_entity) {
+    TRACE_BEGIN_INSTANCE(element, "entering names", "");
     // TODO: pass containing_entity to handle_translation_errors
     handle_translation_errors(*element, [&] { element->enter_names(scope, containing_entity); });
+    TRACE_END_INSTANCE(element, "entering names", "");
 }
 
 bool Body::fully_evaluated() {

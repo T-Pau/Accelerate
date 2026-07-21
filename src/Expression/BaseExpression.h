@@ -38,6 +38,8 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <tpau-cpp-kernal/LocationException.h>
 #include <tpau-cpp-kernal/Value.h>
 
+#include "Base.h"
+
 using namespace tpau::cpp_kernal;
 
 class Entity;
@@ -49,7 +51,7 @@ class Scope;
 /**
  * Abstract base class for all expressions.
  */
-class BaseExpression {
+class BaseExpression : public Base {
   public:
     /// @brief Initialize a BaseExpression with default values.
     BaseExpression() = default;

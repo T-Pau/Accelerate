@@ -41,7 +41,9 @@ using namespace tpau::cpp_kernal;
 
 void Linker::link() {
     auto roots = root_entities();
+    TRACE_BEGIN("ordering", "{} root entities", roots.size());
     entities = EvaluationOrder::order(roots);
+    TRACE_END("ordering", "{} used entities", entities.size());
 
     DiagnosticOutput::global.exit_if_failed();
 

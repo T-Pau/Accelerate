@@ -34,13 +34,14 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+#include "Base.h"
 #include "Target.h"
 #include "UsedEntities.h"
 
 /**
  * @brief The base class to translate a program or library.
  */
-class Linker {
+class Linker : public Base {
   public:
     Linker() = default;
 

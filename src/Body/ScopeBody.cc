@@ -53,13 +53,16 @@ void ScopeBody::serialize(std::ostream& stream, const std::string& prefix) const
 
 void ScopeBody::traverse(std::function<void(Body&)> body_callable, std::function<void(Expression&)> expression_callable) {
     for (auto constant : inner_scope()->get_constants()) {
+        TRACE_BEGIN("traversing scope", "constant {}", constant->name);
         expression_callable(constant->value);
+        TRACE_END("traversing scope", "constant {}", constant->name);
     }
+    TRACE_BEGIN("traversing body", "");
     body_callable(body);
+    TRACE_END("traversing body", "");
 }
 
 std::optional<Body> ScopeBody::evaluate_process(const EvaluationContext& context) {
-    // TODO: if all constants are fully evaluated, we can return the inner body.
     if (scope_fully_evaluated()) {
         return body;
     }
@@ -69,11 +72,15 @@ std::optional<Body> ScopeBody::evaluate_process(const EvaluationContext& context
 void ScopeBody::resolve(Scope* scope, Entity* containing_entity) {
     // Resolve the constants in the outer scope
     for (auto constant : inner_scope()->get_constants()) {
+        TRACE_BEGIN("resolving scope", "constant {}", constant->name);
         constant->value.resolve(scope, containing_entity);
+        TRACE_END("resolving scope", "constant {}", constant->name);
     }
 
     // Resolve the body in the inner scope
+    TRACE_BEGIN("resolving body", "");
     body.resolve(inner_scope().get(), containing_entity);
+    TRACE_END("resolving body", "");
 }
 
 bool ScopeBody::scope_fully_evaluated() {

@@ -36,6 +36,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <optional>
 
+#include "Base.h"
 #include "EvaluationContext.h"
 #include "Memory.h"
 #include "SizeRange.h"
@@ -46,7 +47,7 @@ class CPU;
 /**
  * Abstract base class for all Body types.
  */
-class BodyElement {
+class BodyElement : public Base {
   public:
     /**
      * @brief Construct a BodyElement with unknown location and size.

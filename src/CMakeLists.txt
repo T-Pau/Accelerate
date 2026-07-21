@@ -51,6 +51,7 @@ add_library(xlr8-library STATIC
         AddressingModeMatcher.cc
         ArgumentType.cc
         Assembler.cc
+        Base.cc
         BaseEncoder.cc
         BinaryEncoder.cc
         BodyParser.cc

@@ -64,7 +64,11 @@ class Object : public Entity {
 
     [[nodiscard]] bool has_address() const { return address && address->has_address(); }
 
-    void enter_names() { body.enter_names(scope.get(), this); }
+    void enter_names() {
+        TRACE_BEGIN("entering names", "{}", name);
+        body.enter_names(scope.get(), this);
+        TRACE_END("entering names", "{}", name);
+    }
 
     void resolve_implementation() override;
 
