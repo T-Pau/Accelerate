@@ -211,6 +211,9 @@ void Object::resolve_implementation() {
         reservation_expression->resolve(scope.get(), this);
     }
     body.resolve(scope.get(), this);
+#ifdef TRACE_TRANSLATION
+    std::cerr << body;
+#endif
 }
 
 std::optional<uint64_t> Object::maximum_address() const {

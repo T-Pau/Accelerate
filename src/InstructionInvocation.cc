@@ -219,7 +219,7 @@ InstructionInvocation::Variant::Variant(uint64_t opcode, const AddressingMode& a
 
         seen_arguments.insert(name);
 
-        if (!argument.valid) {
+        if (argument.known_invalid()) {
             valid_ = false;
             return;
         }

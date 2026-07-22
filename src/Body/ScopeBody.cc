@@ -85,5 +85,5 @@ void ScopeBody::resolve(Scope* scope, Entity* containing_entity) {
 
 bool ScopeBody::scope_fully_evaluated() {
     auto constants = inner_scope()->get_constants();
-    return std::all_of(constants.begin(), constants.end(), [](const auto& constant) { return constant->value.has_value(); });
+    return std::all_of(constants.begin(), constants.end(), [](const auto& constant) { return !constant->is_referenced(); });
 }

@@ -108,13 +108,9 @@
 				"/Users/dillo/Projects/T-Pau/Development/Accelerate/share",
 				"--create-library",
 				"--verbose-errors",
-				"--target",
-				"6502",
-				"-o",
-				"a.lib",
 				"a.s"
 			],
-			"cwd": "${workspaceFolder}",
+			"cwd": "${workspaceFolder}/build/tests",
 			"stopAtEntry": true,
 			"externalConsole": false,
 			"MIMode": "lldb"

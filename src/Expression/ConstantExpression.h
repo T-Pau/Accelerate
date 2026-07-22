@@ -42,7 +42,9 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 class ConstantExpression : public EntityExpression {
   public:
-    explicit ConstantExpression(const Location& location, Constant* constant) : EntityExpression(location, constant) {}
+    explicit ConstantExpression(const Location& location, Constant* constant) : EntityExpression(location, constant) { constant->reference(); }
+
+    ~ConstantExpression() override { constant()->unreference(); }
 
     [[nodiscard]] static Expression create(const Location& location, Constant* constant) { return *simplify(location, constant, true); }
 

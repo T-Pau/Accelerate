@@ -94,6 +94,10 @@ class InstructionInvocation {
 
         std::optional<Expression> constraint_expression(const Location& location, Symbol name) const;
 
+        [[nodiscard]] bool known_valid() const { return valid ? *valid : false; }
+
+        [[nodiscard]] bool known_invalid() const { return valid ? !*valid : false; }
+
         std::optional<bool> valid;
         std::optional<Value> known_value;
         const AddressingMode::Argument* definition;
