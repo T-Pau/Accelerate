@@ -167,6 +167,9 @@ void Object::evaluate_inner(EvaluationContext& context) {
     else {
         body.evaluate(context);
     }
+#ifdef TRACE_TRANSLATION
+    std::cerr << body;
+#endif
 }
 
 bool Object::operator<(const Object& other) const {

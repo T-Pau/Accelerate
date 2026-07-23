@@ -55,14 +55,19 @@ std::ostream& operator<<(std::ostream& os, const Base& base) {
 using namespace tpau::cpp_kernal;
 
 std::vector<const Base*> Base::trace_stack;
+const char* Base::trace_type_names[] = {
+    ">>>",
+    "<<<",
+    "---",
+};
 
-void Base::trace_implementation(bool begin, std::string_view what, bool print_this, std::string_view message) const {
-    if (!begin) {
+void Base::trace_implementation(TraceType type, std::string_view what, bool print_this, std::string_view message) const {
+    if (type == TraceType::END) {
         trace_stack.pop_back();
     }
 
     std::cerr << std::string(trace_stack.size() * 2, ' ');
-    std::cerr << (begin ? ">>> " : "<<< ") << type_name() << " " << what;
+    std::cerr << trace_type_names[static_cast<int>(type)] << " " << type_name() << " " << this << " " << what;
     if (print_this) {
         std::cerr << " " << *this;
     }
@@ -71,10 +76,9 @@ void Base::trace_implementation(bool begin, std::string_view what, bool print_th
     }
     std::cerr << std::endl;
 
-    if (begin) {
+    if (type == TraceType::BEGIN) {
         trace_stack.push_back(this);
     }
 }
-
 
 #endif

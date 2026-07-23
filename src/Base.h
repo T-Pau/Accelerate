@@ -41,23 +41,31 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <format>
 #include <vector>
 
-#define TRACE_BEGIN(what, format, ...) trace(true, what, false, format, ##__VA_ARGS__)
-#define TRACE_END(what, format, ...) trace(false, what, false, format, ##__VA_ARGS__)
-#define TRACE_BEGIN_PRINT(what, format, ...) trace(true, what, true, format, ##__VA_ARGS__)
-#define TRACE_END_PRINT(what, format, ...) trace(false, what, true, format, ##__VA_ARGS__)
-#define TRACE_BEGIN_INSTANCE(instance, what, format, ...) instance->trace(true, what, false, format, ##__VA_ARGS__)
-#define TRACE_END_INSTANCE(instance, what, format, ...) instance->trace(false, what, false, format, ##__VA_ARGS__)
-#define TRACE_BEGIN_INSTANCE_PRINT(instance, what, format, ...) instance->trace(true, what, true, format, ##__VA_ARGS__)
-#define TRACE_END_INSTANCE_PRINT(instance, what, format, ...) instance->trace(false, what, true, format, ##__VA_ARGS__)
+#define TRACE_BEGIN(what, format, ...) trace(TraceType::BEGIN, what, false, format, ##__VA_ARGS__)
+#define TRACE_END(what, format, ...) trace(TraceType::END, what, false, format, ##__VA_ARGS__)
+#define TRACE(what, format, ...) trace(TraceType::SINGLE, what, false, format, ##__VA_ARGS__)
+#define TRACE_BEGIN_PRINT(what, format, ...) trace(TraceType::BEGIN, what, true, format, ##__VA_ARGS__)
+#define TRACE_END_PRINT(what, format, ...) trace(TraceType::END, what, true, format, ##__VA_ARGS__)
+#define TRACE_PRINT(what, format, ...) trace(TraceType::SINGLE, what, true, format, ##__VA_ARGS__)
+#define TRACE_BEGIN_INSTANCE(instance, what, format, ...) instance->trace(Base::TraceType::BEGIN, what, false, format, ##__VA_ARGS__)
+#define TRACE_END_INSTANCE(instance, what, format, ...) instance->trace(Base::TraceType::END, what, false, format, ##__VA_ARGS__)
+#define TRACE_INSTANCE(instance, what, format, ...) instance->trace(Base::TraceType::SINGLE, what, false, format, ##__VA_ARGS__)
+#define TRACE_BEGIN_INSTANCE_PRINT(instance, what, format, ...) instance->trace(Base::TraceType::BEGIN, what, true, format, ##__VA_ARGS__)
+#define TRACE_END_INSTANCE_PRINT(instance, what, format, ...) instance->trace(Base::TraceType::END, what, true, format, ##__VA_ARGS__)
+#define TRACE_INSTANCE_PRINT(instance, what, format, ...) instance->trace(Base::TraceType::SINGLE, what, true, format, ##__VA_ARGS__)
 #else
 #define TRACE_BEGIN(what, format, ...)
 #define TRACE_END(what, format, ...)
+#define TRACE(what, format, ...)
 #define TRACE_BEGIN_PRINT_THIS(what, format, ...)
 #define TRACE_END_PRINT_THIS(what, format, ...)
+#define TRACE_PRINT_THIS(what, format, ...)
 #define TRACE_BEGIN_INSTANCE(instance, what, format, ...)
 #define TRACE_END_INSTANCE(instance, what, format, ...)
+#define TRACE_INSTANCE(instance, what, format, ...)
 #define TRACE_BEGIN_INSTANCE_PRINT(instance, what, format, ...)
 #define TRACE_END_INSTANCE_PRINT(instance, what, format, ...)
+#define TRACE_INSTANCE_PRINT(instance, what, format, ...)
 #endif
 
 /**
@@ -81,15 +89,18 @@ class Base {
     virtual void serialize(std::ostream& os) const {}
 
 #ifdef TRACE_TRANSLATION
-    template <typename... Args> void trace(bool begin, std::string_view what, bool print_this, std::format_string<Args...> format, Args&&... args) const { trace_implementation(begin, what, print_this, std::vformat(format.get(), std::make_format_args(args...))); }
+    enum class TraceType { BEGIN, END, SINGLE };
+
+    template <typename... Args> void trace(TraceType type, std::string_view what, bool print_this, std::format_string<Args...> format, Args&&... args) const { trace_implementation(type, what, print_this, std::vformat(format.get(), std::make_format_args(args...))); }
 
 #endif
 
   private:
 #ifdef TRACE_TRANSLATION
     static std::vector<const Base*> trace_stack;
+    static const char* trace_type_names[];
 
-    void trace_implementation(bool begin, std::string_view what, bool print_this, std::string_view message) const;
+    void trace_implementation(TraceType type, std::string_view what, bool print_this, std::string_view message) const;
 #endif
 };
 

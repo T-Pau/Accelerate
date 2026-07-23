@@ -1,5 +1,5 @@
 .DS_Store
 /.cache
-/build
+/build*
 /site
 /.doxygen-cache

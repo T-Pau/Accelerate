@@ -43,14 +43,11 @@ cmake ..
 ```
 If you want to customize the build, you can pass additional parameters to cmake after `..` in the form of `-Dparameter=value`. See below for some useful parameters:
 
+`CMAKE_CXX_FLAGS`
+: for setting custom compiler flags
+
 `CMAKE_INSTALL_PREFIX`
 : for setting the installation path
-  
-If you want to compile with custom compiler flags, pass them to `cmake` as `CMAKE_CXX_FLAGS`, for example:
-
-```sh
-cmake -DCMAKE_CXX_FLAGS="-DMY_CUSTOM_FLAG" ..
-```
 
 You can also check the [cmake FAQ](https://gitlab.kitware.com/cmake/community/-/wikis/FAQ) for more information.
 

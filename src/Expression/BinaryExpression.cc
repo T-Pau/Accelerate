@@ -298,10 +298,15 @@ std::optional<Expression> BinaryExpression::simplify(const Location& location, c
                 if (left.is<ConstantExpression>() && right.is<ConstantExpression>()) {
                     auto left_constant = left.as<ConstantExpression>()->constant();
                     auto right_constant = right.as<ConstantExpression>()->constant();
+                    auto left_value = left_constant->value;
+                    auto right_value = right_constant->value;
 
-                    auto left_object = left_constant->value.as<ObjectExpression>();
-                    auto right_object = right_constant->value.as<ObjectExpression>();
-                    if (left_object && right_object) {
+#ifdef TRACE_TRANSLATION
+                    std::cerr << "left constant: " << left_constant->get_name() << " value: " << static_cast<const void*>(left_value.base_expression()) << " " << left_value.type_name() << " " << left_value << std::endl;
+                    std::cerr << "right constant: " << right_constant->get_name() << " value: " << static_cast<const void*>(right_value.base_expression()) << " " << right_value.type_name() << " " << right_value << std::endl;
+#endif
+
+                    if (left_value.is<ObjectExpression>() && right_value.is<ObjectExpression>() && left_value.as<ObjectExpression>()->object() == right_value.as<ObjectExpression>()->object()) {
                         return ValueExpression::create(location, Value(uint64_t{0}));
                     }
                 }

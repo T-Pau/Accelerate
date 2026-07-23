@@ -52,14 +52,14 @@ class ObjectExpression : public EntityExpression {
 
     [[nodiscard]] std::optional<Value::Type> type() const override { return Value::UNSIGNED; }
 
+    Object* object() const { return static_cast<Object*>(entity); }
+
   protected:
     [[nodiscard]] std::optional<Value> maximum_value() const override;
     [[nodiscard]] std::optional<Value> minimum_value() const override;
 
   private:
     static std::optional<Expression> simplify(const Location& location, Object* object, bool always_create);
-
-    Object* object() const { return static_cast<Object*>(entity); }
 };
 
 #endif // HAD_XLR8_OBJECT_EXPRESSION_H

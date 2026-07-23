@@ -149,6 +149,8 @@ class Body {
 
     [[nodiscard]] bool valid() const { return element->valid; }
 
+    [[nodiscard]] std::string type_name() const { return element->type_name(); }
+
   private:
     std::shared_ptr<BodyElement> element;
 };

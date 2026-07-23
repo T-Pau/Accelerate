@@ -194,6 +194,12 @@ class Expression {
      */
     [[nodiscard]] bool valid() const { return expression->valid; }
 
+    [[nodiscard]] std::string type_name() const { return expression->type_name(); }
+
+#ifdef TRACE_TRANSLATION
+    [[nodiscard]] BaseExpression* base_expression() const { return expression.get(); }
+#endif
+
   private:
     /// @brief A shared pointer to the BaseExpression that this Expression wraps.
     std::shared_ptr<BaseExpression> expression;
