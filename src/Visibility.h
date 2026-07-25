@@ -46,16 +46,16 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 enum class Visibility {
     /**
-     * This visibility is used for entities that are only visible in the current scoped body.
+     * This visibility is used for constants that are only visible in the current body.
      *
      * It is used for parameters to macros and functions, and for the loop variable in `.repeat`.
      *
      * This scope cannot be selected via a visibility directive.
      */
-    SCOPE,
+    ARGUMENT,
 
     /**
-     * This visibility is used for entities that are only visible within the current entity.
+     * This visibility is used for constants that are only visible within the current entity.
      *
      * It is the default visibility for names defined in an entity.
      */
@@ -138,8 +138,8 @@ class VisibilityHelper {
     /// @brief The token for name for the `PUBLIC` visibility (`public`).
     static const Token token_public_name;
 
-    /// @brief The name of the `SCOPE` scope type (`scope`).
-    static const char scope_name[];
+    /// @brief The name of the `ARGUMENT` visibility (`argument`).
+    static const char argument_name[];
 
     /// @brief The name of the `ENTITY` scope type (`entity`).
     static const char entity_name[];

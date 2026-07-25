@@ -41,6 +41,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "AddressingMode.h"
 #include "Body/IfBody.h"
+#include "Body/ScopeBody.h"
 #include "Node.h"
 #include "Scope.h"
 
@@ -170,9 +171,6 @@ class InstructionInvocation {
 
     /// @brief The scope containing the instruction invocation.
     std::shared_ptr<Scope> containing_scope;
-
-    /// @brief The scope with the arguments of the instruction invocation.
-    std::shared_ptr<Scope> scope;
 
     /**
      * @brief The names of the arguments in the instruction invocation.

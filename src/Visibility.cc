@@ -29,7 +29,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "Visibility.h"
 
-const char VisibilityHelper::scope_name[] = "scope";
+const char VisibilityHelper::argument_name[] = "argument";
 const char VisibilityHelper::entity_name[] = "entity";
 const char VisibilityHelper::file_name[] = "file";
 
@@ -40,7 +40,7 @@ const char VisibilityHelper::public_literal[] = "public";
 // Keep in sync with Visibility.
 // clang-format off
 Symbol VisibilityHelper::names[] = {
-    VisibilityHelper::scope_name,
+    VisibilityHelper::argument_name,
     VisibilityHelper::entity_name,
     VisibilityHelper::file_name,
     VisibilityHelper::private_literal,

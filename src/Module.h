@@ -83,6 +83,8 @@ class Module {
      */
     void import(Visibility visibility, const Module& module);
 
+    void add_entity(std::shared_ptr<Entity> entity, std::shared_ptr<Scope> current_file_scope);
+
     /*
      * Get the name of the module.
      *
@@ -129,10 +131,10 @@ class Module {
 
     template <typename T> std::vector<T*> get_entities() const {
         std::vector<T*> entities;
-        collect_entities_from_scope(entities, public_scope_.get());
-        collect_entities_from_scope(entities, private_scope_.get());
-        for (const auto& [file_name, file_scope] : file_scopes) {
-            collect_entities_from_scope(entities, file_scope.get());
+        for (const auto& entity : contained_entities) {
+            if (auto casted_entity = entity->as<T>()) {
+                entities.push_back(casted_entity);
+            }
         }
         return entities;
     }
@@ -150,10 +152,7 @@ class Module {
 
 
   private:
-    template <typename T> void collect_entities_from_scope(std::vector<T*>& entities, const Scope* scope) const {
-        const auto& new_entities = scope->get_all<T>();
-        entities.insert(entities.end(), new_entities.begin(), new_entities.end());
-    }
+    std::unordered_set<std::shared_ptr<Entity>> contained_entities;
 
     /// @brief The name of the module.
     Symbol name_;

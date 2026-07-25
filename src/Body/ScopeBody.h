@@ -36,7 +36,9 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <tpau-cpp-kernal/Exception.h>
 
-#include "Body.h"
+#include "Body/Body.h"
+#include "Entity/Constant.h"
+#include "Scope.h"
 
 using namespace tpau::cpp_kernal;
 
@@ -47,26 +49,28 @@ class ScopeBody : public BodyElement {
     /**
      * @brief Create a new ScopeBody.
      *
-     * @param scope The containing scope for the new scope.
+     * @param containing_scope The scope containing the ScopeBody.
      * @param body The body to wrap.
      * @return The ScopeBody.
      */
-    static Body create(const std::shared_ptr<Scope>& scope, Body body) { return Body(std::make_shared<ScopeBody>(std::move(scope), std::move(body))); }
+    static Body create(const std::shared_ptr<Scope>& containing_scope, Body body) { return Body(std::make_shared<ScopeBody>(containing_scope, std::move(body))); }
 
     /**
      * @brief Construct a new ScopeBody.
      *
-     * @param scope The containing scope for the new scope.
+     * @param containing_scope The scope containing the new scope.
      * @param body The body to wrap.
      */
-    explicit ScopeBody(const std::shared_ptr<Scope>& scope, Body body);
+    ScopeBody(const std::shared_ptr<Scope>& containing_scope, Body body) : inner_scope_(std::make_shared<Scope>(Visibility::ARGUMENT, containing_scope)), body(std::move(body)) {}
 
     /**
-     * @brief Get the scope of the ScopeBody.
+     * @brief Get the inner scope of the ScopeBody.
      *
-     * @return The scope.
+     * @return The inner_scope.
      */
     [[nodiscard]] std::shared_ptr<Scope> inner_scope() const { return inner_scope_; }
+
+    void append(Body inner_body) { body.append(std::move(inner_body)); }
 
     [[nodiscard]] SizeRange size_range() const override { return body.size_range(); }
 
@@ -97,9 +101,13 @@ class ScopeBody : public BodyElement {
 
     [[nodiscard]] bool fully_evaluated() override { return body.fully_evaluated(); }
 
+    void add(std::shared_ptr<Constant> constant);
+
   protected:
     /// @brief The scope introduced by the ScopeBody.
     std::shared_ptr<Scope> inner_scope_;
+
+    std::unordered_set<std::shared_ptr<Constant>> constants;
 
     /// @brief The body contained within the ScopeBody.
     Body body;

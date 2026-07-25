@@ -38,7 +38,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "Address.h"
 #include "Body/Body.h"
-#include "Entity/Entity.h"
+#include "Entity/ScopeEntity.h"
 #include "MemoryMap.h"
 #include "StructuredValue.h"
 #include "Token.h"
@@ -49,10 +49,11 @@ class ObjectFile;
 /**
  * @brief Represents an object.
  */
-class Object : public Entity {
+class Object : public ScopeEntity {
   public:
-    Object(const Location& location, Symbol name, std::shared_ptr<Scope> parent_scope, const std::shared_ptr<StructuredValue>& definition);
-    Object(const Location& location, Symbol name, Visibility visibility, std::shared_ptr<Scope> parent_scope, bool default_only, const MemoryMap::Section* section);
+    Object(const Location& location, Symbol name, std::shared_ptr<Scope> containing_scope, const std::shared_ptr<StructuredValue>& definition);
+
+    Object(const Location& location, Symbol name, Visibility visibility, std::shared_ptr<Scope> containing_scope, bool default_only, const MemoryMap::Section* section) : ScopeEntity(location, name, visibility, containing_scope, default_only), section(section) {}
 
     bool static less_pointers(const Object* a, const Object* b) { return *a < *b; }
 
@@ -66,7 +67,7 @@ class Object : public Entity {
 
     void enter_names() {
         TRACE_BEGIN("entering names", "{}", name);
-        body.enter_names(scope.get(), this);
+        body.enter_names(scope().get(), this);
         TRACE_END("entering names", "{}", name);
     }
 
@@ -89,6 +90,7 @@ class Object : public Entity {
     std::optional<Expression> reservation_expression;
     std::optional<Address> address;
     std::set<Symbol> explicitly_used_objects;
+    bool explicitly_used{false};
 
     Body body;
 

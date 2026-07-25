@@ -100,11 +100,14 @@ Body InstructionInvocation::encode() {
 
     compute_argument_names();
 
-    std::shared_ptr<Scope> scope = containing_scope;
+    auto scope = containing_scope;
+    auto scope_body = std::shared_ptr<ScopeBody>();
+
     if (has_unknown_arguments || uses_pc()) {
-        scope = std::make_shared<Scope>(Visibility::SCOPE, containing_scope);
+        scope_body = std::make_shared<ScopeBody>(containing_scope, Body());
+        scope = scope_body->inner_scope();
         if (uses_pc()) {
-            scope->add(std::make_unique<Constant>(Location(), Symbol(".pc"), Visibility::SCOPE, containing_scope, false, *pc));
+            scope_body->add(std::make_shared<Constant>(Location(), Symbol(".pc"), Visibility::ARGUMENT, containing_scope, false, *pc));
         }
 
         for (size_t i = 0; i < argument_names.size(); ++i) {
@@ -112,7 +115,7 @@ Body InstructionInvocation::encode() {
             const auto& argument = arguments[i];
 
             if (name) {
-                scope->add(std::make_unique<Constant>(Location(), name, Visibility::SCOPE, containing_scope, false, argument));
+                scope_body->add(std::make_shared<Constant>(Location(), name, Visibility::ARGUMENT, containing_scope, false, argument));
             }
         }
     }
@@ -135,10 +138,13 @@ Body InstructionInvocation::encode() {
     }
 
     auto body = IfBody::create(clauses);
-    if (scope != containing_scope) {
-        body = ScopeBody::create(scope, body);
+    if (scope_body) {
+        scope_body->append(body);
+        return Body(scope_body);
     }
-    return body;
+    else {
+        return body;
+    }
 }
 
 void InstructionInvocation::compute_argument_names() {
@@ -249,9 +255,10 @@ InstructionInvocation::Variant::Variant(uint64_t opcode, const AddressingMode& a
 
 std::pair<std::optional<Expression>, Body> InstructionInvocation::Variant::encode(const std::shared_ptr<Scope>& containing_scope) const {
     std::optional<Expression> constraint_expression;
-    std::shared_ptr<Scope> scope = std::make_shared<Scope>(Visibility::SCOPE, containing_scope);
+    auto body = ScopeBody::create(containing_scope, addressing_mode.get().encoding.clone());
+    auto scope_body = body.as<ScopeBody>();
 
-    scope->add(std::make_unique<Constant>(Location{}, Symbol(".opcode"), Visibility::SCOPE, containing_scope, false, ValueExpression::create({}, Value(opcode))));
+    scope_body->add(std::make_shared<Constant>(Location{}, Symbol(".opcode"), Visibility::ARGUMENT, containing_scope, false, ValueExpression::create({}, Value(opcode))));
 
     for (const auto& [name, argument] : arguments) {
         auto renamed_name = get_with_fallback(argument_aliases, name, name);
@@ -267,20 +274,14 @@ std::pair<std::optional<Expression>, Body> InstructionInvocation::Variant::encod
             }
         }
         else {
-            scope->add(std::make_unique<Constant>(Location{}, name, Visibility::SCOPE, containing_scope, false, ValueExpression::create({}, *argument.known_value)));
+            scope_body->add(std::make_shared<Constant>(Location{}, name, Visibility::ARGUMENT, containing_scope, false, ValueExpression::create({}, *argument.known_value)));
         }
     }
-
-    auto body = addressing_mode.get().encoding.clone();
 
     if (!argument_aliases.empty()) {
         for (const auto& [original_name, renamed_name] : argument_aliases) {
-            scope->add(std::make_unique<Constant>(Location{}, original_name, Visibility::SCOPE, scope, false, VariableExpression::create(Location(), renamed_name)));
+            scope_body->add(std::make_shared<Constant>(Location{}, original_name, Visibility::ARGUMENT, scope_body->inner_scope(), false, VariableExpression::create(Location(), renamed_name)));
         }
-    }
-
-    if (scope) {
-        body = ScopeBody::create(scope, body);
     }
 
     return {constraint_expression, body};

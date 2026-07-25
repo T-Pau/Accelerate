@@ -40,6 +40,7 @@ nav = [
             { "Coding Conventions" = "Internal/Explanations/Coding-Conventions.md" },
             { "Translating a Program or Library" = "Internal/Explanations/Translation.md" },
             { "Body Elements and Expressions" = "Internal/Explanations/Body-and-Expressions.md" },
+            { "Ownership and Lifetimes" = "Internal/Explanations/Ownership.md" },
             { "Ideas for Later" = "Internal/Explanations/Ideas-Later.md" }
         ]},
         { "Reference" = [

@@ -34,21 +34,23 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "Entity/Callable.h"
+#include "CallableArguments.h"
+#include "Entity/ScopeEntity.h"
 
 /**
  * @brief Represents a function.
  */
-class Function : public Callable {
+class Function : public ScopeEntity {
   public:
     Function(const Location& location, Symbol name, std::shared_ptr<Scope> parent_scope, const std::shared_ptr<StructuredValue>& definition);
 
-    Function(const Location& location, Symbol name, Visibility visibility, std::shared_ptr<Scope> parent_scope, bool default_only, Arguments arguments, const Expression& definition) : Callable(location, name, visibility, parent_scope, default_only, std::move(arguments)), definition(definition) {}
+    Function(const Location& location, Symbol name, Visibility visibility, std::shared_ptr<Scope> parent_scope, bool default_only, CallableArguments arguments, const Expression& definition) : ScopeEntity(location, name, visibility, parent_scope, default_only), arguments(std::move(arguments)), definition(definition) { this->arguments.enter_arguments(this); }
 
     void serialize(std::ostream& stream) const override;
 
     void resolve_implementation() override;
 
+    CallableArguments arguments;
     Expression definition;
 
   protected:

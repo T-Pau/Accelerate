@@ -45,15 +45,13 @@ TokenGroup StructuredValue::start_group;
 
 void StructuredValue::initialize() {
     if (!initialized) {
-
         start_group = TokenGroup({}, {Token::less, Token::colon, Token::curly_open, Token::square_open}, "object start");
 
         initialized = true;
     }
 }
 
-
-std::shared_ptr<StructuredValue> StructuredValue::parse(Tokenizer &tokenizer) {
+std::shared_ptr<StructuredValue> StructuredValue::parse(Tokenizer& tokenizer) {
     initialize();
 
     auto token = tokenizer.expect(start_group, TokenGroup(Token::NEWLINE));
@@ -77,16 +75,13 @@ std::shared_ptr<StructuredValue> StructuredValue::parse(Tokenizer &tokenizer) {
     }
 
     object->location = token.location;
-    //object->location.extend(tokenizer.current_location());
+    // object->location.extend(tokenizer.current_location());
     return object;
 }
 
-void StructuredValue::setup(FileTokenizer &tokenizer) {
-    tokenizer.add_punctuations({"{", "}", "[", "]", ":"});
-}
+void StructuredValue::setup(FileTokenizer& tokenizer) { tokenizer.add_punctuations({"{", "}", "[", "]", ":"}); }
 
-
-const StructuredArray *StructuredValue::as_array() const {
+const StructuredArray* StructuredValue::as_array() const {
     if (!is_array()) {
         throw LocationException(location, "array expected");
     }
@@ -94,8 +89,7 @@ const StructuredArray *StructuredValue::as_array() const {
     return reinterpret_cast<const StructuredArray*>(this);
 }
 
-
-const StructuredBody *StructuredValue::as_body() const {
+const StructuredBody* StructuredValue::as_body() const {
     if (!is_body()) {
         throw LocationException(location, "body expected");
     }
@@ -103,8 +97,7 @@ const StructuredBody *StructuredValue::as_body() const {
     return reinterpret_cast<const StructuredBody*>(this);
 }
 
-
-const StructuredDictionary *StructuredValue::as_dictionary() const {
+const StructuredDictionary* StructuredValue::as_dictionary() const {
     if (!is_dictionary()) {
         throw LocationException(location, "dictionary expected");
     }
@@ -112,8 +105,7 @@ const StructuredDictionary *StructuredValue::as_dictionary() const {
     return reinterpret_cast<const StructuredDictionary*>(this);
 }
 
-
-const StructuredScalar *StructuredValue::as_scalar() const {
+const StructuredScalar* StructuredValue::as_scalar() const {
     if (!is_scalar()) {
         throw LocationException(location, "scalar expected");
     }
@@ -121,8 +113,7 @@ const StructuredScalar *StructuredValue::as_scalar() const {
     return reinterpret_cast<const StructuredScalar*>(this);
 }
 
-
-const StructuredScalar *StructuredValue::as_singular_scalar() const {
+const StructuredScalar* StructuredValue::as_singular_scalar() const {
     if (!is_singular_scalar()) {
         throw LocationException(location, "singular scalar expected");
     }
@@ -130,8 +121,7 @@ const StructuredScalar *StructuredValue::as_singular_scalar() const {
     return reinterpret_cast<const StructuredScalar*>(this);
 }
 
-
-StructuredArray::StructuredArray(Tokenizer &tokenizer) {
+StructuredArray::StructuredArray(Tokenizer& tokenizer) {
     tokenizer.skip(Token::NEWLINE);
     while (true) {
         auto token = tokenizer.next();
@@ -146,8 +136,7 @@ StructuredArray::StructuredArray(Tokenizer &tokenizer) {
     tokenizer.expect(Token::NEWLINE, TokenGroup::newline);
 }
 
-
-StructuredDictionary::StructuredDictionary(Tokenizer &tokenizer) {
+StructuredDictionary::StructuredDictionary(Tokenizer& tokenizer) {
     tokenizer.skip(Token::NEWLINE);
     while (true) {
         auto token = tokenizer.next();
@@ -160,7 +149,7 @@ StructuredDictionary::StructuredDictionary(Tokenizer &tokenizer) {
     tokenizer.expect(Token::NEWLINE, TokenGroup::newline);
 }
 
-std::shared_ptr<StructuredValue> StructuredDictionary::get_optional(const Token &token) const {
+std::shared_ptr<StructuredValue> StructuredDictionary::get_optional(const Token& token) const {
     auto it = entries.find(token);
     if (it == entries.end()) {
         return {};
@@ -169,27 +158,23 @@ std::shared_ptr<StructuredValue> StructuredDictionary::get_optional(const Token 
     return it->second;
 }
 
-
-
 std::shared_ptr<StructuredValue> StructuredDictionary::operator[](const Token& token) const {
     auto value = get_optional(token);
     if (value == nullptr) {
-            throw LocationException(location, "missing key '{}'", token);
+        throw LocationException(location, "missing key '{}'", token);
     }
 
     return value;
 }
 
-
-StructuredScalar::StructuredScalar(Tokenizer &tokenizer) {
+StructuredScalar::StructuredScalar(Tokenizer& tokenizer) {
     tokens = tokenizer.collect_until(Token::NEWLINE);
     tokenizer.skip(Token::NEWLINE);
 }
 
-
-StructuredBody::StructuredBody(Tokenizer &tokenizer) {
+StructuredBody::StructuredBody(Tokenizer& tokenizer) {
     // TODO: this shouldn't need an environment
-    auto parser = BodyParser(tokenizer, std::make_shared<Scope>(Visibility::SCOPE));
+    auto parser = BodyParser(tokenizer, std::make_shared<Scope>(Visibility::ARGUMENT));
 
     body = parser.parse();
     tokenizer.skip(Token::NEWLINE);

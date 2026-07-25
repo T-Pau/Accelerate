@@ -32,15 +32,6 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Entity/Constant.h"
 #include "Scope.h"
 
-ScopeBody::ScopeBody(const std::shared_ptr<Scope>& scope, Body body) : inner_scope_(std::move(scope)), body(std::move(body)) {
-    if (!inner_scope_) {
-        throw Exception("ScopeBody must be initialized with a non-null scope.");
-    }
-    if (inner_scope_->type() != Visibility::SCOPE) {
-        throw Exception("ScopeBody must be initialized with a scope of type SCOPE.");
-    }
-}
-
 void ScopeBody::serialize(std::ostream& stream, const std::string& prefix) const {
     stream << prefix << ".scope {" << std::endl;
     auto inner_prefix = prefix + "  ";
@@ -71,7 +62,7 @@ std::optional<Body> ScopeBody::evaluate_process(const EvaluationContext& context
 
 void ScopeBody::resolve(Scope* scope, Entity* containing_entity) {
     // Resolve the constants in the outer scope
-    for (auto constant : inner_scope()->get_constants()) {
+    for (auto constant : constants) {
         TRACE_BEGIN("resolving scope", "constant {} {}", static_cast<void*>(constant), constant->name);
         constant->value.resolve(scope, containing_entity);
         TRACE_END("resolving scope", "constant {}", constant->name);
@@ -86,4 +77,12 @@ void ScopeBody::resolve(Scope* scope, Entity* containing_entity) {
 bool ScopeBody::scope_fully_evaluated() {
     auto constants = inner_scope()->get_constants();
     return std::all_of(constants.begin(), constants.end(), [](const auto& constant) { return !constant->is_referenced(); });
+}
+
+void ScopeBody::add(std::shared_ptr<Constant> constant) {
+    if (constant->visibility != Visibility::ARGUMENT) {
+        throw Exception("internal error: cannot add constant {} with visibility {} to ScopeBody, add to entity or module instead", constant->name, constant->visibility);
+    }
+    inner_scope()->add(constant);
+    constants.insert(constant);
 }

@@ -42,7 +42,7 @@ EvaluationContext::EvaluationContext(EvaluationResult& result, EvaluationType ty
     }
 }
 
-EvaluationContext::EvaluationContext(EvaluationResult& result, Entity* entity) : type(ENTITY), entity(entity), environment(entity->scope), offset(0) {}
+EvaluationContext::EvaluationContext(EvaluationResult& result, Entity* entity) : type(ENTITY), entity(entity), environment(entity->containing_scope()), offset(0) {}
 
 EvaluationContext EvaluationContext::evaluating_variable(Symbol variable) const {
     auto new_context = *this;

@@ -176,7 +176,7 @@ void Assembler::parse(Symbol file_name) {
 
 void Assembler::parse_assignment(Visibility visibility, const Token& name, bool default_only) {
     auto value = ExpressionParser(tokenizer).parse();
-    file_scope->add(std::make_unique<Constant>(name.location, name.as_symbol(), visibility, file_scope, default_only, value));
+    module->add_entity(std::make_shared<Constant>(name.location, name.as_symbol(), visibility, file_scope, default_only, value), file_scope);
 }
 
 void Assembler::parse_cpu(const Token& directive) {
@@ -345,9 +345,9 @@ void Assembler::parse_symbol(Visibility visibility, const Token& name) {
         throw LocationException(name.location, "no target specified");
     }
 
-    auto object_ptr = std::make_unique<Object>(name.location, name.as_symbol(), visibility, file_scope, false, target->map.section(current_section));
+    auto object_ptr = std::make_shared<Object>(name.location, name.as_symbol(), visibility, file_scope, false, target->map.section(current_section));
     auto object = object_ptr.get();
-    file_scope->add(std::move(object_ptr));
+    module->add_entity(std::move(object_ptr), file_scope);
     // TODO: maybe delay adding it to file_scope after it has been fully parsed, so we keep ownership while we access it.
 
     while (true) {
@@ -358,7 +358,7 @@ void Assembler::parse_symbol(Visibility visibility, const Token& name) {
         }
         else if (token == Token::curly_open) {
             // TODO: error if .reserved
-            object->body = BodyParser(tokenizer, cpu, object->scope, true).parse();
+            object->body = BodyParser(tokenizer, cpu, object->scope(), true).parse();
             object->enter_names();
             break;
         }
@@ -523,12 +523,12 @@ void Assembler::parse_name(Visibility visibility, const Token& name, bool defaul
         return;
     }
     else if (token == Token::paren_open) {
-        auto arguments = Callable::Arguments(tokenizer);
+        auto arguments = CallableArguments(tokenizer);
         tokenizer.expect(Token::paren_close);
         tokenizer.expect(Token::equals);
 
         auto definition = ExpressionParser(tokenizer).parse();
-        file_scope->add(std::make_unique<Function>(name.location, name.as_symbol(), visibility, file_scope, default_only, arguments, definition));
+        module->add_entity(std::make_shared<Function>(name.location, name.as_symbol(), visibility, file_scope, default_only, arguments, definition), file_scope);
     }
     else {
         tokenizer.unget(token);
@@ -538,13 +538,13 @@ void Assembler::parse_name(Visibility visibility, const Token& name, bool defaul
 
 void Assembler::parse_macro(Visibility visibility, bool default_only) {
     auto name = tokenizer.expect(Token::NAME);
-    auto arguments = Callable::Arguments(tokenizer);
+    auto arguments = CallableArguments(tokenizer);
     tokenizer.expect(Token::curly_open);
-    auto macro = std::make_unique<Macro>(name.location, name.as_symbol(), visibility, file_scope, default_only, arguments);
-    macro->body = BodyParser(tokenizer, cpu, macro->scope, false).parse();
+    auto macro = std::make_shared<Macro>(name.location, name.as_symbol(), visibility, file_scope, default_only, arguments);
+    macro->body = BodyParser(tokenizer, cpu, macro->scope(), false).parse();
     macro->enter_names();
 
-    file_scope->add(std::move(macro));
+    module->add_entity(macro, file_scope);
 }
 
 std::vector<MemoryMap::Block> Assembler::parse_address(const StructuredValue* address) const {

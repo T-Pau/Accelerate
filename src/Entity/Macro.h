@@ -35,25 +35,27 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include "Body/Body.h"
-#include "Entity/Callable.h"
+#include "CallableArguments.h"
+#include "Entity/ScopeEntity.h"
 
 /**
  * @brief Represents a macro.
  */
-class Macro : public Callable {
+class Macro : public ScopeEntity {
   public:
-    Macro(const Location& location, Symbol name, std::shared_ptr<Scope> parent_scope, const std::shared_ptr<StructuredValue>& definition);
+    Macro(const Location& location, Symbol name, std::shared_ptr<Scope> containing_scope, const std::shared_ptr<StructuredValue>& definition);
 
-    Macro(const Location& location, Symbol name, Visibility visibility, std::shared_ptr<Scope> parent_scope, bool default_only, Callable::Arguments arguments) : Callable(location, name, visibility, parent_scope, default_only, std::move(arguments)) {}
+    Macro(const Location& location, Symbol name, Visibility visibility, std::shared_ptr<Scope> containing_scope, bool default_only, CallableArguments arguments);
 
     [[nodiscard]] Body expand(const std::vector<Expression>& arguments, std::shared_ptr<Scope> outer_environment) const;
     void serialize(std::ostream& stream) const override;
 
     void resolve_implementation() override;
 
-    void enter_names() { body.enter_names(scope.get(), this); }
+    void enter_names() { body.enter_names(scope().get(), this); }
 
     Body body;
+    CallableArguments arguments;
 
   protected:
     [[nodiscard]] EvaluationContext evaluation_context(EvaluationResult& result) override;

@@ -34,97 +34,20 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "Entity/Entity.h"
+#include "Entity/ScopeEntity.h"
 #include "EvaluationContext.h"
 #include "Expression/Expression.h"
 
 /**
  * @brief Represents a callable entity that can be invoked with arguments: a macro or function.
  */
-class Callable : public Entity {
+class Callable : public ScopeEntity {
   public:
     /**
      * @brief Represents the argument definitions of a callable entity.
      *
      * Each argument has a name. If the argument is optional, it also has a default value. No non-optional arguments can follow optional arguments.
      */
-    class Arguments {
-      public:
-        /// @brief Construct an empty Arguments object.
-        Arguments() = default;
-
-        /// @brief Construct an Arguments object from a tokenizer.
-        explicit Arguments(Tokenizer& tokenizer);
-
-        /**
-         * @brief Add an argument to the Arguments object.
-         *
-         * @param name The name of the argument.
-         * @param default_argument The default value of the argument, if any.
-         */
-        void add(Symbol name, std::optional<Expression> default_argument);
-
-        /**
-         * @brief Check if callable takes no arguments.
-         *
-         * @return `true` if the callable takes no arguments, `false` otherwise.
-         */
-        [[nodiscard]] bool empty() const { return names.empty(); }
-
-        /**
-         * @brief Get the name of the argument at a given index.
-         *
-         * @param index The index of the argument.
-         * @return The name of the argument.
-         */
-        [[nodiscard]] Symbol name(size_t index) const { return names[index]; }
-
-        /**
-         * @brief Get the list of argument names.
-         *
-         * @return The list of argument names.
-         */
-        [[nodiscard]] const std::vector<Symbol>& argument_names() const { return names; }
-
-        /**
-         * @brief Get the default value of the argument at a given index.
-         *
-         * @param index The index of the argument.
-         * @return The default value of the argument, if any.
-         */
-        [[nodiscard]] std::optional<Expression> default_argument(size_t index) const;
-
-        /**
-         * @brief Get the maximum number of arguments the callable can take.
-         *
-         * @return The maximum number of arguments.
-         */
-        [[nodiscard]] size_t maximum_arguments() const { return names.size(); }
-
-        /**
-         * @brief Get the minimum number of arguments the callable requires.
-         *
-         * @return The minimum number of arguments.
-         */
-        [[nodiscard]] size_t minimum_arguments() const { return names.size() - default_arguments.size(); }
-
-        /**
-         * @brief Print the Arguments object to a stream.
-         *
-         * @param stream The stream to print to.
-         */
-        void serialize(std::ostream& stream) const;
-
-        /// @brief The names of the arguments.
-        std::vector<Symbol> names;
-
-        /**
-         * @brief The default values of the arguments.
-         *
-         * The index in this array is offset by the number of non-optional arguments.
-         */
-        std::vector<Expression> default_arguments;
-    };
 
     /**
      * @brief Construct a new Callable object from a library.
@@ -179,27 +102,7 @@ class Callable : public Entity {
     void serialize_callable(std::ostream& stream) const;
 
   private:
-    /// @brief Initialize static members.
-    static void initialize();
-
-    /// @brief Enter arguments into the callable's scope.
-    void enter_arguments();
-
-    /// @brief Whether static members have been initialized.
-    static bool initialized;
-
-    /// @brief The token representing the "arguments" key in a callable's representation in a library.
-    static Token token_arguments;
 };
-
-/**
- * @brief Serialize the argument definitions to a stream.
- *
- * @param stream The output stream.
- * @param arguments The argument definitions.
- * @return The output stream.
- */
-std::ostream& operator<<(std::ostream& stream, const Callable::Arguments& arguments);
 
 #endif // HAD_XLR8_CALLABLE_H
 #undef IN_XLR8_CALLABLE_H

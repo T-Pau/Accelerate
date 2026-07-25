@@ -65,25 +65,41 @@ class Scope {
         class Iterator {
           public:
             using iterator_category = std::forward_iterator_tag;
-            using value_type = Entity*;
+            using value_type = std::shared_ptr<Entity>;
             using difference_type = std::ptrdiff_t;
             using pointer = Entity**;
             using reference = Entity*&;
 
-            Iterator(const Scope* scope, std::unordered_map<Symbol, std::unique_ptr<Constant>>::const_iterator constant_it, std::unordered_map<Symbol, std::unique_ptr<Function>>::const_iterator function_it, std::unordered_map<Symbol, std::unique_ptr<Macro>>::const_iterator macro_it, std::unordered_map<Symbol, std::unique_ptr<Object>>::const_iterator object_it) : scope(scope), constant_it(constant_it), function_it(function_it), macro_it(macro_it), object_it(object_it) {}
+            Iterator(const Scope* scope, std::unordered_map<Symbol, std::weak_ptr<Constant>>::const_iterator constant_it, std::unordered_map<Symbol, std::weak_ptr<Function>>::const_iterator function_it, std::unordered_map<Symbol, std::weak_ptr<Macro>>::const_iterator macro_it, std::unordered_map<Symbol, std::weak_ptr<Object>>::const_iterator object_it) : scope(scope), constant_it(constant_it), function_it(function_it), macro_it(macro_it), object_it(object_it) {}
 
             [[nodiscard]] value_type operator*() const {
                 if (constant_it != scope->constants.end()) {
-                    return constant_it->second.get();
+                    auto entity = constant_it->second.lock();
+                    if (!entity) {
+                        throw Exception("internal error: entity {} in scope has expired", constant_it->first);
+                    }
+                    return std::dynamic_pointer_cast<Entity>(entity);
                 }
                 else if (function_it != scope->functions.end()) {
-                    return function_it->second.get();
+                    auto entity = function_it->second.lock();
+                    if (!entity) {
+                        throw Exception("internal error: entity {} in scope has expired", function_it->first);
+                    }
+                    return std::dynamic_pointer_cast<Entity>(entity);
                 }
                 else if (macro_it != scope->macros.end()) {
-                    return macro_it->second.get();
+                    auto entity = macro_it->second.lock();
+                    if (!entity) {
+                        throw Exception("internal error: entity {} in scope has expired", macro_it->first);
+                    }
+                    return std::dynamic_pointer_cast<Entity>(entity);
                 }
                 else if (object_it != scope->objects.end()) {
-                    return object_it->second.get();
+                    auto entity = object_it->second.lock();
+                    if (!entity) {
+                        throw Exception("internal error: entity {} in scope has expired", object_it->first);
+                    }
+                    return std::dynamic_pointer_cast<Entity>(entity);
                 }
                 else {
                     throw Exception("iterator out of range");
@@ -118,10 +134,10 @@ class Scope {
 
           private:
             const Scope* scope;
-            std::unordered_map<Symbol, std::unique_ptr<Constant>>::const_iterator constant_it;
-            std::unordered_map<Symbol, std::unique_ptr<Function>>::const_iterator function_it;
-            std::unordered_map<Symbol, std::unique_ptr<Macro>>::const_iterator macro_it;
-            std::unordered_map<Symbol, std::unique_ptr<Object>>::const_iterator object_it;
+            std::unordered_map<Symbol, std::weak_ptr<Constant>>::const_iterator constant_it;
+            std::unordered_map<Symbol, std::weak_ptr<Function>>::const_iterator function_it;
+            std::unordered_map<Symbol, std::weak_ptr<Macro>>::const_iterator macro_it;
+            std::unordered_map<Symbol, std::weak_ptr<Object>>::const_iterator object_it;
         };
 
         [[nodiscard]] Iterator begin() const { return Iterator(scope, scope->constants.begin(), scope->functions.begin(), scope->macros.begin(), scope->objects.begin()); }
@@ -144,7 +160,7 @@ class Scope {
          *
          * @param collection The unordered map containing the entities.
          */
-        Collection(const std::unordered_map<Symbol, std::unique_ptr<T>>& collection) : collection(collection) {}
+        Collection(const std::unordered_map<Symbol, std::weak_ptr<T>>& collection) : collection(collection) {}
 
         /**
          * @brief Iterator for the collection.
@@ -152,31 +168,43 @@ class Scope {
         class Iterator {
           public:
             using iterator_category = std::forward_iterator_tag;
-            using value_type = T*;
+            using value_type = std::shared_ptr<T>;
             using difference_type = std::ptrdiff_t;
-            using pointer = T**;
-            using reference = T*&;
+            using pointer = std::shared_ptr<T>*;
+            using reference = std::shared_ptr<T>&;
 
             /**
              * @brief Initialize the iterator with the given unordered map iterator.
              *
              * @param it The unordered map iterator.
              */
-            Iterator(std::unordered_map<Symbol, std::unique_ptr<T>>::const_iterator it) : it(it) {}
+            Iterator(std::unordered_map<Symbol, std::weak_ptr<T>>::const_iterator it) : it(it) {}
 
             /**
              * @brief Dereference the iterator.
              *
              * @return The entity pointed to by the iterator.
              */
-            [[nodiscard]] value_type operator*() const { return it->second.get(); }
+            [[nodiscard]] value_type operator*() const {
+                auto entity = it->second.lock();
+                if (!entity) {
+                    throw Exception("internal error: entity {} in scope has expired", it->first);
+                }
+                return entity;
+            }
 
             /**
              * @brief Get the pointer to the entity pointed to by the iterator.
              *
              * @return The pointer to the entity.
              */
-            [[nodiscard]] pointer operator->() const { return &(it->second.get()); }
+            [[nodiscard]] pointer operator->() const {
+                auto entity = it->second.lock();
+                if (!entity) {
+                    throw Exception("internal error: entity {} in scope has expired", it->first);
+                }
+                return &entity;
+            }
 
             /**
              * @brief Pre-increment the iterator.
@@ -217,7 +245,7 @@ class Scope {
 
           private:
             /// @brief The underlying unordered map iterator.
-            std::unordered_map<Symbol, std::unique_ptr<T>>::const_iterator it;
+            std::unordered_map<Symbol, std::weak_ptr<T>>::const_iterator it;
         };
 
         /**
@@ -243,7 +271,7 @@ class Scope {
 
       private:
         /// @brief The underlying unordered map containing the entities.
-        const std::unordered_map<Symbol, std::unique_ptr<T>>& collection;
+        const std::unordered_map<Symbol, std::weak_ptr<T>>& collection;
     };
 
     /**
@@ -273,6 +301,8 @@ class Scope {
 
     ~Scope();
 
+    void add_entity(std::shared_ptr<Entity> entity);
+
     /**
      * Add a constant to the scope.
      *
@@ -280,14 +310,14 @@ class Scope {
      * @param name The name of the constant.
      * @param constant The constant to add.
      */
-    void add(std::unique_ptr<Constant> constant);
+    void add(std::shared_ptr<Constant> constant);
     /**
      * Add a function to the scope.
      *
      * @param name The name of the function.
      * @param function The function to add.
      */
-    void add(std::unique_ptr<Function> function);
+    void add(std::shared_ptr<Function> function);
 
     /**
      * Add a macro to the scope.
@@ -295,7 +325,7 @@ class Scope {
      * @param name The name of the macro.
      * @param macro The macro to add.
      */
-    void add(std::unique_ptr<Macro> macro);
+    void add(std::shared_ptr<Macro> macro);
 
     /**
      * Add an object to the scope.
@@ -304,7 +334,7 @@ class Scope {
      * @param name The name of the object.
      * @param object The object to add.
      */
-    void add(std::unique_ptr<Object> object);
+    void add(std::shared_ptr<Object> object);
 
     /**
      * Add a new scope to the list of containing scopes.
@@ -323,6 +353,8 @@ class Scope {
      */
     void import(Visibility visibility, const Module& module);
 
+    std::shared_ptr<Scope> parent();
+
     /**
      * Get a constant from the scope.
      *
@@ -330,7 +362,7 @@ class Scope {
      * @param include_containing_scopes If `true`, search in containing scopes as well; if `false`, only search in this scope.
      * @return The constant if it exists, nullptr otherwise.
      */
-    [[nodiscard]] Constant* get_constant(Symbol name, bool include_containing_scopes = true) const { return get<Constant>(name, include_containing_scopes); }
+    [[nodiscard]] std::shared_ptr<Constant> get_constant(Symbol name, bool include_containing_scopes = true) const { return get<Constant>(name, include_containing_scopes); }
 
     /**
      * Get a function from the scope.
@@ -339,7 +371,7 @@ class Scope {
      * @param include_containing_scopes If `true`, search in containing scopes as well; if `false`, only search in this scope.
      * @return The function if it exists, nullptr otherwise.
      */
-    [[nodiscard]] Function* get_function(Symbol name, bool include_containing_scopes = true) const { return get<Function>(name, include_containing_scopes); }
+    [[nodiscard]] std::shared_ptr<Function> get_function(Symbol name, bool include_containing_scopes = true) const { return get<Function>(name, include_containing_scopes); }
 
     /**
      * Get a macro from the scope.
@@ -348,7 +380,7 @@ class Scope {
      * @param include_containing_scopes If `true`, search in containing scopes as well; if `false`, only search in this scope.
      * @return The macro if it exists, nullptr otherwise.
      */
-    [[nodiscard]] Macro* get_macro(Symbol name, bool include_containing_scopes = true) const { return get<Macro>(name, include_containing_scopes); }
+    [[nodiscard]] std::shared_ptr<Macro> get_macro(Symbol name, bool include_containing_scopes = true) const { return get<Macro>(name, include_containing_scopes); }
 
     /**
      * Get an object from the scope.
@@ -357,7 +389,7 @@ class Scope {
      * @param include_containing_scopes If `true`, search in containing scopes as well; if `false`, only search in this scope.
      * @return The object if it exists, nullptr otherwise.
      */
-    [[nodiscard]] Object* get_object(Symbol name, bool include_containing_scopes = true) const { return get<Object>(name, include_containing_scopes); }
+    [[nodiscard]] std::shared_ptr<Object> get_object(Symbol name, bool include_containing_scopes = true) const { return get<Object>(name, include_containing_scopes); }
 
     [[nodiscard]] AllCollections get_entities() const { return AllCollections(this); }
 
@@ -544,7 +576,7 @@ class Scope {
      * @throws Exception if adding the entity is not allowed.
      */
     template <typename T> Scope* add_precheck(Visibility visibility, Symbol name, const Location& location) {
-        if ((visibility == Visibility::ENTITY || visibility == Visibility::SCOPE) && !std::is_same_v<T, Constant>) {
+        if ((visibility == Visibility::ENTITY || visibility == Visibility::ARGUMENT) && !std::is_same_v<T, Constant>) {
             DiagnosticOutput::global.error(location, "cannot add {} to scope of type {}", get_type_name<T>(), visibility);
             throw Exception();
         }
@@ -614,7 +646,7 @@ class Scope {
      * @param include_containing_scopes If `true`, search in containing scopes as well; if `false`, only search in this scope.
      * @return The entity, if found; otherwise, nullptr.
      */
-    template <typename T> T* get(Symbol name, bool include_containing_scopes = true) const {
+    template <typename T> std::shared_ptr<T> get(Symbol name, bool include_containing_scopes = true) const {
         if (auto entity = get_directly<T>(name)) {
             return entity;
         }
@@ -637,15 +669,15 @@ class Scope {
      * @param name The name of the entity.
      * @return The entity, if found; otherwise, nullptr.
      */
-    template <typename T> T* get_directly(Symbol name) const { throw Exception("internal error: get() not defined for type {}", typeid(T).name()); }
+    template <typename T> std::shared_ptr<T> get_directly(Symbol name) const { throw Exception("internal error: get() not defined for type {}", typeid(T).name()); }
 
-    template <> Constant* get_directly<Constant>(Symbol name) const { return get(constants, name); }
+    template <> std::shared_ptr<Constant> get_directly<Constant>(Symbol name) const { return get(constants, name); }
 
-    template <> Function* get_directly<Function>(Symbol name) const { return get(functions, name); }
+    template <> std::shared_ptr<Function> get_directly<Function>(Symbol name) const { return get(functions, name); }
 
-    template <> Macro* get_directly<Macro>(Symbol name) const { return get(macros, name); }
+    template <> std::shared_ptr<Macro> get_directly<Macro>(Symbol name) const { return get(macros, name); }
 
-    template <> Object* get_directly<Object>(Symbol name) const { return get(objects, name); }
+    template <> std::shared_ptr<Object> get_directly<Object>(Symbol name) const { return get(objects, name); }
 
     /**
      * @brief Get an entity from a collection by name.
@@ -655,10 +687,14 @@ class Scope {
      * @param name The name of the entity.
      * @return The entity if found, {} otherwise.
      */
-    template <typename T> T* get(const std::unordered_map<Symbol, std::unique_ptr<T>>& collection, Symbol name) const {
+    template <typename T> std::shared_ptr<T> get(const std::unordered_map<Symbol, std::weak_ptr<T>>& collection, Symbol name) const {
         auto it = collection.find(name);
         if (it != collection.end()) {
-            return it->second.get();
+            auto entity = it->second.lock();
+            if (!entity) {
+                throw Exception("internal error: entity {} in scope has expired", name);
+            }
+            return entity;
         }
         else {
             return nullptr;
@@ -681,16 +717,16 @@ class Scope {
     Visibility type_{Visibility::ENTITY};
 
     /// @brief The constants in the environment.
-    std::unordered_map<Symbol, std::unique_ptr<Constant>> constants;
+    std::unordered_map<Symbol, std::weak_ptr<Constant>> constants;
 
     /// @brief The functions in the environment.
-    std::unordered_map<Symbol, std::unique_ptr<Function>> functions;
+    std::unordered_map<Symbol, std::weak_ptr<Function>> functions;
 
     /// @brief The macros in the environment.
-    std::unordered_map<Symbol, std::unique_ptr<Macro>> macros;
+    std::unordered_map<Symbol, std::weak_ptr<Macro>> macros;
 
     /// @brief The objects in the environment.
-    std::unordered_map<Symbol, std::unique_ptr<Object>> objects;
+    std::unordered_map<Symbol, std::weak_ptr<Object>> objects;
 
     /// @brief The scopes to search for symbols not found in this scope.
     std::vector<std::shared_ptr<Scope>> next;

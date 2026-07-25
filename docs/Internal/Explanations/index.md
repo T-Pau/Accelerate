@@ -15,5 +15,8 @@ It is intended to developers who want to contribute to the project. It provides 
 ## [Body Elements and Expressions](Body-and-Expressions.md)
 --8<-- "docs/Internal/Explanations/Body-and-Expressions.md:summary"
 
+## [Ownership and Lifetimes](Ownership.md)
+--8<-- "docs/Internal/Explanations/Ownership.md:summary"
+
 ## [Ideas for Later](Ideas-Later.md)
 --8<-- "docs/Internal/Explanations/Ideas-Later.md:summary"

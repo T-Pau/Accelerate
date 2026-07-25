@@ -74,23 +74,25 @@ void Module::import(Visibility visibility, const Module& module) {
 
 std::vector<Entity*> Module::entities() const {
     std::vector<Entity*> entities;
-    auto public_entities = public_scope_->get_entities();
-    entities.insert(entities.end(), public_entities.begin(), public_entities.end());
-    auto private_entities = private_scope_->get_entities();
-    entities.insert(entities.end(), private_entities.begin(), private_entities.end());
-    for (const auto& [file_name, file_scope] : file_scopes) {
-        auto file_entities = file_scope->get_entities();
-        entities.insert(entities.end(), file_entities.begin(), file_entities.end());
+    for (const auto& entity : contained_entities) {
+        entities.push_back(entity.get());
     }
     return entities;
 }
 
 std::vector<Entity*> Module::explicitly_used_entities() const {
     std::vector<Entity*> entities;
-    for (const auto& file_scope : file_scopes | std::views::values) {
-        entities.insert(entities.end(), file_scope->get_explicitly_used_objects().begin(), file_scope->get_explicitly_used_objects().end());
-        auto file_entities = file_scope->get_entities();
-        entities.insert(entities.end(), file_entities.begin(), file_entities.end());
+    for (const auto& entity : contained_entities) {
+        if (auto object = entity->as<Object>()) {
+            if (object->explicitly_used) {
+                entities.push_back(entity.get());
+            }
+        }
     }
     return entities;
+}
+
+void Module::add_entity(std::shared_ptr<Entity> entity, std::shared_ptr<Scope> current_file_scope) {
+    current_file_scope->add_entity(entity);
+    contained_entities.insert(std::move(entity));
 }

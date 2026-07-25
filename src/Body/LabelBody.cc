@@ -88,7 +88,7 @@ void LabelBody::enter_names(Scope* scope, Entity* containing_entity) {
     auto label_expression = BinaryExpression::create(location, VariableExpression::create(location, containing_entity->name), BinaryExpression::Operation::ADD, offset_expression);
 
     if (!name.empty()) {
-        scope->add(std::make_unique<Constant>(location, name, visibility, containing_entity->get_scope(), false, label_expression));
+        scope->add(std::make_unique<Constant>(location, name, visibility, containing_entity->containing_scope(), false, label_expression));
     }
     else {
         scope->add_unnamed_label(location, label_expression);

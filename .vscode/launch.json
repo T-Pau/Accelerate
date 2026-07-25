@@ -79,6 +79,26 @@
 			"MIMode": "lldb"
 		},
 		{
+			"name": "xlr8: create cerberus library",
+			"type": "cppdbg",
+			"request": "launch",
+			"program": "${workspaceFolder}/build/src/xlr8",
+			"args": [
+				"--system-directory",
+				"/Users/dillo/Projects/T-Pau/Development/Accelerate/share",
+				"--depfile",
+				"/Users/dillo/Projects/T-Pau/Development/Accelerate/build/share/lib/cerberus-2100-6502.d",
+				"--create-library",
+				"-o",
+				"/Users/dillo/Projects/T-Pau/Development/Accelerate/build/share/lib/cerberus-2100-6502.lib",
+				"/Users/dillo/Projects/T-Pau/Development/Accelerate/share/lib/cerberus-2100-6502.s"
+			],
+			"cwd": "${workspaceFolder}",
+			"stopAtEntry": false,
+			"externalConsole": false,
+			"MIMode": "lldb"
+		},
+		{
 			"name": "xlr8: no stop",
 			"type": "cppdbg",
 			"request": "launch",

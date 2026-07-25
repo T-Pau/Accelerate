@@ -52,7 +52,6 @@ Expression SizeofExpression::create(const Location& location, const std::vector<
     return Expression(std::make_shared<SizeofExpression>(location, argument.as<VariableExpression>()->variable()));
 }
 
-
 Expression SizeofExpression::create(const Location& location, const Object* object) {
     const auto size_range = object->size_range();
     if (size_range.size()) {
@@ -63,7 +62,6 @@ Expression SizeofExpression::create(const Location& location, const Object* obje
     }
 }
 
-
 std::optional<Expression> SizeofExpression::evaluate(const EvaluationContext& context) {
     if (object && object->size_range().size()) {
         return ValueExpression::create(location, Value(*object->size_range().size()));
@@ -73,18 +71,15 @@ std::optional<Expression> SizeofExpression::evaluate(const EvaluationContext& co
     }
 }
 
-
 void SizeofExpression::serialize_sub(std::ostream& stream) const { stream << ".sizeof(" << object_name << ")"; }
-
 
 void SizeofExpression::resolve(Scope* scope, Entity* containing_entity) {
     if (!object) {
         if (const auto new_object = scope->get_object(object_name)) {
-            object = new_object;
+            object = new_object.get();
         }
         else {
             throw LocationException(location, "unknown object {}", object_name);
         }
     }
 }
-

@@ -92,7 +92,7 @@ std::shared_ptr<BaseExpression> FunctionExpression::clone() const {
 
 void FunctionExpression::resolve(Scope* scope, Entity* containing_entity) {
     BaseExpression::resolve(scope, containing_entity);
-    function = scope->get_function(name);
+    function = scope->get_function(name).get();
     if (!function) {
         throw LocationException(location, "function {} not found", name);
     }

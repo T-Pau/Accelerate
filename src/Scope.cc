@@ -69,8 +69,8 @@ bool Scope::is_defined(Symbol name) const { // NOLINT(misc-no-recursion)
 
 bool Scope::can_contain(Visibility container, Visibility contained) {
     switch (contained) {
-        case Visibility::SCOPE:
-            return container == Visibility::SCOPE || container == Visibility::ENTITY;
+        case Visibility::ARGUMENT:
+            return container == Visibility::ARGUMENT || container == Visibility::ENTITY;
         case Visibility::ENTITY:
             return true;
         case Visibility::FILE:
@@ -133,28 +133,28 @@ void Scope::add_next(std::shared_ptr<Scope> scope) {
     next.push_back(std::move(scope));
 }
 
-void Scope::add(std::unique_ptr<Object> object) {
+void Scope::add(std::shared_ptr<Object> object) {
     auto scope = add_precheck<Object>(object->visibility, object->name, object->location);
     scope->objects[object->name] = std::move(object);
 }
 
-void Scope::add(std::unique_ptr<Constant> constant) {
+void Scope::add(std::shared_ptr<Constant> constant) {
     auto scope = add_precheck<Constant>(constant->visibility, constant->name, constant->location);
     scope->constants[constant->name] = std::move(constant);
 }
 
-void Scope::add(std::unique_ptr<Function> function) {
+void Scope::add(std::shared_ptr<Function> function) {
     auto scope = add_precheck<Function>(function->visibility, function->name, function->location);
     scope->functions[function->name] = std::move(function);
 }
 
-void Scope::add(std::unique_ptr<Macro> macro) {
+void Scope::add(std::shared_ptr<Macro> macro) {
     auto scope = add_precheck<Macro>(macro->visibility, macro->name, macro->location);
     scope->macros[macro->name] = std::move(macro);
 }
 
 void Scope::import(Visibility visibility, const Module& module) {
-    if (visibility == Visibility::SCOPE) {
+    if (visibility == Visibility::ARGUMENT) {
         throw Exception("cannot import module into scope with visibility {}", visibility);
     }
     auto scope = find_containing_scope(visibility);
@@ -193,4 +193,22 @@ bool Scope::can_rename(Symbol new_name) const {
         return true;
     }
     return !std::any_of(next.begin(), next.end(), [&](auto parent) { return parent->contained.contains(new_name); });
+}
+
+void Scope::add_entity(std::shared_ptr<Entity> entity) {
+    if (auto constant = std::dynamic_pointer_cast<Constant>(entity)) {
+        add(constant);
+    }
+    else if (auto function = std::dynamic_pointer_cast<Function>(entity)) {
+        add(function);
+    }
+    else if (auto macro = std::dynamic_pointer_cast<Macro>(entity)) {
+        add(macro);
+    }
+    else if (auto object = std::dynamic_pointer_cast<Object>(entity)) {
+        add(object);
+    }
+    else {
+        throw Exception("internal error: unknown entity type {}", entity->type_name());
+    }
 }

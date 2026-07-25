@@ -34,4 +34,4 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 Token Output::token_output = {Token::NAME, ".output"};
 
-Output::Output(const Location& location, const Target* target, Body body) : Entity(location, token_output.as_symbol(), Visibility::PUBLIC, target->file_scope(), false), body(std::move(body)) {}
+Output::Output(const Location& location, const Target* target, Body body) : ScopeEntity(location, token_output.as_symbol(), Visibility::PUBLIC, target->file_scope(), false), body(std::move(body)) {}

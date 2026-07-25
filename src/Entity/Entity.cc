@@ -50,7 +50,7 @@ using namespace tpau::cpp_kernal;
 const Token Entity::token_default_only = Token(Token::NAME, DEFAULT_ONLY);
 const Token Entity::token_visibility = Token(Token::NAME, VISIBILITY);
 
-Entity::Entity(const Location& location, Symbol name, std::shared_ptr<Scope> parent_scope, const std::shared_ptr<StructuredValue>& definition) : name(name), location(location), scope(std::make_shared<Scope>(Visibility::ENTITY, parent_scope)) {
+Entity::Entity(const Location& location, Symbol name, std::shared_ptr<Scope> containing_scope, const std::shared_ptr<StructuredValue>& definition) : name(name), location(location), containing_scope_(containing_scope) {
     const auto parameters = definition->as_dictionary();
 
     if (const auto default_only_definition = parameters->get_optional(token_default_only)) {
@@ -69,8 +69,6 @@ Entity::Entity(const Location& location, Symbol name, std::shared_ptr<Scope> par
     }
     visibility = *visibility_;
 }
-
-Entity::Entity(const Location& location, Symbol name, Visibility visibility, std::shared_ptr<Scope> parent_scope, bool default_only) : name(name), location(location), visibility(visibility), scope(std::make_shared<Scope>(Visibility::ENTITY, parent_scope)), default_only{default_only} {}
 
 void Entity::serialize_entity(std::ostream& stream) const {
     stream << "    " VISIBILITY ": " << visibility << std::endl;
@@ -158,4 +156,12 @@ void Entity::resolve() {
 std::ostream& operator<<(std::ostream& stream, const Entity& entity) {
     entity.serialize(stream);
     return stream;
+}
+
+std::shared_ptr<Scope> Entity::containing_scope() const {
+    auto scope = containing_scope_.lock();
+    if (!scope) {
+        throw LocationException(location, "internal error: containing scope of {} '{}' destroyed", type_name(), name);
+    }
+    return scope;
 }

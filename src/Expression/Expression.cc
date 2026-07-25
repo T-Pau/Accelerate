@@ -32,7 +32,8 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <tpau-cpp-kernal/DiagnosticOutput.h>
 #include <tpau-cpp-kernal/LocationException.h>
 
-#include "Expression/EntityExpression.h"
+#include "Expression/ConstantExpression.h"
+#include "Expression/ObjectExpression.h"
 #include "Expression/VariableExpression.h"
 #include "Expression/VoidExpression.h"
 #include "ExpressionParser.h"
@@ -130,10 +131,15 @@ Symbol Expression::variable_name() const {
     if (auto variable = as<VariableExpression>()) {
         return variable->symbol;
     }
-    if (auto object = as<EntityExpression>()) {
-        return object->entity->name;
+    else if (auto object = as<ObjectExpression>()) {
+        return object->object()->name;
     }
-    return {};
+    else if (auto constant = as<ConstantExpression>()) {
+        return constant->constant()->name;
+    }
+    else {
+        return {};
+    }
 }
 
 std::ostream& operator<<(std::ostream& stream, const Expression& expression) {

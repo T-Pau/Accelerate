@@ -1,14 +1,14 @@
-#ifdef IN_XLR8_ENTITY_EXPRESSION_H
+#ifdef IN_XLR8_SCOPE_ENTITY_H
 #error "circular include file dependency detected"
 #endif
-#define IN_XLR8_ENTITY_EXPRESSION_H
-#ifndef HAD_XLR8_ENTITY_EXPRESSION_H
-#define HAD_XLR8_ENTITY_EXPRESSION_H
+#define IN_XLR8_SCOPE_ENTITY_H
+#ifndef HAD_XLR8_SCOPE_ENTITY_H
+#define HAD_XLR8_SCOPE_ENTITY_H
 
 /*
 Copyright (C) Dieter Baron
 
-The authors can be contacted at <assembler@tpau.group>
+The authors can be contacted at <accelerate@tpau.group>
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions
@@ -34,26 +34,24 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "Expression/BaseExpression.h"
 #include "Entity/Entity.h"
 
-/**
- * @brief Represents an expression referring to a constant or an object.
- */
-class EntityExpression: public BaseExpression {
-public:
-    explicit EntityExpression(const Location& location, Entity* entity): BaseExpression(location), entity(entity) {}
+class Scope;
 
-protected:
-    void resolve(Scope* scope, Entity* containing_entity) override {containing_entity->uses(entity);}
+class ScopeEntity : public Entity {
+  public:
+    ScopeEntity(const Location& location, Symbol name, std::shared_ptr<Scope> containing_scope, const std::shared_ptr<StructuredValue>& definition);
 
-    void serialize_sub(std::ostream& stream) const override {stream << entity->name;}
+    ScopeEntity(const Location& location, Symbol name, Visibility visibility, std::shared_ptr<Scope> containing_scope, bool default_only = false);
 
-protected:
-    friend class Expression;
-    
-    Entity* entity;
+    [[nodiscard]] std::shared_ptr<Scope> scope() const { return scope_; }
+
+    void add(std::shared_ptr<Constant> constant);
+
+  protected:
+    std::unordered_set<std::shared_ptr<Constant>> constants;
+    std::shared_ptr<Scope> scope_;
 };
 
-#endif // HAD_XLR8_ENTITY_EXPRESSION_H
-#undef IN_XLR8_ENTITY_EXPRESSION_H
+#endif // HAD_XLR8_SCOPE_ENTITY_H
+#undef IN_XLR8_SCOPE_ENTITY_H

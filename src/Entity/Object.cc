@@ -55,7 +55,7 @@ const Token Object::token_reserve{Token::NAME, RESERVE};
 const Token Object::token_section{Token::NAME, SECTION};
 const Token Object::token_uses{Token::NAME, USES};
 
-Object::Object(const Location& location, Symbol name, std::shared_ptr<Scope> parent_scope, const std::shared_ptr<StructuredValue>& definition) : Entity(location, name, parent_scope, definition) {
+Object::Object(const Location& location, Symbol name, std::shared_ptr<Scope> parent_scope, const std::shared_ptr<StructuredValue>& definition) : ScopeEntity(location, name, parent_scope, definition) {
     auto parameters = definition->as_dictionary();
 
     if (auto address_value = parameters->get_optional(token_address)) {
@@ -101,8 +101,6 @@ Object::Object(const Location& location, Symbol name, std::shared_ptr<Scope> par
     // section = owner->target->map.section((*parameters)[token_section]->as_singular_scalar()->token().as_symbol());
 }
 
-Object::Object(const Location& location, Symbol name, Visibility visibility, std::shared_ptr<Scope> parent_scope, bool default_only, const MemoryMap::Section* section) : Entity(location, name, visibility, parent_scope, default_only), section(section) {}
-
 std::ostream& operator<<(std::ostream& stream, const Object& object) {
     object.serialize(stream);
     return stream;
@@ -131,7 +129,7 @@ void Object::serialize(std::ostream& stream) const {
     else {
         stream << "    " BODY " <" << std::endl;
         // TODO: avoid code duplication with ScopedBody
-        auto constants = scope->get_constants();
+        auto constants = scope()->get_constants();
         auto sorted_constants = sorted(constants.begin(), constants.end(), [](const auto& a, const auto& b) { return a->get_name() < b->get_name(); });
         for (const auto& constant : sorted_constants) {
             stream << "        " << constant->get_name() << " = " << constant->value << std::endl;
@@ -208,12 +206,12 @@ void Object::pin(Expression expression) {
 
 void Object::resolve_implementation() {
     if (address) {
-        address->resolve(scope.get(), this);
+        address->resolve(containing_scope().get(), this);
     }
     if (reservation_expression) {
-        reservation_expression->resolve(scope.get(), this);
+        reservation_expression->resolve(containing_scope().get(), this);
     }
-    body.resolve(scope.get(), this);
+    body.resolve(scope().get(), this);
 #ifdef TRACE_TRANSLATION
     std::cerr << body;
 #endif

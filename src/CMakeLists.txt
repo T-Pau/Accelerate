@@ -16,13 +16,13 @@ add_library(xlr8-library STATIC
         Body/RepeatBody.cc
         Body/ScopeBody.cc
 
-        Entity/Callable.cc
         Entity/Constant.cc
         Entity/Entity.cc
         Entity/Function.cc
         Entity/Macro.cc
         Entity/Object.cc
         Entity/Output.cc
+        Entity/ScopeEntity.cc
 
         Expression/ArgumentExpression.cc
         Expression/BaseExpression.cc
@@ -30,7 +30,6 @@ add_library(xlr8-library STATIC
         Expression/ConstantExpression.cc
         Expression/CurrentObjectExpression.cc
         Expression/DefinedExpression.cc
-        Expression/EntityExpression.cc
         Expression/ExistsExpression.cc
         Expression/Expression.cc
         Expression/FillExpression.cc
@@ -55,6 +54,7 @@ add_library(xlr8-library STATIC
         BaseEncoder.cc
         BinaryEncoder.cc
         BodyParser.cc
+        CallableArguments.cc
         Checksum.cc
         ChecksumAlgorithm.cc
         ChecksumAlgorithmXor.cc

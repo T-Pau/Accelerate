@@ -33,9 +33,9 @@ void AssignmentBody::enter_names(Scope* scope, Entity* containing_entity) {
     // TODO: create Constant and add it to scope.
 }
 
-void AssignmentBody::serialize(std::ostream &stream, const std::string &prefix) const {
+void AssignmentBody::serialize(std::ostream& stream, const std::string& prefix) const {
     stream << prefix;
-    if (visibility != Visibility::SCOPE) {
+    if (visibility != Visibility::ARGUMENT) {
         stream << "." << visibility << " ";
     }
     stream << name << " = " << value << std::endl;

@@ -35,14 +35,16 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include "Entity/Object.h"
-#include "Expression/EntityExpression.h"
+#include "Expression/BaseExpression.h"
 
 /**
  * @brief Represents an expression referring to an object.
+ *
+ * Since Objects are not deleted before the end of the program and an ObjectExpression can be contained in the Object it refers to, we use raw pointers to avoid circular ownership.
  */
-class ObjectExpression : public EntityExpression {
+class ObjectExpression : public BaseExpression {
   public:
-    explicit ObjectExpression(const Location& location, Object* object) : EntityExpression(location, object) {}
+    explicit ObjectExpression(const Location& location, Object* object) : BaseExpression(location), object_(object) {}
 
     [[nodiscard]] static Expression create(const Location& location, Object* object) { return *simplify(location, object, true); }
 
@@ -52,7 +54,13 @@ class ObjectExpression : public EntityExpression {
 
     [[nodiscard]] std::optional<Value::Type> type() const override { return Value::UNSIGNED; }
 
-    Object* object() const { return static_cast<Object*>(entity); }
+    void serialize_sub(std::ostream& stream) const override { stream << object()->name; }
+
+    [[nodiscard]] std::optional<Expression> evaluate(const EvaluationContext& context) override { return simplify(location, object(), false); }
+
+    [[nodiscard]] bool needs_cloning() override { return false; }
+
+    Object* object() const { return object_; }
 
   protected:
     [[nodiscard]] std::optional<Value> maximum_value() const override;
@@ -60,6 +68,8 @@ class ObjectExpression : public EntityExpression {
 
   private:
     static std::optional<Expression> simplify(const Location& location, Object* object, bool always_create);
+
+    Object* object_;
 };
 
 #endif // HAD_XLR8_OBJECT_EXPRESSION_H

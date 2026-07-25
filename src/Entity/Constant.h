@@ -38,13 +38,13 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 class Constant : public Entity {
   public:
-    Constant(const Location& location, Symbol name, Visibility visibility, std::shared_ptr<Scope> parent_scope, bool default_only, Expression value) : Entity(location, name, visibility, parent_scope, default_only), value(std::move(value)) {}
+    Constant(const Location& location, Symbol name, Visibility visibility, std::shared_ptr<Scope> containing_scope, bool default_only, Expression value) : Entity(location, name, visibility, containing_scope, default_only), value(std::move(value)) {}
 
     Constant(const Location& location, Symbol name, std::shared_ptr<Scope> parent_scope, const std::shared_ptr<StructuredValue>& definition);
 
     [[nodiscard]] bool has_value() const { return value.has_value(); }
 
-    void resolve_implementation() override { value.resolve(scope.get(), this); }
+    void resolve_implementation() override { value.resolve(containing_scope().get(), this); }
 
     void serialize(std::ostream& stream) const override;
 

@@ -8,7 +8,7 @@
 /*
 Copyright (C) Dieter Baron
 
-The authors can be contacted at <assembler@tpau.group>
+The authors can be contacted at <accelerate@tpau.group>
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions
@@ -35,18 +35,18 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include "Entity/Constant.h"
-#include "Expression/EntityExpression.h"
+#include "Expression/BaseExpression.h"
 
 /**
  * @brief Represents an expression referring to a constant.
  */
-class ConstantExpression : public EntityExpression {
+class ConstantExpression : public BaseExpression {
   public:
-    explicit ConstantExpression(const Location& location, Constant* constant) : EntityExpression(location, constant) { constant->reference(); }
+    explicit ConstantExpression(const Location& location, std::shared_ptr<Constant> constant) : BaseExpression(location), constant_(std::move(constant)) {}
 
-    ~ConstantExpression() override { constant()->unreference(); }
+    ~ConstantExpression() override = default;
 
-    [[nodiscard]] static Expression create(const Location& location, Constant* constant) { return *simplify(location, constant, true); }
+    [[nodiscard]] static Expression create(const Location& location, std::shared_ptr<Constant> constant) { return *simplify(location, constant, true); }
 
     [[nodiscard]] bool has_value() const override { return constant()->has_value(); }
 
@@ -58,7 +58,9 @@ class ConstantExpression : public EntityExpression {
 
     [[nodiscard]] bool needs_cloning() override { return false; }
 
-    Constant* constant() const { return static_cast<Constant*>(entity); }
+    std::shared_ptr<Constant> constant() const { return constant_; }
+
+    void serialize_sub(std::ostream& stream) const override { stream << constant()->name; }
 
   protected:
     [[nodiscard]] std::optional<Value> maximum_value() const override { return constant()->value.maximum_value(); }
@@ -66,7 +68,9 @@ class ConstantExpression : public EntityExpression {
     [[nodiscard]] std::optional<Value> minimum_value() const override { return constant()->value.minimum_value(); }
 
   private:
-    static std::optional<Expression> simplify(const Location& location, Constant* constant, bool always_create);
+    std::shared_ptr<Constant> constant_;
+
+    static std::optional<Expression> simplify(const Location& location, std::shared_ptr<Constant> constant, bool always_create);
 };
 
 #endif // HAD_XLR8_CONSTANT_EXPRESSION_H

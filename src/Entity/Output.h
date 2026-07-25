@@ -35,17 +35,17 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include "Body/Body.h"
-#include "Entity/Entity.h"
+#include "Entity/ScopeEntity.h"
 
-class Output : public Entity {
+class Output : public ScopeEntity {
   public:
     Output(const Location& location, const Target* target, Body body);
 
     [[nodiscard]] const Body& get_body() const { return body; }
 
-    void enter_names() { body.enter_names(scope.get(), this); }
+    void enter_names() { body.enter_names(scope().get(), this); }
 
-    void resolve_implementation() override { body.resolve(scope.get(), this); }
+    void resolve_implementation() override { body.resolve(scope().get(), this); }
 
     // TODO: implement
     // void serialize(std::ostream& stream) const override;

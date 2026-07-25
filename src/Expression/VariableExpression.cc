@@ -72,14 +72,14 @@ void VariableExpression::resolve(Scope* scope, Entity* containing_entity) {
         if (auto constant = scope->get_constant(symbol)) {
             expression = ConstantExpression::create(location, constant);
             if (containing_entity) {
-                containing_entity->uses(constant);
+                containing_entity->uses(constant.get());
             }
             TRACE("resolving", "resolved in scope {} to constant {} {} value {}", static_cast<void*>(scope), static_cast<void*>(constant), constant->name, static_cast<void*>(constant->value.base_expression()));
         }
         else if (auto object = scope->get_object(symbol)) {
-            expression = ObjectExpression::create(location, object);
+            expression = ObjectExpression::create(location, object.get());
             if (containing_entity) {
-                containing_entity->uses(object);
+                containing_entity->uses(object.get());
             }
         }
         else {

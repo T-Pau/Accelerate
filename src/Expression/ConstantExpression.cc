@@ -2,7 +2,7 @@
 
 #include "Expression/ValueExpression.h"
 
-std::optional<Expression> ConstantExpression::simplify(const Location& location, Constant* constant, bool always_create) {
+std::optional<Expression> ConstantExpression::simplify(const Location& location, std::shared_ptr<Constant> constant, bool always_create) {
     if (constant->has_value()) {
         return Expression(ValueExpression::create(location, *(constant->value.value())));
     }

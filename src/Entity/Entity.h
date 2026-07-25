@@ -51,8 +51,10 @@ class Scope;
  */
 class Entity : public Base {
   public:
-    Entity(const Location& location, Symbol name, std::shared_ptr<Scope> parent_scope, const std::shared_ptr<StructuredValue>& definition);
-    Entity(const Location& location, Symbol name, Visibility visibility, std::shared_ptr<Scope> parent_scope, bool default_only = false);
+    Entity(const Location& location, Symbol name, std::shared_ptr<Scope> containing_scope, const std::shared_ptr<StructuredValue>& definition);
+
+    Entity(const Location& location, Symbol name, Visibility visibility, std::shared_ptr<Scope> containing_scope, bool default_only = false) : name(name), location(location), visibility(visibility), containing_scope_(containing_scope), default_only{default_only} {}
+
     virtual ~Entity() = default;
 
     template <typename T> [[nodiscard]] T* as() { return dynamic_cast<T*>(this); }
@@ -86,8 +88,6 @@ class Entity : public Base {
 
     [[nodiscard]] Visibility get_visibility() const { return visibility; }
 
-    [[nodiscard]] std::shared_ptr<Scope> get_scope() const { return scope; }
-
     void virtual serialize(std::ostream& stream) const { serialize_entity(stream); }
 
     // TODO: make protected once BodyParser doesn't evaluate body directly.
@@ -105,8 +105,8 @@ class Entity : public Base {
     /// @brief All entities referenced by the entity.
     std::unordered_set<Entity*> referenced_entities;
 
-    /// @brief The entity's scope.
-    std::shared_ptr<Scope> scope;
+    std::shared_ptr<Scope> containing_scope() const;
+
 
   protected:
     /*
@@ -121,12 +121,15 @@ class Entity : public Base {
 
     [[nodiscard]] virtual EvaluationContext evaluation_context(EvaluationResult& result) { return EvaluationContext(result, this); }
 
-    [[nodiscard]] virtual EvaluationContext evaluation_context(EvaluationResult& result, EvaluationContext::EvaluationType type) { return EvaluationContext(result, type, scope); }
+    [[nodiscard]] virtual EvaluationContext evaluation_context(EvaluationResult& result, EvaluationContext::EvaluationType type) { return EvaluationContext(result, type, {}); }
 
     virtual void evaluate_inner(EvaluationContext& context) = 0;
 
+    std::weak_ptr<Scope> containing_scope_;
+
   private:
     [[nodiscard]] bool check_unresolved(const std::unordered_set<Symbol>& unresolved, Unresolved::Part& part) const;
+
 
     static const Token token_default_only;
     static const Token token_visibility;

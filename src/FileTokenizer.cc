@@ -64,7 +64,8 @@ const std::unordered_map<Token, FileTokenizer::PreprocessorDirective> FileTokeni
 };
 // clang-format on
 
-FileTokenizer::FileTokenizer(const SearchPath& search_path, const Target* target, bool use_preprocessor, const std::unordered_set<Symbol>& defines) : preprocessor_scope(std::make_shared<Scope>(Visibility::SCOPE)), use_preprocessor{use_preprocessor}, search_path{search_path}, target{target} {
+// TODO: is Visibility::ARGUMENT correct here?
+FileTokenizer::FileTokenizer(const SearchPath& search_path, const Target* target, bool use_preprocessor, const std::unordered_set<Symbol>& defines) : preprocessor_scope(std::make_shared<Scope>(Visibility::ARGUMENT)), use_preprocessor{use_preprocessor}, search_path{search_path}, target{target} {
     preprocessor_scope->define(defines);
     if (use_preprocessor) {
         add_literal(token_define);
@@ -545,7 +546,7 @@ void FileTokenizer::preprocess_pre_if(const Token& directive, const std::vector<
     expression.resolve(preprocessor_scope.get(), nullptr);
     auto result = EvaluationResult{};
     // TODO: check if this is correct
-    auto context = EvaluationContext{result, EvaluationContext::STANDALONE, std::make_shared<Scope>(Visibility::SCOPE)};
+    auto context = EvaluationContext{result, EvaluationContext::STANDALONE, std::make_shared<Scope>(Visibility::ARGUMENT)};
     expression.evaluate(context);
     if (!expression.has_value()) {
         throw LocationException(directive.location, "condition in {} must be constant", directive);
