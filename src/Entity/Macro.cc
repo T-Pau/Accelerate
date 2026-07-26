@@ -75,6 +75,7 @@ Body Macro::expand(const std::vector<Expression>& arguments, std::shared_ptr<Sco
 
 void Macro::serialize(std::ostream& stream) const {
     stream << ".macro " << name << " {" << std::endl;
+    serialize_entity(stream);
     arguments.serialize_callable(stream);
     stream << "    body <" << std::endl;
     body.serialize(stream, "        ");

@@ -345,6 +345,11 @@ void Assembler::parse_symbol(Visibility visibility, const Token& name) {
         throw LocationException(name.location, "no target specified");
     }
 
+    if (!current_section) {
+        // TODO: output error, substitute invalid section and continue parsing.
+        tokenizer.skip_until(Token::curly_close, true);
+        throw LocationException(name.location, "object outside section");
+    }
     auto object_ptr = std::make_shared<Object>(name.location, name.as_symbol(), visibility, file_scope, false, target->map.section(current_section));
     auto object = object_ptr.get();
     module->add_entity(std::move(object_ptr), file_scope);

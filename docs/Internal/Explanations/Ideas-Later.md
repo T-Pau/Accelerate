@@ -8,26 +8,38 @@ This article collects ideas for improvements.
 
 These are ideas that improve existing functionality, or add new functionality.
 
+
 ### Argument Restrictions for Macros and Functions
 
 Allowing to restrict arguments to certain types, value ranges, or encodings would allow for better error messages and further evaluation of their bodies.
+
 
 ## Simplification Improvements
 
 These are ideas that simplify expressions and bodies, thus making libraries more compact.
 
-### Inline ArgumentConstant Only Used Once
 
-If an ArgumentConstant is only used once, we can evaluate the reference to its expression. This way, the scope defining it can remove it and maybe itself.
+### Move `.pc` Labels into Instruction's Body
+
+Only the instruction needs the label for `.pc`. Having it in the instruction's body makes it an ArgumentConstant, which can be inlined and removed from the scope, Also, it no longer needs `.label_0` names.
+
+
+### Rearrange BinaryExpressions to Evaluate More Known Values
+
+`(($1234-(test_bcc+$02))-$02)` can be simplified to `($1234-test_bcc)`.
+
+Unless we come up with a clever way to automatically find possible simplifications, it's probably not worth implementing it all by hand. But we can implement a few common ones, like relative addressing calculations as in the above.
 
 
 ## Optimizations
 
 These are ideas that improve performance, either in terms of speed or memory usage.
 
+
 ### Pre-create CPU Invocation Bodies
 
 If we can group the sets of address modes that can be matched by the same node list, we can pre-create the CPU invocation bodies for them, and store them in the instruction.  We would thus not have to recreate them for every invocation.
+
 
 ### Optional Cloning
 

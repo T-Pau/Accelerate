@@ -25,6 +25,12 @@ To report as many errors as possible, Accelerate will continue translating after
 !!! note
     Unresolved entities are no longer collected, they are reported during [Step 2: Resolve names](#2-resolve-names).
 
+!!! todo
+    The following are not yet implemented or not working correctly:
+
+    - addressing mode `relative` accepts all values, but it should be constrained to a range of offsets to the .pc. This is currently not expressible in the CPU definition, but is needed for the 4510 with `relative_word` addressing mode. (This is not a real problem for the 6502, since invalid offsets will be rejected when encoding. So while this needs to be fixed, it is not urgent.)
+
+
 # 1. Parse all Entities
 
 All source files are parsed and all libraries are loaded.

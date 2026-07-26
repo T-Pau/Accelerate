@@ -67,6 +67,7 @@ std::ostream& operator<<(std::ostream& stream, const Function& function) {
 
 void Function::serialize(std::ostream& stream) const {
     stream << ".function " << name << " {" << std::endl;
+    serialize_entity(stream);
     arguments.serialize_callable(stream);
     stream << "    " DEFINITION ": " << definition << std::endl;
     stream << "}" << std::endl;

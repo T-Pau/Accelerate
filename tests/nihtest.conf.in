@@ -13,4 +13,4 @@ default-stderr-replace = "^[^ :]*xlr8: " ""
 
 [environment]
 XLR8_SYSTEM_DIRECTORY = @CMAKE_SOURCE_DIR@/share
-XLR8_VERBOSE_ERRORS = 1
+#XLR8_VERBOSE_ERRORS = 1

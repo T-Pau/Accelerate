@@ -120,6 +120,8 @@ class BinaryExpression : public BaseExpression {
      */
     static std::optional<Expression> simplify(const Location& location, const Expression& left, Operation operation, const Expression& right, bool always_create);
 
+    [[nodiscard]] static Entity* get_referenced_object_or_macro(const Expression& expression);
+
     /**
      * Get the name of a binary operation.
      *

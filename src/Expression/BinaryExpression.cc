@@ -295,20 +295,10 @@ std::optional<Expression> BinaryExpression::simplify(const Location& location, c
                     .pc = object
                     (address-.pc)
                 */
-                if (left.is<ConstantExpression>() && right.is<ConstantExpression>()) {
-                    auto left_constant = left.as<ConstantExpression>()->constant();
-                    auto right_constant = right.as<ConstantExpression>()->constant();
-                    auto left_value = left_constant->value;
-                    auto right_value = right_constant->value;
-
-#ifdef TRACE_TRANSLATION
-                    std::cerr << "left constant: " << left_constant->get_name() << " value: " << static_cast<const void*>(left_value.base_expression()) << " " << left_value.type_name() << " " << left_value << std::endl;
-                    std::cerr << "right constant: " << right_constant->get_name() << " value: " << static_cast<const void*>(right_value.base_expression()) << " " << right_value.type_name() << " " << right_value << std::endl;
-#endif
-
-                    if (left_value.is<ObjectExpression>() && right_value.is<ObjectExpression>() && left_value.as<ObjectExpression>()->object() == right_value.as<ObjectExpression>()->object()) {
-                        return ValueExpression::create(location, Value(uint64_t{0}));
-                    }
+                auto left_object = get_referenced_object_or_macro(left);
+                auto right_object = get_referenced_object_or_macro(right);
+                if (left_object && right_object && left_object == right_object) {
+                    return ValueExpression::create(location, Value(uint64_t{0}));
                 }
 
 #if 0
@@ -543,4 +533,19 @@ const std::string& BinaryExpression::operation_name(Operation operation) {
         throw Exception("internal error: invalid binary operation {}", static_cast<int>(operation));
     }
     return operation_names[static_cast<size_t>(operation)];
+}
+
+Entity* BinaryExpression::get_referenced_object_or_macro(const Expression& expression) {
+    // TODO: handle macros
+    if (auto object_expression = expression.as<ObjectExpression>()) {
+        return object_expression->object();
+    }
+    else if (auto constant_expression = expression.as<ConstantExpression>()) {
+        if (auto constant = constant_expression->constant()) {
+            if (constant->value.is<ObjectExpression>()) {
+                return constant->value.as<ObjectExpression>()->object();
+            }
+        }
+    }
+    return {};
 }

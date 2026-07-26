@@ -34,7 +34,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 void ScopeBody::serialize(std::ostream& stream, const std::string& prefix) const {
     stream << prefix << ".scope {" << std::endl;
-    auto inner_prefix = prefix + "  ";
+    auto inner_prefix = prefix + "    ";
     for (auto constant : inner_scope()->get_constants()) {
         stream << inner_prefix << constant->name << " = " << constant->value << std::endl;
     }
