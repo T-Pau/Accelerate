@@ -44,7 +44,7 @@ void ScopeBody::serialize(std::ostream& stream, const std::string& prefix) const
 
 void ScopeBody::traverse(std::function<void(Body&)> body_callable, std::function<void(Expression&)> expression_callable) {
     for (auto constant : inner_scope()->get_constants()) {
-        TRACE_BEGIN("traversing scope", "constant {} {}", static_cast<void*>(constant), constant->name);
+        TRACE_BEGIN("traversing scope", "constant {} {}", static_cast<void*>(constant.get()), constant->name);
         expression_callable(constant->value);
         TRACE_END("traversing scope", "constant {}", constant->name);
     }
@@ -63,7 +63,7 @@ std::optional<Body> ScopeBody::evaluate_process(const EvaluationContext& context
 void ScopeBody::resolve(Scope* scope, Entity* containing_entity) {
     // Resolve the constants in the outer scope
     for (auto constant : constants) {
-        TRACE_BEGIN("resolving scope", "constant {} {}", static_cast<void*>(constant), constant->name);
+        TRACE_BEGIN("resolving scope", "constant {} {}", static_cast<void*>(constant.get()), constant->name);
         constant->value.resolve(scope, containing_entity);
         TRACE_END("resolving scope", "constant {}", constant->name);
     }

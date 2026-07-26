@@ -290,7 +290,7 @@ std::pair<std::optional<Expression>, Body> InstructionInvocation::Variant::encod
 InstructionInvocation::Argument::Argument(const AddressingMode::Argument* definition, Node* node) : definition(definition) {
     if (node == nullptr) {
         known_value = definition->default_value;
-        valid = true;
+        valid = known_value.has_value();
     }
     else {
         auto argument_type = definition->type;
@@ -305,6 +305,7 @@ InstructionInvocation::Argument::Argument(const AddressingMode::Argument* defini
                 valid = false;
                 return;
             }
+            known_value = enum_argument_type->entry(keyword);
         }
         else if (node->type() != Node::EXPRESSION) {
             valid = false;

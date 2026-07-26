@@ -59,6 +59,25 @@
 			"MIMode": "lldb"
 		},
 		{
+			"name": "xlr8: test cpu-z80",
+			"type": "cppdbg",
+			"request": "launch",
+			"program": "${workspaceFolder}/build/src/xlr8",
+			"args": [
+				"--system-directory",
+				"share",
+				"--create-library",
+				"--target",
+				"z80",
+				"build/tests/z80.s"
+			],
+			"cwd": "${workspaceFolder}",
+			"stopAtEntry": false,
+			"externalConsole": false,
+			"console": "integratedTerminal",
+			"MIMode": "lldb"
+		},
+		{
 			"name": "xlr8: create c64 library",
 			"type": "cppdbg",
 			"request": "launch",

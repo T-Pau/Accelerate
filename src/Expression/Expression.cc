@@ -168,10 +168,15 @@ std::optional<bool> Expression::has_type(Value::Type type) const {
 }
 
 Expression Expression::clone() const {
+#if 0
+    // This is broken, will look into it later. For now, just clone everything.
     if (expression->needs_cloning()) {
         return Expression{expression->clone()};
     }
     else {
         return *this;
     }
+#else
+    return Expression{expression->clone()};
+#endif
 }
