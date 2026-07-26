@@ -314,7 +314,20 @@ InstructionInvocation::Argument::Argument(const AddressingMode::Argument* defini
         else {
             auto expression = dynamic_cast<ExpressionNode*>(node)->expression;
             known_value = expression.value();
-            valid = argument_type->is_valid(expression);
+            if (auto map_argument_type = argument_type->as<ArgumentTypeMap>()) {
+                // For now, require known values for mapped arguments. Otherwise, we would need to create map expressions.
+                // TODO: better error message for unknown values, e.g. "constant value required"
+                if (!known_value || !map_argument_type->has_entry(*known_value)) {
+                    valid = false;
+                    return;
+                }
+                else {
+                    known_value = map_argument_type->entry(*known_value);
+                }
+            }
+            else {
+                valid = argument_type->is_valid(expression);
+            }
         }
     }
 }

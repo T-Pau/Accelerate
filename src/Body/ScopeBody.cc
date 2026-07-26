@@ -54,7 +54,16 @@ void ScopeBody::traverse(std::function<void(Body&)> body_callable, std::function
 }
 
 std::optional<Body> ScopeBody::evaluate_process(const EvaluationContext& context) {
-    if (scope_fully_evaluated()) {
+    std::erase_if(constants, [this](auto& constant) {
+        if (constant.use_count() == 1) {
+            TRACE("evaluating scope", "removing unused constant {} {}", static_cast<void*>(constant.get()), constant->name);
+            inner_scope()->remove_constant(constant->name);
+            return true;
+        }
+        return false;
+    });
+
+    if (constants.empty()) {
         return body;
     }
     return {};
@@ -72,11 +81,6 @@ void ScopeBody::resolve(Scope* scope, Entity* containing_entity) {
     TRACE_BEGIN("resolving body", "in scope {}", static_cast<void*>(inner_scope().get()));
     body.resolve(inner_scope().get(), containing_entity);
     TRACE_END("resolving body", "");
-}
-
-bool ScopeBody::scope_fully_evaluated() {
-    auto constants = inner_scope()->get_constants();
-    return std::all_of(constants.begin(), constants.end(), [](const auto& constant) { return !constant->is_referenced(); });
 }
 
 void ScopeBody::add(std::shared_ptr<Constant> constant) {

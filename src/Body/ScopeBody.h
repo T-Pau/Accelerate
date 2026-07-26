@@ -97,8 +97,6 @@ class ScopeBody : public BodyElement {
 
     void serialize(std::ostream& stream, const std::string& prefix) const override;
 
-    [[nodiscard]] bool scope_fully_evaluated();
-
     [[nodiscard]] bool fully_evaluated() override { return body.fully_evaluated(); }
 
     void add(std::shared_ptr<Constant> constant);

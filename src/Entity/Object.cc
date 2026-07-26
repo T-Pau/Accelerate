@@ -163,6 +163,16 @@ void Object::evaluate_inner(EvaluationContext& context) {
         reservation_expression->evaluate(context);
     }
     else {
+        // We do this twice for now to propagate label offsets.
+        // TODO: Propagate label offsets in a more efficient way that guarantees correctness.
+
+        for (auto& constant : constants) {
+            constant->evaluate();
+        }
+        body.evaluate(context);
+        for (auto& constant : constants) {
+            constant->evaluate();
+        }
         body.evaluate(context);
     }
 #ifdef TRACE_TRANSLATION
@@ -210,6 +220,9 @@ void Object::resolve_implementation() {
     }
     if (reservation_expression) {
         reservation_expression->resolve(containing_scope().get(), this);
+    }
+    for (auto& constant : constants) {
+        constant->resolve();
     }
     body.resolve(scope().get(), this);
 #ifdef TRACE_TRANSLATION

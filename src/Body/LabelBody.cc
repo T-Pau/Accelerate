@@ -49,6 +49,11 @@ void LabelBody::serialize(std::ostream& stream, const std::string& prefix) const
 }
 
 std::optional<Body> LabelBody::evaluate(const EvaluationContext& context) {
+    if (offset().has_size()) {
+        // If our offset was known, all LabelOffsetExpressions that reference us have been evaluated to a value, and we are no longer needed.
+        return Body();
+    }
+    // TODO: handle unnamed labels
 #if 0
     auto new_added_to_environment = added_to_environment;
     auto new_name = name;
@@ -88,9 +93,16 @@ void LabelBody::enter_names(Scope* scope, Entity* containing_entity) {
     auto label_expression = BinaryExpression::create(location, VariableExpression::create(location, containing_entity->name), BinaryExpression::Operation::ADD, offset_expression);
 
     if (!name.empty()) {
-        scope->add(std::make_unique<Constant>(location, name, visibility, containing_entity->containing_scope(), false, label_expression));
+        auto label_constant = std::make_shared<Constant>(location, name, Visibility::ENTITY, containing_entity->containing_scope(), false, label_expression);
+        if (auto scope_entity = containing_entity->as<ScopeEntity>()) {
+            scope_entity->add(label_constant);
+        }
+        else {
+            throw Exception("internal error: cannot add label {} to {}", name, containing_entity->type_name());
+        }
     }
     else {
+        // TODO: who owns the label_expression? Scopes aren't supposed to.
         scope->add_unnamed_label(location, label_expression);
     }
 }

@@ -48,25 +48,12 @@ class Constant : public Entity {
 
     void serialize(std::ostream& stream) const override;
 
-    void reference() { reference_count += 1; }
-
-    void unreference() {
-        if (reference_count == 0) {
-            throw std::logic_error("unbalanced reference/unreference");
-        }
-        reference_count -= 1;
-    }
-
-    [[nodiscard]] bool is_referenced() const { return reference_count > 0; }
-
     Expression value;
 
   protected:
     void evaluate_inner(EvaluationContext& context) override { value.evaluate(context); }
 
   private:
-    size_t reference_count{};
-
     static const Token token_value;
 };
 

@@ -107,16 +107,18 @@ void Body::append(const Body& new_element) {
 }
 
 void Body::evaluate(const EvaluationContext& context) {
-    TRACE_BEGIN_INSTANCE(element, "evaluating", "");
+    TRACE_BEGIN_INSTANCE(element, "evaluating", "new offset: {}, previous offset: {}, size: {}", context.offset, element->offset(), element->size_range());
     handle_translation_errors(
         *element,
         [&] {
             if (const auto new_body = element->evaluate(context)) {
                 *this = *new_body;
             }
+            // We set the offset after evaluation so the evaluated body can check for changes in offset.
+            element->offset_ = context.offset;
         },
         context.entity);
-    TRACE_END_INSTANCE(element, "evaluating", "");
+    TRACE_END_INSTANCE(element, "evaluating", "offset: {}, size: {}", element->offset(), element->size_range());
 }
 
 std::optional<Body> Body::back() const {

@@ -69,6 +69,7 @@ class LabelOffsetExpression : public BaseExpression {
     Symbol entity_name;
     Symbol label_name;
     size_t unnamed_label_index{0};
+    // TODO: use weak_ptr and throw on expired
     BodyElement* body;
 };
 

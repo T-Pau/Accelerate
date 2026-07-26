@@ -46,7 +46,7 @@ using namespace tpau::cpp_kernal;
  * @brief Represents a possibly unbounded range of sizes.
  */
 class SizeRange {
-public:
+  public:
     /**
      * @brief Construct a SizeRange representing unknown size.
      */
@@ -57,28 +57,29 @@ public:
      *
      * @param size The size of the range.
      */
-    explicit SizeRange(uint64_t size): minimum(size), maximum(size) {}
+    explicit SizeRange(uint64_t size) : minimum(size), maximum(size) {}
+
     /**
      * @brief Construct a SizeRange with a minimum and optional maximum.
      *
      * @param minimum The minimum size.
      * @param maximum The maximum size. If not set, the range is unbounded.
      */
-    SizeRange(uint64_t minimum, std::optional<uint64_t> maximum): minimum(minimum), maximum(maximum) {}
+    SizeRange(uint64_t minimum, std::optional<uint64_t> maximum) : minimum(minimum), maximum(maximum) {}
 
     /**
      * @brief Get the maximum value of the size range.
      *
      * @return The maximum value, if any.
      */
-    [[nodiscard]] std::optional<Value> maximum_value() const {return maximum ? Value(*maximum) : std::optional<Value>();}
+    [[nodiscard]] std::optional<Value> maximum_value() const { return maximum ? Value(*maximum) : std::optional<Value>(); }
 
     /**
      * @brief Get the minimum value of the size range.
      *
      * @return The minimum value.
      */
-    [[nodiscard]] Value minimum_value() const {return Value(minimum);}
+    [[nodiscard]] Value minimum_value() const { return Value(minimum); }
 
     /**
      * @brief If the size range has a known size, return it as a Value.
@@ -99,7 +100,7 @@ public:
      *
      * @return `true` if the size is known, `false` otherwise.
      */
-    [[nodiscard]] bool has_size() const {return maximum.has_value() && minimum == *maximum;}
+    [[nodiscard]] bool has_size() const { return maximum.has_value() && minimum == *maximum; }
 
     /**
      * @brief Get the maximum of this size range and another.
@@ -117,7 +118,7 @@ public:
      * @param other The size range to compare with.
      * @return `true` if the size ranges are equal, `false` otherwise.
      */
-    bool operator==(const SizeRange&other) const {return minimum == other.minimum && maximum == other.maximum;}
+    bool operator==(const SizeRange& other) const { return minimum == other.minimum && maximum == other.maximum; }
 
     /**
      * @brief Compare two size ranges for inequality.
@@ -125,7 +126,7 @@ public:
      * @param other The size range to compare with.
      * @return `true` if the size ranges are not equal, `false` otherwise.
      */
-    bool operator!=(const SizeRange&other) const {return !(*this == other);}
+    bool operator!=(const SizeRange& other) const { return !(*this == other); }
 
     /**
      * @brief Subtract another size range from this one.
@@ -149,7 +150,10 @@ public:
      * @param other The size range to add.
      * @return The resulting size range.
      */
-    SizeRange operator+=(const SizeRange& other) {*this = *this + other; return *this;}
+    SizeRange operator+=(const SizeRange& other) {
+        *this = *this + other;
+        return *this;
+    }
 
     /// The minimum size of the range.
     uint64_t minimum{0};
@@ -166,6 +170,15 @@ public:
  * @return The stream after outputting the SizeRange.
  */
 std::ostream& operator<<(std::ostream& stream, const SizeRange& size_range);
+
+template <> struct std::formatter<SizeRange> : std::formatter<std::string_view> {
+    auto format(const SizeRange& size_range, format_context& ctx) const {
+        // We delegate the actual rendering to the base class.
+        // It will use the options parsed by the inherited parse() method.
+        auto formatted_string = std::format("({}..{})", size_range.minimum, size_range.maximum ? std::to_string(*size_range.maximum) : "");
+        return std::formatter<std::string_view>::format(formatted_string, ctx);
+    }
+};
 
 #endif // HAD_XLR8_SIZE_RANGE_H
 #undef IN_XLR8_SIZE_RANGE_H

@@ -38,23 +38,15 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Expression.h"
 
 /// @brief Expression node representing a unary operation.
-class UnaryExpression: public BaseExpression {
-public:
-    enum Operation {
-        BANK_BYTE,
-        BITWISE_NOT,
-        HIGH_BYTE,
-        LOW_BYTE,
-        MINUS,
-        NOT,
-        PLUS
-    };
+class UnaryExpression : public BaseExpression {
+  public:
+    enum Operation { BANK_BYTE, BITWISE_NOT, HIGH_BYTE, LOW_BYTE, MINUS, NOT, PLUS };
 
     /**
      * Create an expression from a unary operation.
-     * 
+     *
      * This might not create a UnaryExpression if the operation can be simplified (e.g. if the operand has a value).
-     * 
+     *
      * @param location The location of the expression in the source code.
      * @param operation The unary operation.
      * @param operand The operand of the unary operation.
@@ -64,23 +56,26 @@ public:
 
     /**
      * Create a unary expression.
-     * 
+     *
      * @param location The location of the expression in the source code.
      * @param operation The unary operation.
      * @param operand The operand of the unary operation.
      */
-    UnaryExpression(const Location& location, Operation operation, Expression operand): BaseExpression(location), operation(operation), operand(std::move(operand)) {}
+    UnaryExpression(const Location& location, Operation operation, Expression operand) : BaseExpression(location), operation(operation), operand(std::move(operand)) {}
 
-protected:
+    std::shared_ptr<BaseExpression> clone() const override { return std::make_shared<UnaryExpression>(location, operation, operand.clone()); }
+
+  protected:
     [[nodiscard]] std::optional<Expression> evaluate_process(const EvaluationContext& context) override;
     [[nodiscard]] std::optional<Value> minimum_value() const override;
     [[nodiscard]] std::optional<Value> maximum_value() const override;
     [[nodiscard]] std::optional<Value::Type> type() const override;
 
     void serialize_sub(std::ostream& stream) const override;
-    void traverse(std::function<void(Expression&)> callable) override {callable(operand);}
 
-private:
+    void traverse(std::function<void(Expression&)> callable) override { callable(operand); }
+
+  private:
     static std::optional<Expression> simplify(const Location& location, Operation operation, const Expression& operand, bool always_create);
 
     /// @brief The unary operation.

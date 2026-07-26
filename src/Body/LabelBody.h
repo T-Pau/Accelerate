@@ -36,7 +36,8 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <tpau-cpp-kernal/Exception.h>
 
-#include "Body.h"
+#include "Body/Body.h"
+#include "Entity/Constant.h"
 #include "SizeRange.h"
 #include "Visibility.h"
 

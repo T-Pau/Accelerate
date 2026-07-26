@@ -156,3 +156,12 @@ std::shared_ptr<BodyElement> DataBody::clone() const {
     }
     return std::make_shared<DataBody>(new_data);
 }
+
+std::optional<Body> DataBody::evaluate_process(const EvaluationContext& context) {
+    size_range_ = SizeRange(0, 0);
+    for (auto& datum : data) {
+        size_range_ += datum.size_range();
+    }
+
+    return {};
+}

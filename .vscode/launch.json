@@ -78,6 +78,25 @@
 			"MIMode": "lldb"
 		},
 		{
+			"name": "xlr8: test cpu-4510",
+			"type": "cppdbg",
+			"request": "launch",
+			"program": "${workspaceFolder}/build/src/xlr8",
+			"args": [
+				"--system-directory",
+				"share",
+				"--create-library",
+				"--target",
+				"4510",
+				"build/tests/4510.s"
+			],
+			"cwd": "${workspaceFolder}",
+			"stopAtEntry": false,
+			"externalConsole": false,
+			"console": "integratedTerminal",
+			"MIMode": "lldb"
+		},
+		{
 			"name": "xlr8: create c64 library",
 			"type": "cppdbg",
 			"request": "launch",

@@ -522,6 +522,8 @@ class Scope {
      */
     void mark_used(Object* object) { explicitly_used_objects.insert(object); }
 
+    void remove_constant(Symbol name) { constants.erase(name); }
+
     /**
      * Get the type of the scope.
      *
