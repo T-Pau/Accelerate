@@ -1,0 +1,94 @@
+#!/usr/bin/env python
+
+import os
+import re
+
+def get_header_files() -> set[str]:
+    header_files = set()
+    for root, _, files in os.walk("src"):
+        for file in files:
+            if file.endswith(".h") and not root.endswith("/obsolete"):
+                header_files.add(os.path.basename(file))
+    return header_files
+
+def get_markdown_files() -> set[str]:
+    markdown_files = set()
+    for root, _, files in os.walk("docs"):
+        if root.startswith("docs/"):
+            root = root[len("docs/"):]
+        elif root.startswith("docs"):
+            root = root[len("docs"):]
+        for file in files:
+            if file.endswith(".md"):
+                markdown_files.add(os.path.join(root, file))
+    return markdown_files
+
+def get_internal_reference_header_files(markdown_files: set[str]) -> set[str]:
+    internal_reference_header_files = set()
+    for file in markdown_files:
+        if file.startswith("Internal/Reference") and not file.endswith("index.md"):
+            name = os.path.basename(file)
+            name = name.replace(".md", ".h")
+            internal_reference_header_files.add(name)
+    return internal_reference_header_files
+
+def get_nav_references() -> set[str]:
+    reference_re = re.compile(r'=\s*"([^"]*\.md)"')
+
+    references = set()
+
+    with open("zensical.toml", "r") as f:
+        # Find beginning of nav array
+        while (line := f.readline()):
+            if line.strip() == "nav = [":
+                break
+
+        while (line := f.readline()):
+            line = line.strip()
+            if line == "]":
+                break
+            if match := reference_re.search(line):
+                reference = match.group(1)
+                references.add(reference)
+    return references
+
+def main():
+    ok = True
+    header_files = get_header_files()
+    markdown_files = get_markdown_files()
+    internal_reference_header_files = get_internal_reference_header_files(markdown_files)
+    nav_references = get_nav_references()
+
+    if header_files != internal_reference_header_files:
+        missing = header_files - internal_reference_header_files
+        extra = internal_reference_header_files - header_files
+        if missing:
+            print("No internal reference page for header files:")
+            for file in sorted(missing):
+                print(f"  {file}")
+        if extra:
+            print("Internal reference page for non-existing header files:")
+            for file in sorted(extra):
+                print(f"  {file}")
+        ok = False
+
+    if nav_references != markdown_files:
+        missing = markdown_files - nav_references
+        extra = nav_references - markdown_files
+        if missing:
+            print("Files missing from nav:")
+            for file in sorted(missing):
+                print(f"  {file}")
+        if extra:
+            print("Nav for non-existing files:")
+            for file in sorted(extra):
+                print(f"  {file}")
+        ok = False
+
+    # TODO: check index pages
+
+    return ok
+
+if __name__ == "__main__":
+    if not main():
+        exit(1)

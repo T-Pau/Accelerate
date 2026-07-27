@@ -47,7 +47,7 @@ class Getter {
 public:
     virtual ~Getter() = default;
 
-    const T& get(Symbol name, Symbol base = {}) {
+    T& get(Symbol name, Symbol base = {}) {
         auto base_filename = name.str();
         if (!base_filename.ends_with(filename_extension())) {
             base_filename += filename_extension();
@@ -68,7 +68,7 @@ public:
         return pair.first->second;
     }
 
-    const T& get(const std::string& name) {return get(Symbol(name));}
+    T& get(const std::string& name) {return get(Symbol(name));}
 
     std::shared_ptr<SearchPath> search_path = std::make_shared<SearchPath>();
 

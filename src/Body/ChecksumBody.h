@@ -47,18 +47,20 @@ using namespace tpau::cpp_kernal;
 /**
  * @brief Represents a body element that computes a checksum over a range of memory: `.checksum algorithm start end [parameters]`.
  */
-class ChecksumBody: public BodyElement {
+class ChecksumBody : public BodyElement {
   public:
-    ChecksumBody(std::shared_ptr<ChecksumAlgorithm> algorithm_, Expression start, Expression end, std::unordered_map<Symbol, Expression> parameters): algorithm{std::move(algorithm_)}, start{std::move(start)}, end{std::move(end)}, parameters{std::move(parameters)} {size_range_ = SizeRange{algorithm->result_size(), algorithm->result_size()};}
+    ChecksumBody(std::shared_ptr<ChecksumAlgorithm> algorithm_, Expression start, Expression end, std::unordered_map<Symbol, Expression> parameters) : algorithm{std::move(algorithm_)}, start{std::move(start)}, end{std::move(end)}, parameters{std::move(parameters)} { size_range_ = SizeRange{algorithm->result_size(), algorithm->result_size()}; }
 
     static Body parse(Tokenizer& tokenizer);
 
-    std::shared_ptr<BodyElement> clone() const override {throw Exception("can't clone .checksum");}
-    bool empty() const override {return false;}
-    void encode(std::string &bytes, const Memory *memory) const override;
+    std::shared_ptr<BodyElement> clone() const override { throw Exception("can't clone .checksum"); }
+
+    bool empty() const override { return false; }
+
+    void encode(std::string& bytes, const Memory* memory) override;
     void traverse(std::function<void(Body&)> body_callable, std::function<void(Expression&)> expression_callable) override;
     std::optional<Body> evaluate_process(const EvaluationContext& context) override;
-    void serialize(std::ostream &stream, const std::string &prefix) const override;
+    void serialize(std::ostream& stream, const std::string& prefix) const override;
 
   private:
     std::shared_ptr<ChecksumAlgorithm> algorithm;

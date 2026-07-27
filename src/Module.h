@@ -148,7 +148,7 @@ class Module {
 
     // Remove this? It's used to pass the target from a source file via Assembler to Linker.
     /// @brief The target of the module.
-    const Target* target{};
+    Target* target{};
 
 
   private:

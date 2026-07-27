@@ -37,33 +37,38 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Body.h"
 #include "Expression/Expression.h"
 #include "Visibility.h"
+
 /**
  * @brief Represents an assignment, which defines a local constant or variable: `name = value`.
  */
-class AssignmentBody: public BodyElement {
-public:
+class AssignmentBody : public BodyElement {
+  public:
     /**
      * Create an assignment body.
-     * 
+     *
      * @param visibility The visibility of the assignment.
      * @param name The name of the variable or constant being assigned.
      * @param value The value being assigned.
      */
-    static Body create(Visibility visibility, Symbol name, Expression value) {
-        return Body(std::make_shared<AssignmentBody>(visibility, name, std::move(value)));
-    }
+    static Body create(Visibility visibility, Symbol name, Expression value) { return Body(std::make_shared<AssignmentBody>(visibility, name, std::move(value))); }
 
-    AssignmentBody(Visibility visibility, Symbol name, Expression value): visibility(visibility), name(name), value(std::move(value)) {}
+    AssignmentBody(Visibility visibility, Symbol name, Expression value) : visibility(visibility), name(name), value(std::move(value)) {}
 
-    [[nodiscard]] std::shared_ptr<BodyElement> clone() const override {return std::make_shared<AssignmentBody>(visibility, name, value);}
-    [[nodiscard]] bool empty() const override {return false;}
-    void encode(std::string &bytes, const Memory *memory) const override {return;}
-    void serialize(std::ostream &stream, const std::string &prefix) const override;
-    void resolve(Scope* scope, Entity* containing_entity) override {value.resolve(scope, containing_entity);}
-    void expand_calls() override {value.expand_calls();}
+    [[nodiscard]] std::shared_ptr<BodyElement> clone() const override { return std::make_shared<AssignmentBody>(visibility, name, value); }
+
+    [[nodiscard]] bool empty() const override { return false; }
+
+    void encode(std::string& bytes, const Memory* memory) override { return; }
+
+    void serialize(std::ostream& stream, const std::string& prefix) const override;
+
+    void resolve(Scope* scope, Entity* containing_entity) override { value.resolve(scope, containing_entity); }
+
+    void expand_calls() override { value.expand_calls(); }
+
     void enter_names(Scope* scope, Entity* containing_entity) override;
 
-private:
+  private:
     Visibility visibility;
     Symbol name;
     Expression value;

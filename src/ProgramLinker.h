@@ -38,7 +38,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 class ProgramLinker : public Linker {
   public:
-    ProgramLinker(Symbol name, const Target* target = nullptr) : Linker(name, target) {}
+    ProgramLinker(Symbol name, Target* target = nullptr) : Linker(name, target) {}
 
     void output(const std::filesystem::path& file_name) override;
     void output_symbol_map(const std::filesystem::path& file_name);
@@ -50,7 +50,6 @@ class ProgramLinker : public Linker {
     [[nodiscard]] virtual std::vector<Entity*> root_entities() override;
 
   private:
-    Body output_body;
     Memory memory;
 };
 

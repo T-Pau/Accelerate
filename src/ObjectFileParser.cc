@@ -27,12 +27,13 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+#include "ObjectFileParser.h"
+
 #include <tpau-cpp-kernal/LocationException.h>
 
 #include "Entity/Object.h"
 #include "ExpressionParser.h"
 #include "LibraryGetter.h"
-#include "ObjectFileParser.h"
 #include "StructuredValue.h"
 
 using namespace tpau::cpp_kernal;
@@ -50,6 +51,7 @@ const Token ObjectFileParser::token_pin = Token(Token::DIRECTIVE, "pin");
 const Token ObjectFileParser::token_target = Token(Token::DIRECTIVE, "target");
 const Token ObjectFileParser::token_use = Token(Token::DIRECTIVE, "use");
 
+#if 0
 // clang-format off
 const std::unordered_map<Symbol, void (ObjectFileParser::*)()> ObjectFileParser::parser_methods ={
     {token_format_version.as_symbol(), &ObjectFileParser::parse_format_version},
@@ -180,3 +182,5 @@ void ObjectFileParser::parse_import() {
         // file->import(LibraryGetter::global.get(token.as_symbol(), file->name).get());
     }
 }
+
+#endif

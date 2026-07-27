@@ -36,6 +36,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "Body/Body.h"
 #include "Entity/ScopeEntity.h"
+#include "Expression/MemoryInfoExpression.h"
 
 class Output : public ScopeEntity {
   public:
@@ -45,17 +46,24 @@ class Output : public ScopeEntity {
 
     void enter_names() { body.enter_names(scope().get(), this); }
 
-    void resolve_implementation() override { body.resolve(scope().get(), this); }
+    // TODO: move to ScopeEntity?
+    void resolve_implementation() override;
 
     // TODO: implement
     // void serialize(std::ostream& stream) const override;
 
+    Memory* memory{};
+
     Body body;
 
   protected:
-    void evaluate_inner(EvaluationContext& context) override {}; // TODO: implement
+    // TODO: move to ScopeEntity?
+    void evaluate_inner(EvaluationContext& context) override;
 
   private:
+    void add_memory_constant(Symbol name, MemoryInfoExpression::InfoType info_type);
+
+
     static Token token_output;
 };
 

@@ -89,7 +89,6 @@ void RepeatBody::serialize(std::ostream& stream, const std::string& prefix) cons
     stream << "}" << std::endl;
 }
 
-
 void RepeatBody::resolve(Scope* scope, Entity* containing_entity) {
     if (start) {
         start->resolve(scope, containing_entity);

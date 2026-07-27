@@ -38,7 +38,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 class LibraryLinker : public Linker {
   public:
-    LibraryLinker(Symbol name, const Target* target = nullptr) : Linker(name, target) {}
+    LibraryLinker(Symbol name, Target* target = nullptr) : Linker(name, target) {}
 
     void output(const std::filesystem::path& file_name) override;
 

@@ -80,7 +80,7 @@ class ScopeBody : public BodyElement {
 
     [[nodiscard]] bool empty() const override { return body.empty(); }
 
-    void encode(std::string& bytes, const Memory* memory) const override { body.encode(bytes, memory); }
+    void encode(std::string& bytes, const Memory* memory) override { body.encode(bytes, memory); }
 
     void traverse(std::function<void(Body&)> body_callable, std::function<void(Expression&)> expression_callable) override;
     void resolve(Scope* scope, Entity* containing_entity) override;

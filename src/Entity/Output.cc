@@ -29,9 +29,31 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "Entity/Output.h"
 
-#include "ObjectFile.h"
+#include "Assembler.h"
 #include "Target.h"
 
 Token Output::token_output = {Token::NAME, ".output"};
 
-Output::Output(const Location& location, const Target* target, Body body) : ScopeEntity(location, token_output.as_symbol(), Visibility::PUBLIC, target->file_scope(), false), body(std::move(body)) {}
+Output::Output(const Location& location, const Target* target, Body body) : ScopeEntity(location, token_output.as_symbol(), Visibility::PUBLIC, target->file_scope(), false), body(std::move(body)) {
+    add_memory_constant(Assembler::token_data_start.as_symbol(), MemoryInfoExpression::InfoType::MEMORY_START);
+    add_memory_constant(Assembler::token_data_end.as_symbol(), MemoryInfoExpression::InfoType::MEMORY_END);
+}
+
+void Output::add_memory_constant(Symbol name, MemoryInfoExpression::InfoType info_type) {
+    auto constant = std::make_shared<Constant>(Location(), name, Visibility::ENTITY, scope(), false, MemoryInfoExpression::create(Location(), this, info_type));
+    add(constant);
+}
+
+void Output::evaluate_inner(EvaluationContext& context) {
+    for (auto& constant : constants) {
+        constant->evaluate();
+    }
+    body.evaluate(context);
+}
+
+void Output::resolve_implementation() {
+    for (auto& constant : constants) {
+        constant->resolve();
+    }
+    body.resolve(scope().get(), this);
+}

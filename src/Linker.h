@@ -45,7 +45,7 @@ class Linker : public Base {
   public:
     Linker() = default;
 
-    explicit Linker(Symbol name, const Target* target_) : module_(name) { set_target(target_); }
+    explicit Linker(Symbol name, Target* target_) : module_(name) { set_target(target_); }
 
     virtual ~Linker() = default;
 
@@ -77,7 +77,7 @@ class Linker : public Base {
 
     [[nodiscard]] Module& module() { return module_; }
 
-    void set_target(const Target* new_target);
+    void set_target(Target* new_target);
 
     /**
      * @brief If no target has been set yet, use the target from the module.
@@ -92,7 +92,7 @@ class Linker : public Base {
     virtual void output(const std::filesystem::path& file_name) = 0;
     virtual const std::string& output_extension() const = 0;
 
-    const Target* target = nullptr;
+    Target* target = nullptr;
 
   protected:
     [[nodiscard]] virtual std::vector<Entity*> root_entities() = 0;

@@ -52,7 +52,7 @@ class MacroBody : public BodyElement {
 
     [[nodiscard]] std::shared_ptr<BodyElement> clone() const override { throw LocationException(location, "can't clone MacroBody"); }
 
-    void encode(std::string& bytes, const Memory* memory) const override { throw LocationException(location, "can't encode unexpanded macro call"); }
+    void encode(std::string& bytes, const Memory* memory) override { throw LocationException(location, "can't encode unexpanded macro call"); }
 
     void serialize(std::ostream& stream, const std::string& prefix) const override;
     void resolve(Scope* scope, Entity* containing_entity) override;

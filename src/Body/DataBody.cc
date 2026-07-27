@@ -72,7 +72,7 @@ std::pair<bool, std::optional<Body>> DataBody::append_sub(const Body& body, cons
     }
 }
 
-void DataBody::encode(std::string& bytes, const Memory* memory) const {
+void DataBody::encode(std::string& bytes, const Memory* memory) {
     for (auto& datum : data) {
         auto value = datum.expression.value();
         if (!value.has_value()) {

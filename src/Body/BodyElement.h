@@ -108,7 +108,7 @@ class BodyElement : public Base {
      * @param bytes The byte string to encode into.
      * @param memory The memory context for encoding.
      */
-    virtual void encode(std::string& bytes, const Memory* memory) const {}
+    virtual void encode(std::string& bytes, const Memory* memory) {}
 
     /**
      * @brief Traverse the BodyElement.

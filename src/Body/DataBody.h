@@ -70,7 +70,7 @@ class DataBody : public BodyElement {
 
     [[nodiscard]] bool empty() const override { return data.empty(); }
 
-    void encode(std::string& bytes, const Memory* memory) const override;
+    void encode(std::string& bytes, const Memory* memory) override;
     void serialize(std::ostream& stream, const std::string& prefix) const override;
     void traverse(std::function<void(Body&)> body_callable, std::function<void(Expression&)> expression_callable) override;
     [[nodiscard]] std::optional<Body> evaluate_process(const EvaluationContext& context) override;

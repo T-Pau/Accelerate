@@ -104,7 +104,7 @@ class IfBody : public BodyElement {
 
     [[nodiscard]] bool empty() const override { return clauses.empty(); }
 
-    void encode(std::string& bytes, const Memory* memory) const override { throw Exception("unresolved if"); }
+    void encode(std::string& bytes, const Memory* memory) override { throw Exception("unresolved if"); }
 
     [[nodiscard]] std::optional<Body> evaluate(const EvaluationContext& context) override;
     // TODO: We might need to implement expand_calls and resolve, depending on how we handle conditional bodies.

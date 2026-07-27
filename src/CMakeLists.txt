@@ -36,6 +36,7 @@ add_library(xlr8-library STATIC
         Expression/FunctionExpression.cc
         Expression/InRangeExpression.cc
         Expression/LabelOffsetExpression.cc
+        Expression/MemoryInfoExpression.cc
         Expression/MinMaxExpression.cc
         Expression/ObjectExpression.cc
         Expression/ObjectNameExpression.cc
@@ -82,7 +83,6 @@ add_library(xlr8-library STATIC
         MemoryMap.cc
         Module.cc
         Node.cc
-        ObjectFile.cc
         ObjectFileParser.cc
         ProgramLinker.cc
         Range.cc

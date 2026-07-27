@@ -159,3 +159,7 @@ void Body::enter_names(Scope* scope, Entity* containing_entity) {
 bool Body::fully_evaluated() {
     return handle_translation_errors(*element, [&] { return element->fully_evaluated(); });
 }
+
+void Body::encode(std::string& bytes, const Memory* memory) {
+    handle_translation_errors(*element, [&] { element->encode(bytes, memory); });
+}

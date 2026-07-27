@@ -51,7 +51,7 @@ class Assembler {
      * @param search_path The search path for source files.
      * @param defines Preprocessor defines.
      */
-    explicit Assembler(const Target* target, const SearchPath& search_path, const std::unordered_set<Symbol>& defines);
+    explicit Assembler(Target* target, const SearchPath& search_path, const std::unordered_set<Symbol>& defines);
 
     /**
      * @brief Parse a target definition from a file.
@@ -104,14 +104,14 @@ class Assembler {
     void parse_target(const Token& directive);
     void parse_use(const Token& directive);
     void parse_visibility(const Token& directive);
-    void set_target(const Target* new_target);
+    void set_target(Target* new_target);
 
     std::vector<MemoryMap::Block> parse_address(const StructuredValue* address) const;
     MemoryMap::Block parse_single_address(const StructuredScalar* address) const;
     uint64_t parse_address_part(const Token& token) const;
     static MemoryMap::AccessType parse_type(const Token& type);
 
-    const Target* target{};
+    Target* target{};
     const CPU* cpu{};
 
     Symbol current_section;

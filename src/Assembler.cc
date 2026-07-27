@@ -91,7 +91,7 @@ const std::unordered_map<Token, Assembler::Directive> Assembler::directives = {
 };
 // clang-format on
 
-Assembler::Assembler(const Target* target, const SearchPath& search_path, const std::unordered_set<Symbol>& defines) : tokenizer{search_path, target, true, defines} { set_target(target); }
+Assembler::Assembler(Target* target, const SearchPath& search_path, const std::unordered_set<Symbol>& defines) : tokenizer{search_path, target, true, defines} { set_target(target); }
 
 Target Assembler::parse_target(Symbol name, Symbol file_name) {
     parsing_target = true;
@@ -391,6 +391,7 @@ void Assembler::parse_symbol(Visibility visibility, const Token& name) {
             object->uses(object_name.as_symbol());
         }
         else if (token == token_used) {
+            object->mark_used();
             file_scope->mark_used(object);
         }
         else {
@@ -512,7 +513,7 @@ void Assembler::parse_visibility(const Token& directive) {
     }
 }
 
-void Assembler::set_target(const Target* new_target) {
+void Assembler::set_target(Target* new_target) {
     // TODO: check that target and new_target are compatible
     target = new_target;
     if (target) {

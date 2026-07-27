@@ -48,9 +48,9 @@ class Target {
 
     static void clear_current_target() { current_target = &empty; };
 
-    static const Target& get(Symbol name);
+    static Target& get(Symbol name);
 
-    static const Target& get(const std::string& name) { return get(Symbol(name)); }
+    static Target& get(const std::string& name) { return get(Symbol(name)); }
 
     static void set_current_target(const Target* target) { current_target = target; }
 
@@ -85,9 +85,11 @@ class Target {
 
     Module module;
     std::shared_ptr<Scope> file_scope_;
-    std::unique_ptr<Output> output;
+    std::shared_ptr<Output> output;
 
     std::string extension = "bin";
+
+  private:
 };
 
 #endif // HAD_XLR8_TARGET_H

@@ -112,7 +112,7 @@ std::pair<bool, std::optional<Body>> BlockBody::append_sub(const Body& body, con
     return {true, {}};
 }
 
-void BlockBody::encode(std::string& bytes, const Memory* memory) const {
+void BlockBody::encode(std::string& bytes, const Memory* memory) {
     for (auto& element : block) {
         element.encode(bytes, memory);
     }

@@ -35,6 +35,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include <iostream>
+#include <sstream>
 
 #include "Expression/Expression.h"
 #include "Tokenizer.h"
@@ -217,6 +218,14 @@ class Address {
 std::ostream& operator<<(std::ostream& stream, Address address);
 
 bool operator<(const std::optional<Address>& a, const std::optional<Address>& b);
+
+template <> struct std::formatter<Address> : std::formatter<std::string_view> {
+    auto format(const Address& address, std::format_context& ctx) const {
+        auto stream = std::ostringstream();
+        address.serialize(stream);
+        return std::formatter<std::string_view>::format(stream.str(), ctx);
+    }
+};
 
 #endif // HAD_XLR8_ADDRESS_H
 #undef IN_XLR8_ADDRESS_H

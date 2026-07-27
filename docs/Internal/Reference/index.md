@@ -47,9 +47,6 @@ These classes represent the components of a program: objects, constants, macros,
 ### [Entity](Entity.md)
 ::: Entity.@brief
 
-### [Callable](Callable.md)
-::: Callable.@brief
-
 ### [Function](Function.md)
 ::: Function.@brief
 
@@ -58,6 +55,9 @@ These classes represent the components of a program: objects, constants, macros,
 
 ### [Object](Object.md)
 ::: Object.@brief
+
+### [ScopeEntity](ScopeEntity.md)
+::: ScopeEntity.@brief
 
 
 ## Expressions
@@ -289,11 +289,23 @@ These classes are not yet sorted into the above categories.
 ### [AbortTraversalException](AbortTraversalException.md)
 ::: AbortTraversalException.@brief
 
+### [Base](Base.md)
+::: Base.@brief
+
+### [BaseEncoder](BaseEncoder.md)
+::: BaseEncoder.@brief
+
+### [CallableArguments](CallableArguments.md)
+::: CallableArguments.@brief
+
 ### [Constant](Constant.md)
 ::: Constant.@brief
 
 ### [EvaluationContext](EvaluationContext.md)
 ::: EvaluationContext.@brief
+
+### [EvaluationOrder](EvaluationOrder.md)
+::: EvaluationOrder.@brief
 
 ### [EvaluationResult](EvaluationResult.md)
 ::: EvaluationResult.@brief
@@ -315,9 +327,6 @@ These classes are not yet sorted into the above categories.
 
 ### [Node](Node.md)
 ::: Node.@brief
-
-### [ObjectFile](ObjectFile.md)
-::: ObjectFile.@brief
 
 ### [Output](Output.md)
 ::: Output.@brief

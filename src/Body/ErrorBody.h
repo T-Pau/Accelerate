@@ -40,23 +40,24 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using namespace tpau::cpp_kernal;
 
-
 /**
  * @brief Represents a body that reports an error when encoded. It can be used with conditional compilation to report errors when certain conditions are met: `.error message`.
  */
-class ErrorBody: public BodyElement {
-public:
-    static Body create(const Location& location, std::string message) {
-        return Body(std::make_shared<ErrorBody>(location, std::move(message)));
-    }
-    explicit ErrorBody(const Location& location, std::string message): location(location), message(std::move(message)) {}
+class ErrorBody : public BodyElement {
+  public:
+    static Body create(const Location& location, std::string message) { return Body(std::make_shared<ErrorBody>(location, std::move(message))); }
 
-    [[nodiscard]] std::shared_ptr<BodyElement> clone() const override {return std::make_shared<ErrorBody>(location, message);}
-    [[nodiscard]] bool empty() const override {return false;}
-    void encode(std::string &bytes, const Memory *memory) const override {throw LocationException(location, message);}
+    explicit ErrorBody(const Location& location, std::string message) : location(location), message(std::move(message)) {}
+
+    [[nodiscard]] std::shared_ptr<BodyElement> clone() const override { return std::make_shared<ErrorBody>(location, message); }
+
+    [[nodiscard]] bool empty() const override { return false; }
+
+    void encode(std::string& bytes, const Memory* memory) override { throw LocationException(location, message); }
+
     [[nodiscard]] std::optional<Body> evaluate(const EvaluationContext& context) override;
-    void serialize(std::ostream &stream, const std::string &prefix) const override;
-    
+    void serialize(std::ostream& stream, const std::string& prefix) const override;
+
     Location location;
     std::string message;
 };

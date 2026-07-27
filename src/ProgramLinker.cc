@@ -29,24 +29,28 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "ProgramLinker.h"
 
+#include <fstream>
+
 #include <tpau-cpp-kernal/DiagnosticOutput.h>
 #include <tpau-cpp-kernal/Exception.h>
 #include <tpau-cpp-kernal/FileReader.h>
 
 #include "Assembler.h"
+#include "Base.h"
 #include "EvaluationOrder.h"
 #include "Scope.h"
 
 using namespace tpau::cpp_kernal;
 
 std::vector<Entity*> ProgramLinker::root_entities() {
+    target->module.import(Visibility::PRIVATE, module());
     memory = target->map.initialize_memory();
 
     auto entities = module().explicitly_used_entities();
+    auto target_entities = target->module.explicitly_used_entities();
 
-    // output can't be evaluated until objects have been copied to memory, so just collect its dependencies here
-    target->output->resolve();
-    entities.insert(entities.end(), target->output->referenced_entities.begin(), target->output->referenced_entities.end());
+    entities.insert(entities.end(), target_entities.begin(), target_entities.end());
+    entities.push_back(target->output.get());
 
     // TODO: add explicitly used objects from libraries?
 
@@ -57,6 +61,7 @@ void ProgramLinker::link_sub() {
     auto unsorted_objects = entities | std::views::filter([](Entity* entity) { return entity->is<Object>(); }) | std::views::transform([](Entity* entity) { return static_cast<Object*>(entity); });
     auto objects = sorted(unsorted_objects.begin(), unsorted_objects.end());
 
+    TRACE_BEGIN("placing", "placing {} objects", objects.size());
     for (auto object : objects) {
         if (!object->size_range().size()) {
             DiagnosticOutput::global.error(object->location, "object '{}' has unknown size", object->name);
@@ -73,9 +78,11 @@ void ProgramLinker::link_sub() {
 
             // TODO: validate that object->address is in object->section
 
+            TRACE_INSTANCE(object, "placing", "object {} has fixed address {}", object->name, *object->address);
+
             auto range = Range(address, size);
             if (!memory[bank].allocate(range, object->is_reservation() ? Memory::RESERVED : Memory::DATA, 0, range.size)) {
-                DiagnosticOutput::global.error(object->location, "fixed space for '{}' (${}, ${}) not free", object->name, range.start, range.end());
+                DiagnosticOutput::global.error(object->location, "fixed space for {} (${}, ${}) not free", object->name, range.start, range.end());
             }
         }
         else {
@@ -90,8 +97,10 @@ void ProgramLinker::link_sub() {
                 DiagnosticOutput::global.error(object->location, "no space left for '{}' ({} bytes) in section '{}'", object->name, *object->size_range().size(), object->section->name);
                 continue;
             }
+            TRACE_INSTANCE(object, "placing", "placed object {} at address {}", object->name, *object->address);
         }
     }
+    TRACE_END("placing", "placing {} objects", objects.size());
 
     DiagnosticOutput::global.exit_if_failed();
 
@@ -122,40 +131,26 @@ void ProgramLinker::link_sub() {
 }
 
 void ProgramLinker::output(const std::filesystem::path& file_name) {
-#if 0
-    auto environment = std::make_shared<Scope>();
+    target->output->memory = &memory;
 
-    for (const auto& object: objects) {
-        if (object->has_address()) {
-            environment->add(object->name, Expression(object->location, object->address->address));
-        }
-    }
+    target->output->evaluate();
 
-    // TODO: support for multiple banks
-    auto data_range = memory[0].data_range();
-
-    environment->add(Assembler::token_data_end.as_symbol(), Expression({}, data_range.end()));
-    environment->add(Assembler::token_data_size.as_symbol(), Expression({}, data_range.size));
-    environment->add(Assembler::token_data_start.as_symbol(), Expression({}, data_range.start));
-    environment->add_next(target->object_file->private_environment);
-    environment->add_next(program->public_environment);
-
-    EvaluationResult result;
-    output_body.evaluate(EvaluationContext(result, EvaluationContext::OUTPUT, environment, target->defines, SizeRange(0)));
-    // TODO: process result
+    Target::set_current_target(target);
+    auto output_body = target->output->get_body();
 
     auto bytes = std::string();
     bytes.reserve(output_body.size_range().minimum);
 
     output_body.encode(bytes, &memory);
 
+#if 0
     for (const auto& checksum: result.checksums) {
         checksum.compute(bytes);
     }
+#endif
 
     auto stream = std::ofstream(file_name, std::ios::binary);
     stream << bytes;
-#endif
 }
 
 void ProgramLinker::output_symbol_map(const std::filesystem::path& file_name) {
@@ -218,11 +213,3 @@ void ProgramLinker::output_symbol_map(const std::filesystem::path& file_name) {
     }
 #endif
 }
-
-#if 0
-UsedEntities ProgramLinker::roots() {
-    auto entities = UsedEntities{};
-    entities.insert(target->output.get());
-    return entities;
-}
-#endif

@@ -79,6 +79,8 @@ class Object : public ScopeEntity {
     [[nodiscard]] std::optional<uint64_t> reservation() const;
     [[nodiscard]] SizeRange size_range() const;
 
+    void mark_used() { explicitly_used = true; }
+
     void uses(Symbol name) { explicitly_used_objects.insert(name); }
 
     void serialize(std::ostream& stream) const override;

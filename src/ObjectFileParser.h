@@ -35,23 +35,26 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include "FileParser.h"
-#include "ObjectFile.h"
 
+// TODO: this should probably become a LibraryParser and create a Module.
 
-class ObjectFileParser: public FileParser {
-public:
+class ObjectFileParser : public FileParser {
+  public:
     ObjectFileParser();
 
+#if 0
     std::shared_ptr<ObjectFile> parse(Symbol filename);
+#endif
 
     static const Token token_in_range;
     static const Token token_label_offset;
     static const Token token_object_name;
 
-protected:
+  protected:
     void parse_directive(const Token& directive) override;
 
-private:
+  private:
+#if 0
     std::shared_ptr<ObjectFile> file;
 
     void parse_constant(const Token& name, const std::shared_ptr<StructuredValue>& definition);
@@ -66,6 +69,8 @@ private:
 
     static const std::unordered_map<Symbol, void (ObjectFileParser::*)()> parser_methods;
     static const std::unordered_map<Symbol, void (ObjectFileParser::*)(const Token& name, const std::shared_ptr<StructuredValue>& definition)> symbol_parser_methods;
+#endif
+
     static const Token token_constant;
     static const Token token_format_version;
     static const Token token_function;

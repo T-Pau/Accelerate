@@ -25,17 +25,15 @@
 			"args": [
 				"--system-directory",
 				"share",
-				"--depfile",
-				"build/share/lib/f256-microkernel.d",
 				"--target",
 				"c64-basic",
 				"-o",
 				"hello-world.prg",
-				"hello-world.s",
+				"examples/hello-world-cbm.s",
 				"cbm.lib"
 			],
 			"cwd": "${workspaceFolder}",
-			"stopAtEntry": false,
+			"stopAtEntry": true,
 			"externalConsole": false,
 			"MIMode": "lldb"
 		},

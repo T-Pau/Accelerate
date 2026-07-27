@@ -33,11 +33,9 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using namespace tpau::cpp_kernal;
 
-Body MemoryBody::create(Location location, Expression bank, Expression start_address, Expression end_address) {
-    return Body(std::make_shared<MemoryBody>(location, std::move(bank), std::move(start_address), std::move(end_address))); 
-}
+Body MemoryBody::create(Location location, Expression bank, Expression start_address, Expression end_address) { return Body(std::make_shared<MemoryBody>(location, std::move(bank), std::move(start_address), std::move(end_address))); }
 
-MemoryBody::MemoryBody(Location location_, Expression bank_, Expression start_address_, Expression end_address_): BodyElement(location_, SizeRange(0, {})), bank(std::move(bank_)), start_address(std::move(start_address_)), end_address(std::move(end_address_)) {
+MemoryBody::MemoryBody(Location location_, Expression bank_, Expression start_address_, Expression end_address_) : BodyElement(location_, SizeRange(0, {})), bank(std::move(bank_)), start_address(std::move(start_address_)), end_address(std::move(end_address_)) {
     auto minimum_start = start_address.minimum_value().value_or(Value(uint64_t{0}));
     if (auto maximum_end = end_address.maximum_value()) {
         size_range_.maximum = maximum_end->unsigned_value() - minimum_start.unsigned_value() + 1;
@@ -53,8 +51,7 @@ MemoryBody::MemoryBody(Location location_, Expression bank_, Expression start_ad
     }
 }
 
-
-void MemoryBody::serialize(std::ostream &stream, const std::string &prefix) const {
+void MemoryBody::serialize(std::ostream& stream, const std::string& prefix) const {
     stream << prefix << ".memory ";
     if (!bank.has_value() || bank.value() != Value(uint64_t{0})) {
         stream << bank << ", ";
@@ -62,8 +59,7 @@ void MemoryBody::serialize(std::ostream &stream, const std::string &prefix) cons
     stream << start_address << ", " << end_address << std::endl;
 }
 
-
-void MemoryBody::encode(std::string &bytes, const Memory *memory) const {
+void MemoryBody::encode(std::string& bytes, const Memory* memory) {
     if (memory == nullptr) {
         throw Exception("can't encode .memory without memory");
     }

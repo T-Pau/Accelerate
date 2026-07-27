@@ -43,21 +43,24 @@ using namespace tpau::cpp_kernal;
 /**
  * @brief Represents a body that repeats a block of code a specified number of times.
  */
-class RepeatBody: public BodyElement {
-public:
-    RepeatBody(Symbol variable, std::optional<Expression> start, Expression end, Body body): variable{variable}, start{std::move(start)}, end{std::move(end)}, body{std::move(body)} {}
+class RepeatBody : public BodyElement {
+  public:
+    RepeatBody(Symbol variable, std::optional<Expression> start, Expression end, Body body) : variable{variable}, start{std::move(start)}, end{std::move(end)}, body{std::move(body)} {}
 
     static Body create(Symbol variable, const std::optional<Expression>& start, const Expression& end, const Body& body);
 
-    [[nodiscard]] std::shared_ptr<BodyElement> clone() const override {throw Exception("can't clone repeat");}
-    [[nodiscard]] bool empty() const override {return false;}
-    void encode(std::string& bytes, const Memory* memory) const override  {throw Exception("unresolved repeat");}
+    [[nodiscard]] std::shared_ptr<BodyElement> clone() const override { throw Exception("can't clone repeat"); }
+
+    [[nodiscard]] bool empty() const override { return false; }
+
+    void encode(std::string& bytes, const Memory* memory) override { throw Exception("unresolved repeat"); }
+
     [[nodiscard]] std::optional<Body> evaluate(const EvaluationContext& context) override;
     void serialize(std::ostream& stream, const std::string& prefix) const override;
     void resolve(Scope* scope, Entity* containing_entity) override;
     void expand_calls() override;
 
-private:
+  private:
     Symbol variable;
     std::optional<Expression> start;
     Expression end;

@@ -37,17 +37,19 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Body.h"
 
 /**
-  * @brief Represents a body that specifies a memory range: `.memory start, end`. It is used in the `.output` definition in targets.
+ * @brief Represents a body that specifies a memory range: `.memory start, end`. It is used in the `.output` definition in targets.
  */
-class MemoryBody: public BodyElement {
-public:
+class MemoryBody : public BodyElement {
+  public:
     static Body create(Location location, Expression bank, Expression start_address, Expression end_address);
     MemoryBody(Location location, Expression bank, Expression start_address, Expression end_address);
 
-    [[nodiscard]] std::shared_ptr<BodyElement> clone() const override {return std::make_shared<MemoryBody>(location, bank, start_address, end_address);}
-    [[nodiscard]] bool empty() const override {return size().value_or(1) == 0;}
-    void encode(std::string &bytes, const Memory* memory) const override;
-    void serialize(std::ostream &stream, const std::string &prefix) const override;
+    [[nodiscard]] std::shared_ptr<BodyElement> clone() const override { return std::make_shared<MemoryBody>(location, bank, start_address, end_address); }
+
+    [[nodiscard]] bool empty() const override { return size().value_or(1) == 0; }
+
+    void encode(std::string& bytes, const Memory* memory) override;
+    void serialize(std::ostream& stream, const std::string& prefix) const override;
     void traverse(std::function<void(Body&)> body_callback, std::function<void(Expression&)> expression_callback) override;
 
     Expression bank;

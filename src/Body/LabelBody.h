@@ -54,7 +54,7 @@ class LabelBody : public BodyElement {
 
     void enter_names(Scope* scope, Entity* containing_entity) override;
 
-    void encode(std::string& bytes, const Memory* memory) const override {}
+    void encode(std::string& bytes, const Memory* memory) override {}
 
     [[nodiscard]] std::shared_ptr<BodyElement> clone() const override { throw Exception("can't clone label"); }
 

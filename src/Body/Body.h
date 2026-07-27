@@ -134,7 +134,7 @@ class Body {
      */
     [[nodiscard]] bool fully_evaluated();
 
-    void encode(std::string& bytes, const Memory* memory = nullptr) const { element->encode(bytes, memory); }
+    void encode(std::string& bytes, const Memory* memory = nullptr);
 
     void evaluate(const EvaluationContext& context);
     [[nodiscard]] std::optional<Body> evaluated(const EvaluationContext& context) const;

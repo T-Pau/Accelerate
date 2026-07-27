@@ -57,7 +57,7 @@ void Linker::link() {
     link_sub();
 }
 
-void Linker::set_target(const Target* new_target) {
+void Linker::set_target(Target* new_target) {
     if (!new_target) {
         return;
     }
@@ -73,7 +73,7 @@ void Linker::set_target(const Target* new_target) {
 
 bool Linker::set_target_from_module() {
     if (!target && module().target) {
-        set_target(module_.target);
+        set_target(module().target);
     }
     return target;
 }
