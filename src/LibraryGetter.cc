@@ -29,9 +29,13 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "LibraryGetter.h"
 
+#include "LibraryParser.h"
+
 LibraryGetter LibraryGetter::global;
 
 Module LibraryGetter::parse(Symbol name, Symbol filename) {
-    // TODO: implement loading of library files
-    return Module(name);
+    auto parser = LibraryParser();
+    auto module = Module(name);
+    parser.parse(filename, &module);
+    return module;
 }

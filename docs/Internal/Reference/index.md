@@ -100,6 +100,9 @@ These classes represent expressions, which are used in various places in a progr
 ### [LabelOffsetExpression](LabelOffsetExpression.md)
 ::: LabelOffsetExpression.@brief
 
+### [MemoryInfoExpression](MemoryInfoExpression.md)
+::: MemoryInfoExpression.@brief
+
 ### [MinMaxExpression](MinMaxExpression.md)
 ::: MinMaxExpression.@brief
 
@@ -225,8 +228,8 @@ These classes implement the various parsers.
 ### [FileTokenizer](FileTokenizer.md)
 ::: FileTokenizer.@brief
 
-### [ObjectFileParser](ObjectFileParser.md)
-::: ObjectFileParser.@brief
+### [LibraryParser](LibraryParser.md)
+::: LibraryParser.@brief
 
 ### [SequenceTokenizer](SequenceTokenizer.md)
 ::: SequenceTokenizer.@brief

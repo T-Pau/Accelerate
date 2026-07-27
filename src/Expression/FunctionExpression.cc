@@ -37,7 +37,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Expression/InRangeExpression.h"
 #include "Expression/MinMaxExpression.h"
 #include "Expression/SizeofExpression.h"
-#include "ObjectFileParser.h"
+#include "LibraryParser.h"
 #include "Scope.h"
 
 // clang-format off
@@ -71,10 +71,10 @@ void FunctionExpression::setup(FileTokenizer& tokenizer) {
 }
 
 Expression FunctionExpression::create(const Location& location, Symbol name, const std::vector<Expression>& arguments) {
-    if (name == ObjectFileParser::token_in_range.as_symbol()) {
+    if (name == LibraryParser::token_in_range.as_symbol()) {
         return InRangeExpression::create(location, arguments);
     }
-    else if (name == ObjectFileParser::token_label_offset.as_symbol()) {
+    else if (name == LibraryParser::token_label_offset.as_symbol()) {
         // TODO: create LabelOffsetExpression
         // return LabelOffsetExpression::create(location, arguments);
     }

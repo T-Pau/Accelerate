@@ -32,12 +32,12 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <tpau-cpp-kernal/LocationException.h>
 
 #include "AddressingMode.h"
-#include "CPUGetter.h"
 #include "Body/DataBody.h"
+#include "CPUGetter.h"
 #include "Expression/ObjectNameExpression.h"
 #include "Expression/ValueExpression.h"
 #include "ExpressionParser.h"
-#include "ObjectFileParser.h"
+#include "LibraryParser.h"
 #include "SequenceTokenizer.h"
 #include "StructuredArray.h"
 #include "StructuredDictionary.h"
@@ -89,14 +89,13 @@ void CPUParser::initialize() {
     }
 }
 
-CPUParser::CPUParser(): FileParser(*CPUGetter::global.search_path) {
+CPUParser::CPUParser() : FileParser(*CPUGetter::global.search_path) {
     initialize();
 
     tokenizer.add_punctuations({"-", ",", "="});
     tokenizer.add_literal(token_opcode);
     tokenizer.add_literal(token_pc);
 }
-
 
 CPU CPUParser::parse(Symbol file_name) {
     cpu = CPU();
@@ -107,7 +106,7 @@ CPU CPUParser::parse(Symbol file_name) {
     return std::move(cpu);
 }
 
-void CPUParser::parse_directive(const Token &directive) {
+void CPUParser::parse_directive(const Token& directive) {
     auto it = parser_methods.find(directive.as_symbol());
     if (it == parser_methods.end()) {
         throw LocationException(directive.location, "unknown directive");
@@ -144,7 +143,7 @@ void CPUParser::parse_addressing_mode() {
         if (!arguments->is_dictionary()) {
             throw LocationException(name.location, "addressing mode definition is not a dictionary");
         }
-        for (const auto& pair: (*arguments->as_dictionary())) {
+        for (const auto& pair : (*arguments->as_dictionary())) {
             if (!pair.first.is_name()) {
                 throw LocationException(pair.first.location, "expected {}, got {}", Token::type_name(Token::NAME), pair.first.type_name());
             }
@@ -188,7 +187,7 @@ void CPUParser::parse_addressing_mode() {
         addressing_mode.add_notation(parse_addressing_mode_notation(addressing_mode, notation->as_scalar()));
     }
     else if (notation->is_array()) {
-        for (const auto& n: (*notation->as_array())) {
+        for (const auto& n : (*notation->as_array())) {
             if (!n->is_scalar()) {
                 throw LocationException(notation->location, "invalid notation for addressing mode '{}'", name);
             }
@@ -202,7 +201,7 @@ void CPUParser::parse_addressing_mode() {
     auto encoding_definition = definition->get_optional(token_encoding);
     if (encoding_definition == nullptr) {
         auto expression = Expression{};
-        if (token_opcode == ObjectFileParser::token_object_name) {
+        if (token_opcode == LibraryParser::token_object_name) {
             expression = ObjectNameExpression::create(token_opcode.location, {});
         }
         else if (token_opcode.is_name() || token_opcode == Token::colon_minus || token_opcode == Token::colon_plus) {
@@ -217,7 +216,7 @@ void CPUParser::parse_addressing_mode() {
     else if (encoding_definition->is_scalar()) {
         auto encoding_tokens = std::vector<Token>();
 
-        for (auto const& token: encoding_definition->as_scalar()->tokens) {
+        for (auto const& token : encoding_definition->as_scalar()->tokens) {
             if (token == token_pc) {
                 addressing_mode.uses_pc = true;
             }
@@ -236,7 +235,7 @@ void CPUParser::parse_addressing_mode() {
 
         auto encoding_tokenizer = SequenceTokenizer(encoding_tokens);
         addressing_mode.encoding = ExpressionParser(encoding_tokenizer).parse_list();
-        for (auto& datum: addressing_mode.encoding.as<DataBody>()->data) {
+        for (auto& datum : addressing_mode.encoding.as<DataBody>()->data) {
             if (datum.expression.is<VariableExpression>() && datum.expression.as<VariableExpression>()->variable() != token_opcode.as_symbol()) {
                 auto variable_name = datum.expression.as<VariableExpression>()->variable();
                 auto encoding_type = addressing_mode.argument(variable_name)->type->as<ArgumentTypeEncoding>();
@@ -253,7 +252,7 @@ void CPUParser::parse_addressing_mode() {
 
     // TODO: warn unused arguments
 
-    for (const auto& argument_name: unencoded_encoding_arguments) {
+    for (const auto& argument_name : unencoded_encoding_arguments) {
         auto argument = addressing_mode.argument(argument_name);
         if (!argument) {
             throw Exception("internal error: expected encoding argument type for '{}'", argument_name);
@@ -267,7 +266,6 @@ void CPUParser::parse_addressing_mode() {
 
     cpu.add_addressing_mode(name.as_symbol(), std::move(addressing_mode));
 }
-
 
 void CPUParser::parse_argument_type() {
     Token name = tokenizer.expect(Token::NAME, group_directive);
@@ -312,7 +310,6 @@ void CPUParser::parse_byte_order() {
     cpu.byte_order = byte_order.as_unsigned();
 }
 
-
 void CPUParser::parse_instruction() {
     Token name = tokenizer.next();
 
@@ -331,7 +328,7 @@ void CPUParser::parse_instruction() {
 
     auto& instruction = cpu.instructions[name.as_symbol()];
 
-    for (const auto& pair: (*parameters->as_dictionary())) {
+    for (const auto& pair : (*parameters->as_dictionary())) {
         if (!pair.first.is_name()) {
             throw LocationException(pair.first.location, "addressing mode must be name");
         }
@@ -348,7 +345,6 @@ void CPUParser::parse_instruction() {
         instruction.opcodes[pair.first.as_symbol()] = pair.second->as_scalar()->token().as_unsigned();
     }
 }
-
 
 void CPUParser::parse_syntax() {
     auto type = tokenizer.expect(Token::NAME, group_directive);
@@ -378,8 +374,7 @@ void CPUParser::parse_syntax() {
     }
 }
 
-
-std::unique_ptr<ArgumentType> CPUParser::parse_argument_type_encoding(const Token& name, const StructuredValue *parameters) {
+std::unique_ptr<ArgumentType> CPUParser::parse_argument_type_encoding(const Token& name, const StructuredValue* parameters) {
     if (!parameters->is_scalar()) {
         throw LocationException(parameters->location, "definition of range argument type '{}' must be scalar", name);
     }
@@ -392,16 +387,14 @@ std::unique_ptr<ArgumentType> CPUParser::parse_argument_type_encoding(const Toke
     return std::make_unique<ArgumentTypeEncoding>(name.as_symbol(), *encoding->as_integer_encoder());
 }
 
-
-std::unique_ptr<ArgumentType> CPUParser::parse_argument_type_enum(const Token& name, const StructuredValue *parameters) {
+std::unique_ptr<ArgumentType> CPUParser::parse_argument_type_enum(const Token& name, const StructuredValue* parameters) {
     auto argument_type = std::make_unique<ArgumentTypeEnum>(name.as_symbol());
 
     if (!parameters->is_dictionary()) {
         throw LocationException(parameters->location, "definition of enum argument type '{}' must be dictionary", name);
-
     }
 
-    for (const auto& pair: (*parameters->as_dictionary())) {
+    for (const auto& pair : (*parameters->as_dictionary())) {
         if (!pair.first.is_name()) {
             throw LocationException(pair.first.location, "key for enum argument type '{}' must be name", name);
         }
@@ -420,14 +413,14 @@ std::unique_ptr<ArgumentType> CPUParser::parse_argument_type_enum(const Token& n
     return argument_type;
 }
 
-std::unique_ptr<ArgumentType> CPUParser::parse_argument_type_map(const Token& name, const StructuredValue *parameters) {
+std::unique_ptr<ArgumentType> CPUParser::parse_argument_type_map(const Token& name, const StructuredValue* parameters) {
     auto argument_type = std::make_unique<ArgumentTypeMap>(name.as_symbol());
 
     if (!parameters->is_dictionary()) {
         throw LocationException(parameters->location, "definition of map argument type '{}' must be dictionary", name);
     }
 
-    for (const auto& pair: (*parameters->as_dictionary())) {
+    for (const auto& pair : (*parameters->as_dictionary())) {
         if (!pair.first.is_integer()) {
             throw LocationException(pair.first.location, "key for map argument type '{}' must be integer", name);
         }
@@ -444,7 +437,7 @@ std::unique_ptr<ArgumentType> CPUParser::parse_argument_type_map(const Token& na
     return argument_type;
 }
 
-std::unique_ptr<ArgumentType> CPUParser::parse_argument_type_range(const Token& name, const StructuredValue *parameters) {
+std::unique_ptr<ArgumentType> CPUParser::parse_argument_type_range(const Token& name, const StructuredValue* parameters) {
     auto argument_type = std::make_unique<ArgumentTypeRange>(name.as_symbol());
 
     if (!parameters->is_scalar()) {
@@ -476,11 +469,10 @@ std::unique_ptr<ArgumentType> CPUParser::parse_argument_type_range(const Token& 
     return argument_type;
 }
 
-
-AddressingMode::Notation CPUParser::parse_addressing_mode_notation(const AddressingMode& addressing_mode, const StructuredScalar *parameters) {
+AddressingMode::Notation CPUParser::parse_addressing_mode_notation(const AddressingMode& addressing_mode, const StructuredScalar* parameters) {
     AddressingMode::Notation notation;
 
-    for (const auto& token: (*parameters)) {
+    for (const auto& token : (*parameters)) {
         if (token.is_name()) {
             auto symbol = token.as_symbol();
             if (addressing_mode.has_argument(symbol)) {

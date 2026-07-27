@@ -95,7 +95,7 @@ Expression::Expression(Tokenizer& tokenizer) { *this = ExpressionParser(tokenize
 #if 0
 // We probably won't keep this, but we will move the logic somewhere, so we keep it for reference.
 Expression::Expression(const Token& token) {
-    if (token == ObjectFileParser::token_object_name) {
+    if (token == LibraryParser::token_object_name) {
         expression = std::make_shared<ObjectNameExpression>(token.location);
     }
     else if (token.is_name() || token == Token::colon_minus || token == Token::colon_plus) {

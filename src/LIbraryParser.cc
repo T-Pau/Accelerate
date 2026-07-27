@@ -27,7 +27,7 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "ObjectFileParser.h"
+#include "LibraryParser.h"
 
 #include <tpau-cpp-kernal/LocationException.h>
 
@@ -35,41 +35,41 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ExpressionParser.h"
 #include "LibraryGetter.h"
 #include "StructuredValue.h"
+#include "Target.h"
 
 using namespace tpau::cpp_kernal;
 
-const Token ObjectFileParser::token_constant = Token(Token::DIRECTIVE, "constant");
-const Token ObjectFileParser::token_format_version = Token(Token::DIRECTIVE, "format_version");
-const Token ObjectFileParser::token_function = Token(Token::DIRECTIVE, "function");
-const Token ObjectFileParser::token_import = Token(Token::DIRECTIVE, "import");
-const Token ObjectFileParser::token_in_range = Token(Token::NAME, ".in_range");
-const Token ObjectFileParser::token_label_offset = Token(Token::NAME, ".label_offset");
-const Token ObjectFileParser::token_macro = Token(Token::DIRECTIVE, "macro");
-const Token ObjectFileParser::token_object = Token(Token::DIRECTIVE, "object");
-const Token ObjectFileParser::token_object_name = Token(Token::NAME, ".current_object");
-const Token ObjectFileParser::token_pin = Token(Token::DIRECTIVE, "pin");
-const Token ObjectFileParser::token_target = Token(Token::DIRECTIVE, "target");
-const Token ObjectFileParser::token_use = Token(Token::DIRECTIVE, "use");
+const Token LibraryParser::token_constant = Token(Token::DIRECTIVE, "constant");
+const Token LibraryParser::token_format_version = Token(Token::DIRECTIVE, "format_version");
+const Token LibraryParser::token_function = Token(Token::DIRECTIVE, "function");
+const Token LibraryParser::token_import = Token(Token::DIRECTIVE, "import");
+const Token LibraryParser::token_in_range = Token(Token::NAME, ".in_range");
+const Token LibraryParser::token_label_offset = Token(Token::NAME, ".label_offset");
+const Token LibraryParser::token_macro = Token(Token::DIRECTIVE, "macro");
+const Token LibraryParser::token_object = Token(Token::DIRECTIVE, "object");
+const Token LibraryParser::token_object_name = Token(Token::NAME, ".current_object");
+const Token LibraryParser::token_pin = Token(Token::DIRECTIVE, "pin");
+const Token LibraryParser::token_target = Token(Token::DIRECTIVE, "target");
+const Token LibraryParser::token_use = Token(Token::DIRECTIVE, "use");
 
-#if 0
 // clang-format off
-const std::unordered_map<Symbol, void (ObjectFileParser::*)()> ObjectFileParser::parser_methods ={
-    {token_format_version.as_symbol(), &ObjectFileParser::parse_format_version},
-    {token_import.as_symbol(), &ObjectFileParser::parse_import},
-    {token_pin.as_symbol(), &ObjectFileParser::parse_pin},
-    {token_target.as_symbol(), &ObjectFileParser::parse_target},
-    {token_use.as_symbol(), &ObjectFileParser::parse_use}
+const std::unordered_map<Symbol, void (LibraryParser::*)()> LibraryParser::parser_methods ={
+    {token_format_version.as_symbol(), &LibraryParser::parse_format_version},
+    {token_import.as_symbol(), &LibraryParser::parse_import},
+    {token_pin.as_symbol(), &LibraryParser::parse_pin},
+    {token_target.as_symbol(), &LibraryParser::parse_target},
+    {token_use.as_symbol(), &LibraryParser::parse_use}
 };
 
-const std::unordered_map<Symbol, void (ObjectFileParser::*)(const Token& name, const std::shared_ptr<StructuredValue>& definition)> ObjectFileParser::symbol_parser_methods = {
-    {token_constant.as_symbol(), &ObjectFileParser::parse_constant},
-    {token_function.as_symbol(), &ObjectFileParser::parse_function},
-    {token_macro.as_symbol(), &ObjectFileParser::parse_macro},
-    {token_object.as_symbol(), &ObjectFileParser::parse_object}
+const std::unordered_map<Symbol, void (LibraryParser::*)(const Token& name, const std::shared_ptr<StructuredValue>& definition)> LibraryParser::symbol_parser_methods = {
+    {token_constant.as_symbol(), &LibraryParser::parse_constant},
+    {token_function.as_symbol(), &LibraryParser::parse_function},
+    {token_macro.as_symbol(), &LibraryParser::parse_macro},
+    {token_object.as_symbol(), &LibraryParser::parse_object}
 };
 // clang-format on
 
-ObjectFileParser::ObjectFileParser() {
+LibraryParser::LibraryParser() {
     tokenizer.add_literal(token_in_range);
     tokenizer.add_literal(token_label_offset);
     tokenizer.add_literal(token_object_name);
@@ -78,17 +78,15 @@ ObjectFileParser::ObjectFileParser() {
     tokenizer.add_literal(Token::colon_plus);
 }
 
-std::shared_ptr<ObjectFile> ObjectFileParser::parse(Symbol filename) {
-    file = std::make_shared<ObjectFile>();
-    file->name = filename;
+void LibraryParser::parse(Symbol filename, Module* module) {
+    this->module = module;
 
     if (!parse_file(filename)) {
-        throw Exception("can't parse object file '{}'", filename);
+        throw Exception("can't parse library '{}'", filename);
     }
-    return file;
 }
 
-void ObjectFileParser::parse_directive(const Token& directive) {
+void LibraryParser::parse_directive(const Token& directive) {
     auto it = parser_methods.find(directive.as_symbol());
     if (it != parser_methods.end()) {
         (this->*it->second)();
@@ -105,42 +103,44 @@ void ObjectFileParser::parse_directive(const Token& directive) {
     }
 }
 
-void ObjectFileParser::parse_constant(const Token& name, const std::shared_ptr<StructuredValue>& definition) {
+void LibraryParser::parse_constant(const Token& name, const std::shared_ptr<StructuredValue>& definition) {
     // TODO: implement
     // file->add_constant(std::make_unique<ObjectFile::Constant>(file.get(), name, definition));
 }
 
-void ObjectFileParser::parse_object(const Token& name, const std::shared_ptr<StructuredValue>& definition) {
+void LibraryParser::parse_object(const Token& name, const std::shared_ptr<StructuredValue>& definition) {
     // TODO: implement
     // file->add_object(std::make_unique<Object>(file.get(), name, definition));
 }
 
-void ObjectFileParser::parse_pin() {
+void LibraryParser::parse_pin() {
     auto name = tokenizer.expect(Token::NAME);
     auto address = ExpressionParser(tokenizer).parse();
 
-    file->pin(name.as_symbol(), address);
+    // TODO: implement
+    // module->pin(name.as_symbol(), address);
 }
 
-void ObjectFileParser::parse_format_version() {
+void LibraryParser::parse_format_version() {
     auto token = tokenizer.expect(Token::VALUE);
     // TODO: implement
 }
 
-void ObjectFileParser::parse_function(const Token& name, const std::shared_ptr<StructuredValue>& definition) {
+void LibraryParser::parse_function(const Token& name, const std::shared_ptr<StructuredValue>& definition) {
     // TODO: implement
     // file->add_function(std::make_unique<Function>(file.get(), name, definition));
 }
 
-void ObjectFileParser::parse_target() {
+void LibraryParser::parse_target() {
     auto name = tokenizer.expect(Token::STRING, TokenGroup::newline);
 
     auto target = &Target::get(name.as_symbol());
     Target::set_current_target(target);
-    file->set_target(target);
+    // TODO: implement
+    // module->set_target(target);
 }
 
-void ObjectFileParser::parse_use() {
+void LibraryParser::parse_use() {
     while (true) {
         auto token = tokenizer.next();
         if (!token.is_name()) {
@@ -150,16 +150,17 @@ void ObjectFileParser::parse_use() {
             break;
         }
 
-        file->mark_used(token.as_symbol());
+        // TODO: implement
+        // module->mark_used(token.as_symbol());
     }
 }
 
-void ObjectFileParser::parse_macro(const Token& name, const std::shared_ptr<StructuredValue>& definition) {
+void LibraryParser::parse_macro(const Token& name, const std::shared_ptr<StructuredValue>& definition) {
     // TODO: implement
     // file->add_macro(std::make_unique<Macro>(file.get(), name, definition));
 }
 
-void ObjectFileParser::parse_import() {
+void LibraryParser::parse_import() {
     auto first = true;
 
     while (true) {
@@ -182,5 +183,3 @@ void ObjectFileParser::parse_import() {
         // file->import(LibraryGetter::global.get(token.as_symbol(), file->name).get());
     }
 }
-
-#endif

@@ -78,12 +78,12 @@ add_library(xlr8-library STATIC
         IntegerEncoder.cc
         LibraryGetter.cc
         LibraryLinker.cc
+        LibraryParser.cc
         Linker.cc
         Memory.cc
         MemoryMap.cc
         Module.cc
         Node.cc
-        ObjectFileParser.cc
         ProgramLinker.cc
         Range.cc
         Scope.cc

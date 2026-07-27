@@ -1,9 +1,9 @@
-#ifdef IN_XLR8_OBJECT_FILE_PARSER_H
+#ifdef IN_XLR8_LIBRARY_PARSER_H
 #error "circular include file dependency detected"
 #endif
-#define IN_XLR8_OBJECT_FILE_PARSER_H
-#ifndef HAD_XLR8_OBJECT_FILE_PARSER_H
-#define HAD_XLR8_OBJECT_FILE_PARSER_H
+#define IN_XLR8_LIBRARY_PARSER_H
+#ifndef HAD_XLR8_LIBRARY_PARSER_H
+#define HAD_XLR8_LIBRARY_PARSER_H
 
 /*
 Copyright (C) Dieter Baron
@@ -35,16 +35,15 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include "FileParser.h"
+#include "Module.h"
 
 // TODO: this should probably become a LibraryParser and create a Module.
 
-class ObjectFileParser : public FileParser {
+class LibraryParser : public FileParser {
   public:
-    ObjectFileParser();
+    LibraryParser();
 
-#if 0
-    std::shared_ptr<ObjectFile> parse(Symbol filename);
-#endif
+    void parse(Symbol filename, Module* module);
 
     static const Token token_in_range;
     static const Token token_label_offset;
@@ -54,8 +53,7 @@ class ObjectFileParser : public FileParser {
     void parse_directive(const Token& directive) override;
 
   private:
-#if 0
-    std::shared_ptr<ObjectFile> file;
+    Module* module{};
 
     void parse_constant(const Token& name, const std::shared_ptr<StructuredValue>& definition);
     void parse_format_version();
@@ -67,9 +65,8 @@ class ObjectFileParser : public FileParser {
     void parse_target();
     void parse_use();
 
-    static const std::unordered_map<Symbol, void (ObjectFileParser::*)()> parser_methods;
-    static const std::unordered_map<Symbol, void (ObjectFileParser::*)(const Token& name, const std::shared_ptr<StructuredValue>& definition)> symbol_parser_methods;
-#endif
+    static const std::unordered_map<Symbol, void (LibraryParser::*)()> parser_methods;
+    static const std::unordered_map<Symbol, void (LibraryParser::*)(const Token& name, const std::shared_ptr<StructuredValue>& definition)> symbol_parser_methods;
 
     static const Token token_constant;
     static const Token token_format_version;
@@ -82,5 +79,5 @@ class ObjectFileParser : public FileParser {
     static const Token token_use;
 };
 
-#endif // HAD_XLR8_OBJECT_FILE_PARSER_H
-#undef IN_XLR8_OBJECT_FILE_PARSER_H
+#endif // HAD_XLR8_LIBRARY_PARSER_H
+#undef IN_XLR8_LIBRARY_PARSER_H
