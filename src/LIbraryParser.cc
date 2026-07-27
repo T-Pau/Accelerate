@@ -103,15 +103,9 @@ void LibraryParser::parse_directive(const Token& directive) {
     }
 }
 
-void LibraryParser::parse_constant(const Token& name, const std::shared_ptr<StructuredValue>& definition) {
-    // TODO: implement
-    // file->add_constant(std::make_unique<ObjectFile::Constant>(file.get(), name, definition));
-}
+void LibraryParser::parse_constant(const Token& name, const std::shared_ptr<StructuredValue>& definition) { module->add_entity(std::make_shared<Constant>(name.location, name.as_symbol(), module->private_scope(), definition), std::shared_ptr<Scope>(module->private_scope())); }
 
-void LibraryParser::parse_object(const Token& name, const std::shared_ptr<StructuredValue>& definition) {
-    // TODO: implement
-    // file->add_object(std::make_unique<Object>(file.get(), name, definition));
-}
+void LibraryParser::parse_object(const Token& name, const std::shared_ptr<StructuredValue>& definition) { module->add_entity(std::make_shared<Object>(name.location, name.as_symbol(), module->private_scope(), definition), std::shared_ptr<Scope>(module->private_scope())); }
 
 void LibraryParser::parse_pin() {
     auto name = tokenizer.expect(Token::NAME);
@@ -126,18 +120,14 @@ void LibraryParser::parse_format_version() {
     // TODO: implement
 }
 
-void LibraryParser::parse_function(const Token& name, const std::shared_ptr<StructuredValue>& definition) {
-    // TODO: implement
-    // file->add_function(std::make_unique<Function>(file.get(), name, definition));
-}
+void LibraryParser::parse_function(const Token& name, const std::shared_ptr<StructuredValue>& definition) { module->add_entity(std::make_shared<Function>(name.location, name.as_symbol(), module->private_scope(), definition), std::shared_ptr<Scope>(module->private_scope())); }
 
 void LibraryParser::parse_target() {
     auto name = tokenizer.expect(Token::STRING, TokenGroup::newline);
 
     auto target = &Target::get(name.as_symbol());
     Target::set_current_target(target);
-    // TODO: implement
-    // module->set_target(target);
+    module->target = target;
 }
 
 void LibraryParser::parse_use() {
@@ -155,10 +145,7 @@ void LibraryParser::parse_use() {
     }
 }
 
-void LibraryParser::parse_macro(const Token& name, const std::shared_ptr<StructuredValue>& definition) {
-    // TODO: implement
-    // file->add_macro(std::make_unique<Macro>(file.get(), name, definition));
-}
+void LibraryParser::parse_macro(const Token& name, const std::shared_ptr<StructuredValue>& definition) { module->add_entity(std::make_shared<Macro>(name.location, name.as_symbol(), module->private_scope(), definition), std::shared_ptr<Scope>(module->private_scope())); }
 
 void LibraryParser::parse_import() {
     auto first = true;
@@ -180,6 +167,6 @@ void LibraryParser::parse_import() {
         if (!token.is_string()) {
             throw LocationException(token.location, "expected string");
         }
-        // file->import(LibraryGetter::global.get(token.as_symbol(), file->name).get());
+        module->import(Visibility::PRIVATE, LibraryGetter::global.get(token.as_symbol()));
     }
 }
