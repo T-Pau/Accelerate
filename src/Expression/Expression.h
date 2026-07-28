@@ -81,6 +81,8 @@ class Expression {
      */
     template <typename T> [[nodiscard]] const T* as() const { return dynamic_cast<const T*>(expression.get()); }
 
+    template <typename T> [[nodiscard]] T* as() { return dynamic_cast<T*>(expression.get()); }
+
     /**
      * @brief Evaluate the expression in a given context.
      *
@@ -182,8 +184,10 @@ class Expression {
      * @brief Expand function calls in the expression.
      *
      * If a function call cannot be expanded, either an error should be reported via DiagnosticOutput and the expression marked as invalid, or an exception should be thrown.
+     *
+     * @return The Expression to replace this Expression with, {} if no replacement is needed.
      */
-    void expand_calls();
+    std::optional<Expression> expand_calls();
 
     /**
      * @brief Check if the expression is valid.

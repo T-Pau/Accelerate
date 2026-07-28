@@ -63,7 +63,7 @@ class VariableExpression : public BaseExpression {
      */
     [[nodiscard]] Symbol variable() const { return symbol; }
 
-    std::shared_ptr<BaseExpression> clone() const override { return std::make_shared<VariableExpression>(location, symbol, expression ? std::make_optional(expression->clone()) : std::nullopt); }
+    Expression clone() const override { return Expression(std::make_shared<VariableExpression>(location, symbol, expression ? std::make_optional(expression->clone()) : std::nullopt)); }
 
   protected:
     // needed for Expression::variable_name()

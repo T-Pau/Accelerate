@@ -50,9 +50,11 @@ class Macro : public ScopeEntity {
     [[nodiscard]] Body expand(const std::vector<Expression>& arguments, std::shared_ptr<Scope> outer_environment) const;
     void serialize(std::ostream& stream) const override;
 
-    void resolve_implementation() override;
-
     void enter_names() { body.enter_names(scope().get(), this); }
+
+    template <ScopeBodyOrExpression Expansion> void set_arguments(Expansion* expansion, const std::vector<Expression>& arguments) { this->arguments.set_arguments(expansion, arguments); }
+
+    void clear_arguments() { this->arguments.clear_arguments(); }
 
     Body body;
     CallableArguments arguments;
@@ -60,7 +62,9 @@ class Macro : public ScopeEntity {
   protected:
     [[nodiscard]] EvaluationContext evaluation_context(EvaluationResult& result) override;
 
-    void evaluate_inner(EvaluationContext& context) override { body.evaluate(context); }
+    void traverse(std::function<void(Entity&)> entity_callback, std::function<void(Body&)> body_callback, std::function<void(Expression&)> expression_callback) override;
+
+    void resolve_implementation() override;
 
   private:
     static void initialize();

@@ -65,13 +65,7 @@ class Object : public ScopeEntity {
 
     [[nodiscard]] bool has_address() const { return address && address->has_address(); }
 
-    void enter_names() {
-        TRACE_BEGIN("entering names", "{}", name);
-        body.enter_names(scope().get(), this);
-        TRACE_END("entering names", "{}", name);
-    }
-
-    void resolve_implementation() override;
+    void enter_names();
 
     std::optional<uint64_t> maximum_address() const;
     std::optional<uint64_t> minimum_address() const;
@@ -90,6 +84,7 @@ class Object : public ScopeEntity {
     const MemoryMap::Section* section;
     uint64_t alignment = 0;
     std::optional<Expression> reservation_expression;
+    std::optional<Expression> address_expression;
     std::optional<Address> address;
     std::set<Symbol> explicitly_used_objects;
     bool explicitly_used{false};
@@ -97,7 +92,10 @@ class Object : public ScopeEntity {
     Body body;
 
   protected:
-    void evaluate_inner(EvaluationContext& context) override;
+    void traverse(std::function<void(Entity&)> entity_callback, std::function<void(Body&)> body_callback, std::function<void(Expression&)> expression_callback) override;
+
+    void evaluate_implementation(EvaluationContext& context) override;
+    void resolve_implementation() override;
 
   private:
     static const Token token_address;

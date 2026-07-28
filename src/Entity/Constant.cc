@@ -30,9 +30,9 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <tpau-cpp-kernal/LocationException.h>
 
 #include "Entity/Constant.h"
+#include "SequenceTokenizer.h"
 #include "StructuredDictionary.h"
 #include "StructuredScalar.h"
-#include "SequenceTokenizer.h"
 
 using namespace tpau::cpp_kernal;
 

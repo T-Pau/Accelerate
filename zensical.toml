@@ -39,6 +39,8 @@ nav = [
             { "index.md" = "Internal/Explanations/index.md" },
             { "Coding Conventions" = "Internal/Explanations/Coding-Conventions.md" },
             { "Translating a Program or Library" = "Internal/Explanations/Translation.md" },
+            { "Expanding Calls" = "Internal/Explanations/Expanding-Calls.md" },
+            { "Entities" = "Internal/Explanations/Entities.md" },
             { "Body Elements and Expressions" = "Internal/Explanations/Body-and-Expressions.md" },
             { "Ownership and Lifetimes" = "Internal/Explanations/Ownership.md" },
             { "Ideas for Later" = "Internal/Explanations/Ideas-Later.md" }
@@ -181,6 +183,9 @@ options.custom_icons = ["overrides/.icons"]
 [project.markdown_extensions.pymdownx.inlinehilite]
 [project.markdown_extensions.pymdownx.snippets]
 [project.markdown_extensions.pymdownx.superfences]
+custom_fences = [
+  { name = "mermaid", class = "mermaid", format = "pymdownx.superfences.fence_code_format" }
+]
 [project.markdown_extensions.pymdownx.highlight]
 anchor_linenums = true
 line_spans = "__span"

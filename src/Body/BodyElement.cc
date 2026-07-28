@@ -47,8 +47,9 @@ void BodyElement::resolve(Scope* scope, Entity* containing_entity) {
     traverse([&](Body& sub_body) { sub_body.resolve(scope, containing_entity); }, [&](Expression& sub_expression) { sub_expression.resolve(scope, containing_entity); });
 }
 
-void BodyElement::expand_calls() {
+std::optional<Body> BodyElement::expand_calls() {
     traverse([&](Body& sub_body) { sub_body.expand_calls(); }, [&](Expression& sub_expression) { sub_expression.expand_calls(); });
+    return {};
 }
 
 std::optional<Body> BodyElement::evaluate(const EvaluationContext& context) {

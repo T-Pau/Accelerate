@@ -63,7 +63,7 @@ class UnaryExpression : public BaseExpression {
      */
     UnaryExpression(const Location& location, Operation operation, Expression operand) : BaseExpression(location), operation(operation), operand(std::move(operand)) {}
 
-    std::shared_ptr<BaseExpression> clone() const override { return std::make_shared<UnaryExpression>(location, operation, operand.clone()); }
+    Expression clone() const override { return Expression(std::make_shared<UnaryExpression>(location, operation, operand.clone())); }
 
   protected:
     [[nodiscard]] std::optional<Expression> evaluate_process(const EvaluationContext& context) override;

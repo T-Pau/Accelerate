@@ -70,6 +70,11 @@ class ScopeBody : public BodyElement {
      */
     [[nodiscard]] std::shared_ptr<Scope> inner_scope() const { return inner_scope_; }
 
+    /**
+     * @brief Append a body to the contained body.
+     *
+     * @param inner_body The body to append.
+     */
     void append(Body inner_body) { body.append(std::move(inner_body)); }
 
     [[nodiscard]] SizeRange size_range() const override { return body.size_range(); }

@@ -29,4 +29,13 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "Expression/ArgumentExpression.h"
 
+#include "Expression/VoidExpression.h"
+
 void ArgumentExpression::serialize_sub(std::ostream& stream) const { stream << symbol; }
+
+Expression ArgumentExpression::clone() const {
+    if (argument.is<VoidExpression>()) {
+        throw LocationException(location, "internal error: argument {} not set", symbol);
+    }
+    return argument;
+}

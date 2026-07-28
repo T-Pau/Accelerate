@@ -98,10 +98,13 @@ void RepeatBody::resolve(Scope* scope, Entity* containing_entity) {
     body.resolve(scope, containing_entity);
 }
 
-void RepeatBody::expand_calls() {
+std::optional<Body> RepeatBody::expand_calls() {
+    return {};
     if (start) {
         start->expand_calls();
     }
     end.expand_calls();
     body.expand_calls();
+
+    // TODO: If variable is set, expand body for each value, and replace ourself with BlockBody.
 }

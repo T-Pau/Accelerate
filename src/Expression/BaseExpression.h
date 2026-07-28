@@ -147,11 +147,13 @@ class BaseExpression : public Base {
     /**
      * Expand function calls in the expression.
      *
-     * The default implementation calls `expand_calls()` on all sub-expressions using `traverse()`.
+     * The default implementation calls `expand_calls()` on all sub-expressions using `traverse()` and returns {}.
      *
      * If a function call cannot be expanded, either an error should be reported via DiagnosticOutput and the expression marked as invalid, or an exception should be thrown.
+     *
+     * @return The Expression to replace this Expression with, {} if no replacement is needed.
      */
-    virtual void expand_calls();
+    virtual std::optional<Expression> expand_calls();
 
     /**
      * Create a deep copy of the expression.
@@ -160,7 +162,7 @@ class BaseExpression : public Base {
      *
      * @return A shared pointer to the cloned expression.
      */
-    [[nodiscard]] virtual std::shared_ptr<BaseExpression> clone() const { throw LocationException(location, "internal error: clone() not implemented for {}", typeid(*this).name()); }
+    [[nodiscard]] virtual Expression clone() const;
 
     /**
      * @brief Check if the expression needs cloning.

@@ -44,14 +44,12 @@ class Constant : public Entity {
 
     [[nodiscard]] bool has_value() const { return value.has_value(); }
 
-    void resolve_implementation() override { value.resolve(containing_scope().get(), this); }
-
     void serialize(std::ostream& stream) const override;
 
     Expression value;
 
   protected:
-    void evaluate_inner(EvaluationContext& context) override { value.evaluate(context); }
+    void traverse(std::function<void(Entity&)> entity_callback, std::function<void(Body&)> body_callback, std::function<void(Expression&)> expression_callback) override { expression_callback(value); }
 
   private:
     static const Token token_value;

@@ -109,15 +109,9 @@ Expression::Expression(const Token& token) {
 
 void Expression::evaluate(const EvaluationContext& context) {
     TRACE_BEGIN_INSTANCE_PRINT(expression, "evaluating", "");
-    handle_translation_errors(
-        *expression,
-        [&]() {
-            auto new_expression = handle_translation_errors(*expression, [&]() { return expression->evaluate(context); });
-            if (new_expression) {
-                *this = *new_expression;
-            }
-        },
-        context.entity);
+    if (auto new_expression = handle_translation_errors(*expression, [&]() { return expression->evaluate(context); }, context.entity)) {
+        *this = *new_expression;
+    }
     TRACE_END_INSTANCE_PRINT(expression, "evaluating", "");
 }
 
@@ -153,9 +147,14 @@ void Expression::resolve(Scope* scope, Entity* containing_entity) {
     TRACE_END_INSTANCE_PRINT(expression, "resolving", "");
 }
 
-void Expression::expand_calls() {
+std::optional<Expression> Expression::expand_calls() {
+    TRACE_BEGIN_INSTANCE_PRINT(expression, "expanding calls", "");
     // TODO: pass containing_entity to handle_translation_errors
-    handle_translation_errors(*expression, [&]() { expression->expand_calls(); });
+    if (auto new_expression = handle_translation_errors(*expression, [&]() { return expression->expand_calls(); })) {
+        *this = *new_expression;
+    }
+    TRACE_END_INSTANCE_PRINT(expression, "expanding calls", "");
+    return *this;
 }
 
 std::optional<bool> Expression::has_type(Value::Type type) const {
@@ -177,6 +176,6 @@ Expression Expression::clone() const {
         return *this;
     }
 #else
-    return Expression{expression->clone()};
+    return expression->clone();
 #endif
 }

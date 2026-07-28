@@ -155,7 +155,7 @@ SizeRange Object::size_range() const {
     }
 }
 
-void Object::evaluate_inner(EvaluationContext& context) {
+void Object::evaluate_implementation(EvaluationContext& context) {
     if (address) {
         address->evaluate(context);
     }
@@ -214,22 +214,6 @@ void Object::pin(Expression expression) {
     address = Address(expression);
 }
 
-void Object::resolve_implementation() {
-    if (address) {
-        address->resolve(containing_scope().get(), this);
-    }
-    if (reservation_expression) {
-        reservation_expression->resolve(containing_scope().get(), this);
-    }
-    for (auto& constant : constants) {
-        constant->resolve();
-    }
-    body.resolve(scope().get(), this);
-#ifdef TRACE_TRANSLATION
-    std::cerr << body;
-#endif
-}
-
 std::optional<uint64_t> Object::maximum_address() const {
     auto maximum_size = size_range().maximum;
     auto maximum = section->maximum_address() - (maximum_size ? *maximum_size : 0);
@@ -251,4 +235,39 @@ std::optional<uint64_t> Object::minimum_address() const {
         }
     }
     return minimum;
+}
+
+void Object::traverse(std::function<void(Entity&)> entity_callback, std::function<void(Body&)> body_callback, std::function<void(Expression&)> expression_callback) {
+    ScopeEntity::traverse(entity_callback, body_callback, expression_callback);
+    if (address) {
+        address->traverse(expression_callback);
+    }
+    if (reservation_expression) {
+        expression_callback(*reservation_expression);
+    }
+    else {
+        for (auto& constant : constants) {
+            entity_callback(*constant);
+        }
+        body_callback(body);
+    }
+}
+
+void Object::enter_names() {
+    TRACE_BEGIN("entering names", "{}", name);
+    body.enter_names(scope().get(), this);
+    TRACE_END("entering names", "{}", name);
+}
+
+void Object::resolve_implementation() {
+    if (address) {
+        address->resolve(scope().get(), this);
+    }
+    if (reservation_expression) {
+        reservation_expression->resolve(scope().get(), this);
+    }
+    else {
+        resolve_constants();
+        body.resolve(scope().get(), this);
+    }
 }

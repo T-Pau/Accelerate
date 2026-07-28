@@ -47,10 +47,13 @@ void Linker::link() {
 
     DiagnosticOutput::global.exit_if_failed();
 
+    Target::set_current_target(target);
+    TRACE_BEGIN("expanding and evaluating", "");
     for (auto* entity : entities) {
         entity->expand_calls();
         entity->evaluate();
     }
+    TRACE_END("expanding and evaluating", "");
 
     DiagnosticOutput::global.exit_if_failed();
 

@@ -150,8 +150,10 @@ class BodyElement : public Base {
      * The default implementation calls `expand_calls()` on all sub-body-elements and sub-expressions using `traverse()`.
      *
      * If a macro or function call cannot be expanded, either an error should be reported via DiagnosticOutput and the BodyElement marked as invalid, or an exception should be thrown.
+     *
+     * @return The Body to replace this BodyElement with, {} if no replacement is needed.
      */
-    virtual void expand_calls();
+    virtual std::optional<Body> expand_calls();
 
     /**
      * @brief Evaluate the BodyElement in a given context.

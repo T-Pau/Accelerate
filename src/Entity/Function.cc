@@ -49,7 +49,7 @@ void Function::initialize() {
 }
 
 Function::Function(const Location& location, Symbol name, std::shared_ptr<Scope> parent_scope, const std::shared_ptr<StructuredValue>& definition_) : ScopeEntity(location, name, parent_scope, definition_) {
-    arguments = CallableArguments(definition_);
+    arguments = CallableArguments(this, definition_);
     auto parameters = definition_->as_dictionary();
     initialize();
     auto tokenizer = SequenceTokenizer((*parameters)[token_definition]->as_scalar()->tokens);
@@ -57,7 +57,7 @@ Function::Function(const Location& location, Symbol name, std::shared_ptr<Scope>
     if (!tokenizer.ended()) {
         throw LocationException(tokenizer.current_location(), "invalid definition");
     }
-    arguments.enter_arguments(this);
+    arguments.enter_arguments();
 }
 
 std::ostream& operator<<(std::ostream& stream, const Function& function) {
@@ -73,4 +73,12 @@ void Function::serialize(std::ostream& stream) const {
     stream << "}" << std::endl;
 }
 
-void Function::resolve_implementation() { definition.resolve(scope().get(), this); }
+void Function::traverse(std::function<void(Entity&)> entity_callback, std::function<void(Body&)> body_callback, std::function<void(Expression&)> expression_callback) {
+    ScopeEntity::traverse(entity_callback, body_callback, expression_callback);
+    expression_callback(definition);
+}
+
+void Function::resolve_implementation() {
+    resolve_constants();
+    definition.resolve(scope().get(), this);
+}

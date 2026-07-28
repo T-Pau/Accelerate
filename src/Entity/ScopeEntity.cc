@@ -13,3 +13,15 @@ void ScopeEntity::add(std::shared_ptr<Constant> constant) {
     scope()->add(constant);
     constants.insert(constant);
 }
+
+void ScopeEntity::traverse(std::function<void(Entity&)> entity_callable, std::function<void(Body&)> body_callable, std::function<void(Expression&)> expression_callable) {
+    for (auto& constant : constants) {
+        entity_callable(*constant);
+    }
+}
+
+void ScopeEntity::resolve_constants() {
+    for (auto& constant : constants) {
+        constant->resolve();
+    }
+}

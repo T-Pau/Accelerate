@@ -145,14 +145,19 @@ void Body::resolve(Scope* scope, Entity* containing_entity) {
 }
 
 void Body::expand_calls() {
+    TRACE_BEGIN_INSTANCE(element, "expanding calls", "");
     // TODO: pass containing_entity to handle_translation_errors
-    handle_translation_errors(*element, [&] { element->expand_calls(); });
+    handle_translation_errors(*element, [&] {
+        if (const auto new_body = element->expand_calls()) {
+            *this = *new_body;
+        }
+    });
+    TRACE_END_INSTANCE(element, "expanding calls", "");
 }
 
 void Body::enter_names(Scope* scope, Entity* containing_entity) {
     TRACE_BEGIN_INSTANCE(element, "entering names", "");
-    // TODO: pass containing_entity to handle_translation_errors
-    handle_translation_errors(*element, [&] { element->enter_names(scope, containing_entity); });
+    handle_translation_errors(*element, [&] { element->enter_names(scope, containing_entity); }, containing_entity);
     TRACE_END_INSTANCE(element, "entering names", "");
 }
 

@@ -40,6 +40,8 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Unresolved.h"
 #include "Visibility.h"
 
+class Body;
+class Expression;
 class Constant;
 class Function;
 class Macro;
@@ -70,9 +72,13 @@ class Entity : public Base {
      */
     void resolve();
 
-    virtual void expand_calls() {}
+    /**
+     * @brief Expand macro and function calls in the entity.
+     */
+    void expand_calls();
 
     void evaluate();
+
     [[nodiscard]] EvaluationResult evaluate(EvaluationContext::EvaluationType type);
     [[nodiscard]] bool check_unresolved(Unresolved& unresolved) const;
 
@@ -109,13 +115,29 @@ class Entity : public Base {
 
 
   protected:
-    /*
+    /**
+     * @brief Traverse the Entity.
+     *
+     * This function is used by the default implementations of `resolve_implementation()` and `expand_calls_implementation()`. Unless a subclass overrides both of these methods, it should override `traverse()`.
+     *
+     * @param body_callable A callable to apply to each sub-body-element.
+     * @param expression_callable A callable to apply to each sub-expression.
+     */
+    virtual void traverse(std::function<void(Entity&)> entity_callable, std::function<void(Body&)> body_callable, std::function<void(Expression&)> expression_callable) {}
+
+    /**
      * @brief Resolve names in the entity.
      *
-     * Subclasses must implement this method.
+     * The default implementation calls `resolve()` on all sub-body-elements and sub-expressions using `traverse()`.
      */
-    virtual void resolve_implementation() = 0;
+    virtual void resolve_implementation();
 
+    /**
+     * @brief Expand macro and function calls in the entity.
+     *
+     * The default implementation calls `expand_calls()` on all sub-body-elements and sub-expressions using `traverse()`.
+     */
+    virtual void expand_calls_implementation();
 
     void serialize_entity(std::ostream& stream) const;
 
@@ -123,7 +145,9 @@ class Entity : public Base {
 
     [[nodiscard]] virtual EvaluationContext evaluation_context(EvaluationResult& result, EvaluationContext::EvaluationType type) { return EvaluationContext(result, type, {}); }
 
-    virtual void evaluate_inner(EvaluationContext& context) = 0;
+    virtual void evaluate_implementation(EvaluationContext& context);
+
+    virtual void evaluate_process(EvaluationContext& context) {}
 
     std::weak_ptr<Scope> containing_scope_;
 

@@ -44,16 +44,12 @@ void Output::add_memory_constant(Symbol name, MemoryInfoExpression::InfoType inf
     add(constant);
 }
 
-void Output::evaluate_inner(EvaluationContext& context) {
-    for (auto& constant : constants) {
-        constant->evaluate();
-    }
-    body.evaluate(context);
+void Output::traverse(std::function<void(Entity&)> entity_callback, std::function<void(Body&)> body_callback, std::function<void(Expression&)> expression_callback) {
+    ScopeEntity::traverse(entity_callback, body_callback, expression_callback);
+    body_callback(body);
 }
 
 void Output::resolve_implementation() {
-    for (auto& constant : constants) {
-        constant->resolve();
-    }
+    resolve_constants();
     body.resolve(scope().get(), this);
 }

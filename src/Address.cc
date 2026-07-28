@@ -119,7 +119,7 @@ void Address::Component::serialize(std::ostream& stream, bool output_if_zero) co
         if (!output_if_zero && value == 0) {
             return;
         }
-        stream << "$" << std::setfill('0') << std::setw(std::max(static_cast<int>(Int::minimum_byte_size(std::get<uint64_t>(component_value))), 2)) << std::hex << std::get<uint64_t>(component_value) << std::dec;
+        stream << "$" << std::setfill('0') << std::setw(std::max(static_cast<int>(Int::minimum_byte_size(std::get<uint64_t>(component_value))) * 2, 2)) << std::hex << std::get<uint64_t>(component_value) << std::dec;
     }
     else if (std::holds_alternative<Expression>(component_value)) {
         stream << std::get<Expression>(component_value);
@@ -231,4 +231,15 @@ std::optional<uint64_t> Address::Component::maximum() const {
 std::ostream& operator<<(std::ostream& stream, Address::Component component) {
     component.serialize(stream);
     return stream;
+}
+
+void Address::traverse(std::function<void(Expression&)> expression_callback) {
+    bank_component.traverse(expression_callback);
+    address_component.traverse(expression_callback);
+}
+
+void Address::Component::traverse(std::function<void(Expression&)> expression_callback) {
+    if (std::holds_alternative<Expression>(component_value)) {
+        expression_callback(std::get<Expression>(component_value));
+    }
 }

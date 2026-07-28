@@ -46,9 +46,6 @@ class Output : public ScopeEntity {
 
     void enter_names() { body.enter_names(scope().get(), this); }
 
-    // TODO: move to ScopeEntity?
-    void resolve_implementation() override;
-
     // TODO: implement
     // void serialize(std::ostream& stream) const override;
 
@@ -57,10 +54,10 @@ class Output : public ScopeEntity {
     Body body;
 
   protected:
-    // TODO: move to ScopeEntity?
-    void evaluate_inner(EvaluationContext& context) override;
-
   private:
+    void traverse(std::function<void(Entity&)> entity_callback, std::function<void(Body&)> body_callback, std::function<void(Expression&)> expression_callback) override;
+    void resolve_implementation() override;
+
     void add_memory_constant(Symbol name, MemoryInfoExpression::InfoType info_type);
 
 

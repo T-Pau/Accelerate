@@ -29,6 +29,7 @@
 				"c64-basic",
 				"-o",
 				"hello-world.prg",
+				"--verbose-errors",
 				"examples/hello-world-cbm.s",
 				"cbm.lib"
 			],

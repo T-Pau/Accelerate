@@ -90,6 +90,8 @@ class Address {
      */
     void serialize(std::ostream& stream) const;
 
+    void traverse(std::function<void(Expression&)> expression_callback);
+
     /**
      * Check if the bank is known.
      *
@@ -103,6 +105,13 @@ class Address {
      * @return `true` if the address within the bank is known, `false` otherwise.
      */
     [[nodiscard]] bool has_address() const { return address_component.has_value(); }
+
+    /**
+     * Check if both the bank and the address within the bank are known.
+     *
+     * @return `true` if both the bank and the address within the bank are known, `false` otherwise.
+     */
+    [[nodiscard]] bool has_value() const { return has_bank() && has_address(); }
 
     /**
      * @brief Get the bank of the address.
@@ -173,6 +182,8 @@ class Address {
 
         [[nodiscard]] bool has_value() const;
         [[nodiscard]] std::optional<uint64_t> value() const;
+
+        void traverse(std::function<void(Expression&)> expression_callback);
 
         void resolve(Scope* scope, Entity* containing_entity);
         void evaluate(const EvaluationContext& context);

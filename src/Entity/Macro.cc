@@ -42,18 +42,21 @@ void Macro::initialize() {
     }
 }
 
-Macro::Macro(const Location& location, Symbol name, Visibility visibility, std::shared_ptr<Scope> containing_scope, bool default_only, CallableArguments arguments) : ScopeEntity(location, name, visibility, containing_scope, default_only), arguments(std::move(arguments)) { this->arguments.enter_arguments(this); }
+Macro::Macro(const Location& location, Symbol name, Visibility visibility, std::shared_ptr<Scope> containing_scope, bool default_only, CallableArguments arguments) : ScopeEntity(location, name, visibility, containing_scope, default_only), arguments(std::move(arguments)) {
+    this->arguments.set_entity(this);
+    this->arguments.enter_arguments();
+}
 
 Macro::Macro(const Location& location, Symbol name, std::shared_ptr<Scope> parent_scope, const std::shared_ptr<StructuredValue>& definition) : ScopeEntity(location, name, parent_scope, definition) {
     initialize();
 
-    arguments = CallableArguments(definition);
+    arguments = CallableArguments(this, definition);
 
     auto parameters = definition->as_dictionary();
 
     body = (*parameters)[token_body]->as_body()->body;
 
-    arguments.enter_arguments(this);
+    arguments.enter_arguments();
 }
 
 std::ostream& operator<<(std::ostream& stream, const Macro& macro) {
@@ -91,4 +94,13 @@ EvaluationContext Macro::evaluation_context(EvaluationResult& result) {
 #endif
 }
 
-void Macro::resolve_implementation() { body.resolve(scope().get(), this); }
+void Macro::traverse(std::function<void(Entity&)> entity_callback, std::function<void(Body&)> body_callback, std::function<void(Expression&)> expression_callback) {
+    ScopeEntity::traverse(entity_callback, body_callback, expression_callback);
+    arguments.traverse(expression_callback);
+    body_callback(body);
+}
+
+void Macro::resolve_implementation() {
+    resolve_constants();
+    body.resolve(scope().get(), this);
+}

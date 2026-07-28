@@ -44,17 +44,19 @@ class Function : public ScopeEntity {
   public:
     Function(const Location& location, Symbol name, std::shared_ptr<Scope> parent_scope, const std::shared_ptr<StructuredValue>& definition);
 
-    Function(const Location& location, Symbol name, Visibility visibility, std::shared_ptr<Scope> parent_scope, bool default_only, CallableArguments arguments, const Expression& definition) : ScopeEntity(location, name, visibility, parent_scope, default_only), arguments(std::move(arguments)), definition(definition) { this->arguments.enter_arguments(this); }
+    Function(const Location& location, Symbol name, Visibility visibility, std::shared_ptr<Scope> parent_scope, bool default_only, CallableArguments arguments, const Expression& definition) : ScopeEntity(location, name, visibility, parent_scope, default_only), arguments(std::move(arguments)), definition(definition) {
+        this->arguments.set_entity(this);
+        this->arguments.enter_arguments();
+    }
 
     void serialize(std::ostream& stream) const override;
-
-    void resolve_implementation() override;
 
     CallableArguments arguments;
     Expression definition;
 
   protected:
-    void evaluate_inner(EvaluationContext& context) override { definition.evaluate(context); }
+    void traverse(std::function<void(Entity&)> entity_callback, std::function<void(Body&)> body_callback, std::function<void(Expression&)> expression_callback) override;
+    void resolve_implementation() override;
 
   private:
     static void initialize();

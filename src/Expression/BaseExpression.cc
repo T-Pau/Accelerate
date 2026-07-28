@@ -53,8 +53,9 @@ void BaseExpression::resolve(Scope* scope, Entity* containing_entity) {
     traverse([&](Expression& sub_expression) { sub_expression.resolve(scope, containing_entity); });
 }
 
-void BaseExpression::expand_calls() {
+std::optional<Expression> BaseExpression::expand_calls() {
     traverse([&](Expression& sub_expression) { sub_expression.expand_calls(); });
+    return {};
 }
 
 std::optional<Expression> BaseExpression::evaluate_process(const EvaluationContext& context) { return {}; }
@@ -71,3 +72,5 @@ bool BaseExpression::children_need_cloning() {
     }
     return false;
 }
+
+Expression BaseExpression::clone() const { throw LocationException(location, "internal error: clone() not implemented for {}", typeid(*this).name()); }

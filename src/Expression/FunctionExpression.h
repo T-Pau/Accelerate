@@ -69,13 +69,13 @@ class FunctionExpression : public BaseExpression {
      */
     static Expression create(const Location& location, Symbol name, const std::vector<Expression>& arguments);
 
-    [[nodiscard]] std::shared_ptr<BaseExpression> clone() const override;
+    [[nodiscard]] Expression clone() const override;
 
   protected:
     void traverse(std::function<void(Expression&)> callable) override;
     void serialize_sub(std::ostream& stream) const override;
     void resolve(Scope* scope, Entity* containing_entity) override;
-    void expand_calls() override;
+    std::optional<Expression> expand_calls() override;
 
   private:
     /// @brief The name of the function being called.

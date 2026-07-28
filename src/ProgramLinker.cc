@@ -59,7 +59,7 @@ std::vector<Entity*> ProgramLinker::root_entities() {
 
 void ProgramLinker::link_sub() {
     auto unsorted_objects = entities | std::views::filter([](Entity* entity) { return entity->is<Object>(); }) | std::views::transform([](Entity* entity) { return static_cast<Object*>(entity); });
-    auto objects = sorted(unsorted_objects.begin(), unsorted_objects.end());
+    auto objects = sorted(unsorted_objects.begin(), unsorted_objects.end(), Object::less_pointers);
 
     TRACE_BEGIN("placing", "placing {} objects", objects.size());
     for (auto object : objects) {
@@ -82,7 +82,7 @@ void ProgramLinker::link_sub() {
 
             auto range = Range(address, size);
             if (!memory[bank].allocate(range, object->is_reservation() ? Memory::RESERVED : Memory::DATA, 0, range.size)) {
-                DiagnosticOutput::global.error(object->location, "fixed space for {} (${}, ${}) not free", object->name, range.start, range.end());
+                DiagnosticOutput::global.error(object->location, "fixed space for {} (${:x}, ${:x}) not free", object->name, range.start, range.end());
             }
         }
         else {
@@ -111,7 +111,7 @@ void ProgramLinker::link_sub() {
     DiagnosticOutput::global.exit_if_failed();
 
     for (auto object : objects) {
-        if (!object->address || object->address.has_value()) {
+        if (!object->address || !object->address->has_value()) {
             DiagnosticOutput::global.error(object->location, "object '{}' has no address", object->name);
             if (DiagnosticOutput::global.verbose_error_messages) {
                 std::cout << object->body;

@@ -112,7 +112,7 @@ void Entity::evaluate() {
     auto result = EvaluationResult{};
     auto context = evaluation_context(result);
     try {
-        evaluate_inner(context);
+        evaluate_implementation(context);
         process_result(result);
     } catch (Exception& ex) {
         DiagnosticOutput::global.error(location, ex);
@@ -125,7 +125,7 @@ EvaluationResult Entity::evaluate(EvaluationContext::EvaluationType type) {
     auto result = EvaluationResult{};
     try {
         auto context = evaluation_context(result, type);
-        evaluate_inner(context);
+        evaluate_implementation(context);
         process_result(result);
     } catch (Exception& ex) {
         DiagnosticOutput::global.error(location, ex);
@@ -164,4 +164,23 @@ std::shared_ptr<Scope> Entity::containing_scope() const {
         throw LocationException(location, "internal error: containing scope of {} '{}' destroyed", type_name(), name);
     }
     return scope;
+}
+
+void Entity::expand_calls() {
+    TRACE_BEGIN("expanding calls", "{}", name);
+    DiagnosticOutput::global.log_exceptions([this]() { expand_calls_implementation(); });
+    TRACE_END("expanding calls", "{}", name);
+}
+
+void Entity::expand_calls_implementation() {
+    traverse([](Entity& entity) { entity.expand_calls(); }, [](Body& body) { body.expand_calls(); }, [](Expression& expression) { expression.expand_calls(); });
+}
+
+void Entity::resolve_implementation() {
+    traverse([this](Entity& entity) { entity.resolve(); }, [this](Body& body) { body.resolve(containing_scope().get(), this); }, [this](Expression& expression) { expression.resolve(containing_scope().get(), this); });
+}
+
+void Entity::evaluate_implementation(EvaluationContext& context) {
+    traverse([](Entity& entity) { entity.evaluate(); }, [&context](Body& body) { body.evaluate(context); }, [&context](Expression& expression) { expression.evaluate(context); });
+    evaluate_process(context);
 }

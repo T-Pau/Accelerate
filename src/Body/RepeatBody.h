@@ -58,7 +58,7 @@ class RepeatBody : public BodyElement {
     [[nodiscard]] std::optional<Body> evaluate(const EvaluationContext& context) override;
     void serialize(std::ostream& stream, const std::string& prefix) const override;
     void resolve(Scope* scope, Entity* containing_entity) override;
-    void expand_calls() override;
+    std::optional<Body> expand_calls() override;
 
   private:
     Symbol variable;

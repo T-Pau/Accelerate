@@ -82,7 +82,7 @@ class ValueExpression : public BaseExpression {
 
     [[nodiscard]] std::optional<Value::Type> type() const override { return value_.type(); }
 
-    [[nodiscard]] std::shared_ptr<BaseExpression> clone() const override { return std::make_shared<ValueExpression>(location, value_); }
+    [[nodiscard]] Expression clone() const override { return Expression(std::make_shared<ValueExpression>(location, value_)); }
 
   protected:
     void serialize_sub(std::ostream& stream) const override;

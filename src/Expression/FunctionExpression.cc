@@ -85,9 +85,9 @@ Expression FunctionExpression::create(const Location& location, Symbol name, con
     return Expression(std::make_shared<FunctionExpression>(location, name, arguments));
 }
 
-std::shared_ptr<BaseExpression> FunctionExpression::clone() const {
+Expression FunctionExpression::clone() const {
     auto new_arguments = arguments | std::views::transform([](const Expression& argument) { return argument.clone(); });
-    return std::make_shared<FunctionExpression>(location, name, std::vector<Expression>(new_arguments.begin(), new_arguments.end()));
+    return Expression(std::make_shared<FunctionExpression>(location, name, std::vector<Expression>(new_arguments.begin(), new_arguments.end())));
 }
 
 void FunctionExpression::resolve(Scope* scope, Entity* containing_entity) {
@@ -98,12 +98,13 @@ void FunctionExpression::resolve(Scope* scope, Entity* containing_entity) {
     }
 }
 
-void FunctionExpression::expand_calls() {
+std::optional<Expression> FunctionExpression::expand_calls() {
     for (auto& argument : arguments) {
         argument.expand_calls();
     }
 
     // TODO: copy function body into this expression, replacing arguments with their values
+    return {};
 }
 
 void FunctionExpression::traverse(std::function<void(Expression&)> callable) {

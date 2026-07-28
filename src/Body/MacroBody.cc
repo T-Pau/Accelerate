@@ -27,9 +27,10 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "MacroBody.h"
+#include "Body/MacroBody.h"
 
-#include "Body.h"
+#include "Body/Body.h"
+#include "Body/ScopeBody.h"
 
 void MacroBody::serialize(std::ostream& stream, const std::string& prefix) const {
     stream << prefix << name;
@@ -52,19 +53,30 @@ void MacroBody::traverse(std::function<void(Body&)> body_callback, std::function
     }
 }
 
-void MacroBody::expand_calls() {
+std::optional<Body> MacroBody::expand_calls() {
     for (auto& argument : arguments) {
         argument.expand_calls();
     }
-    // TODO: expand calls macro if not already done.
-    // TODO: copy macro environment and body here.
-    // TODO: replace argument placeholders in macro environment with argument values.
+
+    if (!macro) {
+        throw LocationException(location, "internal error: macro {} not found", name);
+    }
+
+    // TODO: we need the containing scope
+    auto new_body = ScopeBody::create(std::make_shared<Scope>(Visibility::ARGUMENT), Body{});
+    auto scope_body = new_body.as<ScopeBody>();
+
+    macro->set_arguments(scope_body, arguments);
+    scope_body->append(macro->body.clone());
+    macro->clear_arguments();
+    return new_body;
 }
 
 void MacroBody::resolve(Scope* scope, Entity* containing_entity) {
-    for (auto& argument : arguments) {
-        argument.resolve(scope, containing_entity);
+    BodyElement::resolve(scope, containing_entity);
+    auto macro_ptr = scope->get_macro(name, containing_entity);
+    if (!macro_ptr) {
+        throw LocationException(location, "macro {} not found", name);
     }
-
-    // TODO: resolve macro body.
+    macro = macro_ptr.get();
 }
