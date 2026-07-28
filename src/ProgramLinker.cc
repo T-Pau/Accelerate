@@ -154,41 +154,15 @@ void ProgramLinker::output(const std::filesystem::path& file_name) {
 }
 
 void ProgramLinker::output_symbol_map(const std::filesystem::path& file_name) {
-#if 0
-    auto sorted_objects = std::vector<Object*>(objects.begin(), objects.end());
-    std::ranges::sort(sorted_objects, Object::less_pointers);
+    auto unsorted_objects = entities | std::views::filter([](Entity* entity) { return entity->is<Object>(); }) | std::views::transform([](Entity* entity) { return static_cast<Object*>(entity); });
+    auto objects = sorted(unsorted_objects.begin(), unsorted_objects.end(), Object::less_pointers);    
 
-    std::unordered_set<const ObjectFile::Constant*> constants;
-    std::vector<const ObjectFile::Constant*> sorted_constants;
-
-    program->collect_constants(constants, false);
-    for (const auto& object_file: libraries) {
-        object_file->collect_constants(constants, true);
-
-        for (const auto& object: object_file->all_objects()) {
-            if (object->has_address()) {
-                sorted_objects.push_back(object);
-            }
-        }
-    }
-
-    sorted_constants.insert(sorted_constants.end(), constants.begin(), constants.end());
-    // TODO: sort by address
-    std::ranges::sort(sorted_constants, [](const ObjectFile::Constant* a, const ObjectFile::Constant* b) {
-        auto va = a->value.value();
-        auto vb = b->value.value();
-        if (va && vb) {
-            if (*va != *vb) {
-                return *va < *vb;
-            }
-            else {
-                return a->name < b->name;
-            }
-        }
-        else if (va) {
+    auto unsorted_constants = entities | std::views::filter([](Entity* entity) { return entity->is<Constant>(); }) | std::views::transform([](Entity* entity) { return static_cast<Constant*>(entity); });
+    auto constants = sorted(unsorted_constants.begin(), unsorted_constants.end(), [](const Constant* a, const Constant* b) { 
+        if (a->value.value() < b->value.value()) {
             return true;
         }
-        else if (vb) {
+        else if (a->value.value() > b->value.value()) {
             return false;
         }
         else {
@@ -198,18 +172,17 @@ void ProgramLinker::output_symbol_map(const std::filesystem::path& file_name) {
 
     auto stream = std::ofstream(file_name);
 
-    for (const auto& constant: sorted_constants) {
+    for (const auto& constant: constants) {
         auto value = constant->value.value();
         if (value) {
             stream << "constant\t" << *value << "\t" << constant->name << "\n";
         }
     }
 
-    for (const auto& object: sorted_objects) {
+    for (const auto& object: objects) {
         stream << "object\t" << *object->address;
         stream << "\t$" << std::setfill('0') << std::setw(4) << std::hex << *object->size_range().size() << std::dec;
         stream << "\t" << object->name;
         stream << "\t" << object->section->name << "\t" << (object->is_reservation() ? "reserve" : "data") << "\n";
     }
-#endif
 }
