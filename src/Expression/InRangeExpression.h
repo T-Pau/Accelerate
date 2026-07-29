@@ -79,7 +79,7 @@ class InRangeExpression : public BaseExpression {
 
     [[nodiscard]] bool needs_cloning() override { return false; }
 
-    [[nodiscard]] Expression clone() const override { return Expression(std::make_shared<InRangeExpression>(location, lower_bound.clone(), upper_bound.clone(), argument.clone())); }
+    [[nodiscard]] Expression clone(const CloneContext& context) const override { return Expression(std::make_shared<InRangeExpression>(location, lower_bound.clone(context), upper_bound.clone(context), argument.clone(context))); }
 
   protected:
     void traverse(std::function<void(Expression&)> callable) override {

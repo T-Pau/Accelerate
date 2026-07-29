@@ -166,16 +166,19 @@ std::optional<bool> Expression::has_type(Value::Type type) const {
     return Value::is_subtype(*expression_type, type);
 }
 
-Expression Expression::clone() const {
+Expression Expression::clone(const CloneContext& context) const {
+    TRACE_BEGIN_INSTANCE_PRINT(expression, "cloning", "");
 #if 0
     // This is broken, will look into it later. For now, just clone everything.
     if (expression->needs_cloning()) {
-        return Expression{expression->clone()};
+        return expression->clone(context);
     }
     else {
         return *this;
     }
 #else
-    return expression->clone();
+    auto cloned_expression = expression->clone(context);
 #endif
+    TRACE_END_INSTANCE_PRINT(cloned_expression.expression, "cloning", "");
+    return cloned_expression;
 }

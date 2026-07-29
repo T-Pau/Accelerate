@@ -96,7 +96,7 @@ class BinaryExpression : public BaseExpression {
 
     [[nodiscard]] bool needs_cloning() override { return false; }
 
-    [[nodiscard]] Expression clone() const override { return Expression(std::make_shared<BinaryExpression>(location, left.clone(), operation, right.clone())); }
+    [[nodiscard]] Expression clone(const CloneContext& context) const override { return Expression(std::make_shared<BinaryExpression>(location, left.clone(context), operation, right.clone(context))); }
 
   protected:
     [[nodiscard]] std::optional<Expression> evaluate_process(const EvaluationContext& context) override;

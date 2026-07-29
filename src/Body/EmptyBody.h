@@ -39,13 +39,17 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /**
  * @brief Represents an empty body.
  */
-class EmptyBody: public BodyElement {
-public:
+class EmptyBody : public BodyElement {
+  public:
     EmptyBody() = default;
-    [[nodiscard]] std::shared_ptr<BodyElement> clone() const override {return std::make_shared<EmptyBody>();}
-    [[nodiscard]] bool empty() const override {return true;}
+
+    [[nodiscard]] Body clone(const CloneContext& context) const override { return Body(std::make_shared<EmptyBody>()); }
+
+    [[nodiscard]] bool empty() const override { return true; }
+
     void traverse(std::function<void(Body&)> body_callable, std::function<void(Expression&)> expression_callable) override {}
-    void serialize(std::ostream &stream, const std::string &prefix) const override {}
+
+    void serialize(std::ostream& stream, const std::string& prefix) const override {}
 };
 
 #endif // HAD_XLR8_EMPTY_BODY_H

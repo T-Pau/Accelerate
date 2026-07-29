@@ -54,7 +54,7 @@ class AssignmentBody : public BodyElement {
 
     AssignmentBody(Visibility visibility, Symbol name, Expression value) : visibility(visibility), name(name), value(std::move(value)) {}
 
-    [[nodiscard]] std::shared_ptr<BodyElement> clone() const override { return std::make_shared<AssignmentBody>(visibility, name, value); }
+    [[nodiscard]] Body clone(const CloneContext& context) const override { return Body(std::make_shared<AssignmentBody>(visibility, name, value.clone(context))); }
 
     [[nodiscard]] bool empty() const override { return false; }
 

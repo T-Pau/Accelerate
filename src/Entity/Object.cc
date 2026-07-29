@@ -176,7 +176,7 @@ void Object::evaluate_implementation(EvaluationContext& context) {
         body.evaluate(context);
     }
 #ifdef TRACE_TRANSLATION
-    std::cerr << body;
+    std::cerr << *this;
 #endif
 }
 

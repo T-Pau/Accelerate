@@ -48,7 +48,7 @@ class ArgumentExpression : public BaseExpression {
 
     static Expression create(const Location& location, Symbol symbol) { return Expression(std::make_shared<ArgumentExpression>(location, symbol)); }
 
-    [[nodiscard]] Expression clone() const override;
+    [[nodiscard]] Expression clone(const CloneContext& context) const override;
 
     void set_argument(const Expression& argument) { this->argument = argument; }
 

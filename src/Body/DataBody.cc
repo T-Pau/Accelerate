@@ -148,13 +148,13 @@ void DataBody::traverse(std::function<void(Body&)> body_callable, std::function<
     }
 }
 
-std::shared_ptr<BodyElement> DataBody::clone() const {
+Body DataBody::clone(const CloneContext& context) const {
     auto new_data = std::vector<DataBodyElement>{};
     new_data.reserve(data.size());
     for (const auto& datum : data) {
-        new_data.emplace_back(datum.expression.clone(), datum.encoding);
+        new_data.emplace_back(datum.expression.clone(context), datum.encoding);
     }
-    return std::make_shared<DataBody>(new_data);
+    return DataBody::create(new_data);
 }
 
 std::optional<Body> DataBody::evaluate_process(const EvaluationContext& context) {

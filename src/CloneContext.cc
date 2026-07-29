@@ -27,15 +27,17 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "Expression/ArgumentExpression.h"
+#include "CloneContext.h"
 
-#include "Expression/VoidExpression.h"
-
-void ArgumentExpression::serialize_sub(std::ostream& stream) const { stream << symbol; }
-
-Expression ArgumentExpression::clone(const CloneContext& context) const {
-    if (argument.is<VoidExpression>()) {
-        throw LocationException(location, "internal error: argument {} not set", symbol);
+std::shared_ptr<Constant> CloneContext::map(const std::shared_ptr<Constant>& constant) const {
+    auto it = constant_map.find(constant);
+    if (it != constant_map.end()) {
+        return it->second;
     }
-    return argument;
+    else if (parent) {
+        return parent->map(constant);
+    }
+    else {
+        return constant;
+    }
 }

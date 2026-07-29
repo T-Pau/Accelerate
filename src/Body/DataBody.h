@@ -66,7 +66,7 @@ class DataBody : public BodyElement {
 
     Body appending(const std::vector<DataBodyElement>& elements) const;
     //    void append(Expression expression, std::optional<IntegerEncoder> encoding = {}) {data.emplace_back(std::move(expression), encoding);}
-    [[nodiscard]] std::shared_ptr<BodyElement> clone() const override;
+    [[nodiscard]] Body clone(const CloneContext& context) const override;
 
     [[nodiscard]] bool empty() const override { return data.empty(); }
 

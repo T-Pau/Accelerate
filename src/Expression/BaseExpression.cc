@@ -73,4 +73,4 @@ bool BaseExpression::children_need_cloning() {
     return false;
 }
 
-Expression BaseExpression::clone() const { throw LocationException(location, "internal error: clone() not implemented for {}", typeid(*this).name()); }
+Expression BaseExpression::clone(const CloneContext& context) const { throw LocationException(location, "internal error: clone() not implemented for {}", typeid(*this).name()); }

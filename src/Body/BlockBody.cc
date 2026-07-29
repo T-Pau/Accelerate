@@ -152,3 +152,12 @@ void BlockBody::traverse(std::function<void(Body&)> body_callable, std::function
         body_callable(element);
     }
 }
+
+Body BlockBody::clone(const CloneContext& context) const {
+    auto new_block = std::vector<Body>();
+    new_block.reserve(block.size());
+    for (auto& element : block) {
+        new_block.emplace_back(element.clone(context));
+    }
+    return Body(std::make_shared<BlockBody>(new_block));
+}

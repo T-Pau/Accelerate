@@ -255,7 +255,7 @@ InstructionInvocation::Variant::Variant(uint64_t opcode, const AddressingMode& a
 
 std::pair<std::optional<Expression>, Body> InstructionInvocation::Variant::encode(const std::shared_ptr<Scope>& containing_scope) const {
     std::optional<Expression> constraint_expression;
-    auto body = ScopeBody::create(containing_scope, addressing_mode.get().encoding.clone());
+    auto body = ScopeBody::create(containing_scope, addressing_mode.get().encoding.clone(CloneContext()));
     auto scope_body = body.as<ScopeBody>();
 
     scope_body->add(std::make_shared<Constant>(Location{}, Symbol(".opcode"), Visibility::ARGUMENT, containing_scope, false, ValueExpression::create({}, Value(opcode))));

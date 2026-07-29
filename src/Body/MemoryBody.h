@@ -44,7 +44,7 @@ class MemoryBody : public BodyElement {
     static Body create(Location location, Expression bank, Expression start_address, Expression end_address);
     MemoryBody(Location location, Expression bank, Expression start_address, Expression end_address);
 
-    [[nodiscard]] std::shared_ptr<BodyElement> clone() const override { return std::make_shared<MemoryBody>(location, bank, start_address, end_address); }
+    [[nodiscard]] Body clone(const CloneContext& context) const override { return Body(std::make_shared<MemoryBody>(location, bank.clone(context), start_address.clone(context), end_address.clone(context))); }
 
     [[nodiscard]] bool empty() const override { return size().value_or(1) == 0; }
 

@@ -73,6 +73,7 @@ nav = [
             { "ChecksumAlgorithmXor" = "Internal/Reference/ChecksumAlgorithmXor.md" },
             { "ChecksumBody" = "Internal/Reference/ChecksumBody.md" },
             { "ChecksumComputation" = "Internal/Reference/ChecksumComputation.md" },
+            { "CloneContext" = "Internal/Reference/CloneContext.md" },
             { "Constant" = "Internal/Reference/Constant.md" },
             { "ConstantExpression" = "Internal/Reference/ConstantExpression.md" },
             { "CurrentObjectExpression" = "Internal/Reference/CurrentObjectExpression.md" },

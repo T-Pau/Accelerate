@@ -69,7 +69,7 @@ class FunctionExpression : public BaseExpression {
      */
     static Expression create(const Location& location, Symbol name, const std::vector<Expression>& arguments);
 
-    [[nodiscard]] Expression clone() const override;
+    [[nodiscard]] Expression clone(const CloneContext& context) const override { throw LocationException(location, "internal error: cannot clone unexpanded function call"); }
 
   protected:
     void traverse(std::function<void(Expression&)> callable) override;

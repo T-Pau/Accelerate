@@ -96,11 +96,12 @@ Scope* Scope::find_containing_scope(Visibility visibility) {
     }
 }
 
-std::optional<Location> Scope::find_conflicting_constant_or_object(Symbol name) {
-    if (auto constant = get_constant(name)) {
+std::optional<Location> Scope::find_conflicting_constant_or_object(Symbol name, Visibility visibility) {
+    bool include_containing_scopes = visibility != Visibility::ARGUMENT;
+    if (auto constant = get_constant(name, include_containing_scopes)) {
         return constant->location;
     }
-    if (auto object = get_object(name)) {
+    if (auto object = get_object(name, include_containing_scopes)) {
         return object->location;
     }
     return {};

@@ -90,3 +90,18 @@ void ScopeBody::add(std::shared_ptr<Constant> constant) {
     inner_scope()->add(constant);
     constants.insert(constant);
 }
+
+Body ScopeBody::clone(const CloneContext& context) const {
+    auto new_inner_scope = std::make_shared<Scope>(Visibility::ARGUMENT, Symbol{}, context.containing_scope);
+    auto inner_context = CloneContext(new_inner_scope, &context);
+    auto new_scope_body = std::make_shared<ScopeBody>(new_inner_scope, Body{});
+
+    for (auto& constant : constants) {
+        auto new_constant = std::make_shared<Constant>(constant->location, constant->name, constant->visibility, new_inner_scope, false, constant->value.clone(context));
+        inner_context.add_mapping(constant, new_constant);
+        new_scope_body->add(new_constant);
+    }
+    auto new_body = body.clone(context);
+    new_scope_body->append(new_body);
+    return Body(new_scope_body);
+}

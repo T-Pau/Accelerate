@@ -36,6 +36,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <tpau-cpp-kernal/FileReader.h>
 #include <tpau-cpp-kernal/Int.h>
 #include <tpau-cpp-kernal/LocationException.h>
+#include <tpau-cpp-kernal/UTF8.h>
 
 #include "ExpressionParser.h"
 #include "HexStringDecoder.h"
@@ -239,7 +240,7 @@ Token FileTokenizer::next_raw() {
             return parse_char(location);
         }
         else {
-            throw LocationException(location, "illegal character '{}'", c);
+            throw LocationException(location, "illegal character '{}'", UTF8::encode(c));
         }
     }
 }

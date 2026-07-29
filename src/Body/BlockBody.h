@@ -49,7 +49,7 @@ class BlockBody : public BodyElement {
 
     [[nodiscard]] std::pair<bool, std::optional<Body>> append_sub(const Body& body, const Body& element) override;
 
-    [[nodiscard]] std::shared_ptr<BodyElement> clone() const override { return std::make_shared<BlockBody>(block); }
+    [[nodiscard]] Body clone(const CloneContext& context) const override;
 
     [[nodiscard]] bool empty() const override { return block.empty(); }
 

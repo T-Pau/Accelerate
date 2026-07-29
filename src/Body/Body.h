@@ -36,7 +36,8 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <tpau-cpp-kernal/Location.h>
 
-#include "BodyElement.h"
+#include "Body/BodyElement.h"
+#include "CloneContext.h"
 #include "EvaluationContext.h"
 #include "SizeRange.h"
 
@@ -125,8 +126,7 @@ class Body {
      *
      * @return A new Body that is a deep copy of this body.
      */
-    [[nodiscard]] Body clone() const { return Body(element->clone()); }
-
+    [[nodiscard]] Body clone(const CloneContext& context) const;
     /**
      * @brief Check if all contained body elements and expressions have been fully evaluated.
      *

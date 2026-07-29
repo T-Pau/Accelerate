@@ -42,3 +42,14 @@ std::optional<Expression> ConstantExpression::evaluate(const EvaluationContext& 
     }
     return simplify(location, constant_, false);
 }
+
+Expression ConstantExpression::clone(const CloneContext& context) const {
+    if (std::holds_alternative<std::shared_ptr<Constant>>(constant_)) {
+        auto constant = std::get<std::shared_ptr<Constant>>(constant_);
+        auto new_constant = context.map(constant);
+        return Expression(std::make_shared<ConstantExpression>(location, new_constant));
+    }
+    else {
+        return Expression(std::make_shared<ConstantExpression>(location, std::get<Constant*>(constant_)));
+    }
+}

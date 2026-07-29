@@ -60,6 +60,7 @@ add_library(xlr8-library STATIC
         ChecksumAlgorithm.cc
         ChecksumAlgorithmXor.cc
         ChecksumComputation.cc
+        CloneContext.cc
         CPU.cc
         CPUGetter.cc
         CPUParser.cc

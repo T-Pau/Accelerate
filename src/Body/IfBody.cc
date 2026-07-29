@@ -135,3 +135,12 @@ std::optional<Body> IfBody::evaluate(const EvaluationContext& context) {
     }
     return simplify(clauses, false);
 }
+
+Body IfBody::clone(const CloneContext& context) const {
+    auto new_clauses = std::vector<IfBodyClause>();
+    new_clauses.reserve(clauses.size());
+    for (auto& clause : clauses) {
+        new_clauses.emplace_back(clause.clone(context));
+    }
+    return Body(std::make_shared<IfBody>(new_clauses));
+}

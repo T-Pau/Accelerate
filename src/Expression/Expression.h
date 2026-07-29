@@ -34,6 +34,7 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+#include "CloneContext.h"
 #include "Expression/BaseExpression.h"
 #include "Tokenizer.h"
 
@@ -161,7 +162,7 @@ class Expression {
      *
      * @return A new Expression that is a deep copy of this one.
      */
-    [[nodiscard]] Expression clone() const;
+    [[nodiscard]] Expression clone(const CloneContext& context) const;
 
     /**
      * @brief Check if the expression needs cloning.

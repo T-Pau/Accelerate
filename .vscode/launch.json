@@ -165,6 +165,8 @@
 				"/Users/dillo/Projects/T-Pau/Development/Accelerate/share",
 				"--create-library",
 				"--verbose-errors",
+				"--target",
+				"6502",
 				"a.s"
 			],
 			"cwd": "${workspaceFolder}/build/tests",

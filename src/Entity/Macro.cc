@@ -104,3 +104,14 @@ void Macro::resolve_implementation() {
     resolve_constants();
     body.resolve(scope().get(), this);
 }
+
+void Macro::enter_names() {
+    TRACE_BEGIN("entering names", "{}", name);
+    body.enter_names(scope().get(), this);
+    TRACE_END("entering names", "{}", name);
+}
+
+
+#ifdef TRACE_TRANSLATION
+void Macro::evaluate_process(EvaluationContext& result) { std::cerr << *this; }
+#endif

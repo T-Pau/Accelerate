@@ -37,6 +37,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <optional>
 
 #include "Base.h"
+#include "CloneContext.h"
 #include "EvaluationContext.h"
 #include "Memory.h"
 #include "SizeRange.h"
@@ -89,7 +90,7 @@ class BodyElement : public Base {
 
     virtual void collect_objects(std::unordered_set<Object*>& objects) const {}
 
-    [[nodiscard]] virtual std::shared_ptr<BodyElement> clone() const = 0;
+    [[nodiscard]] virtual Body clone(const CloneContext& context) const = 0;
 
     /**
      * @brief Check if the BodyElement can be discarded.

@@ -50,7 +50,7 @@ class MacroBody : public BodyElement {
 
     MacroBody(Location location, Symbol name, std::vector<Expression> arguments, Macro* macro = {}) : BodyElement(location, SizeRange(0, {})), name(name), macro(macro), arguments(std::move(arguments)) {}
 
-    [[nodiscard]] std::shared_ptr<BodyElement> clone() const override { throw LocationException(location, "can't clone MacroBody"); }
+    [[nodiscard]] Body clone(const CloneContext& context) const override { throw LocationException(location, "internal error: can't clone unexpanded macro call"); }
 
     void encode(std::string& bytes, const Memory* memory) override { throw LocationException(location, "can't encode unexpanded macro call"); }
 

@@ -57,6 +57,8 @@ class IfBodyClause {
      */
     IfBodyClause(std::optional<Expression> condition, Body body) : condition(std::move(condition)), body(std::move(body)) {}
 
+    IfBodyClause clone(const CloneContext& context) const { return IfBodyClause(condition ? std::make_optional(condition->clone(context)) : std::nullopt, body.clone(context)); }
+
     /**
      * @brief Check if the clause's condition evaluates to true.
      *
@@ -100,7 +102,7 @@ class IfBody : public BodyElement {
      */
     static Body create(const std::vector<IfBodyClause>& clauses) { return *simplify(const_cast<std::vector<IfBodyClause>&>(clauses), true); }
 
-    [[nodiscard]] std::shared_ptr<BodyElement> clone() const override { return std::make_shared<IfBody>(clauses); } // TODO: this doesn't copy clauses
+    [[nodiscard]] Body clone(const CloneContext& context) const override;
 
     [[nodiscard]] bool empty() const override { return clauses.empty(); }
 

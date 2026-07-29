@@ -582,8 +582,8 @@ class Scope {
             DiagnosticOutput::global.error(location, "cannot add {} to scope of type {}", get_type_name<T>(), visibility);
             throw Exception();
         }
-        if (auto conflicting = find_conflicting<T>(name)) {
-            DiagnosticOutput::global.error(location, "{} {} already defined", get_type_name<T>(), name);
+        if (auto conflicting = find_conflicting<T>(name, visibility)) {
+            DiagnosticOutput::global.error(location, "{} '{}' already defined", get_type_name<T>(), name);
             DiagnosticOutput::global.note(*conflicting, "previous definition here");
             throw Exception();
         }
@@ -606,17 +606,17 @@ class Scope {
      * @param name The name of the entity.
      * @return The location of the conflicting entity, or {} if no conflict exists.
      */
-    template <typename T> const std::optional<Location> find_conflicting(Symbol name) { throw Exception("internal error: find_conflicting() not defined for type {}", typeid(T).name()); }
+    template <typename T> const std::optional<Location> find_conflicting(Symbol name, Visibility visibility) { throw Exception("internal error: find_conflicting() not defined for type {}", typeid(T).name()); }
 
-    template <> const std::optional<Location> find_conflicting<Constant>(Symbol name) { return find_conflicting_constant_or_object(name); }
+    template <> const std::optional<Location> find_conflicting<Constant>(Symbol name, Visibility visibility) { return find_conflicting_constant_or_object(name, visibility); }
 
-    template <> const std::optional<Location> find_conflicting<Function>(Symbol name) { return find_conflicting_function(name); }
+    template <> const std::optional<Location> find_conflicting<Function>(Symbol name, Visibility visibility) { return find_conflicting_function(name); }
 
-    template <> const std::optional<Location> find_conflicting<Macro>(Symbol name) { return find_conflicting_macro(name); }
+    template <> const std::optional<Location> find_conflicting<Macro>(Symbol name, Visibility visibility) { return find_conflicting_macro(name); }
 
-    template <> const std::optional<Location> find_conflicting<Object>(Symbol name) { return find_conflicting_constant_or_object(name); }
+    template <> const std::optional<Location> find_conflicting<Object>(Symbol name, Visibility visibility) { return find_conflicting_constant_or_object(name, visibility); }
 
-    std::optional<Location> find_conflicting_constant_or_object(Symbol name);
+    std::optional<Location> find_conflicting_constant_or_object(Symbol name, Visibility visibility);
     std::optional<Location> find_conflicting_function(Symbol name);
     std::optional<Location> find_conflicting_macro(Symbol name);
 

@@ -49,7 +49,7 @@ class ErrorBody : public BodyElement {
 
     explicit ErrorBody(const Location& location, std::string message) : location(location), message(std::move(message)) {}
 
-    [[nodiscard]] std::shared_ptr<BodyElement> clone() const override { return std::make_shared<ErrorBody>(location, message); }
+    [[nodiscard]] Body clone(const CloneContext& context) const override { return Body(std::make_shared<ErrorBody>(location, message)); }
 
     [[nodiscard]] bool empty() const override { return false; }
 

@@ -81,7 +81,7 @@ class ScopeBody : public BodyElement {
 
     [[nodiscard]] SizeRange offset() const override { return body.offset(); }
 
-    [[nodiscard]] std::shared_ptr<BodyElement> clone() const override { throw Exception("can't clone ScopeBody"); }
+    [[nodiscard]] Body clone(const CloneContext& context) const override;
 
     [[nodiscard]] bool empty() const override { return body.empty(); }
 

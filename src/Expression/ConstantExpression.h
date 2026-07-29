@@ -62,6 +62,8 @@ class ConstantExpression : public BaseExpression {
 
     [[nodiscard]] Constant* constant() const { return is_argument_constant() ? std::get<std::shared_ptr<Constant>>(constant_).get() : std::get<Constant*>(constant_); }
 
+    [[nodiscard]] Expression clone(const CloneContext& context) const override;
+
     [[nodiscard]] bool is_argument_constant() const { return std::holds_alternative<std::shared_ptr<Constant>>(constant_); }
 
     void serialize_sub(std::ostream& stream) const override { stream << constant()->name; }

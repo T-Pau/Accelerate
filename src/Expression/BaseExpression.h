@@ -39,6 +39,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <tpau-cpp-kernal/Value.h>
 
 #include "Base.h"
+#include "CloneContext.h"
 
 using namespace tpau::cpp_kernal;
 
@@ -162,7 +163,7 @@ class BaseExpression : public Base {
      *
      * @return A shared pointer to the cloned expression.
      */
-    [[nodiscard]] virtual Expression clone() const;
+    [[nodiscard]] virtual Expression clone(const CloneContext& context) const;
 
     /**
      * @brief Check if the expression needs cloning.

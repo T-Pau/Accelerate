@@ -50,7 +50,7 @@ class Macro : public ScopeEntity {
     [[nodiscard]] Body expand(const std::vector<Expression>& arguments, std::shared_ptr<Scope> outer_environment) const;
     void serialize(std::ostream& stream) const override;
 
-    void enter_names() { body.enter_names(scope().get(), this); }
+    void enter_names();
 
     template <ScopeBodyOrExpression Expansion> void set_arguments(Expansion* expansion, const std::vector<Expression>& arguments) { this->arguments.set_arguments(expansion, arguments); }
 
@@ -63,9 +63,10 @@ class Macro : public ScopeEntity {
     [[nodiscard]] EvaluationContext evaluation_context(EvaluationResult& result) override;
 
     void traverse(std::function<void(Entity&)> entity_callback, std::function<void(Body&)> body_callback, std::function<void(Expression&)> expression_callback) override;
-
     void resolve_implementation() override;
-
+#ifdef TRACE_TRANSLATION
+    void evaluate_process(EvaluationContext& result) override;
+#endif
   private:
     static void initialize();
 

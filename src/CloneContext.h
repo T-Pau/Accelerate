@@ -1,3 +1,10 @@
+#ifdef IN_XLR8_CLONE_CONTEXT_H
+#error "circular include file dependency detected"
+#endif
+#define IN_XLR8_CLONE_CONTEXT_H
+#ifndef HAD_XLR8_CLONE_CONTEXT_H
+#define HAD_XLR8_CLONE_CONTEXT_H
+
 /*
 Copyright (C) Dieter Baron
 
@@ -27,15 +34,28 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "Expression/ArgumentExpression.h"
+#include <memory>
+#include <unordered_map>
 
-#include "Expression/VoidExpression.h"
+class Constant;
+class Scope;
 
-void ArgumentExpression::serialize_sub(std::ostream& stream) const { stream << symbol; }
+class CloneContext {
+  public:
+    CloneContext() = default;
 
-Expression ArgumentExpression::clone(const CloneContext& context) const {
-    if (argument.is<VoidExpression>()) {
-        throw LocationException(location, "internal error: argument {} not set", symbol);
-    }
-    return argument;
-}
+    CloneContext(std::shared_ptr<Scope> containing_scope, const CloneContext* parent = nullptr) : containing_scope(std::move(containing_scope)), parent(parent) {}
+
+    std::shared_ptr<Constant> map(const std::shared_ptr<Constant>& constant) const;
+
+    void add_mapping(const std::shared_ptr<Constant>& original, const std::shared_ptr<Constant>& clone) { constant_map[original] = clone; }
+
+    std::shared_ptr<Scope> containing_scope;
+
+  private:
+    const CloneContext* parent = nullptr;
+    std::unordered_map<std::shared_ptr<Constant>, std::shared_ptr<Constant>> constant_map;
+};
+
+#endif // HAD_XLR8_CLONE_CONTEXT_H
+#undef IN_XLR8_CLONE_CONTEXT_H

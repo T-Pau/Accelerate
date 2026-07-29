@@ -168,3 +168,11 @@ bool Body::fully_evaluated() {
 void Body::encode(std::string& bytes, const Memory* memory) {
     handle_translation_errors(*element, [&] { element->encode(bytes, memory); });
 }
+
+Body Body::clone(const CloneContext& context) const {
+    // TODO: use handle_translation_errors?
+    TRACE_BEGIN_INSTANCE(element, "cloning", "");
+    auto cloned_body = element->clone(context);
+    TRACE_END_INSTANCE(cloned_body.element, "cloning", "");
+    return cloned_body;
+}

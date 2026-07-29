@@ -76,7 +76,7 @@ class FillExpression : public BaseExpression {
 
     [[nodiscard]] bool needs_cloning() override { return false; }
 
-    [[nodiscard]] std::optional<Expression> evaluate(const EvaluationContext& context) override { return Expression(std::make_shared<FillExpression>(location, count.clone(), value.clone())); }
+    [[nodiscard]] Expression clone(const CloneContext& context) { return Expression(std::make_shared<FillExpression>(location, count.clone(context), value.clone(context))); }
 
     [[nodiscard]] std::optional<Value::Type> type() const override { return Value::BINARY; }
 

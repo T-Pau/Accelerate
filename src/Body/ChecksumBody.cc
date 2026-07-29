@@ -29,8 +29,8 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <tpau-cpp-kernal/LocationException.h>
 
-#include "Body.h"
-#include "ChecksumBody.h"
+#include "Body/Body.h"
+#include "Body/ChecksumBody.h"
 #include "ExpressionParser.h"
 
 using namespace tpau::cpp_kernal;
@@ -104,4 +104,12 @@ void ChecksumBody::traverse(std::function<void(Body&)> body_callable, std::funct
     for (auto& [name, expression] : parameters) {
         expression_callable(expression);
     }
+}
+
+Body ChecksumBody::clone(const CloneContext& context) const {
+    auto new_parameters = std::unordered_map<Symbol, Expression>();
+    for (auto& [name, expression] : parameters) {
+        new_parameters[name] = expression.clone(context);
+    }
+    return Body(std::make_shared<ChecksumBody>(algorithm, start.clone(context), end.clone(context), new_parameters));
 }

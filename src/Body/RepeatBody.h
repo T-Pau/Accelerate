@@ -49,7 +49,7 @@ class RepeatBody : public BodyElement {
 
     static Body create(Symbol variable, const std::optional<Expression>& start, const Expression& end, const Body& body);
 
-    [[nodiscard]] std::shared_ptr<BodyElement> clone() const override { throw Exception("can't clone repeat"); }
+    [[nodiscard]] Body clone(const CloneContext& context) const override { throw Exception("can't clone repeat"); }
 
     [[nodiscard]] bool empty() const override { return false; }
 

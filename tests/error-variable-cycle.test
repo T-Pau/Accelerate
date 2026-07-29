@@ -3,6 +3,8 @@ arguments --create-library --target 6502 file.s
 return 1
 file file.s <inline>
 cycle = cycle + 1
+indirect_a = indirect_b + 1
+indirect_b = indirect_a + 1
 end-of-inline-data
 stderr
 file.s:1:9: error: circular definition of cycle

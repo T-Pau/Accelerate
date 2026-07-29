@@ -53,7 +53,7 @@ class ChecksumBody : public BodyElement {
 
     static Body parse(Tokenizer& tokenizer);
 
-    std::shared_ptr<BodyElement> clone() const override { throw Exception("can't clone .checksum"); }
+    Body clone(const CloneContext& context) const override;
 
     bool empty() const override { return false; }
 
