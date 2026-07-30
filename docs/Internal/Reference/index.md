@@ -174,6 +174,11 @@ These classes represent body elements, which are used to define the contents of 
 ### [ScopeBody](ScopeBody.md)
 ::: ScopeBody.@brief
 
+### [SimpleRepeatBody](SimpleRepeatBody.md)
+::: SimpleRepeatBody.@brief
+
+### [VariableRepeatBody](VariableRepeatBody.md)
+::: VariableRepeatBody.@brief
 
 ## Memory
 

@@ -4,12 +4,13 @@ AlignEscapedNewlines: Left
 AlwaysBreakAfterReturnType: None
 BraceWrapping:
   BeforeElse: true
+  BeforeCatch: true
 BreakBeforeBraces: Custom
 ColumnLimit: 2000
 IncludeCategories:
-  - Regex: '<[[:alnum:].]+>'
+  - Regex: "<[[:alnum:].]+>"
     Priority: 1
-  - Regex: ''
+  - Regex: ""
     Priority: 2
 IndentCaseLabels: true
 IndentWidth: 4
@@ -18,6 +19,6 @@ KeepEmptyLinesAtTheStartOfBlocks: false
 MaxEmptyLinesToKeep: 2
 PointerAlignment: Left
 ReferenceAlignment: Left
-SeparateDefinitionBlocks : Always
+SeparateDefinitionBlocks: Always
 UseTab: Never
 #PPDirectiveIndentStyle: AfterHash

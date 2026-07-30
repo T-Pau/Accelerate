@@ -36,8 +36,8 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "Body/Body.h"
 #include "Body/IfBody.h"
-#include "Body/RepeatBody.h"
 #include "CPU.h"
+#include "Expression/ValueExpression.h"
 #include "Scope.h"
 #include "SizeRange.h"
 #include "Token.h"
@@ -133,15 +133,15 @@ class BodyParser {
 
     class RepeatNesting : public Nesting {
       public:
-        RepeatNesting(Symbol variable, std::optional<Expression> start, Expression end) : variable{variable}, start{std::move(start)}, end{std::move(end)} {}
+        RepeatNesting(Symbol variable, std::optional<Expression> start, Expression end) : variable{variable}, start{start.value_or(ValueExpression::create({}, Value(uint64_t{0})))}, end{std::move(end)} {}
 
         Body* operator[](size_t index) override { return &inner_body; }
 
-        Body body() override { return RepeatBody::create(variable, start, end, inner_body); }
+        Body body() override;
 
       private:
         Symbol variable;
-        std::optional<Expression> start;
+        Expression start;
         Expression end;
         Body inner_body;
     };

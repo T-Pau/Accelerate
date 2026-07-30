@@ -40,6 +40,8 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Body/LabelBody.h"
 #include "Body/MacroBody.h"
 #include "Body/MemoryBody.h"
+#include "Body/SimpleRepeatBody.h"
+#include "Body/VariableRepeatBody.h"
 #include "Expression/ConstantExpression.h"
 #include "Expression/CurrentObjectExpression.h"
 #include "Expression/ValueExpression.h"
@@ -165,7 +167,8 @@ Body BodyParser::parse() {
                     }
                     break;
             }
-        } catch (LocationException& ex) {
+        }
+        catch (LocationException& ex) {
             DiagnosticOutput::global.error(ex);
             tokenizer.skip_until(TokenGroup::newline);
         }
@@ -579,5 +582,14 @@ void BodyParser::parse_binary_file() {
     }
     else {
         throw LocationException(filename.location, "can't find file '{}'", filename);
+    }
+}
+
+Body BodyParser::RepeatNesting::body() {
+    if (variable) {
+        return VariableRepeatBody::create(variable, start, end, inner_body);
+    }
+    else {
+        return SimpleRepeatBody::create(start, end, inner_body);
     }
 }

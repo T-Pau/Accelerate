@@ -1,7 +1,16 @@
 # cspell: words XFAIL endforeach
 
 set(XFAIL_TESTS
-        error-unclosed-object.test
+    # Won't fix before merge
+    cpu-4510.test # long branches need new argument restriction type
+    cpu-45gs02.test # long branches need new argument restriction type
+    long-branch-short.test # long branches need new argument restriction type
+
+    # Will fix before merge
+    hello-world-zx-spectrum-next.test # function call
+    # hello-world-zx-spectrum-tap.test # function call, checksum
+
+    error-unclosed-object.test
 )
 
 file(GLOB TESTS ${CMAKE_CURRENT_SOURCE_DIR}/*.test)

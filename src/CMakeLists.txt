@@ -14,7 +14,9 @@ add_library(xlr8-library STATIC
         Body/MacroBody.cc
         Body/MemoryBody.cc
         Body/RepeatBody.cc
+        Body/SimpleRepeatBody.cc
         Body/ScopeBody.cc
+        Body/VariableRepeatBody.cc
 
         Entity/Constant.cc
         Entity/Entity.cc

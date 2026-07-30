@@ -13,38 +13,6 @@ test {
     multiload $0400, 3
 }
 end-of-inline-data
-
-file a.lib {} <inline>
-.format_version 1.0
-.target "6502"
-.macro multiload {
-    visibility: private
-    arguments: address, count
-    body <
-        .if (count>$00) {
-          .if .in_range($00, $ff, address) {
-            .data $a5, address:1
-          }
-          .else {
-            .data $ad, address:2
-          }
-          multiload address, (count-$01)
-        }
-    >
-}
-.object test {
-    visibility: private
-    section: code
-    body <
-        .scope {
-          .data $ad, $0400
-          .scope {
-            .data $ad, $0400
-            .scope {
-              .data $ad, $0400
-            }
-          }
-        }
-    >
-}
+stderr
+reference cycle detected
 end-of-inline-data

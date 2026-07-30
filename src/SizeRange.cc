@@ -29,7 +29,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "SizeRange.h"
 
-SizeRange SizeRange::operator+(const SizeRange &other) const {
+SizeRange SizeRange::operator+(const SizeRange& other) const {
     if (!maximum || !other.maximum) {
         return {minimum + other.minimum, {}};
     }
@@ -38,8 +38,7 @@ SizeRange SizeRange::operator+(const SizeRange &other) const {
     }
 }
 
-
-SizeRange SizeRange::operator-(const SizeRange &other) const {
+SizeRange SizeRange::operator-(const SizeRange& other) const {
     if (!other.maximum) {
         return {0, {}};
     }
@@ -52,7 +51,6 @@ SizeRange SizeRange::operator-(const SizeRange &other) const {
         return {new_minimum, std::max(new_minimum, new_maximum)};
     }
 }
-
 
 std::optional<uint64_t> SizeRange::size() const {
     if (has_size()) {
@@ -82,12 +80,32 @@ std::ostream& operator<<(std::ostream& stream, const SizeRange& size_range) {
     return stream;
 }
 
-
 SizeRange SizeRange::max(const SizeRange& other) {
-    uint64_t new_minimum = std::max(minimum, other.minimum);
-    std::optional<uint64_t> new_maximum;
+    auto new_minimum = std::max(minimum, other.minimum);
+    auto new_maximum = std::optional<uint64_t>();
+
     if (maximum && other.maximum) {
         new_maximum = std::max(*maximum, *other.maximum);
+    }
+    return {new_minimum, new_maximum};
+}
+
+SizeRange SizeRange::operator*(const SizeRange& other) const {
+    auto new_minimum = minimum * other.minimum;
+    auto new_maximum = std::optional<uint64_t>();
+
+    if (maximum && other.maximum) {
+        new_maximum = *maximum * *other.maximum;
+    }
+    return {new_minimum, new_maximum};
+}
+
+SizeRange SizeRange::operator*(uint64_t multiplier) const {
+    auto new_minimum = minimum * multiplier;
+    auto new_maximum = std::optional<uint64_t>();
+
+    if (maximum) {
+        new_maximum = *maximum * multiplier;
     }
     return {new_minimum, new_maximum};
 }

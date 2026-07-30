@@ -1,9 +1,9 @@
-#ifdef IN_XLR8_REPEAT_BODY_H
+#ifdef IN_XLR8_SIMPLE_REPEAT_BODY_H
 #error "circular include file dependency detected"
 #endif
-#define IN_XLR8_REPEAT_BODY_H
-#ifndef HAD_XLR8_REPEAT_BODY_H
-#define HAD_XLR8_REPEAT_BODY_H
+#define IN_XLR8_SIMPLE_REPEAT_BODY_H
+#ifndef HAD_XLR8_SIMPLE_REPEAT_BODY_H
+#define HAD_XLR8_SIMPLE_REPEAT_BODY_H
 
 /*
 Copyright (C) Dieter Baron
@@ -36,40 +36,31 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <tpau-cpp-kernal/Exception.h>
 
-#include "Body/Body.h"
+#include "Body/RepeatBody.h"
 
 using namespace tpau::cpp_kernal;
 
 /**
- * @brief Abstract base class for a body that repeats a block of code a specified number of times.
+ * @brief Represents a body that repeats a block of code a specified number of times, not using a variable.
  */
-class RepeatBody : public BodyElement {
+class SimpleRepeatBody : public RepeatBody {
   public:
-    RepeatBody(Expression start, Expression end, Body body) : start{std::move(start)}, end{std::move(end)}, body{std::move(body)} {}
+    SimpleRepeatBody(Expression start, Expression end, Body body) : RepeatBody(start, end, body) {}
 
-    [[nodiscard]] bool empty() const override { return false; }
+    static Body create(Expression start, const Expression& end, const Body& body) { return *simplify(start, end, body, true); }
+
+    [[nodiscard]] Body clone(const CloneContext& context) const override { return Body(std::make_shared<SimpleRepeatBody>(start.clone(context), end.clone(context), body.clone(context))); }
+
+    void encode(std::string& bytes, const Memory* memory) override;
+
+    void serialize(std::ostream& stream, const std::string& prefix) const override;
 
   protected:
-    void traverse(std::function<void(Body&)> body_callback, std::function<void(Expression&)> expression_callback) override;
+    std::optional<Body> evaluate_process(const EvaluationContext& context) override;
 
-    static std::optional<uint64_t> count(const Expression& start, const Expression& end);
-
-    /**
-     * @brief Validates that start and end are a valid repeat range.
-     * @param start The start expression.
-     * @param end The end expression.
-     * @throws LocationException if the range is invalid.
-     */
-    static void validate_range(const Expression& start, const Expression& end);
-
-    [[nodiscard]] std::optional<uint64_t> count() const { return count(start, end); }
-
-    [[nodiscard]] SizeRange count_range() const;
-
-    Expression start;
-    Expression end;
-    Body body;
+  private:
+    static std::optional<Body> simplify(Expression start, Expression end, Body body, bool always_create);
 };
 
-#endif // HAD_XLR8_REPEAT_BODY_H
-#undef IN_XLR8_REPEAT_BODY_H
+#endif // HAD_XLR8_SIMPLE_REPEAT_BODY_H
+#undef IN_XLR8_SIMPLE_REPEAT_BODY_H

@@ -363,8 +363,12 @@ void Assembler::parse_symbol(Visibility visibility, const Token& name) {
         }
         else if (token == Token::curly_open) {
             // TODO: error if .reserved
-            object->body = BodyParser(tokenizer, cpu, object->scope(), true).parse();
-            object->enter_names();
+            if (!DiagnosticOutput::global.log_exceptions([object, this]() {
+                object->body = BodyParser(tokenizer, cpu, object->scope(), true).parse();
+                object->enter_names();
+            })) {
+                tokenizer.skip_until(Token::curly_close, true);
+            }
             break;
         }
         // TODO: parameters

@@ -27,84 +27,69 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "RepeatBody.h"
+#include "Body/RepeatBody.h"
 
-Body RepeatBody::create(Symbol variable, const std::optional<Expression>& start, const Expression& end, const Body& body) {
-#if 0 // TODO: implement create
-    auto scoped_body = body.scoped();
-    if ((!start || start.has_value()) && end.has_value()) {
-        auto expanded_body = Body();
-        auto step = Value(static_cast<uint64_t>(1));
-        auto environment = std::make_shared<Scope>();
-        auto result = EvaluationResult();
-        auto context = EvaluationContext(result, EvaluationContext::ARGUMENTS, environment);
-        for (auto index = start ? *start->value() : Value(static_cast<uint64_t>(0)); index < *end.value(); index += step) {
-            if (variable) {
-                environment->add(variable, Expression({}, index));
-                auto new_body = scoped_body.evaluate(context);
-                // TODO: handle result
-                expanded_body.append(new_body ? *new_body : body);
-            }
-            else {
-                expanded_body.append(scoped_body);
-            }
+void RepeatBody::validate_range(const Expression& start, const Expression& end) {
+    if (!start.has_type(Value::INTEGER).value_or(true)) {
+        throw LocationException(start.location(), "start must be an integer");
+    }
+    if (!end.has_type(Value::INTEGER).value_or(true)) {
+        throw LocationException(end.location(), "end must be an integer");
+    }
+    if (start.has_value() && end.has_value()) {
+        if (*start.value() >= *end.value()) {
+            throw LocationException(start.location(), "start must be less than end");
         }
-        return expanded_body;
     }
-    else {
-        return Body(std::make_shared<RepeatBody>(variable, start, end, scoped_body));
-    }
-#else
-    return {};
-#endif
 }
 
-std::optional<Body> RepeatBody::evaluate(const EvaluationContext& context) {
-#if 0 // TODO: implement evaluate
-    auto new_start = start ? start->evaluate(context) : std::optional<Expression>{};
-    auto new_end = end.evaluate(context);
-    auto new_body = body.evaluate(context);
-
-    if (new_start || new_end || new_body) {
-        return create(variable, new_start ? new_start : start, new_end ? *new_end : end, new_body ? *new_body : body);
+std::optional<uint64_t> RepeatBody::count(const Expression& start, const Expression& end) {
+    try {
+        if (auto count_value = (end.value() - start.value())) {
+            if (count_value->is_signed() || count_value->unsigned_value() == 0) {
+                throw LocationException(start.location(), "start must be less than end");
+            }
+            return count_value->unsigned_value();
+        }
+        else {
+            return {};
+        }
     }
-    else {
-        return {};
+    catch (const Exception& ex) {
+        throw LocationException(start.location(), "invalid repeat count: {}", ex.what());
     }
-#else
-    return {};
-#endif
 }
 
-void RepeatBody::serialize(std::ostream& stream, const std::string& prefix) const {
-    stream << prefix << ".repeat ";
-    if (variable) {
-        stream << variable << ", ";
+SizeRange RepeatBody::count_range() const {
+    auto minimum_start = start.minimum_value();
+    auto maximum_start = start.maximum_value();
+    auto minimum_end = end.minimum_value();
+    auto maximum_end = end.maximum_value();
+
+    auto minimum_count = uint64_t{1};
+    auto maximum_count = std::optional<uint64_t>{};
+
+    // end - start
+    if (maximum_end && minimum_start) {
+        auto maximum_count_value = *maximum_end - *minimum_start;
+        if (maximum_count_value.is_signed() || maximum_count_value.unsigned_value() == 0) {
+            throw LocationException(start.location(), "start must be less than end");
+        }
+        maximum_count = maximum_count_value.unsigned_value();
     }
-    if (start) {
-        stream << *start << ", ";
+
+    if (minimum_end && maximum_start) {
+        auto minimum_count_value = *minimum_end - *maximum_start;
+        if (minimum_count_value.is_signed() || minimum_count_value.unsigned_value() == 0) {
+            throw LocationException(start.location(), "start must be less than end");
+        }
+        minimum_count = minimum_count_value.unsigned_value();
     }
-    stream << end << " {" << std::endl;
-    body.serialize(stream, prefix + "  ");
-    stream << "}" << std::endl;
+    return SizeRange{minimum_count, maximum_count};
 }
 
-void RepeatBody::resolve(Scope* scope, Entity* containing_entity) {
-    if (start) {
-        start->resolve(scope, containing_entity);
-    }
-    end.resolve(scope, containing_entity);
-    // TODO: add argument placeholder for variable to environment for body
-    body.resolve(scope, containing_entity);
-}
-
-std::optional<Body> RepeatBody::expand_calls() {
-    return {};
-    if (start) {
-        start->expand_calls();
-    }
-    end.expand_calls();
-    body.expand_calls();
-
-    // TODO: If variable is set, expand body for each value, and replace ourself with BlockBody.
+void RepeatBody::traverse(std::function<void(Body&)> body_callable, std::function<void(Expression&)> expression_callable) {
+    expression_callable(start);
+    expression_callable(end);
+    body_callable(body);
 }

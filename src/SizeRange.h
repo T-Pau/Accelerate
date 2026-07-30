@@ -155,6 +155,22 @@ class SizeRange {
         return *this;
     }
 
+    /**
+     * @brief Multiply this size range by another size range.
+     *
+     * @param other The size range to multiply with.
+     * @return The resulting size range.
+     */
+    SizeRange operator*(const SizeRange& other) const;
+
+    /**
+     * @brief Multiply this size range by a constant.
+     *
+     * @param multiplier The constant to multiply by.
+     * @return The resulting size range.
+     */
+    SizeRange operator*(uint64_t multiplier) const;
+
     /// The minimum size of the range.
     uint64_t minimum{0};
 
