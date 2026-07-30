@@ -121,8 +121,8 @@ These classes represent expressions, which are used in various places in a progr
 ### [ValueExpression](ValueExpression.md)
 ::: ValueExpression.@brief
 
-### [VariableExpression](VariableExpression.md)
-::: VariableExpression.@brief
+### [NameExpression](NameExpression.md)
+::: NameExpression.@brief
 
 ### [VoidExpression](VoidExpression.md)
 ::: VoidExpression.@brief

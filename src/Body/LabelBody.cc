@@ -35,7 +35,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Entity/Constant.h"
 #include "Expression/BinaryExpression.h"
 #include "Expression/LabelOffsetExpression.h"
-#include "Expression/VariableExpression.h"
+#include "Expression/NameExpression.h"
 #include "Scope.h"
 
 void LabelBody::serialize(std::ostream& stream, const std::string& prefix) const {
@@ -90,7 +90,7 @@ void LabelBody::resolve(Scope* scope, Entity* containing_entity) {
 
 void LabelBody::enter_names(Scope* scope, Entity* containing_entity) {
     auto offset_expression = LabelOffsetExpression::create(location, containing_entity->name, name, this);
-    auto label_expression = BinaryExpression::create(location, VariableExpression::create(location, containing_entity->name), BinaryExpression::Operation::ADD, offset_expression);
+    auto label_expression = BinaryExpression::create(location, NameExpression::create(location, containing_entity->name), BinaryExpression::Operation::ADD, offset_expression);
 
     if (!name.empty()) {
         auto label_constant = std::make_shared<Constant>(location, name, Visibility::ENTITY, containing_entity->containing_scope(), false, label_expression);

@@ -34,65 +34,68 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "Expression/BinaryExpression.h"
 #include "Body/Body.h"
 #include "Encoder.h"
-#include "FileTokenizer.h"
+#include "Expression/BinaryExpression.h"
+#include "Expression/NameExpression.h"
 #include "Expression/UnaryExpression.h"
-#include "Expression/VariableExpression.h"
+#include "FileTokenizer.h"
 
 class ExpressionParser {
-public:
+  public:
     explicit ExpressionParser(Tokenizer& tokenizer) : tokenizer(tokenizer) {}
 
     static void setup(FileTokenizer& tokenizer);
 
-    Expression parse() { top = Element(Location(), START); return do_parse();}
-    Expression parse(const Expression& left) { top = Element(left, 0); return do_parse();}
+    Expression parse() {
+        top = Element(Location(), START);
+        return do_parse();
+    }
+
+    Expression parse(const Expression& left) {
+        top = Element(left, 0);
+        return do_parse();
+    }
 
     std::optional<Encoder> parse_encoding() const;
     Body parse_list();
 
-private:
+  private:
     class BinaryOperator {
-    public:
-        BinaryOperator(BinaryExpression::Operation operation, int level): operation(operation), level(level) {}
+      public:
+        BinaryOperator(BinaryExpression::Operation operation, int level) : operation(operation), level(level) {}
 
         BinaryExpression::Operation operation;
         int level;
     };
 
-    enum ElementType {
-        BINARY_OPERATOR,
-        COMMA,
-        END,
-        FUNCTION_CALL,
-        OPERAND,
-        PARENTHESIS_CLOSED,
-        PARENTHESIS_OPEN,
-        START,
-        UNARY_OPERATOR,
-        UNNAMED_LABEL
-    };
+    enum ElementType { BINARY_OPERATOR, COMMA, END, FUNCTION_CALL, OPERAND, PARENTHESIS_CLOSED, PARENTHESIS_OPEN, START, UNARY_OPERATOR, UNNAMED_LABEL };
 
     class Element {
-    public:
-        explicit Element(const Token& token, ElementType type = OPERAND): type(type), node(std::make_shared<VariableExpression>(token.location, token.as_symbol())), location(token.location) {}
-        Element(const Expression& node, int level = 0, ElementType type = OPERAND): type(type), level(level), node(node), location(node.location()) {}
+      public:
+        explicit Element(const Token& token, ElementType type = OPERAND) : type(type), node(std::make_shared<NameExpression>(token.location, token.as_symbol())), location(token.location) {}
+
+        Element(const Expression& node, int level = 0, ElementType type = OPERAND) : type(type), level(level), node(node), location(node.location()) {}
+
         Element(const Location& location, BinaryOperator binary);
         Element(const Location& location, UnaryExpression::Operation unary);
-        explicit Element(const Location& location, ElementType type): type(type), location(location) {}
+
+        explicit Element(const Location& location, ElementType type) : type(type), location(location) {}
 
         [[nodiscard]] const char* description() const;
-        [[nodiscard]] bool is_binary_operator() const {return type == BINARY_OPERATOR;}
-        [[nodiscard]] bool is_operand() const {return type == OPERAND || type == UNNAMED_LABEL;}
-        [[nodiscard]] bool is_unary_operator() const {return type == UNARY_OPERATOR;}
+
+        [[nodiscard]] bool is_binary_operator() const { return type == BINARY_OPERATOR; }
+
+        [[nodiscard]] bool is_operand() const { return type == OPERAND || type == UNNAMED_LABEL; }
+
+        [[nodiscard]] bool is_unary_operator() const { return type == UNARY_OPERATOR; }
 
         ElementType type;
         int level{0};
 
         Expression node;
         std::vector<Expression> arguments;
+
         union {
             int none;
             BinaryOperator binary;

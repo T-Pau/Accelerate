@@ -205,7 +205,7 @@ void CPUParser::parse_addressing_mode() {
             expression = ObjectNameExpression::create(token_opcode.location, {});
         }
         else if (token_opcode.is_name() || token_opcode == Token::colon_minus || token_opcode == Token::colon_plus) {
-            expression = VariableExpression::create(token_opcode.location, token_opcode.as_symbol());
+            expression = NameExpression::create(token_opcode.location, token_opcode.as_symbol());
         }
         else {
             expression = ValueExpression::create(token_opcode.location, token_opcode.as_value());
@@ -236,8 +236,8 @@ void CPUParser::parse_addressing_mode() {
         auto encoding_tokenizer = SequenceTokenizer(encoding_tokens);
         addressing_mode.encoding = ExpressionParser(encoding_tokenizer).parse_list();
         for (auto& datum : addressing_mode.encoding.as<DataBody>()->data) {
-            if (datum.expression.is<VariableExpression>() && datum.expression.as<VariableExpression>()->variable() != token_opcode.as_symbol()) {
-                auto variable_name = datum.expression.as<VariableExpression>()->variable();
+            if (datum.expression.is<NameExpression>() && datum.expression.as<NameExpression>()->variable() != token_opcode.as_symbol()) {
+                auto variable_name = datum.expression.as<NameExpression>()->variable();
                 auto encoding_type = addressing_mode.argument(variable_name)->type->as<ArgumentTypeEncoding>();
                 if (encoding_type && (!datum.encoding || *datum.encoding == encoding_type->encoding)) {
                     datum.encoding = Encoder{encoding_type->encoding};

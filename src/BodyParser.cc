@@ -174,7 +174,7 @@ Body BodyParser::parse() {
     throw LocationException(Location(), "unclosed body"); // TODO: location
 }
 
-Expression BodyParser::get_label(const Location& location, Symbol name) const { return VariableExpression::create(location, name); }
+Expression BodyParser::get_label(const Location& location, Symbol name) const { return NameExpression::create(location, name); }
 
 void BodyParser::add_constant(Visibility visibility, const Token& name, const Expression& value) {
     if (visibility != Visibility::ENTITY) {

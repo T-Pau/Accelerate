@@ -43,7 +43,7 @@ add_library(xlr8-library STATIC
         Expression/SizeofExpression.cc
         Expression/UnaryExpression.cc
         Expression/ValueExpression.cc
-        Expression/VariableExpression.cc
+        Expression/NameExpression.cc
         Expression/VoidExpression.cc
 
         Address.cc

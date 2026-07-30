@@ -33,7 +33,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "EvaluationContext.h"
 #include "Expression/Expression.h"
-#include "Expression/VariableExpression.h"
+#include "Expression/NameExpression.h"
 #include "Expression/ValueExpression.h"
 #include "Scope.h"
 
@@ -45,13 +45,12 @@ Expression ExistsExpression::create(const Location& location, const std::vector<
     }
     auto& argument = arguments[0];
 
-    if (!argument.is<VariableExpression>()) {
+    if (!argument.is<NameExpression>()) {
         throw LocationException(location, "symbol argument required");
     }
 
-    return Expression(std::make_shared<ExistsExpression>(location, argument.as<VariableExpression>()->variable()));
+    return Expression(std::make_shared<ExistsExpression>(location, argument.as<NameExpression>()->variable()));
 }
-
 
 std::optional<Expression> ExistsExpression::evaluate(const EvaluationContext& context) {
     if (exists.has_value()) {
@@ -60,10 +59,6 @@ std::optional<Expression> ExistsExpression::evaluate(const EvaluationContext& co
     return {};
 }
 
-void ExistsExpression::serialize_sub(std::ostream& stream) const {
-    stream << ".exists(" << symbol << ")";
-}
+void ExistsExpression::serialize_sub(std::ostream& stream) const { stream << ".exists(" << symbol << ")"; }
 
-void ExistsExpression::resolve(Scope* scope, Entity* containing_entity) {
-    exists = scope->get_constant(symbol) || scope->get_object(symbol);
-}
+void ExistsExpression::resolve(Scope* scope, Entity* containing_entity) { exists = scope->get_constant(symbol) || scope->get_object(symbol); }

@@ -8,10 +8,18 @@ This article collects ideas for improvements.
 
 These are ideas that improve existing functionality, or add new functionality.
 
+### Explicit Unsigned Encoding
+
+For `:n` encodings, allow signed and unsigned values that fit into `n` bytes. Use `:+n` to only allow unsigned values. 
+
+This would allow `lda #-2` to be encoded as `lda #$fe` as expected, instead of being an error.
+
 
 ### Argument Restrictions for Macros and Functions
 
-Allowing to restrict arguments to certain types, value ranges, or encodings would allow for better error messages and further evaluation of their bodies.
+Allowing to restrict arguments to certain types, value ranges, or encodings would allow for better error messages and further evaluation of their bodies. Also allow specifying the return type of functions.
+
+This would allow for better error messages, and also allow for further evaluation of their definitions and uses.
 
 
 ## Simplification Improvements

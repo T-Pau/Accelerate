@@ -28,7 +28,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include "Expression/CurrentObjectExpression.h"
-#include "Expression/VariableExpression.h"
+#include "Expression/NameExpression.h"
 #include "Scope.h"
 
 Symbol CurrentObjectExpression::current_object_symbol(".current_object");
@@ -36,7 +36,7 @@ Symbol CurrentObjectExpression::current_object_symbol(".current_object");
 void CurrentObjectExpression::serialize_sub(std::ostream& stream) const { stream << current_object_symbol; }
 
 void CurrentObjectExpression::resolve(Scope* scope, Entity* containing_entity) {
-    variable_expression = VariableExpression::create(location, containing_entity->name);
+    variable_expression = NameExpression::create(location, containing_entity->name);
     variable_expression.resolve(scope, containing_entity);
 }
 

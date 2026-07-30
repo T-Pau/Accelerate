@@ -33,8 +33,8 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "EvaluationContext.h"
 #include "Expression/Expression.h"
+#include "Expression/NameExpression.h"
 #include "Expression/ValueExpression.h"
-#include "Expression/VariableExpression.h"
 #include "Scope.h"
 
 using namespace tpau::cpp_kernal;
@@ -45,11 +45,11 @@ Expression SizeofExpression::create(const Location& location, const std::vector<
     }
     auto& argument = arguments[0];
 
-    if (!argument.is<VariableExpression>()) {
+    if (!argument.is<NameExpression>()) {
         throw LocationException(argument.location(), "symbol argument required");
     }
 
-    return Expression(std::make_shared<SizeofExpression>(location, argument.as<VariableExpression>()->variable()));
+    return Expression(std::make_shared<SizeofExpression>(location, argument.as<NameExpression>()->variable()));
 }
 
 Expression SizeofExpression::create(const Location& location, const Object* object) {

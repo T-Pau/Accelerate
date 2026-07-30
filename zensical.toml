@@ -149,7 +149,7 @@ nav = [
             { "Unresolved" = "Internal/Reference/Unresolved.md" },
             { "UsedEntities" = "Internal/Reference/UsedEntities.md" },
             { "ValueExpression" = "Internal/Reference/ValueExpression.md" },
-            { "VariableExpression" = "Internal/Reference/VariableExpression.md" },
+            { "NameExpression" = "Internal/Reference/NameExpression.md" },
             { "Visibility" = "Internal/Reference/Visibility.md" },
             { "VoidExpression" = "Internal/Reference/VoidExpression.md" },
         ]},

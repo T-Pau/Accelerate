@@ -1,9 +1,9 @@
-#ifdef IN_XLR8_VARIABLE_EXPRESSION_H
+#ifdef IN_XLR8_NAME_EXPRESSION_H
 #error "circular include file dependency detected"
 #endif
-#define IN_XLR8_VARIABLE_EXPRESSION_H
-#ifndef HAD_XLR8_VARIABLE_EXPRESSION_H
-#define HAD_XLR8_VARIABLE_EXPRESSION_H
+#define IN_XLR8_NAME_EXPRESSION_H
+#ifndef HAD_XLR8_NAME_EXPRESSION_H
+#define HAD_XLR8_NAME_EXPRESSION_H
 
 /*
 Copyright (C) Dieter Baron
@@ -38,7 +38,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Expression.h"
 
 /// @brief Expression node representing a variable.
-class VariableExpression : public BaseExpression {
+class NameExpression : public BaseExpression {
   public:
     /**
      * Create a variable expression.
@@ -46,7 +46,7 @@ class VariableExpression : public BaseExpression {
      * @param location The location of the expression.
      * @param symbol The name of the variable.
      */
-    static Expression create(const Location& location, Symbol symbol) { return Expression(std::make_shared<VariableExpression>(location, symbol)); }
+    static Expression create(const Location& location, Symbol symbol) { return Expression(std::make_shared<NameExpression>(location, symbol)); }
 
     /**
      * Create a variable expression.
@@ -54,7 +54,7 @@ class VariableExpression : public BaseExpression {
      * @param location The location of the expression.
      * @param symbol The name of the variable.
      */
-    explicit VariableExpression(const Location& location, Symbol symbol, std::optional<Expression> expression = {}) : BaseExpression(location), symbol(symbol), expression(std::move(expression)) {}
+    explicit NameExpression(const Location& location, Symbol symbol, std::optional<Expression> expression = {}) : BaseExpression(location), symbol(symbol), expression(std::move(expression)) {}
 
     /**
      * Get the name of the variable.
@@ -63,7 +63,7 @@ class VariableExpression : public BaseExpression {
      */
     [[nodiscard]] Symbol variable() const { return symbol; }
 
-    Expression clone(const CloneContext& context) const override { return Expression(std::make_shared<VariableExpression>(location, symbol, expression ? std::make_optional(expression->clone(context)) : std::nullopt)); }
+    Expression clone(const CloneContext& context) const override { return Expression(std::make_shared<NameExpression>(location, symbol, expression ? std::make_optional(expression->clone(context)) : std::nullopt)); }
 
   protected:
     // needed for Expression::variable_name()
@@ -83,5 +83,5 @@ class VariableExpression : public BaseExpression {
     std::optional<Expression> expression;
 };
 
-#endif // HAD_XLR8_VARIABLE_EXPRESSION_H
-#undef IN_XLR8_VARIABLE_EXPRESSION_H
+#endif // HAD_XLR8_NAME_EXPRESSION_H
+#undef IN_XLR8_NAME_EXPRESSION_H

@@ -33,8 +33,8 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <tpau-cpp-kernal/LocationException.h>
 
 #include "Expression/ConstantExpression.h"
+#include "Expression/NameExpression.h"
 #include "Expression/ObjectExpression.h"
-#include "Expression/VariableExpression.h"
 #include "Expression/VoidExpression.h"
 #include "ExpressionParser.h"
 
@@ -99,7 +99,7 @@ Expression::Expression(const Token& token) {
         expression = std::make_shared<ObjectNameExpression>(token.location);
     }
     else if (token.is_name() || token == Token::colon_minus || token == Token::colon_plus) {
-        expression = std::make_shared<VariableExpression>(token.location, token.as_symbol());
+        expression = std::make_shared<NameExpression>(token.location, token.as_symbol());
     }
     else {
         expression = std::make_shared<ValueExpression>(token);
@@ -122,7 +122,7 @@ void Expression::serialize(std::ostream& stream) const {
 }
 
 Symbol Expression::variable_name() const {
-    if (auto variable = as<VariableExpression>()) {
+    if (auto variable = as<NameExpression>()) {
         return variable->symbol;
     }
     else if (auto object = as<ObjectExpression>()) {

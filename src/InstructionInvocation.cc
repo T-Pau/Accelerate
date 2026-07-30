@@ -39,8 +39,8 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "CPU.h"
 #include "Entity/Constant.h"
 #include "Expression/BinaryExpression.h"
+#include "Expression/NameExpression.h"
 #include "Expression/ValueExpression.h"
-#include "Expression/VariableExpression.h"
 #include "ExpressionNode.h"
 #include "TokenNode.h"
 
@@ -280,7 +280,7 @@ std::pair<std::optional<Expression>, Body> InstructionInvocation::Variant::encod
 
     if (!argument_aliases.empty()) {
         for (const auto& [original_name, renamed_name] : argument_aliases) {
-            scope_body->add(std::make_shared<Constant>(Location{}, original_name, Visibility::ARGUMENT, scope_body->inner_scope(), false, VariableExpression::create(Location(), renamed_name)));
+            scope_body->add(std::make_shared<Constant>(Location{}, original_name, Visibility::ARGUMENT, scope_body->inner_scope(), false, NameExpression::create(Location(), renamed_name)));
         }
     }
 

@@ -54,45 +54,34 @@ void ExpressionParser::initialize() {
     if (initialized) {
         return;
     }
-    binary_operators = {
-        {Token::double_pipe, BinaryOperator(BinaryExpression::Operation::LOGICAL_OR, 1)},
+    binary_operators = {{Token::double_pipe, BinaryOperator(BinaryExpression::Operation::LOGICAL_OR, 1)},
 
-        {Token::double_ampersand, BinaryOperator(BinaryExpression::Operation::LOGICAL_AND, 2)},
+                        {Token::double_ampersand, BinaryOperator(BinaryExpression::Operation::LOGICAL_AND, 2)},
 
-        {Token::double_equals, BinaryOperator(BinaryExpression::Operation::EQUAL, 3)},
-        {Token::greater, BinaryOperator(BinaryExpression::Operation::GREATER, 3)},
-        {Token::greater_equals, BinaryOperator(BinaryExpression::Operation::GREATER_EQUAL, 3)},
-        {Token::less, BinaryOperator(BinaryExpression::Operation::LESS, 3)},
-        {Token::less_equals, BinaryOperator(BinaryExpression::Operation::LESS_EQUAL, 3)},
-        {Token::exclaim_equals, BinaryOperator(BinaryExpression::Operation::NOT_EQUAL, 3)},
+                        {Token::double_equals, BinaryOperator(BinaryExpression::Operation::EQUAL, 3)},
+                        {Token::greater, BinaryOperator(BinaryExpression::Operation::GREATER, 3)},
+                        {Token::greater_equals, BinaryOperator(BinaryExpression::Operation::GREATER_EQUAL, 3)},
+                        {Token::less, BinaryOperator(BinaryExpression::Operation::LESS, 3)},
+                        {Token::less_equals, BinaryOperator(BinaryExpression::Operation::LESS_EQUAL, 3)},
+                        {Token::exclaim_equals, BinaryOperator(BinaryExpression::Operation::NOT_EQUAL, 3)},
 
-        {Token::plus, BinaryOperator(BinaryExpression::Operation::ADD, 4)},
-        {Token::minus, BinaryOperator(BinaryExpression::Operation::SUBTRACT, 4)},
-        {Token::pipe, BinaryOperator(BinaryExpression::Operation::BITWISE_OR, 4)},
-        {Token::caret, BinaryOperator(BinaryExpression::Operation::BITWISE_XOR, 4)},
+                        {Token::plus, BinaryOperator(BinaryExpression::Operation::ADD, 4)},
+                        {Token::minus, BinaryOperator(BinaryExpression::Operation::SUBTRACT, 4)},
+                        {Token::pipe, BinaryOperator(BinaryExpression::Operation::BITWISE_OR, 4)},
+                        {Token::caret, BinaryOperator(BinaryExpression::Operation::BITWISE_XOR, 4)},
 
-        {Token::star, BinaryOperator(BinaryExpression::Operation::MULTIPLY, 5)},
-        {Token::slash, BinaryOperator(BinaryExpression::Operation::DIVIDE, 5)},
-        {Token::ampersand, BinaryOperator(BinaryExpression::Operation::BITWISE_AND, 5)},
-        {token_mod, BinaryOperator(BinaryExpression::Operation::MODULO, 5)},
+                        {Token::star, BinaryOperator(BinaryExpression::Operation::MULTIPLY, 5)},
+                        {Token::slash, BinaryOperator(BinaryExpression::Operation::DIVIDE, 5)},
+                        {Token::ampersand, BinaryOperator(BinaryExpression::Operation::BITWISE_AND, 5)},
+                        {token_mod, BinaryOperator(BinaryExpression::Operation::MODULO, 5)},
 
-        {Token::double_less, BinaryOperator(BinaryExpression::Operation::SHIFT_LEFT, 6)},
-        {Token::double_greater, BinaryOperator(BinaryExpression::Operation::SHIFT_RIGHT, 6)}
-    };
+                        {Token::double_less, BinaryOperator(BinaryExpression::Operation::SHIFT_LEFT, 6)},
+                        {Token::double_greater, BinaryOperator(BinaryExpression::Operation::SHIFT_RIGHT, 6)}};
 
-    unary_operators = {
-        {Token::exclaim, UnaryExpression::Operation::NOT},
-        {Token::plus, UnaryExpression::Operation::PLUS},
-        {Token::minus, UnaryExpression::Operation::MINUS},
-        {Token::caret, UnaryExpression::Operation::BANK_BYTE},
-        {Token::less, UnaryExpression::Operation::LOW_BYTE},
-        {Token::greater, UnaryExpression::Operation::HIGH_BYTE},
-        {Token::tilde, UnaryExpression::Operation::BITWISE_NOT}
-    };
+    unary_operators = {{Token::exclaim, UnaryExpression::Operation::NOT}, {Token::plus, UnaryExpression::Operation::PLUS}, {Token::minus, UnaryExpression::Operation::MINUS}, {Token::caret, UnaryExpression::Operation::BANK_BYTE}, {Token::less, UnaryExpression::Operation::LOW_BYTE}, {Token::greater, UnaryExpression::Operation::HIGH_BYTE}, {Token::tilde, UnaryExpression::Operation::BITWISE_NOT}};
 
     initialized = true;
 }
-
 
 ExpressionParser::Element ExpressionParser::next_element() const {
     auto token = tokenizer.next();
@@ -169,14 +158,13 @@ ExpressionParser::Element ExpressionParser::next_element() const {
     return Element(token.location, END);
 }
 
-
-void ExpressionParser::setup(FileTokenizer &tokenizer) {
+void ExpressionParser::setup(FileTokenizer& tokenizer) {
     initialize();
     tokenizer.add_punctuations({"(", ")", ":", ","});
-    for (const auto& [operator_token, _]: binary_operators) {
+    for (const auto& [operator_token, _] : binary_operators) {
         tokenizer.add_literal(operator_token);
     }
-    for (const auto& [operator_token, _]: unary_operators) {
+    for (const auto& [operator_token, _] : unary_operators) {
         tokenizer.add_literal(operator_token);
     }
     tokenizer.add_literal(token_false);
@@ -277,7 +265,7 @@ Expression ExpressionParser::do_parse() {
                     }
 
                     case UNNAMED_LABEL:
-                        tokenizer.unget(Token(Token::PUNCTUATION, next.location, next.node.as<VariableExpression>()->variable()));
+                        tokenizer.unget(Token(Token::PUNCTUATION, next.location, next.node.as<NameExpression>()->variable()));
                         // fallthrough
                     case END:
                         reduce_binary(0);
@@ -387,7 +375,6 @@ void ExpressionParser::shift(ExpressionParser::Element next) {
     top = std::move(next);
 }
 
-
 Body ExpressionParser::parse_list() {
     auto list = std::vector<DataBodyElement>();
 
@@ -492,12 +479,11 @@ void ExpressionParser::reduce_argument_list() {
 }
 
 void ExpressionParser::reduce_function_call() {
-    const auto name = top.node.as<VariableExpression>();
+    const auto name = top.node.as<NameExpression>();
     top = Element(FunctionExpression::create({top.location, tokenizer.current_location()}, name->variable(), top.arguments), 0);
 }
 
-
-const char *ExpressionParser::Element::description() const {
+const char* ExpressionParser::Element::description() const {
     switch (type) {
         case BINARY_OPERATOR:
             return "binary operator";
@@ -528,16 +514,11 @@ const char *ExpressionParser::Element::description() const {
 
         case UNNAMED_LABEL:
             return "unnamed label";
-
     }
 
     throw Exception("invalid element type {}", static_cast<int>(type));
 }
 
-ExpressionParser::Element::Element(const Location& location, ExpressionParser::BinaryOperator binary): type(BINARY_OPERATOR), level(binary.level), location(location) {
-    operation.binary = binary;
-}
+ExpressionParser::Element::Element(const Location& location, ExpressionParser::BinaryOperator binary) : type(BINARY_OPERATOR), level(binary.level), location(location) { operation.binary = binary; }
 
-ExpressionParser::Element::Element(const Location& location, UnaryExpression::Operation unary): type(UNARY_OPERATOR), level(0), location(location) {
-    operation.unary = unary;
-}
+ExpressionParser::Element::Element(const Location& location, UnaryExpression::Operation unary) : type(UNARY_OPERATOR), level(0), location(location) { operation.unary = unary; }

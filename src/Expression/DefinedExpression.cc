@@ -32,8 +32,8 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <tpau-cpp-kernal/LocationException.h>
 
 #include "EvaluationContext.h"
+#include "Expression/NameExpression.h"
 #include "Expression/ValueExpression.h"
-#include "Expression/VariableExpression.h"
 #include "Scope.h"
 
 using namespace tpau::cpp_kernal;
@@ -44,17 +44,14 @@ Expression DefinedExpression::create(const Location& location, const std::vector
     }
     auto& argument = arguments[0];
 
-    if (!argument.is<VariableExpression>()) {
+    if (!argument.is<NameExpression>()) {
         throw LocationException(argument.location(), "symbol argument required");
     }
 
-    return Expression(std::make_shared<DefinedExpression>(location, argument.as<VariableExpression>()->variable()));
+    return Expression(std::make_shared<DefinedExpression>(location, argument.as<NameExpression>()->variable()));
 }
 
-
-void DefinedExpression::resolve(Scope* scope, Entity* containing_entity) {
-    defined = scope->is_defined(symbol);
-}
+void DefinedExpression::resolve(Scope* scope, Entity* containing_entity) { defined = scope->is_defined(symbol); }
 
 std::optional<Expression> DefinedExpression::evaluate(const EvaluationContext& context) {
     if (defined.has_value()) {
@@ -63,6 +60,4 @@ std::optional<Expression> DefinedExpression::evaluate(const EvaluationContext& c
     return {};
 }
 
-void DefinedExpression::serialize_sub(std::ostream& stream) const {
-    stream << ".defined(" << symbol << ")";
-}
+void DefinedExpression::serialize_sub(std::ostream& stream) const { stream << ".defined(" << symbol << ")"; }

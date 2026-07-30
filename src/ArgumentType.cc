@@ -32,8 +32,8 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <tpau-cpp-kernal/Exception.h>
 
 #include "Expression/InRangeExpression.h"
+#include "Expression/NameExpression.h"
 #include "Expression/ValueExpression.h"
-#include "Expression/VariableExpression.h"
 
 using namespace tpau::cpp_kernal;
 
@@ -108,6 +108,6 @@ std::optional<bool> ArgumentTypeEncoding::is_valid(const Expression& expression)
     }
 }
 
-std::optional<Expression> ArgumentTypeRange::constraint_expression(const Location& location, Symbol name) const { return InRangeExpression::create(location, ValueExpression::create({}, lower_bound), ValueExpression::create(location, upper_bound), VariableExpression::create(location, name)); }
+std::optional<Expression> ArgumentTypeRange::constraint_expression(const Location& location, Symbol name) const { return InRangeExpression::create(location, ValueExpression::create({}, lower_bound), ValueExpression::create(location, upper_bound), NameExpression::create(location, name)); }
 
-std::optional<Expression> ArgumentTypeEncoding::constraint_expression(const Location& location, Symbol name) const { return InRangeExpression::create(location, ValueExpression::create({}, *encoding.minimum_value()), ValueExpression::create(location, *encoding.maximum_value()), VariableExpression::create(location, name)); }
+std::optional<Expression> ArgumentTypeEncoding::constraint_expression(const Location& location, Symbol name) const { return InRangeExpression::create(location, ValueExpression::create({}, *encoding.minimum_value()), ValueExpression::create(location, *encoding.maximum_value()), NameExpression::create(location, name)); }

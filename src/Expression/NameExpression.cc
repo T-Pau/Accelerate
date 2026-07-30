@@ -27,7 +27,7 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "VariableExpression.h"
+#include "NameExpression.h"
 
 #include <tpau-cpp-kernal/LocationException.h>
 
@@ -39,7 +39,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using namespace tpau::cpp_kernal;
 
-std::optional<Expression> VariableExpression::evaluate(const EvaluationContext& context) {
+std::optional<Expression> NameExpression::evaluate(const EvaluationContext& context) {
     if (!expression) {
         throw LocationException(location, "internal error: expression not set for variable {}", symbol);
         return {};
@@ -55,7 +55,7 @@ std::optional<Expression> VariableExpression::evaluate(const EvaluationContext& 
     }
 }
 
-void VariableExpression::resolve(Scope* scope, Entity* containing_entity) {
+void NameExpression::resolve(Scope* scope, Entity* containing_entity) {
     if (symbol == Token::colon_minus.as_symbol()) {
         expression = scope->get_previous_unnamed_label(location);
         if (!expression) {
