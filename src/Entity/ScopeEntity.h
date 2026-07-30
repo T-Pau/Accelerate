@@ -46,7 +46,7 @@ class ScopeEntity : public Entity {
 
     [[nodiscard]] std::shared_ptr<Scope> scope() const { return scope_; }
 
-    void add(std::shared_ptr<Constant> constant);
+    void add(std::shared_ptr<Constant> constant, bool add_to_scope = true);
 
   protected:
     void traverse(std::function<void(Entity&)> entity_callable, std::function<void(Body&)> body_callable, std::function<void(Expression&)> expression_callable) override;

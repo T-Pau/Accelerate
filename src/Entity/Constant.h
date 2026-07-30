@@ -46,12 +46,34 @@ class Constant : public Entity {
 
     void serialize(std::ostream& stream) const override;
 
+    void add_reference() { reference_count += 1; }
+
+    void remove_reference() {
+        if (reference_count == 0) {
+            throw LocationException(location, "removing reference from constant with zero references");
+        }
+        reference_count -= 1;
+    }
+
+    [[nodiscard]] bool is_referenced() const { return reference_count > 0; }
+
+    [[nodiscard]] bool single_reference() const { return reference_count == 1; }
+
     Expression value;
 
   protected:
     void traverse(std::function<void(Entity&)> entity_callback, std::function<void(Body&)> body_callback, std::function<void(Expression&)> expression_callback) override { expression_callback(value); }
 
   private:
+    /**
+     * @brief The number of ConstantExpressions that refer to this constant.
+     *
+     * It is used to determine when a ScopeBody can remove a constant from its scope and when an ArgumentConstant can be inlined.
+     *
+     * We don't use `std::shared_ptr`'s reference counting because we only keep a weak reference to the constant in ConstantExpression. Also, counting it ourselves is more precise.
+     */
+    size_t reference_count{};
+
     static const Token token_value;
 };
 

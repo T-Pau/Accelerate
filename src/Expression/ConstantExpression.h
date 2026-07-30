@@ -42,13 +42,11 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 class ConstantExpression : public BaseExpression {
   public:
-    ConstantExpression(const Location& location, std::variant<std::shared_ptr<Constant>, Constant*> constant) : BaseExpression(location), constant_(std::move(constant)) {}
+    ConstantExpression(const Location& location, std::shared_ptr<Constant> constant) : BaseExpression(location), constant_(constant) { constant->add_reference(); }
 
-    ~ConstantExpression() override = default;
+    ~ConstantExpression() override;
 
     [[nodiscard]] static Expression create(const Location& location, std::shared_ptr<Constant> constant) { return *simplify(location, std::move(constant), true); }
-
-    [[nodiscard]] static Expression create(const Location& location, Constant* constant) { return *simplify(location, constant, true); }
 
     [[nodiscard]] bool has_value() const override { return constant()->has_value(); }
 
@@ -60,11 +58,17 @@ class ConstantExpression : public BaseExpression {
 
     [[nodiscard]] bool needs_cloning() override { return false; }
 
-    [[nodiscard]] Constant* constant() const { return is_argument_constant() ? std::get<std::shared_ptr<Constant>>(constant_).get() : std::get<Constant*>(constant_); }
+    [[nodiscard]] std::shared_ptr<Constant> constant() const {
+        auto owned_constant = constant_.lock();
+        if (!owned_constant) {
+            throw LocationException(location, "internal error: constant has expired for constant expression");
+        }
+        return owned_constant;
+    }
 
     [[nodiscard]] Expression clone(const CloneContext& context) const override;
 
-    [[nodiscard]] bool is_argument_constant() const { return std::holds_alternative<std::shared_ptr<Constant>>(constant_); }
+    [[nodiscard]] bool is_argument_constant() const { return constant()->get_visibility() == Visibility::ARGUMENT; }
 
     void serialize_sub(std::ostream& stream) const override { stream << constant()->name; }
 
@@ -74,7 +78,7 @@ class ConstantExpression : public BaseExpression {
     [[nodiscard]] std::optional<Value> minimum_value() const override { return constant()->value.minimum_value(); }
 
   private:
-    std::variant<std::shared_ptr<Constant>, Constant*> constant_;
+    std::weak_ptr<Constant> constant_;
 
     /**
      * @brief Try to simplify a constant expression.
@@ -86,7 +90,7 @@ class ConstantExpression : public BaseExpression {
      * @param always_create Whether to create a new expression if it can't be simplified.
      * @return The expression, or {} if it can't be simplified and `always_create` is `false`.
      */
-    static std::optional<Expression> simplify(const Location& location, std::variant<std::shared_ptr<Constant>, Constant*> constant, bool always_create);
+    static std::optional<Expression> simplify(const Location& location, std::shared_ptr<Constant> constant, bool always_create);
 };
 
 #endif // HAD_XLR8_CONSTANT_EXPRESSION_H

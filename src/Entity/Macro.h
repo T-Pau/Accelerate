@@ -38,6 +38,8 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "CallableArguments.h"
 #include "Entity/ScopeEntity.h"
 
+class ScopeBody;
+
 /**
  * @brief Represents a macro.
  */
@@ -52,9 +54,7 @@ class Macro : public ScopeEntity {
 
     void enter_names();
 
-    template <ScopeBodyOrExpression Expansion> void set_arguments(Expansion* expansion, const std::vector<Expression>& arguments) { this->arguments.set_arguments(expansion, arguments); }
-
-    void clear_arguments() { this->arguments.clear_arguments(); }
+    void set_arguments(ScopeBody* expansion, CloneContext* context, const std::vector<Expression>& arguments);
 
     Body body;
     CallableArguments arguments;

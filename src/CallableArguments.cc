@@ -119,18 +119,19 @@ std::ostream& operator<<(std::ostream& stream, const CallableArguments& argument
 
 void CallableArguments::enter_arguments() {
     for (const auto& argument_name : argument_names()) {
-        entity->add(std::make_shared<Constant>(entity->location, argument_name, Visibility::ENTITY, entity->scope(), false, ArgumentExpression::create(entity->location, argument_name)));
+        auto constant = std::make_shared<Constant>(entity->location, argument_name, Visibility::ENTITY, entity->scope(), false, ArgumentExpression::create(entity->location, argument_name));
+        entity->add(constant);
+        argument_constants.emplace_back(constant);
+    }
+    for (size_t index = 0; index < default_arguments.size(); index++) {
+        auto argument_name = name(index + minimum_arguments());
+        auto constant = std::make_shared<Constant>(entity->location, argument_name, Visibility::ENTITY, entity->scope(), false, default_arguments[index]);
+        entity->add(constant, false);
+        default_argument_constants.emplace_back(constant.get());
     }
 }
 
-void CallableArguments::clear_arguments() {
-    for (const auto& argument_name : argument_names()) {
-        auto argument = get(entity, argument_name);
-        argument->clear_argument();
-    }
-}
-
-std::vector<std::shared_ptr<Constant>> CallableArguments::create_argument_constants(std::shared_ptr<Scope> scope, const std::vector<Expression>& arguments) const {
+std::vector<std::shared_ptr<Constant>> CallableArguments::create_argument_constants(std::shared_ptr<Scope> scope, CloneContext* context, const std::vector<Expression>& arguments) const {
     if (arguments.size() < minimum_arguments() || arguments.size() > maximum_arguments()) {
         throw LocationException(entity->location, "invalid number of arguments for {}: expected {} to {}, got {}", entity->name, minimum_arguments(), maximum_arguments(), arguments.size());
     }
@@ -141,36 +142,14 @@ std::vector<std::shared_ptr<Constant>> CallableArguments::create_argument_consta
         auto argument_name = name(index);
         auto constant = std::make_shared<Constant>(entity->location, argument_name, Visibility::ARGUMENT, scope, false, arguments[index]);
         constants.emplace_back(constant);
+        context->add_mapping(argument_constants[index], constant);
     }
     for (size_t index = arguments.size(); index < maximum_arguments(); index++) {
-        auto argument_name = name(index);
-
-        // TODO: use pre-created constants for default arguments
-        auto constant = std::make_shared<Constant>(entity->location, argument_name, Visibility::ARGUMENT, scope, false, default_argument(index).value());
+        auto constant = default_argument_constants[default_argument_index(index)];
         constants.emplace_back(constant);
+        context->add_mapping(argument_constants[index], constant);
     }
     return constants;
-}
-
-void CallableArguments::set_argument_expressions(const std::vector<std::shared_ptr<Constant>>& arguments) {
-    for (size_t index = 0; index < arguments.size(); index++) {
-        auto argument_name = name(index);
-        auto argument = get(entity, argument_name);
-        auto constant = arguments[index];
-        argument->set_argument(ConstantExpression::create(argument->location, constant));
-    }
-}
-
-ArgumentExpression* CallableArguments::get(ScopeEntity* entity, Symbol name) const {
-    auto argument = entity->scope()->get_constant(name);
-    if (!argument) {
-        throw LocationException(entity->location, "internal error: argument {} not found in {}", name, entity->name);
-    }
-    auto argument_expression = argument->value.as<ArgumentExpression>();
-    if (!argument_expression) {
-        throw LocationException(entity->location, "internal error: argument {} is not an ArgumentExpression in {}", name, entity->name);
-    }
-    return argument_expression;
 }
 
 void CallableArguments::traverse(std::function<void(Expression&)> expression_callback) {

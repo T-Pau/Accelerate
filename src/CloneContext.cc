@@ -30,14 +30,13 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "CloneContext.h"
 
 std::shared_ptr<Constant> CloneContext::map(const std::shared_ptr<Constant>& constant) const {
-    auto it = constant_map.find(constant);
-    if (it != constant_map.end()) {
-        return it->second;
+    auto context = this;
+    while (context) {
+        auto it = context->constant_map.find(constant);
+        if (it != context->constant_map.end()) {
+            return it->second;
+        }
+        context = context->parent;
     }
-    else if (parent) {
-        return parent->map(constant);
-    }
-    else {
-        return constant;
-    }
+    return constant;
 }

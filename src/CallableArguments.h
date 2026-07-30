@@ -79,6 +79,13 @@ class CallableArguments {
      */
     [[nodiscard]] const std::vector<Symbol>& argument_names() const { return names; }
 
+    [[nodiscard]] size_t default_argument_index(size_t index) const {
+        if (index < minimum_arguments()) {
+            throw Exception("internal error: argument {} is not a default argument", index);
+        }
+        return index - minimum_arguments();
+    }
+
     /**
      * @brief Get the default value of the argument at a given index.
      *
@@ -115,6 +122,9 @@ class CallableArguments {
     /// @brief The names of the arguments.
     std::vector<Symbol> names;
 
+    /// @brief The placeholder constants for the arguments.
+    std::vector<std::shared_ptr<Constant>> argument_constants;
+
     /**
      * @brief The default values of the arguments.
      *
@@ -122,49 +132,42 @@ class CallableArguments {
      */
     std::vector<Expression> default_arguments;
 
-    /// @brief Enter arguments into the callable's scope.
+    /**
+     * @brief The constants for the default arguments.
+     *
+     * The index in this array is offset by the number of non-optional arguments.
+     */
+    std::vector<std::shared_ptr<Constant>> default_argument_constants;
+
+    /**
+     * @brief Enter argument placeholder constants into the callable entity's scope.
+     *
+     * This also creates constants for the default arguments but doesn't enter them into the scope.
+     */
     void enter_arguments();
 
     /**
      * @brief Set the arguments for a callable entity.
      *
-     * This creates constants for the actual arguments and sets them in the ArgumentExpression placeholders.
+     * This creates constants for the actual arguments and adds them to the expansion and their mapping in the context.
      *
-     * Call this function before cloning the callable so the actual arguments will be included in the expanded copy.
+     * Call this function before cloning the callable entity's body.
      *
      * @tparam Expansion The type of the expanded copy (ScopeBody or ScopeExpression).
      * @param expansion The expanded copy.
+     * @param context The clone context.
      * @param arguments The list of argument expressions.
      */
-    template <ScopeBodyOrExpression Expansion> void set_arguments(Expansion* expansion, const std::vector<Expression>& arguments) {
-        auto constants = create_argument_constants(expansion->inner_scope(), arguments);
+    template <ScopeBodyOrExpression Expansion> void set_arguments(Expansion* expansion, CloneContext* context, const std::vector<Expression>& arguments) {
+        auto constants = create_argument_constants(expansion->inner_scope(), context, arguments);
         for (auto& constant : constants) {
             expansion->add(constant);
         }
-        set_argument_expressions(constants);
     }
-
-    /**
-     * @brief Clear the arguments for a callable entity.
-     *
-     * This clears the actual arguments in the ArgumentExpression placeholders.
-     *
-     * Call this function after cloning the callable to reset the arguments.
-     */
-    void clear_arguments();
 
   private:
     /// @brief Initialize static members.
     static void initialize();
-
-    /**
-     * @brief Get the argument expression for a given argument name.
-     *
-     * @param entity The ScopeEntity containing the argument.
-     * @param name The name of the argument.
-     * @return A pointer to the argument expression.
-     */
-    ArgumentExpression* get(ScopeEntity* entity, Symbol name) const;
 
     /**
      * @brief Create constants for the actual arguments and add default arguments as required.
@@ -173,14 +176,7 @@ class CallableArguments {
      * @param arguments The list of argument expressions.
      * @return A vector of shared pointers to the created constants.
      */
-    std::vector<std::shared_ptr<Constant>> create_argument_constants(std::shared_ptr<Scope> scope, const std::vector<Expression>& arguments) const;
-
-    /**
-     * @brief Set the ArgumentExpressions to their constants.
-     *
-     * @param constants The list of constants representing the arguments.
-     */
-    void set_argument_expressions(const std::vector<std::shared_ptr<Constant>>& constants);
+    std::vector<std::shared_ptr<Constant>> create_argument_constants(std::shared_ptr<Scope> scope, CloneContext* context, const std::vector<Expression>& arguments) const;
 
     /// @brief The ScopeEntity the arguments belong to.
     ScopeEntity* entity{};

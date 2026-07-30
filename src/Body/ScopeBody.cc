@@ -55,7 +55,7 @@ void ScopeBody::traverse(std::function<void(Body&)> body_callable, std::function
 
 std::optional<Body> ScopeBody::evaluate_process(const EvaluationContext& context) {
     std::erase_if(constants, [this](auto& constant) {
-        if (constant.use_count() == 1) {
+        if (!constant->is_referenced()) {
             TRACE("evaluating scope", "removing unused constant {} {}", static_cast<void*>(constant.get()), constant->name);
             inner_scope()->remove_constant(constant->name);
             return true;
@@ -101,7 +101,7 @@ Body ScopeBody::clone(const CloneContext& context) const {
         inner_context.add_mapping(constant, new_constant);
         new_scope_body->add(new_constant);
     }
-    auto new_body = body.clone(context);
+    auto new_body = body.clone(inner_context);
     new_scope_body->append(new_body);
     return Body(new_scope_body);
 }

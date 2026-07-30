@@ -66,20 +66,14 @@ std::optional<Body> MacroBody::expand_calls() {
         return macro->body.clone(CloneContext{});
     }
 
-#if 0
     // create a new ScopeBody, add argument constants to it, map macro's argument constants to the new constants, and then clone the macro's body into it
     // TODO: we need the containing scope
-    auto 
     auto new_body = ScopeBody::create(std::make_shared<Scope>(Visibility::ARGUMENT), Body{});
     auto scope_body = new_body.as<ScopeBody>();
-
-    macro->set_arguments(scope_body, arguments);
-    scope_body->append(macro->body.clone());
-    macro->clear_arguments();
+    CloneContext context(scope_body->inner_scope());
+    macro->set_arguments(scope_body, &context, arguments);
+    scope_body->append(macro->body.clone(context));
     return new_body;
-#else
-    throw LocationException(location, "expanding macro calls with arguments not yet implemented");
-#endif
 }
 
 void MacroBody::resolve(Scope* scope, Entity* containing_entity) {

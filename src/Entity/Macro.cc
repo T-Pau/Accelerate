@@ -29,6 +29,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "Entity/Macro.h"
 
+#include "Body/ScopeBody.h"
 #include "StructuredBody.h"
 #include "StructuredDictionary.h"
 
@@ -115,3 +116,5 @@ void Macro::enter_names() {
 #ifdef TRACE_TRANSLATION
 void Macro::evaluate_process(EvaluationContext& result) { std::cerr << *this; }
 #endif
+
+void Macro::set_arguments(ScopeBody* expansion, CloneContext* context, const std::vector<Expression>& arguments) { this->arguments.set_arguments(expansion, context, arguments); }
