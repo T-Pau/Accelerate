@@ -45,11 +45,13 @@ using namespace tpau::cpp_kernal;
  */
 class SimpleRepeatBody : public RepeatBody {
   public:
-    SimpleRepeatBody(Expression start, Expression end, Body body) : RepeatBody(start, end, body) {}
+    SimpleRepeatBody(RepeatRange range, Body body) : RepeatBody(std::move(range), std::move(body)) {}
 
-    static Body create(Expression start, const Expression& end, const Body& body) { return *simplify(start, end, body, true); }
+    static Body create(Expression start, Expression end, Body body) { return create(RepeatRange(std::move(start), std::move(end)), std::move(body)); }
 
-    [[nodiscard]] Body clone(const CloneContext& context) const override { return Body(std::make_shared<SimpleRepeatBody>(start.clone(context), end.clone(context), body.clone(context))); }
+    static Body create(RepeatRange range, Body body) { return *simplify(std::move(range), std::move(body), true); }
+
+    [[nodiscard]] Body clone(const CloneContext& context) const override { return Body(std::make_shared<SimpleRepeatBody>(range.clone(context), body.clone(context))); }
 
     void encode(std::string& bytes, const Memory* memory) override;
 
@@ -59,7 +61,7 @@ class SimpleRepeatBody : public RepeatBody {
     std::optional<Body> evaluate_process(const EvaluationContext& context) override;
 
   private:
-    static std::optional<Body> simplify(Expression start, Expression end, Body body, bool always_create);
+    static std::optional<Body> simplify(const RepeatRange& range, const Body& body, bool always_create);
 };
 
 #endif // HAD_XLR8_SIMPLE_REPEAT_BODY_H

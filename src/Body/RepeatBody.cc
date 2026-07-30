@@ -29,7 +29,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "Body/RepeatBody.h"
 
-void RepeatBody::validate_range(const Expression& start, const Expression& end) {
+RepeatBody::RepeatRange::RepeatRange(Expression start_, Expression end_) : start{std::move(start_)}, end{std::move(end_)} {
     if (!start.has_type(Value::INTEGER).value_or(true)) {
         throw LocationException(start.location(), "start must be an integer");
     }
@@ -41,9 +41,11 @@ void RepeatBody::validate_range(const Expression& start, const Expression& end) 
             throw LocationException(start.location(), "start must be less than end");
         }
     }
+    location = start.location();
+    location.extend(end.location());
 }
 
-std::optional<uint64_t> RepeatBody::count(const Expression& start, const Expression& end) {
+std::optional<uint64_t> RepeatBody::RepeatRange::count() const {
     try {
         if (auto count_value = (end.value() - start.value())) {
             if (count_value->is_signed() || count_value->unsigned_value() == 0) {
@@ -60,7 +62,7 @@ std::optional<uint64_t> RepeatBody::count(const Expression& start, const Express
     }
 }
 
-SizeRange RepeatBody::count_range() const {
+SizeRange RepeatBody::RepeatRange::count_range() const {
     auto minimum_start = start.minimum_value();
     auto maximum_start = start.maximum_value();
     auto minimum_end = end.minimum_value();
@@ -89,7 +91,12 @@ SizeRange RepeatBody::count_range() const {
 }
 
 void RepeatBody::traverse(std::function<void(Body&)> body_callable, std::function<void(Expression&)> expression_callable) {
-    expression_callable(start);
-    expression_callable(end);
+    expression_callable(range.start);
+    expression_callable(range.end);
     body_callable(body);
+}
+
+std::ostream& operator<<(std::ostream& stream, const RepeatBody::RepeatRange& range) {
+    stream << range.start << ", " << range.end;
+    return stream;
 }

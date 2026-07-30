@@ -29,17 +29,15 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "Body/SimpleRepeatBody.h"
 
-std::optional<Body> SimpleRepeatBody::simplify(Expression start, Expression end, Body body, bool always_create) {
-    validate_range(start, end);
-
-    if (auto count_value = count(start, end)) {
+std::optional<Body> SimpleRepeatBody::simplify(const RepeatRange& range, const Body& body, bool always_create) {
+    if (auto count_value = range.count()) {
         if (*count_value == 1) {
             return body;
         }
     }
 
     if (always_create) {
-        return Body(std::make_shared<SimpleRepeatBody>(start, end, body));
+        return Body(std::make_shared<SimpleRepeatBody>(range, body));
     }
     else {
         return {};
@@ -47,15 +45,15 @@ std::optional<Body> SimpleRepeatBody::simplify(Expression start, Expression end,
 }
 
 void SimpleRepeatBody::serialize(std::ostream& stream, const std::string& prefix) const {
-    stream << prefix << ".repeat " << start << ", " << end << " {" << std::endl;
+    stream << prefix << ".repeat " << range << " {" << std::endl;
     body.serialize(stream, prefix + "  ");
     stream << "}" << std::endl;
 }
 
 void SimpleRepeatBody::encode(std::string& bytes, const Memory* memory) {
-    auto count_value = count();
+    auto count_value = range.count();
     if (!count_value) {
-        throw LocationException(start.location(), "cannot determine repeat count");
+        throw LocationException(range.location, "cannot determine repeat count");
     }
     std::string repeated_bytes;
     body.encode(repeated_bytes, memory);
@@ -65,8 +63,8 @@ void SimpleRepeatBody::encode(std::string& bytes, const Memory* memory) {
 }
 
 std::optional<Body> SimpleRepeatBody::evaluate_process(const EvaluationContext& context) {
-    auto current_count_range = count_range();
+    auto current_count_range = range.count_range();
     size_range_ = current_count_range * body.size_range();
 
-    return simplify(start, end, body, false);
+    return simplify(range, body, false);
 }

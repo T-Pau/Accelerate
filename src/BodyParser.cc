@@ -587,7 +587,9 @@ void BodyParser::parse_binary_file() {
 
 Body BodyParser::RepeatNesting::body() {
     if (variable) {
-        return VariableRepeatBody::create(variable, start, end, inner_body);
+        // TODO: We need the containing scope here, including for nested repeats.
+        // TODO: We need the location of variable.
+        return VariableRepeatBody::create({}, {}, variable, start, end, inner_body);
     }
     else {
         return SimpleRepeatBody::create(start, end, inner_body);

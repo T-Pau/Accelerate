@@ -353,8 +353,6 @@ class Scope {
      */
     void import(Visibility visibility, const Module& module);
 
-    std::shared_ptr<Scope> parent();
-
     /**
      * Get a constant from the scope.
      *
@@ -530,6 +528,8 @@ class Scope {
      * @return The type of the scope.
      */
     [[nodiscard]] Visibility type() const { return type_; }
+
+    [[nodiscard]] std::shared_ptr<Scope> parent() const { return next.empty() ? nullptr : next[0]; }
 
     /**
      * Get the name of the scope.

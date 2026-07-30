@@ -45,31 +45,31 @@ using namespace tpau::cpp_kernal;
  */
 class RepeatBody : public BodyElement {
   public:
-    RepeatBody(Expression start, Expression end, Body body) : start{std::move(start)}, end{std::move(end)}, body{std::move(body)} {}
+    class RepeatRange {
+      public:
+        RepeatRange(Expression start, Expression end);
 
-    [[nodiscard]] bool empty() const override { return false; }
+        RepeatRange clone(const CloneContext& context) const { return RepeatRange(start.clone(context), end.clone(context)); }
+
+        [[nodiscard]] std::optional<uint64_t> count() const;
+
+        [[nodiscard]] SizeRange count_range() const;
+
+        Location location;
+        Expression start;
+        Expression end;
+    };
+
+    RepeatBody(RepeatRange range, Body body) : range{std::move(range)}, body{std::move(body)} {}
 
   protected:
     void traverse(std::function<void(Body&)> body_callback, std::function<void(Expression&)> expression_callback) override;
 
-    static std::optional<uint64_t> count(const Expression& start, const Expression& end);
-
-    /**
-     * @brief Validates that start and end are a valid repeat range.
-     * @param start The start expression.
-     * @param end The end expression.
-     * @throws LocationException if the range is invalid.
-     */
-    static void validate_range(const Expression& start, const Expression& end);
-
-    [[nodiscard]] std::optional<uint64_t> count() const { return count(start, end); }
-
-    [[nodiscard]] SizeRange count_range() const;
-
-    Expression start;
-    Expression end;
+    RepeatRange range;
     Body body;
 };
+
+std::ostream& operator<<(std::ostream& stream, const RepeatBody::RepeatRange& range);
 
 #endif // HAD_XLR8_REPEAT_BODY_H
 #undef IN_XLR8_REPEAT_BODY_H

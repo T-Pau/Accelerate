@@ -37,6 +37,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <tpau-cpp-kernal/Exception.h>
 
 #include "Body/RepeatBody.h"
+#include "Scope.h"
 
 using namespace tpau::cpp_kernal;
 
@@ -45,11 +46,13 @@ using namespace tpau::cpp_kernal;
  */
 class VariableRepeatBody : public RepeatBody {
   public:
-    VariableRepeatBody(Symbol variable, Expression start, Expression end, Body body);
+    VariableRepeatBody(std::shared_ptr<Scope> containing_scope, Location variable_location, Symbol variable, RepeatRange range, Body body);
 
-    static Body create(Symbol variable, const Expression& start, const Expression& end, const Body& body) { return *simplify(variable, start, end, body, true); }
+    static Body create(std::shared_ptr<Scope> containing_scope, Location variable_location, Symbol variable, Expression start, Expression end, Body body) { return create(std::move(containing_scope), variable_location, variable, RepeatRange(std::move(start), std::move(end)), std::move(body)); }
 
-    [[nodiscard]] Body clone(const CloneContext& context) const override { return Body{std::make_shared<VariableRepeatBody>(variable, start.clone(context), end.clone(context), body.clone(context))}; }
+    static Body create(std::shared_ptr<Scope> containing_scope, Location variable_location, Symbol variable, RepeatRange range, Body body);
+
+    [[nodiscard]] Body clone(const CloneContext& context) const override;
 
     void encode(std::string& bytes, const Memory* memory) override { throw Exception("can't encode unresolved repeat"); }
 
@@ -58,9 +61,11 @@ class VariableRepeatBody : public RepeatBody {
     void resolve(Scope* scope, Entity* containing_entity) override;
 
   private:
-    static std::optional<Body> simplify(Symbol variable, Expression start, const Expression& end, const Body& body, bool always_create);
+    Body expand();
 
     Symbol variable;
+    Location variable_location;
+    std::shared_ptr<Constant> variable_constant;
     std::shared_ptr<Scope> inner_scope;
 };
 
