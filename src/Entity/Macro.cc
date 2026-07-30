@@ -65,18 +65,6 @@ std::ostream& operator<<(std::ostream& stream, const Macro& macro) {
     return stream;
 }
 
-Body Macro::expand(const std::vector<Expression>& arguments, std::shared_ptr<Scope> outer_environment) const {
-#if 0
-    EvaluationResult result;
-    auto inner_environment = std::make_shared<Scope>(*environment);
-    inner_environment->clear_next();
-    inner_environment->add_next(std::move(outer_environment));
-    return body.evaluate(EvaluationContext(result, EvaluationContext::MACRO_EXPANSION, bind(arguments))).value_or(body).scoped(inner_environment);
-#else
-    return {};
-#endif
-}
-
 void Macro::serialize(std::ostream& stream) const {
     stream << ".macro " << name << " {" << std::endl;
     serialize_entity(stream);
@@ -87,13 +75,7 @@ void Macro::serialize(std::ostream& stream) const {
     stream << "}" << std::endl;
 }
 
-EvaluationContext Macro::evaluation_context(EvaluationResult& result) {
-#if 0
-    return Callable::evaluation_context(result).keeping_label_offsets();
-#else
-    return Entity::evaluation_context(result);
-#endif
-}
+EvaluationContext Macro::evaluation_context(EvaluationResult& result) { return Entity::evaluation_context(result); }
 
 void Macro::traverse(std::function<void(Entity&)> entity_callback, std::function<void(Body&)> body_callback, std::function<void(Expression&)> expression_callback) {
     ScopeEntity::traverse(entity_callback, body_callback, expression_callback);

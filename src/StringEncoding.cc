@@ -31,26 +31,14 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <tpau-cpp-kernal/LocationException.h>
 #include <tpau-cpp-kernal/UTF8.h>
 
-#include "StringEncoding.h"
 #include "SequenceTokenizer.h"
+#include "StringEncoding.h"
 #include "StructuredArray.h"
 #include "StructuredDictionary.h"
 #include "StructuredScalar.h"
 #include "Target.h"
 
 using namespace tpau::cpp_kernal;
-
-#if 0
-#include <codecvt>
-
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-declarations"
-
-// Use file-local variable instead of static class member to contain deprecation.
-static auto encoder = std::wstring_convert<std::codecvt_utf8<char32_t>, char32_t>();
-
-#pragma clang diagnostic pop
-#endif
 
 const Token StringEncoding::token_base{Token::NAME, "base"};
 const Token StringEncoding::token_name_delimiters{Token::NAME, "name_delimiters"};
@@ -61,12 +49,11 @@ const Token StringEncoding::token_singletons{Token::NAME, "singletons"};
 const Token StringEncoding::token_use{Token::NAME, "use"};
 const TokenGroup StringEncoding::group_char32{{Token::VALUE, Token::STRING}, {}, "unicode character"};
 
-
 StringEncoding::StringEncoding(Symbol name, const std::shared_ptr<StructuredValue>& definition, const Target& target) {
     auto parameters = definition->as_dictionary();
     if (auto base = parameters->get_optional(token_base)) {
         if (auto base_dictionary = base->as_dictionary()) {
-            for (const auto& pair: *base_dictionary) {
+            for (const auto& pair : *base_dictionary) {
                 import_base(pair.first, pair.second, target);
             }
         }
@@ -80,7 +67,7 @@ StringEncoding::StringEncoding(Symbol name, const std::shared_ptr<StructuredValu
             add_range(ranges);
         }
         else if (ranges->is_array()) {
-            for (const auto& range: *(ranges->as_array())) {
+            for (const auto& range : *(ranges->as_array())) {
                 add_range(range);
             }
         }
@@ -93,7 +80,7 @@ StringEncoding::StringEncoding(Symbol name, const std::shared_ptr<StructuredValu
 
     if (auto singletons = parameters->get_optional(token_singletons)) {
         if (auto singletons_dictionary = singletons->as_dictionary()) {
-            for (const auto& pair: *singletons_dictionary) {
+            for (const auto& pair : *singletons_dictionary) {
                 add_singleton(pair.first, pair.second);
             }
         }
@@ -108,7 +95,7 @@ StringEncoding::StringEncoding(Symbol name, const std::shared_ptr<StructuredValu
 
     if (auto named_ranges_value = parameters->get_optional(token_named_ranges)) {
         if (auto named_ranges = named_ranges_value->as_dictionary()) {
-            for (const auto& pair: *named_ranges) {
+            for (const auto& pair : *named_ranges) {
                 add_named_ranges(pair.first, pair.second);
             }
         }
@@ -119,7 +106,7 @@ StringEncoding::StringEncoding(Symbol name, const std::shared_ptr<StructuredValu
 
     if (auto named = parameters->get_optional(token_named)) {
         if (auto named_dictionary = named->as_dictionary()) {
-            for (const auto& pair: *named_dictionary) {
+            for (const auto& pair : *named_dictionary) {
                 add_named(pair.first, pair.second);
             }
         }
@@ -128,21 +115,6 @@ StringEncoding::StringEncoding(Symbol name, const std::shared_ptr<StructuredValu
         }
     }
 }
-
-
-#if 0
-std::u32string StringEncoding::UTF8::decode(const std::string& string) {
-    return encoder.from_bytes(string);
-}
-
-std::string StringEncoding::UTF8::encode(const std::u32string& string) {
-    return encoder.to_bytes(string);
-}
-
-std::string StringEncoding::UTF8::encode(char32_t codepoint) {
-    return UTF8::encode(std::u32string{codepoint});
-}
-#endif
 
 size_t StringEncoding::encode(std::string* bytes, const std::string& string) const {
     auto codepoints = UTF8::decode(string);
@@ -154,7 +126,7 @@ size_t StringEncoding::encode(std::string* bytes, const std::string& string) con
             auto start = i + named_open.size();
             auto end = codepoints.find(named_close, start);
             if (end == std::u32string::npos) {
-                throw Exception ("unclosed named character");
+                throw Exception("unclosed named character");
             }
             auto character_name = codepoints.substr(start, end - start);
             auto it = named.find(character_name);
@@ -186,7 +158,7 @@ size_t StringEncoding::encode(std::string* bytes, const std::string& string) con
 }
 
 std::optional<uint8_t> StringEncoding::encode(char32_t codepoint) const {
-    for (const auto& range: ranges) {
+    for (const auto& range : ranges) {
         if (auto byte = range.encode(codepoint)) {
             return *byte;
         }
@@ -282,12 +254,11 @@ void StringEncoding::add_singleton(const Token& target_token, const std::shared_
     }
     auto target = get_uint8(target_token);
     if (auto sources_list = sources->as_scalar()) {
-        for (const auto& source_token: *sources_list) {
+        for (const auto& source_token : *sources_list) {
             auto source = get_char32(source_token);
             try {
                 add_singleton(source, target);
-            }
-            catch (Exception &ex) {
+            } catch (Exception& ex) {
                 throw LocationException(source_token.location, ex);
             }
         }
@@ -300,15 +271,14 @@ void StringEncoding::add_singleton(const Token& target_token, const std::shared_
 void StringEncoding::add_named(const Token& target_token, const std::shared_ptr<StructuredValue>& sources) {
     auto target = get_uint8(target_token);
     if (auto sources_list = sources->as_scalar()) {
-        for (const auto& source_token: *sources_list) {
+        for (const auto& source_token : *sources_list) {
             if (!source_token.is_string()) {
                 throw LocationException(source_token.location, "named source must be a string");
             }
             auto source = UTF8::decode(source_token.as_string());
             try {
                 add_named(source, target);
-            }
-            catch (Exception& ex) {
+            } catch (Exception& ex) {
                 throw LocationException(source_token.location, ex);
             }
         }
@@ -327,7 +297,7 @@ void StringEncoding::import_base(const Token& base_token, const std::shared_ptr<
         if (auto base_dict = base_parameters->as_dictionary()) {
             if (auto uses_v = base_dict->get_optional(token_use)) {
                 if (auto uses = uses_v->as_array()) {
-                    for (const auto& use_range_v: (*uses)) {
+                    for (const auto& use_range_v : (*uses)) {
                         if (auto use_range = use_range_v->as_scalar()) {
                             if (use_range->empty() || !(*use_range)[0].is_unsigned()) {
                                 throw LocationException(use_range_v->location, "invalid use range");
@@ -371,8 +341,7 @@ void StringEncoding::import_base(const Token& base_token, const std::shared_ptr<
                             }
                             try {
                                 import_base_range(base, start, end, offset);
-                            }
-                            catch (Exception &ex) {
+                            } catch (Exception& ex) {
                                 throw LocationException(use_range_v->location, ex);
                             }
                         }
@@ -385,7 +354,6 @@ void StringEncoding::import_base(const Token& base_token, const std::shared_ptr<
                     throw LocationException(uses_v->location, "uses must be dictionary");
                 }
             }
-
         }
         else {
             throw LocationException(base_token.location, "base must be dictionary");
@@ -411,19 +379,19 @@ void StringEncoding::add_named(const std::u32string& source, uint8_t target) {
 }
 
 void StringEncoding::import_base_range(const StringEncoding* base, uint8_t start, uint8_t end, uint8_t offset) {
-    for (const auto& range: base->ranges) {
+    for (const auto& range : base->ranges) {
         if (start <= range.target_end() && end >= range.target_start) {
             uint8_t start_offset = std::max(start, range.target_start) - range.target_start;
             uint8_t end_offset = range.target_end() - std::min(end, range.target_end());
             add_range(CharacterRange(range.source_start + start_offset, range.target_start + start_offset + offset, range.length - start_offset - end_offset));
         }
     }
-    for (const auto& pair: base->singletons) {
+    for (const auto& pair : base->singletons) {
         if (is_in_range(pair.second, start, end)) {
             add_singleton(pair.first, pair.second + offset);
         }
     }
-    for (const auto& pair: base->named) {
+    for (const auto& pair : base->named) {
         if (is_in_range(pair.second, start, end)) {
             add_named(pair.first, pair.second + offset);
         }
@@ -444,7 +412,7 @@ void StringEncoding::add_named_ranges(const Token& prefix_token, const std::shar
     }
     auto prefix = UTF8::decode(prefix_token.as_string());
     if (auto ranges_array = ranges_value->as_array()) {
-        for (const auto& range: *ranges_array) {
+        for (const auto& range : *ranges_array) {
             if (auto range_parameters = range->as_scalar()) {
                 if (range_parameters->size() < 3 || !(*range_parameters)[0].is_unsigned() || (*range_parameters)[1] != Token::colon || !(*range_parameters)[2].is_string()) {
                     throw LocationException(range->location, "invalid named range");
@@ -484,9 +452,7 @@ std::optional<uint8_t> StringEncoding::CharacterRange::encode(char32_t codepoint
     return {};
 }
 
-char32_t StringEncoding::get_char32(Tokenizer& tokenizer) {
-    return get_char32(tokenizer.expect(group_char32, TokenGroup::all));
-}
+char32_t StringEncoding::get_char32(Tokenizer& tokenizer) { return get_char32(tokenizer.expect(group_char32, TokenGroup::all)); }
 
 char32_t StringEncoding::get_char32(const Token& token) {
     if (token.is_unsigned()) {
@@ -514,9 +480,7 @@ char32_t StringEncoding::get_char32(const Token& token) {
     }
 }
 
-uint8_t StringEncoding::get_uint8(Tokenizer& tokenizer) {
-    return get_uint8(tokenizer.expect(Token::VALUE));
-}
+uint8_t StringEncoding::get_uint8(Tokenizer& tokenizer) { return get_uint8(tokenizer.expect(Token::VALUE)); }
 
 uint8_t StringEncoding::get_uint8(const Token& token) {
     if (token.is_unsigned()) {
@@ -531,9 +495,7 @@ uint8_t StringEncoding::get_uint8(const Token& token) {
     }
 }
 
-size_t StringEncoding::encoded_size(const Value& value) const {
-    return encoded_size(value.string_value());
-}
+size_t StringEncoding::encoded_size(const Value& value) const { return encoded_size(value.string_value()); }
 
 void StringEncoding::encode(std::string& bytes, const Value& value, std::optional<size_t> size) const {
     auto string = value.string_value();
@@ -553,6 +515,4 @@ std::ostream& operator<<(std::ostream& stream, const StringEncoding& encoding) {
     return stream;
 }
 
-void StringEncoding::serialize(std::ostream& stream) const {
-    stream << name;
-}
+void StringEncoding::serialize(std::ostream& stream) const { stream << name; }

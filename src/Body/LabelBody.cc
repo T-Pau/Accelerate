@@ -54,34 +54,7 @@ std::optional<Body> LabelBody::evaluate(const EvaluationContext& context) {
         return Body();
     }
     // TODO: handle unnamed labels
-#if 0
-    auto new_added_to_environment = added_to_environment;
-    auto new_name = name;
-    auto new_unnamed_index = unnamed_index;
-
-    if (name.empty()) {
-        new_name = unnamed_label_name(context.result.next_unnamed_label++);
-    }
-
-    if (context.entity || context.type == EvaluationContext::OUTPUT) {
-        if (!added_to_environment) {
-            context.environment->add(name, context.offset - context.label_offset);
-            new_added_to_environment = true;
-        }
-        else if (offset != context.offset) {
-            context.environment->update(name, context.offset - context.label_offset);
-        }
-    }
-
-    if (new_added_to_environment != added_to_environment || new_name != name || context.offset != offset) {
-        return Body(new_name, context.offset, new_added_to_environment, new_unnamed_index);
-    }
-    else {
-        return {};
-    }
-#else
     return {};
-#endif
 }
 
 void LabelBody::resolve(Scope* scope, Entity* containing_entity) {

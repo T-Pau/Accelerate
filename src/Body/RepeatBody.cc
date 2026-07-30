@@ -30,7 +30,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "RepeatBody.h"
 
 Body RepeatBody::create(Symbol variable, const std::optional<Expression>& start, const Expression& end, const Body& body) {
-#if 0
+#if 0 // TODO: implement create
     auto scoped_body = body.scoped();
     if ((!start || start.has_value()) && end.has_value()) {
         auto expanded_body = Body();
@@ -60,7 +60,7 @@ Body RepeatBody::create(Symbol variable, const std::optional<Expression>& start,
 }
 
 std::optional<Body> RepeatBody::evaluate(const EvaluationContext& context) {
-#if 0
+#if 0 // TODO: implement evaluate
     auto new_start = start ? start->evaluate(context) : std::optional<Expression>{};
     auto new_end = end.evaluate(context);
     auto new_body = body.evaluate(context);

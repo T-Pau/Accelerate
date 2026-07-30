@@ -77,25 +77,6 @@ void Entity::serialize_entity(std::ostream& stream) const {
     }
 }
 
-void Entity::process_result(EvaluationResult& result) {
-#if 0
-    referenced_objects.insert(result.used_objects.begin(), result.used_objects.end());
-    unresolved_functions = std::move(result.unresolved_functions);
-    unresolved_macros = std::move(result.unresolved_macros);
-    unresolved_variables = std::move(result.unresolved_variables);
-#endif
-}
-
-bool Entity::check_unresolved(Unresolved& unresolved) const {
-#if 0
-    auto ok = check_unresolved(unresolved_functions, unresolved.functions);
-    ok = check_unresolved(unresolved_macros, unresolved.macros) && ok;
-    return check_unresolved(unresolved_variables, unresolved.variables) && ok;
-#else
-    return true;
-#endif
-}
-
 bool Entity::check_unresolved(const std::unordered_set<Symbol>& unresolved, Unresolved::Part& part) const {
     if (unresolved.empty()) {
         return true;
@@ -113,7 +94,6 @@ void Entity::evaluate() {
     auto context = evaluation_context(result);
     try {
         evaluate_implementation(context);
-        process_result(result);
     } catch (Exception& ex) {
         DiagnosticOutput::global.error(location, ex);
         // TODO: throw empty expression?
@@ -126,7 +106,6 @@ EvaluationResult Entity::evaluate(EvaluationContext::EvaluationType type) {
     try {
         auto context = evaluation_context(result, type);
         evaluate_implementation(context);
-        process_result(result);
     } catch (Exception& ex) {
         DiagnosticOutput::global.error(location, ex);
     }

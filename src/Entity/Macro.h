@@ -49,7 +49,6 @@ class Macro : public ScopeEntity {
 
     Macro(const Location& location, Symbol name, Visibility visibility, std::shared_ptr<Scope> containing_scope, bool default_only, CallableArguments arguments);
 
-    [[nodiscard]] Body expand(const std::vector<Expression>& arguments, std::shared_ptr<Scope> outer_environment) const;
     void serialize(std::ostream& stream) const override;
 
     void enter_names();

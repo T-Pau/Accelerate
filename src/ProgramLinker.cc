@@ -143,7 +143,7 @@ void ProgramLinker::output(const std::filesystem::path& file_name) {
 
     output_body.encode(bytes, &memory);
 
-#if 0
+#if 0 // TODO: implement checksums
     for (const auto& checksum: result.checksums) {
         checksum.compute(bytes);
     }
@@ -155,10 +155,10 @@ void ProgramLinker::output(const std::filesystem::path& file_name) {
 
 void ProgramLinker::output_symbol_map(const std::filesystem::path& file_name) {
     auto unsorted_objects = entities | std::views::filter([](Entity* entity) { return entity->is<Object>(); }) | std::views::transform([](Entity* entity) { return static_cast<Object*>(entity); });
-    auto objects = sorted(unsorted_objects.begin(), unsorted_objects.end(), Object::less_pointers);    
+    auto objects = sorted(unsorted_objects.begin(), unsorted_objects.end(), Object::less_pointers);
 
     auto unsorted_constants = entities | std::views::filter([](Entity* entity) { return entity->is<Constant>(); }) | std::views::transform([](Entity* entity) { return static_cast<Constant*>(entity); });
-    auto constants = sorted(unsorted_constants.begin(), unsorted_constants.end(), [](const Constant* a, const Constant* b) { 
+    auto constants = sorted(unsorted_constants.begin(), unsorted_constants.end(), [](const Constant* a, const Constant* b) {
         if (a->value.value() < b->value.value()) {
             return true;
         }
@@ -172,14 +172,14 @@ void ProgramLinker::output_symbol_map(const std::filesystem::path& file_name) {
 
     auto stream = std::ofstream(file_name);
 
-    for (const auto& constant: constants) {
+    for (const auto& constant : constants) {
         auto value = constant->value.value();
         if (value) {
             stream << "constant\t" << *value << "\t" << constant->name << "\n";
         }
     }
 
-    for (const auto& object: objects) {
+    for (const auto& object : objects) {
         stream << "object\t" << *object->address;
         stream << "\t$" << std::setfill('0') << std::setw(4) << std::hex << *object->size_range().size() << std::dec;
         stream << "\t" << object->name;

@@ -301,55 +301,6 @@ std::optional<Expression> BinaryExpression::simplify(const Location& location, c
                     return ValueExpression::create(location, Value(uint64_t{0}));
                 }
 
-#if 0
-                // This special case is for resolving relative addressing within an object.
-                if (left.is<BinaryExpression>() && right.is<BinaryExpression>()) {
-                    // (object_name + N) - (object_name + M) -> N - M
-                    // (.current_object + N) - (.current_object + M) -> N - M
-                    auto left_binary = left.as<BinaryExpression>();
-                    auto right_binary = right.as<BinaryExpression>();
-
-                    if (left_binary->operation == Operation::ADD && right_binary->operation == Operation::ADD) {
-                        auto left_variable = left_binary->left.variable_name();
-                        auto right_variable = right_binary->left.variable_name();
-                        if ((!left_variable.empty() && left_variable == right_variable) || (left_binary->left.is<ObjectNameExpression>() && right_binary->left.is<ObjectNameExpression>())) {
-                            return BinaryExpression::create(location, left_binary->right, operation, right_binary->right);
-                        }
-                    }
-                }
-                else if (right.is<BinaryExpression>()) {
-                    // object_name - (object_name + M) -> -M
-                    auto left_variable = left.variable_name();
-                    auto right_binary = right.as<BinaryExpression>();
-
-                    if (!left_variable.empty() && right_binary->operation == Operation::ADD) {
-                        auto right_variable = right_binary->left.variable_name();
-                        if (left_variable == right_variable) {
-                            return UnaryExpression::create(location, UnaryExpression::Operation::MINUS, right_binary->right);
-                        }
-                    }
-                }
-                else if (left.is<BinaryExpression>()) {
-                    // (object_name + N) - object_name -> N
-                    auto left_binary = left.as<BinaryExpression>();
-                    auto right_variable = right.variable_name();
-
-                    if (!right_variable.empty() && left_binary->operation == Operation::ADD) {
-                        auto left_variable = left_binary->left.variable_name();
-                        if (left_variable == right_variable) {
-                            return left_binary->right;
-                        }
-                    }
-                }
-                else {
-                    // object_name - object_name -> 0
-                    auto left_variable = left.variable_name();
-                    auto right_variable = right.variable_name();
-                    if (!left_variable.empty() && left_variable == right_variable) {
-                        return ValueExpression::create(location, Value(uint64_t{0}));
-                    }
-                }
-#endif
                 break;
             }
 

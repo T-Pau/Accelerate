@@ -91,22 +91,6 @@ Expression::Expression(std::shared_ptr<BaseExpression> expression_) {
 
 Expression::Expression(Tokenizer& tokenizer) { *this = ExpressionParser(tokenizer).parse(); }
 
-
-#if 0
-// We probably won't keep this, but we will move the logic somewhere, so we keep it for reference.
-Expression::Expression(const Token& token) {
-    if (token == LibraryParser::token_object_name) {
-        expression = std::make_shared<ObjectNameExpression>(token.location);
-    }
-    else if (token.is_name() || token == Token::colon_minus || token == Token::colon_plus) {
-        expression = std::make_shared<NameExpression>(token.location, token.as_symbol());
-    }
-    else {
-        expression = std::make_shared<ValueExpression>(token);
-    }
-}
-#endif
-
 void Expression::evaluate(const EvaluationContext& context) {
     TRACE_BEGIN_INSTANCE_PRINT(expression, "evaluating", "");
     if (auto new_expression = handle_translation_errors(*expression, [&]() { return expression->evaluate(context); }, context.entity)) {
@@ -168,7 +152,7 @@ std::optional<bool> Expression::has_type(Value::Type type) const {
 
 Expression Expression::clone(const CloneContext& context) const {
     TRACE_BEGIN_INSTANCE_PRINT(expression, "cloning", "");
-#if 0
+#if 0 // needs_cloning
     // This is broken, will look into it later. For now, just clone everything.
     if (expression->needs_cloning()) {
         return expression->clone(context);

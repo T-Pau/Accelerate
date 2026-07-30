@@ -96,9 +96,6 @@ class Entity : public Base {
 
     void virtual serialize(std::ostream& stream) const { serialize_entity(stream); }
 
-    // TODO: make protected once BodyParser doesn't evaluate body directly.
-    void process_result(EvaluationResult& result);
-
     /// @brief The name of the entity.
     Symbol name;
 
