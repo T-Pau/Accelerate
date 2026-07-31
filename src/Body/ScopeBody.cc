@@ -102,6 +102,6 @@ Body ScopeBody::clone(const CloneContext& context) const {
         new_scope_body->add(new_constant);
     }
     auto new_body = body.clone(inner_context);
-    new_scope_body->append(new_body);
+    new_scope_body->body = new_body;
     return Body(new_scope_body);
 }

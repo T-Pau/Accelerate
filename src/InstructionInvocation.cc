@@ -101,10 +101,12 @@ Body InstructionInvocation::encode() {
     compute_argument_names();
 
     auto scope = containing_scope;
-    auto scope_body = std::shared_ptr<ScopeBody>();
+    auto scope_body_body = Body();
+    ScopeBody* scope_body{};
 
     if (has_unknown_arguments || uses_pc()) {
-        scope_body = std::make_shared<ScopeBody>(containing_scope, Body());
+        scope_body_body = ScopeBody::create(containing_scope, Body());
+        scope_body = scope_body_body.as<ScopeBody>();
         scope = scope_body->inner_scope();
         if (uses_pc()) {
             scope_body->add(std::make_shared<Constant>(Location(), Symbol(".pc"), Visibility::ARGUMENT, containing_scope, false, *pc));
@@ -140,7 +142,7 @@ Body InstructionInvocation::encode() {
     auto body = IfBody::create(clauses);
     if (scope_body) {
         scope_body->append(body);
-        return Body(scope_body);
+        return scope_body_body;
     }
     else {
         return body;

@@ -43,7 +43,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 using namespace tpau::cpp_kernal;
 
 /**
- * @brief Represents a body, that introduces a new scope for its contained body.  */
+ * @brief Represents a body that introduces a new scope for its contained body.  */
 class ScopeBody : public BodyElement {
   public:
     /**
@@ -53,7 +53,7 @@ class ScopeBody : public BodyElement {
      * @param body The body to wrap.
      * @return The ScopeBody.
      */
-    static Body create(const std::shared_ptr<Scope>& containing_scope, Body body) { return Body(std::make_shared<ScopeBody>(containing_scope, std::move(body))); }
+    static Body create(const std::shared_ptr<Scope>& containing_scope, Body body) { return Body(std::make_shared<ScopeBody>(std::make_shared<Scope>(Visibility::ARGUMENT, std::move(containing_scope)), std::move(body))); }
 
     /**
      * @brief Construct a new ScopeBody.
@@ -61,7 +61,7 @@ class ScopeBody : public BodyElement {
      * @param containing_scope The scope containing the new scope.
      * @param body The body to wrap.
      */
-    ScopeBody(const std::shared_ptr<Scope>& containing_scope, Body body) : inner_scope_(std::make_shared<Scope>(Visibility::ARGUMENT, containing_scope)), body(std::move(body)) {}
+    ScopeBody(const std::shared_ptr<Scope>& inner_scope, Body body) : inner_scope_(inner_scope), body(std::move(body)) {}
 
     /**
      * @brief Get the inner scope of the ScopeBody.

@@ -110,6 +110,9 @@ These classes represent expressions, which are used in various places in a progr
 ### [ObjectNameExpression](ObjectNameExpression.md)
 ::: ObjectNameExpression.@brief
 
+### [ScopeExpression](ScopeExpression.md)
+::: ScopeExpression.@brief
+
 ### [SizeofExpression](SizeofExpression.md)
 ::: SizeofExpression.@brief
 

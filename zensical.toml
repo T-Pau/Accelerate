@@ -128,6 +128,7 @@ nav = [
             { "Scope" = "Internal/Reference/Scope.md" },
             { "ScopeBody" = "Internal/Reference/ScopeBody.md" },
             { "ScopeEntity" = "Internal/Reference/ScopeEntity.md" },
+            { "ScopeExpression" = "Internal/Reference/ScopeExpression.md" },
             { "SequenceTokenizer" = "Internal/Reference/SequenceTokenizer.md" },
             { "SimpleRepeatBody" = "Internal/Reference/SimpleRepeatBody.md" },
             { "SizeRange" = "Internal/Reference/SizeRange.md" },

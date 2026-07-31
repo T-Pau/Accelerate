@@ -40,12 +40,13 @@ add_library(xlr8-library STATIC
         Expression/LabelOffsetExpression.cc
         Expression/MemoryInfoExpression.cc
         Expression/MinMaxExpression.cc
+        Expression/NameExpression.cc
         Expression/ObjectExpression.cc
         Expression/ObjectNameExpression.cc
+        Expression/ScopeExpression.cc
         Expression/SizeofExpression.cc
         Expression/UnaryExpression.cc
         Expression/ValueExpression.cc
-        Expression/NameExpression.cc
         Expression/VoidExpression.cc
 
         Address.cc
