@@ -94,8 +94,6 @@ class BinaryExpression : public BaseExpression {
     [[nodiscard]] std::optional<Value> maximum_value() const override;
     [[nodiscard]] std::optional<Value::Type> type() const override;
 
-    [[nodiscard]] bool needs_cloning() override { return false; }
-
     [[nodiscard]] Expression clone(const CloneContext& context) const override { return Expression(std::make_shared<BinaryExpression>(location, left.clone(context), operation, right.clone(context))); }
 
   protected:

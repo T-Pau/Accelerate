@@ -60,17 +60,4 @@ std::optional<Expression> BaseExpression::expand_calls() {
 
 std::optional<Expression> BaseExpression::evaluate_process(const EvaluationContext& context) { return {}; }
 
-bool BaseExpression::children_need_cloning() {
-    try {
-        traverse([&](Expression& child) {
-            if (child.needs_cloning()) {
-                throw AbortTraversalException();
-            }
-        });
-    } catch (const AbortTraversalException&) {
-        return true;
-    }
-    return false;
-}
-
 Expression BaseExpression::clone(const CloneContext& context) const { throw LocationException(location, "internal error: clone() not implemented for {}", typeid(*this).name()); }

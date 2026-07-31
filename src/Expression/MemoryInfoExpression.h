@@ -57,8 +57,6 @@ class MemoryInfoExpression : public BaseExpression {
 
     [[nodiscard]] std::optional<Value::Type> type() const override { return Value::UNSIGNED; }
 
-    [[nodiscard]] bool needs_cloning() override { return false; }
-
   protected:
     void serialize_sub(std::ostream& stream) const override;
 

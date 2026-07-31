@@ -152,17 +152,7 @@ std::optional<bool> Expression::has_type(Value::Type type) const {
 
 Expression Expression::clone(const CloneContext& context) const {
     TRACE_BEGIN_INSTANCE_PRINT(expression, "cloning", "");
-#if 0 // needs_cloning
-    // This is broken, will look into it later. For now, just clone everything.
-    if (expression->needs_cloning()) {
-        return expression->clone(context);
-    }
-    else {
-        return *this;
-    }
-#else
     auto cloned_expression = expression->clone(context);
-#endif
     TRACE_END_INSTANCE_PRINT(cloned_expression.expression, "cloning", "");
     return cloned_expression;
 }

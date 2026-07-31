@@ -56,8 +56,6 @@ class ConstantExpression : public BaseExpression {
 
     [[nodiscard]] std::optional<Expression> evaluate(const EvaluationContext& context) override;
 
-    [[nodiscard]] bool needs_cloning() override { return false; }
-
     [[nodiscard]] std::shared_ptr<Constant> constant() const {
         auto owned_constant = constant_.lock();
         if (!owned_constant) {

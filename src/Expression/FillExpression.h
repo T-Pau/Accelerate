@@ -74,8 +74,6 @@ class FillExpression : public BaseExpression {
      */
     static Expression create(const Location& location, Expression count, Expression value);
 
-    [[nodiscard]] bool needs_cloning() override { return false; }
-
     [[nodiscard]] Expression clone(const CloneContext& context) { return Expression(std::make_shared<FillExpression>(location, count.clone(context), value.clone(context))); }
 
     [[nodiscard]] std::optional<Value::Type> type() const override { return Value::BINARY; }

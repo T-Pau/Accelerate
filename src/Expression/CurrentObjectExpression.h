@@ -60,8 +60,6 @@ class CurrentObjectExpression : public BaseExpression {
 
     void resolve(Scope* scope, Entity* containing_entity) override;
 
-    bool needs_cloning() override { return false; }
-
     [[nodiscard]] std::optional<Expression> evaluate(const EvaluationContext& context) override;
     void serialize_sub(std::ostream& stream) const override;
 

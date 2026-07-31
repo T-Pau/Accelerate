@@ -159,31 +159,11 @@ class BaseExpression : public Base {
     /**
      * Create a deep copy of the expression.
      *
-     * If a subclass has children or ever returns `true` in `needs_cloning()`, it must override this method.
+     * A subclass must override this method if it can occur in a macro or function definition, .repeat body, or instruction encoding.
      *
      * @return A shared pointer to the cloned expression.
      */
     [[nodiscard]] virtual Expression clone(const CloneContext& context) const;
-
-    /**
-     * @brief Check if the expression needs cloning.
-     *
-     * The default implementation returns `true`.
-     *
-     * If calling `evaluate()` never changes any of the expression's members, it can be reused instead of cloned.
-     *
-     * If any of its children need cloning, the expression will be cloned regardless of the return value of this method.
-     *
-     * @return `true` if the expression needs cloning, `false` if it can be reused.
-     */
-    [[nodiscard]] virtual bool needs_cloning() { return true; }
-
-    /**
-     * @brief Check if any of the expression's children need cloning.
-     *
-     * @return `true` if any child expression needs cloning, `false` otherwise.
-     */
-    [[nodiscard]] bool children_need_cloning();
 
     /**
      * The location of the expression in the source code.

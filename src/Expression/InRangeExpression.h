@@ -77,8 +77,6 @@ class InRangeExpression : public BaseExpression {
 
     [[nodiscard]] std::optional<Value::Type> type() const override { return Value::BOOLEAN; }
 
-    [[nodiscard]] bool needs_cloning() override { return false; }
-
     [[nodiscard]] Expression clone(const CloneContext& context) const override { return Expression(std::make_shared<InRangeExpression>(location, lower_bound.clone(context), upper_bound.clone(context), argument.clone(context))); }
 
   protected:

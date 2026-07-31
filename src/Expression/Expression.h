@@ -165,15 +165,6 @@ class Expression {
     [[nodiscard]] Expression clone(const CloneContext& context) const;
 
     /**
-     * @brief Check if the expression needs cloning.
-     *
-     * If calling `evaluate()` never changes any members of the expression, and none of its children need cloning, it can be reused instead of cloned.
-     *
-     * @return `true` if the expression needs cloning, `false` if it can be reused.
-     */
-    [[nodiscard]] bool needs_cloning() { return expression->needs_cloning() || expression->children_need_cloning(); }
-
-    /**
      * @brief Resolve all names in the expression.
      *
      * @param scope The scope to resolve names in.

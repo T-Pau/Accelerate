@@ -52,13 +52,3 @@ These are ideas that improve performance, either in terms of speed or memory usa
 ### Pre-create CPU Invocation Bodies
 
 If we can group the sets of address modes that can be matched by the same node list, we can pre-create the CPU invocation bodies for them, and store them in the instruction.  We would thus not have to recreate them for every invocation.
-
-
-### Optional Cloning
-
-Implement `needs_cloning()`, defaulting to `true`. If `false`, reuse existing Expression/Body.
-
-Implement `children_need_cloning()` that uses `traverse()` to check if any of the children need cloning. Can be used to implement `needs_cloning()`, but is not the default because it would default to `false` (since `traverse()` defaults to no children).
-
-!!! note
-    This is probably not worth the extra complexity and performance for traversing the tree twice. Is there anything besides ValueExpression that doesn't need cloning?

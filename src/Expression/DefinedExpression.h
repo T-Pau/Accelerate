@@ -51,8 +51,6 @@ class DefinedExpression : public BaseExpression {
 
     [[nodiscard]] std::optional<Value::Type> type() const override { return Value::BOOLEAN; }
 
-    [[nodiscard]] bool needs_cloning() override { return false; }
-
   protected:
     void serialize_sub(std::ostream& stream) const override;
     void resolve(Scope* scope, Entity* containing_entity) override;

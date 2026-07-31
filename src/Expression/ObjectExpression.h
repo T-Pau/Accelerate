@@ -58,8 +58,6 @@ class ObjectExpression : public BaseExpression {
 
     [[nodiscard]] std::optional<Expression> evaluate(const EvaluationContext& context) override { return simplify(location, object(), false); }
 
-    [[nodiscard]] bool needs_cloning() override { return false; }
-
     Object* object() const { return object_; }
 
   protected:
