@@ -1,10 +1,12 @@
 description Test instruction with 2 variants, known which will be used
 arguments --create-library --target 6502 -o a.lib a.s b.s c64.lib
+
 file a.s <inline>
 .section zero_page
 .public ptr .reserve 2
 address = ptr + 1
 end-of-inline-data
+
 file b.s <inline>
 .section code
 value = COLOR_BLACK
@@ -13,6 +15,7 @@ value = COLOR_BLACK
     sta address
 }
 end-of-inline-data
+
 file c64.lib <inline>
 .format_version 1.0
 .target "6502"
@@ -21,6 +24,7 @@ file c64.lib <inline>
     value: $00
 }
 end-of-inline-data
+
 file a.lib {} <inline>
 .format_version 1.0
 .target "6502"
@@ -37,7 +41,7 @@ file a.lib {} <inline>
     visibility: public
     section: code
     body <
-        .data $a9, $00, $85, (ptr+$01):1
+        .data $a9, $00, $85, address:1
     >
 }
 .object ptr {

@@ -1,5 +1,6 @@
 description Test instruction with 2 variants, known which will be used after assembly
 arguments --create-library --target 6502 file.s
+
 file file.s <inline>
 .section code
 .public test {
@@ -21,10 +22,7 @@ file file.lib {} <inline>
     visibility: public
     section: code
     body <
-        .scope {
-            address = ptr
-            .data $85, address:1
-        }
+        .data $85, ptr:1
     >
 }
 end-of-inline-data

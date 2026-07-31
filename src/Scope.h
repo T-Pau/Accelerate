@@ -419,6 +419,8 @@ class Scope {
      */
     [[nodiscard]] Collection<Macro> get_macros() const { return Collection<Macro>(macros); }
 
+    [[nodiscard]] const std::unordered_set<Symbol>& get_defines() const { return defines; }
+
     template <typename T> [[nodiscard]] Collection<T> get_all() const { throw Exception("internal error: get_all called for unknown type"); }
 
     template <> [[nodiscard]] Collection<Constant> get_all<Constant>() const { return get_constants(); }

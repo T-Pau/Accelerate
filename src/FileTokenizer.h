@@ -71,6 +71,8 @@ class FileTokenizer : public Tokenizer {
 
     void undefine(Symbol name);
 
+    [[nodiscard]] const std::unordered_set<Symbol>& get_defines() const;
+
     void set_target(const Target* new_target) { target = new_target; }
 
     void add_punctuations(const std::unordered_set<std::string>& names);
@@ -78,6 +80,7 @@ class FileTokenizer : public Tokenizer {
     void add_literal(const Token& token) { add_literal(token.get_type(), token.as_string()); }
 
     void add_literal(Token::Type match, const std::string& name, const std::string& suffix_characters = "");
+
 
     // std::unordered_set<Symbol> defines;
 

@@ -1,4 +1,5 @@
 arguments --create-library --target c64-basic a.s
+
 file a.s <inline>
 .macro choose value64, value128, address {
     .if .defined(C64) {
@@ -15,6 +16,7 @@ test {
     rts
 }
 end-of-inline-data
+
 file a.lib {} <inline>
 .format_version 1.0
 .target "c64-basic"
@@ -22,12 +24,26 @@ file a.lib {} <inline>
     visibility: private
     arguments: value64, value128, address
     body <
-        .data $a2, value64:1
-        .if .in_range($00, $ff, address) {
-          .data $86, address:1
+        .scope {
+            value = value64
+            .if .in_range($00, $ff, value) {
+              .data $a2, value:1
+            }
+            .else {
+              .error "arguments out of range" ("a.s", 3, 9, 21)
+            }
         }
-        .else {
-          .data $8e, address:2
+        .scope {
+            address = address
+            .if .in_range($00, $ff, address) {
+              .data $86, address:1
+            }
+            .else_if .in_range($00, $ffff, address) {
+              .data $8e, address:2
+            }
+            .else {
+              .error "arguments out of range" ("a.s", 8, 5, 16)
+            }
         }
     >
 }
@@ -35,10 +51,7 @@ file a.lib {} <inline>
     visibility: private
     section: code
     body <
-        .scope {
-          .data $a2, $40, $8e, $4567
-        }
-        .data $60
+        .data $a2, $40, $8e, $4567, $60
     >
 }
 end-of-inline-data

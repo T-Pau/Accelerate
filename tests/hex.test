@@ -48,9 +48,7 @@ file test.lib {} <>
     visibility: private
     section: data
     body <
-        .scope {
-          .data {{04050607}}
-        }
+        .data {{04050607}}
     >
 }
 end-of-inline-data

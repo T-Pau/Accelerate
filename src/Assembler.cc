@@ -106,7 +106,7 @@ Target Assembler::parse_target(Symbol name, Symbol file_name) {
     module = &parsed_target.module;
     file_scope = parsed_target.file_scope();
     parse(file_name);
-    // TODO: // parsed_target.defines = std::move(tokenizer.defines);
+    parsed_target.define(tokenizer.get_defines());
     return std::move(parsed_target);
 }
 
@@ -123,7 +123,7 @@ void Assembler::parse(Symbol file_name) {
         Target::set_current_target(target);
         target->cpu->setup(tokenizer);
         cpu = target->cpu;
-        tokenizer.define(target->defines);
+        tokenizer.define(target->get_defines());
     }
     ExpressionParser::setup(tokenizer);
     BodyParser::setup(tokenizer);
@@ -163,7 +163,8 @@ void Assembler::parse(Symbol file_name) {
                 case Token::KEYWORD:
                     throw LocationException(token.location, "unexpected {}", token.type_name());
             }
-        } catch (LocationException& ex) {
+        }
+        catch (LocationException& ex) {
             DiagnosticOutput::global.error(ex);
             tokenizer.skip_until(TokenGroup::newline, true);
         }
@@ -191,7 +192,8 @@ void Assembler::parse_cpu(const Token& directive) {
         }
         new_cpu->setup(tokenizer);
         cpu = new_cpu;
-    } catch (Exception& ex) {
+    }
+    catch (Exception& ex) {
         throw LocationException(name.location, ex);
     }
 }
@@ -364,9 +366,9 @@ void Assembler::parse_symbol(Visibility visibility, const Token& name) {
         else if (token == Token::curly_open) {
             // TODO: error if .reserved
             if (!DiagnosticOutput::global.log_exceptions([object, this]() {
-                object->body = BodyParser(tokenizer, cpu, object->scope(), true).parse();
-                object->enter_names();
-            })) {
+                    object->body = BodyParser(tokenizer, cpu, object->scope(), true).parse();
+                    object->enter_names();
+                })) {
                 tokenizer.skip_until(Token::curly_close, true);
             }
             break;
@@ -522,7 +524,7 @@ void Assembler::set_target(Target* new_target) {
     target = new_target;
     if (target) {
         tokenizer.set_target(target);
-        tokenizer.define(target->defines);
+        tokenizer.define(target->get_defines());
     }
 }
 

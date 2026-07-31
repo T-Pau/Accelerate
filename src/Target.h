@@ -76,11 +76,17 @@ class Target {
      */
     [[nodiscard]] std::shared_ptr<Scope> public_scope() const { return module.public_scope(); }
 
+    [[nodiscard]] const std::unordered_set<Symbol>& get_defines() const { return public_scope()->get_defines(); }
+
+    void define(Symbol name) { public_scope()->define(name); }
+
+    void define(const std::unordered_set<Symbol>& defines) { public_scope()->define(defines); }
+
     Symbol name;
     const CPU* cpu = &CPU::empty;
     MemoryMap map;
     std::unordered_map<Symbol, StringEncoding> string_encodings;
-    std::unordered_set<Symbol> defines;
+    // std::unordered_set<Symbol> defines;
     const StringEncoding* default_string_encoding{};
 
     Module module;

@@ -110,7 +110,8 @@ Token FileTokenizer::sub_next() {
                 arguments.emplace_back(argument_token);
             }
             preprocess(token, arguments);
-        } catch (LocationException& ex) {
+        }
+        catch (LocationException& ex) {
             DiagnosticOutput::global.error(ex);
         }
     }
@@ -271,14 +272,16 @@ Token FileTokenizer::parse_hex(Location location) {
             current_source->expand_location(location);
             try {
                 return {location, Value(decoder.end(), true)};
-            } catch (Exception& ex) {
+            }
+            catch (Exception& ex) {
                 throw LocationException(current_location(), ex);
             }
         }
 
         try {
             decoder.decode(static_cast<char>(c));
-        } catch (Exception& ex) {
+        }
+        catch (Exception& ex) {
             throw LocationException(current_location(), ex);
         }
     }
@@ -510,7 +513,8 @@ void FileTokenizer::preprocess_include(const Token& directive, const std::vector
             throw LocationException(filename_token.location, "file not found");
         }
         push(file);
-    } catch (Exception& ex) {
+    }
+    catch (Exception& ex) {
         throw LocationException(filename_token.location, ex);
     }
 }
@@ -685,3 +689,5 @@ void FileTokenizer::define(Symbol name) { preprocessor_scope->define(name); }
 void FileTokenizer::define(const std::unordered_set<Symbol>& defines) { preprocessor_scope->define(defines); }
 
 void FileTokenizer::undefine(Symbol name) { preprocessor_scope->undefine(name); }
+
+const std::unordered_set<Symbol>& FileTokenizer::get_defines() const { return preprocessor_scope->get_defines(); }

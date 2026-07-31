@@ -1,4 +1,5 @@
 arguments --target c64-basic --create-library -Dcommandline a.s
+
 file a.s <>
 .define source_file
 .define undefined
@@ -45,6 +46,7 @@ skipped_else_if = "! skipped else if"
 skipped_else = "! skipped else"
 .pre_end
 end-of-inline-data
+
 
 file a.lib {} <>
 .format_version 1.0
