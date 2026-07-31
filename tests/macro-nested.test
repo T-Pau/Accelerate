@@ -24,7 +24,7 @@ file a.lib {} <inline>
     body <
         .scope {
             value = value
-            .if .in_range($00, $ff, value) {
+            .if .in_range(-$80, $ff, value) {
               .data $a9, value:1
             }
             .else {
@@ -34,10 +34,10 @@ file a.lib {} <inline>
         .scope {
             address = address
             .if .in_range($00, $ff, address) {
-              .data $85, address:1
+              .data $85, address:+1
             }
             .else_if .in_range($00, $ffff, address) {
-              .data $8d, address:2
+              .data $8d, address:+2
             }
             .else {
               .error "arguments out of range" ("a.s", 3, 5, 16)
@@ -51,7 +51,7 @@ file a.lib {} <inline>
     body <
         .scope {
             value = value
-            .if .in_range($00, $ff, value) {
+            .if .in_range(-$80, $ff, value) {
               .data $a9, value:1
             }
             .else {
@@ -61,7 +61,7 @@ file a.lib {} <inline>
         .data $8d, $1234
         .scope {
             value = value
-            .if .in_range($00, $ff, value) {
+            .if .in_range(-$80, $ff, value) {
               .data $a9, value:1
             }
             .else {

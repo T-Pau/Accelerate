@@ -35,8 +35,11 @@
 
 .argument_type byte fits :1
 .argument_type signed_byte fits :-1
+.argument_type unsigned_byte fits :+1
 
 .argument_type word fits :2
+.argument_type unsigned_word fits :+2
+
 .argument_type any any
 
 .argument_type bc_or_de enum {
@@ -158,7 +161,7 @@
 .addressing_mode a__indirect {
     notation: a,(nn)
     arguments {
-        nn: word
+        nn: unsigned_word
     }
     encoding: .opcode, nn
 }
@@ -174,7 +177,7 @@
 .addressing_mode a__indirect_byte {
     notation: a,(n)
     arguments {
-        n: byte
+        n: unsigned_byte
     }
     encoding: .opcode, n
 }
@@ -212,7 +215,7 @@
 .addressing_mode address {
     notation: nn
     arguments {
-       nn: word
+       nn: unsigned_word
     }
     encoding: .opcode, nn
 }
@@ -273,7 +276,7 @@
     notation: cc,nn
     arguments {
         cc: condition
-        nn: word
+        nn: unsigned_word
     }
     encoding: .opcode | cc << 3, nn
 }
@@ -285,7 +288,7 @@
 .addressing_mode hl__indirect {
     notation: hl,(nn)
     arguments {
-        nn: word
+        nn: unsigned_word
     }
     encoding: .opcode, nn
 }
@@ -376,7 +379,7 @@
     notation: i,nn
     arguments {
         i: index_register
-        nn: word
+        nn: unsigned_word
     }
     encoding: $dd | i << 5, .opcode, nn
 }
@@ -385,7 +388,7 @@
     notation: i,(nn)
     arguments {
         i: index_register
-        nn: word
+        nn: unsigned_word
     }
     encoding: $dd | i << 5, .opcode, nn
 }
@@ -393,7 +396,7 @@
 .addressing_mode indirect__a {
     notation: (nn),a
     arguments {
-        nn: word
+        nn: unsigned_word
     }
     encoding: .opcode, nn
 }
@@ -409,7 +412,7 @@
 .addressing_mode indirect__hl {
     notation: (nn),hl
     arguments {
-        nn: word
+        nn: unsigned_word
     }
     encoding: .opcode, nn
 }
@@ -417,7 +420,7 @@
 .addressing_mode indirect__index_register {
     notation: (nn),i
     arguments {
-        nn: word
+        nn: unsigned_word
         i: index_register
     }
     encoding: $dd | i << 5, .opcode, nn
@@ -427,7 +430,7 @@
     notation: (nn),dd
     arguments {
         dd: register_pair_sp
-        nn: word
+        nn: unsigned_word
     }
     encoding: $ed, .opcode | dd << 4, nn
 }
@@ -435,7 +438,7 @@
 .addressing_mode indirect_byte__a {
     notation: (n),a
     arguments {
-        n: byte
+        n: unsigned_byte
     }
     encoding: .opcode, n
 }
@@ -616,7 +619,7 @@
     notation: dd,(nn)
     arguments {
         dd: register_pair_sp
-        nn: word
+        nn: unsigned_word
     }
     encoding: $ed, .opcode | dd << 4, nn
 }

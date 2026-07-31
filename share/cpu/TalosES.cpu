@@ -1,7 +1,7 @@
 .syntax punctuation: "," "(" ")" "=" "+" "-" "++"
 .syntax keywords: "a" "ah" "al" "b" "bh" "bl" "r" "rh" "rl" "ja" "jah" "jal" "ar1" "ar2"
 
-.argument_type byte range: 0, $ff
+.argument_type byte fits :1
 
 .argument_type destination_register enum {
     ah: 0

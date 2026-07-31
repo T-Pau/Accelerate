@@ -32,7 +32,7 @@
 .addressing_mode zero_page_indirect {
     notation: (address)
     arguments {
-        address: byte
+        address: unsigned_byte
     }
     encoding: .opcode, address
 }
@@ -40,7 +40,7 @@
 .addressing_mode absolute_x_indexed_indirect {
     notation: (address,x)
     arguments {
-        address: word
+        address: unsigned_word
     }
     encoding: .opcode, address
 }

@@ -43,7 +43,7 @@
 .addressing_mode address__extended {
     notation: nn
     arguments {
-       nn: any ; TODO: word
+       nn: any ; TODO: unsigned_word
     }
     encoding: $ed, .opcode, >nn, <nn
 }
@@ -100,7 +100,7 @@
     notation: rr,nn
     arguments {
         rr: register_pair_hl
-        nn: word
+        nn: unsigned_word
     }
     encoding: $ed, .opcode + rr, nn
 }

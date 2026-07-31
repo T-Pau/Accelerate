@@ -22,7 +22,7 @@ file file.lib {} <inline>
     visibility: public
     section: code
     body <
-        .data $85, ptr:1
+        .data $85, ptr:+1
     >
 }
 end-of-inline-data

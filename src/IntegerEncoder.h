@@ -41,19 +41,23 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 using namespace tpau::cpp_kernal;
 
 /**
-  * @brief Implements an encoder that encodes integer values, taking into account the minimum size and byte order.
-  */
-class IntegerEncoder: public BaseEncoder {
-public:
+ * @brief Implements an encoder that encodes integer values, taking into account the minimum size and byte order.
+ */
+class IntegerEncoder : public BaseEncoder {
+  public:
+    /// @brief The value range accepted.
     enum Type {
-        SIGNED,
-        UNSIGNED
+        SIGNED,   ///< Accepts values in the range of two's complement signed integers.
+        UNSIGNED, ///< Accepts values in the range of unsigned integers.
+        EITHER    ///< Accepts values in the range of both signed and unsigned integers.
     };
 
-    IntegerEncoder(Type type, std::optional<size_t> size, std::optional<uint64_t> byte_order = {}): type(type), size(size), explicit_byte_order(byte_order) {}
+    IntegerEncoder(Type type, std::optional<size_t> size, std::optional<uint64_t> byte_order = {}) : type(type), size(size), explicit_byte_order(byte_order) {}
+
     explicit IntegerEncoder(const Value& value);
 
-    [[nodiscard]] std::optional<size_t> byte_size() const {return size;}
+    [[nodiscard]] std::optional<size_t> byte_size() const { return size; }
+
     void encode(std::string& bytes, const Value& value) const override;
     [[nodiscard]] size_t encoded_size(const Value& value) const override;
     [[nodiscard]] bool fits(const Value& value) const override;
@@ -65,18 +69,19 @@ public:
     bool operator==(const Encoder& other) const override;
 
     bool operator==(const IntegerEncoder& other) const;
-    bool operator!=(const IntegerEncoder& other) const {return !(*this == other);}
+
+    bool operator!=(const IntegerEncoder& other) const { return !(*this == other); }
 
     static uint64_t default_byte_order();
     static const uint64_t little_endian_byte_order;
     static const uint64_t big_endian_byte_order;
 
-private:
+  private:
     Type type;
     std::optional<size_t> size;
     std::optional<uint64_t> explicit_byte_order;
 
-    [[nodiscard]] uint64_t byte_order() const {return explicit_byte_order.value_or(default_byte_order());}
+    [[nodiscard]] uint64_t byte_order() const { return explicit_byte_order.value_or(default_byte_order()); }
 };
 
 std::ostream& operator<<(std::ostream& stream, const IntegerEncoder& encoding);

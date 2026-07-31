@@ -40,9 +40,7 @@ using namespace tpau::cpp_kernal;
 const uint64_t IntegerEncoder::big_endian_byte_order = 87654321;
 const uint64_t IntegerEncoder::little_endian_byte_order = 12345678;
 
-uint64_t IntegerEncoder::default_byte_order() {
-    return Target::current_target && Target::current_target->cpu ? Target::current_target->cpu->byte_order : little_endian_byte_order;
-}
+uint64_t IntegerEncoder::default_byte_order() { return Target::current_target && Target::current_target->cpu ? Target::current_target->cpu->byte_order : little_endian_byte_order; }
 
 std::ostream& operator<<(std::ostream& stream, const IntegerEncoder& encoding) {
     encoding.serialize(stream);
@@ -56,16 +54,12 @@ void IntegerEncoder::encode(std::string& bytes, const Value& value) const {
         throw Exception("value overflow");
     }
 
-    switch (type) {
-        case SIGNED: {
-            int64_t signed_value = value.signed_value();
-            Int::encode(bytes, *(reinterpret_cast<uint64_t*>(&signed_value)), size ? *size : encoded_size(value), byte_order());
-            break;
-        }
-
-        case UNSIGNED:
-            Int::encode(bytes, value.unsigned_value(), size ? *size : encoded_size(value), byte_order());
-            break;
+    if (value.is_signed()) {
+        int64_t signed_value = value.signed_value();
+        Int::encode(bytes, *(reinterpret_cast<uint64_t*>(&signed_value)), size ? *size : encoded_size(value), byte_order());
+    }
+    else {
+        Int::encode(bytes, value.unsigned_value(), size ? *size : encoded_size(value), byte_order());
     }
 }
 
@@ -92,6 +86,9 @@ bool IntegerEncoder::is_natural_encoder(const Value& value) const {
 
         case UNSIGNED:
             return value.is_unsigned() && value.default_size() == size && byte_order() == default_byte_order();
+
+        case EITHER:
+            return value.is_integer() && value.default_size() == size && byte_order() == default_byte_order();
     }
     throw Exception("internal error: invalid integer encoder type {}", static_cast<int>(type));
 }
@@ -104,6 +101,10 @@ void IntegerEncoder::serialize(std::ostream& stream) const {
                 break;
 
             case UNSIGNED:
+                stream << ":+" << *size;
+                break;
+
+            case EITHER:
                 stream << ":" << *size;
                 break;
         }
@@ -111,6 +112,9 @@ void IntegerEncoder::serialize(std::ostream& stream) const {
     else {
         if (type == SIGNED && !size) {
             stream << ":-";
+        }
+        else if (type == UNSIGNED && !size) {
+            stream << ":+";
         }
         else {
             stream << ":";
@@ -129,6 +133,9 @@ void IntegerEncoder::serialize(std::ostream& stream) const {
             stream << "(";
             if (type == SIGNED) {
                 stream << "-";
+            }
+            else if (type == UNSIGNED) {
+                stream << "+";
             }
             stream << *size << ")";
         }
@@ -170,6 +177,7 @@ IntegerEncoder::IntegerEncoder(const Value& value) {
 std::optional<Value> IntegerEncoder::minimum_value() const {
     switch (type) {
         case SIGNED:
+        case EITHER:
             if (!size || size == 8) {
                 return Value(std::numeric_limits<int64_t>::min());
             }
@@ -197,6 +205,7 @@ std::optional<Value> IntegerEncoder::maximum_value() const {
             return Value((int64_t{1} << (size.value_or(8) * 8 - 1)) - 1);
 
         case UNSIGNED:
+        case EITHER:
             if (!size || size == 8) {
                 return Value(std::numeric_limits<uint64_t>::max());
             }

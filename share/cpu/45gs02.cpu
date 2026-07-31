@@ -43,7 +43,7 @@
 .addressing_mode zero_page_quad {
     notation: address
     arguments {
-        address: byte
+        address: unsigned_byte
     }
     encoding: $42, $42, .opcode, address
 }
@@ -51,7 +51,7 @@
 .addressing_mode zero_page_quad_x_indexed {
     notation: address,x
     arguments {
-        address: byte
+        address: unsigned_byte
     }
     encoding: $42, $42, .opcode, address
 }
@@ -59,7 +59,7 @@
 .addressing_mode absolute_quad {
     notation: address
     arguments {
-        address: word
+        address: unsigned_word
     }
     encoding: $42, $42, .opcode, address
 }
@@ -67,7 +67,7 @@
 .addressing_mode absolute_quad_x_indexed {
     notation: address,x
     arguments {
-        address: word
+        address: unsigned_word
     }
     encoding: $42, $42, .opcode, address
 }
@@ -75,7 +75,7 @@
 .addressing_mode quad_indirect_z_indexed {
     notation: (address),z
     arguments {
-        address: byte
+        address: unsigned_byte
     }
     encoding: $42, $42, .opcode, address
 }
@@ -83,7 +83,7 @@
 .addressing_mode quad_zero_page_z_indexed {
     notation: [address],z
     arguments {
-        address: byte
+        address: unsigned_byte
     }
     encoding: $ea, .opcode, address
 }
@@ -92,7 +92,7 @@
 .addressing_mode quad_zero_page_quad_z_indexed {
     notation: [address],z
     arguments {
-        address: byte
+        address: unsigned_byte
     }
     encoding: $42, $42, $ea, .opcode, address
 }
@@ -100,7 +100,7 @@
 .addressing_mode zero_page_indirect_quad {
     notation: (address)
     arguments {
-        address: byte
+        address: unsigned_byte
     }
     encoding: $42, $42, .opcode, address
 }
@@ -108,7 +108,7 @@
 .addressing_mode quad_zero_page_indirect_quad {
     notation: [address]
     arguments {
-        address: byte
+        address: unsigned_byte
     }
     encoding: $42, $42, $ea, .opcode, address
 }

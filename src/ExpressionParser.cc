@@ -412,7 +412,7 @@ std::optional<Encoder> ExpressionParser::parse_encoding() const {
             type = IntegerEncoder::UNSIGNED;
         }
         else {
-            type = IntegerEncoder::UNSIGNED;
+            type = IntegerEncoder::EITHER;
             name_allowed = true;
             tokenizer.unget(token);
         }

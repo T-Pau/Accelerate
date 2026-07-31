@@ -40,7 +40,7 @@
 .addressing_mode indirect_byte__register {
     notation: (n),r
     arguments {
-        n: byte
+        n: unsigned_byte
         r: register
     }
     encoding: $ed, .opcode | r << 3, n
@@ -63,7 +63,7 @@
     notation: r,(n)
     arguments {
         r: register
-        n: byte
+        n: unsigned_byte
     }
     encoding: $ed, .opcode | r << 3, n
 }
