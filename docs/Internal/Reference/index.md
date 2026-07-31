@@ -6,8 +6,6 @@ This section contains reference documentation for the classes and functions used
 
 It is intended to developers who want to contribute to the project. It provides documentation of the classes and how to use them. For rationale behind their design and how they work together, see the [Internal Explanations](../Explanations/index.md) section.
 
-Private methods and members are not documented here, since they are only relevant when working on that class, which usually require more detail than the documentation provides. They are documented in the source code itself, so IDEs should provide documentation popups for them.
-
 Classes used from T'Pau C++ Kernal are documented in its [reference section](https://tpau-cpp-kernal.tpau.group/Reference/).
 
 The table of contents in the sidebar lists the classes in alphabetical order. 

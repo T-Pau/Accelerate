@@ -22,6 +22,11 @@ Allowing to restrict arguments to certain types, value ranges, or encodings woul
 This would allow for better error messages, and also allow for further evaluation of their definitions and uses.
 
 
+### Visibility for Defines
+
+Allow defines to be public, private, or file-local. Also, use the current parsing scope in the FileTokenizer.
+
+
 ## Simplification Improvements
 
 These are ideas that simplify expressions and bodies, thus making libraries more compact.
@@ -54,3 +59,6 @@ If we can group the sets of address modes that can be matched by the same node l
 Implement `needs_cloning()`, defaulting to `true`. If `false`, reuse existing Expression/Body.
 
 Implement `children_need_cloning()` that uses `traverse()` to check if any of the children need cloning. Can be used to implement `needs_cloning()`, but is not the default because it would default to `false` (since `traverse()` defaults to no children).
+
+!!! note
+    This is probably not worth the extra complexity and performance for traversing the tree twice. Is there anything besides ValueExpression that doesn't need cloning?

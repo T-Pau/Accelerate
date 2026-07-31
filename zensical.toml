@@ -202,7 +202,7 @@ default_handler = "doxygen"
 [project.plugins.mkdocstrings.handlers.doxygen]
 paths = ["src"]
 include_directories = {"src" = ""}
-options = { show_protected = true, show_parameter_types = false, private_includes = true }
+options = { show_protected = true, show_private = true, show_parameter_types = false, private_includes = true }
 
 
 [project.theme]
