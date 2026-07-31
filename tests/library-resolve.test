@@ -41,7 +41,7 @@ file a.lib {} <inline>
     visibility: public
     section: code
     body <
-        .data $a9, $00, $85, address:1
+        .data $a9, $00, $85, address:+1
     >
 }
 .object ptr {

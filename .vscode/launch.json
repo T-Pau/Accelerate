@@ -6,12 +6,16 @@
 			"type": "cppdbg",
 			"request": "launch",
 			"program": "${workspaceFolder}/build/src/xlr8",
-			"cwd": "${workspaceFolder}/build/tests/sandbox_error-variable-cycle.d22tfovp7",
+			"cwd": "${workspaceFolder}/build/tests/sandbox",
 			"args": [
 				"--create-library",
 				"--target",
 				"6502",
-				"file.s"
+				"-o",
+				"a.lib",
+				"a.s",
+				"b.s",
+				"c.lib"
 			],
 			"stopAtEntry": false,
 			"externalConsole": false,

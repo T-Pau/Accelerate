@@ -72,7 +72,7 @@ CallableArguments::CallableArguments(Tokenizer& tokenizer) {
     }
 }
 
-CallableArguments::CallableArguments(ScopeEntity* entity, const std::shared_ptr<StructuredValue>& definition) : entity(entity) {
+CallableArguments::CallableArguments(ScopeEntity* entity, const std::shared_ptr<StructuredValue>& definition) {
     auto parameters = definition->as_dictionary();
 
     if (auto arguments_value = parameters->get_optional(token_arguments)) {
@@ -81,6 +81,7 @@ CallableArguments::CallableArguments(ScopeEntity* entity, const std::shared_ptr<
         }
         auto tokenizer = SequenceTokenizer(arguments_value->as_scalar()->tokens);
         *this = CallableArguments(tokenizer);
+        this->entity = entity;
         if (!tokenizer.ended()) {
             throw LocationException(tokenizer.next().location, "invalid arguments");
         }

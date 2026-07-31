@@ -8,6 +8,7 @@ set(XFAIL_TESTS
 
     # Not implemented yet
     hello-world-zx-spectrum-next.test # function call
+    library-function.test # function call
     macro-named-label.test # labels in macros
     macro-named-label-fixed.test # labels in macros
     macro-named-label-half-fixed.test # labels in macros
@@ -17,20 +18,16 @@ set(XFAIL_TESTS
     macro-nested-branch.test # labels in macros
 
     # Crashes
-    library-function.test # segfault
-    library-macro.test # segfault
     repeat.test # segfault
 
     # Should investigate
     hello-world-zx-spectrum-tap.test # internal errors; not implemented: function call, checksum
     error-variable-cycle.test # missing details in error message
     hello-world-cerberus-2100-6502.test # empty program
-    hex.test # missing .include in library
     label-assignment.test # .private label not propagated to module
     label-named.test # label got lost
     label-unnamed-loop.test # undefined variable
     label-unnamed.test # labels not evaluated
-    library-resolve.test # missing .include in library
     macro-recursive.test # cycle not detected
     macro-variable.test # macro argument can't shadow constant
     error-unclosed-object.test # missing location in error message, follow-on error messages

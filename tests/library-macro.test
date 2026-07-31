@@ -57,11 +57,17 @@ file a.lib {} <inline>
     arguments: address
     body <
         .data $a9, $00
-        .if .in_range($00, $ff, address) {
-          .data $85, address:1
-        }
-        .else {
-          .data $8d, address:2
+        .scope {
+            address = address
+            .if .in_range($00, $ff, address) {
+              .data $85, address:+1
+            }
+            .else_if .in_range($00, $ffff, address) {
+              .data $8d, address:+2
+            }
+            .else {
+              .error "arguments out of range" ("a.s", 4, 5, 16)
+            }
         }
     >
 }
@@ -70,11 +76,17 @@ file a.lib {} <inline>
     arguments: address
     body <
         .data $a2, $01
-        .if .in_range($00, $ff, address) {
-          .data $86, address:1
-        }
-        .else {
-          .data $8e, address:2
+        .scope {
+            address = address
+            .if .in_range($00, $ff, address) {
+              .data $86, address:+1
+            }
+            .else_if .in_range($00, $ffff, address) {
+              .data $8e, address:+2
+            }
+            .else {
+              .error "arguments out of range" ("b.s", 4, 5, 16)
+            }
         }
     >
 }
@@ -82,15 +94,7 @@ file a.lib {} <inline>
     visibility: public
     section: code
     body <
-        .scope {
-          .data $a2, $01, $8e, $1001
-        }
-        .scope {
-          .data $a9, $00, $8d, $2002
-        }
-        .scope {
-          .data $a0, $02, $8c, $3003
-        }
+        .data $a2, $01, $8e, $1001, $a9, $00, $8d, $2002, $a0, $02, $8c, $3003
     >
 }
 end-of-inline-data

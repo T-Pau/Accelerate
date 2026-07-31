@@ -150,6 +150,8 @@ class Module {
     /// @brief The target of the module.
     Target* target{};
 
+    const std::unordered_set<Module*>& imported_modules(Visibility visibility) const;
+
 
   private:
     std::unordered_set<std::shared_ptr<Entity>> contained_entities;
@@ -165,6 +167,10 @@ class Module {
 
     /// @brief The private scope of the module.
     std::shared_ptr<Scope> private_scope_;
+
+    std::unordered_map<Visibility, std::unordered_set<Module*>> imported_modules_;
+
+    static std::unordered_set<Module*> no_modules;
 };
 
 

@@ -48,6 +48,8 @@ class LibraryLinker : public Linker {
     [[nodiscard]] virtual std::vector<Entity*> root_entities() override { return module().entities(); }
 
   private:
+    void print_imported_modules(std::ostream& stream, Visibility visibility);
+
     template <typename T> void output_entities(std::ostream& stream) {
         auto entities = sorted(module().get_entities<T>(), [](const T* a, const T* b) { return a->name < b->name; });
         for (const auto& entity : entities) {

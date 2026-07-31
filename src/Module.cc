@@ -29,6 +29,8 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "Module.h"
 
+std::unordered_set<Module*> Module::no_modules{};
+
 Module::Module(Symbol name) : name_(name) {
     public_scope_ = std::make_shared<Scope>(Visibility::PUBLIC, name);
     private_scope_ = std::make_shared<Scope>(Visibility::PRIVATE, name, public_scope_);
@@ -70,6 +72,17 @@ void Module::import(Visibility visibility, const Module& module) {
     }
 
     scope->add_next(module.public_scope());
+    imported_modules_[visibility].insert(const_cast<Module*>(&module));
+}
+
+const std::unordered_set<Module*>& Module::imported_modules(Visibility visibility) const {
+    auto it = imported_modules_.find(visibility);
+    if (it != imported_modules_.end()) {
+        return it->second;
+    }
+    else {
+        return no_modules;
+    }
 }
 
 std::vector<Entity*> Module::entities() const {

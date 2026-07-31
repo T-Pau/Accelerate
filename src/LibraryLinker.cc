@@ -32,6 +32,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <fstream>
 
 #include <tpau-cpp-kernal/Exception.h>
+#include <tpau-cpp-kernal/Util.h>
 
 #include "EvaluationOrder.h"
 
@@ -55,10 +56,26 @@ void LibraryLinker::output(const std::filesystem::path& file_name) {
         stream << ".target \"" << target->name.str() << "\"" << std::endl;
     }
 
-    // TODO: output imported libraries, pinned and used objects.
+    print_imported_modules(stream, Visibility::PRIVATE);
+    print_imported_modules(stream, Visibility::PUBLIC);
+
+    // TODO: output pinned and used objects.
 
     output_entities<Constant>(stream);
     output_entities<Function>(stream);
     output_entities<Macro>(stream);
     output_entities<Object>(stream);
+}
+
+void LibraryLinker::print_imported_modules(std::ostream& stream, Visibility visibility) {
+    auto imported_modules = module().imported_modules(visibility);
+
+    auto names = std::vector<Symbol>();
+    for (const auto& imported_module : imported_modules) {
+        names.emplace_back(imported_module->name());
+    }
+    std::sort(names.begin(), names.end());
+    for (const auto& name : names) {
+        stream << ".import " << (visibility == Visibility::PRIVATE ? "" : "public ") << "\"" << name.str() << "\"" << std::endl;
+    }
 }
