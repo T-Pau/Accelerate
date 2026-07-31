@@ -123,11 +123,12 @@ void CallableArguments::enter_arguments() {
         entity->add(constant);
         argument_constants.emplace_back(constant);
     }
+    // TODO: use pre-created default argument constants instead of creating new ones here.
     for (size_t index = 0; index < default_arguments.size(); index++) {
         auto argument_name = name(index + minimum_arguments());
         auto constant = std::make_shared<Constant>(entity->location, argument_name, Visibility::ENTITY, entity->scope(), false, default_arguments[index]);
         entity->add(constant, false);
-        default_argument_constants.emplace_back(constant.get());
+        default_argument_constants.emplace_back(constant);
     }
 }
 

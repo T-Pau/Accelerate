@@ -1,4 +1,5 @@
 arguments --create-library --target 6502 a.s
+
 file a.s <inline>
 .macro store value, address {
     lda #value
@@ -15,6 +16,7 @@ test {
     rts
 }
 end-of-inline-data
+
 file a.lib {} <inline>
 .format_version 1.0
 .target "6502"

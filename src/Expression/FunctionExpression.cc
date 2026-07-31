@@ -87,10 +87,12 @@ Expression FunctionExpression::create(const Location& location, Symbol name, con
 
 void FunctionExpression::resolve(Scope* scope, Entity* containing_entity) {
     BaseExpression::resolve(scope, containing_entity);
-    function = scope->get_function(name).get();
-    if (!function) {
+    auto function_ptr = scope->get_function(name);
+    if (!function_ptr) {
         throw LocationException(location, "function {} not found", name);
     }
+    function = function_ptr.get();
+    containing_entity->uses(function_ptr.get());
 }
 
 std::optional<Expression> FunctionExpression::expand_calls() {

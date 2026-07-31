@@ -39,12 +39,7 @@ file a.lib {} <inline>
     visibility: private
     section: code
     body <
-        .scope {
-          .data $a2, $28, $a0, $00
-        }
-        .scope {
-          .data $a2, $28, $a0, $00
-        }
+        .data $a2, $28, $a0, $00, $a2, $28, $a0, $00
     >
 }
 end-of-inline-data

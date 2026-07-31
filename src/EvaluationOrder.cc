@@ -31,6 +31,9 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <tpau-cpp-kernal/DiagnosticOutput.h>
 #include <tpau-cpp-kernal/Exception.h>
+#ifdef TRACE_TRANSLATION
+#include <tpau-cpp-kernal/Util.h>
+#endif
 
 #include "Entity/Object.h"
 
@@ -75,6 +78,10 @@ EvaluationOrder::Node* EvaluationOrder::node_for(Entity* entity) {
 
     entity->resolve();
 
+#ifdef TRACE_TRANSLATION
+    std::vector<Symbol> dependency_names;
+#endif
+
     for (auto* dependency : entity->referenced_entities) {
         if (dependency == entity) {
             DiagnosticOutput::global.error("entity {} depends on itself", entity->name);
@@ -85,10 +92,17 @@ EvaluationOrder::Node* EvaluationOrder::node_for(Entity* entity) {
             (void)node_for(dependency);
         }
         else {
+#ifdef TRACE_TRANSLATION
+            dependency_names.push_back(dependency->name);
+#endif
             auto dependency_node = node_for(dependency);
             node->add_dependency(dependency_node);
         }
     }
+
+#ifdef TRACE_TRANSLATION
+    TRACE_INSTANCE(entity, "ordering", "{} depends on: {}", entity->name, join(dependency_names, ", "));
+#endif
 
     if (node->is_ready()) {
         ready_nodes.insert(node);

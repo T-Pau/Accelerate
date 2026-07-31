@@ -82,5 +82,6 @@ void MacroBody::resolve(Scope* scope, Entity* containing_entity) {
     if (!macro_ptr) {
         throw LocationException(location, "macro {} not found", name);
     }
+    containing_entity->uses(macro_ptr.get());
     macro = macro_ptr.get();
 }

@@ -17,7 +17,6 @@ set(XFAIL_TESTS
     macro-nested-branch.test # labels in macros
 
     # Crashes
-    expression-double-unary.test # exit code -5
     library-function.test # segfault
     library-macro.test # segfault
     repeat.test # segfault
