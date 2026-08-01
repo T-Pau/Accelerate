@@ -44,7 +44,6 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Entity/Macro.h"
 #include "Entity/Object.h"
 #include "Expression/Expression.h"
-#include "LocationSymbol.h"
 #include "UnnamedLabelList.h"
 #include "Visibility.h"
 
