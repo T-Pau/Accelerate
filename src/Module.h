@@ -146,6 +146,13 @@ class Module {
      */
     void rename(Symbol new_name);
 
+    /**
+     * @brief Resolve names and expressions in the module.
+     *
+     * This function does not resolve the contained entities.
+     */
+    void resolve();
+
     // Remove this? It's used to pass the target from a source file via Assembler to Linker.
     /// @brief The target of the module.
     Target* target{};

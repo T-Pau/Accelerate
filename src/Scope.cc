@@ -161,13 +161,6 @@ void Scope::import(Visibility visibility, const Module& module) {
     scope->add_next(module.public_scope());
 }
 
-void Scope::pin(Symbol object_name, Expression address) {
-    if (pinned_object_names.contains(object_name)) {
-        throw Exception("object {} already has an address", object_name);
-    }
-    pinned_object_names[object_name] = std::move(address);
-}
-
 void Scope::rename(Symbol new_name) {
     if (name_ == new_name) {
         return;
@@ -210,5 +203,34 @@ void Scope::add_entity(std::shared_ptr<Entity> entity) {
     }
     else {
         throw Exception("internal error: unknown entity type {}", entity->type_name());
+    }
+}
+
+void Scope::resolve() {
+    for (auto& used : explicitly_used_object_names) {
+        if (auto object = get_object(used.object_name)) {
+            object->mark_used();
+        }
+        else {
+            DiagnosticOutput::global.error(used.location, "unknown object '{}' marked as used", used.object_name);
+        }
+    }
+
+    for (auto& pin : pinned_object_names) {
+        if (auto object = get_object(pin.object_name)) {
+            if (object->has_address()) {
+                DiagnosticOutput::global.error(pin.location, "object '{}' already has an address", pin.object_name);
+            }
+            else {
+                pin.address.resolve(this, object.get());
+                object->address = pin.address;
+                if (pin.mark_used) {
+                    object->mark_used();
+                }
+            }
+        }
+        else {
+            DiagnosticOutput::global.error(pin.location, "unknown object '{}' pinned to address", pin.object_name);
+        }
     }
 }

@@ -23,7 +23,7 @@ PROGRAM_END = $effd
     ]
 }
 
-.pin start PROGRAM_START
+.pin start PROGRAM_START .used
 
 .extension "bin"
 

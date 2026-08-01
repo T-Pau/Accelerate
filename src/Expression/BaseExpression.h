@@ -177,6 +177,9 @@ class BaseExpression : public Base {
      */
     bool valid{true};
 
+    /// @brief Indicates whether the expression has been resolved.
+    bool resolved{false};
+
   protected:
     /**
      * Call a method on all sub-expressions of this expression.

@@ -23,7 +23,7 @@ set(XFAIL_TESTS
     repeat.test # inner body can't find variable
     hello-world-zx-spectrum-tap.test # internal errors; not implemented: function call, checksum
     error-variable-cycle.test # missing details in error message
-    hello-world-cerberus-2100-6502.test # empty program, probably .use not working
+    hello-world-cerberus-2100-6502.test # labels evaluated wrong
     label-assignment.test # .private label not propagated to module
     label-named.test # label got lost
     label-unnamed-loop.test # undefined variable

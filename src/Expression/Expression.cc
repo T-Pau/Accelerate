@@ -126,6 +126,10 @@ std::ostream& operator<<(std::ostream& stream, const Expression& expression) {
 }
 
 void Expression::resolve(Scope* scope, Entity* containing_entity) {
+    if (expression->resolved) {
+        return;
+    }
+    expression->resolved = true;
     TRACE_BEGIN_INSTANCE_PRINT(expression, "resolving", "");
     handle_translation_errors(*expression, [&]() { expression->resolve(scope, containing_entity); }, containing_entity);
     TRACE_END_INSTANCE_PRINT(expression, "resolving", "");

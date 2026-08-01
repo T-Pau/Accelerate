@@ -36,7 +36,7 @@ block .address BUFFER_START .used {
     jmp $af99
 }
 
-.pin start BUFFER_START + .sizeof(block)
+.pin start BUFFER_START + .sizeof(block) .used
 
 .output {
     .memory BUFFER_START, BUFFER_END

@@ -20,7 +20,7 @@ PROGRAM_END = $efff
     segment: program
 }
 
-.pin start PROGRAM_START
+.pin start PROGRAM_START .used
 
 .extension "bin"
 

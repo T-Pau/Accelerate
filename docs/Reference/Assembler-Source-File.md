@@ -17,10 +17,10 @@ This overrides the CPU specified in the target for this file.
 ### `.pin`
 
 <pre>
-  <code>.pin <em>name</em> <em>address</em></code>
+  <code>.pin <em>name</em> <em>address</em> [.used]</code>
 </pre>
 
-Sets the address of object *name* to *address* and marks it as used.
+Sets the address of object *name* to *address*. If `.used` is specified, the object will be marked as used and included in the **binary program**.
 
 ### `.section`
 
@@ -51,10 +51,12 @@ Marks the object *name* as used.
 ### `.visibility`
 
 <pre>
-<code>.visibility <em>{</em>public<em>|</em>private<em>}</em></code>
+<code>.visibility <em>visibility</em></code>
 </pre>
 
 The `.visibility` directive specifies the visibility of the following elements.
+
+`local` elements are only visible within the same source file.
 
 `private` elements are only visible within the same module (library, main program, or target).
 
@@ -65,11 +67,15 @@ The `.visibility` directive specifies the visibility of the following elements.
 
 ### Element Modifiers
 
-Elements can be preceded by one or more modifiers:
+Elements can be preceded on the same line by one or more modifiers:
 
 #### `.default`
 
 This definition is only used if no regular definition with the same name is found. It can be used by a target to define a default implementation.
+
+#### `.local`
+
+Makes the element local to the current source file. It will not be visible to other source files in the same module.
 
 #### `.private`
 
@@ -83,6 +89,8 @@ Makes the element public.
 ### Objects
 
 #### Object Modifiers
+
+Objects can be modified by one or more of the following modifiers, specified after their name on the same line:
 
 ##### `.align`
 

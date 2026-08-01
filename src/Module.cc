@@ -109,3 +109,11 @@ void Module::add_entity(std::shared_ptr<Entity> entity, std::shared_ptr<Scope> c
     current_file_scope->add_entity(entity);
     contained_entities.insert(std::move(entity));
 }
+
+void Module::resolve() {
+    public_scope_->resolve();
+    private_scope_->resolve();
+    for (const auto& [file_name, file_scope] : file_scopes) {
+        file_scope->resolve();
+    }
+}

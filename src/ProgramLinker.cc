@@ -46,6 +46,9 @@ std::vector<Entity*> ProgramLinker::root_entities() {
     target->module.import(Visibility::PRIVATE, module());
     memory = target->map.initialize_memory();
 
+    target->module.resolve();
+    module().resolve();
+
     auto entities = module().explicitly_used_entities();
     auto target_entities = target->module.explicitly_used_entities();
 

@@ -22,6 +22,27 @@
 			"MIMode": "lldb"
 		},
 		{
+			"name": "xlr8: hello-world-cerberus",
+			"type": "cppdbg",
+			"request": "launch",
+			"program": "${workspaceFolder}/build/src/xlr8",
+			"args": [
+				"--system-directory",
+				"share",
+				"--target",
+				"cerberus-2100-6502",
+				"-o",
+				"hello-world.prg",
+				"--verbose-errors",
+				"examples/hello-world-cerberus-2100-6502.s",
+				"cbm.lib"
+			],
+			"cwd": "${workspaceFolder}",
+			"stopAtEntry": false,
+			"externalConsole": false,
+			"MIMode": "lldb"
+		},
+		{
 			"name": "xlr8: hello-world-c64",
 			"type": "cppdbg",
 			"request": "launch",

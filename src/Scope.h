@@ -44,6 +44,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Entity/Macro.h"
 #include "Entity/Object.h"
 #include "Expression/Expression.h"
+#include "LocationSymbol.h"
 #include "UnnamedLabelList.h"
 #include "Visibility.h"
 
@@ -502,7 +503,7 @@ class Scope {
      * @param object_name The name of the object.
      * @param address The address to pin the object to.
      */
-    void pin(Symbol object_name, Expression address);
+    void pin(Location location, Symbol object_name, Address address, bool mark_used) { pinned_object_names.emplace_back(location, object_name, std::move(address), mark_used); }
 
     /**
      * Explicitly mark an object as used.
@@ -511,16 +512,14 @@ class Scope {
      *
      * @param object_name The name of the object to mark as used.
      */
-    void mark_used(Symbol object_name) { explicitly_used_object_names.insert(object_name); }
+    void mark_used(Location location, Symbol object_name) { explicitly_used_object_names.emplace_back(location, object_name); }
 
     /**
-     * Explicitly mark an object as used.
+     * Resolve names and expressions in the scope.
      *
-     * This will ensure that the object is included in the final output, even if it is not referenced by any other used entities.
-     *
-     * @param object The object to mark as used.
+     * This function does not resolve the contained entities.
      */
-    void mark_used(Object* object) { explicitly_used_objects.insert(object); }
+    void resolve();
 
     void remove_constant(Symbol name) { constants.erase(name); }
 
@@ -549,15 +548,25 @@ class Scope {
      */
     void rename(Symbol new_name);
 
-    /**
-     * @brief Get the set of objects explicitly marked as used.
-     *
-     * @return The set of explicitly used objects.
-     */
-    [[nodiscard]] const std::unordered_set<Object*>& get_explicitly_used_objects() const { return explicitly_used_objects; }
-
-
   private:
+    class Pin {
+      public:
+        Pin(Location location, Symbol object_name, Address address, bool mark_used) : location(location), object_name(object_name), address(std::move(address)), mark_used(mark_used) {}
+
+        Location location;
+        Symbol object_name;
+        Address address;
+        bool mark_used;
+    };
+
+    class MarkedUsed {
+      public:
+        MarkedUsed(Location location, Symbol object_name) : location(location), object_name(object_name) {}
+
+        Location location;
+        Symbol object_name;
+    };
+
     /**
      * @brief Determines if a scope of type `contained` can be contained in a scope of type `container`.
      *
@@ -754,21 +763,17 @@ class Scope {
     /**
      * @brief The objects that have been pinned to specific addresses.
      *
-     * These will be resolved and the address of the objects set once all names are defined.
+     * These will be resolved and the address of the objects set by `resolve()` once all names are defined.
      */
-    std::unordered_map<Symbol, Expression> pinned_object_names;
+    std::vector<Pin> pinned_object_names;
 
     /**
-     * @brief The names of the objects that have been explicitly marked as used.
+     * @brief The names of the objects that have been explicitly marked as used and the location where they were marked.
      *
-     * These will be resolved and added to `explicitly_used_objects` once all names are defined.
+     * These will be resolved and marked used by `resolve()` once all names are defined.
      */
-    std::unordered_set<Symbol> explicitly_used_object_names;
-
-    /// @brief The objects that have been explicitly marked as used.
-    std::unordered_set<Object*> explicitly_used_objects;
+    std::vector<MarkedUsed> explicitly_used_object_names;
 };
-
 
 #endif // HAD_XLR8_SCOPE_H
 #undef IN_XLR8_SCOPE_H
