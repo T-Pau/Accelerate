@@ -129,7 +129,7 @@ Body BodyParser::parse() {
                 case Token::PUNCTUATION:
                     if (token == Token::curly_close && !nesting.empty()) {
                         tokenizer.skip(Token::NEWLINE);
-                        if (nesting.back()->is_if()) {
+                        if (nesting.back()->is<IfNesting>()) {
                             auto next_token = tokenizer.peek();
                             if (next_token == token_else || next_token == token_else_if) {
                                 break;
@@ -306,8 +306,10 @@ void BodyParser::parse_repeat() {
     auto token = tokenizer.next();
 
     auto variable = Symbol{};
+    auto variable_location = Location{};
     if (token.is_name()) {
         variable = token.as_symbol();
+        variable_location = token.location;
         tokenizer.expect(Token::comma);
     }
     else {
@@ -325,7 +327,8 @@ void BodyParser::parse_repeat() {
         tokenizer.unget(token);
     }
 
-    nesting.emplace_back(std::make_unique<RepeatNesting>(variable, start, end));
+    // TODO: We need the containing scope here, including for nested repeats.
+    nesting.emplace_back(std::make_unique<RepeatNesting>(variable, variable_location, start, end, environment));
     push_body(NestingIndex(nesting.size() - 1, 0));
     tokenizer.expect(Token::curly_open);
 }
@@ -428,7 +431,7 @@ void BodyParser::pop_body() {
 }
 
 void BodyParser::push_clause(Expression condition) {
-    auto if_nesting = nesting.back()->as_if();
+    auto if_nesting = nesting.back()->as<IfNesting>();
     if (!if_nesting) {
         throw Exception("not inside .if");
     }
@@ -548,7 +551,7 @@ void BodyParser::parse_binary_file() {
             if (end) {
                 throw LocationException(directive.location, "duplicate .end");
             }
-            length = argument.as_unsigned();
+            end = argument.as_unsigned();
         }
     }
 
@@ -587,9 +590,7 @@ void BodyParser::parse_binary_file() {
 
 Body BodyParser::RepeatNesting::body() {
     if (variable) {
-        // TODO: We need the containing scope here, including for nested repeats.
-        // TODO: We need the location of variable.
-        return VariableRepeatBody::create({}, {}, variable, start, end, inner_body);
+        return VariableRepeatBody::create(containing_scope, variable_location, variable, start, end, inner_body);
     }
     else {
         return SimpleRepeatBody::create(start, end, inner_body);

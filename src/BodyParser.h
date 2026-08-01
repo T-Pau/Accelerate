@@ -93,10 +93,6 @@ class BodyParser {
     Body parse();
 
   private:
-    class IfNesting;
-    class RepeatNesting;
-    class ScopeNesting;
-
     class Nesting {
       public:
         virtual ~Nesting() = default;
@@ -104,17 +100,11 @@ class BodyParser {
         virtual Body* operator[](size_t index) = 0;
         virtual Body body() = 0;
 
-        IfNesting* as_if() { return dynamic_cast<IfNesting*>(this); }
+        template <typename T> T* as() { return dynamic_cast<T*>(this); }
 
-        RepeatNesting* as_repeat() { return dynamic_cast<RepeatNesting*>(this); }
+        template <typename T> const T* as() const { return dynamic_cast<const T*>(this); }
 
-        ScopeNesting* as_scope() { return dynamic_cast<ScopeNesting*>(this); }
-
-        bool is_if() { return as_if(); }
-
-        bool is_repeat() { return as_repeat(); }
-
-        bool is_scope() { return as_scope(); }
+        template <typename T> bool is() const { return as<T>() != nullptr; }
     };
 
     class IfNesting : public Nesting {
@@ -133,7 +123,7 @@ class BodyParser {
 
     class RepeatNesting : public Nesting {
       public:
-        RepeatNesting(Symbol variable, std::optional<Expression> start, Expression end) : variable{variable}, start{start.value_or(ValueExpression::create({}, Value(uint64_t{0})))}, end{std::move(end)} {}
+        RepeatNesting(Symbol variable, Location variable_location, std::optional<Expression> start, Expression end, std::shared_ptr<Scope> containing_scope) : variable{variable}, variable_location{variable_location}, start{start.value_or(ValueExpression::create({}, Value(uint64_t{0})))}, end{std::move(end)}, containing_scope{std::move(containing_scope)} {}
 
         Body* operator[](size_t index) override { return &inner_body; }
 
@@ -144,6 +134,8 @@ class BodyParser {
         Expression start;
         Expression end;
         Body inner_body;
+        Location variable_location;
+        std::shared_ptr<Scope> containing_scope;
     };
 
     class ScopeNesting : public Nesting {

@@ -18,18 +18,16 @@ set(XFAIL_TESTS
     macro-nested-branch.test # labels in macros
 
     # Crashes
-    repeat.test # segfault
 
     # Should investigate
+    repeat.test # inner body can't find variable
     hello-world-zx-spectrum-tap.test # internal errors; not implemented: function call, checksum
     error-variable-cycle.test # missing details in error message
-    hello-world-cerberus-2100-6502.test # empty program
+    hello-world-cerberus-2100-6502.test # empty program, probably .use not working
     label-assignment.test # .private label not propagated to module
     label-named.test # label got lost
     label-unnamed-loop.test # undefined variable
     label-unnamed.test # labels not evaluated
-    macro-recursive.test # cycle not detected
-    macro-variable.test # macro argument can't shadow constant
     error-unclosed-object.test # missing location in error message, follow-on error messages
 )
 

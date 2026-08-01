@@ -41,7 +41,7 @@ VariableRepeatBody::VariableRepeatBody(std::shared_ptr<Scope> inner_scope, Locat
 }
 
 Body VariableRepeatBody::create(std::shared_ptr<Scope> containing_scope, Location variable_location, Symbol variable, RepeatRange range, Body body) {
-    auto repeat_body = std::make_shared<VariableRepeatBody>(std::make_shared<Scope>(Visibility::ARGUMENT, containing_scope), variable_location, variable, std::move(range), std::move(body));
+    auto repeat_body = std::make_shared<VariableRepeatBody>(std::make_shared<Scope>(Visibility::ARGUMENT, containing_scope), variable_location, variable, range, std::move(body));
     if (range.start.has_value() && range.end.has_value()) {
         return repeat_body->expand();
     }

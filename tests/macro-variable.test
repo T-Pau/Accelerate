@@ -27,17 +27,23 @@ file a.lib {} <inline>
     visibility: private
     arguments: value
     body <
-        .data $a9, value:1, $8d, $1234
+        .scope {
+            value = value
+            .if .in_range(-$80, $ff, value) {
+              .data $a9, value:1
+            }
+            .else {
+              .error "arguments out of range" ("a.s", 4, 5, 15)
+            }
+        }
+        .data $8d, $1234
     >
 }
 .object test {
     visibility: private
     section: code
     body <
-        .scope {
-          .data $a9, $12, $8d, $1234
-        }
-        .data $60
+        .data $a9, $12, $8d, $1234, $60
     >
 }
 end-of-inline-data

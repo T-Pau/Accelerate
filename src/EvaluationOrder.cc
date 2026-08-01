@@ -84,7 +84,7 @@ EvaluationOrder::Node* EvaluationOrder::node_for(Entity* entity) {
 
     for (auto* dependency : entity->referenced_entities) {
         if (dependency == entity) {
-            DiagnosticOutput::global.error("entity {} depends on itself", entity->name);
+            DiagnosticOutput::global.error(entity->location, "recursive definition of {}", entity->name);
             continue;
         }
         if (dependency->as<Object>()) {

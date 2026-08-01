@@ -1,5 +1,6 @@
 description Test recursive macro
 arguments --create-library --target 6502 a.s
+return 1
 
 file a.s <inline>
 .macro multiload address, count {
@@ -14,5 +15,7 @@ test {
 }
 end-of-inline-data
 stderr
-reference cycle detected
+a.s:1:8: error: recursive definition of multiload
+.macro multiload address, count {
+       ^^^^^^^^^
 end-of-inline-data
