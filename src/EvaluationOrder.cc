@@ -31,9 +31,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <tpau-cpp-kernal/DiagnosticOutput.h>
 #include <tpau-cpp-kernal/Exception.h>
-#ifdef TRACE_TRANSLATION
 #include <tpau-cpp-kernal/Util.h>
-#endif
 
 #include "Entity/Object.h"
 
@@ -62,8 +60,7 @@ void EvaluationOrder::compute_order() {
         }
 
         if (!blocked_nodes.empty()) {
-            // TODO: find entities involved in the cycle and report them, and break the cycle to continue with the rest of the entities
-            throw Exception("circular dependency detected");
+            break_cycle();
         }
     }
 }
@@ -84,7 +81,8 @@ EvaluationOrder::Node* EvaluationOrder::node_for(Entity* entity) {
 
     for (auto* dependency : entity->referenced_entities) {
         if (dependency == entity) {
-            DiagnosticOutput::global.error(entity->location, "recursive definition of {}", entity->name);
+            // TODO: mark entity as invalid
+            DiagnosticOutput::global.error(entity->location, "circular definition: {} -> {}", entity->name, entity->name);
             continue;
         }
         if (dependency->as<Object>()) {
@@ -131,4 +129,56 @@ void EvaluationOrder::remove_from_dependents(Node* node) {
             ready_nodes.insert(dependent);
         }
     }
+}
+
+void EvaluationOrder::break_cycle() {
+    while (ready_nodes.empty()) {
+        auto cycle = find_cycle();
+        auto first = cycle.front();
+        auto second = cycle.size() > 1 ? cycle[1] : cycle.front();
+        auto names = std::vector<Symbol>();
+        for (auto* node : cycle) {
+            // TODO: mark entity as invalid
+            names.push_back(node->entity->name);
+        }
+        names.push_back(first->entity->name);
+        DiagnosticOutput::global.error(first->entity->location, "circular definition: {}", join(names, " -> "));
+        first->remove_dependency(second);
+        if (first->is_ready()) {
+            blocked_nodes.erase(first);
+            ready_nodes.insert(first);
+        }
+    }
+}
+
+std::vector<EvaluationOrder::Node*> EvaluationOrder::find_cycle() {
+    auto stack = std::vector<TraversalPosition>();
+    auto visited = std::unordered_set<Node*>();
+
+    stack.emplace_back(*blocked_nodes.begin());
+
+    while (!stack.empty()) {
+        auto next = stack.back().next();
+        if (next) {
+            if (visited.contains(next)) {
+                auto start = std::find_if(stack.begin(), stack.end(), [next](const TraversalPosition& pos) { return pos.node == next; });
+                if (start == stack.end()) {
+                    throw Exception("internal error: cycle detection failed");
+                }
+                auto cycle = std::vector<Node*>();
+                for (auto it = start; it != stack.end(); ++it) {
+                    cycle.push_back(it->node);
+                }
+                return cycle;
+            }
+            else {
+                visited.insert(next);
+                stack.emplace_back(next);
+            }
+        }
+        else {
+            stack.pop_back();
+        }
+    }
+    throw Exception("internal error: no cycle found starting from node for entity {}", (*blocked_nodes.begin())->entity->name);
 }

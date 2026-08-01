@@ -113,6 +113,18 @@ class EvaluationOrder {
         void remove_dependency(Node* node) { dependencies.erase(node); }
     };
 
+    class TraversalPosition {
+      public:
+        TraversalPosition(Node* node) : node(node), dependency_it(node->dependencies.begin()) {}
+
+        [[nodiscard]] bool has_next() const { return dependency_it != node->dependencies.end(); }
+
+        [[nodiscard]] Node* next() { return (dependency_it != node->dependencies.end()) ? *dependency_it++ : nullptr; }
+
+        Node* node;
+        std::unordered_set<Node*>::const_iterator dependency_it;
+    };
+
     /**
      * @brief Get a node for an entity in the dependency graph.
      *
@@ -142,6 +154,15 @@ class EvaluationOrder {
      * @param node The node to place in the evaluation order.
      */
     void place_node(Node* node);
+
+    /**
+     * @brief Breaks a cycle in the dependency graph.
+     *
+     * Report one cycle and break it.
+     */
+    void break_cycle();
+
+    std::vector<Node*> find_cycle();
 
     /*
      * @brief The nodes corresponding to the entities to be evaluated.

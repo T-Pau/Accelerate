@@ -28,7 +28,6 @@ set(XFAIL_TESTS
     label-unnamed-loop.test # undefined variable
     label-unnamed.test # labels not evaluated
     error-unclosed-object.test # missing location in error message, follow-on error messages
-    error-variable-cycle.test # missing details in error message
 )
 
 file(GLOB TESTS ${CMAKE_CURRENT_SOURCE_DIR}/*.test)
