@@ -181,7 +181,7 @@
 			"MIMode": "lldb"
 		},
 		{
-			"name": "xlr8: a.s",
+			"name": "xlr8: a.lib",
 			"type": "cppdbg",
 			"request": "launch",
 			"program": "${workspaceFolder}/build/src/xlr8",
@@ -195,7 +195,25 @@
 				"a.s"
 			],
 			"cwd": "${workspaceFolder}/build/tests",
-			"stopAtEntry": true,
+			"stopAtEntry": false,
+			"externalConsole": false,
+			"MIMode": "lldb"
+		},
+		{
+			"name": "xlr8: a.prg",
+			"type": "cppdbg",
+			"request": "launch",
+			"program": "${workspaceFolder}/build/src/xlr8",
+			"args": [
+				"--system-directory",
+				"/Users/dillo/Projects/T-Pau/Development/Accelerate/share",
+				"--verbose-errors",
+				"--target",
+				"c64-basic",
+				"a.s"
+			],
+			"cwd": "${workspaceFolder}/build/tests",
+			"stopAtEntry": false,
 			"externalConsole": false,
 			"MIMode": "lldb"
 		}

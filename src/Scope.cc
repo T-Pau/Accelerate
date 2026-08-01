@@ -42,7 +42,11 @@ using namespace tpau::cpp_kernal;
 
 Scope::Scope(Visibility type, Symbol name) : type_(type), name_(name) {}
 
-Scope::Scope(Visibility type, Symbol name, std::shared_ptr<Scope> next) : type_(type), name_(name) { add_next(std::move(next)); }
+Scope::Scope(Visibility type, Symbol name, std::shared_ptr<Scope> next) : type_(type), name_(name) {
+    if (next) {
+        add_next(std::move(next));
+    }
+}
 
 Scope::~Scope() {
     if (name()) {

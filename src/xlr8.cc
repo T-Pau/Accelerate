@@ -100,6 +100,7 @@ int main(int argc, char* argv[]) {
 int xlr8::process() {
     std::optional<std::string> target_name;
     auto create_program = true;
+    auto use_default_system_directory = true;
 
     for (const auto& option : arguments.options) {
         try {
@@ -117,6 +118,7 @@ int xlr8::process() {
             }
             else if (option.name == "system-directory") {
                 system_path.append_directory(option.argument);
+                use_default_system_directory = false;
             }
             else if (option.name == "target") {
                 target_name = option.argument;
@@ -127,14 +129,17 @@ int xlr8::process() {
             else if (option.name == "verbose-errors") {
                 DiagnosticOutput::global.verbose_error_messages = true;
             }
-        } catch (Exception& ex) {
+        }
+        catch (Exception& ex) {
             DiagnosticOutput::global.error(ex);
         }
     }
 
     system_path.append_path(include_path);
-    const auto system_directory = SystemEnvironment::get("XLR8_SYSTEM_DIRECTORY");
-    system_path.append_directory(system_directory ? *system_directory : SYSTEM_DIRECTORY);
+    if (use_default_system_directory) {
+        const auto system_directory = SystemEnvironment::get("XLR8_SYSTEM_DIRECTORY");
+        system_path.append_directory(system_directory.value_or(SYSTEM_DIRECTORY));
+    }
 
     if (SystemEnvironment::is_set("XLR8_VERBOSE_ERRORS")) {
         DiagnosticOutput::global.verbose_error_messages = true;
@@ -198,9 +203,11 @@ int xlr8::process() {
     for (const auto& file_name : library_files) {
         try {
             linker->module().import(Visibility::PRIVATE, LibraryGetter::global.get(file_name));
-        } catch (LocationException& ex) {
+        }
+        catch (LocationException& ex) {
             DiagnosticOutput::global.error(ex);
-        } catch (Exception& ex) {
+        }
+        catch (Exception& ex) {
             DiagnosticOutput::global.error(Location(file_name), ex);
         }
     }
@@ -208,9 +215,11 @@ int xlr8::process() {
     for (const auto& file_name : source_files) {
         try {
             Assembler(linker->target, include_path, defines).parse_object_file(Symbol(file_name), &linker->module());
-        } catch (LocationException& ex) {
+        }
+        catch (LocationException& ex) {
             DiagnosticOutput::global.error(ex);
-        } catch (Exception& ex) {
+        }
+        catch (Exception& ex) {
             DiagnosticOutput::global.error(Location(file_name), ex);
         }
     }

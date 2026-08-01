@@ -1,4 +1,5 @@
 arguments --target c64-basic --symbol-map a.sym a.s
+
 file a.s <inline>
 .macro call {
     store $1000, string
@@ -16,7 +17,15 @@ string {
 .section code
 .public start {
     call
+    rts
 }
 end-of-inline-data
+
 file a.sym {} <>
+constant	$0801	basic_start
+object	$0801	$000d	basic_program	data	data
+object	$080e	$000b	start	code	data
+object	$0819	$0003	string	data	data
 end-of-inline-data
+
+file a.prg {} macro-use.prg

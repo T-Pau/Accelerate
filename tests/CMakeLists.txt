@@ -16,19 +16,19 @@ set(XFAIL_TESTS
     macro-unnamed-label-half-fixed.test # labels in macros
     macro-unnamed-label-fixed.test # labels in macros
     macro-nested-branch.test # labels in macros
+    hello-world-zx-spectrum-tap.test # labels in macros, function call, checksum
 
     # Crashes
 
     # Should investigate
     repeat.test # inner body can't find variable
-    hello-world-zx-spectrum-tap.test # internal errors; not implemented: function call, checksum
-    error-variable-cycle.test # missing details in error message
     hello-world-cerberus-2100-6502.test # labels evaluated wrong
     label-assignment.test # .private label not propagated to module
     label-named.test # label got lost
     label-unnamed-loop.test # undefined variable
     label-unnamed.test # labels not evaluated
     error-unclosed-object.test # missing location in error message, follow-on error messages
+    error-variable-cycle.test # missing details in error message
 )
 
 file(GLOB TESTS ${CMAKE_CURRENT_SOURCE_DIR}/*.test)

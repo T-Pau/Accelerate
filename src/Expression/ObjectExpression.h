@@ -58,6 +58,8 @@ class ObjectExpression : public BaseExpression {
 
     [[nodiscard]] std::optional<Expression> evaluate(const EvaluationContext& context) override { return simplify(location, object(), false); }
 
+    [[nodiscard]] Expression clone(const CloneContext& context) const override { return Expression(std::make_shared<ObjectExpression>(location, object())); }
+
     Object* object() const { return object_; }
 
   protected:

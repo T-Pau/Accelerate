@@ -111,7 +111,7 @@ Specifies the address to place the object at.
 
 ##### `.used`
 
-Marks the object as used.
+Marks the object as used. It will be included in the **binary program** even if it is not referenced by any other object.
 
 ##### `.uses`
 
