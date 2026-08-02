@@ -27,10 +27,18 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "AssignmentBody.h"
+#include "Body/AssignmentBody.h"
+
+#include "Entity/Constant.h"
+#include "Entity/ScopeEntity.h"
 
 void AssignmentBody::enter_names(Scope* scope, Entity* containing_entity) {
-    // TODO: create Constant and add it to scope.
+    auto scope_entity = dynamic_cast<ScopeEntity*>(containing_entity);
+    if (!scope_entity) {
+        throw LocationException(location, "internal error: AssignmentBody: containing entity is not a ScopeEntity");
+    }
+    auto constant = std::make_shared<Constant>(location, name, visibility, scope_entity->scope(), false, value);
+    scope_entity->add(constant);
 }
 
 void AssignmentBody::serialize(std::ostream& stream, const std::string& prefix) const {

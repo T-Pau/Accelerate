@@ -23,7 +23,7 @@ set(XFAIL_TESTS
     # Should investigate
     repeat.test # inner body can't find variable
     hello-world-cerberus-2100-6502.test # labels evaluated wrong
-    label-assignment.test # .private label not propagated to module
+    label-assignment.test # .private label can't be added to entity, needs to be added to module.
     label-named.test # label got lost
     label-unnamed-loop.test # undefined variable
     label-unnamed.test # labels not evaluated
