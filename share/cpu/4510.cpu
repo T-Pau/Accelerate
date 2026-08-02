@@ -29,7 +29,7 @@
 
 .include "6502.cpu"
 
-.argument_type word: fits :2
+.argument_type word fits :2
 
 .addressing_mode immediate_word {
     notation: #value

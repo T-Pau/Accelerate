@@ -18,7 +18,7 @@ file a.lib {} <inline>
 .target "6502"
 .constant next {
     visibility: private
-    value: (test+$03)
+    value: (test.label+$01)
 }
 .object foo {
     visibility: private
@@ -29,7 +29,8 @@ file a.lib {} <inline>
     visibility: private
     section: code
     body <
-        .data $a5, foo:1, $ea
+        label = (test+$02)
+        .data $a5, foo:+1, $ea
     >
 }
 end-of-inline-data

@@ -106,6 +106,10 @@ std::vector<Entity*> Module::explicitly_used_entities() const {
 }
 
 void Module::add_entity(std::shared_ptr<Entity> entity, std::shared_ptr<Scope> current_file_scope) {
+    if (entity->containing_module) {
+        throw Exception("entity {} already belongs to module {}", entity->name, entity->containing_module->name());
+    }
+    entity->containing_module = this;
     current_file_scope->add_entity(entity);
     contained_entities.insert(std::move(entity));
 }

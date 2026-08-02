@@ -17,13 +17,13 @@ set(XFAIL_TESTS
     macro-unnamed-label-fixed.test # labels in macros
     macro-nested-branch.test # labels in macros
     hello-world-zx-spectrum-tap.test # labels in macros, function call, checksum
+    label-assignment.test # scope path
 
     # Crashes
 
     # Should investigate
     repeat.test # inner body can't find variable
     hello-world-cerberus-2100-6502.test # labels evaluated wrong
-    label-assignment.test # .private label can't be added to entity, needs to be added to module.
     label-named.test # label got lost
     label-unnamed-loop.test # undefined variable
     label-unnamed.test # labels not evaluated

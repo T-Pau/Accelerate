@@ -1,5 +1,6 @@
 #include "Entity/ScopeEntity.h"
 
+#include "Module.h"
 #include "Scope.h"
 
 ScopeEntity::ScopeEntity(const Location& location, Symbol name, std::shared_ptr<Scope> containing_scope, const std::shared_ptr<StructuredValue>& definition) : Entity(location, name, std::move(containing_scope), definition) { scope_ = std::make_shared<Scope>(Visibility::ENTITY, this->containing_scope()); }
@@ -8,12 +9,22 @@ ScopeEntity::ScopeEntity(const Location& location, Symbol name, Visibility visib
 
 void ScopeEntity::add(std::shared_ptr<Constant> constant, bool add_to_scope) {
     if (constant->visibility != Visibility::ENTITY) {
-        throw Exception("internal error: cannot add constant {} with visibility {} to {}, add to module instead", constant->name, constant->visibility, type_name());
+        if (!add_to_scope) {
+            throw LocationException(location, "internal error: cannot add constant {} with visibility {} to module but not to scope", constant->name, constant->visibility, type_name());
+        }
+        if (containing_module) {
+            containing_module->add_entity(constant, scope()->parent());
+        }
+        else {
+            throw LocationException(location, "internal error: cannot add constant {} with visibility {} to {} with no containing module", constant->name, constant->visibility, type_name());
+        }
     }
-    if (add_to_scope) {
-        scope()->add(constant);
+    else {
+        if (add_to_scope) {
+            scope()->add(constant);
+        }
+        constants.insert(constant);
     }
-    constants.insert(constant);
 }
 
 void ScopeEntity::traverse(std::function<void(Entity&)> entity_callable, std::function<void(Body&)> body_callable, std::function<void(Expression&)> expression_callable) {

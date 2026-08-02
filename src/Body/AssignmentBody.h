@@ -64,10 +64,8 @@ class AssignmentBody : public BodyElement {
 
     void resolve(Scope* scope, Entity* containing_entity) override { value.resolve(scope, containing_entity); }
 
-    std::optional<Body> expand_calls() override {
-        value.expand_calls();
-        return {};
-    }
+    // All our work is done in enter_names(), so we can remove ourselves.
+    std::optional<Body> evaluate(const EvaluationContext& context) override { return Body(); }
 
     void enter_names(Scope* scope, Entity* containing_entity) override;
 

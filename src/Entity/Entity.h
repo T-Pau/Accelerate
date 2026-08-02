@@ -45,6 +45,7 @@ class Expression;
 class Constant;
 class Function;
 class Macro;
+class Module;
 class Object;
 class Scope;
 
@@ -110,6 +111,7 @@ class Entity : public Base {
 
     std::shared_ptr<Scope> containing_scope() const;
 
+    Module* containing_module{nullptr};
 
   protected:
     /**
