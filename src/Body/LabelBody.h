@@ -65,6 +65,20 @@ class LabelBody : public BodyElement {
 
     Visibility visibility;
     Symbol name;
+
+    [[nodiscard]] bool is_referenced() const { return reference_count > 0; }
+
+    void add_reference() { reference_count += 1; }
+
+    void remove_reference() {
+        if (reference_count == 0) {
+            throw LocationException(location, "removing reference from label with zero references");
+        }
+        reference_count -= 1;
+    }
+
+  private:
+    uint64_t reference_count{0};
 };
 
 

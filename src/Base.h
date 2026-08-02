@@ -34,6 +34,7 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+#include <memory>
 #include <ostream>
 #include <string>
 
@@ -75,7 +76,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  * It is used for Body, Entity and Expression hierarchies.
  */
-class Base {
+class Base : public std::enable_shared_from_this<Base> {
   public:
     virtual ~Base() = default;
 

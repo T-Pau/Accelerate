@@ -1,0 +1,172 @@
+description Test function expansion
+arguments --create-library --target a a.s
+
+file a.target <inline>
+.include "6502.target"
+.section all {
+    type: reserve_only
+    address: $0000 - $ffff
+}
+end-of-inline-data
+
+file a.s <inline>
+.section code
+label_start {
+label:
+    bne label
+}
+label_start_address .address $1000 {
+label:
+    bne label
+}
+label_middle {
+    nop
+label:
+    bne label
+}
+label_middle_address .address $1000 {
+    nop
+label:
+    bne label
+}
+label_unknown {
+    lda unknown
+label:
+    bne label
+}
+label_unknown_address .address $1000 {
+    lda unknown
+label:
+    bne label
+}
+label_unknown_across {
+    lda unknown
+label:
+    bne label_unknown_across
+}
+label_unknown_across_address .address $1000 {
+    lda unknown
+label:
+    bne label_unknown_across_address
+}
+.section all
+unknown .reserve 1
+end-of-inline-data
+
+file a.lib {} <inline>
+.format_version 1.0
+.target "a"
+.object label_middle {
+    visibility: private
+    section: code
+    body <
+        label = (label_middle+$01)
+        .data $ea, $d0, -$02
+    >
+}
+.object label_middle_address {
+    visibility: private
+    address: $1000
+    section: code
+    body <
+        label = $1001
+        .data $ea, $d0, -$02
+    >
+}
+.object label_start {
+    visibility: private
+    section: code
+    body <
+        label = label_start
+        .data $d0, -$02
+    >
+}
+.object label_start_address {
+    visibility: private
+    address: $1000
+    section: code
+    body <
+        label = $1000
+        .data $d0, -$02
+    >
+}
+.object label_unknown {
+    visibility: private
+    section: code
+    body <
+        label = (label_unknown+label_offset(label_unknown,label))
+        .scope {
+            address = unknown
+            .if .in_range($00, $ff, address) {
+              .data $a5, address:+1
+            }
+            .else {
+              .data $ad, address:+2
+            }
+        }
+      label:
+        .data $d0, -$02
+    >
+}
+.object label_unknown_across {
+    visibility: private
+    section: code
+    body <
+        label = (label_unknown_across+label_offset(label_unknown_across,label))
+        .scope {
+            address = unknown
+            .if .in_range($00, $ff, address) {
+              .data $a5, address:+1
+            }
+            .else {
+              .data $ad, address:+2
+            }
+        }
+      label:
+        .data $d0, (-label_offset(label_unknown_across,label)-$02):-1
+    >
+}
+.object label_unknown_across_address {
+    visibility: private
+    address: $1000
+    section: code
+    body <
+        label = ($1000+label_offset(label_unknown_across_address,label))
+        .scope {
+            address = unknown
+            .if .in_range($00, $ff, address) {
+              .data $a5, address:+1
+            }
+            .else {
+              .data $ad, address:+2
+            }
+        }
+      label:
+        .data $d0, (-label_offset(label_unknown_across_address,label)-$02):-1
+    >
+}
+.object label_unknown_address {
+    visibility: private
+    address: $1000
+    section: code
+    body <
+        label = ($1000+label_offset(label_unknown_address,label))
+        .scope {
+            address = unknown
+            .if .in_range($00, $ff, address) {
+              .data $a5, address:+1
+            }
+            .else {
+              .data $ad, address:+2
+            }
+        }
+      label:
+        .data $d0, -$02
+    >
+}
+.object unknown {
+    visibility: private
+    section: all
+    reserve: $01
+}
+end-of-inline-data

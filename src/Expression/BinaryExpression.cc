@@ -32,6 +32,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <tpau-cpp-kernal/Exception.h>
 
 #include "Expression/ConstantExpression.h"
+#include "Expression/LabelOffsetExpression.h"
 #include "Expression/ObjectExpression.h"
 #include "Expression/UnaryExpression.h"
 #include "Expression/ValueExpression.h"
@@ -287,20 +288,36 @@ std::optional<Expression> BinaryExpression::simplify(const Location& location, c
                     return UnaryExpression::create(location, UnaryExpression::Operation::MINUS, right);
                 }
 
-                // These special cases are for resolving relative addressing within an object.
-
-                /*
-                  .pc label at start of object:
-                    address = object
-                    .pc = object
-                    (address-.pc)
-                */
-                auto left_object = get_referenced_object_or_macro(left);
-                auto right_object = get_referenced_object_or_macro(right);
-                if (left_object && right_object && left_object == right_object) {
-                    return ValueExpression::create(location, Value(uint64_t{0}));
+                // For the difference of two label expressions within the same object, return the difference of their offsets.
+                // This simplifies relative jumps within an object.
+                auto [left_entity, left_offset] = deconstruct_label(left);
+                auto [right_entity, right_offset] = deconstruct_label(right);
+                if (left_entity && right_entity) {
+                    if (left_entity == right_entity) {
+                        if (left_offset && right_offset) {
+                            auto left_label_offset = left_offset->as<LabelOffsetExpression>();
+                            auto right_label_offset = right_offset->as<LabelOffsetExpression>();
+                            if (left_label_offset && right_label_offset && *left_label_offset == *right_label_offset) {
+                                // The same label offset, so the difference is 0.
+                                return ValueExpression::create(location, Value(uint64_t{0}));
+                            }
+                            // left_offset - right_offset
+                            return BinaryExpression::create(location, *left_offset, Operation::SUBTRACT, *right_offset);
+                        }
+                        else if (left_offset) {
+                            // left_offset - 0
+                            return *left_offset;
+                        }
+                        else if (right_offset) {
+                            // 0 - right_offset
+                            return UnaryExpression::create(location, UnaryExpression::Operation::MINUS, *right_offset);
+                        }
+                        else {
+                            // 0 - 0
+                            return ValueExpression::create(location, Value(uint64_t{0}));
+                        }
+                    }
                 }
-
                 break;
             }
 
@@ -486,17 +503,65 @@ const std::string& BinaryExpression::operation_name(Operation operation) {
     return operation_names[static_cast<size_t>(operation)];
 }
 
-Entity* BinaryExpression::get_referenced_object_or_macro(const Expression& expression) {
+std::optional<BinaryExpression::LabelEntity> BinaryExpression::get_label_entity(const Expression& expression) {
     // TODO: handle macros
     if (auto object_expression = expression.as<ObjectExpression>()) {
         return object_expression->object();
     }
+    else if (auto value_expression = expression.as<ValueExpression>()) {
+        auto value = *value_expression->value();
+        if (value.is_unsigned()) {
+            return value.unsigned_value();
+        }
+    }
     else if (auto constant_expression = expression.as<ConstantExpression>()) {
         if (auto constant = constant_expression->constant()) {
-            if (constant->value.is<ObjectExpression>()) {
-                return constant->value.as<ObjectExpression>()->object();
+            if (auto object_expression = constant->value.as<ObjectExpression>()) {
+                return object_expression->object();
+            }
+            else if (auto value_expression = constant->value.as<ValueExpression>()) {
+                auto value = *value_expression->value();
+                if (value.is_unsigned()) {
+                    return value.unsigned_value();
+                }
             }
         }
     }
     return {};
+}
+
+std::pair<std::optional<BinaryExpression::LabelEntity>, std::optional<Expression>> BinaryExpression::deconstruct_label(const Expression& expression) {
+    if (auto entity = get_label_entity(expression)) {
+        TRACE_INSTANCE(expression, "deconstructing label", "{} {} {}", entity->type_name(), static_cast<void*>(entity), entity->name);
+        return {entity, {}};
+    }
+    else if (auto constant_expression = expression.as<ConstantExpression>()) {
+        if (auto constant = constant_expression->constant()) {
+            if (auto binary_expression = constant->value.as<BinaryExpression>()) {
+                if (binary_expression->operation != Operation::ADD) {
+                    return {{}, {}};
+                }
+                else if (auto entity = get_label_entity(binary_expression->left)) {
+                    TRACE_INSTANCE(expression, "deconstructing label", "{} {} {}, offset {}", entity->type_name(), static_cast<void*>(entity), entity->name, binary_expression->right);
+                    return {entity, binary_expression->right};
+                }
+                else {
+                    return {{}, {}};
+                }
+            }
+        }
+    }
+    return {{}, {}};
+}
+
+bool BinaryExpression::LabelEntity::operator==(const LabelEntity& other) const {
+    if (entity_or_address.index() != other.entity_or_address.index()) {
+        return false;
+    }
+    if (std::holds_alternative<Entity*>(entity_or_address)) {
+        return std::get<Entity*>(entity_or_address) == std::get<Entity*>(other.entity_or_address);
+    }
+    else {
+        return std::get<uint64_t>(entity_or_address) == std::get<uint64_t>(other.entity_or_address);
+    }
 }

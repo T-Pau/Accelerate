@@ -33,20 +33,29 @@ To report as many errors as possible, Accelerate will continue translating after
 
 # 1. Parse all Entities
 
-All source files are parsed and all libraries are loaded.
+All source files are parsed and all libraries are loaded. `enter_names()` is called on all entities, which enters their names into the correct scope.
 
-This results in a collection of objects, constants, macros, and functions, arranged in nested scopes.
+This results in a collection of entities (objects, constants, macros, and functions), arranged in nested scopes.
 
 Duplicate names in the same scope will result in an error. Duplicate names in different scopes are allowed, and will be resolved to the closest scope.
 
 After this step, all entities are known.
 
 
+# 2. Get Used Entities
+
+All used entities are collected.
+
+For programs, this starts with the target's `.output` entity and objects marked explicitly as used. Then recursively all entities referenced by these entities are collected.
+
+For libraries, all entities are collected, since what is used depends on the program using the library.
+
+The following steps are only performed on the used entities. Unused entities are ignored.
+
+
 # 2. Resolve Names
 
 This step resolves all names in bodies and expressions in their respective scopes. It is implemented by the `resolve()` methods of entities, body parts, and expressions.
-
-Only entities in the program or library being translated are evaluated; names in loaded libraries are already resolved.
 
 The following actions are performed during this pass:
 

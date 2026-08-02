@@ -1,0 +1,125 @@
+description Test function expansion
+arguments --create-library --target a a.s
+
+file a.target <inline>
+.include "6502.target"
+.section all {
+    type: reserve_only
+    address: $0000 - $ffff
+}
+end-of-inline-data
+
+file a.s <inline>
+.section code
+label_start {
+label:
+    jmp label
+}
+label_start_address .address $1000 {
+label:
+    jmp label
+}
+label_middle {
+    nop
+label:
+    jmp label
+}
+label_middle_address .address $1000 {
+    nop
+label:
+    jmp label
+}
+label_unknown {
+    lda unknown
+label:
+    jmp label
+}
+label_unknown_address .address $1000 {
+    lda unknown
+label:
+    jmp label
+}
+.section all
+unknown .reserve 1
+end-of-inline-data
+
+file a.lib {} <inline>
+.format_version 1.0
+.target "a"
+.object label_middle {
+    visibility: private
+    section: code
+    body <
+        label = (label_middle+$01)
+        .data $ea, $4c, label:+2
+    >
+}
+.object label_middle_address {
+    visibility: private
+    address: $1000
+    section: code
+    body <
+        label = $1001
+        .data $ea, $4c, $1001
+    >
+}
+.object label_start {
+    visibility: private
+    section: code
+    body <
+        label = label_start
+        .data $4c, label:+2
+    >
+}
+.object label_start_address {
+    visibility: private
+    address: $1000
+    section: code
+    body <
+        label = $1000
+        .data $4c, $1000
+    >
+}
+.object label_unknown {
+    visibility: private
+    section: code
+    body <
+        label = (label_unknown+label_offset(label_unknown,label))
+        .scope {
+            address = unknown
+            .if .in_range($00, $ff, address) {
+              .data $a5, address:+1
+            }
+            .else {
+              .data $ad, address:+2
+            }
+        }
+      label:
+        .data $4c, label:+2
+    >
+}
+.object label_unknown_address {
+    visibility: private
+    address: $1000
+    section: code
+    body <
+        label = ($1000+label_offset(label_unknown_address,label))
+        .scope {
+            address = unknown
+            .if .in_range($00, $ff, address) {
+              .data $a5, address:+1
+            }
+            .else {
+              .data $ad, address:+2
+            }
+        }
+      label:
+        .data $4c, label:+2
+    >
+}
+.object unknown {
+    visibility: private
+    section: all
+    reserve: $01
+}
+end-of-inline-data

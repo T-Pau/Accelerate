@@ -31,9 +31,23 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <tpau-cpp-kernal/LocationException.h>
 
-#include "ValueExpression.h"
+#include "Body/LabelBody.h"
+#include "Expression/ValueExpression.h"
 
 using namespace tpau::cpp_kernal;
+
+LabelOffsetExpression::LabelOffsetExpression(const Location& location, Symbol entity_name, Symbol label_name, size_t unnamed_label_index, std::shared_ptr<LabelBody> body) : BaseExpression(location), entity_name(entity_name), label_name(label_name), unnamed_label_index(unnamed_label_index), body_(body) {
+    if (!body) {
+        throw LocationException(location, "internal error: LabelOffsetExpression: body is null");
+    }
+    body->add_reference();
+}
+
+LabelOffsetExpression::~LabelOffsetExpression() {
+    if (auto label_body = body_.lock()) {
+        label_body->remove_reference();
+    }
+}
 
 std::optional<Expression> LabelOffsetExpression::evaluate(const EvaluationContext& context) {
     // TODO: make sure body is evaluated first?
@@ -54,4 +68,13 @@ void LabelOffsetExpression::serialize_sub(std::ostream& stream) const {
         stream << unnamed_label_index;
     }
     stream << ")";
+}
+
+std::shared_ptr<LabelBody> LabelOffsetExpression::body() const {
+    if (auto label_body = body_.lock()) {
+        return label_body;
+    }
+    else {
+        throw LocationException(location, "internal error: LabelOffsetExpression body disappeared");
+    }
 }

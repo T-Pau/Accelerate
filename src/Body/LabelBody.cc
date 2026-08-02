@@ -49,8 +49,7 @@ void LabelBody::serialize(std::ostream& stream, const std::string& prefix) const
 }
 
 std::optional<Body> LabelBody::evaluate(const EvaluationContext& context) {
-    if (offset().has_size()) {
-        // If our offset was known, all LabelOffsetExpressions that reference us have been evaluated to a value, and we are no longer needed.
+    if (!is_referenced()) {
         return Body();
     }
     // TODO: handle unnamed labels
@@ -62,11 +61,12 @@ void LabelBody::resolve(Scope* scope, Entity* containing_entity) {
 }
 
 void LabelBody::enter_names(Scope* scope, Entity* containing_entity) {
-    auto offset_expression = LabelOffsetExpression::create(location, containing_entity->name, name, this);
+    auto label_body = std::dynamic_pointer_cast<LabelBody>(shared_from_this());
+    auto offset_expression = LabelOffsetExpression::create(location, containing_entity->name, name, label_body);
     auto label_expression = BinaryExpression::create(location, NameExpression::create(location, containing_entity->name), BinaryExpression::Operation::ADD, offset_expression);
 
     if (!name.empty()) {
-        auto label_constant = std::make_shared<Constant>(location, name, Visibility::ENTITY, containing_entity->containing_scope(), false, label_expression);
+        auto label_constant = std::make_shared<Constant>(location, name, visibility, containing_entity->containing_scope(), false, label_expression);
         if (auto scope_entity = containing_entity->as<ScopeEntity>()) {
             scope_entity->add(label_constant);
         }

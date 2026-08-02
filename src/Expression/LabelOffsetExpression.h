@@ -36,6 +36,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "BaseExpression.h"
 #include "Body/Body.h"
+#include "Body/LabelBody.h"
 #include "EvaluationContext.h"
 
 /**
@@ -45,21 +46,40 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 class LabelOffsetExpression : public BaseExpression {
   public:
-    static Expression create(const Location& location, Symbol entity_name, Symbol label_name, BodyElement* body) { return Expression(std::make_shared<LabelOffsetExpression>(location, entity_name, label_name, 0, body)); }
+    static Expression create(const Location& location, Symbol entity_name, Symbol label_name, std::shared_ptr<LabelBody> body) { return Expression(std::make_shared<LabelOffsetExpression>(location, entity_name, label_name, 0, body)); }
 
-    static Expression create(const Location& location, Symbol entity_name, size_t unnamed_label_index, BodyElement* body) { return Expression(std::make_shared<LabelOffsetExpression>(location, entity_name, Symbol(), unnamed_label_index, body)); }
+    static Expression create(const Location& location, Symbol entity_name, size_t unnamed_label_index, std::shared_ptr<LabelBody> body) { return Expression(std::make_shared<LabelOffsetExpression>(location, entity_name, Symbol(), unnamed_label_index, body)); }
 
-    LabelOffsetExpression(const Location& location, Symbol entity_name, Symbol label_name, size_t unnamed_label_index, BodyElement* body) : BaseExpression(location), entity_name(entity_name), label_name(label_name), unnamed_label_index(unnamed_label_index), body(body) {}
+    LabelOffsetExpression(const Location& location, Symbol entity_name, Symbol label_name, size_t unnamed_label_index, std::shared_ptr<LabelBody> body);
 
-    [[nodiscard]] std::optional<Value> minimum_value() const override { return body->offset().minimum_value(); }
+    virtual ~LabelOffsetExpression();
 
-    [[nodiscard]] std::optional<Value> maximum_value() const override { return body->offset().maximum_value(); }
+    [[nodiscard]] Symbol entity() const { return entity_name; }
 
-    [[nodiscard]] std::optional<Value> value() const override { return body->offset().value(); }
+    [[nodiscard]] Symbol label() const { return label_name; }
+
+    [[nodiscard]] size_t unnamed_index() const { return unnamed_label_index; }
+
+    [[nodiscard]] std::shared_ptr<LabelBody> body() const;
+
+    [[nodiscard]] std::optional<Value> minimum_value() const override { return body()->offset().minimum_value(); }
+
+    [[nodiscard]] std::optional<Value> maximum_value() const override { return body()->offset().maximum_value(); }
+
+    [[nodiscard]] std::optional<Value> value() const override { return body()->offset().value(); }
 
     [[nodiscard]] std::optional<Value::Type> type() const override { return Value::UNSIGNED; }
 
-    [[nodiscard]] bool has_value() const override { return body->offset().has_size(); }
+    [[nodiscard]] bool has_value() const override { return body()->offset().has_size(); }
+
+    // TODO: Is this sufficient?
+    /**
+     * @brief Compare two label offset expressions for equality.
+     *
+     * @param other The other label offset expression to compare with.
+     * @return `true` if both expressions refer to the same body element, `false` otherwise.
+     */
+    bool operator==(const LabelOffsetExpression& other) const { return body() == other.body(); }
 
   protected:
     [[nodiscard]] std::optional<Expression> evaluate(const EvaluationContext& context) override;
@@ -70,7 +90,7 @@ class LabelOffsetExpression : public BaseExpression {
     Symbol label_name;
     size_t unnamed_label_index{0};
     // TODO: use weak_ptr and throw on expired
-    BodyElement* body;
+    std::weak_ptr<LabelBody> body_;
 };
 
 #endif // HAD_XLR8_LABEL_OFFSET_EXPRESSION_H

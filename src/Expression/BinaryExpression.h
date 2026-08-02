@@ -106,6 +106,18 @@ class BinaryExpression : public BaseExpression {
     }
 
   private:
+    class LabelEntity {
+      public:
+        LabelEntity(Entity* entity) : entity_or_address(entity) {}
+
+        LabelEntity(uint64_t address) : entity_or_address(address) {}
+
+        [[nodiscard]] bool operator==(const LabelEntity& other) const;
+
+      private:
+        std::variant<Entity*, uint64_t> entity_or_address;
+    };
+
     /**
      * Simplify a binary expression if possible.
      *
@@ -118,7 +130,27 @@ class BinaryExpression : public BaseExpression {
      */
     static std::optional<Expression> simplify(const Location& location, const Expression& left, Operation operation, const Expression& right, bool always_create);
 
-    [[nodiscard]] static Entity* get_referenced_object_or_macro(const Expression& expression);
+    /**
+     * @brief This deconstructs label expressions.
+     *
+     * These are of the form `entity` or `entity + label_offset`. `entity` is an ObjectExpression or a ValueExpression representing an entity's address, and `label_offset` is a LabelOffsetExpression or ValueExpression.
+     *
+     * If the expression is not a label expression, the pair {}, {} is returned.
+     *
+     * @param expression The expression to check.
+     * @return The referenced entity or its address, or {} if there is none; and the label_offset or {} if there is none.
+     */
+    [[nodiscard]] static std::pair<std::optional<LabelEntity>, std::optional<Expression>> deconstruct_label(const Expression& expression);
+
+    /**
+     * @brief Get the label entity referenced by an expression.
+     *
+     * If this is an ObjectExpression, return the referenced entity. If it is an unsigned ValueExpression, return its value. If it is a ConstantExpression referencing either, return the referenced entity or value. Otherwise, return {}.
+     *
+     * @param expression The expression to check.
+     * @return The referenced entity, or {} if there is none.
+     */
+    [[nodiscard]] static std::optional<LabelEntity> get_label_entity(const Expression& expression);
 
     /**
      * Get the name of a binary operation.

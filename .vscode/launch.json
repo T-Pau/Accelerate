@@ -10,12 +10,10 @@
 			"args": [
 				"--create-library",
 				"--target",
-				"6502",
+				"a",
 				"-o",
 				"a.lib",
-				"a.s",
-				"b.s",
-				"c.lib"
+				"a.s"
 			],
 			"stopAtEntry": false,
 			"externalConsole": false,
@@ -49,9 +47,13 @@
 			"program": "${workspaceFolder}/build/src/xlr8",
 			"args": [
 				"--system-directory",
+				"build/share",
+				"--system-directory",
 				"share",
 				"--target",
 				"c64-basic",
+				"--symbol-map",
+				"hello-world.sym",
 				"-o",
 				"hello-world.prg",
 				"--verbose-errors",
@@ -59,7 +61,7 @@
 				"cbm.lib"
 			],
 			"cwd": "${workspaceFolder}",
-			"stopAtEntry": true,
+			"stopAtEntry": false,
 			"externalConsole": false,
 			"MIMode": "lldb"
 		},
