@@ -29,18 +29,6 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "Base.h"
 
-#include <typeinfo>
-
-std::string Base::type_name() const {
-    auto raw_name = typeid(*this).name();
-
-    auto p = raw_name;
-    while (*p && !std::isalpha(*p) && *p != '_') {
-        ++p;
-    }
-    return p;
-}
-
 std::ostream& operator<<(std::ostream& os, const Base& base) {
     base.serialize(os);
     return os;

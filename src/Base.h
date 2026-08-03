@@ -36,7 +36,11 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <memory>
 #include <ostream>
-#include <string>
+#include <typeinfo>
+
+#include <tpau-cpp-kernal/Util.h>
+
+using namespace tpau::cpp_kernal;
 
 #ifdef TRACE_TRANSLATION
 #include <format>
@@ -85,7 +89,7 @@ class Base : public std::enable_shared_from_this<Base> {
      *
      * @return The name of the type of this object.
      */
-    std::string type_name() const;
+    std::string_view type_name() const { return clean_type_name(typeid(*this).name()); }
 
     virtual void serialize(std::ostream& os) const {}
 

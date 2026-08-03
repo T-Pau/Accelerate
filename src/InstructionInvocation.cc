@@ -263,7 +263,7 @@ std::pair<std::optional<Expression>, Body> InstructionInvocation::Variant::encod
     scope_body->add(std::make_shared<Constant>(Location{}, Symbol(".opcode"), Visibility::ARGUMENT, containing_scope, false, ValueExpression::create({}, Value(opcode))));
 
     for (const auto& [name, argument] : arguments) {
-        auto renamed_name = get_with_fallback(argument_aliases, name, name);
+        auto renamed_name = get_with_default(argument_aliases, name, name);
         if (!argument.known_value) {
             auto constraint = argument.constraint_expression(Location{}, renamed_name);
             if (constraint.has_value()) {

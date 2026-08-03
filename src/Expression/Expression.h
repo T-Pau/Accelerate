@@ -190,7 +190,7 @@ class Expression {
      */
     [[nodiscard]] bool valid() const { return expression->valid; }
 
-    [[nodiscard]] std::string type_name() const { return expression->type_name(); }
+    [[nodiscard]] std::string_view type_name() const { return expression->type_name(); }
 
 #ifdef TRACE_TRANSLATION
     [[nodiscard]] BaseExpression* base_expression() const { return expression.get(); }

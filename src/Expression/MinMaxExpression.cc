@@ -48,7 +48,7 @@ std::optional<Expression> MinMaxExpression::simplify(const Location& location, c
     }
 
     if (a.has_value() && b.has_value()) {
-            return ValueExpression::create(location, min_max(minimum, *a.value(), *b.value()));
+        return ValueExpression::create(location, min_max(minimum, *a.value(), *b.value()));
     }
     else if (always_create) {
         return Expression(std::make_shared<MinMaxExpression>(location, a, b, minimum));
@@ -58,14 +58,9 @@ std::optional<Expression> MinMaxExpression::simplify(const Location& location, c
     }
 }
 
+std::optional<Expression> MinMaxExpression::evaluate_process(const EvaluationContext& context) { return simplify(location, a, b, minimum, false); }
 
-std::optional<Expression> MinMaxExpression::evaluate_process(const EvaluationContext& context) {
-    return simplify(location, a, b, minimum, false);
-}
-
-void MinMaxExpression::serialize_sub(std::ostream& stream) const {
-    stream << (minimum ? ".min" : ".max") << "(" << a << ", " << b << ")";
-}
+void MinMaxExpression::serialize_sub(std::ostream& stream) const { stream << (minimum ? ".min" : ".max") << "(" << a << ", " << b << ")"; }
 
 std::optional<Value> MinMaxExpression::minimum_value() const {
     const auto a_min = a.minimum_value();
