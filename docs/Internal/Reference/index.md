@@ -319,9 +319,6 @@ These classes are not yet sorted into the above categories.
 ### [EvaluationOrder](EvaluationOrder.md)
 ::: EvaluationOrder.@brief
 
-### [EvaluationResult](EvaluationResult.md)
-::: EvaluationResult.@brief
-
 ### [ExpressionNode](ExpressionNode.md)
 ::: ExpressionNode.@brief
 
@@ -375,9 +372,6 @@ These classes are not yet sorted into the above categories.
 
 ### [UnnamedLabelList](UnnamedLabelList.md)
 ::: UnnamedLabelList.@brief
-
-### [Unresolved](Unresolved.md)
-::: Unresolved.@brief
 
 ### [Visibility](Visibility.md)
 

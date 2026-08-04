@@ -59,8 +59,6 @@ class Macro : public ScopeEntity {
     CallableArguments arguments;
 
   protected:
-    [[nodiscard]] EvaluationContext evaluation_context(EvaluationResult& result) override;
-
     void traverse(std::function<void(Entity&)> entity_callback, std::function<void(Body&)> body_callback, std::function<void(Expression&)> expression_callback) override;
     void resolve_implementation() override;
 #ifdef TRACE_TRANSLATION

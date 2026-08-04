@@ -34,9 +34,6 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include <unordered_set>
-
-#include "EvaluationResult.h"
 #include "Expression/Expression.h"
 #include "SizeRange.h"
 
@@ -45,53 +42,21 @@ class Scope;
 
 class EvaluationContext {
   public:
-    enum EvaluationType {
-        ARGUMENTS, // Bind arguments in function call or instruction encoding.
-        RESOLVE,   // Resolve names.
+    EvaluationContext(std::shared_ptr<Scope> environment, const SizeRange& offset = SizeRange(0, {})) : environment(std::move(environment)), offset(offset) {}
 
-        // old
-        ENTITY,          // Evaluate object with completed body.
-        LABELS,          // Resolve named and unnamed labels.
-        LABELS_2,        // Resolve forward label uses.
-        MACRO_EXPANSION, // Bind arguments and duplicate labels in macro invocation.
-        OUTPUT,          // Evaluate output.
-        STANDALONE       // Preprocessor if condition.
-    };
-
-    // ARGUMENTS, LABELS, MACRO_EXPANSION, STANDALONE
-    EvaluationContext(EvaluationResult& result, EvaluationType type, std::shared_ptr<Scope> environment, std::unordered_set<Symbol> defines = {}, const SizeRange& offset = SizeRange(0, {}));
-    // ENTITY
-    EvaluationContext(EvaluationResult& result, Entity* entity);
+    EvaluationContext(Entity* entity);
 
     EvaluationContext(const EvaluationContext& context) = default;
 
-    [[nodiscard]] bool shallow() const;
-
-    [[nodiscard]] EvaluationContext evaluating_variable(Symbol variable) const;
-    [[nodiscard]] EvaluationContext skipping_variables(const std::vector<Symbol>& variables) const;
     [[nodiscard]] EvaluationContext adding_offset(const SizeRange& size) const;
     [[nodiscard]] EvaluationContext setting_offset(const SizeRange& offset) const;
-    [[nodiscard]] EvaluationContext keeping_label_offsets() const;
     [[nodiscard]] EvaluationContext making_conditional() const;
-    [[nodiscard]] EvaluationContext adding_scope(std::shared_ptr<Scope> new_environment, const SizeRange& new_label_offset) const;
+    [[nodiscard]] EvaluationContext adding_scope(std::shared_ptr<Scope> new_environment) const;
 
-    [[nodiscard]] bool evaluating(Symbol variable) const { return evaluating_variables.contains(variable); }
-
-    [[nodiscard]] bool skipping(Symbol variable) const { return skip_variables.contains(variable); }
-
-    [[nodiscard]] std::optional<Expression> lookup_variable(Symbol variable) const;
-
-    EvaluationType type;
     Entity* entity = nullptr;
     std::shared_ptr<Scope> environment;
-    std::unordered_set<Symbol> defines;
     SizeRange offset = SizeRange(0, {});
-    SizeRange label_offset = SizeRange(0); // For preserving label offsets in macro calls.
-    bool labels_are_offset = false;
-    bool keep_label_offsets = false;
     bool conditional = false;
-    std::unordered_set<Symbol> skip_variables;       // For preserving arguments in macro/function bodies.
-    std::unordered_set<Symbol> evaluating_variables; // Variables currently being evaluated (used for circular definition detection).
 };
 
 #endif // HAD_XLR8_EVALUATION_CONTEXT_H

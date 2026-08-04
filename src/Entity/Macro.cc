@@ -75,8 +75,6 @@ void Macro::serialize(std::ostream& stream) const {
     stream << "}" << std::endl;
 }
 
-EvaluationContext Macro::evaluation_context(EvaluationResult& result) { return Entity::evaluation_context(result); }
-
 void Macro::traverse(std::function<void(Entity&)> entity_callback, std::function<void(Body&)> body_callback, std::function<void(Expression&)> expression_callback) {
     ScopeEntity::traverse(entity_callback, body_callback, expression_callback);
     arguments.traverse(expression_callback);

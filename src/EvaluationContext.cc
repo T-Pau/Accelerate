@@ -35,20 +35,7 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using namespace tpau::cpp_kernal;
 
-EvaluationContext::EvaluationContext(EvaluationResult& result, EvaluationType type, std::shared_ptr<Scope> environment, std::unordered_set<Symbol> defines, const SizeRange& offset) : type(type), environment(std::move(environment)), defines{std::move(defines)}, offset(offset) {
-    if (type == MACRO_EXPANSION) {
-        label_offset = SizeRange(0, {});
-        labels_are_offset = true;
-    }
-}
-
-EvaluationContext::EvaluationContext(EvaluationResult& result, Entity* entity) : type(ENTITY), entity(entity), environment(entity->containing_scope()), offset(0) {}
-
-EvaluationContext EvaluationContext::evaluating_variable(Symbol variable) const {
-    auto new_context = *this;
-    new_context.evaluating_variables.insert(variable);
-    return new_context;
-}
+EvaluationContext::EvaluationContext(Entity* entity) : entity(entity), environment(entity->containing_scope()), offset(0) {}
 
 EvaluationContext EvaluationContext::adding_offset(const SizeRange& size) const {
     auto new_context = *this;
@@ -68,50 +55,8 @@ EvaluationContext EvaluationContext::making_conditional() const {
     return new_context;
 }
 
-bool EvaluationContext::shallow() const {
-    switch (type) {
-        case ARGUMENTS:
-        case LABELS:
-        case LABELS_2:
-        case MACRO_EXPANSION:
-            return true;
-
-        case ENTITY:
-        case OUTPUT:
-        case STANDALONE:
-            return false;
-
-        default:
-            break;
-    }
-
-    throw Exception("internal error: invalid evaluation type");
-}
-
-EvaluationContext EvaluationContext::skipping_variables(const std::vector<Symbol>& variables) const {
-    auto new_context = *this;
-    new_context.skip_variables.insert(variables.begin(), variables.end());
-    return new_context;
-}
-
-std::optional<Expression> EvaluationContext::lookup_variable(Symbol variable) const {
-    if (skipping(variable)) {
-        return {};
-    }
-    // TODO: return (*environment)[variable];
-    return {};
-}
-
-EvaluationContext EvaluationContext::adding_scope(std::shared_ptr<Scope> new_environment, const SizeRange& new_label_offset) const {
+EvaluationContext EvaluationContext::adding_scope(std::shared_ptr<Scope> new_environment) const {
     auto new_context = *this;
     new_context.environment = std::move(new_environment);
-    new_context.label_offset = new_label_offset;
-    new_context.labels_are_offset = true;
-    return new_context;
-}
-
-EvaluationContext EvaluationContext::keeping_label_offsets() const {
-    auto new_context = *this;
-    new_context.keep_label_offsets = true;
     return new_context;
 }

@@ -77,39 +77,17 @@ void Entity::serialize_entity(std::ostream& stream) const {
     }
 }
 
-bool Entity::check_unresolved(const std::unordered_set<Symbol>& unresolved, Unresolved::Part& part) const {
-    if (unresolved.empty()) {
-        return true;
-    }
-
-    for (auto& unresolved_name : unresolved) {
-        part.add(this, unresolved_name);
-    }
-    return false;
-}
-
 void Entity::evaluate() {
     TRACE_BEGIN("evaluating", "{}", name);
-    auto result = EvaluationResult{};
-    auto context = evaluation_context(result);
+    auto context = evaluation_context();
     try {
         evaluate_implementation(context);
-    } catch (Exception& ex) {
+    }
+    catch (Exception& ex) {
         DiagnosticOutput::global.error(location, ex);
         // TODO: throw empty expression?
     }
     TRACE_END("evaluating", "{}", name);
-}
-
-EvaluationResult Entity::evaluate(EvaluationContext::EvaluationType type) {
-    auto result = EvaluationResult{};
-    try {
-        auto context = evaluation_context(result, type);
-        evaluate_implementation(context);
-    } catch (Exception& ex) {
-        DiagnosticOutput::global.error(location, ex);
-    }
-    return result;
 }
 
 void Entity::uses(Entity* entity) {

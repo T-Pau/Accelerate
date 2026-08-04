@@ -37,7 +37,6 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Base.h"
 #include "EvaluationContext.h"
 #include "StructuredValue.h"
-#include "Unresolved.h"
 #include "Visibility.h"
 
 class Body;
@@ -79,9 +78,6 @@ class Entity : public Base {
     void expand_calls();
 
     void evaluate();
-
-    [[nodiscard]] EvaluationResult evaluate(EvaluationContext::EvaluationType type);
-    [[nodiscard]] bool check_unresolved(Unresolved& unresolved) const;
 
     [[nodiscard]] bool is_default_only() const { return default_only; }
 
@@ -140,9 +136,7 @@ class Entity : public Base {
 
     void serialize_entity(std::ostream& stream) const;
 
-    [[nodiscard]] virtual EvaluationContext evaluation_context(EvaluationResult& result) { return EvaluationContext(result, this); }
-
-    [[nodiscard]] virtual EvaluationContext evaluation_context(EvaluationResult& result, EvaluationContext::EvaluationType type) { return EvaluationContext(result, type, {}); }
+    [[nodiscard]] virtual EvaluationContext evaluation_context() { return EvaluationContext(this); }
 
     virtual void evaluate_implementation(EvaluationContext& context);
 
@@ -151,9 +145,6 @@ class Entity : public Base {
     std::weak_ptr<Scope> containing_scope_;
 
   private:
-    [[nodiscard]] bool check_unresolved(const std::unordered_set<Symbol>& unresolved, Unresolved::Part& part) const;
-
-
     static const Token token_default_only;
     static const Token token_visibility;
 

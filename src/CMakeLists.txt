@@ -70,7 +70,6 @@ add_library(xlr8-library STATIC
         Encoder.cc
         EvaluationContext.cc
         EvaluationOrder.cc
-        EvaluationResult.cc
         ExpressionNode.cc
         ExpressionParser.cc
         FileParser.cc
@@ -103,7 +102,6 @@ add_library(xlr8-library STATIC
         Tokenizer.cc
         TokenNode.cc
         UnnamedLabelList.cc
-        Unresolved.cc
         UsedEntities.cc
         Visibility.cc
 )
