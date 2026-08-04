@@ -44,7 +44,7 @@ IfBody::IfBody(std::vector<IfBodyClause> clauses_) : clauses(std::move(clauses_)
 }
 
 void IfBody::serialize(std::ostream& stream, const std::string& prefix) const {
-    if (empty()) {
+    if (clauses.empty()) {
         return;
     }
     if (clauses.front().is_true()) {

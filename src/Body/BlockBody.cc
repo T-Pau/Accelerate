@@ -73,18 +73,18 @@ std::optional<Body> BlockBody::evaluate(const EvaluationContext& context) {
         current_offset += element.size_range();
         new_size_range += element.size_range();
         if (!element.empty()) {
-            if (previous_element) {
-                auto [success, new_body] = previous_element->append_sub(element);
-                if (success) {
-                    if (new_body) {
-                        new_block.back() = *new_body;
-                    }
-                    continue;
+        if (previous_element) {
+            auto [success, new_body] = previous_element->append_sub(element);
+            if (success) {
+                if (new_body) {
+                    new_block.back() = *new_body;
                 }
+                continue;
             }
-            new_block.emplace_back(element);
-            previous_element = element;
         }
+        new_block.emplace_back(element);
+        previous_element = element;
+    }
     }
 
     block = std::move(new_block);

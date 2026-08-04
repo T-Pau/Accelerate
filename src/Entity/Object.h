@@ -61,7 +61,7 @@ class Object : public ScopeEntity {
 
     [[nodiscard]] bool is_reservation() const { return reservation_expression.has_value(); }
 
-    [[nodiscard]] bool empty() const { return !is_reservation() && body.empty(); }
+    [[nodiscard]] bool empty() const { return size_range().size() == 0; }
 
     [[nodiscard]] bool has_address() const { return address && address->has_address(); }
 

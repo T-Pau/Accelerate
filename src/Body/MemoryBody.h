@@ -46,8 +46,6 @@ class MemoryBody : public BodyElement {
 
     [[nodiscard]] Body clone(const CloneContext& context) const override { return Body(std::make_shared<MemoryBody>(location, bank.clone(context), start_address.clone(context), end_address.clone(context))); }
 
-    [[nodiscard]] bool empty() const override { return size().value_or(1) == 0; }
-
     void encode(std::string& bytes, const Memory* memory) override;
     void serialize(std::ostream& stream, const std::string& prefix) const override;
     void traverse(std::function<void(Body&)> body_callback, std::function<void(Expression&)> expression_callback) override;

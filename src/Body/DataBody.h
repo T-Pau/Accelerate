@@ -68,8 +68,6 @@ class DataBody : public BodyElement {
     //    void append(Expression expression, std::optional<IntegerEncoder> encoding = {}) {data.emplace_back(std::move(expression), encoding);}
     [[nodiscard]] Body clone(const CloneContext& context) const override;
 
-    [[nodiscard]] bool empty() const override { return data.empty(); }
-
     void encode(std::string& bytes, const Memory* memory) override;
     void serialize(std::ostream& stream, const std::string& prefix) const override;
     void traverse(std::function<void(Body&)> body_callable, std::function<void(Expression&)> expression_callable) override;

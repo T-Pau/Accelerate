@@ -104,8 +104,6 @@ class IfBody : public BodyElement {
 
     [[nodiscard]] Body clone(const CloneContext& context) const override;
 
-    [[nodiscard]] bool empty() const override { return clauses.empty(); }
-
     void encode(std::string& bytes, const Memory* memory) override { throw Exception("unresolved if"); }
 
     [[nodiscard]] std::optional<Body> evaluate(const EvaluationContext& context) override;

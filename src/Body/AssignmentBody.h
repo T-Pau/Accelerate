@@ -56,8 +56,6 @@ class AssignmentBody : public BodyElement {
 
     [[nodiscard]] Body clone(const CloneContext& context) const override { return Body(std::make_shared<AssignmentBody>(visibility, name, value.clone(context))); }
 
-    [[nodiscard]] bool empty() const override { return false; }
-
     void encode(std::string& bytes, const Memory* memory) override { return; }
 
     void serialize(std::ostream& stream, const std::string& prefix) const override;

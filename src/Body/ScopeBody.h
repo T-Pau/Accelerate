@@ -83,8 +83,6 @@ class ScopeBody : public BodyElement {
 
     [[nodiscard]] Body clone(const CloneContext& context) const override;
 
-    [[nodiscard]] bool empty() const override { return body.empty(); }
-
     void encode(std::string& bytes, const Memory* memory) override { body.encode(bytes, memory); }
 
     void traverse(std::function<void(Body&)> body_callable, std::function<void(Expression&)> expression_callable) override;

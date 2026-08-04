@@ -93,15 +93,6 @@ class BodyElement : public Base {
     [[nodiscard]] virtual Body clone(const CloneContext& context) const = 0;
 
     /**
-     * @brief Check if the BodyElement can be discarded.
-     *
-     * The default implementation returns `false`.
-     *
-     * @return `true` if the BodyElement is empty, `false` otherwise.
-     */
-    [[nodiscard]] virtual bool empty() const { return false; }
-
-    /**
      * @brief Encode the BodyElement into a byte string.
      *
      * The default implementation does nothing. Subclasses that represent data or instructions should override this method.

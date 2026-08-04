@@ -55,8 +55,6 @@ class ChecksumBody : public BodyElement {
 
     Body clone(const CloneContext& context) const override;
 
-    bool empty() const override { return false; }
-
     void encode(std::string& bytes, const Memory* memory) override;
     void traverse(std::function<void(Body&)> body_callable, std::function<void(Expression&)> expression_callable) override;
     std::optional<Body> evaluate_process(const EvaluationContext& context) override;

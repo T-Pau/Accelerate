@@ -113,13 +113,11 @@ class Body {
     [[nodiscard]] std::optional<Body> back() const;
 
     /**
-     * @brief Check if the BodyElement can be discarded.
+     * @brief Check if it is an EmptyBody.
      *
-     * Subclasses must implement this method.
-     *
-     * @return `true` if the BodyElement is empty, `false` otherwise.
+     * @return `true` if the body is empty, `false` otherwise.
      */
-    [[nodiscard]] bool empty() const { return element->empty(); }
+    [[nodiscard]] bool empty() const;
 
     /**
      * @brief Create a deep copy of the body.

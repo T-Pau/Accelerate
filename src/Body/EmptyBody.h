@@ -45,8 +45,6 @@ class EmptyBody : public BodyElement {
 
     [[nodiscard]] Body clone(const CloneContext& context) const override { return Body(std::make_shared<EmptyBody>()); }
 
-    [[nodiscard]] bool empty() const override { return true; }
-
     void traverse(std::function<void(Body&)> body_callable, std::function<void(Expression&)> expression_callable) override {}
 
     void serialize(std::ostream& stream, const std::string& prefix) const override {}

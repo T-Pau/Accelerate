@@ -90,7 +90,7 @@ void Body::append(const Body& new_element) {
     if (new_element.empty()) {
         return;
     }
-    if (element->empty()) {
+    else if (empty()) {
         element = new_element.element;
     }
     else {
@@ -125,7 +125,7 @@ std::optional<Body> Body::back() const {
     if (const auto block = as<BlockBody>()) {
         return block->back();
     }
-    else if (!empty()) {
+    else if (!is<EmptyBody>()) {
         return *this;
     }
     else {
@@ -176,3 +176,5 @@ Body Body::clone(const CloneContext& context) const {
     TRACE_END_INSTANCE(cloned_body.element, "cloning", "");
     return cloned_body;
 }
+
+bool Body::empty() const { return is<EmptyBody>(); }

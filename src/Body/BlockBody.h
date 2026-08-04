@@ -51,8 +51,6 @@ class BlockBody : public BodyElement {
 
     [[nodiscard]] Body clone(const CloneContext& context) const override;
 
-    [[nodiscard]] bool empty() const override { return block.empty(); }
-
     void encode(std::string& bytes, const Memory* memory) override;
     [[nodiscard]] std::optional<Body> evaluate(const EvaluationContext& context) override;
     void traverse(std::function<void(Body&)> body_callable, std::function<void(Expression&)> expression_callable) override;
