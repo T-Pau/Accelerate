@@ -37,6 +37,8 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using namespace tpau::cpp_kernal;
 
+bool EvaluationOrder::NodePointerComparator::operator()(const Node* a, const Node* b) const { return *a < *b; }
+
 std::vector<Entity*> EvaluationOrder::order(const std::vector<Entity*>& starting_entities) {
     EvaluationOrder evaluation_order(starting_entities);
     evaluation_order.compute_order();
@@ -153,32 +155,41 @@ void EvaluationOrder::break_cycle() {
 
 std::vector<EvaluationOrder::Node*> EvaluationOrder::find_cycle() {
     auto stack = std::vector<TraversalPosition>();
-    auto visited = std::unordered_set<Node*>();
+    auto checked = std::unordered_set<Node*>();
 
-    stack.emplace_back(*blocked_nodes.begin());
+    for (auto* node : blocked_nodes) {
+        if (checked.contains(node)) {
+            continue;
+        }
 
-    while (!stack.empty()) {
-        auto next = stack.back().next();
-        if (next) {
-            if (visited.contains(next)) {
-                auto start = std::find_if(stack.begin(), stack.end(), [next](const TraversalPosition& pos) { return pos.node == next; });
-                if (start == stack.end()) {
-                    throw Exception("internal error: cycle detection failed");
+        auto visited = std::unordered_set<Node*>();
+        stack.emplace_back(node);
+        visited.insert(node);
+
+        while (!stack.empty()) {
+            auto next = stack.back().next();
+            if (next) {
+                if (visited.contains(next)) {
+                    auto start = std::find_if(stack.begin(), stack.end(), [next](const TraversalPosition& pos) { return pos.node == next; });
+                    if (start == stack.end()) {
+                        throw Exception("internal error: cycle detection failed");
+                    }
+                    auto cycle = std::vector<Node*>();
+                    for (auto it = start; it != stack.end(); ++it) {
+                        cycle.push_back(it->node);
+                    }
+                    return cycle;
                 }
-                auto cycle = std::vector<Node*>();
-                for (auto it = start; it != stack.end(); ++it) {
-                    cycle.push_back(it->node);
+                else {
+                    checked.insert(next);
+                    visited.insert(next);
+                    stack.emplace_back(next);
                 }
-                return cycle;
             }
             else {
-                visited.insert(next);
-                stack.emplace_back(next);
+                stack.pop_back();
             }
         }
-        else {
-            stack.pop_back();
-        }
     }
-    throw Exception("internal error: no cycle found starting from node for entity {}", (*blocked_nodes.begin())->entity->name);
+    throw Exception("internal error: no cycle found even though there are only blocked entities");
 }

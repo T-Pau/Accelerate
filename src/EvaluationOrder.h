@@ -34,6 +34,7 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+#include <set>
 #include <unordered_set>
 #include <vector>
 
@@ -72,6 +73,14 @@ class EvaluationOrder {
     void compute_order();
 
   private:
+    class Node;
+
+    /// @brief Comparator for deterministic Node pointer ordering by entity name
+    class NodePointerComparator {
+      public:
+        bool operator()(const Node* a, const Node* b) const;
+    };
+
     /// @brief This represents a node in the dependency graph of entities to be evaluated.
     class Node {
       public:
@@ -85,7 +94,7 @@ class EvaluationOrder {
         Entity* entity;
 
         /// @brief The nodes that this node depends on.
-        std::unordered_set<Node*> dependencies;
+        std::set<Node*, NodePointerComparator> dependencies;
 
         /// @brief The nodes that depend on this node.
         std::unordered_set<Node*> dependents;
@@ -99,6 +108,8 @@ class EvaluationOrder {
             dependencies.insert(node);
             node->dependents.insert(this);
         }
+
+        [[nodiscard]] std::strong_ordering operator<=>(const Node& other) const { return entity->name <=> other.entity->name; }
 
         /**
          * @brief Checks if this node is ready to be evaluated.
@@ -122,7 +133,7 @@ class EvaluationOrder {
         [[nodiscard]] Node* next() { return (dependency_it != node->dependencies.end()) ? *dependency_it++ : nullptr; }
 
         Node* node;
-        std::unordered_set<Node*>::const_iterator dependency_it;
+        std::set<Node*, NodePointerComparator>::const_iterator dependency_it;
     };
 
     /**
@@ -173,10 +184,10 @@ class EvaluationOrder {
     std::unordered_map<Entity*, Node> nodes;
 
     /// @brief The nodes that have dependencies and are not ready to be evaluated.
-    std::unordered_set<Node*> blocked_nodes;
+    std::set<Node*, NodePointerComparator> blocked_nodes;
 
     /// @brief The nodes that have no dependencies and are ready to be evaluated.
-    std::unordered_set<Node*> ready_nodes;
+    std::set<Node*, NodePointerComparator> ready_nodes;
 
     /**
      * @brief The entities that have been added to the evaluation order.
