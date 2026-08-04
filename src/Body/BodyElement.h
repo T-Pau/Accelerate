@@ -88,8 +88,6 @@ class BodyElement : public Base {
      */
     [[nodiscard]] std::optional<uint64_t> size() const { return size_range().size(); }
 
-    virtual void collect_objects(std::unordered_set<Object*>& objects) const {}
-
     [[nodiscard]] virtual Body clone(const CloneContext& context) const = 0;
 
     /**
