@@ -154,42 +154,35 @@ void EvaluationOrder::break_cycle() {
 }
 
 std::vector<EvaluationOrder::Node*> EvaluationOrder::find_cycle() {
-    auto stack = std::vector<TraversalPosition>();
-    auto checked = std::unordered_set<Node*>();
+    auto stack = TraversalStack();
 
-    for (auto* node : blocked_nodes) {
-        if (checked.contains(node)) {
-            continue;
-        }
+    stack.add(*blocked_nodes.begin());
 
-        auto visited = std::unordered_set<Node*>();
-        stack.emplace_back(node);
-        visited.insert(node);
-
-        while (!stack.empty()) {
-            auto next = stack.back().next();
-            if (next) {
-                if (visited.contains(next)) {
-                    auto start = std::find_if(stack.begin(), stack.end(), [next](const TraversalPosition& pos) { return pos.node == next; });
-                    if (start == stack.end()) {
-                        throw Exception("internal error: cycle detection failed");
-                    }
-                    auto cycle = std::vector<Node*>();
-                    for (auto it = start; it != stack.end(); ++it) {
-                        cycle.push_back(it->node);
-                    }
-                    return cycle;
+    while (!stack.empty()) {
+        auto next = stack.next();
+        if (next) {
+            if (stack.contains(next)) {
+                auto start = stack.find(next);
+                if (start == stack.end()) {
+                    throw Exception("internal error: cycle detection failed");
                 }
-                else {
-                    checked.insert(next);
-                    visited.insert(next);
-                    stack.emplace_back(next);
+                auto cycle = std::vector<Node*>();
+                for (auto it = start; it != stack.end(); ++it) {
+                    cycle.push_back(*it);
                 }
+                return cycle;
             }
             else {
-                stack.pop_back();
+                stack.add(next);
             }
+        }
+        else {
+            stack.pop_back();
         }
     }
     throw Exception("internal error: no cycle found even though there are only blocked entities");
+}
+
+EvaluationOrder::TraversalStack::Iterator EvaluationOrder::TraversalStack::find(Node* node) const {
+    return Iterator(std::find_if(stack.begin(), stack.end(), [node](const TraversalPosition& pos) { return pos.node == node; }));
 }

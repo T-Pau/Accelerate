@@ -130,10 +130,65 @@ class EvaluationOrder {
 
         [[nodiscard]] bool has_next() const { return dependency_it != node->dependencies.end(); }
 
-        [[nodiscard]] Node* next() { return (dependency_it != node->dependencies.end()) ? *dependency_it++ : nullptr; }
+        [[nodiscard]] Node* next() { return has_next() ? *dependency_it++ : nullptr; }
 
         Node* node;
         std::set<Node*, NodePointerComparator>::const_iterator dependency_it;
+    };
+
+    class TraversalStack {
+      public:
+        class Iterator {
+          public:
+            explicit Iterator(const std::vector<TraversalPosition>::const_iterator& it) : it(it) {}
+
+            [[nodiscard]] Node* operator*() const { return it->node; }
+
+            [[nodiscard]] Node* operator->() const { return it->node; }
+
+            Iterator& operator++() {
+                ++it;
+                return *this;
+            }
+
+            [[nodiscard]] bool operator==(const Iterator& other) const { return it == other.it; }
+
+          private:
+            std::vector<TraversalPosition>::const_iterator it;
+        };
+
+        [[nodiscard]] Iterator begin() const { return Iterator(stack.begin()); }
+
+        [[nodiscard]] Iterator end() const { return Iterator(stack.end()); }
+
+        [[nodiscard]] Iterator find(Node* node) const;
+
+        void add(Node* node) {
+            visited.insert(node);
+            stack.emplace_back(node);
+        }
+
+        Node* next() {
+            if (!stack.empty()) {
+                return stack.back().next();
+            }
+            return nullptr;
+        }
+
+        void pop_back() {
+            if (!stack.empty()) {
+                visited.erase(stack.back().node);
+                stack.pop_back();
+            }
+        }
+
+        [[nodiscard]] bool empty() const { return stack.empty(); }
+
+        [[nodiscard]] bool contains(Node* node) const { return visited.contains(node); }
+
+      private:
+        std::vector<TraversalPosition> stack;
+        std::unordered_set<Node*> visited;
     };
 
     /**
